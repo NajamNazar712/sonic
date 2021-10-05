@@ -47,7 +47,7 @@
                             <input type="text" name="name" id="name" class="form-control" placeholder="Department Name*" data-rule-required="true" data-msg-required="Name is required">
                         </div>
                         <div class="form-group">
-                            <textarea name="description" class="form-control" id="description" placeholder="Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
+                            <textarea name="description" class="form-control" id="description" placeholder="Description"></textarea>
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
@@ -75,7 +75,7 @@
                             <input type="text" name="name" id="edit_name" class="form-control" placeholder="Department Name*" data-rule-required="true" data-msg-required="Name is required">
                         </div>
                         <div class="form-group">
-                            <textarea name="description" class="form-control" id="edit_description" placeholder="Description*" data-rule-required="true" data-msg-required="Description is required"></textarea>
+                            <textarea name="description" class="form-control" id="edit_description" placeholder="Description"></textarea>
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>

@@ -244,9 +244,76 @@
             var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || count(array_intersect([413, 442], session('permissions'))) !== 0)
+                @if (session('role_id') == 1 || count(array_intersect([413, 442, 587], session('permissions'))) !== 0)
 
                 buttons: [
+                    @if (session('role_id') == 1 || in_array(587, session('permissions')))
+                    {
+                        text: 'Return Confirm',
+                        className: 'btn btn-primary return_confirm',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to change shipment status to Return Confirm!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                        table.rows().nodes().each(function (index) {
+                                            var row = table.row(index);
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                var remarks = $(row.node()).find('td.remarks input').val();
+                                                shipment_remarks[id] = remarks;
+                                            }
+                                        });
+                                        $.ajax({
+                                            url:"{{route('admin.month_closing.confirm')}}",
+                                            method:'POST',
+                                            data:{
+                                                'shipment_ids':selected_rows,
+                                                '_token':'{{ csrf_token() }}',
+                                                'remark': shipment_remarks
+                                            }
+                                        }).done(function (data) {
+                                            UnblockPagePermanently();
+                                            selected_rows = [];
+                                            shipment_remarks = {};
+                                            table.rows().deselect();
+                                            table.button('.close_action').disable();
+                                            table.button('.return_confirm').disable();
+                                            table.button('.re-attempt').disable();
+
+                                            table.draw(true);
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                        });
+                                    }
+                                });
+
+                            }
+                        }
+                    },
+                    @endif
                     @if (session('role_id') == 1 || in_array(413, session('permissions')))
                     {
                         text: 'Switch To Close',
@@ -292,6 +359,8 @@
                                             selected_rows = [];
                                             table.button('.close_action').disable();
                                             table.button('.re-attempt').disable();
+                                            table.button('.return_confirm').disable();
+                                            
                                             table.draw(true);
                                             if(data.status == 1) {
 
@@ -433,6 +502,8 @@
                                             table.rows().deselect();
                                             table.button('.close_action').disable();
                                             table.button('.re-attempt').disable();
+                                            table.button('.return_confirm').disable();
+                                            
                                             table.draw(true);
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
@@ -466,6 +537,8 @@
 
                                     table.button('.close_action').enable();
                                     table.button('.re-attempt').enable();
+                                    table.button('.return_confirm').enable();
+                                    
 
                                 }
                             });
@@ -495,6 +568,8 @@
                                     if (selected_rows.length == 0) {
                                         table.button('.close_action').disable();
                                         table.button('.re-attempt').disable();
+                                        table.button('.return_confirm').disable();
+                                        
                                     }
                                 }
                             });
@@ -668,11 +743,15 @@
                 if (selected_rows.length > 0) {
                     table.button('.close_action').enable();
                     table.button('.re-attempt').enable();
+                    table.button('.return_confirm').enable();
+                    
 
                 }
                 else {
                     table.button('.close_action').disable();
                     table.button('.re-attempt').disable();
+                    table.button('.return_confirm').disable();
+                    
                 }
 
             });

@@ -46,6 +46,8 @@ use Carbon\Carbon;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\AgentReturnConfirmation;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use Illuminate\Support\Facades\Auth;
 use DB;
 use Illuminate\Support\Facades\File;
@@ -459,9 +461,16 @@ class ReturnController extends Controller
                     }
                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
                    if($return_assign_shipment->exists()){
+
                        $return_assign_shipment = $return_assign_shipment ->latest()->first();
                        $return_assign_shipment->status = 0;
                        $return_assign_shipment->save();
+
+                       $return_assign_log = new ReturnAssignedShipmentLogs();
+                       $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                       $return_assign_log->status = 2;
+                       $return_assign_log->assigned_by = Auth::id();
+                       $return_assign_log->save();
                    }
 
                 }
@@ -480,6 +489,11 @@ class ReturnController extends Controller
                     $return_assign_shipment->status = 0;
                     $return_assign_shipment->save();
                 }
+                $return_assign_log = new ReturnAssignedShipmentLogs();
+                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                $return_assign_log->status = 4;
+                $return_assign_log->assigned_by = Auth::id();
+                $return_assign_log->save();
             }
             return ['status'=>1,'success'=>"Agent Unassigned successfully"];
 
@@ -533,6 +547,12 @@ class ReturnController extends Controller
                    if($return_assign_shipment){
                        $return_assign_shipment->status = 0;
                        $return_assign_shipment->save();
+
+                       $return_assign_log = new ReturnAssignedShipmentLogs();
+                       $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                       $return_assign_log->status = 1;
+                       $return_assign_log->assigned_by = Auth::id();
+                       $return_assign_log->save();
                    }
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
@@ -586,6 +606,12 @@ class ReturnController extends Controller
                    $return_assign_shipment = $return_assign_shipment ->latest()->first();
                    $return_assign_shipment->status = 0;
                    $return_assign_shipment->save();
+
+                   $return_assign_log = new ReturnAssignedShipmentLogs();
+                       $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                       $return_assign_log->status = 2;
+                       $return_assign_log->assigned_by = Auth::id();
+                       $return_assign_log->save();
                }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
@@ -630,6 +656,12 @@ class ReturnController extends Controller
                    if($return_assign_shipment){
                        $return_assign_shipment->status = 0;
                        $return_assign_shipment->save();
+
+                       $return_assign_log = new ReturnAssignedShipmentLogs();
+                       $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                       $return_assign_log->status = 1;
+                       $return_assign_log->assigned_by = Auth::id();
+                       $return_assign_log->save();
                    }
 
                     NotificationsController::send(15, 0, $request->shipment_id);
@@ -1054,6 +1086,12 @@ class ReturnController extends Controller
                        if($return_assign_shipment){
                            $return_assign_shipment->status = 0;
                            $return_assign_shipment->save();
+                       
+                           $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 1;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
                        }
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
@@ -1750,16 +1788,7 @@ class ReturnController extends Controller
 
                 $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
 
-                $rider_device_token = EmployeeDeviceToken::where('employee_id',$rider)
-                    ->where('employee_type_id', 2)
-                    ->select('device_token');
-                if ($rider_device_token->exists()) {
-                    $rider_device_token = $rider_device_token->first();
-                    $device_token = $rider_device_token->device_token;
-                    $title = "Return Note Assigned";
-                    $message = "Dear Rider Return Note # " . $note->id . " Has Been Assigned To You";
-                    NotificationsController::bolt_app_notification($rider, 2,$device_token, $title, $message);
-                }
+                NotificationsController::app_notification(6, $rider, 2, $note->id);
 
                 if ($note) {
                     foreach ($valid_shipments as $index  => $shipment_id) {
@@ -1871,7 +1900,8 @@ class ReturnController extends Controller
             ->join('admins','admins.id','=','return_notes.admin_id')
             ->leftjoin('return_note_shipments as rns','rns.return_note_id', '=', 'return_notes.id')
             ->select(['return_notes.id as return_note', 'return_notes.id','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status',DB::raw('(SELECT COUNT(r.id) FROM return_notes AS r INNER JOIN return_note_shipments AS rns ON r.id = rns.return_note_id WHERE rns.return_note_id = return_notes.id AND rns.status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])
-            ->whereIn('return_notes.status',[0,3]);
+            ->whereIn('return_notes.status',[0,3])
+        ->groupBy('return_note_id');
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
@@ -2967,10 +2997,6 @@ class ReturnController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Trax ID</strong></td>
                             <td>' . $rider_id . '</td>
-                            <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
-                            </td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Category</strong></td>
@@ -3745,6 +3771,12 @@ class ReturnController extends Controller
                 if($check_already_assigned){
                     $check_already_assigned->status = 0;
                     $check_already_assigned->save();
+
+                            $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
+                            $return_assign_log->status = 4;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
                 }
                 $assign_shipments = new ReturnAssignedShipments();
                 $assign_shipments->admin_id = $request->admin_id;
@@ -3752,6 +3784,31 @@ class ReturnController extends Controller
                 $assign_shipments->status = 1;
                 $assign_shipments->assigned_by = Auth::id();
                 $assign_shipments->save();
+
+                $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
+                            $return_assign_log->status = 0;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
+
+                //set record in login/logut table
+                $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$request->admin_id)->where('current_date',Carbon::now()->format("Y-m-d"));
+                
+                if(!$check_agent_return_confrimation->exists()){
+                    $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                     ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id);
+                     if($agent_role->exists()){
+                         $agent_return_confrimation = new AgentReturnConfirmation;
+                         $agent_return_confrimation->admin_id = $request->admin_id;
+                         $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                         $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
+                         $agent_return_confrimation->save();
+                     }
+                 }else{
+                    $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                 }
+                //set record in login/logut table end
+                
             }
             return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
         }
@@ -4216,6 +4273,209 @@ class ReturnController extends Controller
                 }
             });
         return $datatables->make(true);
+
+    }
+
+    public function rcp_agent_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),451);
+        $today = Carbon::now()->endOfDay();
+        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            ->where('admin_roles.department_id',3)->get();
+        $hubs = City::where([['status',1],['hub',1]])->get();
+        return view('admin.return.rcp_agent', compact('agents','today','hubs'));
+    }
+
+    public function rcp_agent_list(Request $request){   
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),452);
+        }
+        $agent_productivity = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
+                    ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
+                    ->select('a.name as agent_name','a.id as agent_id','agent_return_confirmations.login_time as start_time','agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id');
+        $datatable = Datatables::of($agent_productivity)
+            ->addColumn('total_assigning', function ($agent_productivity){
+                $total_assigning = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                ->where('rasl.status',0)
+                ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+                return $total_assigning;
+
+            })
+            ->addColumn('actual_productivity', function ($agent_productivity){
+               
+                $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                ->whereIn('rasl.status',[1,2,3])
+                ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+              
+                return $actual_productivity;
+             })
+             ->addColumn('reattempt', function ($agent_productivity){
+               
+
+                $reattempt = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                ->where('rasl.status',1)
+                ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+              
+                return $reattempt;
+             })
+             ->addColumn('return', function ($agent_productivity){
+
+                $return = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                ->where('rasl.status',2)
+                ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+              
+                return $return;
+            })
+             ->addColumn('intercept', function ($agent_productivity){
+
+                $intercept = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                ->where('rasl.status',3)
+                ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+              
+                return $intercept;
+             })
+             ->addColumn('pending', function ($agent_productivity){
+                
+                $total_assigning = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                ->where('rasl.status',0)
+                ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+            
+                $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                ->whereIn('rasl.status',[1,2,3,4])
+                ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+                    
+                if($total_assigning == 0){
+                    return '0';
+                }else{
+
+                    return $total_assigning - $actual_productivity;
+                }
+             })
+             ->addColumn('productivity', function ($agent_productivity){
+                    
+                    $total_assigning = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                    ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                    ->where('rasl.status',0)
+                    ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+                
+                    $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                    ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                    ->whereIn('rasl.status',[1,2,3])
+                    ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+
+                    if($total_assigning == 0){
+                        return 0;
+                    }else{
+                        return number_format(($actual_productivity/($total_assigning))*100,2);
+                    }
+             })
+             ->addColumn('un_assigned', function ($agent_productivity){
+            
+                $un_assigned = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                    ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                    ->where('rasl.status',4)
+                    ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+                
+                    return $un_assigned;
+
+             });
+             if ($request->get('from_date') && $request->get('to_date')) {
+                $from = $request->get('from_date');
+                $to = $request->get('to_date');
+                $agent_productivity = $agent_productivity->whereBetween('agent_return_confirmations.current_date',[$from,$to]);
+            }
+            if ($request->get('agent')) {
+                $agent_ids = $request->get('agent');
+                $agent_productivity = $agent_productivity->whereIn('agent_return_confirmations.admin_id',$agent_ids);
+            }
+            if($request->get('hub')){
+                $hub_id = $request->get('hub');
+               
+                $agent_productivity->join('shipments as sh','sh.id','=','ras.shipment_id')
+                ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
+                ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+                ->where('h.id',$hub_id);
+
+            }
+             return $datatable->make(true);
+    }
+
+    public function rcp_agent_data(Request $request){
+        $stats = array();
+        $agent = $request->agent;
+        $from = $request->from_date;
+        $to = $request->to_date;
+        $hub = $request->hub;
+        if ($hub) {
+            
+            $stats['total'] = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            ->join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
+            ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->where('rasl.status',0)
+            ->where('h.id',$hub);
+
+            $stats['completed'] = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            ->join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
+            ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->whereIn('rasl.status',[1,2,3])
+            ->where('h.id',$hub);
+
+            $stats['rcp_reattempt'] = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            ->join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
+            ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->where('rasl.status',1)
+            ->where('h.id',$hub);
+
+        }else{
+           
+            $stats['total'] = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            ->where('rasl.status',0);
+
+            $stats['completed'] = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            ->whereIn('rasl.status',[1,2,3]);
+
+
+            $stats['rcp_reattempt'] = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            ->where('rasl.status',1);
+            
+        }
+        if($from != null || $to != null){
+
+            $stats['total'] = $stats['total']->whereBetween('return_assigned_shipments.created_at',[$from,$to]);
+            $stats['completed'] = $stats['completed']->whereBetween('return_assigned_shipments.created_at',[$from,$to]);
+            $stats['rcp_reattempt'] = $stats['rcp_reattempt']->whereBetween('return_assigned_shipments.created_at',[$from,$to]);
+            
+        }
+      
+        if($agent){
+         
+            $stats['total'] = $stats['total']->where('return_assigned_shipments.admin_id',$agent);
+            $stats['completed'] = $stats['completed']->where('return_assigned_shipments.admin_id',$agent);
+            $stats['rcp_reattempt'] = $stats['rcp_reattempt']->where('return_assigned_shipments.admin_id',$agent);
+
+        }
+       
+        $stats['total'] = number_format($stats['total']->count());
+        
+        $stats['completed'] = number_format($stats['completed']->count());
+        $stats['rcp_reattempt'] = number_format($stats['rcp_reattempt']->count());
+        
+        if($stats['total'] == 0){
+            $stats['productivity'] = '0';
+        }else{
+            $stats['productivity'] = number_format((intval($stats['completed'])/intval($stats['total']))*100,2);
+        }
+        return response()->json(['status' => 1, 'stats' => $stats]);
 
     }
 }

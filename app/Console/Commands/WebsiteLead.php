@@ -75,6 +75,9 @@ class WebsiteLead extends Command
                 $new_lead->requested_date = $lead->created_at;
                 $new_lead->message = $lead->message;
                 $new_lead->reference_id = $lead->reference_id;
+                $new_lead->brand = $lead->brand;
+                $new_lead->service_id = $lead->service_id;
+                $new_lead->company = $lead->company;
                 $new_lead->save();
 
                 $lead_log = new LeadLog();

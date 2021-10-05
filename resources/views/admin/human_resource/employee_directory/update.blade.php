@@ -53,8 +53,8 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Father's/Husband Name<span class="text-danger">*</span></label>
-                                                <input type="text" id="name" class="form-control border-primary" value="{{$employee->guardian_name}}" data-rule-required="true" data-msg-required="Father's/Husband Name is required" name="name">
+                                                <label>Father/Husband Name<span class="text-danger">*</span></label>
+                                                <input type="text" id="name" class="form-control border-primary" value="{{$employee->guardian_name}}" data-rule-required="true" data-msg-required="Father/Husband Name is required" name="name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -159,6 +159,12 @@
                                             </div>
                                         </div>
                                         <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>CNIC<span class="text-danger">*</span></label>
+                                                <input type="text" id="cnic" data-rule-required="true"  data-msg-required="CNIC is required" class="form-control border-primary" value="{{$employee->cnic}}" name="cnic">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
                                             <label>CNIC Issue Date</label>
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
@@ -187,30 +193,10 @@
                                         <h4 class="form-section">Official Info</h4>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Designation</label>
-                                                <select name="designation" id="designation" class="select2 form-control " style="width: 100%">
-                                                    @foreach($designations as $designation)
-                                                        <option value="{{$designation->id}}">{{$designation->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
                                                 <label>City<span class="text-danger">*</span></label>
                                                 <select name="city" id="city" class="select2 form-control " data-rule-required="true"  data-msg-required="City is required" style="width: 100%">
                                                     @foreach($cities as $city)
                                                         <option value="{{$city->id}}">{{$city->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Department<span class="text-danger">*</span></label>
-                                                <select name="department" id="department" data-rule-required="true"  data-msg-required="Department is required" class="select2 form-control " style="width: 100%">
-                                                    @foreach($departments as $department)
-                                                        <option value="{{$department->id}}">{{$department->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -227,26 +213,39 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Official Email</label>
+                                                <label>Department<span class="text-danger">*</span></label>
+                                                <select name="department" id="department" data-rule-required="true"  data-msg-required="Department is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($departments as $department)
+                                                        <option value="{{$department->id}}">{{$department->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Designation<span class="text-danger">*</span></label>
+                                                <select name="designation" id="designation" data-rule-required="true" data-msg-required="Designation is Required" class="select2 form-control " style="width: 100%">
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
+                                                <input type="text" id="bolt_pin" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" class="form-control border-primary" value="{{$employee->pin}}" name="bolt_pin" data-rule-minlength="4" data-rule-maxlength="4">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Official Number</label>
+                                                <input type="text" id="official_number" class="form-control border-primary" value="{{$employee->official_phone_number}}" name="official_number" >
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Official & Outlook ID</label>
                                                 <input type="email" id="official_email" class="form-control border-primary" value="{{$employee->official_email}}" name="official_email" >
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Official Number<span class="text-danger">*</span></label>
-                                                <input type="text" id="official_number" data-rule-required="true" data-msg-required="Official Number is required" class="form-control border-primary" value="{{$employee->official_phone_number}}" name="official_number" >
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Sonic ID</label>
-                                                <input type="text" id="sonic_id" class="form-control border-primary" value="{{$employee->sonic_id}}" name="sonic_id" >
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Bolt Pin<span class="text-danger">*</span></label>
-                                                <input type="text" id="bolt_pin" data-rule-required="true" data-msg-required="Bolt Pin is required" class="form-control border-primary" value="{{$employee->pin}}" name="bolt_pin" >
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -1976,6 +1975,9 @@
 
 
     <script type="text/javascript">
+        $("#cancel-button-profile").on('click',function (){
+            window.location.href = "{{route("admin.human_resource.employee_directory.index")}}";
+        });
         var today = new Date();
         today.setHours(0,0,0,0);
         $(document).ready(function() {
@@ -1985,8 +1987,17 @@
             });
 
             $('#profile-form #bolt_pin').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
                 'mask': '9999',
                 'clearIncomplete': true,
+            });
+
+            $('#profile-form #cnic').inputmask({
+                'mask': '99999-9999999-9',
+                'clearIncomplete': true
             });
 
             $('#references-form #reference_years').inputmask({
@@ -2136,7 +2147,37 @@
                 placeholder: "Select Department",
                 width:'100%',
             });
+
+            $("#department").on('change',function(){
+                id = $(this).val();
+                $.ajax({
+                    url: '{!! route('admin.human_resource.employee_directory.get.designation') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'department_id': id
+                    }
+                })
+                .done(function(data) {
+                    $("#designation").html('');
+                    if(data.status == 1)
+                    {
+                        $.each(data.designations,function (i,value){
+                            $("#designation").append('<option value='+value.id+'>'+value.name+'</option>');
+                        });
+                        $("#designation").val("{{$employee->designation_id}}").trigger('change');
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
+
             $("#department").val("{{$employee->department_id ?? ''}}").trigger('change');
+
 
             var family_member_index = 0;
             $(".marital_status_family_member").prepend('<option value="" selected></option>').select2({

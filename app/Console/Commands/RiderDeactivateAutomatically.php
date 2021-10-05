@@ -3,6 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Rider;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class RiderDeactivateAutomatically extends Command
@@ -38,6 +43,16 @@ class RiderDeactivateAutomatically extends Command
      */
     public function handle()
     {
-        NotificationsController::send(155, null);
+        $date_week_age = Carbon::now()->subDays(7)->toDateTimeString();
+        $today = Carbon::now()->toDateTimeString();
+        $rider_data = '';
+        $rider_ids = Rider::where('status', 1)->whereDate('created_at', '<', $date_week_age)->pluck('id')->toArray();
+        $deliveries  = DeliveryNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
+        $v2_pickups  = V2PickupNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
+        $rider_active = array_unique(array_merge($deliveries,$v2_pickups));
+        $data = array_diff($rider_ids, $rider_active);
+        if ($data != null){
+            NotificationsController::send(155, $data);
+        }
     }
 }

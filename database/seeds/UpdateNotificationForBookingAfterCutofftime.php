@@ -1,0 +1,20 @@
+<?php
+
+use Illuminate\Database\Seeder;
+
+class UpdateNotificationForBookingAfterCutofftime extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        DB::table('notifications')->where('id', 152)->delete();
+        DB::table('notifications')->insert(array(
+            array('id' => 152, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Booking After Cut Off Time', 'type_id' => 2, 'subject' => NULL , 'body' => 'Dear [shipper_name],' . PHP_EOL. 'You have booked shipment after cut off time so we cannot commit pick up today but will try to arrange it or it will be done tomorrow.' . PHP_EOL. 'Thanks and Regards,' . PHP_EOL. 'Team TRAX', 'updated_by' => 3, 'status' => 1)
+        ));
+    }
+}

@@ -665,6 +665,8 @@
                                 var shipment = '';
                                 var open_box_iocn = '';
                                 var ccd_icon = '';
+                                var roll_id = '<?php echo session('role_id') == 1?>';
+                                var department_id = '<?php echo session('department_id') == 6?>';
                                 if(details.open_box){
                                     open_box_iocn = '<span><i class="fas fa-box-open"></i></span>';
                                 }
@@ -705,7 +707,7 @@
                                         shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
 
                                     }
-                                    if(details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1){
+                                    if((roll_id && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)|| (department_id && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)){
                                         shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary ml-1 print_pieces" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
                                     }
                                 }
@@ -718,7 +720,7 @@
                                     }else{
                                         shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                     }
-                                    if(details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1){
+                                    if((roll_id && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1) || (department_id && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)){
                                         shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary ml-1 print_pieces" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
                                     }
                                 }
@@ -1274,6 +1276,33 @@
                                         shipment += '<td>' + history.created_at + '</td>';
                                         shipment += '<td>' + history.delivery_note_id + '</td>';
                                         shipment += '<td>' + history.received_by + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
+                                if ('outstanding_history' in details) {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Resolved Outstanding Shipment History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+
+                                    shipment += '<table class="table table-sm table-borderless datatable resolved_outstanding_shipment">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Resolved By</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+                                    $.each(details.outstanding_history, function (index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.resolved_by + '</td>';
                                         shipment += '</tr>';
                                     });
 

@@ -363,6 +363,69 @@
 										</tr>
 										</tbody>
 									</table>
+
+									<table class="table table-bordered">
+										<thead>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Express Center/Franchise</th>
+										</tr>
+										<tr role="row" class="bg-primary bg-lighten-1 white">
+                                            <th class="text-center border-primary border-lighten-2">Type</th>
+                                            <th class="border-primary border-lighten-2">Name</th>
+                                        </tr>
+										</thead>
+										<tbody>
+										<tr role="row">
+											<td class="text-center">1</td>
+											<td class="text-center">Trax Center</td>
+										</tr>
+                                        
+										<tr role="row">
+											<td class="text-center">2</td>
+											<td class="text-center">Trax Franchise</td>
+										</tr>
+										</tbody>
+									</table>
+
+									<table class="table table-bordered">
+										<thead>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Trax Centers</th>
+										</tr>
+                                        <tr role="row" class="bg-primary bg-lighten-1 white">
+                                            <th class="text-center border-primary border-lighten-2">ID</th>
+                                            <th class="border-primary border-lighten-2">Name</th>
+                                        </tr>
+										</thead>
+										<tbody>
+                                        @foreach ($trax_centers as $trax_center)  
+                                            <tr role="row">
+                                                <td class="text-center">{{$trax_center->id}}</td>
+                                                <td class="text-center">{{$trax_center->name}}</td>
+                                            </tr>
+                                        @endforeach    
+										</tbody>
+									</table>
+
+                                    <table class="table table-bordered">
+										<thead>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Trax Franchises</th>
+										</tr>
+                                        <tr role="row" class="bg-primary bg-lighten-1 white">
+                                            <th class="text-center border-primary border-lighten-2">ID</th>
+                                            <th class="border-primary border-lighten-2">Name</th>
+                                        </tr>
+										</thead>
+										<tbody>
+                                        @foreach ($trax_franchises as $trax_franchise)  
+                                            <tr role="row">
+                                                <td class="text-center">{{$trax_franchise->id}}</td>
+                                                <td class="text-center">{{$trax_franchise->name}}</td>
+                                            </tr>
+                                        @endforeach    
+										</tbody>
+									</table>
 								</div>
 
 								<div class="col">
