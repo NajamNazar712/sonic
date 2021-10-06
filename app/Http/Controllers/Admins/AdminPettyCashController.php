@@ -444,7 +444,7 @@ class AdminPettyCashController extends Controller
                     $selected_amount = $petty_details->amount;
                 }
 
-                $amount = '<div class="input-group" style="min-width: 100px;"><input type="text" class="form-control form-control-sm" disabled value="' . $selected_amount . '" name="amount[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Amount is required"><div class="input-group-append amount_log"><span class="input-group-text p-0 pl-sm-1 pr-sm-1"><i class="ft-align-justify font-medium-4"></i></span></div></div>';
+                $amount = '<div class="input-group" style="min-width: 100px;"><input type="text" class="form-control form-control-sm amount_input" disabled value="' . $selected_amount . '" name="amount[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Amount is required"><div class="input-group-append amount_log"><span class="input-group-text p-0 pl-sm-1 pr-sm-1"><i class="ft-align-justify font-medium-4"></i></span></div></div>';
                 return $amount;
             })
             ->editColumn('reference_no', function ($petty_details) {

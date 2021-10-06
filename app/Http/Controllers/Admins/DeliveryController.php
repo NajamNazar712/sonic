@@ -4137,8 +4137,7 @@ class DeliveryController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),83);
         }
 
-        $deliveries = DeliveryNote::
-        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+        $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
@@ -4221,6 +4220,161 @@ class DeliveryController extends Controller
 
         return $datatable->make(true);
 
+    }
+
+    public function get_dncc_to_add(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $delivery_notes = DeliveryNote::where('dncc_status',0)->where('cash_collection_status',1)->where('hub_id',$sdn->hub_id)->orderBy('id','desc')->get(['id']);
+                    return response()->json(['status'=>1,'dn'=>$delivery_notes]);
+                }
+                else{
+                    return response()->json(['status'=>0,'message'=>'Can not add DNCC to SDN']);
+                }
+            }
+            else{
+                return response()->json(['status'=>0,'message'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function add_dncc (Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $delivery_note = DeliveryNote::where('dncc_status',0)->where('cash_collection_status',1)->where('hub_id',$sdn->hub_id)->where('id',$request->dncc_id)->first();
+
+                    DeliveryNoteStationDepositNote::create([
+                        'station_deposit_note_id' => $sdn->id,
+                        'delivery_note_id' => $delivery_note->id
+                    ]);
+
+                    $sdn->dncc_count = $sdn->dncc_count + 1;
+                    $sdn->sdn_delivered_shipments = $sdn->sdn_delivered_shipments + $delivery_note->delivered_shipments;
+                    $sdn->sdn_amount = $sdn->sdn_amount + $delivery_note->received_cod_amount;
+                    $sdn->sdn_net_amount = $sdn->sdn_net_amount + $delivery_note->received_cod_amount;
+                    $sdn->update();
+
+//                    $delivery_note->expense = "";
+//                    $delivery_note->net_amount = "";
+                    $delivery_note->remarks = $request->remarks;
+                    $delivery_note->dncc_status = 1;
+                    $delivery_note->update();
+
+                    return back()->with(['success'=>'DNCC added to SDN']);
+                }
+                else{
+                    return back()->with(['error'=>'Can not add DNCC to SDN']);
+                }
+            }
+            else{
+                return back()->with(['error'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return back()->with(['error'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function get_dncc_to_remove(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $delivery_note_ids = [];
+                    foreach ($sdn->delivery_notes_list as $dn_list)
+                    {
+                        $delivery_note_ids[] = $dn_list->delivery_note_id;
+                    }
+
+                    return response()->json(['status'=>1,'dncc'=>DeliveryNote::whereIn('id',$delivery_note_ids)->get()]);
+                }
+                else{
+                    return response()->json(['status'=>0,'message'=>'Can not remove DNCC from SDN']);
+                }
+            }
+            else{
+                return response()->json(['status'=>0,'message'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function remove_dncc(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $dncc_ids = explode(',', $request->dncc_id);
+                    $delivery_notes = DeliveryNote::whereIn('id', $dncc_ids)->where('dncc_status', 1);
+                    if($delivery_notes->exists())
+                    {
+                        $total_dncc = 0;
+                        $total_delivered_shipments = 0;
+                        $total_sdn_amount = 0;
+                        $total_sdn_net_amount = 0;
+                        $delivery_notes = $delivery_notes->get();
+                        foreach ($delivery_notes as $delivery_note)
+                        {
+                            $total_dncc++;
+                            $total_delivered_shipments += $delivery_note->delivered_shipments;
+                            $total_sdn_amount += $delivery_note->received_cod_amount;
+                            $total_sdn_net_amount += $delivery_note->received_cod_amount;
+
+                            $delivery_note->remarks = "";
+                            $delivery_note->dncc_status = 0;
+                            $delivery_note->update();
+
+                            DeliveryNoteStationDepositNote::where('station_deposit_note_id',$sdn->id)->where('delivery_note_id',$delivery_note->id)->delete();
+                        }
+
+                        $sdn->dncc_count = $sdn->dncc_count - $total_dncc;
+                        $sdn->sdn_delivered_shipments = $sdn->sdn_delivered_shipments - $total_delivered_shipments;
+                        $sdn->sdn_amount = $sdn->sdn_amount - $total_sdn_amount;
+                        $sdn->sdn_net_amount = $sdn->sdn_net_amount - $total_sdn_net_amount;
+                        $sdn->update();
+
+                        return back()->with(['success'=>'DNCC removed successfully']);
+                    }
+                    else{
+                        return back()->with('error', 'Invalid DNCC');
+                    }
+                }
+                else{
+                    return back()->with(['error'=>'Can not add DNCC to SDN']);
+                }
+            }
+            else{
+                return back()->with(['error'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return back()->with(['error'=>'SDN Id Not Found']);
+        }
     }
 
     //for ajax select dncc
@@ -4486,6 +4640,14 @@ class DeliveryController extends Controller
 
                 $reconcile_to_deposit = '<button type="button" class="dropdown-item update_status_deposit"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Deposit</div></button>';
 
+                $add_dncc = '<button type="button" class="dropdown-item add_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add DNCC</div></button>';
+
+                $add_pncc = '<button type="button" class="dropdown-item add_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add PNCC</div></button>';
+
+                $remove_dncc = '<button type="button" class="dropdown-item remove_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove DNCC</div></button>';
+
+                $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove PNCC</div></button>';
+
 
                 $dropdown = '
                   <div class="btn-group">
@@ -4518,6 +4680,24 @@ class DeliveryController extends Controller
                     $dropdown .= $reconcile_to_deposit;
                 }
 
+                if($result->status == 0 && $result->adjusted == 0 && (session('role_id') == 1 || in_array(605, session('permissions'))))
+                {
+                    if($result->sdn_type == 1)
+                    {
+                        $dropdown .= $add_dncc;
+
+                        if($result->dncc_count > 1) {
+                            $dropdown .= $remove_dncc;
+                        }
+                    }
+                    else{
+                        $dropdown .= $add_pncc;
+
+                        if($result->dncc_count > 1) {
+                            $dropdown .= $remove_pncc;
+                        }
+                    }
+                }
                 $dropdown .= '
                     </div>
                   </div>

@@ -310,6 +310,16 @@
                         this_table.api().table().columns.adjust();
                     });
 
+                    $(".amount_input").inputmask({
+                        'alias': 'decimal',
+                        'allowMinus': false,
+                        'allowPlus': false,
+                        'rightAlign': false,
+                        'digits': 2,
+                        'min': 0.00,
+                        'max': 600000.00
+                    });
+
                     // $(".hub_select").select2({
                     //     placeholder: "Select Hub",
                     //     width:'100%'

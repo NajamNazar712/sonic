@@ -456,7 +456,7 @@
                     'rightAlign': false,
                     'digits': 2,
                     'min': 0.00,
-                    'max': 1000000.00
+                    'max': 600000.00
                 });
 
             }

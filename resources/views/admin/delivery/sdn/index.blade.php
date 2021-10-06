@@ -324,6 +324,87 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="AddDNCCModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddDNCCModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add DNCC</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="sdn_add_dncc" class="form" action="{{route('admin.delivery.sdn.dncc.add')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="sdn_id" id="sdn_id_for_add_dncc">
+                        <div class="form-group">
+                            <select name="dncc_id" id="dncc_select" data-rule-required="true" data-msg-required="DNCC is Required" class="select2 form-control">
+
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="remarks" id="dncc_remarks_input" placeholder="Remarks" class="form-control">
+                        </div>
+
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-3">
+                                <button type="submit" class="btn btn-primary btn-block">Add DNCC</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="RemoveDNCCModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RemoveDNCCModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Remove DNCC</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="sdn_remove_dncc" class="form" action="{{route('admin.delivery.sdn.dncc.remove')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="sdn_id" id="sdn_id_for_remove_dncc">
+                        <input type="hidden" name="dncc_id" id="dncc_id_for_remove_dncc">
+                        <table class="table table-bordered datatable" id="remove_dncc_table" style="z-index: 3;width: 100%;">
+                            <thead>
+                                <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1"></th>
+                                    <th class="border-primary border-darken-1">S NO.</th>
+                                    <th class="border-primary border-darken-1">DNCC #</th>
+                                    <th class="border-primary border-darken-1">No. of Delivered Shipments</th>
+                                    <th class="border-primary border-darken-1">Amount</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-3">
+                                <button type="submit" id="remove_dncc_btn" disabled class="btn btn-primary btn-block">Remove DNCC</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -695,6 +776,11 @@
                 table.draw();
             });
 
+            $("#sdn_add_dncc #dncc_select").prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select DNCC*',
+                width:'100%',
+                dropdownCssClass: 'form-control-sm p-0'
+            });
 
 
             {{--$('#sdn_upload_form').bind('submit',function (e) {--}}
@@ -887,6 +973,7 @@
                 }
 
             });
+
 
 
 
@@ -1179,6 +1266,125 @@
                    });
                }
             });
+            $('body').on('click','.add_dncc', function () {
+               var id = $(this).parents('tr').attr('id');
+               if(id){
+                   $.ajax({
+                       url:'{!! route('admin.delivery.sdn.dncc.get.add') !!}',
+                       type:'POST',
+                       data: {
+                           'sdn_id':id,
+                           '_token': '{{ csrf_token() }}'
+                       }
+                   }).done(function (data) {
+                       if(data.status == 1)
+                       {
+                           html = "";
+                          $.each(data.dn,function (i,v){
+                              let dn_id = v.id.toString();
+                              html +=  '<option value="'+dn_id+'">'+dn_id.padStart(6,0)+'</option>';
+                          });
+
+                          $("#sdn_add_dncc #dncc_select").html(html).val("").trigger('change');
+                          $("#sdn_add_dncc #dncc_remarks_input").val("");
+                          $("#sdn_add_dncc #sdn_id_for_add_dncc").val(id);
+                          $("#AddDNCCModal").modal('show');
+                       }
+                       else{
+                           toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                       }
+                   });
+               }
+            });
+
+            var remove_dncc_table;
+            var dncc_selected_rows = [];
+            $('body').on('click','.remove_dncc', function () {
+                var id = $(this).parents('tr').attr('id');
+                if(id){
+                    $.ajax({
+                        url:'{!! route('admin.delivery.sdn.dncc.get.remove') !!}',
+                        type:'POST',
+                        data: {
+                            'sdn_id':id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }else{
+                            $('#RemoveDNCCModal').modal('show');
+                            $("#sdn_id_for_remove_dncc").val(id);
+                            remove_dncc_table = $('#remove_dncc_table').DataTable({
+                                dom: 'ltipr',
+                                ordering:false,
+                                paging:false,
+                                columns: [
+                                    {orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {name: 'dncc', class: 'align-middle dncc form-group'},
+                                    {name: 'delivered_shipments', class: 'align-middle delivered_shipments form-group'},
+                                    {name: 'amount', class: 'align-middle expense_amount form-group'},
+                                ],
+
+                                rowCallback: function(row, d, index) {
+                                    var info = remove_dncc_table.page.info();
+                                    $('td:eq(0)', row).addClass('select-checkbox');
+
+                                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+
+                                    if ($.inArray(parseInt(d[0]), dncc_selected_rows) !== -1) {
+                                        remove_dncc_table.row(row).select();
+                                    }
+                                    else{
+                                        remove_dncc_table.row(row).deselect();
+                                    }
+
+                                },
+                                initComplete: function() {
+
+                                }
+                            });
+
+                            $.each(data.dncc, function (index, value) {
+                                remove_dncc_table.row.add([value.id,, value.id.toString().padStart(6,0), value.delivered_shipments, value.received_cod_amount]);
+                                remove_dncc_table.draw(true);
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('#RemoveDNCCModal #remove_dncc_table').on('click', 'tbody tr td.select-checkbox', function() {
+
+                    var id = parseInt(remove_dncc_table.row( $(this).parents('tr') ).data()[0]);
+
+                    var index = $.inArray(id, dncc_selected_rows);
+
+
+                    if (index === -1) {
+                        if(dncc_selected_rows.length + 1 != remove_dncc_table.rows().count()) {
+                            dncc_selected_rows.push(id);
+                        }
+                    } else {
+                        dncc_selected_rows.splice(index, 1);
+                    }
+
+                    if (dncc_selected_rows.length > 0) {
+                        $("#remove_dncc_btn").prop('disabled', false);
+                    } else {
+                        $("#remove_dncc_btn").prop('disabled', true);
+                    }
+
+                    remove_dncc_table.draw(false);
+
+            });
+
+            $('#RemoveDNCCModal ').on('hidden.bs.modal', function () {
+                remove_dncc_table.clear();
+                remove_dncc_table.destroy();
+                dncc_selected_rows = [];
+            });
 
             $('#ViewDepositSlip').on('hidden.bs.modal', function () {
                 deposit_slip_table.clear();
@@ -1370,6 +1576,82 @@
                         }
                     });
 
+                }
+            });
+
+            $("#sdn_add_dncc").validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Add DNCC To SDN!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            form.submit();
+                        }
+                    });
+
+                }
+            });
+
+            $("#sdn_remove_dncc").validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    if(dncc_selected_rows.length > 0) {
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to Remove DNCC From SDN!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                $("#sdn_remove_dncc #dncc_id_for_remove_dncc").val(dncc_selected_rows);
+                                form.submit();
+                            }
+                        });
+                    }
                 }
             });
 
