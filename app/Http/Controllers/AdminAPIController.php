@@ -3493,14 +3493,35 @@ class AdminAPIController extends Controller
                                     if (strpos($body, '[time]') !== FALSE) {
                                         $body = str_replace('[time]', Carbon::parse($shift->start_time)->addMinutes($grace_time)->toTimeString(), $body);
                                     }
+                                    if (strpos($body, '[name]') !== FALSE) {
+                                        $body = str_replace('[name]', $admin->name, $body);
+                                    }
                                     $attendance = EmployeeAttendance::where('employee_id', $admin_id)->where('employee_type', 1)->whereDate('attendance_date', Carbon::now()->format("Y-m-d"))
                                         ->whereNotNull('clock_in_datetime');
                                     if (!$attendance->exists()) {
                                         if ($now_time->diffInMinutes(Carbon::parse($shift->start_time)) == 0) {
+                                            $notification_history = new EmployeeNotificationHistory();
+                                            $notification_history->employee_id = $admin_id;
+                                            $notification_history->employee_type_id = 1;
+                                            $notification_history->title = $title;
+                                            $notification_history->message = $body;
+                                            $notification_history->save();
                                             return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
                                         } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(ceil($grace_time / 2))) == 0) {
+                                            $notification_history = new EmployeeNotificationHistory();
+                                            $notification_history->employee_id = $admin_id;
+                                            $notification_history->employee_type_id = 1;
+                                            $notification_history->title = $title;
+                                            $notification_history->message = $body;
+                                            $notification_history->save();
                                             return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
                                         } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(($grace_time - 1))) == 0) {
+                                            $notification_history = new EmployeeNotificationHistory();
+                                            $notification_history->employee_id = $admin_id;
+                                            $notification_history->employee_type_id = 1;
+                                            $notification_history->title = $title;
+                                            $notification_history->message = $body;
+                                            $notification_history->save();
                                             return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
                                         } else {
                                             return response()->json(['status' => 1, 'message' => 'Time error', 'notification' => 1]);
