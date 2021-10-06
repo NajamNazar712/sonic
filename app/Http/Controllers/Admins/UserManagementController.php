@@ -8,6 +8,7 @@ use App\Http\Models\Admin\ModulePermission;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -36,7 +37,8 @@ class UserManagementController extends Controller
       ActivityTrailController::createActivityTrailLog(Auth::id(),358);
       $hubs=City::select('id','name')->where('hub',1)->get();
       $roles = AdminRole::with('department')->get();
-      return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles]);
+      $reporting_locations = ReportingLocation::where('status',1)->get();
+      return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles, 'reporting_locations' => $reporting_locations]);
     }
 
     public function user_list(Request $request) {
