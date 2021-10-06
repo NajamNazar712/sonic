@@ -6,13 +6,13 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\City;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
-use App\http\Models\RestrictedCityIntercept;
+use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\Facades\Auth;
 
