@@ -145,6 +145,7 @@ class AdminAPIController extends Controller
                     $information['role'] = 'staff';
 
                     if($request->has('device_token')){
+                        EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
                         $employee_device_token = EmployeeDeviceToken::where('employee_id', $user->id)
                             ->where('employee_type_id', 1);
                         if ($employee_device_token->exists()) {
