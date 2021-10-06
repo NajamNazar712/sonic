@@ -20,6 +20,7 @@ use App\Http\Models\Admin\Retail\RetailTraxBox;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
+use App\http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
@@ -3456,58 +3457,77 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $admin_id = $request->admin_id;
-            $admin = Admin::find($admin_id);
-            if ($admin) {
-                if ($admin->reporting_location_id) {
-                    $reporting_location = ReportingLocation::join('admins as a', 'reporting_locations.id', 'a.reporting_location_id')
-                        ->where('a.id', $admin_id);
-                } else {
-                    $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                        ->join('admins as a', 'e.id', 'a.employee_id')
-                        ->where('a.id', $admin_id);
-                }
-                if ($reporting_location->exists()) {
-                    $reporting_location = $reporting_location->first();
-                    $reporting_location->radius;
-                    $destination = $reporting_location->lat . ',' . $reporting_location->long;
-                    $origin = $request->latitude . ',' . $request->longitude;
-                    $distance = $this->distance($origin, $destination);
-                    if ($distance <= $reporting_location->radius / 1000) {
-                        if ($admin->shift_id) {
-                            $shift = EmployeeShift::where('id', $admin->shift_id);
+            $notification = AppNotification::find(10);
+            if ($notification) {
+                if ($notification->status) {
+                    $title = $notification->title;
+                    $body = $notification->body;
+                    $admin_id = $request->admin_id;
+                    $admin = Admin::find($admin_id);
+                    if ($admin) {
+                        if ($admin->reporting_location_id) {
+                            $reporting_location = ReportingLocation::join('admins as a', 'reporting_locations.id', 'a.reporting_location_id')
+                                ->where('a.id', $admin_id);
                         } else {
-                            $shift = EmployeeShift::join('employees as e', 'employee_shifts.id', '=', 'e.shift_id')
-                                ->where('e.id', $admin->employee_id);
+                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                                ->join('admins as a', 'e.id', 'a.employee_id')
+                                ->where('a.id', $admin_id);
                         }
-                        if ($shift->exists()) {
-                            $shift = $shift->first();
-                            $now_time = Carbon::createFromFormat("H:i:s", Carbon::now()->format("H:i").':00');
-                            $grace_time = $shift->extension_minutes;
-                            if ($now_time->diffInMinutes(Carbon::parse($shift->start_time)) == 0) {
-                                return response()->json(['status' => 0, 'data' => ['body' => "Please Mark Your Attendance", 'title' => "Mark Attendance"], 'notification' => 0, 'message' => "success"]);
-                            } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(ceil($grace_time / 2))) == 0) {
-                                return response()->json(['status' => 0, 'data' => ['body' => "Please Mark Your Attendance", 'title' => "Mark Attendance"], 'notification' => 0, 'message' => "success"]);
-                            } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(($grace_time - 1))) == 0) {
-                                return response()->json(['status' => 0, 'data' => ['body' => "Please Mark Your Attendance", 'title' => "Mark Attendance"], 'notification' => 0, 'message' => "success"]);
+                        if ($reporting_location->exists()) {
+                            $reporting_location = $reporting_location->first();
+                            $reporting_location->radius;
+                            $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                            $origin = $request->latitude . ',' . $request->longitude;
+                            $distance = $this->distance($origin, $destination);
+                            if ($distance <= $reporting_location->radius / 1000) {
+                                if ($admin->shift_id) {
+                                    $shift = EmployeeShift::where('id', $admin->shift_id);
+                                } else {
+                                    $shift = EmployeeShift::join('employees as e', 'employee_shifts.id', '=', 'e.shift_id')
+                                        ->where('e.id', $admin->employee_id);
+                                }
+                                if ($shift->exists()) {
+                                    $shift = $shift->first();
+                                    $now_time = Carbon::createFromFormat("H:i:s", Carbon::now()->format("H:i") . ':00');
+                                    $grace_time = $shift->extension_minutes;
+                                    if (strpos($body, '[time]') !== FALSE) {
+                                        $body = str_replace('[time]', Carbon::parse($shift->start_time)->addMinutes($grace_time)->toTimeString(), $body);
+                                    }
+                                    $attendance = EmployeeAttendance::where('employee_id', $admin_id)->where('employee_type', 1)->whereDate('attendance_date', Carbon::now()->format("Y-m-d"))
+                                        ->whereNotNull('clock_in_datetime');
+                                    if (!$attendance->exists()) {
+                                        if ($now_time->diffInMinutes(Carbon::parse($shift->start_time)) == 0) {
+                                            return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
+                                        } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(ceil($grace_time / 2))) == 0) {
+                                            return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
+                                        } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(($grace_time - 1))) == 0) {
+                                            return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
+                                        } else {
+                                            return response()->json(['status' => 1, 'message' => 'Time error', 'notification' => 1]);
+                                        }
+                                    } else {
+                                        return response()->json(['status' => 1, 'message' => 'Attendance already marked', 'notification' => 1]);
+                                    }
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Shift not found!', 'notification' => 1]);
+                                }
                             } else {
-                                return response()->json(['status' => 1, 'message' => 'Time error', 'notification' => 1]);
+                                return response()->json(['status' => 1, 'message' => 'User is off-site', 'notification' => 1]);
                             }
                         } else {
-                            return response()->json(['status' => 1, 'message' => 'Shift not found!', 'notification' => 1]);
+                            return response()->json(['status' => 1, 'message' => 'Reporting location not found', 'notification' => 1]);
                         }
                     } else {
-                        return response()->json(['status' => 1, 'message' => 'User is off-site', 'notification' => 1]);
+                        return response()->json(['status' => 1, 'message' => 'User Not Found!', 'notification' => 1]);
                     }
                 } else {
-                    return response()->json(['status' => 1, 'message' => 'Reporting location not found', 'notification' => 1]);
+                    return response()->json(['status' => 1, 'message' => 'Notification Disabled', 'notification' => 1]);
                 }
             } else {
-                return response()->json(['status' => 1, 'message' => 'User Not Found!', 'notification' => 1]);
+                return response()->json(['status' => 1, 'message' => 'Notification Not Found!', 'notification' => 1]);
             }
         }
     }
-
 
 
 }
