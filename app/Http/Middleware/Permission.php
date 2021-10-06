@@ -229,7 +229,18 @@ class Permission
             'delivery.completed.dncc.list' => 41,
             'delivery.sdn.index' => 42,
             'delivery.sdn.list' => 42,
+            
             'delivery.sdn.back_to_deposit' => 604,
+
+            'delivery.sdn.dncc.add' => 605,
+            'delivery.sdn.dncc.get.add' => 605,
+            'delivery.sdn.dncc.remove' => 605,
+            'delivery.sdn.dncc.get.remove' => 605,
+            'delivery.sdn.pncc.add' => 605,
+            'delivery.sdn.pncc.get.add' => 605,
+            'delivery.sdn.pncc.remove' => 605,
+            'delivery.sdn.pncc.get.remove' => 605,
+
             'delivery.sdn.dn' => 42,
             'delivery.sdn.shipments' => 42,
             'delivery.sdn.details' => 42,

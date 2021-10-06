@@ -1160,6 +1160,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('remove','Admins\DeliveryController@remove_dncc')->name('remove');
                 Route::post('get/dncc/remove','Admins\DeliveryController@get_dncc_to_remove')->name('get.remove');
             });
+
+            Route::prefix('pncc')->name('pncc.')->group(function() {
+                Route::post('add','Admins\DeliveryController@add_pncc')->name('add');
+                Route::post('get/pncc','Admins\DeliveryController@get_pncc_to_add')->name('get.add');
+                Route::post('remove','Admins\DeliveryController@remove_pncc')->name('remove');
+                Route::post('get/pncc/remove','Admins\DeliveryController@get_pncc_to_remove')->name('get.remove');
+            });
         });
         Route::prefix('misroute')->name('misroute.')->group(function (){
             Route::get('','Admins\DeliveryController@misroute_index')->name('index');
