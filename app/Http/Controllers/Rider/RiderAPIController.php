@@ -9720,7 +9720,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $rider_id = $request->rider_id;
-            $rider = Admin::find($rider_id);
+            $rider = Rider::find($rider_id);
             if ($rider) {
                 $latitude = $request->latitude;
                 $longitude = $request->longitude;
