@@ -3482,15 +3482,13 @@ class AdminAPIController extends Controller
                         }
                         if ($shift->exists()) {
                             $shift = $shift->first();
-                            $now = Carbon::now()->format("H:i:s");
-                            $now_time = Carbon::createFromFormat("H:i:s", $now);
-//                            return response()->json([$now_time, Carbon::parse($shift->start_time)]);
+                            $now_time = Carbon::createFromFormat("H:i:s", Carbon::now()->format("H:i").':00');
                             $grace_time = $shift->extension_minutes;
-                            if (($now_time->diffInMinutes(Carbon::parse($shift->start_time))) == 0) {
+                            if ($now_time->diffInMinutes(Carbon::parse($shift->start_time)) == 0) {
                                 return response()->json(['status' => 0, 'data' => ['body' => "Please Mark Your Attendance", 'title' => "Mark Attendance"], 'notification' => 0, 'message' => "success"]);
-                            } elseif (($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(ceil($grace_time / 2)))) == 0) {
+                            } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(ceil($grace_time / 2))) == 0) {
                                 return response()->json(['status' => 0, 'data' => ['body' => "Please Mark Your Attendance", 'title' => "Mark Attendance"], 'notification' => 0, 'message' => "success"]);
-                            } elseif ($now_time == Carbon::parse($shift->start_time)->addMinutes(($grace_time - 1))) {
+                            } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(($grace_time - 1))) == 0) {
                                 return response()->json(['status' => 0, 'data' => ['body' => "Please Mark Your Attendance", 'title' => "Mark Attendance"], 'notification' => 0, 'message' => "success"]);
                             } else {
                                 return response()->json(['status' => 1, 'message' => 'Time error', 'notification' => 1]);

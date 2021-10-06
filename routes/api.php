@@ -140,6 +140,7 @@ Route::name('api.')->group(function () {
             Route::prefix('location')->name('location.')->group(function(){
                 Route::post('','Rider\RiderAPIController@get_rider_location')->name('get');
             });
+            Route::post('location_v2', 'Rider\RiderAPIController@get_rider_location_v2')->name('location_v2');
 
             Route::prefix('delivery')->name('delivery.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
@@ -254,7 +255,7 @@ Route::name('api.')->group(function () {
                 Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
             Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');
-            Route::post('attendance_notification', 'AdminAPIController@attendance_notification')->name('attendance_notification');
+            Route::post('location_v2', 'AdminAPIController@attendance_notification')->name('location_v2');
 
         });
 

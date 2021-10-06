@@ -9720,23 +9720,22 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $rider_id = $request->rider_id;
-            $latitude = $request->latitude;
-            $longitude = $request->longitude;
-
-            $log = RiderLocationLog::where('rider_id', $rider_id);
-
-            if ($log->exists()) {
-                $log = $log->first();
-            } else {
-                $log = new RiderLocationLog();
-                $log->rider_id = $rider_id;
-            }
-            $log->latitude = $latitude;
-            $log->longitude = $longitude;
-            $log->save();
-            $rider_id = $request->rider_id;
             $rider = Admin::find($rider_id);
             if ($rider) {
+                $latitude = $request->latitude;
+                $longitude = $request->longitude;
+
+                $log = RiderLocationLog::where('rider_id', $rider_id);
+
+                if ($log->exists()) {
+                    $log = $log->first();
+                } else {
+                    $log = new RiderLocationLog();
+                    $log->rider_id = $rider_id;
+                }
+                $log->latitude = $latitude;
+                $log->longitude = $longitude;
+                $log->save();
                 if ($rider->reporting_location_id) {
                     $reporting_location = ReportingLocation::join('riders as r', 'reporting_locations.id', 'r.reporting_location_id')
                         ->where('r.id', $rider_id);
@@ -9760,13 +9759,13 @@ class RiderAPIController extends Controller
                         }
                         if ($shift->exists()) {
                             $shift = $shift->first();
-                            $now_time = Carbon::now()->format("H:i:s");
+                            $now_time = Carbon::createFromFormat("H:i:s", Carbon::now()->format("H:i").':00');
                             $grace_time = $shift->extension_minutes;
-                            if ($now_time == Carbon::parse($shift->start_time)) {
+                            if ($now_time->diffInMinutes(Carbon::parse($shift->start_time)) == 0) {
                                 return response()->json(['status' => 0, 'data' => ['body' => "Please Mark Your Attendance", 'title' => "Mark Attendance"], 'notification' => 0, 'message' => "success"]);
-                            } elseif (Carbon::parse($now_time) == Carbon::parse($shift->start_time)->addMinutes(ceil($grace_time / 2))) {
+                            } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(ceil($grace_time / 2))) == 0) {
                                 return response()->json(['status' => 0, 'data' => ['body' => "Please Mark Your Attendance", 'title' => "Mark Attendance"], 'notification' => 0, 'message' => "success"]);
-                            } elseif ($now_time == Carbon::parse($shift->start_time)->addMinutes(($grace_time - 1))) {
+                            } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(($grace_time - 1))) == 0) {
                                 return response()->json(['status' => 0, 'data' => ['body' => "Please Mark Your Attendance", 'title' => "Mark Attendance"], 'notification' => 0, 'message' => "success"]);
                             } else {
                                 return response()->json(['status' => 1, 'message' => 'Time error', 'notification' => 1]);
