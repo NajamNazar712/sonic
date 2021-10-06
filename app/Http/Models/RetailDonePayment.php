@@ -11,7 +11,7 @@ class RetailDonePayment extends Model
     }
 
     public function shipper() {
-        return $this->belongsTo('App\http\Models\Admin\Retail\RetailShipperInfo', 'user_id', 'id');
+        return $this->belongsTo('App\Http\Models\Admin\Retail\RetailShipperInfo', 'user_id', 'id');
     }
     public function company_bank() {
         return $this->belongsTo('App\Http\Models\BanksList', 'company_bank_id', 'id');

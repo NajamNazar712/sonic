@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingShipmentsForPayment;
 use App\Http\Models\RetailPendingPayment;
-use App\http\Models\RetailPendingShipmentsForPayment;
+use App\Http\Models\RetailPendingShipmentsForPayment;
 use App\Http\Models\Shipment;
 use Illuminate\Console\Command;
 use DB;

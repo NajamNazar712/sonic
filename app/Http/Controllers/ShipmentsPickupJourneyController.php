@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\http\Models\V2Pickup\ShipmentsV2PickupJourney;
+use App\Http\Models\V2Pickup\ShipmentsV2PickupJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
