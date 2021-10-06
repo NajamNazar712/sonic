@@ -8127,10 +8127,17 @@ class RiderAPIController extends Controller
                                 $return_note_data->save();
                             }
 
-                            $updated_shipments_count = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
+                            $updated_shipments = ReturnNoteShipment::where('return_note_id', $request->return_note_id);
+                            $updated_shipments_count = $updated_shipments->where('status', 0)->count();
+                            $total_shipments_count = $updated_shipments->count();
+                            $undelivered_shipments_count = $updated_shipments->where('status', 1)->count();
 
                             if ($updated_shipments_count == 0) {
-                                $return_note_data->status = 3;
+                                if($total_shipments_count == $undelivered_shipments_count){
+                                    $return_note_data->status = 1;
+                                }else{
+                                    $return_note_data->status = 3;
+                                }
                                 $return_note_data->updated_at = Carbon::now();
                                 $return_note_data->save();
                             }
