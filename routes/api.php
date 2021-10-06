@@ -254,6 +254,7 @@ Route::name('api.')->group(function () {
                 Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
             Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');
+            Route::post('attendance_notification', 'AdminAPIController@attendance_notification')->name('attendance_notification');
 
         });
 
