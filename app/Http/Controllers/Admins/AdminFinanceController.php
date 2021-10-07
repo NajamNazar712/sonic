@@ -6102,7 +6102,6 @@ class AdminFinanceController extends Controller
             $html .= '
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
 
                     window.print();
                   }
@@ -6532,7 +6531,6 @@ class AdminFinanceController extends Controller
             $html .= '
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
 
                     window.print();
                   }
@@ -6984,7 +6982,6 @@ class AdminFinanceController extends Controller
             $html .= '
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
 
                     window.print();
                   }
@@ -7912,7 +7909,6 @@ class AdminFinanceController extends Controller
             $html .= '
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
 
                     window.print();
                   }
@@ -7929,7 +7925,6 @@ class AdminFinanceController extends Controller
                 <body>No Payment(s) for the given Criteria</body>
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
                   }
                 </script>
             </html>
