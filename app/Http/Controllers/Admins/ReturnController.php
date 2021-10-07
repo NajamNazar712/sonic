@@ -3800,7 +3800,7 @@ class ReturnController extends Controller
 
                  
                     $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                     ->where('admin_roles.department_id',3)->where('a.status',1);
+                     ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id)->where('a.status',1);
                      
                      if($agent_role->exists()){
                          $agent_return_confrimation = new AgentReturnConfirmation;
@@ -3809,8 +3809,10 @@ class ReturnController extends Controller
                          $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
                          $agent_return_confrimation->save();
                      }
-                 }else{
+                 }
+                 else{
                     $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                    $check_agent_return_confrimation->save();
                  }
                 //set record in login/logut table end
                 
@@ -3952,7 +3954,8 @@ class ReturnController extends Controller
                                     
                     if(!$check_agent_return_confrimation->exists()){
                         $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                        ->where('admin_roles.department_id',3)->where('a.status',1);
+                        ->where('admin_roles.department_id',3)->where('a.id',$agent_id)->where('a.status',1);
+
                         if($agent_role->exists()){
                             $agent_return_confrimation = new AgentReturnConfirmation;
                             $agent_return_confrimation->admin_id = $agent_id;
@@ -3960,8 +3963,10 @@ class ReturnController extends Controller
                             $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
                             $agent_return_confrimation->save();
                         }
-                    }else{
+                    }
+                    else{
                         $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                        $check_agent_return_confrimation->save();
                     }
                     //set record in login/logut table end
 
