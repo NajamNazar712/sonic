@@ -98,10 +98,7 @@
                                         <th>Open Shipment</th>
 {{--                                        <th>Return Address ID</th>--}}
 
-                                        @if($service_type_check_id == 1 || $service_type_check_id == null)
-                                            <th>Express Center/Franchise</th>
-                                            <th>Trax Centers/Franchises ID</th>
-                                        @endif
+                                      
                                         <th></th>
                                     </tr>
                                     </thead>
@@ -475,32 +472,7 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][open_shipment]', $ro['open_shipment'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                             @endif
-                                            @if($service_type_check_id == 1 || $service_type_check_id == null)
-                                                @if(isset($errors[$no]['self_collection']) || strtolower($ro['self_collection']) == 'yes')
-            
-                                                    @if(isset($errors[$no]['trax_center_franchise_type']))
-                                                        <td>{!! Form::text('form[' . $no . '][trax_center_franchise_type]', $ro['trax_center_franchise_type'], ['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['trax_center_franchise_type']}}</font></td>
-                                                    @else
-                                                        <td>{!! Form::text('form[' . $no . '][trax_center_franchise_type]', $ro['trax_center_franchise_type'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
-                                                    @endif
-                                                @else
-                                                    <td>{!! Form::text('form[' . $no . '][trax_center_franchise_type]', $ro['trax_center_franchise_type'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
-
-                                                @endif
-                                            @endif
-                                            @if($service_type_check_id == 1 || $service_type_check_id == null)
-                                                @if(isset($errors[$no]['self_collection']) || strtolower($ro['self_collection']) == 'yes')
-            
-                                                    @if(isset($errors[$no]['trax_center_franchise_id']))
-                                                        <td>{!! Form::text('form[' . $no . '][trax_center_franchise_id]', $ro['trax_center_franchise_id'], ['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['trax_center_franchise_id']}}</font></td>
-                                                    @else
-                                                        <td>{!! Form::text('form[' . $no . '][trax_center_franchise_id]', $ro['trax_center_franchise_id'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
-                                                    @endif
-                                                @else
-                                                    <td>{!! Form::text('form[' . $no . '][trax_center_franchise_id]', $ro['trax_center_franchise_id'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
-
-                                                @endif
-                                            @endif
+                                            
 
                                                 <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                       

@@ -222,7 +222,7 @@
 
     <style>
         .selectize-control {
-            width: 300px !important;
+            width: 305px !important;
         }
     </style>
 @endsection

@@ -511,7 +511,7 @@
                 if(shipment_id != ''){
                     var redirect = '{!! route('admin.intercept.index', ':id') !!}';
                     var url = redirect.replace(':id', shipment_id);
-                    window.location = url;
+                    window.open(url);
                 }
             });
 

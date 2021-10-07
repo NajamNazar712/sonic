@@ -6356,6 +6356,7 @@ class AdminDashboardController extends Controller
      * @return int
      */
     public function addRates(Request $request, $id){
+
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -6814,10 +6815,10 @@ class AdminDashboardController extends Controller
                         if (array_key_exists($index, $request->on_wa_spkg)) {
                             $wa_spkg[$index] = $request->on_wa_spkg[$index];
                         } else {
-                            $wa_spkg[$index] = 0;
+                            $wa_spkg[$index] = 0.5;
                         };
                     }else{
-                        $wa_spkg[$index] = 0;
+                        $wa_spkg[$index] = 0.5;
                     }
                     WeightCharge::create([
                         'user_id' => $id,
@@ -6980,6 +6981,7 @@ class AdminDashboardController extends Controller
                 ]);
                 $wa_switch_overland = array();
                 $wa_spkg_overland = array();
+                $standard_weight = StandardWeightCharge::where('shipping_mode_id',2)->pluck('kg_range')->toArray();
                 foreach ($request->ol_wa_range_up as $index => $ol_wa_range_up) {
                     if($request->has('ol_wa_switch')) {
                         if (array_key_exists($index, $request->ol_wa_switch)) {
@@ -6994,10 +6996,10 @@ class AdminDashboardController extends Controller
                         if (array_key_exists($index, $request->ol_wa_spkg)) {
                             $wa_spkg_overland[$index] = $request->ol_wa_spkg[$index];
                         } else {
-                            $wa_spkg_overland[$index] = 0;
+                            $wa_spkg_overland[$index] = isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
                         };
                     }else{
-                        $wa_spkg_overland[$index] = 0;
+                        $wa_spkg_overland[$index] =  isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
                     }
                     WeightCharge::create([
                         'user_id' => $id,
@@ -7159,6 +7161,7 @@ class AdminDashboardController extends Controller
                 ]);
                 $wa_switch_detain = array();
                 $wa_spkg_detain = array();
+                $standard_weight = StandardWeightCharge::where('shipping_mode_id',3)->pluck('kg_range')->toArray();
                 foreach ($request->detain_wa_range_up as $index => $detain_wa_range_up) {
                     if ($request->has('detain_wa_switch')) {
                         if (array_key_exists($index, $request->detain_wa_switch)) {
@@ -7173,10 +7176,10 @@ class AdminDashboardController extends Controller
                         if (array_key_exists($index, $request->detain_wa_spkg)) {
                             $wa_spkg_detain[$index] = $request->detain_wa_spkg[$index];
                         } else {
-                            $wa_spkg_detain[$index] = 0;
+                            $wa_spkg_detain[$index] = isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
                         };
                     } else {
-                        $wa_spkg_detain[$index] = 0;
+                        $wa_spkg_detain[$index] = isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
                     }
                     WeightCharge::create([
                         'user_id' => $id,
@@ -7337,6 +7340,7 @@ class AdminDashboardController extends Controller
                 ]);
                 $wa_switch_sameday = array();
                 $wa_spkg_sameday = array();
+                $standard_weight = StandardWeightCharge::where('shipping_mode_id',4)->pluck('kg_range')->toArray();
                 foreach ($request->sameday_wa_range_up as $index => $sameday_wa_range_up) {
                     if($request->has('sameday_wa_switch')) {
                         if (array_key_exists($index, $request->sameday_wa_switch)) {
@@ -7351,10 +7355,10 @@ class AdminDashboardController extends Controller
                         if (array_key_exists($index, $request->sameday_wa_spkg)) {
                             $wa_spkg_sameday[$index] = $request->sameday_wa_spkg[$index];
                         } else {
-                            $wa_spkg_sameday[$index] = 0;
+                            $wa_spkg_sameday[$index] = isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
                         };
                     }else{
-                        $wa_spkg_sameday[$index] = 0;
+                        $wa_spkg_sameday[$index] = isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
                     }
                     WeightCharge::create([
                         'user_id' => $id,
@@ -7365,9 +7369,9 @@ class AdminDashboardController extends Controller
                         'spkg' => $wa_spkg_sameday[$index],
                         'local_or_6hr' => $request->sameday_wa_local_charges[$index],
                         'national_charges_class_0' => $request->sameday_class_0_charges[$index],
-                        'national_charges_class_1' => 0,
-                        'national_charges_class_2' => 0,
-                        'national_charges_class_3' => 0
+                        'national_charges_class_1' => '10%',
+                        'national_charges_class_2' => '20%',
+                        'national_charges_class_3' => 250
                     ]);
                 }
 
@@ -7410,9 +7414,9 @@ class AdminDashboardController extends Controller
                         'shipping_mode_id'=>4,
                         'local'=> $request->sameday_return_local_charges,
                         'national_charges_class_0'=> $request->sameday_return_class_0_charges,
-                        'national_charges_class_1'=> 0,
-                        'national_charges_class_2'=> 0,
-                        'national_charges_class_3'=> 0
+                        'national_charges_class_1'=> '0%',
+                        'national_charges_class_2'=> '0%',
+                        'national_charges_class_3'=> '0%'
                     ]);
                 }
                 if($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on'){
@@ -7474,7 +7478,9 @@ class AdminDashboardController extends Controller
             }
         }
 
+        $warehouse_charges = 0;
         if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+            $warehouse_charges = 1;
 
             $wms_user_info = new WmsUserInformation();
             $wms_user_info->user_id = $id;
@@ -7540,6 +7546,503 @@ class AdminDashboardController extends Controller
             $rate_remark->save();
 
         }
+
+
+        //overnight
+
+        $weight_charges = WeightCharge::where('user_id',$id)->where('shipping_mode_id',1);
+        $standard_charges = StandardWeightCharge::where('shipping_mode_id',1);
+        $overnight_changes = 0;
+        if($weight_charges->exists()){
+            $standard_range_up = $standard_charges->pluck('range_up')->toArray();
+            $weight_range_up = $weight_charges->pluck('range_up')->toArray();
+            $weight_range_up_diff = $this->compare_data($weight_range_up,$standard_range_up);
+
+            $standard_range_down = $standard_charges->pluck('range_down')->toArray();
+            $weight_range_down = $weight_charges->pluck('range_down')->toArray();
+            $weight_range_down_diff = $this->compare_data($weight_range_down,$standard_range_down);
+
+            $standard_kg_range = $standard_charges->pluck('kg_range')->toArray();
+            $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
+            $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
+
+            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
+            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
+            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
+            //dd($weight_addition,$standard_weight_addition,$weight_addition_diff);
+
+            $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
+            $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
+            $local_diff = $this->compare_data($weight_local,$standard_local);
+
+            $standard_national_0 = $standard_charges->pluck('national_charges_class_0')->toArray();
+            $weight_national_0 = $weight_charges->pluck('national_charges_class_0')->toArray();
+            $national_charges_0_diff = $this->compare_data($weight_national_0,$standard_national_0);
+
+            $standard_national_1 = $standard_charges->pluck('national_charges_class_1')->toArray();
+            $weight_national_1 = $weight_charges->pluck('national_charges_class_1')->toArray();
+            $national_charges_1_diff = $this->compare_data($weight_national_1,$standard_national_1);
+
+            $standard_national_2 = $standard_charges->pluck('national_charges_class_2')->toArray();
+            $weight_national_2 = $weight_charges->pluck('national_charges_class_2')->toArray();
+            $national_charges_2_diff = $this->compare_data($weight_national_2,$standard_national_2);
+
+            $standard_national_3 = $standard_charges->pluck('national_charges_class_3')->toArray();
+            $weight_national_3 = $weight_charges->pluck('national_charges_class_3')->toArray();
+            $national_charges_3_diff = $this->compare_data($weight_national_3,$standard_national_3);
+
+            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id',1)->first();
+            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id',1)->where('user_id',$id)->first();
+
+            $booking_type_charges_diff = 0;
+            if($booking_type_charges){
+                if($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges ||  $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges){
+                    $booking_type_charges_diff = 1;
+                }
+            }
+
+
+            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id',1)->where('user_id',$id);
+            $cash_handling_charges_change = 0;
+            if($cash_handling_charges->exists()){
+                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id',1);
+
+                $cash_handling_charges_range_up = $cash_handling_charges->pluck('range_up')->toArray();
+                $standard_cash_handling_charges_range_up = $standard_cash_handling_charges->pluck('range_up')->toArray();
+                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up,$standard_cash_handling_charges_range_up);
+
+                $cash_handling_charges_range_down = $cash_handling_charges->pluck('range_down')->toArray();
+                $standard_cash_handling_charges_range_down = $standard_cash_handling_charges->pluck('range_down')->toArray();
+                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down,$standard_cash_handling_charges_range_down);
+
+                $cash_handling_charges = $cash_handling_charges->pluck('charges')->toArray();
+                $standard_cash_handling_charges = $standard_cash_handling_charges->pluck('charges')->toArray();
+                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges,$standard_cash_handling_charges);
+
+                if(($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)){
+                    $cash_handling_charges_change = 1;
+                }
+
+            }
+            else{
+                $cash_handling_charges_change = 1;
+            }
+
+            $return_charges = ReturnCharge::where('shipping_mode_id',1)->where('user_id',$id);
+            $return_charges_diff = 0;
+
+            if($return_charges->exists()){
+                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id',1)->first();
+                $return_charges = $return_charges->first();
+
+
+                if($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3)
+                {
+                    $return_charges_diff = 1;
+                }
+            }
+            else{
+                $return_charges_diff = 1;
+            }
+
+            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id',1)->where('user_id',$id);
+            $fuel_surcharge_diff = 0;
+            if($fuel_surcharge->exists()){
+                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id',1)->first();
+                $fuel_surcharge = $fuel_surcharge->first();
+
+                if($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge){
+                    $fuel_surcharge_diff = 1;
+                }
+            }
+            else{
+                $fuel_surcharge_diff = 1;
+            }
+
+            $insurance_charge = InsuranceCharge::where('shipping_mode_id',1)->where('user_id',$id);
+            $insurance_charges_diff = 0;
+            if($insurance_charge->exists()){
+                $insurance_charges_diff = 1;
+            }
+            
+
+
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
+            {
+                $overnight_changes = 1;
+            }
+//            dd($weight_range_up_diff,$weight_range_down_diff,$kg_range_diff,$local_diff,$national_charges_0_diff,$national_charges_1_diff, $national_charges_2_diff,$national_charges_3_diff,$booking_type_charges_diff,$cash_handling_charges_change,$return_charges_diff,$fuel_surcharge_diff,$weight_addition_diff,$insurance_charges_diff,$overnight_changes);
+        }
+
+        //overland
+        $weight_charges = WeightCharge::where('user_id',$id)->where('shipping_mode_id',2);
+        $standard_charges = StandardWeightCharge::where('shipping_mode_id',2);
+        $overland_changes = 0;
+        if($weight_charges->exists()){
+            $standard_range_up = $standard_charges->pluck('range_up')->toArray();
+            $weight_range_up = $weight_charges->pluck('range_up')->toArray();
+            $weight_range_up_diff = $this->compare_data($weight_range_up,$standard_range_up);
+
+            $standard_range_down = $standard_charges->pluck('range_down')->toArray();
+            $weight_range_down = $weight_charges->pluck('range_down')->toArray();
+            $weight_range_down_diff = $this->compare_data($weight_range_down,$standard_range_down);
+
+            $standard_kg_range = $standard_charges->pluck('kg_range')->toArray();
+            $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
+            $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
+
+            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
+            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
+            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
+
+            $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
+            $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
+            $local_diff = $this->compare_data($weight_local,$standard_local);
+
+            $standard_national_0 = $standard_charges->pluck('national_charges_class_0')->toArray();
+            $weight_national_0 = $weight_charges->pluck('national_charges_class_0')->toArray();
+            $national_charges_0_diff = $this->compare_data($weight_national_0,$standard_national_0);
+
+            $standard_national_1 = $standard_charges->pluck('national_charges_class_1')->toArray();
+            $weight_national_1 = $weight_charges->pluck('national_charges_class_1')->toArray();
+            $national_charges_1_diff = $this->compare_data($weight_national_1,$standard_national_1);
+
+            $standard_national_2 = $standard_charges->pluck('national_charges_class_2')->toArray();
+            $weight_national_2 = $weight_charges->pluck('national_charges_class_2')->toArray();
+            $national_charges_2_diff = $this->compare_data($weight_national_2,$standard_national_2);
+
+            $standard_national_3 = $standard_charges->pluck('national_charges_class_3')->toArray();
+            $weight_national_3 = $weight_charges->pluck('national_charges_class_3')->toArray();
+            $national_charges_3_diff = $this->compare_data($weight_national_3,$standard_national_3);
+
+            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id',2)->first();
+            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id',2)->where('user_id',$id)->first();
+
+            $booking_type_charges_diff = 0;
+            if($booking_type_charges){
+                if($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges ||  $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges){
+                    $booking_type_charges_diff = 1;
+                }
+            }
+
+            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id',2)->where('user_id',$id);
+            $cash_handling_charges_change = 0;
+            if($cash_handling_charges->exists()){
+                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id',2);
+
+                $cash_handling_charges_range_up = $cash_handling_charges->pluck('range_up')->toArray();
+                $standard_cash_handling_charges_range_up = $standard_cash_handling_charges->pluck('range_up')->toArray();
+                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up,$standard_cash_handling_charges_range_up);
+
+                $cash_handling_charges_range_down = $cash_handling_charges->pluck('range_down')->toArray();
+                $standard_cash_handling_charges_range_down = $standard_cash_handling_charges->pluck('range_down')->toArray();
+                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down,$standard_cash_handling_charges_range_down);
+
+                $cash_handling_charges = $cash_handling_charges->pluck('charges')->toArray();
+                $standard_cash_handling_charges = $standard_cash_handling_charges->pluck('charges')->toArray();
+                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges,$standard_cash_handling_charges);
+
+                if(($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)){
+                    $cash_handling_charges_change = 1;
+                }
+
+            }
+            else{
+                //for toggle close
+                $cash_handling_charges_change = 1;
+            }
+
+            $return_charges = ReturnCharge::where('shipping_mode_id',2)->where('user_id',$id);
+            $return_charges_diff = 0;
+
+            if($return_charges->exists()){
+                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id',2)->first();
+                $return_charges = $return_charges->first();
+
+
+                if($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3)
+                {
+                    $return_charges_diff = 1;
+                }
+            }
+            else{
+                $return_charges_diff = 1;
+            }
+
+            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id',2)->where('user_id',$id);
+            $fuel_surcharge_diff = 0;
+            if($fuel_surcharge->exists()){
+                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id',2)->first();
+                $fuel_surcharge = $fuel_surcharge->first();
+
+                if($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge){
+                    $fuel_surcharge_diff = 1;
+                }
+            }
+            else{
+                $fuel_surcharge_diff = 1;
+            }
+
+            $insurance_charge = InsuranceCharge::where('shipping_mode_id',2)->where('user_id',$id);
+            $insurance_charges_diff = 0;
+            if($insurance_charge->exists()){
+                $insurance_charges_diff = 1;
+            }
+
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
+            {
+                $overland_changes = 1;
+            }
+        }
+
+        //detain
+        $weight_charges = WeightCharge::where('user_id',$id)->where('shipping_mode_id',3);
+        $standard_charges = StandardWeightCharge::where('shipping_mode_id',3);
+        $detain_changes = 0;
+        if($weight_charges->exists()){
+            $standard_range_up = $standard_charges->pluck('range_up')->toArray();
+            $weight_range_up = $weight_charges->pluck('range_up')->toArray();
+            $weight_range_up_diff = $this->compare_data($weight_range_up,$standard_range_up);
+
+            $standard_range_down = $standard_charges->pluck('range_down')->toArray();
+            $weight_range_down = $weight_charges->pluck('range_down')->toArray();
+            $weight_range_down_diff = $this->compare_data($weight_range_down,$standard_range_down);
+
+            $standard_kg_range = $standard_charges->pluck('kg_range')->toArray();
+            $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
+            $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
+
+            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
+            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
+            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
+
+            $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
+            $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
+            $local_diff = $this->compare_data($weight_local,$standard_local);
+
+            $standard_national_0 = $standard_charges->pluck('national_charges_class_0')->toArray();
+            $weight_national_0 = $weight_charges->pluck('national_charges_class_0')->toArray();
+            $national_charges_0_diff = $this->compare_data($weight_national_0,$standard_national_0);
+
+            $standard_national_1 = $standard_charges->pluck('national_charges_class_1')->toArray();
+            $weight_national_1 = $weight_charges->pluck('national_charges_class_1')->toArray();
+            $national_charges_1_diff = $this->compare_data($weight_national_1,$standard_national_1);
+
+            $standard_national_2 = $standard_charges->pluck('national_charges_class_2')->toArray();
+            $weight_national_2 = $weight_charges->pluck('national_charges_class_2')->toArray();
+            $national_charges_2_diff = $this->compare_data($weight_national_2,$standard_national_2);
+
+            $standard_national_3 = $standard_charges->pluck('national_charges_class_3')->toArray();
+            $weight_national_3 = $weight_charges->pluck('national_charges_class_3')->toArray();
+            $national_charges_3_diff = $this->compare_data($weight_national_3,$standard_national_3);
+
+            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id',3)->first();
+            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id',3)->where('user_id',$id)->first();
+
+            $booking_type_charges_diff = 0;
+            if($booking_type_charges){
+                if($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges ||  $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges){
+                    $booking_type_charges_diff = 1;
+                }
+            }
+
+            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id',3)->where('user_id',$id);
+            $cash_handling_charges_change = 0;
+            if($cash_handling_charges->exists()){
+                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id',3);
+
+                $cash_handling_charges_range_up = $cash_handling_charges->pluck('range_up')->toArray();
+                $standard_cash_handling_charges_range_up = $standard_cash_handling_charges->pluck('range_up')->toArray();
+                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up,$standard_cash_handling_charges_range_up);
+
+                $cash_handling_charges_range_down = $cash_handling_charges->pluck('range_down')->toArray();
+                $standard_cash_handling_charges_range_down = $standard_cash_handling_charges->pluck('range_down')->toArray();
+                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down,$standard_cash_handling_charges_range_down);
+
+                $cash_handling_charges = $cash_handling_charges->pluck('charges')->toArray();
+                $standard_cash_handling_charges = $standard_cash_handling_charges->pluck('charges')->toArray();
+                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges,$standard_cash_handling_charges);
+
+                if(($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)){
+                    $cash_handling_charges_change = 1;
+                }
+
+            }
+            else{
+                $cash_handling_charges_change = 1;
+            }
+
+            $return_charges = ReturnCharge::where('shipping_mode_id',3)->where('user_id',$id);
+            $return_charges_diff = 0;
+
+            if($return_charges->exists()){
+                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id',3)->first();
+                $return_charges = $return_charges->first();
+
+
+                if($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3)
+                {
+                    $return_charges_diff = 1;
+                }
+            }
+            else{
+                $return_charges_diff = 1;
+            }
+
+            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id',3)->where('user_id',$id);
+            $fuel_surcharge_diff = 0;
+            if($fuel_surcharge->exists()){
+                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id',3)->first();
+                $fuel_surcharge = $fuel_surcharge->first();
+
+                if($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge){
+                    $fuel_surcharge_diff = 1;
+                }
+            }
+            else{
+                $fuel_surcharge_diff = 1;
+            }
+
+            $insurance_charge = InsuranceCharge::where('shipping_mode_id',3)->where('user_id',$id);
+            $insurance_charges_diff = 0;
+            if($insurance_charge->exists()){
+                $insurance_charges_diff = 1;
+            }
+
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
+            {
+                $detain_changes = 1;
+            }
+        }
+
+        //sameday
+        $weight_charges = WeightCharge::where('user_id',$id)->where('shipping_mode_id',4);
+        $standard_charges = StandardWeightCharge::where('shipping_mode_id',4);
+        $sameday_changes = 0;
+        if($weight_charges->exists()){
+            $standard_range_up = $standard_charges->pluck('range_up')->toArray();
+            $weight_range_up = $weight_charges->pluck('range_up')->toArray();
+            $weight_range_up_diff = $this->compare_data($weight_range_up,$standard_range_up);
+
+            $standard_range_down = $standard_charges->pluck('range_down')->toArray();
+            $weight_range_down = $weight_charges->pluck('range_down')->toArray();
+            $weight_range_down_diff = $this->compare_data($weight_range_down,$standard_range_down);
+
+            $standard_kg_range = $standard_charges->pluck('kg_range')->toArray();
+            $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
+            $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
+
+            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
+            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
+            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
+
+            $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
+            $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
+            $local_diff = $this->compare_data($weight_local,$standard_local);
+
+            $standard_national_0 = $standard_charges->pluck('national_charges_class_0')->toArray();
+            $weight_national_0 = $weight_charges->pluck('national_charges_class_0')->toArray();
+            $national_charges_0_diff = $this->compare_data($weight_national_0,$standard_national_0);
+
+            $standard_national_1 = $standard_charges->pluck('national_charges_class_1')->toArray();
+            $weight_national_1 = $weight_charges->pluck('national_charges_class_1')->toArray();
+            $national_charges_1_diff = $this->compare_data($weight_national_1,$standard_national_1);
+
+            $standard_national_2 = $standard_charges->pluck('national_charges_class_2')->toArray();
+            $weight_national_2 = $weight_charges->pluck('national_charges_class_2')->toArray();
+            $national_charges_2_diff = $this->compare_data($weight_national_2,$standard_national_2);
+
+            $standard_national_3 = $standard_charges->pluck('national_charges_class_3')->toArray();
+            $weight_national_3 = $weight_charges->pluck('national_charges_class_3')->toArray();
+            $national_charges_3_diff = $this->compare_data($weight_national_3,$standard_national_3);
+
+            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id',4)->first();
+            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id',4)->where('user_id',$id)->first();
+
+            $booking_type_charges_diff = 0;
+            if($booking_type_charges){
+                if($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges ||  $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges){
+                    $booking_type_charges_diff = 1;
+                }
+            }
+
+
+            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id',4)->where('user_id',$id);
+            $cash_handling_charges_change = 0;
+            if($cash_handling_charges->exists()){
+                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id',4);
+
+                $cash_handling_charges_range_up = $cash_handling_charges->pluck('range_up')->toArray();
+                $standard_cash_handling_charges_range_up = $standard_cash_handling_charges->pluck('range_up')->toArray();
+                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up,$standard_cash_handling_charges_range_up);
+
+                $cash_handling_charges_range_down = $cash_handling_charges->pluck('range_down')->toArray();
+                $standard_cash_handling_charges_range_down = $standard_cash_handling_charges->pluck('range_down')->toArray();
+                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down,$standard_cash_handling_charges_range_down);
+
+                $cash_handling_charges = $cash_handling_charges->pluck('charges')->toArray();
+                $standard_cash_handling_charges = $standard_cash_handling_charges->pluck('charges')->toArray();
+                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges,$standard_cash_handling_charges);
+
+                if(($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)){
+                    $cash_handling_charges_change = 1;
+                }
+
+            }
+            else{
+                $cash_handling_charges_change = 1;
+            }
+
+            $return_charges = ReturnCharge::where('shipping_mode_id',4)->where('user_id',$id);
+            $return_charges_diff = 0;
+
+            if($return_charges->exists()){
+                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id',4)->first();
+                $return_charges = $return_charges->first();
+
+
+                if($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3)
+                {
+                    $return_charges_diff = 1;
+                }
+            }
+            else{
+                $return_charges_diff = 1;
+            }
+
+            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id',4)->where('user_id',$id);
+            $fuel_surcharge_diff = 0;
+            if($fuel_surcharge->exists()){
+                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id',4)->first();
+                $fuel_surcharge = $fuel_surcharge->first();
+
+                if($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge){
+                    $fuel_surcharge_diff = 1;
+                }
+            }
+            else{
+                $fuel_surcharge_diff = 1;
+            }
+
+            $insurance_charge = InsuranceCharge::where('shipping_mode_id',4)->where('user_id',$id);
+            $insurance_charges_diff = 0;
+            if($insurance_charge->exists()){
+                $insurance_charges_diff = 1;
+            }
+
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
+            {
+                $sameday_changes = 1;
+            }
+        }
+
+        //dd($overnight_changes,$overland_changes,$detain_changes,$sameday_changes,$warehouse_charges);
+
+        if($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0){
+
+            User::where('id',$id)->update(['rate_status'=>0,'status' => 2,'rates_authorized_by'=> 32,'rates_approved_at'=>Carbon::now()]);
+        }
+        
 
         //Sales Commisssion
 
@@ -10666,6 +11169,21 @@ class AdminDashboardController extends Controller
     }
 
 
+    static public function compare_data($array_1,$array_2){
+        if(count($array_2) == count($array_1)){
+            $diff = array_diff($array_1,$array_2);
+            //dd(count($diff));
+            if(count($diff) > 0){
+                return 1;
+            }
+            else{
+                return 0;
+            }
+        }
+        else{
+            return 1;
+        }
+    }
 
 }
 

@@ -8128,10 +8128,17 @@ class RiderAPIController extends Controller
                                 $return_note_data->save();
                             }
 
-                            $updated_shipments_count = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
+                            $updated_shipments = ReturnNoteShipment::where('return_note_id', $request->return_note_id);
+                            $updated_shipments_count = $updated_shipments->where('status', 0)->count();
+                            $total_shipments_count = $updated_shipments->count();
+                            $undelivered_shipments_count = $updated_shipments->where('status', 1)->count();
 
                             if ($updated_shipments_count == 0) {
-                                $return_note_data->status = 3;
+                                if($total_shipments_count == $undelivered_shipments_count){
+                                    $return_note_data->status = 1;
+                                }else{
+                                    $return_note_data->status = 3;
+                                }
                                 $return_note_data->updated_at = Carbon::now();
                                 $return_note_data->save();
                             }
@@ -9605,6 +9612,98 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => "Rider not found"]);
             }
         }
+    }
+
+    public function forget_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                if($rider->status){
+                    $pin = rand(1000, 9999);
+                    $rider->reset_pin_otp = $pin;
+                    $rider->save();
+                    NotificationsController::send(158, $rider->id);
+                    return response()->json(['status' => 0, 'message' => 'Pin has been sent to your registered number', 'otp' => $pin]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function reset_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'otp' => ['required', 'integer', 'digits:4'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                if($request->input('otp') == $rider->reset_pin_otp){
+                    $rider->pin = bcrypt($request->pin);
+                    $rider->reset_pin_otp = NULL;
+                    $rider->save();
+                    return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
+                }else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function fake_status_count(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $fake_status_count = NULL;
+        $month = NULL;
+        if ($request->has('date')) {
+            $r_current_date = Carbon::createFromFormat("Y-m-d H:i:s", $request->date . '-26 23:59:59')->toDateTimeString();
+            $r_previous_month = Carbon::parse($r_current_date)->subMonth()->addDay()->format("Y-m-d 00:00:00");
+
+            $fake_status_count = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
+                ->whereBetween('dn.status_verified_at', [$r_previous_month, $r_current_date])
+                ->where('rider_id', $rider_id)
+                ->where('update_type', 1)
+                ->where('fake_status', 1)->count('fake_status');
+            $month = Carbon::parse($request->date)->format("F-Y");
+        }
+        $current_month = Carbon::now()->format("Y-m");
+        $current_date = Carbon::createFromFormat("Y-m-d H:i:s", $current_month . '-26 23:59:59')->toDateTimeString();
+        $previous_month = Carbon::parse($current_date)->subMonth()->addDay()->format("Y-m-d 00:00:00");
+
+        $current_fake_status_count = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
+            ->whereBetween('dn.status_verified_at', [$previous_month, $current_date])
+            ->where('rider_id', $rider_id)
+            ->where('update_type', 1)
+            ->where('fake_status', 1)->count('fake_status');
+        $c_month = Carbon::now()->format("F-Y");
+        return response()->json(['status' => 0, 'current_count' => $current_fake_status_count, 'current_month' => $c_month, 'count' => $fake_status_count, 'month' => $month]);
     }
 
     /*public function delivery_packaging_material_update($tracking_number){

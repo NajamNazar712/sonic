@@ -123,22 +123,12 @@ class ShipmentsJourneyController extends Controller
       }
         if (in_array($shipper_status_id, [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11, 14, 16, 30, 36, 37, 20, 12]) && $verification == 1) {
             $shipment = Shipment::find($shipment_id);
-            $status = ShipmentStatus::find($shipper_status_id);
             $consignee_user = ConsigneeUser::where('phone_number_1', $shipment->consignee_phone_number_1)
                 ->orwhere('phone_number_2', $shipment->consignee_phone_number_1);
             if ($consignee_user->exists()) {
                 $consignee_user = $consignee_user->first();
                 $consignee_id = $consignee_user->id;
-                $device_token = EmployeeDeviceToken::where('employee_id', $consignee_id)
-                    ->where('employee_type_id', 4)
-                    ->select('device_token');
-                if ($device_token->exists()) {
-                    $device_token = $device_token->first();
-                    $device_token = $device_token->device_token;
-                    $title = "Shipment Update";
-                    $message = 'Dear ' . $consignee_user->name . PHP_EOL . 'Your Shipment ' . $shipment->tracking_number . ' is moved to ' . $status->name . ' status';
-                    NotificationsController::bolt_app_notification($consignee_id, 4, $device_token, $title, $message);
-                }
+                NotificationsController::app_notification(8, $consignee_id, 4, $shipment_id, $shipper_status_id);
             }
         }
 
@@ -146,18 +136,7 @@ class ShipmentsJourneyController extends Controller
             $shipment_subscription = ShipperShipmentsSubscription::where('shipment_id',$shipment_id);
             if ($shipment_subscription->exists()) {
                 $shipment_subscription = $shipment_subscription->first();
-                $status = ShipmentStatus::find($shipper_status_id);
-                $shipment = Shipment::find($shipment_id);
-                $device_token = EmployeeDeviceToken::where('employee_id', $shipment_subscription->shipper_id)
-                    ->where('employee_type_id', 3)
-                    ->select('device_token');
-                if ($device_token->exists()) {
-                    $device_token = $device_token->first();
-                    $device_token = $device_token->device_token;
-                    $title = "Shipment Update";
-                    $message = 'Dear ' . $shipment_subscription->shipper->name . PHP_EOL . 'Your Shipment ' . $shipment->tracking_number . ' is moved to ' . $status->name . ' status';
-                    NotificationsController::bolt_app_notification($shipment_subscription->shipper_id, 3, $device_token, $title, $message);
-                }
+                NotificationsController::app_notification(7, $shipment_subscription->shipper_id, 3, $shipment_id, $shipper_status_id);
             }
         }
 

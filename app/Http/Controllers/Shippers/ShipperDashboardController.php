@@ -1581,7 +1581,11 @@ class ShipperDashboardController extends Controller
             });
         }
 
-        if (!$request->get('tracking_number') && !$request->get('phone_number')) {
+        if ($order_id = $request->get('order_id')) {
+            $datatable->where('shipments.order_id',$order_id);
+        }
+
+        if (!$request->get('tracking_number') && !$request->get('phone_number') && !$request->get('order_id')) {
             $datatable->whereRaw('FALSE');
         }
 

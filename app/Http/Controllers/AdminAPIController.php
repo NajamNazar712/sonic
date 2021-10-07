@@ -38,15 +38,23 @@ use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
+use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Password;
 
 class AdminAPIController extends Controller
 {
+    use SendsPasswordResetEmails;
+
+    public function broker(){
+        return Password::broker('admins');
+    }
+
     private $names = [
         'email_address' => 'Email Address',
         'password' => 'Password',
@@ -3406,6 +3414,33 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Failed']);
         }
 
+    }
+
+    public function forget_password(Request $request)
+    {
+        $rules = [
+            'email' => ['required', 'email']
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::where('email', $request->email);
+            if ($admin->exists()) {
+                $admin = $admin->first();
+                if($admin->status == 0){
+                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                }
+                $this->sendResetLinkEmail($request);
+                return response()->json(['status' => 0, 'message' => 'Password reset link has been sent to your email']);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Email is not registered']);
+            }
+
+        }
     }
 
 

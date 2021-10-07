@@ -3,53 +3,54 @@
 @section('title','Pending Deliveries')
 
 @section('content')
-                <h1 class="mb-1">
-                    Pending Deliveries
-                </h1>
+    <h1 class="mb-1">
+        Pending Deliveries
+    </h1>
 
-                <div class="card">
-                    <div class="card-content" aria-expanded="true">
-                        <div class="card-body">
-                            @include('admin.inc.messages')
-                            <div class="row justify-content-center">
-                                <div class="col-3">
-                                    <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                                        @foreach($shipping_mode as $mode)
-                                            <option value="{{$mode->id}}">{{$mode->mode}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-
-                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                <thead>
-                                <tr role="row" class="bg-primary white">
-
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Tracking No.</th>
-                                    <th class="border-primary border-darken-1">Shipper</th>
-                                    <th class="border-primary border-darken-1">Origin</th>
-                                    <th class="border-primary border-darken-1">Destination</th>
-                                    <th class="border-primary border-darken-1">Hub</th>
-                                    <th class="border-primary border-darken-1">Consignee Name</th>
-                                    <th class="border-primary border-darken-1">Reattempt By</th>
-                                    <th class="border-primary border-darken-1">Collection Amount</th>
-                                    <th class="border-primary border-darken-1">Shipping Mode</th>
-                                    <th class="border-primary border-darken-1">Service Type</th>
-                                    <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Reason</th>
-                                    <th class="border-primary border-darken-1">Remarks</th>
-                                    <th class="border-primary border-darken-1">Origin Arrival Date</th>
-                                    <th class="border-primary border-darken-1">Destination Arrival Date</th>
-                                    <th class="border-primary border-darken-1">Status Date</th>
-                                    <th class="border-primary border-darken-1">Action</th>
-                                </tr>
-                                </thead>
-                            </table>
-                        </div>
+    <div class="card">
+        <div class="card-content" aria-expanded="true">
+            <div class="card-body">
+                @include('admin.inc.messages')
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                            @foreach($shipping_mode as $mode)
+                                <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
+
+
+                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                    <thead>
+                    <tr role="row" class="bg-primary white">
+
+                        <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Reattempt By</th>
+                        <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Collection Amount</th>
+                        <th class="border-primary border-darken-1">Shipping Mode</th>
+                        <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Reason</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Origin Arrival Date</th>
+                        <th class="border-primary border-darken-1">Destination Arrival Date</th>
+                        <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Action</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
 
 
 @endsection
@@ -140,9 +141,9 @@
             if ( this.context.length ) {
                 body = [];
                 var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
+                params.start = 0;
+                params.length = -1;
+                params.excel = true;
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.delivery.pending.list') }}',
                     data: params,
@@ -157,7 +158,7 @@
                         head.push('Hub');
                         head.push('Consignee Name');
                         head.push('Reattempted By');
-                        head.push('Collection Amount');
+                        head.push('Address');                        head.push('Collection Amount');
                         head.push('Shipping Mode');
                         head.push('Service Type');
                         head.push('Status');
@@ -177,7 +178,7 @@
                             row.push(values.hub);
                             row.push(values.consignee_name);
                             row.push(values.agent);
-                            row.push(values.amount);
+                            row.push(values.consignee_address);                            row.push(values.amount);
                             row.push(values.shipping_mode);
                             row.push(values.service_type);
                             row.push(values.status);
@@ -213,9 +214,9 @@
             pageLength: 50,
             pagingType: 'full_numbers',
             processing: true,
-                language: {
-                    processing: data_table_loader
-                },
+            language: {
+                processing: data_table_loader
+            },
             serverSide: true,
             ajax:{
                 url: '{{ route('admin.delivery.pending.list') }}',
@@ -224,7 +225,7 @@
                 }
             },
             rowId: 'shId',
-            order: [[14, 'desc']],
+            order: [[15, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -234,7 +235,7 @@
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
-                {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},                {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
@@ -357,67 +358,67 @@
         });
         var select;
         $('#UniversalDisputeModal').on('shown.bs.modal',function () {
-                var id = $('#universal_dispute_id').val();
+            var id = $('#universal_dispute_id').val();
 
-                if(id){
-                    $.ajax({
-                        url: '{!! route('admin.dispute.data') !!}',
-                        method: 'POST',
-                        data:{
-                            '_token': '{{ csrf_token() }}',
-                            'shipment_id':id
-                        }
-                    }).done(function (data) {
-                        if(data.success == 1){
-                            $('#universal_city_select').prepend('<option value="" selected="selected"></option>').select2({
-                                placeholder:'Select a city',
-                                dropdownParent:$('#universal_dispute_form')
-                            });
-                            $.each(data.cities,function(key,value){
-                                var newOption = new Option(value.name, value.id, false, false);
-                                $('#universal_city_select').append(newOption).trigger('select');
-                            });
-                            $.each(data.dispute_types,function(key,value) {
-                                var dispute = new Option(value.type, value.id, false, false);
-                                $('#universal_dispute_type_select').append(dispute).trigger('select');
-                            });
-                            $('#universal_dispute_type_select').prepend('<option value="" selected="selected"></option>').select2({
-                                placeholder:'Select a Dispute type',
-                                dropdownParent:$('#universal_dispute_form')
-                            });
-                            $('#universal_tracking_number').val(data.tracking);
-                            select = $('#universal_tracking_number').selectize({
-                                placeholder: 'Tracking Number(s)*',
-                                delimiter: ',',
-                                createOnBlur: true,
-                                persist: false,
-                                plugins: ['remove_button'],
-                                onDropdownOpen: function(dropdown) {
-                                    dropdown.remove();
-                                },
-                                onType: function(str) {
-                                    var regex = /^[0-9,]+$/;
+            if(id){
+                $.ajax({
+                    url: '{!! route('admin.dispute.data') !!}',
+                    method: 'POST',
+                    data:{
+                        '_token': '{{ csrf_token() }}',
+                        'shipment_id':id
+                    }
+                }).done(function (data) {
+                    if(data.success == 1){
+                        $('#universal_city_select').prepend('<option value="" selected="selected"></option>').select2({
+                            placeholder:'Select a city',
+                            dropdownParent:$('#universal_dispute_form')
+                        });
+                        $.each(data.cities,function(key,value){
+                            var newOption = new Option(value.name, value.id, false, false);
+                            $('#universal_city_select').append(newOption).trigger('select');
+                        });
+                        $.each(data.dispute_types,function(key,value) {
+                            var dispute = new Option(value.type, value.id, false, false);
+                            $('#universal_dispute_type_select').append(dispute).trigger('select');
+                        });
+                        $('#universal_dispute_type_select').prepend('<option value="" selected="selected"></option>').select2({
+                            placeholder:'Select a Dispute type',
+                            dropdownParent:$('#universal_dispute_form')
+                        });
+                        $('#universal_tracking_number').val(data.tracking);
+                        select = $('#universal_tracking_number').selectize({
+                            placeholder: 'Tracking Number(s)*',
+                            delimiter: ',',
+                            createOnBlur: true,
+                            persist: false,
+                            plugins: ['remove_button'],
+                            onDropdownOpen: function(dropdown) {
+                                dropdown.remove();
+                            },
+                            onType: function(str) {
+                                var regex = /^[0-9,]+$/;
 
-                                    if (!regex.test(str)) {
-                                        select[0].selectize.setTextboxValue('');
-                                    }
-                                },
-                                create: function(input) {
-                                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
-                                        return {
-                                            value: input,
-                                            text: input
-                                        }
-                                    }
-                                    else {
-                                        return false;
+                                if (!regex.test(str)) {
+                                    select[0].selectize.setTextboxValue('');
+                                }
+                            },
+                            create: function(input) {
+                                if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                                    return {
+                                        value: input,
+                                        text: input
                                     }
                                 }
-                            });
+                                else {
+                                    return false;
+                                }
+                            }
+                        });
 
-                        }
-                    });
-                }
+                    }
+                });
+            }
         });
         var max_char = 190;
         $('#universal_description').on('keypress copy paste',function (e) {
