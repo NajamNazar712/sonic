@@ -1826,6 +1826,43 @@
                 }
             });
 
+            $("#sdn_add_pncc").validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Add PNCC To SDN!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            form.submit();
+                        }
+                    });
+
+                }
+            });
+
             $("#sdn_remove_dncc").validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -1858,6 +1895,45 @@
                         }).then(function (confirm) {
                             if (confirm) {
                                 $("#sdn_remove_dncc #dncc_id_for_remove_dncc").val(dncc_selected_rows);
+                                form.submit();
+                            }
+                        });
+                    }
+                }
+            });
+
+            $("#sdn_remove_pncc").validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    if(pncc_selected_rows.length > 0) {
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to Remove PNCC From SDN!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                $("#sdn_remove_pncc #pncc_id_for_remove_pncc").val(pncc_selected_rows);
                                 form.submit();
                             }
                         });
