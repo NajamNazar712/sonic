@@ -26,7 +26,7 @@ use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\InternationalDhlZone;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\InternationalUsersCreditLimit;
-use App\Http\models\InvoiceUploadSlip;
+use App\Http\Models\InvoiceUploadSlip;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PendingPaymentCalculation;
