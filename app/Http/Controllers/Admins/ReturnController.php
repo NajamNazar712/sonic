@@ -504,7 +504,6 @@ class ReturnController extends Controller
     }
     
     public function return_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
-        dd($request);
         $shipment_ids = $request->shipment_ids;
 
         if($request->action == 'reattempt'){
