@@ -268,6 +268,7 @@
                         .done(function (data) {
 
                             if(data.status){
+                                $('#agent_id').empty().append('<option selected="selected" placeholder="Select Hub *" value="">text</option>');
                                 $('#agend_input').removeClass('d-none');
                                 $.each(data.agents, function (index, agent) {
                                     $('#agent_id').append('<option value="'+agent.id+'" >'+agent.name+'</option>')

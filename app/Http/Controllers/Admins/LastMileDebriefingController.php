@@ -75,7 +75,14 @@ class LastMileDebriefingController extends Controller
         $admin_ids = AdminHub::where('hub_id',$request->hub_id)->pluck('admin_id')->toArray();
         if(count($admin_ids) > 0){
 
-            $agents = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->get();
+            //$agents = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->get();
+
+            $agents = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.id')
+            ->whereIn('admins.id', $admin_ids)
+            ->where('admins.role_id', 18)
+            ->where('admins.status',1)
+            ->where('ea.clock_out_datetime','=',null)
+            ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))->get();
            
             return response()->json(['status' => 1, 'agents' => $agents]);
         }
