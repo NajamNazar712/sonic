@@ -47,7 +47,7 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required">
+											<input type="text" name="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters">
 										</div>
 									</div>
 

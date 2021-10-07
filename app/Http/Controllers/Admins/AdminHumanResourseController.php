@@ -413,6 +413,26 @@ class AdminHumanResourseController extends Controller
             $employee->pin = $request->pin;
             $employee->update();
 
+            if($employee->employee_type_id == 1)
+            {
+                $admin = Admin::where('trax_id',$employee->trax_id);
+                if($admin->exists()) {
+                    $admin = $admin->first();
+                    $admin->password = bcrypt($employee->pin);
+                    $admin->dummy_pin = $employee->pin;
+                    $admin->update();
+                }
+            }
+            else {
+                $rider = Rider::where('trax_id',$employee->trax_id);
+                if($rider->exists()) {
+                    $rider = $rider->first();
+                    $rider->pin = bcrypt($employee->pin);
+                    $rider->dummy_pin = $employee->pin;
+                    $rider->update();
+                }
+            }
+
             return back()->with(['success'=>'Employee Pin Updated Successfully']);
         }
         return back()->with(['error'=>'Employee Not Found']);
@@ -773,7 +793,8 @@ class AdminHumanResourseController extends Controller
                             $admin->cnic = $employee->cnic;
                             $admin->role_id = $employee->designation->role_id ?? 79;
                             $admin->default_hub_id = $employee->city->hub_city->id;
-                            $admin->pin = $employee->pin;
+                            $admin->password = bcrypt($employee->pin);
+                            $admin->dummy_pin = $employee->pin;
                             $admin->designation_id = $employee->designation_id;
                             $admin->shift_id = $employee->shift_id;
                             $admin->reporting_location_id = $employee->reporting_location_id;
@@ -899,7 +920,8 @@ class AdminHumanResourseController extends Controller
                 $admin->cnic = $employee->cnic;
                 $admin->name = $employee->name;
                 $admin->default_hub_id = $employee->city->hub_city->id;
-                $admin->pin = $employee->pin;
+                $admin->password = bcrypt($employee->pin);
+                $admin->dummy_pin = $employee->pin;
                 $admin->shift_id = $employee->shift_id;
                 $admin->reporting_location_id = $employee->reporting_location_id;
                 $admin->update();

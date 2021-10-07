@@ -2322,7 +2322,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/accounts/pending/{id}/rates' ,'Admins\AdminDashboardController@viewShipperRates');
     //Reset Password
     Route::post('password/email','Auth\AdminForgotPasswordController@sendResetLinkEmail')->name('password.email');
+    Route::post('get/otp','Auth\AdminForgotPasswordController@GenerateOTP')->name('password.generate.otp');
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
+    Route::post('password/reset/pin','Auth\AdminResetPasswordController@reset_pin')->name('password.reset.pin');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset')->name('password.reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
 

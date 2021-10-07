@@ -216,7 +216,8 @@ $designations = EmployeeDesignation::where('status',1)->get();
         $admin->cnic = $request->input('cnic');
         $admin->role_id = $request->input('role_id');
         $admin->default_hub_id = $request->input('default_hub');
-        $admin->pin = $request->input('pin');
+        $admin->password = bcrypt($request->input('pin'));
+        $admin->dummy_pin = $request->input('pin');
         $admin->shift_id = $request->input('shift_id');
         $admin->designation_id = $request->input('designation_id');
 
@@ -324,12 +325,12 @@ $designations = EmployeeDesignation::where('status',1)->get();
             $admin->updated_by = Auth::id();
             $admin->trax_id = $request->trax_id;
             $admin->shift_id = $request->input('shift_id');
-            $admin->pin = $request->input('pin');
             $admin->designation_id = $request->input('designation_id');
 
-//            if ($request->filled('password')) {
-//                $admin->password = bcrypt($request->input('password'));
-//            }
+            if ($request->filled('pin')) {
+                $admin->password = bcrypt($request->input('pin'));
+                $admin->dummy_pin = $request->input('pin');
+            }
 
 
 
@@ -365,7 +366,7 @@ $designations = EmployeeDesignation::where('status',1)->get();
                 $employee->official_email = $admin->email;
                 $employee->cnic = $admin->cnic;
                 $employee->name = $admin->name;
-                $employee->pin = $admin->pin;
+                $employee->pin = $admin->dummy_pin;
                 $employee->shift_id = $admin->shift_id;
                 $employee->reporting_location_id = $admin->reporting_location_id;
 

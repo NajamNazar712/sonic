@@ -76,21 +76,19 @@
                                     <form class="form-horizontal" id="admin_login_form" method="POST" action="{{ route('admin.login.submit') }}" autocomplete="off">
                                     {{ csrf_field()  }}
                                         <fieldset class="form-group position-relative has-icon-left">
-                                            <input type="email" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="email" placeholder="Email Address"
-                                                 value="{{old('email')}}"  required>
+                                            <input type="text" name="phone_number" class="form-control {{ $errors->has('phone_number') ? ' is-invalid' : '' }}" id="phone_number" placeholder="Phone Number" value="{{old('phone_number')}}"  required>
                                             <div class="form-control-position">
                                                 <i class="ft-user"></i>
                                             </div>
                                         </fieldset>
                                         <fieldset class="form-group position-relative has-icon-left">
-                                            <input type="password" name="password" class="form-control {{ $errors->has('password') ? ' is-invalid' : '' }}" id="password" placeholder="Enter Password"
-                                                   required>
+                                            <input type="password" name="pin" class="form-control {{ $errors->has('pin') ? ' is-invalid' : '' }}" id="pin" placeholder="Enter Pin" required>
                                             <div class="form-control-position">
                                                 <i class="la la-key"></i>
                                             </div>
-                                            @if ($errors->has('password'))
+                                            @if ($errors->has('pin'))
                                                 <span class="invalid-feedback">
-                                            <strong>{{ $errors->first('password') }}</strong>
+                                            <strong>{{ $errors->first('pin') }}</strong>
                                             </span>
                                             @endif
                                         </fieldset>
@@ -101,7 +99,7 @@
                                                     <label for="remember-me"> Remember Me</label>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-6 col-12 float-sm-left text-center text-sm-right"><a href="{{ route('admin.password.request') }}" class="card-link">Forgot Password?</a></div>
+                                            <div class="col-md-6 col-12 float-sm-left text-center text-sm-right"><a href="{{ route('admin.password.request') }}" class="card-link">Forgot Pin?</a></div>
                                         </div>
                                         <button type="button" class="btn btn-outline-info btn-block" id="login_button"><i class="ft-unlock"></i> Login</button>
                                     </form>
@@ -170,8 +168,8 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        var email = null;
-        var password = null;
+        var phone_number = null;
+        var pin = null;
 
 
         $('#otp_input').inputmask({
@@ -181,6 +179,20 @@
             'rightAlign': false,
             'mask': '999999'
         });
+
+        $('#phone_number').inputmask({
+            'mask': '9999-9999999',
+            'clearIncomplete': true
+        });
+
+        $('#pin').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'mask': '9999',
+        });
+
         $('body').on('keyup change','#otp_input',function() {
             if($(this).val().length === 6){
                 $('#otp_submit').attr('disabled', false);
@@ -197,7 +209,7 @@
                     url: '{!! route('admin.login.verify_otp') !!}',
                     type: 'POST',
                     data: {
-                        'email': email,
+                        'phone_number': phone_number,
                         'otp': otp,
                         '_token': '{{ csrf_token() }}'
                     }
@@ -213,16 +225,16 @@
                 });
             }
         });
-        $('#email').on('change', function () {
-            var email_check = $('#email').valid();
-            if(!email_check){
-                $('#email-error').addClass('danger');
+        $('#phone_number').on('change', function () {
+            var phone_check = $('#phone_number').valid();
+            if(!phone_check){
+                $('#phone_number-error').addClass('danger');
             }
         });
-        $('#email').on('change', function () {
-            var password_check = $('#password').valid();
-            if(!password_check){
-                $('#password-error').addClass('danger');
+        $('#pin').on('change', function () {
+            var pin_check = $('#pin').valid();
+            if(!pin_check){
+                $('#pin-error').addClass('danger');
             }
         });
         $('#otp_input').keypress(function (event) {
@@ -234,7 +246,7 @@
                         url: '{!! route('admin.login.verify_otp') !!}',
                         type: 'POST',
                         data: {
-                            'email': email,
+                            'phone_number': phone_number,
                             'otp': otp,
                             '_token': '{{ csrf_token() }}'
                         }
@@ -253,17 +265,17 @@
 
         });
         $('#login_button').on('click', function () {
-            var email_check = $('#email').valid();
-            var password_check = $('#password').valid();
-            if(email_check && password_check){
-                email = $('#email').val();
-                password = $('#password').val();
+            var phone_check = $('#phone_number').valid();
+            var pin_check = $('#pin').valid();
+            if(phone_check && pin_check){
+                phone_number = $('#phone_number').val();
+                pin = $('#pin').val();
                 $.ajax({
                     url: '{!! route('admin.login.credentials') !!}',
                     method: 'POST',
                     data: {
-                        'email': email,
-                        'password': password,
+                        'phone_number': phone_number,
+                        'pin': pin,
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
@@ -275,24 +287,24 @@
                 });
             }
             else{
-                $('#email-error').addClass('danger');
-                $('#password-error').addClass('danger');
+                $('#phone_number-error').addClass('danger');
+                $('#pin-error').addClass('danger');
             }
         });
 
         $('#admin_login_form input').keypress(function () {
             if(event.keyCode == 13){
-                var email_check = $('#email').valid();
-                var password_check = $('#password').valid();
-                if(email_check && password_check){
-                    email = $('#email').val();
-                    password = $('#password').val();
+                var phone_check = $('#phone_number').valid();
+                var pin_check = $('#pin').valid();
+                if(phone_check && pin_check){
+                    phone_number = $('#phone_number').val();
+                    pin = $('#pin').val();
                     $.ajax({
                         url: '{!! route('admin.login.credentials') !!}',
                         method: 'POST',
                         data: {
-                            'email': email,
-                            'password': password,
+                            'phone_number': phone_number,
+                            'pin': pin,
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
@@ -304,8 +316,8 @@
                     });
                 }
                 else{
-                    $('#email-error').addClass('danger');
-                    $('#password-error').addClass('danger');
+                    $('#phone_number-error').addClass('danger');
+                    $('#pin-error').addClass('danger');
                 }
             }
         });
