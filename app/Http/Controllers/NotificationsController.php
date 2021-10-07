@@ -15,7 +15,7 @@ use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\SalePersonTag;
-use App\http\Models\AppNotification;
+use App\Http\Models\AppNotification;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\ConsigneeUser;
