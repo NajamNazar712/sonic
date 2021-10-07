@@ -18,7 +18,9 @@ use App\Http\Models\Admin\DeliveryShipmentsNotReceivedOperations;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
+use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
+use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteAdjustment;
@@ -4366,6 +4368,161 @@ class DeliveryController extends Controller
                 }
                 else{
                     return back()->with(['error'=>'Can not add DNCC to SDN']);
+                }
+            }
+            else{
+                return back()->with(['error'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return back()->with(['error'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function get_pncc_to_add(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $pickup_notes = RetailPickupNote::where('status',4)->where('pncc_status',0)->where('hub_id',$sdn->hub_id)->orderBy('id','desc')->get(['id']);
+                    return response()->json(['status'=>1,'dn'=>$pickup_notes]);
+                }
+                else{
+                    return response()->json(['status'=>0,'message'=>'Can not add PNCC to SDN']);
+                }
+            }
+            else{
+                return response()->json(['status'=>0,'message'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function add_pncc (Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $pickup_note = RetailPickupNote::where('pncc_status',0)->where('status',4)->where('hub_id',$sdn->hub_id)->where('id',$request->pncc_id)->first();
+
+                    PickupNoteStationDepositNote::create([
+                        'station_deposit_note_id' => $sdn->id,
+                        'retail_pickup_note_id' => $pickup_note->id
+                    ]);
+
+                    $sdn->dncc_count = $sdn->dncc_count + 1;
+                    $sdn->sdn_delivered_shipments = $sdn->sdn_delivered_shipments + $pickup_note->shipments;
+                    $sdn->sdn_amount = $sdn->sdn_amount + $pickup_note->amount;
+                    $sdn->sdn_net_amount = $sdn->sdn_net_amount + $pickup_note->amount;
+                    $sdn->update();
+
+//                    $delivery_note->expense = "";
+//                    $delivery_note->net_amount = "";
+                    $pickup_note->remarks = $request->remarks;
+                    $pickup_note->pncc_status = 1;
+                    $pickup_note->update();
+
+                    return back()->with(['success'=>'PNCC added to SDN']);
+                }
+                else{
+                    return back()->with(['error'=>'Can not add PNCC to SDN']);
+                }
+            }
+            else{
+                return back()->with(['error'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return back()->with(['error'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function get_pncc_to_remove(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $pickup_note_ids = [];
+                    foreach ($sdn->pickup_notes_list as $dn_list)
+                    {
+                        $pickup_note_ids[] = $dn_list->retail_pickup_note_id;
+                    }
+
+                    return response()->json(['status'=>1,'pncc'=>RetailPickupNote::whereIn('id',$pickup_note_ids)->get()]);
+                }
+                else{
+                    return response()->json(['status'=>0,'message'=>'Can not remove PNCC from SDN']);
+                }
+            }
+            else{
+                return response()->json(['status'=>0,'message'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function remove_pncc(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $pncc_ids = explode(',', $request->pncc_id);
+                    $pickup_notes = RetailPickupNote::whereIn('id', $pncc_ids)->where('pncc_status', 1);
+                    if($pickup_notes->exists())
+                    {
+                        $total_pncc = 0;
+                        $total_shipments = 0;
+                        $total_sdn_amount = 0;
+                        $total_sdn_net_amount = 0;
+                        $pickup_notes = $pickup_notes->get();
+                        foreach ($pickup_notes as $pickup_note)
+                        {
+                            $total_pncc++;
+                            $total_shipments += $pickup_note->shipments;
+                            $total_sdn_amount += $pickup_note->amount;
+                            $total_sdn_net_amount += $pickup_note->amount;
+
+                            $pickup_note->remarks = "";
+                            $pickup_note->pncc_status = 0;
+                            $pickup_note->update();
+
+                            PickupNoteStationDepositNote::where('station_deposit_note_id',$sdn->id)->where('retail_pickup_note_id',$pickup_note->id)->delete();
+                        }
+
+                        $sdn->dncc_count = $sdn->dncc_count - $total_pncc;
+                        $sdn->sdn_delivered_shipments = $sdn->sdn_delivered_shipments - $total_shipments;
+                        $sdn->sdn_amount = $sdn->sdn_amount - $total_sdn_amount;
+                        $sdn->sdn_net_amount = $sdn->sdn_net_amount - $total_sdn_net_amount;
+                        $sdn->update();
+
+                        return back()->with(['success'=>'PNCC removed successfully']);
+                    }
+                    else{
+                        return back()->with('error', 'Invalid PNCC');
+                    }
+                }
+                else{
+                    return back()->with(['error'=>'Can not add PNCC to SDN']);
                 }
             }
             else{

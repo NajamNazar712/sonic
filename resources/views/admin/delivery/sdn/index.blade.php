@@ -405,6 +405,88 @@
         </div>
     </div>
 
+
+    <div class="modal fade text-left" id="AddPNCCModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddPNCCModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add pncc</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="sdn_add_pncc" class="form" action="{{route('admin.delivery.sdn.pncc.add')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="sdn_id" id="sdn_id_for_add_pncc">
+                        <div class="form-group">
+                            <select name="pncc_id" id="pncc_select" data-rule-required="true" data-msg-required="PNCC is Required" class="select2 form-control">
+
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="remarks" id="pncc_remarks_input" placeholder="Remarks" class="form-control">
+                        </div>
+
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-3">
+                                <button type="submit" class="btn btn-primary btn-block">Add PNCC</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="RemovePNCCModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RemovePNCCModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Remove PNCC</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="sdn_remove_pncc" class="form" action="{{route('admin.delivery.sdn.pncc.remove')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="sdn_id" id="sdn_id_for_remove_pncc">
+                        <input type="hidden" name="pncc_id" id="pncc_id_for_remove_pncc">
+                        <table class="table table-bordered datatable" id="remove_pncc_table" style="z-index: 3;width: 100%;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1"></th>
+                                <th class="border-primary border-darken-1">S NO.</th>
+                                <th class="border-primary border-darken-1">PNCC #</th>
+                                <th class="border-primary border-darken-1">No. of Shipments</th>
+                                <th class="border-primary border-darken-1">Amount</th>
+                            </tr>
+                            </thead>
+                        </table>
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-3">
+                                <button type="submit" id="remove_pncc_btn" disabled class="btn btn-primary btn-block">Remove PNCC</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -778,6 +860,13 @@
 
             $("#sdn_add_dncc #dncc_select").prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select DNCC*',
+                width:'100%',
+                dropdownCssClass: 'form-control-sm p-0'
+            });
+
+
+            $("#sdn_add_pncc #pncc_select").prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select PNCC*',
                 width:'100%',
                 dropdownCssClass: 'form-control-sm p-0'
             });
@@ -1297,6 +1386,38 @@
                }
             });
 
+            $('body').on('click','.add_pncc', function () {
+                var id = $(this).parents('tr').attr('id');
+                if(id){
+                    $.ajax({
+                        url:'{!! route('admin.delivery.sdn.pncc.get.add') !!}',
+                        type:'POST',
+                        data: {
+                            'sdn_id':id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 1)
+                        {
+                            html = "";
+                            $.each(data.dn,function (i,v){
+                                let dn_id = v.id.toString();
+                                html +=  '<option value="'+dn_id+'">'+dn_id+'</option>';
+                            });
+
+                            $("#sdn_add_pncc #pncc_select").html(html).val("").trigger('change');
+                            $("#sdn_add_pncc #pncc_remarks_input").val("");
+                            $("#sdn_add_pncc #sdn_id_for_add_pncc").val(id);
+                            $("#AddPNCCModal").modal('show');
+                        }
+                        else{
+                            toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            });
+
+
             var remove_dncc_table;
             var dncc_selected_rows = [];
             $('body').on('click','.remove_dncc', function () {
@@ -1384,6 +1505,95 @@
                 remove_dncc_table.clear();
                 remove_dncc_table.destroy();
                 dncc_selected_rows = [];
+            });
+
+            var remove_pncc_table;
+            var pncc_selected_rows = [];
+            $('body').on('click','.remove_pncc', function () {
+                var id = $(this).parents('tr').attr('id');
+                if(id){
+                    $.ajax({
+                        url:'{!! route('admin.delivery.sdn.pncc.get.remove') !!}',
+                        type:'POST',
+                        data: {
+                            'sdn_id':id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }else{
+                            $('#RemovePNCCModal').modal('show');
+                            $("#sdn_id_for_remove_pncc").val(id);
+                            remove_pncc_table = $('#remove_pncc_table').DataTable({
+                                dom: 'ltipr',
+                                ordering:false,
+                                paging:false,
+                                columns: [
+                                    {orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {name: 'pncc', class: 'align-middle pncc form-group'},
+                                    {name: 'shipments', class: 'align-middle shipments form-group'},
+                                    {name: 'amount', class: 'align-middle expense_amount form-group'},
+                                ],
+
+                                rowCallback: function(row, d, index) {
+                                    var info = remove_pncc_table.page.info();
+                                    $('td:eq(0)', row).addClass('select-checkbox');
+
+                                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+
+                                    if ($.inArray(parseInt(d[0]), pncc_selected_rows) !== -1) {
+                                        remove_pncc_table.row(row).select();
+                                    }
+                                    else{
+                                        remove_pncc_table.row(row).deselect();
+                                    }
+
+                                },
+                                initComplete: function() {
+
+                                }
+                            });
+
+                            $.each(data.pncc, function (index, value) {
+                                remove_pncc_table.row.add([value.id,, value.id, value.shipments, value.amount]);
+                                remove_pncc_table.draw(true);
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('#RemovePNCCModal #remove_pncc_table').on('click', 'tbody tr td.select-checkbox', function() {
+
+                var id = parseInt(remove_pncc_table.row( $(this).parents('tr') ).data()[0]);
+
+                var index = $.inArray(id, pncc_selected_rows);
+
+
+                if (index === -1) {
+                    if(pncc_selected_rows.length + 1 != remove_pncc_table.rows().count()) {
+                        pncc_selected_rows.push(id);
+                    }
+                } else {
+                    pncc_selected_rows.splice(index, 1);
+                }
+
+                if (pncc_selected_rows.length > 0) {
+                    $("#remove_pncc_btn").prop('disabled', false);
+                } else {
+                    $("#remove_pncc_btn").prop('disabled', true);
+                }
+
+                remove_pncc_table.draw(false);
+
+            });
+
+            $('#RemovePNCCModal ').on('hidden.bs.modal', function () {
+                remove_pncc_table.clear();
+                remove_pncc_table.destroy();
+                pncc_selected_rows = [];
             });
 
             $('#ViewDepositSlip').on('hidden.bs.modal', function () {
