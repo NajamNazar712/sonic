@@ -3118,6 +3118,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminNsaAccountShipmentController@carrefour_arrival_index')->name('index');
             Route::post('store', 'Admins\AdminNsaAccountShipmentController@carrefour_arrival_submit')->name('submit');
         });
+        Route::prefix('delivery')->name('delivery.')->group(function () {
+            Route::get('', 'Admins\AdminNsaAccountShipmentController@carrefour_delivery_index')->name('index');
+            Route::post('store', 'Admins\AdminNsaAccountShipmentController@carrefour_delivery_submit')->name('submit');
+        });
+        Route::prefix('return')->name('return.')->group(function () {
+            Route::get('', 'Admins\AdminNsaAccountShipmentController@carrefour_return_index')->name('index');
+            Route::post('store', 'Admins\AdminNsaAccountShipmentController@carrefour_return_submit')->name('submit');
+        });
     });
 
 	Route::prefix('leads')->name('leads.')->group(function(){

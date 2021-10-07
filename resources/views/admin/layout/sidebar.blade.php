@@ -714,6 +714,16 @@
                                            href="{{ route('admin.carrefour.arrival.index') }}">Bulk Arrival</a>
                                     </li>
                                 @endif
+                                @if (session('role_id') == 1 || in_array(579, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.carrefour.delivery.index') }}">Bulk Delivery</a>
+                                    </li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(579, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.carrefour.return.index') }}">Bulk Return</a>
+                                    </li>
+                                @endif
                             </ul>
                         </li>
                     @endif
