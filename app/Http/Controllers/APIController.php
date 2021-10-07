@@ -388,7 +388,11 @@ class APIController extends Controller
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
             if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
                 $result = ShipperShipmentBookController::check_origin($value, $shipping_mode_id, $user_id);
                 if ($result) {
                     return true;
@@ -401,7 +405,11 @@ class APIController extends Controller
         Validator::extend('destination_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
             if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
                 $result = ShipperShipmentBookController::check_destination($value, $shipping_mode_id, $user_id, 2);
                 if ($result) {
                     return true;
@@ -414,7 +422,11 @@ class APIController extends Controller
         Validator::extend('destination_return_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
             if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
                 $result = ShipperShipmentBookController::check_return_destination($value, $shipping_mode_id, $user_id);
                 if ($result) {
                     return true;
