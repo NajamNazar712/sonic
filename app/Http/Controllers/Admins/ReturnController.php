@@ -3797,8 +3797,11 @@ class ReturnController extends Controller
                 $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$request->admin_id)->where('current_date',Carbon::now()->format("Y-m-d"));
                 
                 if(!$check_agent_return_confrimation->exists()){
+
+                 
                     $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                     ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id);
+                     ->where('admin_roles.department_id',3)->where('a.status',1);
+                     
                      if($agent_role->exists()){
                          $agent_return_confrimation = new AgentReturnConfirmation;
                          $agent_return_confrimation->admin_id = $request->admin_id;
@@ -3949,7 +3952,7 @@ class ReturnController extends Controller
                                     
                     if(!$check_agent_return_confrimation->exists()){
                         $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                        ->where('admin_roles.department_id',3)->where('a.id',$agent_id);
+                        ->where('admin_roles.department_id',3)->where('a.status',1);
                         if($agent_role->exists()){
                             $agent_return_confrimation = new AgentReturnConfirmation;
                             $agent_return_confrimation->admin_id = $agent_id;
