@@ -1900,10 +1900,8 @@ class ReturnController extends Controller
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
-            ->leftjoin('return_note_shipments as rns','rns.return_note_id', '=', 'return_notes.id')
-            ->select(['return_notes.id as return_note', 'return_notes.id','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status',DB::raw('(SELECT COUNT(r.id) FROM return_notes AS r INNER JOIN return_note_shipments AS ranss ON r.id = ranss.return_note_id WHERE ranss.return_note_id = return_notes.id AND ranss.status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])
-            ->whereIn('return_notes.status',[0,3])
-        ->groupBy('return_note_id');
+            ->select(['return_notes.id as return_note', 'return_notes.id','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status',DB::raw('(SELECT COUNT(shipment_id) FROM return_note_shipments WHERE return_note_id = return_notes.id AND status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])
+            ->whereIn('return_notes.status',[0,3]);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
@@ -1912,6 +1910,9 @@ class ReturnController extends Controller
         $datatables = Datatables::of($deliveries)
             ->editColumn('return_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printreturnnote'><u>" . str_pad($deliveries->return_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            })
+            ->addColumn('return_note_id_padded', function ($deliveries) {
+                return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->addColumn('return_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
