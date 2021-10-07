@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\City;
-use App\http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\Excel_reports\MonthAverage;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

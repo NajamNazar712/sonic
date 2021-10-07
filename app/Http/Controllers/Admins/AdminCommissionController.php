@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 //use App\Http\Models\Shipment;
 //use App\Http\Models\ShipmentsJourney;
-use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStock;
 use Illuminate\Http\Request;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Commission\TierType;

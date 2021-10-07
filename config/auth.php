@@ -97,7 +97,7 @@ return [
 
          'retails' => [
              'driver' => 'eloquent',
-             'model' => App\http\Models\Admin\Retail\RetailUser::class,
+             'model' => App\Http\Models\Admin\Retail\RetailUser::class,
          ],
     ],
 

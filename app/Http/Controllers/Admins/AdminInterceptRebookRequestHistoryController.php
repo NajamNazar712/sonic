@@ -7,16 +7,16 @@ use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
-use App\http\Models\RestrictedCityIntercept;
+use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
-use App\http\Models\Admin\Retail\RetailFranchise;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
 
 class AdminInterceptRebookRequestHistoryController extends Controller

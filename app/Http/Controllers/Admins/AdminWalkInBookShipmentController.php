@@ -6,8 +6,8 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
-use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
-use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -50,8 +50,8 @@ use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
-use App\http\Models\Admin\Retail\RetailFranchise;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use DNS2D;
 
 class AdminWalkInBookShipmentController extends Controller

@@ -28,15 +28,15 @@ use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
 use App\Http\Models\Rates\RateDestinationHub;
 use App\Http\Models\Rates\RateOriginHub;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
-use App\http\Models\ShipmentOrderDate;
+use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentsAirWaybillJourney;
-use App\http\Models\ShipmentShipperReference;
+use App\Http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
-use App\http\Models\SubstituteUserShipment;
+use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\ZoneClassCity;
 use App\Jobs\ProcessShipmentBookingDistributionDB;
 use Carbon\Carbon;
@@ -62,6 +62,8 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\ShipmentPiece;
@@ -4999,7 +5001,6 @@ class ShipperShipmentBookController extends Controller
                 foreach ($cities as $city){
                     $city_name[$city->name]=$city->name;
                 }
-
                 return view('client.shipment.book.corporate.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id]);
             }
         }
