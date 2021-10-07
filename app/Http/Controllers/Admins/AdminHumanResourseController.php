@@ -455,9 +455,25 @@ class AdminHumanResourseController extends Controller
                     $rider = $rider->first();
                     $rider_status = $rider->rider_type_id;
                     if($rider_status == 2){
+                        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+                        if ($global_setting->exists()) {
+                            $global_setting = $global_setting->first();
+                            $trax_id = $global_setting->setting_value + 1;
+                            $global_setting->setting_value = $trax_id;
+                            $global_setting->save();
+                            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                        } else {
+                            $trax_id = null;
+                        }
+
+                        $rider->trax_id = $trax_id;
                         $rider->rider_type_id = 1;
                         $rider->updated_by = Auth::id();
                         $rider->save();
+
+                        $employee->trax_id = $trax_id;
+                        $employee->update();
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                     }
 
@@ -723,21 +739,21 @@ class AdminHumanResourseController extends Controller
                 $employee = Employee::find($employee_id);
                 if(in_array($employee->request_status_id, [1, 2])) {
                     if($employee->trax_id == null) {
-                        if($employee->employee_type_id == 1 || ($employee->employee_type_id == 2 && $employee->rider_request->rider_type_id == 1)) {
-                            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-                            if ($global_setting->exists()) {
-                                $global_setting = $global_setting->first();
-                                $trax_id = $global_setting->setting_value + 1;
-                                $global_setting->setting_value = $trax_id;
-                                $global_setting->save();
-                                $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-                            } else {
-                                $trax_id = null;
-                            }
+                        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-                            $employee->trax_id = $trax_id;
+                        if ($global_setting->exists()) {
+                            $global_setting = $global_setting->first();
+                            $trax_id = $global_setting->setting_value + 1;
+                            $global_setting->setting_value = $trax_id;
+                            $global_setting->save();
+                            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                        } else {
+                            $trax_id = null;
                         }
+
+                        $employee->trax_id = $trax_id;
+
                     }
                     $employee->request_status_id = 3;
                     $employee->save();
