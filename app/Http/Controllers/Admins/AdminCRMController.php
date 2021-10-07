@@ -11,22 +11,22 @@ use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
-use App\http\Models\Admin\KeyAccountDailyShipmentCrm;
-use App\http\Models\Admin\KeyAccountDailySummaryCrm;
-use App\http\Models\Admin\KeyAccountPendingCrm;
-use App\http\Models\Admin\KeyAccountPendingSummaryCrm;
-use App\http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\KeyAccountDailyShipmentCrm;
+use App\Http\Models\Admin\KeyAccountDailySummaryCrm;
+use App\Http\Models\Admin\KeyAccountPendingCrm;
+use App\Http\Models\Admin\KeyAccountPendingSummaryCrm;
+use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\CRM\CrmComments;
-use App\http\Models\CRM\CrmConsigneeInfoPrint;
+use App\Http\Models\CRM\CrmConsigneeInfoPrint;
 use App\Http\Models\CRM\CrmPaymentShipment;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestCaseNatureAndTypeHistory;
-use App\http\Models\CRM\CrmRequestEscalationTagging;
+use App\Http\Models\CRM\CrmRequestEscalationTagging;
 use App\Http\Models\CRM\CrmRequestImage;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
@@ -36,9 +36,9 @@ use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\CRM\DelayInDeliveryShipment;
-use App\http\Models\CRM\Escalation\CrmEscalationLevel;
-use App\http\Models\CRM\Escalation\CrmEscalationTagging;
-use App\http\Models\CRM\Escalation\CrmEscalationTaggingLevel;
+use App\Http\Models\CRM\Escalation\CrmEscalationLevel;
+use App\Http\Models\CRM\Escalation\CrmEscalationTagging;
+use App\Http\Models\CRM\Escalation\CrmEscalationTaggingLevel;
 use App\Http\Models\CRM\Escalation\CrmRequestEscalationLog;
 use App\Http\Models\CRM\Escalation\CrmRequestEscalationStatus;
 use App\Http\Models\DonePayment;
@@ -70,8 +70,8 @@ use Illuminate\Support\Facades\Storage;
 use phpDocumentor\Reflection\Types\Null_;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
-use App\http\Models\Admin\Retail\RetailFranchise;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\ShipmentDetail;
 
 class AdminCRMController extends Controller
@@ -3693,25 +3693,7 @@ class AdminCRMController extends Controller
                             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
                 ';
                 }
-                $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
-                if ($express_details->exists()) {
-                    if($shipment->shipper_status_id != 54){
-                        $express_details = $express_details->first();
-                        if($express_details->center_frachise_type==1){
-                            $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
-                            $express_center =  '('. $trax_center->name. ')';
-                        }elseif ($express_details->center_frachise_type==2) {
-                            $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
-                            $express_center = '('. $trax_franchise->name . ')';
-                        }else{
-                            $express_center = '';
-                        }
-                    }else{
-                        $express_center = '';
-                    }
-                }else{
-                    $express_center = '';
-                }
+                
                 if ($type != 'pdf') {
                     $table_start .= '
                             <td class="color primary"><strong>Datetime</strong></td>
@@ -3730,7 +3712,7 @@ class AdminCRMController extends Controller
                             <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
                             <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
                             <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .' '.$express_center.'</strong></td>
+                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .'</strong></td>
                           </tr>
                           <tr>
                             <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -3757,7 +3739,7 @@ class AdminCRMController extends Controller
                             <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
                             <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
                             <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .' '.$express_center. '</strong></td>
+                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .'</strong></td>
                           </tr>
                           <tr>
                             <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -4089,25 +4071,7 @@ class AdminCRMController extends Controller
 
                 }
                 
-                $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
-                if ($express_details->exists()) {
-                    if($shipment->shipper_status_id != 54){
-                        $express_details = $express_details->first();
-                        if($express_details->center_frachise_type==1){
-                            $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
-                            $express_center =  '('. $trax_center->name. ')';
-                        }elseif ($express_details->center_frachise_type==2) {
-                            $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
-                            $express_center = '('. $trax_franchise->name . ')';
-                        }else{
-                            $express_center = '';
-                        }
-                    }else{
-                        $express_center = '';
-                    }
-                }else{
-                    $express_center = '';
-                }
+                
                 if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                     $shipment_pieces = '';
 
@@ -4122,7 +4086,7 @@ class AdminCRMController extends Controller
                             <td rowspan="1" class="color primary border twice-left"><strong>Origin</strong></td>
                             <td rowspan="1" class="border">' . $shipment->pickup_address->city->name . '</td>
                             <td rowspan="1" class="color primary border "><strong>Destination</strong></td>
-                            <td rowspan="1" class="border">' . $shipment->consignee_city->name .' '.$express_center. '</td>
+                            <td rowspan="1" class="border">' . $shipment->consignee_city->name .'</td>
                             
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                             <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">

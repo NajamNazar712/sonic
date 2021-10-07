@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Models\AccountType;
 use App\Http\Models\Admin\Admin;
-use App\http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\Territory;
@@ -20,7 +20,7 @@ use App\Http\Models\Reference;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\UserBankInfo;
-use App\http\Models\UserDocumentAttachment;
+use App\Http\Models\UserDocumentAttachment;
 use App\Mail\Notifications;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

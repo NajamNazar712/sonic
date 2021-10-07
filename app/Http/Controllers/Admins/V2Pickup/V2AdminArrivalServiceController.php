@@ -11,7 +11,7 @@ use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;

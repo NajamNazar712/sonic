@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Models\Shipment;
 use App\Http\Models\Telenor;
-use App\http\Models\TelenorApiError;
+use App\Http\Models\TelenorApiError;
 use App\Http\Models\TelenorCallResponse;
-use App\http\Models\TelenorCallSession;
+use App\Http\Models\TelenorCallSession;
 use App\Mail\Notifications;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
