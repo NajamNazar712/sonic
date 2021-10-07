@@ -3811,6 +3811,7 @@ class ReturnController extends Controller
                      }
                  }
                  else{
+                    $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
                     $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
                     $check_agent_return_confrimation->save();
                  }
@@ -3965,6 +3966,7 @@ class ReturnController extends Controller
                         }
                     }
                     else{
+                        $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
                         $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
                         $check_agent_return_confrimation->save();
                     }
