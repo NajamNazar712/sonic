@@ -7626,7 +7626,7 @@ class AdminReportsController extends Controller
 
             $time_array = array();
 
-            $total_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status);
+            $total_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 1);
             $total_status_updated = $total_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $total_status_updated = $total_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
@@ -7642,7 +7642,7 @@ class AdminReportsController extends Controller
                 $total_status_updated = $total_status_updated->where('rider_id', $rider);
             }
 
-            $total_status_updated_count = $total_status_updated->select(DB::raw('DISTINCT shipment_id'))->count();
+            $total_status_updated_count = $total_status_updated->distinct('shipment_id')->count('shipment_id');
 
             $out_for_delivery = DB::connection('reports')->table('shipments_journey')->where('shipper_status_id',5);
             $out_for_delivery = $out_for_delivery->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
@@ -7660,12 +7660,12 @@ class AdminReportsController extends Controller
                 $out_for_delivery = $out_for_delivery->where('rider_id', $rider);
             }
 
-            $out_for_delivery_count = $out_for_delivery->select(DB::raw('DISTINCT shipment_id'))->count();
+            $out_for_delivery_count = $out_for_delivery->distinct('shipment_id')->count('shipment_id');
             $out_for_delivery_percentage = 0;
             if($out_for_delivery_count > 0){
                 $out_for_delivery_percentage = ($total_status_updated_count / $out_for_delivery_count) * 100;
             }
-            $bolt_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->whereNotNull('rider_id');
+            $bolt_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 1)->whereNotNull('rider_id');
             $bolt_status_updated = $bolt_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $bolt_status_updated = $bolt_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
@@ -7680,7 +7680,7 @@ class AdminReportsController extends Controller
             if($rider != null){
                 $bolt_status_updated = $bolt_status_updated->where('rider_id', $rider);
             }
-            $bolt_status_updated_count = $bolt_status_updated->select(DB::raw('DISTINCT shipment_id'))->count();
+            $bolt_status_updated_count = $bolt_status_updated->distinct('shipment_id')->count('shipment_id');
 
             $bolt_status_percentage = 0;
             if($total_status_updated_count > 0){
@@ -7690,7 +7690,7 @@ class AdminReportsController extends Controller
             if($out_for_delivery_count > 0){
                 $out_for_delivery_percentage = ($total_status_updated_count / $out_for_delivery_count) * 100;
             }
-            $sonic_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->whereNull('rider_id');
+            $sonic_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 1)->whereNull('rider_id');
             $sonic_status_updated = $sonic_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $sonic_status_updated = $sonic_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
@@ -7705,14 +7705,14 @@ class AdminReportsController extends Controller
             if($rider != null){
                 $sonic_status_updated = $sonic_status_updated->where('rider_id', $rider);
             }
-            $sonic_status_updated_count = $sonic_status_updated->select(DB::raw('DISTINCT shipment_id'))->count();
+            $sonic_status_updated_count = $sonic_status_updated->distinct('shipment_id')->count('shipment_id');
 
             $sonic_status_percentage = 0;
             if($total_status_updated_count > 0){
                 $sonic_status_percentage = ($sonic_status_updated_count / $total_status_updated_count) * 100;
             }
 
-            $bolt_status_undelivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $undelivered_status)->whereNotNull('rider_id');
+            $bolt_status_undelivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $undelivered_status)->where('verification', 1)->whereNotNull('rider_id');
             $bolt_status_undelivered = $bolt_status_undelivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $bolt_status_undelivered = $bolt_status_undelivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
@@ -7727,10 +7727,10 @@ class AdminReportsController extends Controller
             if($rider != null){
                 $bolt_status_undelivered = $bolt_status_undelivered->where('rider_id', $rider);
             }
-            $bolt_status_undelivered_count = $bolt_status_undelivered->select(DB::raw('DISTINCT shipment_id'))->count();
+            $bolt_status_undelivered_count = $bolt_status_undelivered->distinct('shipment_id')->count('shipment_id');
 
 
-            $bolt_status_delivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivered_status)->whereNotNull('rider_id');
+            $bolt_status_delivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivered_status)->where('verification', 1)->whereNotNull('rider_id');
             $bolt_status_delivered = $bolt_status_delivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $bolt_status_delivered = $bolt_status_delivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
@@ -7745,11 +7745,11 @@ class AdminReportsController extends Controller
             if($rider != null){
                 $bolt_status_delivered = $bolt_status_delivered->where('rider_id', $rider);
             }
-            $bolt_status_delivered_count = $bolt_status_delivered->select(DB::raw('DISTINCT shipment_id'))->count();
+            $bolt_status_delivered_count = $bolt_status_delivered->distinct('shipment_id')->count('shipment_id');
 
 
 
-            $sonic_status_undelivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $undelivered_status)->whereNull('rider_id');
+            $sonic_status_undelivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $undelivered_status)->where('verification', 1)->whereNull('rider_id');
             $sonic_status_undelivered = $sonic_status_undelivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $sonic_status_undelivered = $sonic_status_undelivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
@@ -7764,9 +7764,9 @@ class AdminReportsController extends Controller
             if($rider != null){
                 $sonic_status_undelivered = $sonic_status_undelivered->where('rider_id', $rider);
             }
-            $sonic_status_undelivered_count = $sonic_status_undelivered->select(DB::raw('DISTINCT shipment_id'))->count();
+            $sonic_status_undelivered_count = $sonic_status_undelivered->distinct('shipment_id')->count('shipment_id');
 
-            $sonic_status_delivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivered_status)->whereNull('rider_id');
+            $sonic_status_delivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivered_status)->where('verification', 1)->whereNull('rider_id');
             $sonic_status_delivered = $sonic_status_delivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $sonic_status_delivered = $sonic_status_delivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
@@ -7781,7 +7781,7 @@ class AdminReportsController extends Controller
             if($rider != null){
                 $sonic_status_delivered = $sonic_status_delivered->where('rider_id', $rider);
             }
-            $sonic_status_delivered_count = $sonic_status_delivered->select(DB::raw('DISTINCT shipment_id'))->count();
+            $sonic_status_delivered_count = $sonic_status_delivered->distinct('shipment_id')->count('shipment_id');
 
 
             $time_array['time'] = $slot;
