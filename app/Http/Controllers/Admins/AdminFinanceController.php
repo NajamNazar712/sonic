@@ -729,7 +729,7 @@ class AdminFinanceController extends Controller
         $count = $count->count();
 
         $shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
-            ->join('retail_shipments as rs','rs.shipment_id','=','s.id')
+            ->leftjoin('retail_shipments as rs','rs.shipment_id','=','s.id')
             ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
@@ -1599,7 +1599,7 @@ class AdminFinanceController extends Controller
             $delivery_note_shipment = $delivery_note_shipment->first();
 
             $shipment = Shipment::find($request->id);
-            if($shipment->shipment_type == 1){
+            if($shipment->shipment_type == 1 || $shipment->shipment_type == 2){
                 $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                 if($journey){
                     $start = $journey->created_at;
