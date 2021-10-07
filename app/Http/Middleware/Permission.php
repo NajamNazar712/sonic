@@ -629,9 +629,16 @@ class Permission
             'notifications.index' => 100,
             'notifications.list' => 100,
             'notifications.send_custom_email' => 103,
+            'notifications.send_custom_notification' => 103,
             'notifications.details' => 101,
             'notifications.status' => 102,
             'notifications.edit' => 101,
+
+            'app_notifications.index' => 601,
+            'app_notifications.list' => 601,
+            'app_notifications.details' => 602,
+            'app_notifications.edit' => 602,
+            'app_notifications.status' => 603,
 
             'crm.permissions' => 188,
             'crm.list' => 188,
@@ -1046,7 +1053,9 @@ class Permission
             'settings.ccd_booking.index' => 558,
 
             'human_resource.payslip.index' => 596,
-
+            
+            'return.rcp_agent.index' => 600,
+            'return.rcp_agent.list' => 600,
 
         ],
 
@@ -1138,7 +1147,7 @@ class Permission
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
 
-
+            
 
             
 

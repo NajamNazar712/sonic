@@ -130,6 +130,16 @@
                         <div class="row">
                             <div class="col">
                                 <fieldset class="form-group">
+                                    <select name="rider_main_category" id="main_category_list" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($rider_main_categories as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col">
+                                <fieldset class="form-group">
                                     <select name="rider_category" id="category_list" class="form-control select2"
                                             data-rule-required="true" data-msg-required="This field is required">
                                         @foreach($rider_categories as $category)
@@ -138,6 +148,8 @@
                                     </select>
                                 </fieldset>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col">
                                 <fieldset class="form-group">
                                     <select name="category" id="category" class="form-control select2"
@@ -229,7 +241,7 @@
                         {{csrf_field()}}
                         <input type="hidden" name="employee_id" id="employee_id" value="">
                         <div class="form-group">
-                            <input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required">
+                            <input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" data-rule-minlength="4" data-rule-maxlength="4">
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>
@@ -283,9 +295,14 @@
                 placeholder: 'Select Route',
                 dropdownParent: $('#editRiderModal')
             });
+            $('#main_category_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Rider Main Category',
+                dropdownParent: $('#editRiderModal')
+            });
             $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Rider Category',
+                placeholder: 'Select Rider Sub-Category',
                 dropdownParent: $('#editRiderModal')
             });
 
@@ -893,7 +910,8 @@
                 if(check_bit != null)
                 {
                     var rider_type = table.row($(this).parents('tr')).data().active_rider_type_id;
-                    $('#category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
+                    $('#main_category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
+                     $('#category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
                     $('#category').val(table.row($(this).parents('tr')).data().operation_id).trigger('change');
                     route_id = table.row($(this).parents('tr')).data().route_id;
                 }
@@ -912,8 +930,12 @@
 
             });
 
-            $('#UpdatePinModal #pin').inputmask({
-                'mask': '9999',
+            $("#UpdatePinModal #pin").inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'mask':"9999",
                 'clearIncomplete': true,
             });
 
@@ -935,6 +957,7 @@
                 $('#city_list').val(null).trigger('change');
                 $('#rider_type_list').val(null).trigger('change');
                 $('#route_list').val(null).trigger('change');
+                $('#main_category_list').val(null).trigger('change');
                 $('#category_list').val(null).trigger('change');
                 $('#category').val(null).trigger('change');
 

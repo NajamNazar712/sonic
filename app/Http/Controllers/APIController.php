@@ -35,6 +35,7 @@ use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\Invoice;
 use App\Http\Models\InvoiceShipment;
 use App\http\Models\ReportingLocation;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
@@ -492,11 +493,11 @@ class APIController extends Controller
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if (in_array($user_id, $ccd_account_tags)) {
                     $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->first();
+                        $query->whereNotIn('id', [3]);
                     })];
                 } else {
                     $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->whereNotIn('id', [2]);
+                        $query->whereNotIn('id', [2, 3]);
                     })];
                 }
             }
@@ -565,11 +566,11 @@ class APIController extends Controller
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if (in_array($user_id, $ccd_account_tags)) {
                     $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->first();
+                        $query->whereNotIn('id', [3]);
                     })];
                 } else {
                     $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->whereNotIn('id', [2]);
+                        $query->whereNotIn('id', [2, 3]);
                     })];
                 }
             }
@@ -905,7 +906,7 @@ class APIController extends Controller
             }
 
             if ($service_type_id == 3 && $payment_mode_id == 4) {
-                $payment_mode_id == 1;
+                $payment_mode_id = 1;
             }
 
             if ($payment_mode_id == 4) {
@@ -3866,6 +3867,13 @@ class APIController extends Controller
                             $return_assign_shipment = $return_assign_shipment->latest()->first();
                             $return_assign_shipment->status = 0;
                             $return_assign_shipment->save();
+                            
+                            $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 2;
+                            $return_assign_log->assigned_by = $user_id;
+                            $return_assign_log->save();
+
                         }
                         return response()->json(['status' => 0, 'message' => 'Shipment successfully marked as Shipment - Return Confirm']);
                     }
@@ -3897,6 +3905,12 @@ class APIController extends Controller
                             if ($return_assign_shipment) {
                                 $return_assign_shipment->status = 0;
                                 $return_assign_shipment->save();
+
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                $return_assign_log->status = 5;
+                                $return_assign_log->assigned_by = $user_id;
+                                $return_assign_log->save();
                             }
                             if ($journey) {
                                 NotificationsController::send(33, $shipment->id);
