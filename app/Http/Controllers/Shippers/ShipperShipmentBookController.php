@@ -6661,6 +6661,8 @@ class ShipperShipmentBookController extends Controller
         $shipping_mode_id = $request->shipping_mode_id;
         $pickup_city_id = $request->pickup_city_id;
         $consignee_city_id = $request->consignee_city_id;
+        $service_type_id = $request->service_type_id;
+
         $user_id = session('user_id');
 
         $user = User::find($user_id);
@@ -6673,10 +6675,15 @@ class ShipperShipmentBookController extends Controller
         if(!$destination_city){
             return FALSE;
         }
+
         $pickup_city = $pickup_city->id;
         $destination_city = $destination_city->id;
         $origin_city_allowed = TRUE;
         $destination_city_allowed = TRUE;
+        if($service_type_id == 5){
+            return ['origin_city_allowed' => $origin_city_allowed, 'destination_city_allowed' => $destination_city_allowed];
+        }
+
         if($user->account_type_id == 1){
             $rate_origin = RateOriginHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
             if($rate_origin->exists()){

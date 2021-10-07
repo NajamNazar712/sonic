@@ -843,7 +843,8 @@
 			@if (!Session::has('service_type_id'))
 			$('#select_service_type').modal('show');
 			@else
-					service_type = '{{ Session::get('service_type_id') }}';
+
+			service_type = '{{ Session::get('service_type_id') }}';
 
 			if(service_type == 1){
 				$('#pieces_quantity').removeClass('d-none');
@@ -1333,6 +1334,7 @@
 							'shipping_mode_id': shipping_mode_id,
 							'consignee_city_id': consignee_city_id,
 							'pickup_city_id': pickup_city_id,
+							'service_type_id': service_type
 						}
 					}).done(function (data) {
 						if(data.origin_city_allowed == true){
