@@ -2326,7 +2326,11 @@ class ShipperShipmentBookController extends Controller
         Validator::extend('origin_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
             if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
                 $result = self::check_origin($value, $shipping_mode_id, $user_id);
                 if($result){
                     return TRUE;
@@ -2340,7 +2344,11 @@ class ShipperShipmentBookController extends Controller
         Validator::extend('destination_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
             if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
                 $result = self::check_destination($value, $shipping_mode_id, $user_id, 1);
                 if($result){
                     return TRUE;
