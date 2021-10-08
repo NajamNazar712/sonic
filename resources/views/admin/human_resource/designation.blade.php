@@ -430,12 +430,14 @@
 
             $("#addDesignationForm #department").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department*",
-                width:'100%'
+                width:'100%',
+                dropdownParent: $("#addDesignationForm")
             });
 
             $("#addDesignationForm #hubs").select2({
                 placeholder: "Select Hubs*",
-                width:'100%'
+                width:'100%',
+                dropdownParent: $("#addDesignationForm")
             });
 
             $("#addDesignationForm #selectAll").on('click',function (){
@@ -450,17 +452,26 @@
 
             $("#editDesignationForm #department_edit").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department*",
-                width:'100%'
+                width:'100%',
+                dropdownParent: $("#editDesignationForm")
             });
 
-            $("#editDesignationForm #role_edit,#addDesignationForm #role").prepend('<option value="" selected></option>').select2({
+            $("#editDesignationForm #role_edit").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Role*",
-                width:'100%'
+                width:'100%',
+                dropdownParent: $("#editDesignationForm")
+            });
+
+            $("#addDesignationForm #role").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Role*",
+                width:'100%',
+                dropdownParent: $("#addDesignationForm")
             });
 
             $("#editDesignationForm #hubs_edit").select2({
                 placeholder: "Select Hubs*",
-                width:'100%'
+                width:'100%',
+                dropdownParent: $("#editDesignationForm")
             });
 
             $("#editDesignationForm #selectAll").on('click',function (){

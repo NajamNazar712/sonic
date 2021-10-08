@@ -368,7 +368,6 @@ $designations = EmployeeDesignation::where('status',1)->get();
                 $employee->name = $admin->name;
                 $employee->pin = $admin->dummy_pin;
                 $employee->shift_id = $admin->shift_id;
-                $employee->reporting_location_id = $admin->reporting_location_id;
 
                 $employee->update();
             }

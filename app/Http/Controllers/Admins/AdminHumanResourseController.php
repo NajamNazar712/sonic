@@ -797,7 +797,6 @@ class AdminHumanResourseController extends Controller
                             $admin->dummy_pin = $employee->pin;
                             $admin->designation_id = $employee->designation_id;
                             $admin->shift_id = $employee->shift_id;
-                            $admin->reporting_location_id = $employee->reporting_location_id;
 
                             if($employee->status_id == 2)
                             {
@@ -865,8 +864,7 @@ class AdminHumanResourseController extends Controller
         $employments = $employee->employment_history;
         $attachments = $employee->attachments;
         $place_of_birth_cities = City::where('business_category_id',1)->get();
-        $reporting_locations = ReportingLocation::where('status',1)->get();
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities','reporting_locations'));
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities'));
     }
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
@@ -902,7 +900,6 @@ class AdminHumanResourseController extends Controller
         $employee->pin = $request->bolt_pin;
         $employee->place_of_birth = $request->place_of_birth;
         $employee->date_of_birth = $request->date_of_birth_formatted;
-        $employee->reporting_location_id = $request->reporting_location;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
 
@@ -923,7 +920,6 @@ class AdminHumanResourseController extends Controller
                 $admin->password = bcrypt($employee->pin);
                 $admin->dummy_pin = $employee->pin;
                 $admin->shift_id = $employee->shift_id;
-                $admin->reporting_location_id = $employee->reporting_location_id;
                 $admin->update();
 
                 AdminHub::where('admin_id',$admin->id)->delete();
@@ -950,7 +946,6 @@ class AdminHumanResourseController extends Controller
                 $rider->address = $employee->address;
                 $rider->dummy_pin = $employee->pin;
                 $rider->shift_id = $employee->shift_id;
-                $rider->reporting_location_id = $employee->reporting_location_id;
                 $rider->pin = bcrypt($employee->pin);
                 $rider->save();
             }
