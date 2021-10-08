@@ -8305,25 +8305,21 @@ class NotificationsController extends Controller
                         $sales_person_tag = Admin::find($sales_person_tag->admin_id);
                         $sales_person_data['name'] = $sales_person_tag->name;
                         $to = $sales_person_tag->email;
-                    }
-                    else
-                    {
-                        $to = '';
-                    }
 
-                    if (strpos($body, '[Sales_Person]') !== FALSE) {
-                        $body = str_replace('[Sales_Person]', $sales_person_data['name'], $body);
-                    }
+                        if (strpos($body, '[Sales_Person]') !== FALSE) {
+                            $body = str_replace('[Sales_Person]', $sales_person_data['name'], $body);
+                        }
 
-                    if (strpos($body, '[shipment_no]') !== FALSE) {
-                        $body = str_replace('[shipment_no]', $shipment->tracking_number, $body);
-                    }
+                        if (strpos($body, '[shipment_no]') !== FALSE) {
+                            $body = str_replace('[shipment_no]', $shipment->tracking_number, $body);
+                        }
 
-                    if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $shipment->user->name, $body);
-                    }
+                        if (strpos($body, '[shipper_name]') !== FALSE) {
+                            $body = str_replace('[shipper_name]', $shipment->user->name, $body);
+                        }
 
-                    self::email($subject, $body, $to);
+                        self::email($subject, $body, $to);
+                    }
                 }
                 else if ($id == 155) {
                     $getdata = $reference_1_id;
