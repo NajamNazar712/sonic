@@ -527,6 +527,11 @@
             text-shadow: none;
         }
 
+        table.dataTable tbody tr.selected {
+            background-color: #ebf5ff !important;
+            color: #64a0d2 !important;
+        }
+
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }

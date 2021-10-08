@@ -4233,7 +4233,7 @@ class DeliveryController extends Controller
             {
                 if($sdn->adjusted == 0 && $sdn->status == 0)
                 {
-                    $delivery_notes = DeliveryNote::where('dncc_status',0)->where('cash_collection_status',1)->where('hub_id',$sdn->hub_id)->orderBy('id','desc')->get(['id']);
+                    $delivery_notes = DeliveryNote::where('dncc_status',0)->where('cash_collection_status',1)->where('hub_id',$sdn->hub_id)->where('status',1)->orderBy('id','desc')->get(['id']);
                     return response()->json(['status'=>1,'dn'=>$delivery_notes]);
                 }
                 else{
