@@ -4530,9 +4530,9 @@ class ReturnController extends Controller
         }else{
             $stats['productivity'] = number_format((intval($stats['completed'])/intval($stats['total']))*100,2);
         }
-        $stats['total'] = number_format($stats['total']->count());
-        $stats['completed'] = number_format($stats['completed']->count());
-        $stats['rcp_reattempt'] = number_format($stats['rcp_reattempt']->count());
+        $stats['total'] = number_format($stats['total']);
+        $stats['completed'] = number_format($stats['completed']);
+        $stats['rcp_reattempt'] = number_format($stats['rcp_reattempt']);
 
         return response()->json(['status' => 1, 'stats' => $stats]);
 
