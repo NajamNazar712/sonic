@@ -17,7 +17,8 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Statement No.</th>
-                        <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Origin Hub</th>
+                        <th class="border-primary border-darken-1">Destination Hub</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
                         <th class="border-primary border-darken-1">Date (From - To)</th>
                         <th class="border-primary border-darken-1">Amount</th>
@@ -77,7 +78,8 @@
                             head = [];
                             head.push('S.No');
                             head.push('Statement No.');
-                            head.push('Hub');
+                            head.push('Origin Hub');
+                            head.push('Destination Hub');
                             head.push('Statement Reference No.');
                             head.push('Date (From - To)');
                             head.push('Amount');
@@ -98,7 +100,8 @@
 
                                 row.push(index + 1);
                                 row.push(values.statement_id);
-                                row.push(values.hub_name);
+                                row.push(values.origin_hub_name);
+                                row.push(values.destination_hub_name);
                                 row.push(values.reference_no);
                                 row.push(values.date);
                                 row.push(values.total_amount);
@@ -145,7 +148,8 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'statement_link', name: 'petty_cash_statements.id', class: 'align-middle statement_link'},
-                    {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
+                    {data: 'origin_hub_name', name: 'o.name', class: 'align-middle origin_hub_name'},
+                    {data: 'destination_hub_name', name: 'd.name', class: 'align-middle destination_hub_name'},
                     {data: 'reference_no', name: 'petty_cash_statements.reference_no', class: 'align-middle reference_no'},
                     {data: 'date', name: 'date', class: 'align-middle date', orderable:false},
                     {data: 'total_amount', name: 'petty_cash_statements.total_amount', class: 'align-middle total_amount'},

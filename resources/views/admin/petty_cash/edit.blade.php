@@ -317,7 +317,7 @@
                         'rightAlign': false,
                         'digits': 2,
                         'min': 0.00,
-                        'max': 600000.00
+                        'max': 6000000.00
                     });
 
                     // $(".hub_select").select2({
