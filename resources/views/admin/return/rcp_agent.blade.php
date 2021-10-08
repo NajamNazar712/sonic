@@ -72,7 +72,7 @@
                                                 <i class="icon-grid font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 id="total"></h3>
+                                                <h3 id="total">0</h3>
                                                 <span>Total Assigned</span>
                                             </div>
                                         </div>
@@ -89,7 +89,7 @@
                                                 <i class="icon-hourglass text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="completed"></h3>
+                                                <h3 class="text-white" id="completed">0</h3>
                                                 <span>Total Completed</span>
                                             </div>
                                         </div>
@@ -106,7 +106,7 @@
                                                 <i class="icon-layers text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="rcp_reattempt"></h3>
+                                                <h3 class="text-white" id="rcp_reattempt">0</h3>
                                                 <span class="font-13">Re-Attempt RCP</span>
                                             </div>
                                         </div>
@@ -123,7 +123,7 @@
                                                 <i class="icon-check text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="productivity"></h3>
+                                                <h3 class="text-white" id="productivity">0</h3>
                                                 <span>Productivity %</span>
                                             </div>
                                         </div>
