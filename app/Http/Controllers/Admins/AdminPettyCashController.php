@@ -162,8 +162,8 @@ class AdminPettyCashController extends Controller
                     if($first)
                     {
                         $first = false;
-                        $petty_cash->destination_hub_id == Admin::find($request->operation_manager[$selected_id])->destination_hub_id ?? 0;
-                        $petty_cash->update();
+                        $petty_cash->destination_hub_id = Admin::find($request->operation_manager[$selected_id])->default_hub_id ?? 0;
+                        $petty_cash->save();
                     }
                     $total_amount += $request->amount[$selected_id];
 
@@ -231,8 +231,8 @@ class AdminPettyCashController extends Controller
                     if($first)
                     {
                         $first = false;
-                        $petty_cash_draft->destination_hub_id == Admin::find($request->operation_manager[$selected_id])->destination_hub_id ?? 0;
-                        $petty_cash_draft->update();
+                        $petty_cash_draft->destination_hub_id = Admin::find($request->operation_manager[$selected_id])->default_hub_id ?? 0;
+                        $petty_cash_draft->save();
                     }
                     $total_amount += $request->amount[$selected_id];
 
@@ -1098,7 +1098,7 @@ class AdminPettyCashController extends Controller
                     $reference_document .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]) . ' target="_blank">View</a></button>';
                 }
                 if ($petty_details->reference_document_2 != null) {
-                    $reference_document .= '<br><button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document_2]) . ' target="_blank">View</a></button>';
+                    $reference_document .= '<br><button type="button" class="btn btn-primary btn-sm mt-1"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document_2]) . ' target="_blank">View</a></button>';
                 }
                 $reference_document .= '</div>';
                 return $reference_document;
@@ -1760,8 +1760,8 @@ class AdminPettyCashController extends Controller
                         if($first)
                         {
                             $first = false;
-                            $petty_cash_draft->destination_hub_id == Admin::find($request->operation_manager[$selected_id])->destination_hub_id ?? 0;
-                            $petty_cash_draft->update();
+                            $petty_cash_draft->destination_hub_id = Admin::find($request->operation_manager[$selected_id])->default_hub_id ?? 0;
+                            $petty_cash_draft->save();
                         }
                         $total_amount += $request->amount[$selected_id];
                         $petty_cash_draft_detail = new PettyCashStatementDetailDraft();
@@ -1857,8 +1857,8 @@ class AdminPettyCashController extends Controller
                         if($first)
                         {
                             $first = false;
-                            $petty_cash->destination_hub_id == Admin::find($request->operation_manager[$selected_id])->destination_hub_id ?? 0;
-                            $petty_cash->update();
+                            $petty_cash->destination_hub_id = Admin::find($request->operation_manager[$selected_id])->default_hub_id ?? 0;
+                            $petty_cash->save();
                         }
                         $total_amount += $request->amount[$selected_id];
 

@@ -749,7 +749,7 @@
                     { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
                     { data:'resolved_by' ,name: 'resolved_by', class: 'align-middle resolved_by'},
                     { data:'status' ,name: 'status', class: 'align-middle status'},
-                    { data:'adjustment_date' ,name: 'station_deposit_notes.adjustment_date', class: 'align-middle adjustment_date'},
+                    { data:'adjustment_date' ,name: 'sdna.date', class: 'align-middle adjustment_date'},
                     { data:'sdn_adjustment_amount' ,name: 'station_deposit_notes.adjustment_amount', class: 'align-middle adjustment_amount'},
                     { data:'adjusted_reference_link' ,name: 'station_deposit_notes.adjustment_ref', class: 'align-middle text-center adjustment_ref',orderable: false, searchable: false},
                     { data:'difference_amount' ,name: 'difference_amount', class: 'align-middle difference_amount',orderable: false, searchable: false},
