@@ -4510,16 +4510,30 @@ class ReturnController extends Controller
 
         }
        
-        $stats['total'] = number_format($stats['total']->count());
+        // $stats['total'] = number_format($stats['total']->count());
         
-        $stats['completed'] = number_format($stats['completed']->count());
-        $stats['rcp_reattempt'] = number_format($stats['rcp_reattempt']->count());
+        // $stats['completed'] = number_format($stats['completed']->count());
+        // $stats['rcp_reattempt'] = number_format($stats['rcp_reattempt']->count());
+        
+        // if($stats['total'] == 0){
+        //     $stats['productivity'] = '0';
+        // }else{
+        //     $stats['productivity'] = number_format((intval($stats['completed'])/intval($stats['total']))*100,2);
+        // }
+            
+        $stats['total'] = $stats['total']->count();
+        $stats['completed'] = $stats['completed']->count();
+        $stats['rcp_reattempt'] = $stats['rcp_reattempt']->count();
         
         if($stats['total'] == 0){
             $stats['productivity'] = '0';
         }else{
             $stats['productivity'] = number_format((intval($stats['completed'])/intval($stats['total']))*100,2);
         }
+        $stats['total'] = number_format($stats['total']->count());
+        $stats['completed'] = number_format($stats['completed']->count());
+        $stats['rcp_reattempt'] = number_format($stats['rcp_reattempt']->count());
+
         return response()->json(['status' => 1, 'stats' => $stats]);
 
     }
