@@ -23,7 +23,7 @@
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Name</th>
-                                    <th class="border-primary border-darken-1">Email</th>
+                                    <th class="border-primary border-darken-1">Outlook ID</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Created At</th>
                                    {{-- <th class="border-primary border-darken-1"></th>--}}
@@ -77,7 +77,7 @@
                             head.push('City');
                             head.push('Designation');
                             head.push('Name');
-                            head.push('Email');
+                            head.push('Outlook ID');
                             head.push('Phone');
                             head.push('Created Datetime');
                             $.each(result.data, function(index, values) {

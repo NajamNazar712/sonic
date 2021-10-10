@@ -77,7 +77,7 @@
 										<th class="border-primary border-darken-1">Employee Id</th>
 										<th class="border-primary border-darken-1">Name</th>
 										<th class="border-primary border-darken-1">Phone Number</th>
-										<th class="border-primary border-darken-1">Email</th>
+										<th class="border-primary border-darken-1">Outlook ID</th>
 										<th class="border-primary border-darken-1">CNIC</th>
 										<th class="border-primary border-darken-1">Designation</th>
 										<th class="border-primary border-darken-1">Role</th>
@@ -174,7 +174,7 @@
                             head.push('Employee Id');
                             head.push('Name');
                             head.push('Phone Number');
-                            head.push('Email');
+                            head.push('Outlook ID');
                             head.push('CNIC');
                             head.push('Designation');
                             head.push('Role');
