@@ -1972,11 +1972,12 @@ class AdminPettyCashController extends Controller
             $petty_cash_statement = PettyCashStatement::find($petty_cash_statement_id);
             $city_id = Auth::user()->default_hub_id;
             $petty_cash_statement_detail = PettyCashStatementDetail::where('petty_cash_statement_id',$petty_cash_statement_id)->first();
-            $consignee_city_id = $petty_cash_statement_detail->hub_id;
-            $consignee_city_name = City::where('id',$consignee_city_id)->pluck("name")->first();
             $consignee = Admin::find($petty_cash_statement_detail->operation_manager_id);
             $consignee_name = $consignee->name;
             $consignee_number = $consignee->phone_number;
+            $consignee_city_id = $consignee->default_hub_id ?? $petty_cash_statement_detail->hub_id;
+            $consignee_city_name = City::where('id',$consignee_city_id)->pluck("name")->first();
+
 
             $special_instructions = 'Petty Cash Statement # ' . $petty_cash_statement_id;
             $pickup = UserShippingInfo::where('user_id', $user_id)->where('city_id', $city_id);
