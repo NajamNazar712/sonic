@@ -6932,6 +6932,12 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                         $statement->status = 5;
                         $statement->save();
 
+                        foreach ($statement->petty_cash_statement_details as $detail)
+                        {
+                            $detail->status = 1;
+                            $detail->update();
+                        }
+
                         $sdn_adjustment = new StationDepositNoteAdjustment();
                         $sdn_adjustment->sdn_id = $sdn->id;
                         $sdn_adjustment->petty_cash_statement_id = $statement->id;

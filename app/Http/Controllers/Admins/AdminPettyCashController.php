@@ -566,7 +566,9 @@ class AdminPettyCashController extends Controller
             ->whereIn('petty_cash_statements.status', [0, 1, 2, 7]);
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('petty_cash_statements.hub_id', session('hubs'));
+            $petty = $petty->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))->orWhere(function ($query) {
+                $query->whereIn('petty_cash_statements.destination_hub_id', session('hubs'));
+            });
         }
 
         $petty = Datatables::of($petty)
@@ -932,7 +934,9 @@ class AdminPettyCashController extends Controller
             ->whereIn('petty_cash_statements.status', [3, 4, 5]);
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('petty_cash_statements.hub_id', session('hubs'));
+            $petty = $petty->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))->orWhere(function ($query) {
+                $query->whereIn('petty_cash_statements.destination_hub_id', session('hubs'));
+            });
         }
 
         $petty = Datatables::of($petty)
@@ -1140,7 +1144,9 @@ class AdminPettyCashController extends Controller
             ->where('petty_cash_statements.status', 6);
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('petty_cash_statements.hub_id', session('hubs'));
+            $petty = $petty->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))->orWhere(function ($query) {
+                $query->whereIn('petty_cash_statements.destination_hub_id', session('hubs'));
+            });
         }
 
         $petty = Datatables::of($petty)
@@ -1557,7 +1563,9 @@ class AdminPettyCashController extends Controller
             ->select('petty_cash_statement_drafts.id as draft_id', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statement_drafts.reference_no', 'petty_cash_statement_drafts.from', 'petty_cash_statement_drafts.to', 'cb.name as created_by', 'petty_cash_statement_drafts.created_at', 'petty_cash_statement_drafts.total_amount');
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('petty_cash_statement_drafts.hub_id', session('hubs'));
+            $petty = $petty->whereIn('petty_cash_statement_drafts.origin_hub_id', session('hubs'))->orWhere(function ($query) {
+                $query->whereIn('petty_cash_statement_drafts.destination_hub_id', session('hubs'));
+            });
         }
 
         $petty = Datatables::of($petty)
@@ -1970,7 +1978,7 @@ class AdminPettyCashController extends Controller
 
         if ($petty_cash_statement_id) {
             $petty_cash_statement = PettyCashStatement::find($petty_cash_statement_id);
-            $city_id = Auth::user()->default_hub_id;
+            $city_id = $user->city_id;
             $petty_cash_statement_detail = PettyCashStatementDetail::where('petty_cash_statement_id',$petty_cash_statement_id)->first();
             $consignee = Admin::find($petty_cash_statement_detail->operation_manager_id);
             $consignee_name = $consignee->name;
@@ -1986,9 +1994,9 @@ class AdminPettyCashController extends Controller
                 $pickup = $pickup->first();
                 $pickup_address_id = $pickup->id;
             } else {
-                $poc = Auth::user()->name;
-                $poc_phone = Auth::user()->phone_number;
-                $poc_email = Auth::user()->email ?? "-";
+                $poc = $user->name;
+                $poc_phone = $user->phone;
+                $poc_email = $user->email;
                 $city_name = City::where('id',$city_id)->pluck("name")->first();
                 $address = 'Trax office ' . $city_name;
                 $pickup_address_id = $this->add_pickup_address($user_id, $address, $poc, $poc_phone, $poc_email, $city_id);

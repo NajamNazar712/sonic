@@ -180,8 +180,6 @@
                 data: {
                     '_token': '{{ csrf_token() }}',
                     'ids[]': '{{ session('print') }}',
-                    'shipper_name': "{{Auth::user()->name}}",
-                    'shipper_phone': "{{Auth::user()->phone_number}}",
                 }
             })
                     .done(function(data) {
