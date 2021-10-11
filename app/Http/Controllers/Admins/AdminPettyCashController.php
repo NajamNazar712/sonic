@@ -43,7 +43,7 @@ class AdminPettyCashController extends Controller
     public function make_petty_cash_statement_index()
     {
         $head = PettyCashAccountHead::where('status', 1)->select('id', 'name')->get();
-        $zones = Zone::where('business_category_id',1)->select('id','name')->get();
+        $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
         $operation_managers = Admin::where('role_id',10)->where('status',1)->select(['id','trax_id','name'])->get();
         if (session('role_id') == 1) {
@@ -75,7 +75,7 @@ class AdminPettyCashController extends Controller
     public function make_petty_cash_statement_get_hubs(Request $request)
     {
             $zone_id = $request->zone;
-            $hubs = City::where('zone_id',$zone_id)->where('hub',1);
+            $hubs = City::where('zone_id',$zone_id)->where('hub',1)->where('status',1);
             if($hubs->exists())
             {
                 $data = $hubs->select(['id','name'])->get();
@@ -89,7 +89,7 @@ class AdminPettyCashController extends Controller
     public function make_petty_cash_statement_get_cities(Request $request)
     {
         $hub_id = $request->hub;
-        $cities = City::where('hub_id',$hub_id)->where('hub',0);
+        $cities = City::where('hub_id',$hub_id)->where('hub',0)->where('status',1);
         if($cities->exists())
         {
             $data = $cities->select(['id','name'])->get();
@@ -291,7 +291,7 @@ class AdminPettyCashController extends Controller
     {
         $petty = PettyCashStatement::find($id);
         $head = PettyCashAccountHead::select('id', 'name')->get();
-        $zones = Zone::where('business_category_id',1)->select('id','name')->get();
+        $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
         if (session('role_id') == 1) {
             $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
@@ -354,7 +354,7 @@ class AdminPettyCashController extends Controller
             })
             ->addColumn('zone_name', function ($petty_details) {
                 $zone_id = $petty_details->zone_id;
-                $zones = Zone::where('business_category_id',1)->select('id','name')->get();
+                $zones = Zone::where('business_category_id',1)->where('status',1)->select('id','name')->get();
                 $drops = '';
                 $selected = '';
                 foreach ($zones as $zone) {
@@ -371,7 +371,7 @@ class AdminPettyCashController extends Controller
             ->addColumn('hub_name', function ($petty_details) {
                 $zone_id = $petty_details->zone_id;
                 $hub_id = $petty_details->hub_id;
-                $petty_hubs = City::where('hub',1)->where('zone_id',$zone_id)->select('id','name')->get();
+                $petty_hubs = City::where('hub',1)->where('status',1)->where('zone_id',$zone_id)->select('id','name')->get();
                 $drops = '';
                 $selected = '';
                 foreach ($petty_hubs as $petty_hub) {
@@ -388,7 +388,7 @@ class AdminPettyCashController extends Controller
             ->addColumn('city_name', function ($petty_details) {
                 $hub_id = $petty_details->hub_id;
                 $city_id = $petty_details->city_id;
-                $cities = City::where('hub',0)->where('hub_id',$hub_id)->select('id','name')->get();
+                $cities = City::where('hub',0)->where('status',1)->where('hub_id',$hub_id)->select('id','name')->get();
                 $drops = '';
                 $selected = '';
                 foreach ($cities as $city) {
@@ -518,9 +518,9 @@ class AdminPettyCashController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),39);
         if (session('role_id') == 1) {
-            $hubs = City::where('hub', 1)->get();
+            $hubs = City::where('hub', 1)->where('status',1)->get();
         } else {
-            $hubs = City::where('hub', 1)->whereIn('id', session('hubs'))->get();
+            $hubs = City::where('hub', 1)->where('status',1)->whereIn('id', session('hubs'))->get();
         }
         $zones = Zone::where('status', 1)->get();
         return view('admin.petty_cash.statements')->with(['hubs' => $hubs,'zones'=>$zones]);
@@ -1020,7 +1020,7 @@ class AdminPettyCashController extends Controller
         }
         $petty = $petty->first();
         $head = PettyCashAccountHead::select('id', 'name')->get();
-        $cities = City::select('id', 'name')->get();
+        $cities = City::select('id', 'name')->where('status',1)->get();
         return view('admin.petty_cash.view')->with(['heads' => $head, 'cities' => $cities, 'petty_statement' => $petty]);
     }
 
@@ -1603,7 +1603,7 @@ class AdminPettyCashController extends Controller
                 $titles_array[$title->id] = $title->account_titles;
             }
 
-            $zones = Zone::where('business_category_id',1)->select('id','name')->get();
+            $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
             $hub_array = array();
             $city_array = array();
             foreach ($zones as $zone) {
@@ -1673,7 +1673,7 @@ class AdminPettyCashController extends Controller
             })
             ->addColumn('hub_name', function ($petty_details) {
                 if ($petty_details->hub_id != null) {
-                    $hubs = City::select('id', 'name')->get();
+                    $hubs = City::select('id', 'name')->where('status',1)->get();
                     $drops = '';
                     $selected = '';
                     foreach ($hubs as $hub) {
@@ -1687,7 +1687,7 @@ class AdminPettyCashController extends Controller
                     $select = '<select class="form-control form-control-sm select2 hub_select" name="hub[' . $petty_details->petty_cash_statement_draft_id . ']" data-rule-required="true" data-msg-required="Hub is required">' . $drops . '</select>';
                     return $select;
                 } else {
-                    $hubs = City::where('hub', 1)->select('id', 'name')->get();
+                    $hubs = City::where('hub', 1)->select('id', 'name')->where('status',1)->get();
                     $drops = '';
 
                     $drops .= '<option value="" selected></option>';
