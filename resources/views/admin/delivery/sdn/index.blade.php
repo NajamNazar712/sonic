@@ -867,7 +867,7 @@
                 placeholder:'Select DNCC*',
                 width:'100%',
                 dropdownCssClass: 'form-control-sm p-0',
-                dropdownContainer: $("#sdn_add_dncc")
+                dropdownParent: $("#sdn_add_dncc")
             });
 
 
@@ -875,7 +875,7 @@
                 placeholder:'Select PNCC*',
                 width:'100%',
                 dropdownCssClass: 'form-control-sm p-0',
-                dropdownContainer: $("#sdn_add_pncc")
+                dropdownParent: $("#sdn_add_pncc")
             });
 
 
