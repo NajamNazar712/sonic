@@ -930,6 +930,10 @@ class Permission
 
             'carrefour.arrival.index' => 579,
             'carrefour.arrival.submit' => 579,
+            'carrefour.delivery.index' => 606,
+            'carrefour.delivery.submit' => 606,
+            'carrefour.return.index' => 607,
+            'carrefour.return.submit' => 607,
 
 
             'leads.index' => 416,

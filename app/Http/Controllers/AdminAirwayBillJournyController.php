@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
-use App\http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\City;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsAirWaybillJourney;

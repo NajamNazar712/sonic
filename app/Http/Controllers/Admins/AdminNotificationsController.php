@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admins;
 
 
-use App\http\Models\AppNotification;
-use App\http\Models\AppType;
+use App\Http\Models\AppNotification;
+use App\Http\Models\AppType;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\NotificationType;
 use App\Http\Models\Rider;
