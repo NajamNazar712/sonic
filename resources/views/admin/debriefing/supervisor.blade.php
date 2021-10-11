@@ -618,13 +618,13 @@
                                     $('#sms_delivery_note_id').val(id);
                                     $('#sms_undelivered_shipments').html(html);
                                     $('#shipments_sms_modal').modal('show');
-                                    
+                                    var tbltaha;
                                     $('#ReasonSearch').keyup(function(e){
                                         var input, filter, table, tr, td, i, txtValue;
                                         input = document.getElementById("ReasonSearch");
                                         filter = input.value.toUpperCase();
-                                        table = document.getElementById("myTable");
-                                        tr = table.getElementsByTagName("tr");
+                                        tbltaha = document.getElementById("myTable");
+                                        tr = tbltaha.getElementsByTagName("tr");
                                         for (i = 0; i < tr.length; i++) {
                                             td = tr[i].getElementsByTagName("td")[2];
                                             if (td) {
@@ -636,10 +636,16 @@
                                             }
                                             }       
                                         }
+                                        if($('.sms_checkbox:checked').length == $('.sms_checkbox').filter(':visible').length){
+                                            $('#selectAll').prop('checked',true);
+                                        }else{
+                                            $('#selectAll').prop('checked',false);
+                                        }
                                     });
                                     $('#selectAll').click(function(e){
-                                    var tbl= $(e.target).closest('table');
-                                    $('td input:checkbox',tbl).prop('checked',this.checked);
+                                    //var tbltaha= $(e.target).closest('table');
+                                    $('td input:checkbox',tbltaha).filter(':visible').prop('checked',this.checked);
+                                    
                                     });
 
                                     $('.sms_checkbox').on('click',function(){
