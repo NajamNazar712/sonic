@@ -158,8 +158,7 @@
                         head.push('Hub');
                         head.push('Consignee Name');
                         head.push('Reattempted By');
-                        head.push('Address');
-                        head.push('Collection Amount');
+                        head.push('Address');                        head.push('Collection Amount');
                         head.push('Shipping Mode');
                         head.push('Service Type');
                         head.push('Status');
@@ -179,8 +178,7 @@
                             row.push(values.hub);
                             row.push(values.consignee_name);
                             row.push(values.agent);
-                            row.push(values.consignee_address);
-                            row.push(values.amount);
+                            row.push(values.consignee_address);                            row.push(values.amount);
                             row.push(values.shipping_mode);
                             row.push(values.service_type);
                             row.push(values.status);
@@ -237,8 +235,7 @@
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
-                {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},                {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},

@@ -10,15 +10,15 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
-use App\http\Models\Admin\BookingSmsForShippers;
+use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RetailPickupNote;
-use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\SalePersonTag;
-use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
-use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
@@ -29,7 +29,7 @@ use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
@@ -297,41 +297,34 @@ class V2AdminPickupsController extends Controller
             if($legend_filter = $request->get('legend_filter')){
                 if($legend_filter==8){
                     $datatables->where('v2_pickup_requests.reverse_pickup',1);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==2){
                     $datatables->where('v2_pickup_requests.vendor','<>',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==3){
                     $datatables->where('v2_pickup_requests.try_and_buy',1)
                     ->where('v2_pickup_requests.vendor',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==4){
                     $datatables->where('v2_pickup_requests.status_id',3)->where('v2_pickup_requests.attempts',1)
                     ->where('v2_pickup_requests.try_and_buy',null)
                     ->where('v2_pickup_requests.vendor',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==5){
                     $datatables->where('v2_pickup_requests.status_id',3)->where('v2_pickup_requests.attempts',2)
                     ->where('v2_pickup_requests.try_and_buy',null)
                     ->where('v2_pickup_requests.vendor',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==6){
                     $datatables->where('v2_pickup_requests.status_id',3)->where('v2_pickup_requests.attempts','>',2)
                     ->where('v2_pickup_requests.try_and_buy',null)
                     ->where('v2_pickup_requests.vendor',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==7){
                     $datatables->where('v2_pickup_requests.after_cut_off_time','<>',null)
                     ->where('v2_pickup_requests.status_id','<>',3)
                     ->where('v2_pickup_requests.try_and_buy',null)
                     ->where('v2_pickup_requests.vendor',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==1){
                     $datatables->where('v2_pickup_requests.created_at','<=',Carbon::now()->startOfDay()->addDays(6))
@@ -340,13 +333,24 @@ class V2AdminPickupsController extends Controller
                         ->where('v2_pickup_requests.try_and_buy',null)
                         ->where('v2_pickup_requests.vendor',null)
                         ->where('v2_pickup_requests.reverse_pickup',null);
-
-                    return $datatables->make(true);
                 }
 
-            }else{
-                    return $datatables->make(true);
             }
+            
+            if($legend_filter = $request->get('before_cut_off_time')){
+                //to be made as before cut off time
+                
+                $cut_off_time = '17:30:00';
+                $setting = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+                if ($setting->exists()) {
+                    $setting = $setting->first();
+                    $cut_off_time = $setting->setting_value . ':00:00';
+                    $cut_off_time = Carbon::parse($cut_off_time)->format('H:i:s');
+                    $datatables->whereTime('v2_pickup_requests.created_at','<=',$cut_off_time);
+                }
+
+            }
+                    return $datatables->make(true);
 
         
     }
@@ -440,7 +444,8 @@ class V2AdminPickupsController extends Controller
 
                 $pickups++;
                 self::retail_pickup_assign($pickup_request_id, $rider_id);
-            } else {
+            }
+            else {
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if ($pickup_request->current_rider_id == $rider_id) {
                     continue;
@@ -481,45 +486,14 @@ class V2AdminPickupsController extends Controller
                     }
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
-
-                if ($previous_rider_id != null) {
-                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $previous_rider_id)
-                        ->where('employee_type_id', 2)
-                        ->select('device_token');
-                    if ($rider_device_token->exists()) {
-                        $rider_device_token = $rider_device_token->first();
-                        $device_token = $rider_device_token->device_token;
-                        $title = "Pickup Request Reassigned";
-                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Reassigned To " . $pickup_request->rider->name;
-                        NotificationsController::bolt_app_notification($previous_rider_id, 2, $device_token, $title, $message);
-                    }
-                }
-
-                if ($rider_id != null && $previous_rider_id == null) {
-                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
-                        ->where('employee_type_id', 2)
-                        ->select('device_token');
-                    if ($rider_device_token->exists()) {
-                        $rider_device_token = $rider_device_token->first();
-                        $device_token = $rider_device_token->device_token;
-                        $title = "Pickup Request Assigned";
-                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Assigned To You";
-                        NotificationsController::bolt_app_notification($rider_id, 2, $device_token, $title, $message);
-                    }
-                } elseif ($rider_id != null && $previous_rider_id != null) {
-                    $previous_rider = Rider::where('id', $previous_rider_id)->select('name')->first();
-                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
-                        ->where('employee_type_id', 2)
-                        ->select('device_token');
-                    if ($rider_device_token->exists()) {
-                        $rider_device_token = $rider_device_token->first();
-                        $device_token = $rider_device_token->device_token;
-                        $title = "Pickup Request Ressigned";
-                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Ressigned To You From " . $previous_rider->name;
-                        NotificationsController::bolt_app_notification($rider_id, 2, $device_token, $title, $message);
-                    }
-                }
-
+            }
+            if ($previous_rider_id != NULL) {
+                NotificationsController::app_notification(2, $previous_rider_id, 2, $pickup_request->current_rider_id, $pickup_request->shipper_id);
+            }
+            if ($rider_id != NULL && $previous_rider_id == NULL) {
+                NotificationsController::app_notification(3, $rider_id, 2, $pickup_request->shipper_id);
+            } elseif ($rider_id != NULL && $previous_rider_id != NULL) {
+                NotificationsController::app_notification(1, $rider_id, 2, $previous_rider_id, $pickup_request->shipper_id);
             }
         }
         if (count($allowed_pickup_requests) > 0) {

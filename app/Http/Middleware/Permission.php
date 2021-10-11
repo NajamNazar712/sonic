@@ -44,6 +44,11 @@ class Permission
             'accounts.sister_account.merged_account.mapping.submit' => 242,
             'accounts.receiving_sheet.index' => 364,
 
+            'corporate.reimbursement_setting.index' => 598,
+            'corporate.reimbursement_setting.store' => 598,
+            'corporate.reimbursement_setting.approve' => 599,
+            'corporate.reimbursement_setting.reject' => 599,
+
             'daily_visit.index' => 265,
             'daily_visit.store' => 265,
             'daily_visit.business_card' => 264,
@@ -636,9 +641,16 @@ class Permission
             'notifications.index' => 100,
             'notifications.list' => 100,
             'notifications.send_custom_email' => 103,
+            'notifications.send_custom_notification' => 103,
             'notifications.details' => 101,
             'notifications.status' => 102,
             'notifications.edit' => 101,
+
+            'app_notifications.index' => 601,
+            'app_notifications.list' => 601,
+            'app_notifications.details' => 602,
+            'app_notifications.edit' => 602,
+            'app_notifications.status' => 603,
 
             'crm.permissions' => 188,
             'crm.list' => 188,
@@ -926,6 +938,7 @@ class Permission
             'telenor.call.index' => 402,
             'telenor.call.list' => 402,
             'telenor.return.bulk_return' => 525,
+            'telenor.revert.bulk_revert' => 595,
 
             'carrefour.arrival.index' => 579,
             'carrefour.arrival.submit' => 579,
@@ -959,6 +972,10 @@ class Permission
             'human_resource.employee_directory.rider.incentive' => 381,
             'human_resource.employee_directory.rider.permanent' => 381,
             'human_resource.employee_directory.rider.blacklist' => 382,
+
+
+            'human_resource.employee_directory.staff.deactivate' => 591,
+            'human_resource.employee_directory.staff.activate' => 591,
 
             'human_resource.employee_directory.approve' => 469,
             'human_resource.employee_directory.reject' => 469,
@@ -1048,7 +1065,9 @@ class Permission
             'settings.ccd_booking.index' => 558,
 
             'human_resource.payslip.index' => 596,
-
+            
+            'return.rcp_agent.index' => 600,
+            'return.rcp_agent.list' => 600,
 
         ],
 
@@ -1140,7 +1159,7 @@ class Permission
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
 
-
+            
 
             
 

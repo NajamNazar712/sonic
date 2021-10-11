@@ -111,6 +111,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
+
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
         // $schedule->command('email:inactiverideronroutereport')->dailyAt('19:36')->runInBackground();
         $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
@@ -164,6 +166,7 @@ class Kernel extends ConsoleKernel
         if ($daily_pickup_sales_cron_time) {
             $schedule->command('email:dailypickupsalesreportrm')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
             $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+            $schedule->command('email:dailypickupsalesreportindividualforkae')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
         }
 
         $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();

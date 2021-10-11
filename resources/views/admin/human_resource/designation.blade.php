@@ -20,6 +20,8 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Designation ID</th>
                                     <th class="border-primary border-darken-1">Designation Name</th>
+                                    <th class="border-primary border-darken-1">Department Name</th>
+                                    <th class="border-primary border-darken-1">Role</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -48,6 +50,17 @@
                             <input type="text" name="name" id="name" class="form-control" placeholder="Designation Name*" data-rule-required="true" data-msg-required="Name is required">
                         </div>
                         <div class="form-group">
+                            <select name="department_id" id="department" class="select2 form-control " data-rule-required="true" data-msg-required="Department is required" style="width: 100%">
+                                @foreach($departments as $department)
+                                    <option value="{{$department->id}}">{{$department->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <select name="role_id" id="role" class="select2 form-control " data-rule-required="true" data-msg-required="Role is required" style="width: 100%">
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <textarea name="description" class="form-control" id="description" placeholder="Description"></textarea>
                         </div>
                         <div class="form-group ml-1">
@@ -72,8 +85,20 @@
                     <form action="{{route('admin.human_resource.designation.edit')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="editDesignationForm" novalidate="novalidate">
                         {{csrf_field()}}
                         <input type="hidden" name="designation_id" id="designation_id" value="">
+                        <input type="hidden" id="role_dummy" value="">
                         <div class="form-group">
                             <input type="text" name="name" id="edit_name" class="form-control" placeholder="Designation Name*" data-rule-required="true" data-msg-required="Name is required">
+                        </div>
+                        <div class="form-group">
+                            <select name="department_id" id="department_edit" class="select2 form-control " data-rule-required="true" data-msg-required="Department is required" style="width: 100%">
+                                @foreach($departments as $department)
+                                    <option value="{{$department->id}}">{{$department->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <select name="role_id" id="role_edit" class="select2 form-control " data-rule-required="true" data-msg-required="Role is required" style="width: 100%">
+                            </select>
                         </div>
                         <div class="form-group">
                             <textarea name="description" class="form-control" id="edit_description" placeholder="Description"></textarea>
@@ -123,6 +148,8 @@
                             head.push('S.No');
                             head.push('Designation ID');
                             head.push('Designation Name');
+                            head.push('Department Name');
+                            head.push('Role');
                             head.push('Status');
 
                             $.each(result.data, function (index, values) {
@@ -130,6 +157,8 @@
                                 row.push(index + 1);
                                 row.push(values.code);
                                 row.push(values.name);
+                                row.push(values.department);
+                                row.push(values.role);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -177,6 +206,8 @@
                     },
                     {data: 'code', name: 'employee_designations.name', class: 'align-middle code'},
                     {data: 'name', name: 'employee_designations.name', class: 'align-middle name'},
+                    {data: 'department', name: 'ad.name', class: 'align-middle department'},
+                    {data: 'role', name: 'r.name', class: 'align-middle role'},
                     {data: 'status', name: 'employee_designations.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
@@ -226,16 +257,21 @@
             });
             $('#addDesignationModal').on('hide.bs.modal', function () {
                 $('#name').val('');
+                $('#department').val('').trigger('change');
                 $('#description').val('');
             });
 
             $('body').on('click', '.edit', function (e) {
                 var id = $(this).data('target-id');
                 var name = table.row($(this).parents('tr')).data().name;
+                var department_id = table.row($(this).parents('tr')).data().department_id;
+                var role_id = table.row($(this).parents('tr')).data().role_id;
                 var description = table.row($(this).parents('tr')).data().description;
                 $('#designation_id').val(id);
                 $('#edit_name').val(name);
+                $('#department_edit').val(department_id).trigger('change');
                 $('#edit_description').val(description);
+                $('#role_dummy').val(role_id);
                 $('#editDesignationModal').modal('show');
             });
 
@@ -361,6 +397,73 @@
                             });
                     }
                 });
+            });
+
+            $("#addDesignationForm #department").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Department*",
+                width:'100%'
+            });
+
+            $("#editDesignationForm #department_edit").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Department*",
+                width:'100%'
+            });
+
+            $("#editDesignationForm #role_edit,#addDesignationForm #role").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Role*",
+                width:'100%'
+            });
+
+
+            $("#addDesignationForm #department").on('change',function (){
+                department_id = $(this).val();
+                $.ajax({
+                    url: '{!! route('admin.human_resource.designation.roles') !!}',
+                    method: 'POST',
+                    data: {
+                        'department_id': department_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        $('#addDesignationForm #role').html('<option value="" selected>Select Role</option>');
+                        if (data.status == 1) {
+                            $.each(data.roles,function (i,v){
+                                $('#addDesignationForm #role').append('<option value="'+v.id+'">'+v.name+'</option>');
+                            });
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+            });
+
+            $("#editDesignationForm #department_edit").on('change',function (){
+                department_id = $(this).val();
+                $.ajax({
+                    url: '{!! route('admin.human_resource.designation.roles') !!}',
+                    method: 'POST',
+                    data: {
+                        'department_id': department_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        $('#editDesignationForm #role_edit').html('<option value="" selected>Select Role</option>');
+                        if (data.status == 1) {
+                            $.each(data.roles,function (i,v){
+                                $('#editDesignationForm #role_edit').append('<option value="'+v.id+'">'+v.name+'</option>');
+                            });
+                            $('#editDesignationForm #role_edit').val($('#editDesignationForm #role_dummy').val()).trigger('change');
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
             });
 
             $("#addDesignationForm").validate({

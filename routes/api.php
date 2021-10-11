@@ -97,11 +97,13 @@ Route::name('api.')->group(function () {
 
 	Route::prefix('rider')->name('rider.')->group(function() {
 		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
-		Route::post('login_v2', 'Rider\RiderAPIController@login_v2')->name('login_v2');
-		Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
-		Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
+        Route::post('login_v2', 'Rider\RiderAPIController@login_v2')->name('login_v2');
+        Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
+        Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
         Route::get('shipment_settings', 'Rider\RiderAPIController@shipment_attempt_settings')->name('shipment_settings');
+        Route::post('forget_pin', 'Rider\RiderAPIController@forget_pin')->name('forget_pin');
+        Route::post('reset_pin', 'Rider\RiderAPIController@reset_pin')->name('reset_pin');
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
@@ -208,6 +210,8 @@ Route::name('api.')->group(function () {
                 Route::post('retail_shipment_store', 'Rider\RiderAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
 
+            Route::post('payslip', 'Rider\RiderAPIController@rider_payslip')->name('payslip');
+            Route::post('fake_status', 'Rider\RiderAPIController@fake_status_count')->name('fake_status');
 		});
 
 	});
@@ -216,6 +220,7 @@ Route::name('api.')->group(function () {
         Route::post('login', 'AdminAPIController@login')->name('login');
         Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
+        Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'AdminAPIController@validate_cnic_phone_number')->name('validate_data');
@@ -240,6 +245,7 @@ Route::name('api.')->group(function () {
                 Route::post('history', 'AdminAPIController@attendance_history')->name('history');
                 Route::post('mark_v2', 'AdminAPIController@mark_attendance_v2')->name('mark_v2');
                 Route::post('detail_v2', 'AdminAPIController@attendance_details_v2')->name('detail_v2');
+                Route::post('mark_api', 'AdminAPIController@mark_attendance_api')->name('mark_api');
             });
 
             Route::prefix('retail')->name('retail.')->group(function () {

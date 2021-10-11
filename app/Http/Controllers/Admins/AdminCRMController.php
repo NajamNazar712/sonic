@@ -11,22 +11,22 @@ use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
-use App\http\Models\Admin\KeyAccountDailyShipmentCrm;
-use App\http\Models\Admin\KeyAccountDailySummaryCrm;
-use App\http\Models\Admin\KeyAccountPendingCrm;
-use App\http\Models\Admin\KeyAccountPendingSummaryCrm;
-use App\http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\KeyAccountDailyShipmentCrm;
+use App\Http\Models\Admin\KeyAccountDailySummaryCrm;
+use App\Http\Models\Admin\KeyAccountPendingCrm;
+use App\Http\Models\Admin\KeyAccountPendingSummaryCrm;
+use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\CRM\CrmComments;
-use App\http\Models\CRM\CrmConsigneeInfoPrint;
+use App\Http\Models\CRM\CrmConsigneeInfoPrint;
 use App\Http\Models\CRM\CrmPaymentShipment;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestCaseNatureAndTypeHistory;
-use App\http\Models\CRM\CrmRequestEscalationTagging;
+use App\Http\Models\CRM\CrmRequestEscalationTagging;
 use App\Http\Models\CRM\CrmRequestImage;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
@@ -36,9 +36,9 @@ use App\Http\Models\CRM\CrmRequestTaggingTypes;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\CRM\DelayInDeliveryShipment;
-use App\http\Models\CRM\Escalation\CrmEscalationLevel;
-use App\http\Models\CRM\Escalation\CrmEscalationTagging;
-use App\http\Models\CRM\Escalation\CrmEscalationTaggingLevel;
+use App\Http\Models\CRM\Escalation\CrmEscalationLevel;
+use App\Http\Models\CRM\Escalation\CrmEscalationTagging;
+use App\Http\Models\CRM\Escalation\CrmEscalationTaggingLevel;
 use App\Http\Models\CRM\Escalation\CrmRequestEscalationLog;
 use App\Http\Models\CRM\Escalation\CrmRequestEscalationStatus;
 use App\Http\Models\DonePayment;
@@ -70,6 +70,9 @@ use Illuminate\Support\Facades\Storage;
 use phpDocumentor\Reflection\Types\Null_;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\ShipmentDetail;
 
 class AdminCRMController extends Controller
 {
@@ -516,7 +519,7 @@ class AdminCRMController extends Controller
                 $approvers[] = $admin_request->admin;
             }
             
-            return view('admin.crm.request_details')->with(['crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count()+1, 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $approvers]);
+            return view('admin.crm.request_details')->with(['crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $approvers]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -3690,7 +3693,7 @@ class AdminCRMController extends Controller
                             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
                 ';
                 }
-
+                
                 if ($type != 'pdf') {
                     $table_start .= '
                             <td class="color primary"><strong>Datetime</strong></td>
@@ -3700,7 +3703,7 @@ class AdminCRMController extends Controller
                             <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
                             <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
                 ';
-
+               
                     $table_start .= '
                             <td class="color primary"><strong>Order ID</strong></td>
                             <td>' . $shipment->order_id . '</td>
@@ -3709,7 +3712,7 @@ class AdminCRMController extends Controller
                             <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
                             <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
                             <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .'</strong></td>
                           </tr>
                           <tr>
                             <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -3736,7 +3739,7 @@ class AdminCRMController extends Controller
                             <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
                             <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
                             <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .'</strong></td>
                           </tr>
                           <tr>
                             <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -4067,7 +4070,8 @@ class AdminCRMController extends Controller
                     $shipment_details .= $table_end;
 
                 }
-
+                
+                
                 if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                     $shipment_pieces = '';
 
@@ -4082,7 +4086,7 @@ class AdminCRMController extends Controller
                             <td rowspan="1" class="color primary border twice-left"><strong>Origin</strong></td>
                             <td rowspan="1" class="border">' . $shipment->pickup_address->city->name . '</td>
                             <td rowspan="1" class="color primary border "><strong>Destination</strong></td>
-                            <td rowspan="1" class="border">' . $shipment->consignee_city->name . '</td>
+                            <td rowspan="1" class="border">' . $shipment->consignee_city->name .'</td>
                             
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                             <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">

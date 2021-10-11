@@ -11,7 +11,7 @@ use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
-use App\http\Models\ReportingLocation;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use Carbon\Carbon;
 use Cassandra\Session;
@@ -34,7 +34,7 @@ class AdminAttendanceController extends Controller
     public function admin_attendance_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),56);
 
-        if(session('role_id') == 1 && session('role_id') == 17){
+        if(in_array(session('role_id'), [1, 63, 70])){
             $cities = City::select('id','name')->get();
             $departments = AdminDepartment::select('id','name')->get();
             $users = Admin::where('status', 1)->select('id','name')->get();
@@ -82,8 +82,11 @@ class AdminAttendanceController extends Controller
             ->leftjoin('employee_shifts as res', 'r.shift_id', 'res.id')
             ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as admin_shift', 'res.name as rider_shift');
 
-        if(session('role_id') != 1 && session('role_id') != 17){
+        if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
             $attendances->where('ad.id', session('department_id'));
+            if(session('department_id') != 6){
+                $attendances->where('employee_attendances.employee_type', 1);
+            }
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
         }
 
@@ -265,203 +268,162 @@ class AdminAttendanceController extends Controller
         return $distance;
     }
 
-    public function mark_attendance_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),432);
+    public function mark_attendance_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 432);
         $admin_id = Auth::id();
         $date = Carbon::now()->format("Y-m-d");
-        dd($date);
-        $now_time = Carbon::now()->format("H:i:s");
         $admin = Admin::find($admin_id);
-        if($admin){
+        if ($admin) {
             $admin_shift = EmployeeShift::where('id', $admin->shift_id);
-            if($admin_shift->exists()){
+            if ($admin_shift->exists()) {
                 $admin_shift = $admin_shift->first();
-                if($now_time < $admin_shift->start_time){
+                $shift_time = Carbon::createFromFormat('H:i:s', $admin_shift->start_time);
+                if (Carbon::now()->lt($shift_time)) {
                     $date = Carbon::now()->subDays(1)->format("Y-m-d");
                 }
             }
-        }else{
-            return response()->json(['status' => 0, 'error' => 'User not found']);
-        }
-        $date = Carbon::now();
-        $today_date = Carbon::today()->toDateString();
-        $attendance_clock_in = EmployeeAttendance::where('employee_id',Auth::id())->where('attendance_date',$today_date)->whereNotNull('clock_in')->whereNull('clock_out')->latest()->first();
-         $clock_in = 0;
-        $clock_out = 0;
-        if($attendance_clock_in){
-            $clock_in = 1;
-        }
-        if(isset($attendance_clock_in) && $attendance_clock_in->clockout != NULL){
-            $clock_out = 1;
-        }
-        return view('admin.attendance.mark_index',compact('clock_in','clock_out'));
-    }
-
-    public function mark_attendance_submit(Request $request){
-        
-        $date_time = Carbon::now();
-        $time = $date_time->toTimeString();
-        $date = Carbon::today()->toDateString();
-        $employee_type = 0;
-        $auth_id = Auth::id();
-        $admin = Admin::where('id',$auth_id);
-        if($admin->exists()){
-            $employee_type = 1;
-        }
-        else{
-            $employee_type = 2;
-        }
-        if(session('latitude') && session('longitude')){
-
-            $location_status = 0;
-            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                ->join('admins as a', 'e.id', 'a.employee_id')
-                ->where('a.id', $auth_id);
-            
-            if($reporting_location->exists()){
-                $reporting_location = $reporting_location->first();
-                $reporting_location->radius;
-                $destination = $reporting_location->lat . ',' . $reporting_location->long;
-                $origin = session('latitude') . ',' . session('longitude');
-                $distance = $this->distance($origin, $destination);
-                if ($distance > $reporting_location->radius / 1000) {
-                    $location_status = 1;
-                } else {
-                    $location_status = 2;
+            $clock_in = 0;
+            $clock_out = 0;
+            $attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', $date)
+                ->where('employee_type', 1);
+            if ($attendance->exists()) {
+                $attendance = $attendance->first();
+                if ($attendance->clock_in_datetime != NULL) {
+                    $clock_in = 1;
+                }
+                if ($attendance->clock_out_datetime != NULL) {
+                    $clock_out = 1;
                 }
             }
+            return view('admin.attendance.mark_index', compact('clock_in', 'clock_out', 'date'));
+        } else {
+            return redirect()->back()->with(['status' => 0, 'error' => 'User not found']);
+        }
+    }
 
-             if($request->clock_in == 1 && $request->clock_out == 0){
-                $employee_attendance = EmployeeAttendance::where('employee_id',$auth_id)->where('attendance_date',$date)->latest();
-                if($employee_attendance->exists()){
+    public function mark_attendance_submit(Request $request)
+    {
+        $attendance_date = $request->attendance_date;
+        $attendance_mark = Carbon::now()->format('Y-m-d H:i:s');
+        $admin_id = Auth::id();
+        $admin = Admin::find($admin_id);
+        if ($admin) {
+            if (session('latitude') && session('longitude')) {
+                $location_status = 0;
+                $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                    ->join('admins as a', 'e.id', 'a.employee_id')
+                    ->where('a.id', $admin_id);
+                if ($reporting_location->exists()) {
+                    $reporting_location = $reporting_location->first();
+                    $reporting_location->radius;
+                    $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                    $origin = session('latitude') . ',' . session('longitude');
+                    $distance = $this->distance($origin, $destination);
+                    if ($distance > $reporting_location->radius / 1000) {
+                        $location_status = 1;
+                    } else {
+                        $location_status = 2;
+                    }
+                }
+                $employee_attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                    ->where('employee_type', 1)
+                    ->where('attendance_date', $attendance_date);
+                if ($employee_attendance->exists()) {
                     $attendance = $employee_attendance->first();
-                    $attendance->clock_out = $time;
-                    $attendance->clock_out_latitude = session('latitude');
-                    $attendance->clock_out_longitude = session('longitude');
-                    $attendance->updated_at = Carbon::now();
-                    $attendance->employee_type = $employee_type;
-                    $attendance->clock_out_location = $location_status;
-                    $attendance->save();
-
-                    $attendance_action_log = new EmployeeAttendanceActionLog();
-                    $attendance_action_log->employee_id = $attendance->employee_id;
-                    $attendance_action_log->employee_type = $employee_type;
-                    $attendance_action_log->action_id = 2;
-                    $attendance_action_log->action_date = $date;
-                    $attendance_action_log->latitude =  $attendance->clock_out_latitude;
-                    $attendance_action_log->longitude =  $attendance->clock_out_longitude;
-                    $attendance_action_log->created_at =  Carbon::now();
-                    $attendance_action_log->location_status = $location_status;
-                    $attendance_action_log->save();
-
-                    return response()->json(['status' => 2, 'success' => 'Clock Out Successful','time' => $time,'date' => $date]);
+                } else {
+                    $attendance = new EmployeeAttendance();
+                    $attendance->employee_id = $admin_id;
+                    $attendance->employee_type = 1;
+                    $attendance->attendance_date = $attendance_date;
                 }
+                if ($request->clock_in == 1 && $request->clock_out == 0) {
+                    if ($attendance->clock_out_datetime == NULL){
+                        $attendance->clock_out_datetime = $attendance_mark;
+                        $attendance->clock_out_latitude = session('latitude');
+                        $attendance->clock_out_longitude = session('longitude');
+                        $attendance->clock_out_location = $location_status;
+                        $attendance->save();
+
+                        $attendance_action_log = new EmployeeAttendanceActionLog();
+                        $attendance_action_log->employee_id = $admin_id;
+                        $attendance_action_log->employee_type = 1;
+                        $attendance_action_log->action_id = 2;
+                        $attendance_action_log->action_date = $attendance_mark;
+                        $attendance_action_log->attendance_date = $attendance_date;
+                        $attendance_action_log->latitude = $attendance->clock_out_latitude;
+                        $attendance_action_log->longitude = $attendance->clock_out_longitude;
+                        $attendance_action_log->location_status = $location_status;
+                        $attendance_action_log->save();
+                        return response()->json(['status' => 2, 'success' => 'Clock Out Successful', 'date' => $attendance_mark, 'error' => 0]);
+                    }else{
+                        return response()->json(['status' => 2, 'message' => 'You have already marked Clock Out', 'error' => 1]);
+                    }
+                } elseif ($request->clock_in == 0 && $request->clock_out == 0) {
+                    if($attendance->clock_in_datetime == NULL){
+                        $attendance->clock_in_datetime = $attendance_mark;
+                        $attendance->clock_in_latitude = session('latitude');
+                        $attendance->clock_in_longitude = session('longitude');
+                        $attendance->clock_in_location = $location_status;
+                        $attendance->save();
+
+                        $attendance_action_log = new EmployeeAttendanceActionLog();
+                        $attendance_action_log->employee_id = $admin_id;
+                        $attendance_action_log->employee_type = 1;
+                        $attendance_action_log->action_id = 1;
+                        $attendance_action_log->action_date = $attendance_mark;
+                        $attendance_action_log->attendance_date = $attendance_date;
+                        $attendance_action_log->latitude = $attendance->clock_in_latitude;
+                        $attendance_action_log->longitude = $attendance->clock_in_longitude;
+                        $attendance_action_log->location_status = $location_status;
+                        $attendance_action_log->save();
+                        return response()->json(['status' => 1, 'success' => 'Clock In Successful', 'date' => $attendance_mark, 'error' => 0]);
+                    }else{
+                        return response()->json(['status' => 1, 'message' => 'You have already marked Clock In', 'error' => 1]);
+                    }
+                } else {
+                    return response()->json(['status' => 0, 'error' => 'Unable to mark attendance']);
+                }
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Enable Your Location First']);
             }
-             else if(EmployeeAttendance::where('employee_id', $auth_id)->where('attendance_date', $date)->exists()){
-                     $attendance_action_log = EmployeeAttendanceActionLog::where('employee_id',$auth_id)->where('action_date',$date)->latest()->first();
-                     $employee_attendance = EmployeeAttendance::where('employee_id', $auth_id)->where('attendance_date', $date)->latest();
-                     if ($employee_attendance->exists()) {
-                         $attendance = $employee_attendance->first();
-                         if($attendance_action_log->action_id == 1) {
-                         $attendance->clock_out = $time;
-                         $attendance->clock_out_latitude = session('latitude');
-                         $attendance->clock_out_longitude = session('longitude');
-                         $attendance->updated_at = Carbon::now();
-                         $attendance->employee_type = $employee_type;
-                         $attendance->clock_out_location = $location_status;
-                         $attendance->save();
-                         $msg = 'Clock Out Successful';
-                         $status = 2;
-                         $action_id = 2;
-                     }
-                     else{
-                         $attendance->attendance_date = $date ;
-                         $attendance->clock_in = $time;
-                         $attendance->clock_in_latitude = session('latitude');
-                         $attendance->clock_in_longitude = session('longitude');
-                         $attendance->updated_at = Carbon::now();
-                         $attendance->employee_type = $employee_type;
-                         $attendance->clock_in_location = $location_status;
-                         $attendance->save();
-                         $msg = 'Clock In Successful';
-                         $status = 1;
-                         $action_id = 1;
-                     }
-
-                         $attendance_action_log = new EmployeeAttendanceActionLog();
-                         $attendance_action_log->employee_id = $attendance->employee_id;
-                         $attendance_action_log->employee_type = $employee_type;
-                         $attendance_action_log->action_id = $action_id;
-                         $attendance_action_log->action_date = $date;
-                         $attendance_action_log->latitude =  $attendance->clock_out_latitude;
-                         $attendance_action_log->longitude =  $attendance->clock_out_longitude;
-                         $attendance_action_log->created_at =  Carbon::now();
-                         $attendance_action_log->location_status = $location_status;
-                         $attendance_action_log->save();
-
-                         return response()->json(['status' => $status, 'success' => $msg,'time' => $time,'date' => $date]);
-                 }
-             }
-             else{
-                 $attendance = new EmployeeAttendance();
-                 $attendance->employee_id = $auth_id;
-                 $attendance->attendance_date = $date ;
-                 $attendance->clock_in = $time;
-                 $attendance->clock_in_latitude = session('latitude');
-                 $attendance->clock_in_longitude = session('longitude');
-                 $attendance->created_at = Carbon::now();
-                 $attendance->employee_type = $employee_type;
-                 $attendance->clock_in_location = $location_status;
-                 $attendance->save();
-
-                 $attendance_action_log = new EmployeeAttendanceActionLog();
-                 $attendance_action_log->employee_id = $attendance->employee_id;
-                 $attendance_action_log->employee_type = $employee_type;
-                 $attendance_action_log->action_id = 1;
-                 $attendance_action_log->action_date = $date;
-                 $attendance_action_log->latitude =  $attendance->clock_in_latitude;
-                 $attendance_action_log->longitude =  $attendance->clock_in_longitude;
-                 $attendance_action_log->created_at =  Carbon::now();
-                 $attendance_action_log->location_status = $location_status;
-                 $attendance_action_log->save();
-
-                 return response()->json(['status' => 1, 'success' => 'Clock In Successful','time' => $time,'date' => $date]);
-
-             }
-        }
-        else{
-            return response()->json(['status' => 0, 'error' => 'Enable Your Location First']);
+        } else {
+            return redirect()->back()->with(['status' => 0, 'error' => 'User not found']);
         }
 
     }
 
-    public function mark_attendance_list(){
-
+    public function mark_attendance_list(Request $request)
+    {
         $date = Carbon::today()->toDateString();
+        if ($request->has('attendance_date')) {
+            $date = $request->attendance_date;
+        }
         $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', Auth::id())
-            ->whereDate('action_date',$date)
+            ->whereDate('attendance_date', $date)
             ->where('employee_type', 1)
-            ->select('latitude', 'longitude','action_id','created_at')
-            ->orderBy('action_date', 'ASC');
+            ->select('latitude', 'longitude', 'action_id', 'attendance_date', 'action_date');
 
         $datatable = Datatables::of($admin_attendance_action)
-            ->editColumn('latitude',function($action){
-                $api = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng='.$action->latitude.','.$action->longitude.'&key=AIzaSyAIg5c-H5DaYBwF_D0HuWliQZQ6XzKj8Nk';
+            ->editColumn('latitude', function ($action) {
+                $api = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=' . $action->latitude . ',' . $action->longitude . '&key=AIzaSyAIg5c-H5DaYBwF_D0HuWliQZQ6XzKj8Nk';
                 $data = json_decode(file_get_contents($api));
                 $data_array = get_object_vars($data);
                 $result = $data_array['results'][0]->formatted_address;
                 return $result;
             })
-            ->editColumn('action_id',function ($data){
-               if($data->action_id == 1){
-                   return 'Clock-In';
-               }
-               else{
-                   return 'Clock-Out';
-               }
+            ->editColumn('attendance_date', function ($data) {
+                return Carbon::parse($data->attendance_date)->format("Y-m-d");
             })
-        ;
-           return $datatable->make(true);
+            ->editColumn('action_id', function ($data) {
+                if ($data->action_id == 1) {
+                    return 'Clock-In';
+                } else {
+                    return 'Clock-Out';
+                }
+            });
+        return $datatable->make(true);
     }
 
 

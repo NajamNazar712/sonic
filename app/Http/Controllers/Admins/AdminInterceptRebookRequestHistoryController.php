@@ -7,13 +7,17 @@ use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
-use App\http\Models\RestrictedCityIntercept;
+use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\SelfCollectionShipment;
+use App\Http\Models\ShipmentDetail;
 
 class AdminInterceptRebookRequestHistoryController extends Controller
 {
@@ -129,7 +133,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $intercept_type = $request->consignee;
-
+        
         $shipment_status = $shipment->status_shipper->name;
         $crm = false;
         $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_type_id', 11);
@@ -200,8 +204,9 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                        ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
 
                    }
+                    
 
-
+                    
                     return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                 }
             } else {
@@ -211,4 +216,6 @@ class AdminInterceptRebookRequestHistoryController extends Controller
             return redirect()->back()->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
         }
     }
+
+    
 }

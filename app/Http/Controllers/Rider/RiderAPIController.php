@@ -11,14 +11,14 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
-use App\http\Models\Admin\Retail\RetailCashDeposit;
-use App\http\Models\Admin\Retail\RetailCashDepositShipment;
-use App\http\Models\Admin\Retail\RetailPaymentMode;
-use App\http\Models\Admin\Retail\RetailShipment;
-use App\http\Models\Admin\Retail\RetailShipperInfo;
-use App\http\Models\Admin\Retail\RetailShippingMode;
-use App\http\Models\Admin\Retail\RetailTraxBox;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\Http\Models\Admin\Retail\RetailPaymentMode;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
+use App\Http\Models\Admin\Retail\RetailTraxBox;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
@@ -45,12 +45,13 @@ use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
+use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Product;
-use App\http\Models\ReportingLocation;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderDelivery;
@@ -63,7 +64,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Zone;
@@ -1431,10 +1432,10 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
 
-        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
+        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0)->orderBy('id', 'DESC');
 
         if ($pickup_note->exists()) {
-            $pickup_note = $pickup_note->latest('id')->first();
+            $pickup_note = $pickup_note->first();
 
             $information = array();
 
@@ -4308,6 +4309,7 @@ class RiderAPIController extends Controller
             }
             if ($request->action == 1) {
                 $rider_attendance->clock_in = $attendance_time;
+                $rider_attendance->clock_in_datetime = $attendance_datetime;
                 $rider_attendance->clock_in_latitude = $request->latitude;
                 $rider_attendance->clock_in_longitude = $request->longitude;
                 $rider_attendance->clock_in_location = $location_status;
@@ -4316,6 +4318,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->employee_id = $rider_id;
                 $rider_attendance_action->employee_type = 2;
                 $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->attendance_date = $attendance_date;
                 $rider_attendance_action->action_date = $attendance_datetime;
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
@@ -4325,6 +4328,7 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action]);
             } elseif ($request->action == 2) {
                 $rider_attendance->clock_out = $attendance_time;
+                $rider_attendance->clock_out_datetime = $attendance_datetime;
                 $rider_attendance->clock_out_latitude = $request->latitude;
                 $rider_attendance->clock_out_longitude = $request->longitude;
                 $rider_attendance->clock_out_location = $location_status;
@@ -4333,6 +4337,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->employee_id = $rider_id;
                 $rider_attendance_action->employee_type = 2;
                 $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->attendance_date = $attendance_date;
                 $rider_attendance_action->action_date = $attendance_datetime;
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
@@ -4900,6 +4905,7 @@ class RiderAPIController extends Controller
                         $information['cargo_user'] = 0;
 
                         if($request->has('device_token')){
+                            EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
                             $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
                                 ->where('employee_type_id', 2);
                             if ($employee_device_token->exists()) {
@@ -8122,10 +8128,17 @@ class RiderAPIController extends Controller
                                 $return_note_data->save();
                             }
 
-                            $updated_shipments_count = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
+                            $updated_shipments = ReturnNoteShipment::where('return_note_id', $request->return_note_id);
+                            $updated_shipments_count = $updated_shipments->where('status', 0)->count();
+                            $total_shipments_count = $updated_shipments->count();
+                            $undelivered_shipments_count = $updated_shipments->where('status', 1)->count();
 
                             if ($updated_shipments_count == 0) {
-                                $return_note_data->status = 3;
+                                if($total_shipments_count == $undelivered_shipments_count){
+                                    $return_note_data->status = 1;
+                                }else{
+                                    $return_note_data->status = 3;
+                                }
                                 $return_note_data->updated_at = Carbon::now();
                                 $return_note_data->save();
                             }
@@ -9568,6 +9581,129 @@ class RiderAPIController extends Controller
             }
             return response()->json(['status' => 0, 'attendance_details' => []]);
         }
+    }
+
+    public function rider_payslip(Request $request)
+    {
+        $rules = [
+            'date' => ['required']
+        ];
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $riders = Rider::find($rider_id);
+            if ($riders) {
+                $payslip = EmployeePayslip::where('trax_id', $riders->trax_id)
+                    ->whereMonth('payroll_month', Carbon::parse($request->date)->format("m"))
+                    ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
+                if ($payslip->exists()) {
+                    $payslip = $payslip->get();
+                    $month = Carbon::parse($request->date)->format("F-Y");
+                    return response()->json(['status' => 0, 'payroll_month' => $month, 'data' => $payslip]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Payslip not found"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "Rider not found"]);
+            }
+        }
+    }
+
+    public function forget_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                if($rider->status){
+                    $pin = rand(1000, 9999);
+                    $rider->reset_pin_otp = $pin;
+                    $rider->save();
+                    NotificationsController::send(158, $rider->id);
+                    return response()->json(['status' => 0, 'message' => 'Pin has been sent to your registered number', 'otp' => $pin]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function reset_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'otp' => ['required', 'integer', 'digits:4'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                if($request->input('otp') == $rider->reset_pin_otp){
+                    $rider->pin = bcrypt($request->pin);
+                    $rider->reset_pin_otp = NULL;
+                    $rider->save();
+                    return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
+                }else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function fake_status_count(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $fake_status_count = NULL;
+        $month = NULL;
+        if ($request->has('date')) {
+            $r_current_date = Carbon::createFromFormat("Y-m-d H:i:s", $request->date . '-26 23:59:59')->toDateTimeString();
+            $r_previous_month = Carbon::parse($r_current_date)->subMonth()->addDay()->format("Y-m-d 00:00:00");
+
+            $fake_status_count = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
+                ->whereBetween('dn.status_verified_at', [$r_previous_month, $r_current_date])
+                ->where('rider_id', $rider_id)
+                ->where('update_type', 1)
+                ->where('fake_status', 1)->count('fake_status');
+            $month = Carbon::parse($request->date)->format("F-Y");
+        }
+        $current_month = Carbon::now()->format("Y-m");
+        $current_date = Carbon::createFromFormat("Y-m-d H:i:s", $current_month . '-26 23:59:59')->toDateTimeString();
+        $previous_month = Carbon::parse($current_date)->subMonth()->addDay()->format("Y-m-d 00:00:00");
+
+        $current_fake_status_count = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
+            ->whereBetween('dn.status_verified_at', [$previous_month, $current_date])
+            ->where('rider_id', $rider_id)
+            ->where('update_type', 1)
+            ->where('fake_status', 1)->count('fake_status');
+        $c_month = Carbon::now()->format("F-Y");
+        return response()->json(['status' => 0, 'current_count' => $current_fake_status_count, 'current_month' => $c_month, 'count' => $fake_status_count, 'month' => $month]);
     }
 
     /*public function delivery_packaging_material_update($tracking_number){

@@ -52,7 +52,7 @@
                                 </div>
                             </form>
 
-                            <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                            <form id="search_form" class="form-inline mb-1 row" novalidate="novalidate">
 
                                 <div class="col-3">
                                     <div class="form-group input-group ml-1">
@@ -67,7 +67,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group col-2 mt-2 justify-content-center">
+                                <div class="form-group col-2 mt-2">
                                     <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search
                                     </button>
                                 </div>
@@ -86,8 +86,9 @@
                                         <th class="border-primary border-darken-1">Date of Joining</th>
                                         <th class="border-primary border-darken-1">CNIC</th>
                                         <th class="border-primary border-darken-1">Total Deduction</th>
+                                        <th class="border-primary border-darken-1">Total Salary</th>
                                         <th class="border-primary border-darken-1">Net Salary</th>
-                                        <th class="border-primary border-darken-1">IBAN</th>
+                                        <th class="border-primary border-darken-1">IBAN / Account No.</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -277,6 +278,7 @@
                             head.push('Date of Joining');
                             head.push('CNIC');
                             head.push('Total Deduction');
+                            head.push('Total Salary');
                             head.push('Net Salary');
                             head.push('IBAN');
                             $.each(result.data, function(index, values) {
@@ -294,6 +296,7 @@
                                 row.push(values.joining_date);
                                 row.push(values.cnic);
                                 row.push(values.total_deduction);
+                                row.push(values.total_salary);
                                 row.push(values.net_salary);
                                 row.push(values.iban);
 
@@ -313,7 +316,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'International Standard DHL Rates',
+                        title: 'Employee Payslips',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -348,6 +351,7 @@
                     {data: 'joining_date', name: 'employee_payslips.joining_date', class: 'align-middle joining_date'},
                     {data: 'cnic', name: 'employee_payslips.cnic', class: 'align-middle cnic'},
                     {data: 'total_deduction', name: 'employee_payslips.total_deduction', class: 'align-middle total_deduction'},
+                    {data: 'total_salary', name: 'employee_payslips.total_salary', class: 'align-middle total_salary'},
                     {data: 'net_salary', name: 'employee_payslips.net_salary', class: 'align-middle net_salary'},
                     {data: 'iban', name: 'employee_payslips.iban', class: 'align-middle iban'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},

@@ -14,9 +14,9 @@ use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
-use App\http\Models\Admin\Retail\RetailFranchise;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
-use App\http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\Blacklist\ConsigneeInformation;
@@ -34,13 +34,15 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\Invoice;
 use App\Http\Models\InvoiceShipment;
-use App\http\Models\ReportingLocation;
+use App\Http\Models\ReportingLocation;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
-use App\http\Models\ShipmentOrderDate;
+use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentPrebook;
-use App\http\Models\ShipmentShipperReference;
+use App\Http\Models\ShipmentShipperReference;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
@@ -57,6 +59,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use phpDocumentor\Reflection\PseudoTypes\False_;
 use phpDocumentor\Reflection\Types\Null_;
 use SnappyImage;
 use SnappyPDF;
@@ -83,6 +86,7 @@ class APIController extends Controller
         'consignee_phone_number_2' => 'Consignee Phone Number 2',
         'consignee_email_address' => 'Consignee Email Address',
         'self_collection' => 'Self Collection',
+       
         'order_id' => 'Order ID',
         'order_date' => 'Order Date',
         'package_type' => 'Package Type',
@@ -384,7 +388,11 @@ class APIController extends Controller
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
             if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
                 $result = ShipperShipmentBookController::check_origin($value, $shipping_mode_id, $user_id);
                 if ($result) {
                     return true;
@@ -397,7 +405,11 @@ class APIController extends Controller
         Validator::extend('destination_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
             if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
                 $result = ShipperShipmentBookController::check_destination($value, $shipping_mode_id, $user_id, 2);
                 if ($result) {
                     return true;
@@ -410,7 +422,11 @@ class APIController extends Controller
         Validator::extend('destination_return_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
             if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
                 $result = ShipperShipmentBookController::check_return_destination($value, $shipping_mode_id, $user_id);
                 if ($result) {
                     return true;
@@ -490,11 +506,11 @@ class APIController extends Controller
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if (in_array($user_id, $ccd_account_tags)) {
                     $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->first();
+                        $query->whereNotIn('id', [3]);
                     })];
                 } else {
                     $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->whereNotIn('id', [2]);
+                        $query->whereNotIn('id', [2, 3]);
                     })];
                 }
             }
@@ -563,11 +579,11 @@ class APIController extends Controller
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if (in_array($user_id, $ccd_account_tags)) {
                     $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->first();
+                        $query->whereNotIn('id', [3]);
                     })];
                 } else {
                     $rules['payment_mode_id'] = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                        $query->whereNotIn('id', [2]);
+                        $query->whereNotIn('id', [2, 3]);
                     })];
                 }
             }
@@ -903,7 +919,7 @@ class APIController extends Controller
             }
 
             if ($service_type_id == 3 && $payment_mode_id == 4) {
-                $payment_mode_id == 1;
+                $payment_mode_id = 1;
             }
 
             if ($payment_mode_id == 4) {
@@ -920,6 +936,7 @@ class APIController extends Controller
                 }
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
             }
+           
 
             if ($shipment_pre_book) {
                 $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
@@ -1101,6 +1118,14 @@ class APIController extends Controller
             }
 
             NotificationsController::send(2, $shipment_id);
+            $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+            $now = Carbon::now()->format('H:i:s');
+            $cutofftime = $settingsfortime->setting_value.":00:00";
+            if($now>$cutofftime)
+            {
+                NotificationsController::send(152, $shipment_id);
+                NotificationsController::send(153, $shipment_id);
+            }
             if ($request->has('pieces_quantity')) {
                 if ($request->input('pieces_quantity') > 1) {
                     $video = array("https://www.youtube.com/watch?v=Uy0KAIx3xHQ", "Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment ملٹیپل پیسز شپمینٹ بک یا پیک کرنے کا طریقہ اس وڈیو میں ضرور دیکھیں اگر شپمینٹ بتاۓ ہؤۓ طریقہ  کے تہت  ہینڈاؤرنہیں ہوئ تو ہم اس شپمینٹ کو پروسیس نہیں کریں گے  ");
@@ -3855,6 +3880,13 @@ class APIController extends Controller
                             $return_assign_shipment = $return_assign_shipment->latest()->first();
                             $return_assign_shipment->status = 0;
                             $return_assign_shipment->save();
+                            
+                            $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 2;
+                            $return_assign_log->assigned_by = $user_id;
+                            $return_assign_log->save();
+
                         }
                         return response()->json(['status' => 0, 'message' => 'Shipment successfully marked as Shipment - Return Confirm']);
                     }
@@ -3886,6 +3918,12 @@ class APIController extends Controller
                             if ($return_assign_shipment) {
                                 $return_assign_shipment->status = 0;
                                 $return_assign_shipment->save();
+
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                $return_assign_log->status = 5;
+                                $return_assign_log->assigned_by = $user_id;
+                                $return_assign_log->save();
                             }
                             if ($journey) {
                                 NotificationsController::send(33, $shipment->id);
@@ -3937,6 +3975,7 @@ class APIController extends Controller
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
                                         } else {
+                                            
                                             InterceptReBookRequest::create([
                                                 'shipment_id' => $shipment->id,
                                                 'consignee_city_id' => $shipment->consignee_city_id,
@@ -3954,8 +3993,13 @@ class APIController extends Controller
                                             $shipment->shipper_status_id = 54;
                                             $shipment->intercepted = 1;
                                             $shipment->save();
+                                            ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
 
-                                            ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, $user_id);
+                                            // ShipmentsJourneyController::add($shipment->id, 55, 55, NULL, NULL, $user_id, NULL);
+                                            
+                                            
+
+                                            
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
 
                                         }
@@ -3979,7 +4023,6 @@ class APIController extends Controller
                                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                                 'amount' => ['required', 'nullable', 'numeric', 'between:0,1000000'],
-
                             ];
 
                             $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -4003,6 +4046,7 @@ class APIController extends Controller
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
                                         } else {
+                                            
                                             $s_amount = str_replace(",", "", "$request->amount");
                                             $amount = (int) $s_amount;
                                             InterceptReBookRequest::create([
@@ -4024,6 +4068,8 @@ class APIController extends Controller
                                             $shipment->save();
 
                                             ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, NULL);
+                                            
+                                            
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
                                         }
                                     } else {

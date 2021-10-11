@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\http\Models\Admin\Retail\RetailShippingMode;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
 
 class UpdateRetailShippingModesForReplaceOvernightOverlandDetainTableSeeder extends Seeder
 {
