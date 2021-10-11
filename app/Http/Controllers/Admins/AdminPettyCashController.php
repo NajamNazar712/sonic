@@ -566,7 +566,8 @@ class AdminPettyCashController extends Controller
             ->whereIn('petty_cash_statements.status', [0, 1, 2, 7]);
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))->orWhere(function ($query) {
+            $petty = $petty->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))
+                ->orWhere(function ($query) {
                 $query->whereIn('petty_cash_statements.destination_hub_id', session('hubs'));
             });
         }
@@ -1978,7 +1979,7 @@ class AdminPettyCashController extends Controller
 
         if ($petty_cash_statement_id) {
             $petty_cash_statement = PettyCashStatement::find($petty_cash_statement_id);
-            $city_id = $user->city_id;
+            $city_id = Auth::user()->default_hub_id;
             $petty_cash_statement_detail = PettyCashStatementDetail::where('petty_cash_statement_id',$petty_cash_statement_id)->first();
             $consignee = Admin::find($petty_cash_statement_detail->operation_manager_id);
             $consignee_name = $consignee->name;
