@@ -866,14 +866,16 @@
             $("#sdn_add_dncc #dncc_select").prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select DNCC*',
                 width:'100%',
-                dropdownCssClass: 'form-control-sm p-0'
+                dropdownCssClass: 'form-control-sm p-0',
+                dropdownContainer: $("#sdn_add_dncc")
             });
 
 
             $("#sdn_add_pncc #pncc_select").prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select PNCC*',
                 width:'100%',
-                dropdownCssClass: 'form-control-sm p-0'
+                dropdownCssClass: 'form-control-sm p-0',
+                dropdownContainer: $("#sdn_add_pncc")
             });
 
 
