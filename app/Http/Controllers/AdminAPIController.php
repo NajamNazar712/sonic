@@ -3491,7 +3491,7 @@ class AdminAPIController extends Controller
                                     $now_time = Carbon::createFromFormat("H:i:s", Carbon::now()->format("H:i") . ':00');
                                     $grace_time = $shift->extension_minutes;
                                     if (strpos($body, '[time]') !== FALSE) {
-                                        $body = str_replace('[time]', Carbon::parse($shift->start_time)->addMinutes($grace_time)->toTimeString(), $body);
+                                        $body = str_replace('[time]', Carbon::parse($shift->start_time)->addMinutes($grace_time + 1)->toTimeString(), $body);
                                     }
                                     if (strpos($body, '[name]') !== FALSE) {
                                         $body = str_replace('[name]', $admin->name, $body);
@@ -3567,6 +3567,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            //Date Decision
             $admin = Admin::find($admin_id);
             $attendance_date = Carbon::now()->format("Y-m-d");
             $admin_shift = EmployeeShift::where('id', $admin->shift_id);
@@ -3577,7 +3578,9 @@ class AdminAPIController extends Controller
                     $attendance_date = Carbon::now()->subDays(1)->format("Y-m-d");
                 }
             }
+            //-------------
 
+            //Location Check
             $location_status = 0;
             $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
                 ->join('admins as a', 'e.id', 'a.employee_id')
@@ -3594,7 +3597,20 @@ class AdminAPIController extends Controller
                     $location_status = 2;
                 }
             }
+            //-------------
 
+            //15 Seconds Check
+            $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 1)->select('action_date')->orderBy('id', 'DESC');
+            if($admin_attendance_action->exists()){
+                $admin_attendance_action = $admin_attendance_action->first();
+                $last_action = Carbon::parse($admin_attendance_action->action_date);
+                if(Carbon::now()->diffInSeconds($last_action) < 15){
+                    return response()->json(['status' => 1, 'message' => 'Wait for 15 Seconds']);
+                }
+            }
+            //-------------
             $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
                 ->whereDate('attendance_date', $attendance_date)
                 ->where('employee_type', 1);

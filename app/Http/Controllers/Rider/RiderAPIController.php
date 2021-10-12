@@ -9768,7 +9768,7 @@ class RiderAPIController extends Controller
                                     $now_time = Carbon::createFromFormat("H:i:s", Carbon::now()->format("H:i") . ':00');
                                     $grace_time = $shift->extension_minutes;
                                     if (strpos($body, '[time]') !== FALSE) {
-                                        $body = str_replace('[time]', Carbon::parse($shift->start_time)->addMinutes($grace_time)->toTimeString(), $body);
+                                        $body = str_replace('[time]', Carbon::parse($shift->start_time)->addMinutes($grace_time + 1)->toTimeString(), $body);
                                     }
                                     if (strpos($body, '[name]') !== FALSE) {
                                         $body = str_replace('[name]', $rider->name, $body);
