@@ -3615,10 +3615,9 @@ class APIController extends Controller
             }
             else if($request->order_id) 
             {
+                $detail = array();
                 $order_id = $request->order_id;
-
                 $shipments = Shipment::where('order_id', $order_id)->where('user_id', $user_id)->get();
-                $detail[] = array();
                 foreach($shipments as $shipment)
                 {
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
@@ -3630,8 +3629,7 @@ class APIController extends Controller
                     $current_status_time = $shipment_journey->created_at;
                     $current_reason_id = $shipment_journey->status_reason_id;
     
-                    $details = array();
-    
+
                     $duration = TelenorShipmentStatusEstimatedTime::where('shipper_status_id', $current_status_id);
                     if ($duration->exists()) {
                         $duration = $duration->first();
@@ -3643,6 +3641,7 @@ class APIController extends Controller
                         if ($difference_eta < 0) {
                             $difference_eta = 0;
                         }
+                        $details = array();
                         $details['order_id'] = $order_id;
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['status'] = ShipmentStatus::find($current_status_id)->name;
@@ -3654,11 +3653,10 @@ class APIController extends Controller
                             } else {
                                 $details['reason'] = '';
                             }
+                            $detail[] = $details;
                         }
                     }
-                    $detail[] = $details;
                 }
-
                 if (!empty($detail)) {
                     return response()->json(['status' => 0, 'message' => 'ETA of Order #' . $order_id, 'details' => $detail]);
                 } else {
