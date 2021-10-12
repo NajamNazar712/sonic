@@ -3617,7 +3617,7 @@ class APIController extends Controller
             {
                 $order_id = $request->order_id;
 
-                $shipments = Shipment::where('order_id', $order_id)->get();
+                $shipments = Shipment::where('order_id', $order_id)->where('user_id', $user_id)->get();
                 $detail[] = array();
                 foreach($shipments as $shipment)
                 {
