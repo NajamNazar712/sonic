@@ -3551,7 +3551,7 @@ class APIController extends Controller
             'tracking_number' => ['required_without:order_id', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })],
-            'order_id' => ['required_without:tracking_number', 'integer', 'between:0,1000000000000', Rule::exists('shipments', 'order_id')->where(function ($query) use ($user_id) {
+            'order_id' => ['required_without:tracking_number', 'regex:/^[A-Za-z0-9\-\_]+$/u', 'max:20', Rule::exists('shipments', 'order_id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })],
             
