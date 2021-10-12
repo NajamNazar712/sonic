@@ -824,7 +824,8 @@ class AdminHumanResourseController extends Controller
         $attachments = $employee->attachments;
         $place_of_birth_cities = City::where('business_category_id',1)->get();
         $reporting_locations = ReportingLocation::where('status',1)->get();
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities','reporting_locations'));
+        $shifts = EmployeeShift::where('status', 1)->get();
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities','reporting_locations', 'shifts'));
     }
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
@@ -862,6 +863,7 @@ class AdminHumanResourseController extends Controller
         $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->reporting_location_id = $request->reporting_location;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+        $employee->shift_id = $request->shift_id;
         $employee->update();
 
         if($employee->employee_type_id == 1)
