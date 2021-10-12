@@ -47,7 +47,7 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters">
+											<input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters">
 										</div>
 									</div>
 
@@ -202,6 +202,15 @@
 
 			$('#user_form #phone_number').inputmask({
 				'mask': '9999-9999999',
+				'clearIncomplete': true
+			});
+
+			$('#user_form #pin').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false,
+				'rightAlign': false,
+				'mask': '9999',
 				'clearIncomplete': true
 			});
 
