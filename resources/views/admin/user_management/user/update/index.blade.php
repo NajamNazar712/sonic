@@ -120,7 +120,7 @@
 										<div class="form-group">
 											<select name="location_id" class="select2" id="location_list" data-rule-required="true" data-msg-required="Reporting location is required">
 												@foreach($reporting_locations as $reporting_location)
-													@if ($reporting_location->id == $reporting_location->shift_id)
+													@if ($reporting_location->id == $user->reporting_location_id)
 														<option value="{{$reporting_location->id}}" selected="selected"> {{$reporting_location->name}}</option>
 													@else
 														<option value="{{$reporting_location->id}}"> {{$reporting_location->name}}</option>

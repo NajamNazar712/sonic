@@ -779,7 +779,7 @@ class AdminNotificationsController extends Controller
             }else if($id == 9){
                 $details['fields'] = ["rider", "otp"];
             }else if($id == 10){
-                $details['fields'] = ["time"];
+                $details['fields'] = ["time", "name"];
             }
             return $details;
         }else{

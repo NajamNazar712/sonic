@@ -247,6 +247,8 @@ Route::name('api.')->group(function () {
                 Route::post('mark_v2', 'AdminAPIController@mark_attendance_v2')->name('mark_v2');
                 Route::post('detail_v2', 'AdminAPIController@attendance_details_v2')->name('detail_v2');
                 Route::post('mark_api', 'AdminAPIController@mark_attendance_api')->name('mark_api');
+                Route::get('flutter_detail', 'AdminAPIController@flutter_attendance_details')->name('flutter_detail');
+                Route::post('flutter_mark', 'AdminAPIController@flutter_mark_attendance')->name('flutter_mark');
             });
 
             Route::prefix('retail')->name('retail.')->group(function () {
