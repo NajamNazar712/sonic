@@ -184,7 +184,7 @@
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#to_date_root').css('top', '40px');
@@ -240,32 +240,6 @@
                     UnblockPagePermanently();
 
                     return {body: body, header:head};
-                }
-            });
-            $('#search_form #search_update_date_from').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #search_update_date_to').pickadate('picker').set('min', $('#search_form #search_update_date_from').pickadate('picker').get('select'));
-                    }
-                }
-            });
-            $('#search_form #search_update_date_to').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #search_update_date_from').pickadate('picker').set('max', $('#search_form #search_update_date_to').pickadate('picker').get('select'));
-                    }
                 }
             });
             var table = $('#datatable').DataTable({

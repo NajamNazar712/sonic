@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\http\Models\Admin\KeyAccountPendingCrm;
-use App\http\Models\Admin\KeyAccountPendingSummaryCrm;
+use App\Http\Models\Admin\KeyAccountPendingCrm;
+use App\Http\Models\Admin\KeyAccountPendingSummaryCrm;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\http\Models\CRM\CrmSettings;
-use App\http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\CRM\CrmSettings;
+use App\Http\Models\CRM\CrmTatHolidays;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 

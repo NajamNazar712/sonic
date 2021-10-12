@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\NotificationsController;
-use App\http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use Carbon\Carbon;

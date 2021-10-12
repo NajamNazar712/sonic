@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\AdminRole;
-use App\http\Models\Admin\KeyAccountDailySummary;
-use App\http\Models\Admin\KeyAccountDailySummaryCrm;
-use App\http\Models\Admin\KeyAccountPendingCrm;
-use App\http\Models\Admin\KeyAccountPendingSummaryCrm;
+use App\Http\Models\Admin\KeyAccountDailySummary;
+use App\Http\Models\Admin\KeyAccountDailySummaryCrm;
+use App\Http\Models\Admin\KeyAccountPendingCrm;
+use App\Http\Models\Admin\KeyAccountPendingSummaryCrm;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;

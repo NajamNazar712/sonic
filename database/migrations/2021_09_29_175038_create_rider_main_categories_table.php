@@ -15,7 +15,7 @@ class CreateRiderMainCategoriesTable extends Migration
     {
         Schema::create('rider_main_categories', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name')->index();
+            $table->string('name');
             $table->timestamps();
         });
     }
