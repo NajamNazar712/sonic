@@ -39,7 +39,7 @@
                                             <fieldset class="form-group">
                                                 <select name="rider" id="rider" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
                                                     @foreach($riders as $rider)
-                                                        <option value="{{$rider->id}}">{{$rider->name}})</option>
+                                                        <option value="{{$rider->id}}">{{$rider->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
