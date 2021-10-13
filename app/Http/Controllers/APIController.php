@@ -3618,13 +3618,15 @@ class APIController extends Controller
                 $detail = array();
                 $order_id = $request->order_id;
                 $shipments = Shipment::where('order_id', $order_id)->where('user_id', $user_id)->get();
+
                 foreach($shipments as $shipment)
                 {
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
-
+                    
                     if (!$shipment_journey) {
                         return response()->json(['status' => 1, 'message' => 'No data found!']);
                     }
+                    
                     $current_status_id = $shipment_journey->shipper_status_id;
                     $current_status_time = $shipment_journey->created_at;
                     $current_reason_id = $shipment_journey->status_reason_id;
@@ -3632,6 +3634,7 @@ class APIController extends Controller
 
                     $duration = TelenorShipmentStatusEstimatedTime::where('shipper_status_id', $current_status_id);
                     if ($duration->exists()) {
+                        
                         $duration = $duration->first();
                         $estimated_eta = $duration->eta;
     
@@ -3653,8 +3656,8 @@ class APIController extends Controller
                             } else {
                                 $details['reason'] = '';
                             }
-                            $detail[] = $details;
                         }
+                        $detail[] = $details;
                     }
                 }
                 if (!empty($detail)) {
