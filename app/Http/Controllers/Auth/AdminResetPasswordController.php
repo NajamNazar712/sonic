@@ -46,7 +46,7 @@ class AdminResetPasswordController extends Controller
 
     public function reset_pin(Request $request)
     {
-        $admin = Admin::where('phone_number', $request->phone_number);
+        $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number',$request->phone_number);
         if ($admin->exists()) {
             $admin = $admin->first();
             $environment = config('app.env');
@@ -54,6 +54,7 @@ class AdminResetPasswordController extends Controller
                 if ($admin->otp == $request->otp) {
                     $admin->dummy_pin = $request->pin;
                     $admin->password = bcrypt($request->pin);
+                    $admin->otp = null;
                     $admin->save();
                     event(new PasswordReset($admin));
                     NotificationsController::send(159, $admin->id);

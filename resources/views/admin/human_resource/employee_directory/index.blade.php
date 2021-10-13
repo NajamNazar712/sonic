@@ -57,33 +57,43 @@
                     <div class="modal-body">
                         <div id="unEditableFields">
                             <div class="row">
-                            <div class="col">
-                                <fieldset class="form-group">
-                                    <select name="rider_type" id="rider_type_list" class="form-control select2"
-                                            data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($rider_types as $rider_type)
-                                            <option value="{{$rider_type->id}}">{{$rider_type->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
-                            </div>
-                        </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="rider_type" id="rider_type_list" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($rider_types as $rider_type)
+                                                <option value="{{$rider_type->id}}">{{$rider_type->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="city_id" id="city_list" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="shift_id" id="shift_list" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($employee_shifts as $shift)
+                                                <option value="{{$shift->id}}">{{$shift->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
 
-                            <div class="row">
-                            <div class="col">
-                                <fieldset class="form-group">
-                                    <select name="city_id" id="city_list" class="form-control select2"
-                                            data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($cities as $city)
-                                            <option value="{{$city->id}}">{{$city->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
                             </div>
-                        </div>
+
+
                             <input type="hidden" name="employee_id" id="employee_id">
                             <div>
-                            <div class="row mb-2">
+                                <div class="row mb-2">
                                 <div class="col">
                                     <fieldset class="form-group">
                                         <input type="text" class="form-control" name="rider_name" id="rider_name"
@@ -115,7 +125,7 @@
                                     </fieldset>
                                 </div>
                             </div>
-                        </div>
+                            </div>
 
                             <div class="row mb-2">
                             <div class="col">
@@ -288,6 +298,12 @@
             $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select City',
+                dropdownParent: $('#editRiderModal')
+            });
+
+            $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Shift',
                 dropdownParent: $('#editRiderModal')
             });
             $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
@@ -905,8 +921,10 @@
                 var pin = table.row($(this).parents('tr')).data().pin;
                 var address = table.row($(this).parents('tr')).data().address;
                 var city_id = table.row($(this).parents('tr')).data().city_id;
+                var shift_id = table.row($(this).parents('tr')).data().shift_id;
                 var check_bit = table.row($(this).parents('tr')).data().check_if_rider_present_bit;
                 $('#city_list').val(city_id).trigger('change');
+                $('#shift_list').val(shift_id).trigger('change');
                 if(check_bit != null)
                 {
                     var rider_type = table.row($(this).parents('tr')).data().active_rider_type_id;

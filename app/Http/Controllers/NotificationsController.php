@@ -141,7 +141,7 @@ class NotificationsController extends Controller
       $mail->send(new Notifications($subject, $body, $from));
     }
 
-    static public function send($id, $reference_1_id, $reference_2_id = NULL)
+    static public function send($id, $reference_1_id, $reference_2_id = NULL,$reference_3_id = NULL)
     {
         $notification = Notification::find($id);
 
@@ -7757,7 +7757,7 @@ class NotificationsController extends Controller
                     if (strpos($body, '[code]') !== FALSE) {
                         $body = str_replace('[code]', $otp, $body);
                     }
-                    $to = $admin->phone_number;
+                    $to = $reference_3_id;
                     self::sms($body, $to, 1);
                 } else if ($id == 139) {
 

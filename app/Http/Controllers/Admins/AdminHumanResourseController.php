@@ -214,8 +214,9 @@ class AdminHumanResourseController extends Controller
         $employee_types = EmployeeType::all();
         $employee_statuses = EmployeeStatus::all();
         $employee_department = AdminDepartment::all();
+        $employee_shifts = EmployeeShift::where('status',1)->get(['id','name']);
         $city = City::where('business_category_id', 1)->get();
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories]);
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts]);
     }
 
     public function employee_directory_list(Request $request){
@@ -234,7 +235,7 @@ class AdminHumanResourseController extends Controller
             ->join('employee_types as et','et.id','=','employees.employee_type_id')
             ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
             ->join('employee_statuses as es','es.id','=','employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address','employees.guardian_name as father_name','ads.name as department_name'])
+            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address','employees.shift_id as shift_id','employees.guardian_name as father_name','ads.name as department_name'])
             ->where(function ($q){
                 $q ->where('r.blacklist','=',0)
                     ->orWhere('r.blacklist','=',null);
@@ -673,8 +674,10 @@ class AdminHumanResourseController extends Controller
             $rider->address = $request->address;
             $rider->status =1;
             $rider->pin = bcrypt($request->pin);
+            $rider->dummy_pin = $request->pin;
             $rider->created_by = Auth::id();
             $rider->trax_id = $trax_id;
+            $rider->shift_id = $request->shift_id;
             $rider->rider_type_id  = $request->rider_type;
             $rider->save();
 
@@ -789,7 +792,8 @@ class AdminHumanResourseController extends Controller
 
                             $admin->name = $employee->name;
                             $admin->email = $employee->official_email;
-                            $admin->phone_number = $employee->official_phone_number;
+                            $admin->phone_number = $employee->phone_number;
+                            $admin->official_phone_number = $employee->official_phone_number;
                             $admin->cnic = $employee->cnic;
                             $admin->role_id = $employee->designation->role_id ?? 79;
                             $admin->default_hub_id = $employee->city->hub_city->id;
@@ -797,6 +801,7 @@ class AdminHumanResourseController extends Controller
                             $admin->dummy_pin = $employee->pin;
                             $admin->designation_id = $employee->designation_id;
                             $admin->shift_id = $employee->shift_id;
+
 
                             if($employee->status_id == 2)
                             {
@@ -811,6 +816,14 @@ class AdminHumanResourseController extends Controller
                             $admin->employee_id = $employee->id;
 
                             $admin->save();
+
+                            foreach ($employee->designation->hubs as $hub)
+                            {
+                                $admin_hub = new AdminHub();
+                                $admin_hub->admin_id = $admin->id;
+                                $admin_hub->hub_id = $hub->hub_id;
+                                $admin_hub->save();
+                            }
                         }
 
                     }
@@ -870,7 +883,8 @@ class AdminHumanResourseController extends Controller
     public function employee_directory_profile_update (Employee $employee, Request $request)
     {
         $request->validate([
-            'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id)],
+            'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id),Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
+            'official_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id),Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
             'cnic'=> [Rule::unique('employees', 'cnic')->ignore($employee->id)],
         ]);
 
@@ -910,9 +924,24 @@ class AdminHumanResourseController extends Controller
             {
                 $admin = $admin->first();
 
+                if($admin->designation_id != $employee->designation_id)
+                {
+                    AdminHub::where('admin_id',$admin->id)->delete();
+
+                    $hubs = EmployeeDesignationHub::where('designation_id',$employee->designation_id)->get(['hub_id']);
+                    foreach ($hubs as $hub)
+                    {
+                        $admin_hub = new AdminHub();
+                        $admin_hub->admin_id = $admin->id;
+                        $admin_hub->hub_id = $hub->hub_id;
+                        $admin_hub->save();
+                    }
+                }
+
                 $admin->designation_id = $employee->designation_id;
                 $admin->role_id = $employee->designation->role_id ?? 79;
-                $admin->phone_number = $employee->official_phone_number;
+                $admin->phone_number = $employee->phone_number;
+                $admin->official_phone_number = $employee->official_phone_number;
                 $admin->email = $employee->official_email;
                 $admin->cnic = $employee->cnic;
                 $admin->name = $employee->name;
@@ -922,16 +951,6 @@ class AdminHumanResourseController extends Controller
                 $admin->shift_id = $employee->shift_id;
                 $admin->update();
 
-                AdminHub::where('admin_id',$admin->id)->delete();
-
-                $hubs = EmployeeDesignationHub::where('designation_id',$employee->designation_id)->get(['hub_id']);
-                foreach ($hubs as $hub)
-                {
-                    $admin_hub = new AdminHub();
-                    $admin_hub->admin_id = $admin->id;
-                    $admin_hub->hub_id = $hub->hub_id;
-                    $admin_hub->save();
-                }
             }
         }
         else{
@@ -2430,19 +2449,6 @@ class AdminHumanResourseController extends Controller
             $designation_hub->save();
         }
 
-        $admins = Admin::where('designation_id',$designation->id)->get(['id']);
-        foreach ($admins as $admin)
-        {
-            AdminHub::where('admin_id',$admin->id)->delete();
-            foreach ($request->hub_id as $hub)
-            {
-                $admin_hub = new AdminHub();
-                $admin_hub->admin_id = $admin->id;
-                $admin_hub->hub_id = $hub;
-                $admin_hub->save();
-            }
-        }
-
         return redirect()->back()->with('success', 'Designation Updated Successfully!');
     }
 
@@ -2450,7 +2456,7 @@ class AdminHumanResourseController extends Controller
     {
         if($request->has('department_id'))
         {
-            $designations = EmployeeDesignation::where('department_id',$request->department_id);
+            $designations = EmployeeDesignation::where('department_id',$request->department_id)->where('status',1);
             if($designations->exists())
             {
                 return response()->json(['status'=>1,'designations'=>$designations->get()]);

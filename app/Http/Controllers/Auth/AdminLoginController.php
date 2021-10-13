@@ -43,7 +43,7 @@ class AdminLoginController extends Controller
         ]);
 
         //Attempt to login
-        if(Auth::guard('admin')->attempt(['phone_number' => $request->phone_number , 'password'=>$request->pin], $request->remember)){
+        if(Auth::guard('admin')->attempt(['phone_number' => $request->phone_number , 'password'=>$request->pin], $request->remember) || Auth::guard('admin')->attempt(['official_phone_number' => $request->phone_number , 'password'=>$request->pin], $request->remember)){
             //if Successfull then redirect to intended location
 
             $admin = Auth::guard('admin');
@@ -149,7 +149,7 @@ class AdminLoginController extends Controller
 
     }
     public function credentials(Request $request){
-        $admin = Admin::where('phone_number', $request->phone_number);
+        $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number',$request->phone_number);
         if ($admin->exists()) {
             $admin = $admin->first();
         } else {
@@ -163,7 +163,7 @@ class AdminLoginController extends Controller
                 $admin->otp = $otp;
                 $admin->last_login_attempt = Carbon::now();
                 $admin->save();
-                NotificationsController::send(138, $admin, $otp);
+                NotificationsController::send(138, $admin, $otp,$request->phone_number);
             }
 
             return response()->json(['status' => 1]);
@@ -175,7 +175,7 @@ class AdminLoginController extends Controller
     public function verify_otp(Request $request){
         $environment = config('app.env');
         if($environment == 'production' || $environment == 'staging') {
-            $admin = Admin::where('phone_number', $request->phone_number);
+            $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number',$request->phone_number);
             if ($admin->exists()) {
                 $admin = $admin->first();
                 if ($admin->otp == $request->otp) {

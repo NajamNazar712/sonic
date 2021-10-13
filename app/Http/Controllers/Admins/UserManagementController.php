@@ -48,7 +48,7 @@ class UserManagementController extends Controller
         ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
         ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation');
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation','admins.official_phone_number');
 
         if(!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
@@ -213,6 +213,7 @@ $designations = EmployeeDesignation::where('status',1)->get();
         $admin->name = $request->input('name');
         $admin->email = $request->input('email');
         $admin->phone_number = $request->input('phone_number');
+        $admin->official_phone_number = $request->input('official_phone_number');
         $admin->cnic = $request->input('cnic');
         $admin->role_id = $request->input('role_id');
         $admin->default_hub_id = $request->input('default_hub');
@@ -228,6 +229,27 @@ $designations = EmployeeDesignation::where('status',1)->get();
                 $employee = $employee->first();
                 $employee_id = $employee->id;
             }
+            else{
+                $employee = new Employee();
+                $employee->trax_id = $trax_id;
+                $employee->name = $request->name;
+                $employee->city_id = $request->default_hub_id;
+                $employee->cnic = $request->cnic;
+                $employee->phone_number = $request->phone_number;
+                $employee->official_phone_number = $request->official_phone_number;
+                $employee->employee_type_id = 1;
+                $employee->request_status_id = 3;
+                $employee->status_id = 3;
+                $employee->official_email = $request->email;
+                $employee->designation_id = $request->designation_id;
+                $employee->department_id = EmployeeDesignation::find($request->designation_id)->department_id ?? null;
+                $employee->pin = $request->pin;
+                $employee->shift_id = $request->shift_id;
+                $employee->save();
+
+                $employee_id = $employee->id;
+
+            }
 
         }
         else{
@@ -239,6 +261,25 @@ $designations = EmployeeDesignation::where('status',1)->get();
                 $global_setting->setting_value = $trax_id;
                 $global_setting->save();
                 $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+
+                $employee = new Employee();
+                $employee->trax_id = $trax_id;
+                $employee->name = $request->name;
+                $employee->city_id = $request->default_hub_id;
+                $employee->cnic = $request->cnic;
+                $employee->phone_number = $request->phone_number;
+                $employee->official_phone_number = $request->official_phone_number;
+                $employee->employee_type_id = 1;
+                $employee->request_status_id = 3;
+                $employee->status_id = 3;
+                $employee->official_email = $request->email;
+                $employee->designation_id = $request->designation_id;
+                $employee->department_id = EmployeeDesignation::find($request->designation_id)->department_id ?? null;
+                $employee->pin = $request->pin;
+                $employee->shift_id = $request->shift_id;
+                $employee->save();
+
+                $employee_id = $employee->id;
             }
             else{
                 $trax_id = null;
@@ -249,6 +290,8 @@ $designations = EmployeeDesignation::where('status',1)->get();
         $admin->employee_id = $employee_id;
 
         $admin->save();
+
+
 
         if ($request->has('hub_ids')) {
             foreach($request->input('hub_ids') as $hub_id) {
@@ -308,13 +351,63 @@ $designations = EmployeeDesignation::where('status',1)->get();
         
     }
 
+    public function validate_phone(Request $request)
+    {
+        $id = null;
+        if($request->has('id'))
+        {
+            $id = $request->id;
+        }
+
+        $phone_number = null;
+        if($request->has('phone_number'))
+        {
+            $phone_number = $request->phone_number;
+        }
+
+        if($request->has('official_phone_number'))
+        {
+            $phone_number = $request->official_phone_number;
+        }
+
+        $phone_validate = Admin::where('id','!=',$id)->where(function ($query) use ($phone_number){
+            $query->where('phone_number',$phone_number)
+                ->orwhere('official_phone_number',$phone_number);
+            })->exists();
+
+        if($phone_validate)
+        {
+            return "false";
+        }
+
+        $trax_id = null;
+        if($id != null)
+        {
+            $admin = Admin::find($id);
+            $trax_id = $admin->trax_id;
+        }
+
+        $phone_validate = Employee::where('trax_id','!=',$trax_id)->where(function ($query) use ($phone_number){
+            $query->where('phone_number',$phone_number)
+                ->orwhere('official_phone_number',$phone_number);
+            })->exists();
+
+        if($phone_validate)
+        {
+            return "false";
+        }
+
+        return "true";
+    }
+
     public function user_update_store(Request $request, $id) {
-        
+
             $admin = Admin::find($id);
 
             $admin->name = $request->input('name');
             $admin->email = $request->input('email');
             $admin->phone_number = $request->input('phone_number');
+            $admin->official_phone_number = $request->input('official_phone_number');
             $admin->cnic = $request->input('cnic');
             if($admin->role_id != $request->input('role_id'))
             {
@@ -362,7 +455,8 @@ $designations = EmployeeDesignation::where('status',1)->get();
             {
                 $employee = $employee->first();
                 $employee->designation_id = $admin->designation_id;
-                $employee->official_phone_number = $admin->phone_number;
+                $employee->phone_number = $admin->phone_number;
+                $employee->official_phone_number = $admin->official_phone_number;
                 $employee->official_email = $admin->email;
                 $employee->cnic = $admin->cnic;
                 $employee->name = $admin->name;

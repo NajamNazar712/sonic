@@ -40,7 +40,7 @@ class AdminForgotPasswordController extends Controller
 
     public function GenerateOTP(Request $request)
     {
-        $admin = Admin::where('phone_number', $request->phone_number);
+        $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number',$request->phone_number);
         if ($admin->exists()) {
             $admin = $admin->first();
             $environment = config('app.env');
@@ -50,7 +50,7 @@ class AdminForgotPasswordController extends Controller
                 $admin->otp = $otp;
                 $admin->last_login_attempt = Carbon::now();
                 $admin->save();
-                NotificationsController::send(138, $admin, $otp);
+                NotificationsController::send(138, $admin, $otp,$request->phone_number);
             }
 
             return response()->json(['status' => 1]);

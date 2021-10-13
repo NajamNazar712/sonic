@@ -29,7 +29,13 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" value="{{ $user->phone_number }}">
+											<input type="text" name="phone_number" id="phone_number" class="form-control unique_phone" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" data-rule-remote="{{ route('admin.user_management.users.validate_phone',['id'=>$user->id]) }}" data-msg-remote="Phone Number is not unique" value="{{ $user->phone_number }}">
+										</div>
+									</div>
+
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<input type="text" name="official_phone_number" id="official_phone_number" class="form-control unique_phone" placeholder="Official Phone Number*" data-rule-required="true" data-msg-required="Official Phone Number is required" data-rule-remote="{{ route('admin.user_management.users.validate_phone',['id'=>$user->id]) }}" data-msg-remote="Official Phone Number is not unique" value="{{ $user->official_phone_number }}">
 										</div>
 									</div>
 
@@ -200,7 +206,7 @@
 				});
 			@endif
 
-			$('#user_form #phone_number').inputmask({
+			$('#user_form #phone_number,#user_form #official_phone_number').inputmask({
 				'mask': '9999-9999999',
 				'clearIncomplete': true
 			});
@@ -282,5 +288,19 @@
 				e.preventDefault();
 			}
 		});
+
+		$.validator.addMethod("unique_phone", function(value, element) {
+			var parentForm = $(element).closest('form');
+			var timeRepeated = 0;
+			if (value != '') {
+				$(parentForm.find('.unique_phone')).each(function () {
+					if ($(this).val() === value && value != 0) {
+						timeRepeated++;
+					}
+				});
+			}
+			return timeRepeated === 1 || timeRepeated === 0;
+
+		}, "Phone Number Can Not Be Duplicate");
 	</script>
 @endsection

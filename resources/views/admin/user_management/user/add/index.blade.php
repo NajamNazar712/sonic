@@ -29,7 +29,13 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+											<input type="text" name="phone_number" id="phone_number" class="form-control unique_phone" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" data-rule-remote="{{ route('admin.user_management.users.validate_phone') }}" data-msg-remote="Phone Number is not unique">
+										</div>
+									</div>
+
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<input type="text" name="official_phone_number" id="official_phone_number" class="form-control unique_phone" placeholder="Official Phone Number*" data-rule-required="true" data-msg-required="Official Phone Number is required" data-rule-remote="{{ route('admin.user_management.users.validate_phone') }}" data-msg-remote="Official Phone Number is not unique">
 										</div>
 									</div>
 
@@ -161,7 +167,7 @@
 				placeholder: 'Select Designation'
 			});
 
-			$('#user_form #phone_number').inputmask({
+			$('#user_form #phone_number,#user_form #official_phone_number').inputmask({
 				'mask': '9999-9999999',
 				'clearIncomplete': true
 			});
@@ -199,6 +205,20 @@
 					insert: '<div class="icheck_line-icon"></div>' + text
 				});
 			});
+
+			$.validator.addMethod("unique_phone", function(value, element) {
+				var parentForm = $(element).closest('form');
+				var timeRepeated = 0;
+				if (value != '') {
+					$(parentForm.find('.unique_phone')).each(function () {
+						if ($(this).val() === value && value != 0) {
+							timeRepeated++;
+						}
+					});
+				}
+				return timeRepeated === 1 || timeRepeated === 0;
+
+			}, "Phone Number Can Not Be Duplicate");
 
 			$('#user_form').validate({
 				errorClass: 'danger',
@@ -263,6 +283,8 @@
 				e.preventDefault();
 			}
 		});
+
+
 
 	</script>
 @endsection

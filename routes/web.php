@@ -1603,6 +1603,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status', 'Admins\UserManagementController@user_status')->name('status');
             Route::post('assign_hubs', 'Admins\UserManagementController@user_assign_hub')->name('assign_hubs');
 
+            Route::get('validate_phone','Admins\UserManagementController@validate_phone')->name('validate_phone');
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@user_add_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@user_add_store')->name('store');
