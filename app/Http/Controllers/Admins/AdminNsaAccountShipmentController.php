@@ -7,6 +7,8 @@ use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPaymentJourneyController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
@@ -1232,7 +1234,6 @@ class AdminNsaAccountShipmentController extends Controller
         $routes = Route::where('status', 1)->get();
         return view('admin.carrefour.delivery')->with(['riders' => $riders, 'routes' => $routes]);
     }
-
     public function carrefour_delivery_submit(Request $request)
     {
         $names = [
@@ -1362,13 +1363,26 @@ class AdminNsaAccountShipmentController extends Controller
                             $shipments_count = 0;
                             $total_cod_amount = 0;
                             foreach ($carrefour_shipments as $carrefour_shipment) {
-                                if (!in_array($carrefour_shipment->id, $valid_shipments)) {
-                                    if ($carrefour_shipment) {
-                                        $valid_shipments[] = $carrefour_shipment->id;
-                                        $shipments_count++;
+                                if ($carrefour_shipment) {
+                                    if (!in_array($carrefour_shipment->id, $valid_shipments)) {
+                                        $check = false;
+                                        if($carrefour_shipment->consignee_city->hub_id != $carrefour_shipment->pickup_address->city->hub_id){
+                                            if($carrefour_shipment->shipper_status_id == 4){
+                                                $check = true;
+                                            }
+                                        }
+                                        else{
+                                            if($carrefour_shipment->shipper_status_id == 2){
+                                                $check = true;
+                                            }
+                                        }
+                                        if($check){
+                                            $valid_shipments[] = $carrefour_shipment->id;
+                                            $shipments_count++;
 
-                                        if ($carrefour_shipment->booking_type_id != 4 || ($carrefour_shipment->booking_type_id == 4 && $carrefour_shipment->charges_mode_id == 2)) {
-                                            $total_cod_amount += $carrefour_shipment->amount;
+                                            if ($carrefour_shipment->booking_type_id != 4 || ($carrefour_shipment->booking_type_id == 4 && $carrefour_shipment->charges_mode_id == 2)) {
+                                                $total_cod_amount += $carrefour_shipment->amount;
+                                            }
                                         }
                                     }
                                 }
@@ -1377,49 +1391,76 @@ class AdminNsaAccountShipmentController extends Controller
                             $route_id = $request->route;
                             $order = false;
                             if ($shipments_count != 0) {
-                                $note = DeliveryNote::create([
-                                    'hub_id' => 202,
-                                    'rider_id' => $rider_id,
-                                    'route_id' => $route_id,
-                                    'shipments_count' => $shipments_count,
-                                    'admin_id' => 50,
-                                    'total_cod_amount' => $total_cod_amount,
-                                    'password' => NULL,
-                                    'last_updated_at' => Carbon::now(),
-                                    'special_rider' => 0,
-                                    'order' => $order
-                                ]);
+                                $rider = Rider::find($rider_id);
+                                if($rider){
+                                    $note = DeliveryNote::create([
+                                        'hub_id' => $rider->city->hub_id,
+                                        'rider_id' => $rider_id,
+                                        'route_id' => $route_id,
+                                        'shipments_count' => $shipments_count,
+                                        'admin_id' => Auth::id(),
+                                        'total_cod_amount' => $total_cod_amount,
+                                        'password' => NULL,
+                                        'last_updated_at' => Carbon::now(),
+                                        'special_rider' => 0,
+                                        'order' => $order
+                                    ]);
 
-                                if ($note) {
-                                    if (!$order) {  //Default
-                                        sort($valid_shipments); //sort_valid_shipments;
+                                    if ($note) {
+                                        if (!$order) {  //Default
+                                            sort($valid_shipments); //sort_valid_shipments;
+                                        }
+                                        $serial = 1;
+                                        foreach ($valid_shipments as $index => $shipment) {
+                                            DeliveryNoteShipment::create([
+                                                'delivery_note_id' => $note->id,
+                                                'shipment_id' => $shipment,
+                                                'notification' => 0,
+                                                'rider_information' => 0,
+                                                'ordering' => $serial
+                                            ]);
+                                            $serial++;
+                                        }
+                                        foreach ($valid_shipments as $index => $shipment) {
+
+                                            $shipment_data = Shipment::find($shipment);
+
+                                            $shipment_data->shipper_status_id = 5;
+                                            $shipment_data->consignee_status_id = 5;
+                                            $shipment_data->save();
+
+                                            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $rider_id);
+                                        }
+
+                                        //rider attendance
+                                        $attendance_datetime = Carbon::now()->format('Y-m-d H:i:s');
+                                        $attendance_date = Carbon::now()->format('Y-m-d');
+
+                                        $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                                            ->whereDate('attendance_date', $attendance_date)
+                                            ->where('employee_type', 2);
+                                        if (!$rider_attendance->exists()) {
+                                            $rider_attendance = new EmployeeAttendance();
+                                            $rider_attendance->employee_id = $rider_id;
+                                            $rider_attendance->employee_type = 2;
+                                            $rider_attendance->attendance_date = $attendance_date;
+                                            $rider_attendance->clock_in_datetime = $attendance_datetime;
+                                            $rider_attendance->clock_in_latitude = '0';
+                                            $rider_attendance->clock_in_longitude = '0';
+                                            $rider_attendance->save();
+
+                                            $rider_attendance_action = new EmployeeAttendanceActionLog();
+                                            $rider_attendance_action->employee_id = $rider_id;
+                                            $rider_attendance_action->employee_type = 2;
+                                            $rider_attendance_action->action_id = 1;
+                                            $rider_attendance_action->attendance_date = $attendance_date;
+                                            $rider_attendance_action->action_date = $attendance_datetime;
+                                            $rider_attendance_action->latitude = '0';
+                                            $rider_attendance_action->longitude = '0';
+                                            $rider_attendance_action->save();
+                                        }
+                                        //rider attendance end
                                     }
-                                    $serial = 1;
-                                    foreach ($valid_shipments as $index => $shipment) {
-                                        DeliveryNoteShipment::create([
-                                            'delivery_note_id' => $note->id,
-                                            'shipment_id' => $shipment,
-                                            'notification' => 0,
-                                            'rider_information' => 0,
-                                            'ordering' => $serial
-                                        ]);
-                                        $serial++;
-                                    }
-                                    foreach ($valid_shipments as $index => $shipment) {
-
-                                        $shipment_data = Shipment::find($shipment);
-
-                                        $shipment_data->shipper_status_id = 14;
-                                        $shipment_data->consignee_status_id = 14;
-                                        $shipment_data->save();
-
-                                        ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                                        ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 50, $note->id, NULL, 0);
-                                        ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 50, $note->id, NULL, 1);
-                                        DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
-                                    }
-
-                                    DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 50, 'received_cod_amount' => 0, 'status' => 1, 'last_updated_at' => Carbon::now(), 'status_verified_at' => Carbon::now()]);
                                 }
                             }
                         }
@@ -1427,7 +1468,7 @@ class AdminNsaAccountShipmentController extends Controller
                             return $row . ': ' . $tracking_number;
                         }, array_keys($tracking_numbers), $tracking_numbers));
 
-                        return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as delivered with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                        return redirect()->back()->with(['success' => 'Delivery Note Created, Total ' . count($rows) . ' Shipment(s) with Tracking Number(s):' . PHP_EOL . $tracking_numbers,'print'=>$note->id]);
                     } else {
                         $errors = array_map(function ($row, $errors) {
                             return $row . ':' . PHP_EOL . implode(' | ', $errors);
@@ -1580,13 +1621,26 @@ class AdminNsaAccountShipmentController extends Controller
                             $shipments_count = 0;
                             $total_cod_amount = 0;
                             foreach ($carrefour_shipments as $carrefour_shipment) {
-                                if (!in_array($carrefour_shipment->id, $valid_shipments)) {
-                                    if ($carrefour_shipment) {
-                                        $valid_shipments[] = $carrefour_shipment->id;
-                                        $shipments_count++;
+                                if ($carrefour_shipment) {
+                                    if (!in_array($carrefour_shipment->id, $valid_shipments)) {
+                                        $check = false;
+                                        if($carrefour_shipment->consignee_city->hub_id != $carrefour_shipment->pickup_address->city->hub_id){
+                                            if($carrefour_shipment->shipper_status_id == 22){
+                                                $check = true;
+                                            }
+                                        }
+                                        else{
+                                            if($carrefour_shipment->shipper_status_id == 20){
+                                                $check = true;
+                                            }
+                                        }
+                                        if($check){
+                                            $valid_shipments[] = $carrefour_shipment->id;
+                                            $shipments_count++;
 
-                                        if ($carrefour_shipment->booking_type_id != 4 || ($carrefour_shipment->booking_type_id == 4 && $carrefour_shipment->charges_mode_id == 2)) {
-                                            $total_cod_amount += $carrefour_shipment->amount;
+                                            if ($carrefour_shipment->booking_type_id != 4 || ($carrefour_shipment->booking_type_id == 4 && $carrefour_shipment->charges_mode_id == 2)) {
+                                                $total_cod_amount += $carrefour_shipment->amount;
+                                            }
                                         }
                                     }
                                 }
@@ -1594,62 +1648,20 @@ class AdminNsaAccountShipmentController extends Controller
 
                             $order = false;
                             if ($shipments_count != 0) {
-                                $note = DeliveryNote::create([
-                                    'hub_id' => 202,
-                                    'rider_id' => $rider_id,
-                                    'route_id' => $route_id,
-                                    'shipments_count' => $shipments_count,
-                                    'admin_id' => 50,
-                                    'total_cod_amount' => $total_cod_amount,
-                                    'password' => NULL,
-                                    'last_updated_at' => Carbon::now(),
-                                    'special_rider' => 0,
-                                    'order' => $order
-                                ]);
+                                $rider = Rider::find($rider_id);
+                                if($rider){
+                                    $note = ReturnNote::create(['hub_id' => $rider->city->hub_id, 'rider_id' => $rider_id, 'route_id' => $route_id, 'shipments_count' => $shipments_count, 'admin_id' => Auth::id()]);
+                                    if ($note) {
+                                        foreach ($valid_shipments as $shipment_id) {
+                                            $shipment = Shipment::where('id', $shipment_id);
 
-
-                                if ($note) {
-                                    if (!$order) {  //Default
-                                        sort($valid_shipments); //sort_valid_shipments;
-                                    }
-                                    $serial = 1;
-                                    foreach ($valid_shipments as $index => $shipment) {
-                                        DeliveryNoteShipment::create([
-                                            'delivery_note_id' => $note->id,
-                                            'shipment_id' => $shipment,
-                                            'notification' => 0,
-                                            'rider_information' => 0,
-                                            'ordering' => $serial
-                                        ]);
-                                        $serial++;
-                                    }
-                                    foreach ($valid_shipments as $index => $shipment) {
-                                        $shipment_data = Shipment::find($shipment);
-                                        $shipment_data->shipper_status_id = 20;
-                                        $shipment_data->consignee_status_id = 20;
-                                        $shipment_data->save();
-
-                                        ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                                        ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0);
-                                        ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1);
-                                        DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
-                                    }
-
-                                    DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 50, 'received_cod_amount' => 0, 'status' => 1, 'last_updated_at' => Carbon::now(), 'status_verified_at' => Carbon::now()]);
-                                }
-
-                                $note = ReturnNote::create(['hub_id' => 202, 'rider_id' => 274, 'route_id' => 2, 'shipments_count' => $shipments_count, 'admin_id' => 50, 'status' => 3]);
-                                if ($note) {
-                                    foreach ($valid_shipments as $shipment_id) {
-                                        $shipment = Shipment::where('id', $shipment_id);
-
-                                        $shipment = $shipment->first();
-                                        ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id, 'status' => 1]);
-                                        $shipment->shipper_status_id = 25;
-                                        $shipment->consignee_status_id = 25;
-                                        $shipment->save();
-                                        ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                                        ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                            $shipment = $shipment->first();
+                                            ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id, 'status' => 1]);
+                                            $shipment->shipper_status_id = 23;
+                                            $shipment->consignee_status_id = 23;
+                                            $shipment->save();
+                                            ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider_id);
+                                        }
                                     }
                                 }
                             }
@@ -1658,7 +1670,7 @@ class AdminNsaAccountShipmentController extends Controller
                             return $row . ': ' . $tracking_number;
                         }, array_keys($tracking_numbers), $tracking_numbers));
 
-                        return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as returned with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                        return redirect()->back()->with(['success' => 'Return Note Created, Total ' . count($rows) . ' Shipment(s) with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
                     } else {
                         $errors = array_map(function ($row, $errors) {
                             return $row . ':' . PHP_EOL . implode(' | ', $errors);
