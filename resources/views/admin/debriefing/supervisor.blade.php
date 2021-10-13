@@ -587,15 +587,15 @@
                                     var html = '';
                                     html += '<div class="row">';
                                     html += '<div class="col-12">';
-                                    html += '<table class="table table-sm table-bordered mb-0">';
+                                    html += '<table class="table table-sm table-bordered mb-0" ID="myTable">';
 
                                     html += '<thead>';
                                     html += '<tr>';
                                     html += '<th><strong>Tracking Number</strong></th>';
                                     html += '<th><strong>Status</strong></th>';
-                                    html += '<th><strong>Reason</strong></th>';
+                                    html += '<th><strong>Reason <fieldset class="form-group m-0 position-relative has-icon-right"><input type="text" id="ReasonSearch" class="form-control form-control-sm input-sm primary"><div class="form-control-position primary"><i class="la la-search"></i></div></fieldset></strong></th>';
                                     html += '<th><strong>Number of Attempt(s)</strong></th>';
-                                    html += '<th><strong></strong></th>';
+                                    html += '<th><strong><input type="checkbox" id="selectAll" checked /></strong></th>';
                                     html += '</tr>';
                                     html += '</thead>';
                                     html += '<tbody>';
@@ -618,7 +618,43 @@
                                     $('#sms_delivery_note_id').val(id);
                                     $('#sms_undelivered_shipments').html(html);
                                     $('#shipments_sms_modal').modal('show');
+                                    var tbltaha;
+                                    $('#ReasonSearch').keyup(function(e){
+                                        var input, filter, table, tr, td, i, txtValue;
+                                        input = document.getElementById("ReasonSearch");
+                                        filter = input.value.toUpperCase();
+                                        tbltaha = document.getElementById("myTable");
+                                        tr = tbltaha.getElementsByTagName("tr");
+                                        for (i = 0; i < tr.length; i++) {
+                                            td = tr[i].getElementsByTagName("td")[2];
+                                            if (td) {
+                                            txtValue = td.textContent || td.innerText;
+                                            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                                tr[i].style.display = "";
+                                            } else {
+                                                tr[i].style.display = "none";
+                                            }
+                                            }       
+                                        }
+                                        if($('.sms_checkbox:checked').length == $('.sms_checkbox').filter(':visible').length){
+                                            $('#selectAll').prop('checked',true);
+                                        }else{
+                                            $('#selectAll').prop('checked',false);
+                                        }
+                                    });
+                                    $('#selectAll').click(function(e){
+                                    //var tbltaha= $(e.target).closest('table');
+                                    $('td input:checkbox',tbltaha).filter(':visible').prop('checked',this.checked);
+                                    
+                                    });
 
+                                    $('.sms_checkbox').on('click',function(){
+                                        if($('.sms_checkbox:checked').length == $('.sms_checkbox').length){
+                                            $('#selectAll').prop('checked',true);
+                                        }else{
+                                            $('#selectAll').prop('checked',false);
+                                        }
+                                    });
                                 }
                                 else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
