@@ -277,6 +277,9 @@ class AdminHumanResourseController extends Controller
 
                 return null;
             })
+            ->addColumn('employee_hub',function($user){
+                return City::where('id',$user->city_id)->first()->hub_city->name ?? "";
+            })
             ->editColumn('employee_type',function ($user){
                 if($user->employee_type_id == 1)
                 {
@@ -2447,6 +2450,19 @@ class AdminHumanResourseController extends Controller
             $designation_hub->designation_id = $designation->id;
             $designation_hub->hub_id = $hub;
             $designation_hub->save();
+        }
+
+        $admins = Admin::where('designation_id',$designation->id)->get(['id']);
+        foreach ($admins as $admin)
+        {
+            AdminHub::where('admin_id',$admin->id)->delete();
+            foreach ($request->hub_id as $hub)
+            {
+                $admin_hub = new AdminHub();
+                $admin_hub->admin_id = $admin->id;
+                $admin_hub->hub_id = $hub;
+                $admin_hub->save();
+            }
         }
 
         return redirect()->back()->with('success', 'Designation Updated Successfully!');

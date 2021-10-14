@@ -22,6 +22,7 @@
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Employee FullName</th>
                                     <th class="border-primary border-darken-1">Gender</th>
+                                    <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
@@ -402,6 +403,7 @@
                             head.push('Employee ID');
                             head.push('Employee FullName');
                             head.push('Gender');
+                            head.push('Hub');
                             head.push('City');
                             head.push('CNIC');
                             head.push('Phone No.');
@@ -417,6 +419,7 @@
                                 row.push(values.trax_id);
                                 row.push(values.employee_name);
                                 row.push(values.gender);
+                                row.push(values.employee_hub);
                                 row.push(values.city);
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
@@ -652,7 +655,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[12, 'desc']],
+                order: [[13, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -661,6 +664,7 @@
                     {data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
                     {data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name'},
                     {data: 'gender', name: 'eg.name', class: 'align-middle gender'},
+                    {data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
@@ -693,7 +697,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')|| $(header).is('.employee_hub')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.employee_type'))
