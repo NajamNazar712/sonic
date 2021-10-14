@@ -477,10 +477,18 @@
                                         <span class="danger">*</span>
                                     </label>
 
-                                    <select name="sub_segment_id" id="sub_segment_id" class="select2 form-control required" style="width: 100%" disabled>
-                                        @foreach($sub_segments as $sub_segment)
-                                            <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
-                                        @endforeach
+                                    <select name="sub_segment_id" id="sub_segment_id" class="select2 form-control required" style="width: 100%" >
+                                        @if ($sub_segments->count() > 0)
+                                            @foreach($sub_segments as $sub_segment)
+                                                @if ($sub_segment->id == $user->sub_segment_id)
+                                                <option value="{{$sub_segment->id}}" selected>{{$sub_segment->name}}</option>
+                                                    
+                                                @else
+                                                    
+                                                <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
+                                                @endif
+                                            @endforeach
+                                        @endif
                                     </select>
                                 </div>
                             </div>
@@ -888,7 +896,7 @@
                 }).done(function (data) {
                     console.log(data);
                    if (data.status == 0) {
-                    $('#sub_segment_id').prop("disabled", false);
+                    // $('#sub_segment_id').prop("disabled", false);
                        $('#sub_segment_id').children().remove();
                                     $('#sub_segment_id').prepend('<option value="" selected="selected"></option>')
                                 $.each(data.sub_segments, function (index, sub_segments) {
@@ -910,15 +918,15 @@
             // @endif
 
 
-            $('#sub_segment_id').prepend('<option value="" selected></option>').select2({
+            $('#sub_segment_id').select2({
                 placeholder: "Select Sub Segment",
                 width:'100%',
             });
-            @if($user->sub_segment_id != null)
-            var sub_segment_id = {!! $user->sub_segment_id !!};
+            // @if($user->sub_segment_id != null)
+            // var sub_segment_id = {!! $user->sub_segment_id !!};
             
-            $('#sub_segment_id').val(sub_segment_id).trigger('change');
-            @endif
+            // $('#sub_segment_id').val(sub_segment_id).trigger('change');
+            // @endif
 
 
             

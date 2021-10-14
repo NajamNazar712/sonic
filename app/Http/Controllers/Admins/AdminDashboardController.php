@@ -8418,6 +8418,7 @@ class AdminDashboardController extends Controller
     public function userProfile($id)
     {
         $user = User::find($id);
+        
         $product = Product::find($user->product_id);
         $products = Product::all();
         $banks = BanksList::all();
@@ -8428,7 +8429,7 @@ class AdminDashboardController extends Controller
         $email_ids = implode(',', $email_ids);
         $reference = Reference::where('id', $user->reference_id)->first();
         $segments = Segment::all();
-        $sub_segments = SubCategorySegment::all();
+        $sub_segments = SubCategorySegment::where('segment_id',$user->segment->id)->get();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
         $territories = Territory::select('id','name')->get();
