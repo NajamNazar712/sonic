@@ -6,8 +6,8 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
-use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
-use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -50,8 +50,8 @@ use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
-use App\http\Models\Admin\Retail\RetailFranchise;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use DNS2D;
 
 class AdminWalkInBookShipmentController extends Controller
@@ -725,26 +725,7 @@ class AdminWalkInBookShipmentController extends Controller
                             <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
                             <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
                 ';
-                $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
-                        if ($express_details->exists()) {
-                            if($shipment->shipper_status_id != 54){
-                                $express_details = $express_details->first();
-                                if($express_details->center_frachise_type==1){
-                                    $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
-                                    $express_center =  '('. $trax_center->name. ')';
-                                }elseif ($express_details->center_frachise_type==2) {
-                                    $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
-                                    $express_center = '('. $trax_franchise->name . ')';
-                                }else{
-                                    $express_center = '';
-                                }
-                            }else{
-                                $express_center = '';
-                            }
-                    
-                        }else{
-                            $express_center = '';
-                        }
+                
 
                 $table_start .= '
                                 <td class="color primary"><strong>Order ID</strong></td>
@@ -754,7 +735,7 @@ class AdminWalkInBookShipmentController extends Controller
                                 <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
                                 <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .' '.$express_center.'</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .'</strong></td>
                               </tr>
                               <tr>
                                 <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -856,26 +837,7 @@ class AdminWalkInBookShipmentController extends Controller
             }
 
             $html .= $shipment_details;
-            $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
-                        if ($express_details->exists()) {
-                            if($shipment->shipper_status_id != 54){
-
-                                $express_details = $express_details->first();
-                                if($express_details->center_frachise_type==1){
-                                    $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
-                                    $express_center =  '('. $trax_center->name. ')';
-                                }elseif ($express_details->center_frachise_type==2) {
-                                    $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
-                                    $express_center = '('. $trax_franchise->name . ')';
-                                }else{
-                                    $express_center = '';
-                                }
-                            }else{
-                                $express_center = '';
-                            }
-                        }else{
-                            $express_center = '';
-                        }
+            
             if($shipment->actual_weight > 0){
             $item = $shipment->items->first();
             $invoice = '<div class="invoice p-1">
@@ -960,7 +922,7 @@ class AdminWalkInBookShipmentController extends Controller
                                     <td class="color secondary"><strong>Origin</strong></td>
                                     <td>'. $shipment->pickup_address->city->name .'</td>
                                     <td class="color secondary"><strong>Destination</strong></td>
-                                    <td>'. $shipment->consignee_city->name .' '.$express_center.'</td>
+                                    <td>'. $shipment->consignee_city->name .'</td>
                                 </tr>
                                 <tr>
                                     <td class="color secondary"><strong>Booking Date</strong></td>

@@ -515,9 +515,9 @@
                                 index++;
                                 var img = '';
                                 var remove = '';
-                                @if (session('role_id') == 1 || in_array(109, session('permissions')))
+                                @if (session('role_id') == 1 || (in_array(109, session('permissions')) && in_array(608, session('permissions'))))
                                 remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-                            @endif
+                                @endif
                                 if(Array.isArray(detail.images)){
                                     detail.images.forEach(function(image){
                                         img += '<div class="col mb-1"><a class="btn btn-sm btn-outline-info align-middle" href="' + image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a></div>';
