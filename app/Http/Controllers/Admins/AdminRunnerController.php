@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\NotificationsController;
-use App\http\Models\Runner;
-use App\http\Models\RunnerDetail;
-use App\http\Models\RunnerDetailTime;
-use App\http\Models\RunnerJunction;
+use App\Http\Models\Runner;
+use App\Http\Models\RunnerDetail;
+use App\Http\Models\RunnerDetailTime;
+use App\Http\Models\RunnerJunction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
