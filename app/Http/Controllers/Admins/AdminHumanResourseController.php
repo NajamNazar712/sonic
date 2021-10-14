@@ -416,7 +416,7 @@ class AdminHumanResourseController extends Controller
 
             if($employee->employee_type_id == 1)
             {
-                $admin = Admin::where('trax_id',$employee->trax_id);
+                $admin = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
                 if($admin->exists()) {
                     $admin = $admin->first();
                     $admin->password = bcrypt($employee->pin);
@@ -425,7 +425,7 @@ class AdminHumanResourseController extends Controller
                 }
             }
             else {
-                $rider = Rider::where('trax_id',$employee->trax_id);
+                $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
                 if($rider->exists()) {
                     $rider = $rider->first();
                     $rider->pin = bcrypt($employee->pin);
@@ -445,7 +445,7 @@ class AdminHumanResourseController extends Controller
         if($employee_id){
             $employee = Employee::find($employee_id);
             if($employee){
-                $rider = Rider::where('trax_id',$employee->trax_id);
+                $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
                 if($rider->exists())
                 {
                     $rider = $rider->first();
@@ -470,7 +470,7 @@ class AdminHumanResourseController extends Controller
         if($employee_id){
             $employee = Employee::find($employee_id);
             if($employee){
-                $rider = Rider::where('trax_id',$employee->trax_id);
+                $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
                 if($rider->exists())
                 {
                     $rider = $rider->first();
@@ -516,7 +516,7 @@ class AdminHumanResourseController extends Controller
         {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
-        $rider = Rider::where('trax_id',$employee->trax_id);
+        $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
         if($rider->doesntExist()){
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
@@ -541,7 +541,7 @@ class AdminHumanResourseController extends Controller
         {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
-        $rider = Rider::where('trax_id',$employee->trax_id);
+        $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
         if($rider->doesntExist()){
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
@@ -567,7 +567,7 @@ class AdminHumanResourseController extends Controller
         {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
-        $rider = Rider::where('trax_id',$employee->trax_id);
+        $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
         if($rider->doesntExist()){
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
@@ -594,7 +594,7 @@ class AdminHumanResourseController extends Controller
         {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
-        $staff = Admin::where('trax_id',$employee->trax_id);
+        $staff = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
         if($staff->doesntExist()){
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
@@ -620,7 +620,7 @@ class AdminHumanResourseController extends Controller
         {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
-        $staff = Admin::where('trax_id',$employee->trax_id);
+        $staff = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
         if($staff->doesntExist()){
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
@@ -664,7 +664,7 @@ class AdminHumanResourseController extends Controller
 
         $employee = $employee->first();
         $trax_id = $employee->trax_id;
-        $rider = Rider::where('trax_id',$trax_id);
+        $rider = Rider::where('trax_id',$trax_id)->where('trax_id','!=',null);
         if($rider->doesntExist()) {
             $rider = new Rider();
             $rider->city_id = $request->city_id;
@@ -784,7 +784,7 @@ class AdminHumanResourseController extends Controller
                     if($employee->employee_type_id == 1)
                     {
 
-                        $admin = Admin::where('trax_id',$employee->trax_id);
+                        $admin = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
 
                         if($admin->doesntExist())
                         {
@@ -919,7 +919,7 @@ class AdminHumanResourseController extends Controller
 
         if($employee->employee_type_id == 1)
         {
-            $admin = Admin::where('trax_id',$employee->trax_id);
+            $admin = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
             if($admin->exists())
             {
                 $admin = $admin->first();
@@ -954,7 +954,7 @@ class AdminHumanResourseController extends Controller
             }
         }
         else{
-            $rider = Rider::where('trax_id',$employee->trax_id);
+            $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
             if($rider->exists())
             {
                 $rider = $rider->first();

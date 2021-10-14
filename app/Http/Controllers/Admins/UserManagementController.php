@@ -180,6 +180,20 @@ class UserManagementController extends Controller
 
             $admin->save();
 
+            $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
+            if($employee->exists())
+            {
+                $employee = $employee->first();
+                if($request->status) {
+                    $employee->status_id = AdminHumanResourseController::GetStatusOfEmployee($employee->id);
+                }
+                else{
+                    $employee->status_id = 2;
+                }
+
+                $employee->update();
+            }
+
             if ($request->status) {
                 return ['status' => 0, 'success' => 'Admin has been enabled'];
             }
@@ -450,7 +464,7 @@ $designations = EmployeeDesignation::where('status',1)->get();
                 AdminHub::where('admin_id', $id)->delete();
             }
 
-            $employee = Employee::where('trax_id',$admin->trax_id);
+            $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
             if($employee->exists())
             {
                 $employee = $employee->first();

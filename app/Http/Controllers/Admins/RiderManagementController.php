@@ -359,7 +359,7 @@ class RiderManagementController extends Controller
         $rider->save();
 
 
-        $employee = Employee::where('trax_id',$rider->trax_id);
+        $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
         if($employee->exists())
         {
             $employee = $employee->first();
@@ -382,7 +382,7 @@ class RiderManagementController extends Controller
         $status = $request->status;
         if($status == 'riderActive'){
             $rider = Rider::where('id',$id)->update(['status'=>1]);
-            $employee = Employee::where('trax_id',$rider->trax_id);
+            $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
             if($employee->exists())
             {
                 $employee = $employee->first();
@@ -394,7 +394,7 @@ class RiderManagementController extends Controller
             }
         }else if($status == 'riderInactive'){
             $rider =Rider::where('id',$id)->update(['status'=>0]);
-            $employee = Employee::where('trax_id',$rider->trax_id);
+            $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
             if($employee->exists())
             {
                 $employee = $employee->first();
@@ -470,7 +470,7 @@ class RiderManagementController extends Controller
                         $trax_id = null;
                     }
 
-                    $employee = Employee::where('trax_id',$rider->trax_id);
+                    $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
                     if($employee->exists())
                     {
                         $employee->trax_id = $trax_id;
