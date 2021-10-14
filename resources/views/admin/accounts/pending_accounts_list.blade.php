@@ -769,7 +769,7 @@
             serverSide: true,
             deferLoading: 0,
             rowId: 'id',
-            order: [[2, 'desc']],
+            order: [[10, 'desc']],
             ajax: {
                 url: '{{ route('admin.accounts.pending.ajax') }}',
                 type: "POST",
