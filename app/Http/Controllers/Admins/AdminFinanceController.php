@@ -1432,7 +1432,7 @@ class AdminFinanceController extends Controller
                 $delivery_note_shipment = $delivery_note_shipment->first();
 
                 $shipment = Shipment::find($shipment_id);
-                if($shipment->shipment_type == 1){
+                if($shipment->shipment_type == 1 || $shipment->shipment_type == 2){
                     $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
                     if($journey){
                         $start = $journey->created_at;
