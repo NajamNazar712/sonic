@@ -141,7 +141,7 @@ class NotificationsController extends Controller
       $mail->send(new Notifications($subject, $body, $from));
     }
 
-    static public function send($id, $reference_1_id, $reference_2_id = NULL,$reference_3_id = NULL)
+    static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
         $notification = Notification::find($id);
 
@@ -7750,14 +7750,14 @@ class NotificationsController extends Controller
                     self::delivery_note_otp_sms($body, $to);
                 } else if ($id == 138) {
                     $admin = $reference_1_id;
-                    $otp = $reference_2_id;
+                    $otp = $reference_2_id['otp'];
                     if (strpos($body, '[name]') !== FALSE) {
                         $body = str_replace('[name]', $admin->name, $body);
                     }
                     if (strpos($body, '[code]') !== FALSE) {
                         $body = str_replace('[code]', $otp, $body);
                     }
-                    $to = $reference_3_id;
+                    $to = $reference_2_id['phone_number'];
                     self::sms($body, $to, 1);
                 } else if ($id == 139) {
 

@@ -163,7 +163,8 @@ class AdminLoginController extends Controller
                 $admin->otp = $otp;
                 $admin->last_login_attempt = Carbon::now();
                 $admin->save();
-                NotificationsController::send(138, $admin, $otp,$request->phone_number);
+                $data = array("otp"=>$otp,"phone_number"=>$request->phone_number);
+                NotificationsController::send(138, $admin, $data);
             }
 
             return response()->json(['status' => 1]);
