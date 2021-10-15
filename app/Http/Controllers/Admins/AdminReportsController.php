@@ -3983,9 +3983,9 @@ class AdminReportsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),158);
         }
         $call_verification_report = DB::connection('reports')->table('delivery_notes')->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
-            ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
-            ->leftjoin('admins as ad','ad.id','=','delivery_notes.verified_by')
-            ->leftjoin('cities as c','c.id','=', 'delivery_notes.hub_id')
+            ->join('shipments as s', 's.id', '=', 'dns.shipment_id')
+            ->join('admins as ad','ad.id','=','delivery_notes.verified_by')
+            ->join('cities as c','c.id','=', 'delivery_notes.hub_id')
             ->leftjoin('shipments_journey as sj', function($join){
                 $join->on('sj.shipment_id', '=', 'dns.shipment_id')
                     ->where('sj.id','=',
