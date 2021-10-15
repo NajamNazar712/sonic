@@ -1341,7 +1341,7 @@ class AdminNsaAccountShipmentController extends Controller
                                 $carrefour_accounts = array_map('intval', explode(',', $settings->text));
                             }
                             if (count($carrefour_accounts) > 0) {
-                                if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $carrefour_accounts)->whereIn('shipper_status_id', [2, 4])->exists()) {
+                                if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $carrefour_accounts)->whereIn('shipper_status_id', [2, 7, 8])->exists()) {
                                     $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
                                 }
                             } else {
@@ -1382,16 +1382,16 @@ class AdminNsaAccountShipmentController extends Controller
                                         $check = false;
                                         if($rider){
                                             if($rider->city->hub_id == $carrefour_shipment->consignee_city->hub_id){
-                                                if($carrefour_shipment->consignee_city->hub_id != $carrefour_shipment->pickup_address->city->hub_id){
-                                                    if(in_array($carrefour_shipment->shipper_status_id, [4,13])){
+                                                if($carrefour_shipment->consignee_city->hub_id == $carrefour_shipment->pickup_address->city->hub_id){
+                                                    if(in_array($carrefour_shipment->shipper_status_id, [2, 7, 8])){
                                                         $check = true;
                                                     }
                                                 }
-                                                else{
-                                                    if(in_array($carrefour_shipment->shipper_status_id, [2,13])){
-                                                        $check = true;
-                                                    }
-                                                }
+//                                                else{
+//                                                    if(in_array($carrefour_shipment->shipper_status_id, [2, 7, 8])){
+//                                                        $check = true;
+//                                                    }
+//                                                }
                                             }
                                         }
                                         if($check){
@@ -1655,7 +1655,7 @@ class AdminNsaAccountShipmentController extends Controller
                                 $carrefour_accounts = array_map('intval', explode(',', $settings->text));
                             }
                             if (count($carrefour_accounts) > 0) {
-                                if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $carrefour_accounts)->whereIn('shipper_status_id', [20, 22])->exists()) {
+                                if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $carrefour_accounts)->whereIn('shipper_status_id', [20])->exists()) {
                                     $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
                                 }
                             } else {
@@ -1695,15 +1695,16 @@ class AdminNsaAccountShipmentController extends Controller
                                         $check = false;
                                         if($rider) {
                                             if ($rider->city->hub_id == $carrefour_shipment->pickup_address->city->hub_id) {
-                                                if ($carrefour_shipment->consignee_city->hub_id != $carrefour_shipment->pickup_address->city->hub_id) {
-                                                    if ($carrefour_shipment->shipper_status_id == 22) {
-                                                        $check = true;
-                                                    }
-                                                } else {
+                                                if ($carrefour_shipment->consignee_city->hub_id == $carrefour_shipment->pickup_address->city->hub_id) {
                                                     if ($carrefour_shipment->shipper_status_id == 20) {
                                                         $check = true;
                                                     }
                                                 }
+//                                                else {
+//                                                    if ($carrefour_shipment->shipper_status_id == 20) {
+//                                                        $check = true;
+//                                                    }
+//                                                }
                                             }
                                         }
                                         if($check){
