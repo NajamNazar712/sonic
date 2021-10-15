@@ -56,7 +56,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
-
+    Route::post('get_sub_segment', 'Auth\RegisterController@get_sub_segment')->name('get_sub_segment');
+    
     Route::prefix('orders')->name('orders.')->group(function(){
         Route::get('','Shippers\ShipperDashboardController@orders_index')->name('index');
         Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
