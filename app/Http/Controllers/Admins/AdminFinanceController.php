@@ -3382,13 +3382,14 @@ class AdminFinanceController extends Controller
             }
             else {
                 $payment_shipment = RetailDonePaymentShipment::where('retail_done_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
-    
+                $rdp = RetailDonePayment::find($payment_shipment->retail_done_payment_id);
+                    
                 $shipment = Shipment::find($shipment_id);
     
                 $amount = 0;
                 $payable = 0 - $payment_shipment->payable;
     
-                $pending_payment = RetailPendingPayment::where('user_id', $shipment->user_id);
+                $pending_payment = RetailPendingPayment::where('user_id', $rdp->user_id);
     
                 if ($pending_payment->exists()) {
                     $pending_payment = $pending_payment->first();
@@ -3401,7 +3402,7 @@ class AdminFinanceController extends Controller
                 else {
                     $pending_payment = new RetailPendingPayment();
     
-                    $pending_payment->user_id = $shipment->user_id;
+                    $pending_payment->user_id = $rdp->user_id;
                     $pending_payment->total_shipments = 1;
                     $pending_payment->delivered_shipments = 0;
                     $pending_payment->adjusted_shipments = 1;
@@ -3614,14 +3615,15 @@ class AdminFinanceController extends Controller
                 }
                 else {
                     $payment_shipment = RetailDonePaymentShipment::find($payment_shipment_id);
-    
+                    $rdp = RetailDonePayment::find($payment_shipment->retail_done_payment_id);
+                    
                     if ($payment_shipment) {
                         $shipment = Shipment::find($shipment_id);
     
                         $amount = 0;
                         $payable = 0 - $payment_shipment->payable;
                         //retail pending payment
-                        $pending_payment = RetailPendingPayment::where('user_id', $shipment->user_id);
+                        $pending_payment = RetailPendingPayment::where('user_id', $rdp->user_id);
     
                         if ($pending_payment->exists()) {
                             $pending_payment = $pending_payment->first();
@@ -3634,7 +3636,7 @@ class AdminFinanceController extends Controller
                         else {
                             $pending_payment = new RetailPendingPayment();
     
-                            $pending_payment->user_id = $shipment->user_id;
+                            $pending_payment->user_id = $rdp->user_id;
                             $pending_payment->total_shipments = 1;
                             $pending_payment->delivered_shipments = 0;
                             $pending_payment->adjusted_shipments = 1;
@@ -3669,11 +3671,11 @@ class AdminFinanceController extends Controller
     
                     if ($invoice_shipment) {
                         $shipment = Shipment::find($shipment_id);
-    
+                        $rs = RetailShipment::where('shipment_id',$shipment_id)->get()->first();
                         $amount = 0;
                         $payable = $invoice_shipment->invoice_amount;
     
-                        $pending_payment = RetailPendingPayment::where('user_id', $shipment->user_id);
+                        $pending_payment = RetailPendingPayment::where('user_id', $rs->shipper_account_no);
     
                         if ($pending_payment->exists()) {
                             $pending_payment = $pending_payment->first();
