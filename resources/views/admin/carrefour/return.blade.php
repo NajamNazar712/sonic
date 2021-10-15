@@ -35,12 +35,19 @@
                                         </div>
                                     </div>
                                     <div class="row mb-2 justify-content-center">
+
+                                        <div class="col-3">
+                                            <fieldset class="form-group">
+                                                <select name="hub" id="hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required" >
+                                                    @foreach($hubs as $hub)
+                                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
                                         <div class="col-3">
                                             <fieldset class="form-group">
                                                 <select name="rider" id="rider" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
-                                                    @foreach($riders as $rider)
-                                                        <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                                    @endforeach
                                                 </select>
                                             </fieldset>
                                         </div>
@@ -57,7 +64,7 @@
                                     <div class="row justify-content-center">
                                         <div class="col-auto">
                                             <div class="form-group">
-                                                <button type="submit" name="upload" class="btn btn-primary">Bulk Return</button>
+                                                <button type="submit" name="upload" class="btn btn-primary">Submit &amp; Print</button>
                                             </div>
                                         </div>
                                     </div>
@@ -114,11 +121,39 @@
                 var pid = '{{ session('print') }}';
                 print(pid);
             @endif
+
+            $('#hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Hub*',
+            });
             $('#rider').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Rider*',
             });
             $('#route').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Route*',
+            });
+            $("#hub").on('change',function () {
+                var hub_id = $(this).val();
+                $.ajax({
+                    url: '{!! route('admin.return.create.riders.hub') !!}',
+                    method: 'GET',
+                    data: {
+                        'hub_id': hub_id,
+                    }
+                }).done(function(data) {
+                    console.log(data);
+                    html = "";
+                    $.each(data,function (i,v) {
+                        html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name}</option>`
+                    });
+                    $('#rider').html(html);
+                    $('#rider').val(null).trigger('change');
+
+                });
+            });
+
+            $('#rider').on('change',function () {
+                var route = $(this).find(":selected").data("id");
+                $('#route').val(route).trigger('change');
             });
             $.validator.addMethod('maxsize', function(value, element, params) {
                 if ($(element).attr('type') === 'file') {
@@ -149,7 +184,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Your shipment(s) are being delivered!',
+                        text: 'Creating Return Note!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

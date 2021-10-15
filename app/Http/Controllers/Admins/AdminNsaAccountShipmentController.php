@@ -16,6 +16,7 @@ use App\Http\Models\Admin\NsaAccountShipment;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\City;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\InvoiceShipment;
 use App\Http\Models\PackagingMaterialRequest;
@@ -1368,13 +1369,13 @@ class AdminNsaAccountShipmentController extends Controller
                         $invalid_tracking_numbers = array();
                         $rider_id = $request->rider;
                         $route_id = $request->route;
+                        $rider = Rider::find($rider_id);
                         if ($carrefour_shipments->exists()) {
                             $carrefour_shipments = $carrefour_shipments->get();
 
                             $valid_shipments = array();
                             $shipments_count = 0;
                             $total_cod_amount = 0;
-                            $rider = Rider::find($rider_id);
                             foreach ($carrefour_shipments as $carrefour_shipment) {
                                 if ($carrefour_shipment) {
                                     if (!in_array($carrefour_shipment->id, $valid_shipments)) {
@@ -1382,12 +1383,12 @@ class AdminNsaAccountShipmentController extends Controller
                                         if($rider){
                                             if($rider->city->hub_id == $carrefour_shipment->consignee_city->hub_id){
                                                 if($carrefour_shipment->consignee_city->hub_id != $carrefour_shipment->pickup_address->city->hub_id){
-                                                    if($carrefour_shipment->shipper_status_id == 4){
+                                                    if(in_array($carrefour_shipment->shipper_status_id, [4,13])){
                                                         $check = true;
                                                     }
                                                 }
                                                 else{
-                                                    if($carrefour_shipment->shipper_status_id == 2){
+                                                    if(in_array($carrefour_shipment->shipper_status_id, [2,13])){
                                                         $check = true;
                                                     }
                                                 }
@@ -1504,13 +1505,21 @@ class AdminNsaAccountShipmentController extends Controller
                                             }
                                         }
                                     }
-                                    return redirect()->back()->with(['error' => 'Delivery Note cannot be created!']);
+                                    else{
+                                        return redirect()->back()->with(['error' => 'Delivery Note cannot be created!']);
+                                    }
                                 }
-                                return redirect()->back()->with(['error' => 'Rider not Found!']);
+                                else{
+                                    return redirect()->back()->with(['error' => 'Rider not found!']);
+                                }
                             }
+                            else{
+                                return redirect()->back()->with(['error' => 'In-Valid Shipment(s)!']);
+                            }
+                        }
+                        else{
                             return redirect()->back()->with(['error' => 'In-Valid Shipment(s)!']);
                         }
-                        return redirect()->back()->with(['error' => 'In-Valid Shipment(s)!']);
                     } else {
                         $errors = array_map(function ($row, $errors) {
                             return $row . ':' . PHP_EOL . implode(' | ', $errors);
@@ -1532,9 +1541,25 @@ class AdminNsaAccountShipmentController extends Controller
     }
 
     public function carrefour_return_index(){
-        $riders = Rider::where('status', 1)->get();
-        $routes = Route::where('status', 1)->get();
-        return view('admin.carrefour.return')->with(['riders' => $riders, 'routes' => $routes]);
+        $routes = Route::where('status', 1);
+
+        if (session('role_id') != 1) {
+            $routes = $routes->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $routes = $routes->get();
+
+        $hubs = City::where([['status',1],['hub',1]]);
+
+        if(session('role_id') != 1)
+        {
+            $hubs = $hubs->WhereIn('id',session('hubs'));
+        }
+
+        $hubs = $hubs->get(['id','name']);
+        return view('admin.carrefour.return')->with(['hubs' => $hubs, 'routes' => $routes]);
     }
     public function carrefour_return_submit(Request $request){
         $names = [
@@ -1630,7 +1655,7 @@ class AdminNsaAccountShipmentController extends Controller
                                 $carrefour_accounts = array_map('intval', explode(',', $settings->text));
                             }
                             if (count($carrefour_accounts) > 0) {
-                                if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $carrefour_accounts)->whereIn('shipper_status_id', [2, 4, 13])->exists()) {
+                                if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $carrefour_accounts)->whereIn('shipper_status_id', [20, 22])->exists()) {
                                     $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
                                 }
                             } else {
@@ -1654,11 +1679,13 @@ class AdminNsaAccountShipmentController extends Controller
                         }
 
                         $carrefour_shipments = Shipment::whereIn('id', $shipment_ids);
-
+                        $valid_tracking_numbers = array();
+                        $invalid_tracking_numbers = array();
+                        $rider_id = $request->rider;
+                        $route_id = $request->route;
+                        $rider = Rider::find($rider_id);
                         if ($carrefour_shipments->exists()) {
                             $carrefour_shipments = $carrefour_shipments->get();
-                            $rider_id = $request->rider;
-                            $route_id = $request->route;
                             $valid_shipments = array();
                             $shipments_count = 0;
                             $total_cod_amount = 0;
@@ -1666,23 +1693,30 @@ class AdminNsaAccountShipmentController extends Controller
                                 if ($carrefour_shipment) {
                                     if (!in_array($carrefour_shipment->id, $valid_shipments)) {
                                         $check = false;
-                                        if($carrefour_shipment->consignee_city->hub_id != $carrefour_shipment->pickup_address->city->hub_id){
-                                            if($carrefour_shipment->shipper_status_id == 22){
-                                                $check = true;
-                                            }
-                                        }
-                                        else{
-                                            if($carrefour_shipment->shipper_status_id == 20){
-                                                $check = true;
+                                        if($rider) {
+                                            if ($rider->city->hub_id == $carrefour_shipment->pickup_address->city->hub_id) {
+                                                if ($carrefour_shipment->consignee_city->hub_id != $carrefour_shipment->pickup_address->city->hub_id) {
+                                                    if ($carrefour_shipment->shipper_status_id == 22) {
+                                                        $check = true;
+                                                    }
+                                                } else {
+                                                    if ($carrefour_shipment->shipper_status_id == 20) {
+                                                        $check = true;
+                                                    }
+                                                }
                                             }
                                         }
                                         if($check){
                                             $valid_shipments[] = $carrefour_shipment->id;
                                             $shipments_count++;
+                                            $valid_tracking_numbers[] = $carrefour_shipment->tracking_number;
 
                                             if ($carrefour_shipment->booking_type_id != 4 || ($carrefour_shipment->booking_type_id == 4 && $carrefour_shipment->charges_mode_id == 2)) {
                                                 $total_cod_amount += $carrefour_shipment->amount;
                                             }
+                                        }
+                                        else{
+                                            $invalid_tracking_numbers[] = $carrefour_shipment->tracking_number;
                                         }
                                     }
                                 }
@@ -1704,15 +1738,48 @@ class AdminNsaAccountShipmentController extends Controller
                                             $shipment->save();
                                             ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider_id);
                                         }
+
+                                        $success_check = false;
+                                        $error_check = false;
+                                        if(count($valid_tracking_numbers) > 0){
+                                            $success_check = true;
+                                            $valid_tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                                                return $row . ': ' . $tracking_number;
+                                            }, array_keys($valid_tracking_numbers), $valid_tracking_numbers));
+                                        }
+                                        if(count($invalid_tracking_numbers) > 0){
+                                            $error_check = true;
+                                            $invalid_tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                                                return $row . ': ' . $tracking_number;
+                                            }, array_keys($invalid_tracking_numbers), $invalid_tracking_numbers));
+                                        }
+                                        if($success_check && $error_check){
+                                            return redirect()->back()->with(['success' => 'Return Note Created, Total ' . count($rows) . ' Shipment(s) with Tracking Number(s):' . PHP_EOL . $valid_tracking_numbers, 'error' => 'Return Note cannot be created against shipment(s) with Tracking Number:' . PHP_EOL . $invalid_tracking_numbers, 'print'=>$note->id]);
+                                        }
+                                        else{
+                                            if($success_check){
+                                                return redirect()->back()->with(['success' => 'Return Note Created, Total ' . count($rows) . ' Shipment(s) with Tracking Number(s):' . PHP_EOL . $valid_tracking_numbers,'print'=>$note->id]);
+                                            }
+                                            elseif ($error_check){
+                                                return redirect()->back()->with(['error' => 'Return Note cannot be created against shipment(s) with Tracking Number:' . PHP_EOL . $invalid_tracking_numbers,'print'=>$note->id]);
+                                            }
+                                        }
+                                    }
+                                    else{
+                                        return redirect()->back()->with(['error' => 'Return Note cannot be created!']);
                                     }
                                 }
+                                else{
+                                    return redirect()->back()->with(['error' => 'Rider not found!']);
+                                }
+                            }
+                            else{
+                                return redirect()->back()->with(['error' => 'In-Valid Shipment(s)!']);
                             }
                         }
-                        $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                            return $row . ': ' . $tracking_number;
-                        }, array_keys($tracking_numbers), $tracking_numbers));
-
-                        return redirect()->back()->with(['success' => 'Return Note Created, Total ' . count($rows) . ' Shipment(s) with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                        else{
+                            return redirect()->back()->with(['error' => 'In-Valid Shipment(s)!']);
+                        }
                     } else {
                         $errors = array_map(function ($row, $errors) {
                             return $row . ':' . PHP_EOL . implode(' | ', $errors);

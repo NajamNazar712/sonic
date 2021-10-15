@@ -63,7 +63,7 @@
                                     <div class="row justify-content-center">
                                         <div class="col-auto">
                                             <div class="form-group">
-                                                <button type="submit" name="upload" class="btn btn-primary">Bulk Deliver</button>
+                                                <button type="submit" name="upload" class="btn btn-primary">Submit &amp; Print</button>
                                             </div>
                                         </div>
                                     </div>
@@ -217,7 +217,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Your shipment(s) are being delivered!',
+                        text: 'Creating Delivery Note!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
