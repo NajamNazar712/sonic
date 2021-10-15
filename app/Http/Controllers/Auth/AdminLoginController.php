@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRoleModulePermission;
+use App\Http\Models\AgentReturnConfirmation;
 use Illuminate\Support\Facades\Hash;
 
 class AdminLoginController extends Controller
@@ -85,7 +86,26 @@ class AdminLoginController extends Controller
                     }
                 }
             }
-
+//mark login start
+            $check_login = AgentReturnConfirmation::where('admin_id',$id)->where('current_date',Carbon::now()->format("Y-m-d"));
+            if(!$check_login->exists()){
+               $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                ->where('admin_roles.department_id',3)->where('a.id',$id);
+                if($agent_role->exists()){
+                    $agent_login = new AgentReturnConfirmation;
+                    $agent_login->login_time = Carbon::now();
+                    $agent_login->admin_id = $id;
+                    $agent_login->current_date = Carbon::now()->format("Y-m-d");
+                    $agent_login->save();
+                }
+            }else{
+                $check_login = $check_login->get()->first();
+                if($check_login->login_time == NULL){
+                    $check_login->login_time = Carbon::now();
+                    $check_login->save();
+                }
+            }
+//mark login end
             session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login]);
 
             return redirect()->intended(route('admin.dashboard.index'));
@@ -105,6 +125,19 @@ class AdminLoginController extends Controller
     public function logout(Request $request)
     {
         if(Auth::guard('admin')){
+            //mark logout start
+            $admin = Auth::guard('admin');
+            $check_logout = AgentReturnConfirmation::where('admin_id',$admin->id())->where('current_date',Carbon::now()->format("Y-m-d"));
+            if($check_logout->exists()){
+                $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                ->where('admin_roles.department_id',3)->where('a.id',$admin->id());
+                if($agent_role->exists()){
+                    $agent_logout = $check_logout->first();
+                    $agent_logout->logout_time = Carbon::now();
+                    $agent_logout->save();
+                }
+            }
+            //mark logout end
             Auth::guard('admin')->logout();
 
             $request->session()->invalidate();

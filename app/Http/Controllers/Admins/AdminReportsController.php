@@ -73,6 +73,7 @@ class AdminReportsController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftjoin('zones as z', 'z.id', '=', 'h.zone_id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
@@ -97,7 +98,7 @@ class AdminReportsController extends Controller
             })
             //->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select(['p.product_name as product_type','si.description as description','ssr.name as reason','sjr.remarks as remarks','ss.name as status','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'shipments.created_at', 'usi.poc','u.id as account_no','sm.mode as shipping_mode', 'shipments.order_id as order_id',DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt')]);
+            ->select(['z.name  as zone','p.product_name as product_type','si.description as description','ssr.name as reason','sjr.remarks as remarks','ss.name as status','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'shipments.created_at', 'usi.poc','u.id as account_no','sm.mode as shipping_mode', 'shipments.order_id as order_id',DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt')]);
 
         $type = $request->get('search_types');
 
@@ -261,8 +262,14 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('image', function ($return_note) {
+                if ($return_note->delivered_to_shipper_count != 0) {
                 return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
-            })
+                }
+                else {
+
+                    return '-';
+                }
+                })
             ->editColumn('shipments_count_link', function($return_note) {
                 if ($return_note->shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $return_note->shipments_count . '</button>';
@@ -4108,7 +4115,7 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
         $zones = DB::table('zones')->get();
-        return view('admin.reports.fake_statuses_report')->with(['riders' => $riders, 'hubs' => $hubs, 'shipping_modes' => $shipping_modes,'zones' => $zones]); 
+        return view('admin.reports.fake_statuses_report')->with(['riders' => $riders, 'hubs' => $hubs, 'shipping_modes' => $shipping_modes,'zones' => $zones]);
     }
 
     public function fake_status_list(request $request){
@@ -4120,9 +4127,12 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
+            ->leftjoin('admin_hubs as ah', 'ah.hub_id', '=', 'c.hub_id')
             ->leftjoin('zones as z', 'z.id', '=', 'c.zone_id')
             ->select('z.name as zone_name','r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::connection('reports')->raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
-            ->where('dns.fake_status', 1)->groupBy('delivery_notes.id');
+            ->where('dns.fake_status', 1)
+            ->where('ah.admin_id', Auth::id())
+            ->groupBy('delivery_notes.id');
 
 
         $datatables = Datatables::of($delivery_note)
@@ -6146,7 +6156,13 @@ class AdminReportsController extends Controller
                     ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id AND crm_comments.comment_type = 1)')) ;
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
-            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crsh.created_at as reopen_date','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin')
+            
+            ->leftjoin('crm_comments as ccse', function($join){
+                $join->on('ccse.crm_request_id', '=', 'crm_requests.id')
+                    ->where('ccse.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id AND crm_comments.comment_type = 0)'));
+            })
+            
+            ->select('ccse.created_at as last_comment_date_external', 'ccse.comment as last_comment_external','crm_requests.id as request_number', 's.tracking_number as tracking_number','crsh.created_at as reopen_date','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin')
             ->groupBy('crm_requests.id');
 
         $datatable = Datatables::of($crm)
@@ -6346,7 +6362,7 @@ class AdminReportsController extends Controller
                         $sub_query->where('ccs.comment_by', '=', 0)
                             ->where('accs.name', 'like', '%' . $keyword . '%');
                     });
-                        
+
                 }
                 else {
                     $query->whereRaw('false');
@@ -6391,7 +6407,7 @@ class AdminReportsController extends Controller
         if($case_nature_type = $request->get('search_case_nature_type')){
             $datatable->where('crcnt.id', '=', $case_nature_type);
         }
-        
+
         if ($mode = $request->get('search_shipping_mode')) {
             $datatable->where('s.booking_type_id', '=', $mode);
         }
@@ -6510,7 +6526,7 @@ class AdminReportsController extends Controller
                     });
             });
 
-        
+
             $stats['in_process'] = $stats['in_process']->whereExists(function($query) use ($origin) {
                 $query->from('user_shipping_infos')
                     ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -6588,6 +6604,7 @@ class AdminReportsController extends Controller
 
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $shipments = $shipments->whereBetween('shipments.created_at', [$from,$to]);
@@ -6767,7 +6784,8 @@ class AdminReportsController extends Controller
         $sdn = StationDepositNote::
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
-            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref','station_deposit_notes.created_at']);
+            ->leftjoin('admins as a', 'a.id', '=', 'station_deposit_notes.status_updated_by')
+            ->select(['a.name as resolved_by','station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref','station_deposit_notes.created_at']);
 
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -7550,6 +7568,7 @@ class AdminReportsController extends Controller
         $data = self::last_mile_status_data($date_from, $date_to, $search_destination, $search_hub, $search_zone, $search_rider);
         return response()->json(['status' => 0, 'time_slots' => $data]);
     }
+
     public function last_mile_status_data($from, $to, $destination, $hub, $zone, $rider){
         $data = array();
         $from = Carbon::parse($from)->toDateString();
@@ -7570,7 +7589,13 @@ class AdminReportsController extends Controller
         $sum_sonic_status_updated = 0;
         $sum_sonic_status_percentage = 0;
         $sum_out_for_delivery_percentage = 0;
-        $delivery_note_status = array(7, 8, 9, 12, 15, 18, 56);
+        $sum_total_shipment_deliverd_bolt = 0;
+        $sum_total_shipment_undeliverd_bolt = 0;
+        $sum_total_shipment_deliverd_sonic = 0;
+        $sum_total_shipment_undeliverd_sonic = 0;
+        $delivery_note_status = array(7, 8, 9, 10, 11, 12, 14, 15, 18, 29, 30, 35, 56);
+        $undelivered_status = array(7, 8, 9, 12, 15, 18, 56, 29, 10, 11, 35);
+        $delivered_status = array(14, 30, 36, 37);
         foreach ($time_slots as $id => $slot){
             $total_status_updated_count = 0;
             $bolt_status_updated_count = 0;
@@ -7601,7 +7626,7 @@ class AdminReportsController extends Controller
 
             $time_array = array();
 
-            $total_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0);
+            $total_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 1);
             $total_status_updated = $total_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $total_status_updated = $total_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
@@ -7617,8 +7642,8 @@ class AdminReportsController extends Controller
                 $total_status_updated = $total_status_updated->where('rider_id', $rider);
             }
 
-            $total_status_updated_count = $total_status_updated->count();
-            
+            $total_status_updated_count = $total_status_updated->distinct('shipment_id')->count('shipment_id');
+
             $out_for_delivery = DB::connection('reports')->table('shipments_journey')->where('shipper_status_id',5);
             $out_for_delivery = $out_for_delivery->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $out_for_delivery = $out_for_delivery->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
@@ -7635,9 +7660,12 @@ class AdminReportsController extends Controller
                 $out_for_delivery = $out_for_delivery->where('rider_id', $rider);
             }
 
-            $out_for_delivery_count = $out_for_delivery->count();
-            
-            $bolt_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0)->whereNotNull('rider_id');
+            $out_for_delivery_count = $out_for_delivery->distinct('shipment_id')->count('shipment_id');
+            $out_for_delivery_percentage = 0;
+            if($out_for_delivery_count > 0){
+                $out_for_delivery_percentage = ($total_status_updated_count / $out_for_delivery_count) * 100;
+            }
+            $bolt_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 1)->whereNotNull('rider_id');
             $bolt_status_updated = $bolt_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $bolt_status_updated = $bolt_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
@@ -7652,7 +7680,7 @@ class AdminReportsController extends Controller
             if($rider != null){
                 $bolt_status_updated = $bolt_status_updated->where('rider_id', $rider);
             }
-            $bolt_status_updated_count = $bolt_status_updated->count();
+            $bolt_status_updated_count = $bolt_status_updated->distinct('shipment_id')->count('shipment_id');
 
             $bolt_status_percentage = 0;
             if($total_status_updated_count > 0){
@@ -7662,7 +7690,7 @@ class AdminReportsController extends Controller
             if($out_for_delivery_count > 0){
                 $out_for_delivery_percentage = ($total_status_updated_count / $out_for_delivery_count) * 100;
             }
-            $sonic_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0)->whereNull('rider_id');
+            $sonic_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 1)->whereNull('rider_id');
             $sonic_status_updated = $sonic_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $sonic_status_updated = $sonic_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
@@ -7677,12 +7705,84 @@ class AdminReportsController extends Controller
             if($rider != null){
                 $sonic_status_updated = $sonic_status_updated->where('rider_id', $rider);
             }
-            $sonic_status_updated_count = $sonic_status_updated->count();
+            $sonic_status_updated_count = $sonic_status_updated->distinct('shipment_id')->count('shipment_id');
 
             $sonic_status_percentage = 0;
             if($total_status_updated_count > 0){
                 $sonic_status_percentage = ($sonic_status_updated_count / $total_status_updated_count) * 100;
             }
+
+            $bolt_status_undelivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $undelivered_status)->where('verification', 1)->whereNotNull('rider_id');
+            $bolt_status_undelivered = $bolt_status_undelivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
+            $bolt_status_undelivered = $bolt_status_undelivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            if($destination != null){
+                $bolt_status_undelivered = $bolt_status_undelivered->where('city_id', $destination);
+            }
+            if($hub != null){
+                $bolt_status_undelivered = $bolt_status_undelivered->whereIn('city_id', $hub_cities);
+            }
+            if($zone != null){
+                $bolt_status_undelivered = $bolt_status_undelivered->whereIn('city_id', $zone_cities);
+            }
+            if($rider != null){
+                $bolt_status_undelivered = $bolt_status_undelivered->where('rider_id', $rider);
+            }
+            $bolt_status_undelivered_count = $bolt_status_undelivered->distinct('shipment_id')->count('shipment_id');
+
+
+            $bolt_status_delivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivered_status)->where('verification', 1)->whereNotNull('rider_id');
+            $bolt_status_delivered = $bolt_status_delivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
+            $bolt_status_delivered = $bolt_status_delivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            if($destination != null){
+                $bolt_status_delivered = $bolt_status_delivered->where('city_id', $destination);
+            }
+            if($hub != null){
+                $bolt_status_delivered = $bolt_status_delivered->whereIn('city_id', $hub_cities);
+            }
+            if($zone != null){
+                $bolt_status_delivered = $bolt_status_delivered->whereIn('city_id', $zone_cities);
+            }
+            if($rider != null){
+                $bolt_status_delivered = $bolt_status_delivered->where('rider_id', $rider);
+            }
+            $bolt_status_delivered_count = $bolt_status_delivered->distinct('shipment_id')->count('shipment_id');
+
+
+
+            $sonic_status_undelivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $undelivered_status)->where('verification', 1)->whereNull('rider_id');
+            $sonic_status_undelivered = $sonic_status_undelivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
+            $sonic_status_undelivered = $sonic_status_undelivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            if($destination != null){
+                $sonic_status_undelivered = $sonic_status_undelivered->where('city_id', $destination);
+            }
+            if($hub != null){
+                $sonic_status_undelivered = $sonic_status_undelivered->whereIn('city_id', $hub_cities);
+            }
+            if($zone != null){
+                $sonic_status_undelivered = $sonic_status_undelivered->whereIn('city_id', $zone_cities);
+            }
+            if($rider != null){
+                $sonic_status_undelivered = $sonic_status_undelivered->where('rider_id', $rider);
+            }
+            $sonic_status_undelivered_count = $sonic_status_undelivered->distinct('shipment_id')->count('shipment_id');
+
+            $sonic_status_delivered = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivered_status)->where('verification', 1)->whereNull('rider_id');
+            $sonic_status_delivered = $sonic_status_delivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
+            $sonic_status_delivered = $sonic_status_delivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            if($destination != null){
+                $sonic_status_delivered = $sonic_status_delivered->where('city_id', $destination);
+            }
+            if($hub != null){
+                $sonic_status_delivered = $sonic_status_delivered->whereIn('city_id', $hub_cities);
+            }
+            if($zone != null){
+                $sonic_status_delivered = $sonic_status_delivered->whereIn('city_id', $zone_cities);
+            }
+            if($rider != null){
+                $sonic_status_delivered = $sonic_status_delivered->where('rider_id', $rider);
+            }
+            $sonic_status_delivered_count = $sonic_status_delivered->distinct('shipment_id')->count('shipment_id');
+
 
             $time_array['time'] = $slot;
             $time_array['total_status_updated'] = $total_status_updated_count;
@@ -7692,13 +7792,18 @@ class AdminReportsController extends Controller
             $time_array['bolt_status_percentage'] = round($bolt_status_percentage, 2) .'%';
             $time_array['sonic_status_updated'] = $sonic_status_updated_count;
             $time_array['sonic_status_percentage'] = round($sonic_status_percentage, 2) .'%';
+            $time_array['total_shipment_deliverd_bolt'] =$bolt_status_delivered_count;
+            $time_array['total_shipment_undeliverd_bolt'] =$bolt_status_undelivered_count;
+            $time_array['total_shipment_deliverd_sonic'] =$sonic_status_delivered_count;
+            $time_array['total_shipment_undeliverd_sonic'] =$sonic_status_undelivered_count;
             $sum_total_status_updated = $sum_total_status_updated + $total_status_updated_count;
             $sum_out_for_delivery_count = $sum_out_for_delivery_count + $out_for_delivery_count;
             $sum_bolt_status_updated = $sum_bolt_status_updated + $bolt_status_updated_count;
-//                $sum_bolt_status_percentage = $sum_bolt_status_percentage + $bolt_status_percentage;
             $sum_sonic_status_updated = $sum_sonic_status_updated + $sonic_status_updated_count;
-//                $sum_sonic_status_percentage = $sum_sonic_status_percentage + $sonic_status_percentage;
-
+            $sum_total_shipment_deliverd_bolt = $sum_total_shipment_deliverd_bolt + $bolt_status_delivered_count;
+            $sum_total_shipment_undeliverd_bolt = $sum_total_shipment_undeliverd_bolt + $bolt_status_undelivered_count;
+            $sum_total_shipment_deliverd_sonic = $sum_total_shipment_deliverd_sonic + $sonic_status_delivered_count;
+            $sum_total_shipment_undeliverd_sonic = $sum_total_shipment_undeliverd_sonic + $sonic_status_undelivered_count;
             $data[] = $time_array;
         }
 
@@ -7709,7 +7814,7 @@ class AdminReportsController extends Controller
 
         }
 
-        $data[] = array('time' => 'Total','out_for_delivery_count' => $sum_out_for_delivery_count, 'total_status_updated' => $sum_total_status_updated,'out_for_delivery_percentage' => round($sum_out_for_delivery_percentage, 2). '%', 'bolt_status_updated' => $sum_bolt_status_updated, 'bolt_status_percentage' => round($sum_bolt_status_percentage, 2) . '%', 'sonic_status_updated' => $sum_sonic_status_updated, 'sonic_status_percentage' => round($sum_sonic_status_percentage, 2). '%');
+        $data[] = array('time' => 'Total','out_for_delivery_count' => $sum_out_for_delivery_count, 'total_status_updated' => $sum_total_status_updated,'out_for_delivery_percentage' => round($sum_out_for_delivery_percentage, 2). '%', 'bolt_status_updated' => $sum_bolt_status_updated, 'bolt_status_percentage' => round($sum_bolt_status_percentage, 2) . '%', 'sonic_status_updated' => $sum_sonic_status_updated, 'sonic_status_percentage' => round($sum_sonic_status_percentage, 2). '%','total_shipment_deliverd_bolt' =>  $sum_total_shipment_deliverd_bolt,'total_shipment_undeliverd_bolt'=>$sum_total_shipment_undeliverd_bolt,'total_shipment_deliverd_sonic'=>$sum_total_shipment_deliverd_sonic,'total_shipment_undeliverd_sonic'=>$sum_total_shipment_undeliverd_sonic);
 
         return $data;
     }
@@ -9073,7 +9178,7 @@ class AdminReportsController extends Controller
                 }else{
                     return 'Yes';
                 }
-            }) 
+            })
             ->addColumn('charges', function ($shipments){
                 return '<div class="text-center">
                                 <button type="button" class="btn btn-primary btn-sm"><a class="white" ><i class="la la-dollar align-middle"></i></a></button>
@@ -9103,7 +9208,7 @@ class AdminReportsController extends Controller
         if($tracking_number){
             $shipment = Shipment::where('tracking_number',$tracking_number)->first();
             $user = User::find($shipment->user_id);
-            
+
             if($user->account_type->id == 1){
                 $insurance_charges = InsuranceCharge::where('user_id',$user->id);
 
@@ -9136,7 +9241,7 @@ class AdminReportsController extends Controller
         $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
 
         return view('admin.reports.operation_service_report')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'shippimg_modes'=>$shippimg_modes, 'statuses' => $statuses, 'zones' => $zones]);
-   
+
     }
 
     public function operation_service_level_list(Request $request){

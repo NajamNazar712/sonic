@@ -125,6 +125,15 @@
                                                     </td>
                                                 </tr>
                                             @endif
+                                            @if($user->sub_segment_id != null)
+                                                <tr>
+                                                    <td><b>Sub Segment</b></td>
+                                                    <td>{{$user->sub_segment->name}}
+                                                    </td>
+                                                </tr>
+                                            @endif
+
+                                            
                                             {{--@if($user->account_type_id == 2)
                                                 <tr>
                                                     <td style="vertical-align: middle;"><b>Invoice Grouping</b></td>

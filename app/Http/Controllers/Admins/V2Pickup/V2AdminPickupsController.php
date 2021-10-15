@@ -10,15 +10,15 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
-use App\http\Models\Admin\BookingSmsForShippers;
+use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RetailPickupNote;
-use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\SalePersonTag;
-use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
-use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
@@ -29,7 +29,7 @@ use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
@@ -266,6 +266,24 @@ class V2AdminPickupsController extends Controller
                     } else {
                         return '';
                     }
+            })
+            ->addColumn('aging',function ($pickup_requests){
+                $requested_date=$pickup_requests->requested_date;
+                $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $days =Carbon::createFromTime($settings->setting_value, '0', '0', 'Asia/Karachi');
+                   
+                    $startTime = Carbon::parse($requested_date);
+                    $endTime = Carbon::parse($days);
+
+                    $totalDuration =  $startTime->diffInHours($endTime).' Hrs';
+                   
+                    //$difference =  $requested_date->diff($days)->format('%H:%I:%S')." Minutes";
+                    //$difference=$requested_date-$days;
+                    return $totalDuration;
+                }
+                //$days = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
             })
             ->editColumn('brand_name', function ($pickup_requests) {
                 if($pickup_requests->brand_name==null){

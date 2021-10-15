@@ -21,7 +21,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\City;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
-use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use Carbon\Carbon;
@@ -75,7 +75,14 @@ class LastMileDebriefingController extends Controller
         $admin_ids = AdminHub::where('hub_id',$request->hub_id)->pluck('admin_id')->toArray();
         if(count($admin_ids) > 0){
 
-            $agents = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->get();
+            //$agents = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->get();
+
+            $agents = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.id')
+            ->whereIn('admins.id', $admin_ids)
+            ->where('admins.role_id', 18)
+            ->where('admins.status',1)
+            ->where('ea.clock_out_datetime','=',null)
+            ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))->get();
            
             return response()->json(['status' => 1, 'agents' => $agents]);
         }
@@ -86,23 +93,33 @@ class LastMileDebriefingController extends Controller
 
     public function supervisor_assign_agents(Request $request){
         $delivery_note_details = DeliveryNote::find($request->delivery_note_id);
-        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
-        if(count($delivery_note_shipments) > 0){
-            foreach ($delivery_note_shipments as $delivery_note_shipment){
-                $agent_call_monitor = AgentCallMonitoring::where('shipment_id', $delivery_note_shipment->shipment_id)->where('delivery_note_id', $delivery_note_shipment->delivery_note_id);
-                if($agent_call_monitor->exists()){
-                    $agent_call_monitor = $agent_call_monitor->first();
-                    $agent_call_monitor->agent_id = $request->agent_id;
+        if($delivery_note_details->status == 0){
+            $delivery_note_shipments = $delivery_note_details->delivery_note_undelivered_shipments;
+            if(count($delivery_note_shipments) > 0){
+                foreach ($delivery_note_shipments as $delivery_note_shipment){
+                    $agent_call_monitor = AgentCallMonitoring::where('shipment_id', $delivery_note_shipment->shipment_id)->where('delivery_note_id', $delivery_note_shipment->delivery_note_id);
+                    if($agent_call_monitor->exists()){
+                        $agent_call_monitor = $agent_call_monitor->first();
+                        if($agent_call_monitor->completed == 0){
+                            $agent_call_monitor->agent_id = $request->agent_id;
+                        }
+                    }
+                    else{
+                        $agent_call_monitor = new AgentCallMonitoring;
+                        $agent_call_monitor->agent_id = $request->agent_id;
+                        $agent_call_monitor->shipment_id = $delivery_note_shipment->shipment_id;
+                        $agent_call_monitor->delivery_note_id = $delivery_note_shipment->delivery_note_id;
+                    }
+                    $agent_call_monitor->save();
                 }
-                else{
-                    $agent_call_monitor = new AgentCallMonitoring;
-                    $agent_call_monitor->agent_id = $request->agent_id;
-                    $agent_call_monitor->shipment_id = $delivery_note_shipment->shipment_id;
-                    $agent_call_monitor->delivery_note_id = $delivery_note_shipment->delivery_note_id;
-                }
-                $agent_call_monitor->save();
+                return redirect()->back()->with('success', 'Agent Assign successfully.');
             }
-            return redirect()->back()->with('success', 'Agent Assign successfully.');
+            else{
+                return redirect()->back()->with('error', 'Undelivered shipments not found!');
+            }
+        }
+        else{
+            return redirect()->back()->with('error', 'Delivery note already verified!');
         }
     }
 

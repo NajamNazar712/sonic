@@ -11,14 +11,14 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
-use App\http\Models\Admin\Retail\RetailCashDeposit;
-use App\http\Models\Admin\Retail\RetailCashDepositShipment;
-use App\http\Models\Admin\Retail\RetailPaymentMode;
-use App\http\Models\Admin\Retail\RetailShipment;
-use App\http\Models\Admin\Retail\RetailShipperInfo;
-use App\http\Models\Admin\Retail\RetailShippingMode;
-use App\http\Models\Admin\Retail\RetailTraxBox;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\Http\Models\Admin\Retail\RetailPaymentMode;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
+use App\Http\Models\Admin\Retail\RetailTraxBox;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
@@ -51,7 +51,7 @@ use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Product;
-use App\http\Models\ReportingLocation;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderDelivery;
@@ -64,7 +64,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Zone;
@@ -4905,6 +4905,7 @@ class RiderAPIController extends Controller
                         $information['cargo_user'] = 0;
 
                         if($request->has('device_token')){
+                            EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
                             $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
                                 ->where('employee_type_id', 2);
                             if ($employee_device_token->exists()) {
@@ -8127,10 +8128,17 @@ class RiderAPIController extends Controller
                                 $return_note_data->save();
                             }
 
-                            $updated_shipments_count = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
+                            $updated_shipments = ReturnNoteShipment::where('return_note_id', $request->return_note_id);
+                            $updated_shipments_count = $updated_shipments->where('status', 0)->count();
+                            $total_shipments_count = $updated_shipments->count();
+                            $undelivered_shipments_count = $updated_shipments->where('status', 1)->count();
 
                             if ($updated_shipments_count == 0) {
-                                $return_note_data->status = 3;
+                                if($total_shipments_count == $undelivered_shipments_count){
+                                    $return_note_data->status = 1;
+                                }else{
+                                    $return_note_data->status = 3;
+                                }
                                 $return_note_data->updated_at = Carbon::now();
                                 $return_note_data->save();
                             }

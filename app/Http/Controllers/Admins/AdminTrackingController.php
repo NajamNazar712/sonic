@@ -3,20 +3,21 @@
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
-use App\http\Models\Admin\KeyAccountDailyShipment;
-use App\http\Models\Admin\KeyAccountDailySummary;
+use App\Http\Models\Admin\KeyAccountDailyShipment;
+use App\Http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
-use App\http\Models\Admin\Retail\RetailFranchise;
-use App\http\Models\Admin\Retail\RetailShipment;
-use App\http\Models\Admin\Retail\RetailShipperInfo;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
-use App\http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\ResolvedOutstandingShipment;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\http\Models\CRM\CrmSettings;
-use App\http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\CRM\CrmSettings;
+use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\ShipmentInformationLog;
@@ -25,7 +26,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Shipment;
 use App\Http\Models\Rider;
@@ -54,8 +55,9 @@ class AdminTrackingController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
-
-        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
+        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
+        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
+        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims,'return_confirm_reasons' => $return_confirm_reasons]);
     }
 
     public function track(Request $request) {
@@ -228,10 +230,9 @@ class AdminTrackingController extends Controller
                     }
 
                     $shipment_payment_journey = $shipment->shipment_payment_journey;
-
                     if ($shipment_payment_journey) {
+                        $journey_details = array();
                         foreach ($shipment_payment_journey as $journey) {
-                            $journey_details = array();
                             $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             if($journey->payment_id == null){
@@ -1155,6 +1156,17 @@ class AdminTrackingController extends Controller
                                 $journey_details['user'] = $journey->admin->name;
 
                                 $details['weight_history'][] = $journey_details;
+                            }
+                        }
+
+                        $resolved_outstanding_shipments = ResolvedOutstandingShipment::where('shipment_id', $shipment->id);
+                        if($resolved_outstanding_shipments->exists()){
+                            $resolved_outstanding_shipments = $resolved_outstanding_shipments->get();
+                            $outstanding_details = array();
+                            foreach ($resolved_outstanding_shipments as $resolved_outstanding_shipment) {
+                                $outstanding_details['date_time'] = Carbon::parse($resolved_outstanding_shipment->created_at)->toDateTimeString();
+                                $outstanding_details['resolved_by'] = $resolved_outstanding_shipment->admin->name;
+                                $details['outstanding_history'][] = $outstanding_details;
                             }
                         }
 

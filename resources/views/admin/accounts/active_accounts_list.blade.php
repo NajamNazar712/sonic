@@ -96,6 +96,8 @@
                                         <th class="border-primary border-darken-1">Duplicate</th>
                                         <th class="border-primary border-darken-1">Intl Rate Status</th>
                                         <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
+                                        <th class="border-primary border-darken-1">Segment</th>
+                                        <th class="border-primary border-darken-1">Sub Category Segment</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -564,6 +566,8 @@
                         head.push('Documents Rejection Reason');
                         head.push('Intl Rates Status');
                         head.push('Intl Rates Status Remarks');
+                        head.push('Segment');
+                        head.push('Sub Category Segment');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -605,6 +609,8 @@
                             row.push(values.documents_rejection_reason);
                             row.push(values.international_rate_status);
                             row.push(values.international_rejected_reason);
+                            row.push(values.segment);
+                            row.push(values.sub_segment);
 
                             body.push(row);
                         });
@@ -1083,7 +1089,7 @@
             serverSide: true,
            deferLoading: 0,
             rowId: 'id',
-            order: [[2, 'desc']],
+            order: [[26, 'desc']],
             ajax: {
                url: '{{ route('admin.accounts.active.ajax') }}',
                 method: 'post',
@@ -1138,6 +1144,8 @@
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
                 {data: 'international_rate_status', name: 'iui.status', class: 'align-middle international_rate_status'},
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
+                {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
+                {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {

@@ -1031,7 +1031,7 @@
                 if(row_id != ''){
                     var redirect = '{!! route('cod.intercept.index', ':id') !!}';
                     var url = redirect.replace(':id', row_id);
-                    window.location = url;
+                    window.open(url);
                 }
             });
 
