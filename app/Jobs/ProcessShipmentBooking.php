@@ -4,9 +4,9 @@ namespace App\Jobs;
 
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Shipment;
-use App\http\Models\ShipmentOrderDate;
-use App\http\Models\ShipmentShipperReference;
-use App\http\Models\SubstituteUserShipment;
+use App\Http\Models\ShipmentOrderDate;
+use App\Http\Models\ShipmentShipperReference;
+use App\Http\Models\SubstituteUserShipment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;

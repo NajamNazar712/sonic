@@ -6,7 +6,7 @@ use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentCalculation;
-use App\http\Models\Shipper\ShipperPayment;
+use App\Http\Models\Shipper\ShipperPayment;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;

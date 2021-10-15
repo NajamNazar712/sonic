@@ -22,7 +22,7 @@ use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
-use App\http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\DeliveryNoteRequests;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\Handover\Handover;
@@ -33,6 +33,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\Admin\AgentCallMonitoring;
 
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
@@ -47,8 +48,8 @@ use App\Http\Models\Notification;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
-use App\http\Models\RestrictedCityIntercept;
-use App\http\Models\RestrictParcelsAttempt;
+use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
@@ -86,7 +87,7 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ShipmentDetail;
 
@@ -3336,11 +3337,14 @@ class DeliveryController extends Controller
                             }
                         }
                     }
+                    //For Debriefing
+                    $this->agent_call_completed($delivery_note->id);
+
                     if($delivery_note->updated_by == NULL){
                         $delivery_note->updated_by = Auth::id();
                         $delivery_note->save();
                     }
-
+                    
                     if(count($lost_shipments_array) > 0){
                         NotificationsController::send(150, $lost_shipments_array);
                     }
@@ -3380,6 +3384,11 @@ class DeliveryController extends Controller
 
     }
 
+    //For Debriefing
+    public function agent_call_completed($deliverynote)
+    {
+        $agents_check = AgentCallMonitoring::where('delivery_note_id', '=', $deliverynote)->where('completed','=','0')->update(array('completed' => 1));   
+    }
     //print dncc
     public function dncc_print(Request $request)
     {
@@ -5973,14 +5982,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $previous_consignee_city_id = $shipment->consignee_city_id;
                     $new_consignee_city_id = $intercept->consignee_city_id;
 
-                    $self_collection = false;
-
-                        $shipment_self_collection = SelfCollectionShipment::where('shipment_id',$shipment->id);
-                        if ($shipment_self_collection->exists()) {
-                            if($previous_consignee_city_id == $new_consignee_city_id){
-                                $self_collection = true;
-                            }
-                        }
+                    
 
 
                     // if($shipment->self_collection == 1){
@@ -6030,13 +6032,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
-                    if($self_collection){
-                        $shipment = Shipment::find($shipment_id);
-                        $shipment->shipper_status_id = 15;
-                        $shipment->consignee_status_id = 15;
-                        $shipment->save();
-                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
-                    }
+                    
 
                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
                     if($return_assign_shipment){
@@ -6054,13 +6050,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             }
 
             if ($valid) {
-                $text = '';
-                if($self_collection){
-                    $text = 'Shipment(s) has been marked as Intercept Approved, Please note that is also marked as self collection.';
-                }
-                else{
                     $text = 'Shipment(s) has been marked as Intercept Approved';
-                }
                 return ['status' => 0, 'success' => $text, 'print' => $print];
             }
             else {

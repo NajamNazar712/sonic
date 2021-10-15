@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admins\Retail;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
-use App\http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\BanksList;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;

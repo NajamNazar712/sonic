@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Webhook\PaymentStatusWebhookController;
-use App\http\Models\RetailShipmentsPaymentJourney;
+use App\Http\Models\RetailShipmentsPaymentJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 

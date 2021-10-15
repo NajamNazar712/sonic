@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AdminReportsEmailController;
 use App\Http\Models\Admin\GlobalSettings;
-use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
+use App\Http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\City;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
