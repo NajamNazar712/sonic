@@ -3688,7 +3688,7 @@ class AdminFinanceController extends Controller
                         else {
                             $pending_payment = new RetailPendingPayment();
     
-                            $pending_payment->user_id = $shipment->user_id;
+                            $pending_payment->user_id = $rs->shipper_account_no;
                             $pending_payment->total_shipments = 1;
                             $pending_payment->delivered_shipments = 0;
                             $pending_payment->adjusted_shipments = 1;
