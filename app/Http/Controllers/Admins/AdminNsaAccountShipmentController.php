@@ -13,6 +13,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NsaAccountShipment;
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\DonePaymentShipment;
@@ -1230,9 +1231,17 @@ class AdminNsaAccountShipmentController extends Controller
 
     public function carrefour_delivery_index()
     {
-        $riders = Rider::where('status', 1)->get();
-        $routes = Route::where('status', 1)->get();
-        return view('admin.carrefour.delivery')->with(['riders' => $riders, 'routes' => $routes]);
+        $routes = Route::where('status', 1);
+
+        if (session('role_id') != 1) {
+            $routes = $routes->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $routes = $routes->get();
+        $operation_rider_category = OperationRidersCategory::all();
+        return view('admin.carrefour.delivery')->with(['operation_rider_category' => $operation_rider_category, 'routes' => $routes]);
     }
     public function carrefour_delivery_submit(Request $request)
     {
@@ -1355,43 +1364,52 @@ class AdminNsaAccountShipmentController extends Controller
                         }
 
                         $carrefour_shipments = Shipment::whereIn('id', $shipment_ids);
-
+                        $valid_tracking_numbers = array();
+                        $invalid_tracking_numbers = array();
+                        $rider_id = $request->rider;
+                        $route_id = $request->route;
                         if ($carrefour_shipments->exists()) {
                             $carrefour_shipments = $carrefour_shipments->get();
 
                             $valid_shipments = array();
                             $shipments_count = 0;
                             $total_cod_amount = 0;
+                            $rider = Rider::find($rider_id);
                             foreach ($carrefour_shipments as $carrefour_shipment) {
                                 if ($carrefour_shipment) {
                                     if (!in_array($carrefour_shipment->id, $valid_shipments)) {
                                         $check = false;
-                                        if($carrefour_shipment->consignee_city->hub_id != $carrefour_shipment->pickup_address->city->hub_id){
-                                            if($carrefour_shipment->shipper_status_id == 4){
-                                                $check = true;
-                                            }
-                                        }
-                                        else{
-                                            if($carrefour_shipment->shipper_status_id == 2){
-                                                $check = true;
+                                        if($rider){
+                                            if($rider->city->hub_id == $carrefour_shipment->consignee_city->hub_id){
+                                                if($carrefour_shipment->consignee_city->hub_id != $carrefour_shipment->pickup_address->city->hub_id){
+                                                    if($carrefour_shipment->shipper_status_id == 4){
+                                                        $check = true;
+                                                    }
+                                                }
+                                                else{
+                                                    if($carrefour_shipment->shipper_status_id == 2){
+                                                        $check = true;
+                                                    }
+                                                }
                                             }
                                         }
                                         if($check){
                                             $valid_shipments[] = $carrefour_shipment->id;
+                                            $valid_tracking_numbers[] = $carrefour_shipment->tracking_number;
                                             $shipments_count++;
 
                                             if ($carrefour_shipment->booking_type_id != 4 || ($carrefour_shipment->booking_type_id == 4 && $carrefour_shipment->charges_mode_id == 2)) {
                                                 $total_cod_amount += $carrefour_shipment->amount;
                                             }
                                         }
+                                        else{
+                                            $invalid_tracking_numbers[] = $carrefour_shipment->tracking_number;
+                                        }
                                     }
                                 }
                             }
-                            $rider_id = $request->rider;
-                            $route_id = $request->route;
                             $order = false;
                             if ($shipments_count != 0) {
-                                $rider = Rider::find($rider_id);
                                 if($rider){
                                     $note = DeliveryNote::create([
                                         'hub_id' => $rider->city->hub_id,
@@ -1460,15 +1478,39 @@ class AdminNsaAccountShipmentController extends Controller
                                             $rider_attendance_action->save();
                                         }
                                         //rider attendance end
+                                        $success_check = false;
+                                        $error_check = false;
+                                        if(count($valid_tracking_numbers) > 0){
+                                            $success_check = true;
+                                            $valid_tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                                                return $row . ': ' . $tracking_number;
+                                            }, array_keys($valid_tracking_numbers), $valid_tracking_numbers));
+                                        }
+                                        if(count($invalid_tracking_numbers) > 0){
+                                            $error_check = true;
+                                            $invalid_tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                                                return $row . ': ' . $tracking_number;
+                                            }, array_keys($invalid_tracking_numbers), $invalid_tracking_numbers));
+                                        }
+                                        if($success_check && $error_check){
+                                            return redirect()->back()->with(['success' => 'Delivery Note Created, Total ' . count($rows) . ' Shipment(s) with Tracking Number(s):' . PHP_EOL . $valid_tracking_numbers, 'error' => 'Delivery Note cannot be created against shipment(s) with Tracking Number:' . PHP_EOL . $invalid_tracking_numbers, 'print'=>$note->id]);
+                                        }
+                                        else{
+                                            if($success_check){
+                                                return redirect()->back()->with(['success' => 'Delivery Note Created, Total ' . count($rows) . ' Shipment(s) with Tracking Number(s):' . PHP_EOL . $valid_tracking_numbers,'print'=>$note->id]);
+                                            }
+                                            elseif ($error_check){
+                                                return redirect()->back()->with(['error' => 'Delivery Note cannot be created against shipment(s) with Tracking Number:' . PHP_EOL . $invalid_tracking_numbers,'print'=>$note->id]);
+                                            }
+                                        }
                                     }
+                                    return redirect()->back()->with(['error' => 'Delivery Note cannot be created!']);
                                 }
+                                return redirect()->back()->with(['error' => 'Rider not Found!']);
                             }
+                            return redirect()->back()->with(['error' => 'In-Valid Shipment(s)!']);
                         }
-                        $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                            return $row . ': ' . $tracking_number;
-                        }, array_keys($tracking_numbers), $tracking_numbers));
-
-                        return redirect()->back()->with(['success' => 'Delivery Note Created, Total ' . count($rows) . ' Shipment(s) with Tracking Number(s):' . PHP_EOL . $tracking_numbers,'print'=>$note->id]);
+                        return redirect()->back()->with(['error' => 'In-Valid Shipment(s)!']);
                     } else {
                         $errors = array_map(function ($row, $errors) {
                             return $row . ':' . PHP_EOL . implode(' | ', $errors);

@@ -37,10 +37,16 @@
                                     <div class="row mb-2 justify-content-center">
                                         <div class="col-3">
                                             <fieldset class="form-group">
-                                                <select name="rider" id="rider" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
-                                                    @foreach($riders as $rider)
-                                                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                                <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Category is required">
+                                                    @foreach($operation_rider_category as $category)
+                                                        <option value="{{$category->id}}">{{$category->name}}</option>
                                                     @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-3">
+                                            <fieldset class="form-group">
+                                                <select name="rider" id="rider" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
                                                 </select>
                                             </fieldset>
                                         </div>
@@ -117,8 +123,70 @@
             $('#rider').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Rider*',
             });
+
+            $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Category*',
+            }).bind('select2:select', function () {
+                if(this.value){
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.operation_riders') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'operation_rider_id': this.value,
+                        }
+                    }).done(function(data){
+
+                        if (data.status == 1) {
+                            var html = "";
+                            $.each(data.riders, function(key,value) {
+                                html += `<option value="${value.id}">${value.name}</option>`;
+                            });
+                            $('#rider').html(html);
+                            $('#rider').val('').trigger('change');
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
             $('#route').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Route*',
+            });
+            $('#rider').on('change',function () {
+                var route = $(this).find(":selected").data("id");
+                var rider_id = $(this).val();
+                if(rider_id != null){
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.rider_dncc_status') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'rider_id': rider_id,
+                        }
+                    }).done(function(data){
+                        if (data.status == 1) {
+                            ccd_rider = parseInt(data.ccd_rider);
+                            $('#route').val(route).trigger('change');
+                            $("#deliveryNoteSubmitBtn").attr('disabled',false);
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $("#deliveryNoteSubmitBtn").attr('disabled',true);
+                        }
+                    });
+                }
+                else{
+                    $('#route').val(route).trigger('change');
+                }
+
             });
             $.validator.addMethod('maxsize', function(value, element, params) {
                 if ($(element).attr('type') === 'file') {
