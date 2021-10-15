@@ -509,109 +509,110 @@ class ShipperDashboardController extends Controller
     {
         $correct = FALSE;
         $reason = $request->reason;
-        
-        foreach ($request->ids as $id) {
-            $shipment = Shipment::where('id', $id)->where('user_id', session('user_id'));
-            if ($shipment->exists()) {
-                $shipment = $shipment->first();
+        if(count($request->ids) > 0){
+            foreach ($request->ids as $id) {
+                $shipment = Shipment::where('id', $id)->where('user_id', session('user_id'));
+                if ($shipment->exists()) {
+                    $shipment = $shipment->first();
 
-                if ($shipment->shipper_status_id == 1 && $shipment->shipment_type == 1) {
+                    if ($shipment->shipper_status_id == 1 && $shipment->shipment_type == 1) {
 
-                    $other_retail_shipment = OtherRetailShipment::where('shipment_id',$id);
-                    if ($other_retail_shipment->exists()) {
-                        $other_retail_shipment = $other_retail_shipment->first();
-                        $other_retail_shipment->delete();
-                    }
-                    $other_parcel_receiving_shipment = OtherParcelReceivingShipment::where('shipment_id', $id);
-                    if ($other_parcel_receiving_shipment->exists()) {
-                        $other_parcel_receiving_shipment = $other_parcel_receiving_shipment->get()->first();
-                        $other_parcel_receiving_id = $other_parcel_receiving_shipment->other_parcel_receiving_id;
-                        $other_parcel_receiving_shipment->delete();
-                        $other_parcel_receiving = OtherParcelReceiving::find($other_parcel_receiving_id);
-                        $other_parcel_receiving->total_cn = $other_parcel_receiving->total_cn-1;
-                        $other_parcel_receiving->save();
-                        if($other_parcel_receiving->total_cn < 1){
-                            $other_parcel_receiving->total_cn = 0;
+                        $other_retail_shipment = OtherRetailShipment::where('shipment_id',$id);
+                        if ($other_retail_shipment->exists()) {
+                            $other_retail_shipment = $other_retail_shipment->first();
+                            $other_retail_shipment->delete();
+                        }
+                        $other_parcel_receiving_shipment = OtherParcelReceivingShipment::where('shipment_id', $id);
+                        if ($other_parcel_receiving_shipment->exists()) {
+                            $other_parcel_receiving_shipment = $other_parcel_receiving_shipment->get()->first();
+                            $other_parcel_receiving_id = $other_parcel_receiving_shipment->other_parcel_receiving_id;
+                            $other_parcel_receiving_shipment->delete();
+                            $other_parcel_receiving = OtherParcelReceiving::find($other_parcel_receiving_id);
+                            $other_parcel_receiving->total_cn = $other_parcel_receiving->total_cn-1;
                             $other_parcel_receiving->save();
-                        }  
-                    }
-                    if($shipment->warehouse == 1){
-                        continue;
-                    }
-                    //Consolidated Shipments
-                    $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
-                    if($consolidated_shipment){
-                        $consolidation_id = $consolidated_shipment->consolidation_id;
-                        ConsolidationShipments::where('id', $consolidated_shipment->id)->delete();
-                        $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
-
-                        if(count($remaining_consolidated_shipments) == 1){
-                            ConsolidationShipments::where('consolidation_id', $consolidation_id)->delete();
-                            Consolidation::where('id', $consolidation_id)->delete();
-                        }
-                        else{
-                            foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
-                                $new_order_consolidated_shipment = ConsolidationShipments::find($remaining_consolidated_shipment->id);
-                                $new_order_consolidated_shipment->order = $index + 1;
-                                $new_order_consolidated_shipment->save();
+                            if($other_parcel_receiving->total_cn < 1){
+                                $other_parcel_receiving->total_cn = 0;
+                                $other_parcel_receiving->save();
                             }
-                            $consolidation = Consolidation::find($consolidation_id);
-                            $consolidation->count = count($remaining_consolidated_shipments);
-                            if($consolidation->default_shipment_id == $shipment->id){
-                                $consolidation->default_shipment_id = $remaining_consolidated_shipments[0]->shipment_id;
-                            }
-                            $consolidation->save();
                         }
-                    }
-                    //Consolidated Shipments
-                    $shipment->shipper_status_id = 17;
-                    $shipment->consignee_status_id = 17;
-                    ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Cancelled by Shipper ' .'- '. $reason, session('user_id'), NULL);
-                    $packaging_material = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
-                    if($packaging_material){
-                        $packaging_material->status_id = 6;
-                        $packaging_material->save();
-                    }
-                    if($shipment->warehouse == 1){
-                        $shipment->warehouse_order_status = 9;
-                        $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->get();
-                        if($shipment_products){
-                            foreach ($shipment_products as $shipment_product){
-                                $pending_pickings_products = WmsPendingPicking::leftjoin('wms_pending_picking_shipments as wpps', 'wpps.picking_id', '=', 'wms_pending_pickings.id')
-                                    ->select('wms_pending_pickings.id as id')
-                                    ->where('wpps.shipment_id', $shipment->id)
-                                    ->where('wms_pending_pickings.product_id', $shipment_product->product_id)->first();
-                                if($pending_pickings_products){
-                                    $pending_picking = WmsPendingPicking::find($pending_pickings_products->id);
-                                    $pending_picking->quantity = $pending_picking->quantity - $shipment_product->quantity;
-                                    $pending_picking->save();
+                        if($shipment->warehouse == 1){
+                            continue;
+                        }
+                        //Consolidated Shipments
+                        $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
+                        if($consolidated_shipment){
+                            $consolidation_id = $consolidated_shipment->consolidation_id;
+                            ConsolidationShipments::where('id', $consolidated_shipment->id)->delete();
+                            $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
 
-                                    $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
-                                    if($current_stock_addition){
-                                        $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
-                                        $current_stock_addition->save();
-                                    }
-
-                                    if($pending_picking->quantity <= 0){
-                                        $pending_picking->status = 1;
+                            if(count($remaining_consolidated_shipments) == 1){
+                                ConsolidationShipments::where('consolidation_id', $consolidation_id)->delete();
+                                Consolidation::where('id', $consolidation_id)->delete();
+                            }
+                            else{
+                                foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
+                                    $new_order_consolidated_shipment = ConsolidationShipments::find($remaining_consolidated_shipment->id);
+                                    $new_order_consolidated_shipment->order = $index + 1;
+                                    $new_order_consolidated_shipment->save();
+                                }
+                                $consolidation = Consolidation::find($consolidation_id);
+                                $consolidation->count = count($remaining_consolidated_shipments);
+                                if($consolidation->default_shipment_id == $shipment->id){
+                                    $consolidation->default_shipment_id = $remaining_consolidated_shipments[0]->shipment_id;
+                                }
+                                $consolidation->save();
+                            }
+                        }
+                        //Consolidated Shipments
+                        $shipment->shipper_status_id = 17;
+                        $shipment->consignee_status_id = 17;
+                        ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Cancelled by Shipper ' .'- '. $reason, session('user_id'), NULL);
+                        $packaging_material = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                        if($packaging_material){
+                            $packaging_material->status_id = 6;
+                            $packaging_material->save();
+                        }
+                        if($shipment->warehouse == 1){
+                            $shipment->warehouse_order_status = 9;
+                            $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->get();
+                            if($shipment_products){
+                                foreach ($shipment_products as $shipment_product){
+                                    $pending_pickings_products = WmsPendingPicking::leftjoin('wms_pending_picking_shipments as wpps', 'wpps.picking_id', '=', 'wms_pending_pickings.id')
+                                        ->select('wms_pending_pickings.id as id')
+                                        ->where('wpps.shipment_id', $shipment->id)
+                                        ->where('wms_pending_pickings.product_id', $shipment_product->product_id)->first();
+                                    if($pending_pickings_products){
+                                        $pending_picking = WmsPendingPicking::find($pending_pickings_products->id);
+                                        $pending_picking->quantity = $pending_picking->quantity - $shipment_product->quantity;
                                         $pending_picking->save();
+
+                                        $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
+                                        if($current_stock_addition){
+                                            $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
+                                            $current_stock_addition->save();
+                                        }
+
+                                        if($pending_picking->quantity <= 0){
+                                            $pending_picking->status = 1;
+                                            $pending_picking->save();
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    $shipment->save();
+                        $shipment->save();
 
-                    V2AdminPickupsController::cancel($shipment->id);
+                        V2AdminPickupsController::cancel($shipment->id);
 
 //                    ShipmentsPickupJourneyController::add($shipment->id, 4);
 
 
-                    $correct = TRUE;
+                        $correct = TRUE;
+                    }
                 }
-            }
 
+            }
         }
         if ($correct) {
             return response()->json(['status' => 1, 'success' => 'Shipment(s) has been cancelled successfully']);
