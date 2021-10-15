@@ -1484,13 +1484,13 @@ class AdminNsaAccountShipmentController extends Controller
                                         if(count($valid_tracking_numbers) > 0){
                                             $success_check = true;
                                             $valid_tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                                                return $row . ': ' . $tracking_number;
+                                                return $row + 1 . ': ' . $tracking_number;
                                             }, array_keys($valid_tracking_numbers), $valid_tracking_numbers));
                                         }
                                         if(count($invalid_tracking_numbers) > 0){
                                             $error_check = true;
                                             $invalid_tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                                                return $row . ': ' . $tracking_number;
+                                                return $row + 1 . ': ' . $tracking_number;
                                             }, array_keys($invalid_tracking_numbers), $invalid_tracking_numbers));
                                         }
                                         if($success_check && $error_check){
@@ -1745,13 +1745,13 @@ class AdminNsaAccountShipmentController extends Controller
                                         if(count($valid_tracking_numbers) > 0){
                                             $success_check = true;
                                             $valid_tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                                                return $row . ': ' . $tracking_number;
+                                                return $row + 1 . ': ' . $tracking_number;
                                             }, array_keys($valid_tracking_numbers), $valid_tracking_numbers));
                                         }
                                         if(count($invalid_tracking_numbers) > 0){
                                             $error_check = true;
                                             $invalid_tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                                                return $row . ': ' . $tracking_number;
+                                                return $row + 1 . ': ' . $tracking_number;
                                             }, array_keys($invalid_tracking_numbers), $invalid_tracking_numbers));
                                         }
                                         if($success_check && $error_check){
