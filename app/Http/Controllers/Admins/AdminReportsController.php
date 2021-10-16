@@ -5181,7 +5181,7 @@ class AdminReportsController extends Controller
         }
 
         if (Auth::id() == 3) {
-            $connection == 'mysql';
+            $connection = 'mysql';
         }
         else {
             $connection = 'reports';
