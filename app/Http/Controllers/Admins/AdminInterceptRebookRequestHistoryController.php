@@ -7,16 +7,16 @@ use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
-use App\http\Models\RestrictedCityIntercept;
+use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
-use App\http\Models\Admin\Retail\RetailFranchise;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
 
 class AdminInterceptRebookRequestHistoryController extends Controller
@@ -133,19 +133,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $intercept_type = $request->consignee;
-        if ($request->filled('self_collection')) {
-            $self_collection = TRUE;
-
-            $express_center_id = $request->express_center;
-            
-            $express_center_type = $request->center_franchise;
-        } else {
-            $self_collection = FALSE;
-            
-
-            $express_center_id = 0;
-            $express_center_type = 0;
-        }
+        
         $shipment_status = $shipment->status_shipper->name;
         $crm = false;
         $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_type_id', 11);
@@ -216,35 +204,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                        ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
 
                    }
-                    if($self_collection == TRUE){
-                        $shipment_self_collection = SelfCollectionShipment::where('shipment_id',$shipment->id);
-                        if (!$shipment_self_collection->exists()) {
-                            $shipment_self_collection = new SelfCollectionShipment();
-                            $shipment_self_collection->shipment_id = $shipment->id;
-                            $shipment_self_collection->save();
-                        }
-
-                        $shipment_detail = ShipmentDetail::where('shipment_id',$shipment->id);
-                        if ($shipment_detail->exists()) {
-                            $shipment_detail = $shipment_detail->first();
-                            $shipment_detail->center_frachise_id = $express_center_id;
-                            $shipment_detail->center_frachise_type = $express_center_type;
-                            $shipment_detail->save();
-                        }else{
-                            $shipment_detail = new ShipmentDetail();
-                            $shipment_detail->shipment_id = $shipment->id;
-                            $shipment_detail->center_frachise_id = $express_center_id;
-                            $shipment_detail->center_frachise_type = $express_center_type;
-                            $shipment_detail->save();
-                        }
-                        if ($intercept_type == 2){
-                            ShipmentsJourneyController::add($shipment->id, 15, 15, NULL, NULL, NULL, Auth::id());
-                            $shipment = Shipment::find($request->shipment_id);
-                            $shipment->shipper_status_id = 15;
-                            $shipment->consignee_status_id = 15;
-                            $shipment->save();
-                        }    
-                    }
+                    
 
                     
                     return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
@@ -257,10 +217,5 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         }
     }
 
-    public function get_express_centers(Request $request){
-        $trax_centers = RetailTraxCenter::where('default_hub', $request->hub_id)->where('status', 1)->get();
-        $trax_franchise = RetailFranchise::where('default_hub', $request->hub_id)->where('status',1)->get();
-           
-        return response()->json(['status' => 1, 'trax_centers' => $trax_centers, 'trax_franchise' => $trax_franchise]);
-    }
+    
 }

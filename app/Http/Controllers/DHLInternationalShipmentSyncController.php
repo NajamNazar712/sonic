@@ -19,7 +19,7 @@ use App\Http\Models\City;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;

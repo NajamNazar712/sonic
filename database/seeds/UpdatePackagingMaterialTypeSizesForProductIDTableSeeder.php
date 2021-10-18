@@ -9,7 +9,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Warehouse\Warehouse;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
-use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStock;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;

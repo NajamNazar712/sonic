@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
-use App\http\Models\UserDocumentAttachment;
+use App\Http\Models\UserDocumentAttachment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;

@@ -18,11 +18,14 @@ use App\Http\Models\Admin\DeliveryShipmentsNotReceivedOperations;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
+use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
+use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\Admin\StationDepositNoteAdjustment;
 use App\Http\Models\Admin\StationDepositNoteSlip;
-use App\http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\DeliveryNoteRequests;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\Handover\Handover;
@@ -33,6 +36,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\Admin\AgentCallMonitoring;
 
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
@@ -47,8 +51,8 @@ use App\Http\Models\Notification;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
-use App\http\Models\RestrictedCityIntercept;
-use App\http\Models\RestrictParcelsAttempt;
+use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
@@ -81,12 +85,11 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
-use function foo\func;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ShipmentDetail;
 
@@ -102,7 +105,7 @@ class DeliveryController extends Controller
 
     public function pending_delivery_index(Request $request)
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),19);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 19);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -111,9 +114,8 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),79);
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 79);
         }
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -134,7 +136,7 @@ class DeliveryController extends Controller
                     ->where('ras.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
             })
-            ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
+            ->leftjoin('admins as agent', 'agent.id', '=', 'ras.admin_id')
             ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
@@ -152,8 +154,7 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
                     ->where('crm.case_nature_id', DB::raw(1));
             })
-            ->select('agent.name as agent','shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address',                'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date','sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint')
-            ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
+            ->select('agent.name as agent','shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address','shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date','sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint')            ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
 
@@ -166,7 +167,7 @@ class DeliveryController extends Controller
                 'class' => function ($shipments) {
                     if ($shipments->complaint != null) {
                         return 'complaint_row';
-                    }else if($shipments->booking_type_id == 3){
+                    } else if ($shipments->booking_type_id == 3) {
                         return "tnb_row";
                     } else {
                         return '';
@@ -177,14 +178,13 @@ class DeliveryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            ->editColumn('amount', function($shipment){
+            ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
-                    return $shipment->shipper .' (' . $shipment->poc . ')';
-                }
-                else {
+                    return $shipment->shipper . ' (' . $shipment->poc . ')';
+                } else {
                     return $shipment->shipper;
                 }
             })
@@ -265,11 +265,11 @@ class DeliveryController extends Controller
                     return '';
                 }
             });
-            if($mode = $request->get('search_shipping_mode')){
+        if ($mode = $request->get('search_shipping_mode')) {
 
-                $datatables->where('sm.id', '=', $mode);
-            }
-           return $datatables->make(true);
+            $datatables->where('sm.id', '=', $mode);
+        }
+        return $datatables->make(true);
 
 
     }
@@ -297,7 +297,19 @@ class DeliveryController extends Controller
         $routes = $routes->get();
         $operation_rider_category = OperationRidersCategory::all();
 
-        return view('admin.delivery.note.index')->with(['routes' => $routes,'operation_rider_category' => $operation_rider_category]);
+        return view('admin.delivery.note.index')->with(['routes' => $routes, 'operation_rider_category' => $operation_rider_category]);
+    }
+
+    public function get_adjustment_reference(Request $request)
+    {
+        $adjustments = StationDepositNoteAdjustment::where('sdn_id',$request->sdn_id)->get();
+        $html = "";
+        foreach ($adjustments as $adjustment)
+        {
+            $html .= '<u><a href="javascript:void(0);" onclick="printStatement('.$adjustment->petty_cash_statement_id.')">'. $adjustment->petty_cash_statement_id .'</a></u><br>';
+        }
+
+        return response()->json(['status'=>1,'html'=>$html]);
     }
 
     public function check_rider_dncc_status(Request $request)
@@ -3336,11 +3348,14 @@ class DeliveryController extends Controller
                             }
                         }
                     }
+                    //For Debriefing
+                    $this->agent_call_completed($delivery_note->id);
+
                     if($delivery_note->updated_by == NULL){
                         $delivery_note->updated_by = Auth::id();
                         $delivery_note->save();
                     }
-
+                    
                     if(count($lost_shipments_array) > 0){
                         NotificationsController::send(150, $lost_shipments_array);
                     }
@@ -3380,6 +3395,11 @@ class DeliveryController extends Controller
 
     }
 
+    //For Debriefing
+    public function agent_call_completed($deliverynote)
+    {
+        $agents_check = AgentCallMonitoring::where('delivery_note_id', '=', $deliverynote)->where('completed','=','0')->update(array('completed' => 1));   
+    }
     //print dncc
     public function dncc_print(Request $request)
     {
@@ -4137,8 +4157,7 @@ class DeliveryController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),83);
         }
 
-        $deliveries = DeliveryNote::
-        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+        $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
@@ -4221,6 +4240,316 @@ class DeliveryController extends Controller
 
         return $datatable->make(true);
 
+    }
+
+    public function get_dncc_to_add(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $delivery_notes = DeliveryNote::where('dncc_status',0)->where('cash_collection_status',1)->where('hub_id',$sdn->hub_id)->where('status',1)->orderBy('id','desc')->get(['id']);
+                    return response()->json(['status'=>1,'dn'=>$delivery_notes]);
+                }
+                else{
+                    return response()->json(['status'=>0,'message'=>'Can not add DNCC to SDN']);
+                }
+            }
+            else{
+                return response()->json(['status'=>0,'message'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function add_dncc (Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $delivery_note = DeliveryNote::where('dncc_status',0)->where('cash_collection_status',1)->where('hub_id',$sdn->hub_id)->where('id',$request->dncc_id)->first();
+
+                    DeliveryNoteStationDepositNote::create([
+                        'station_deposit_note_id' => $sdn->id,
+                        'delivery_note_id' => $delivery_note->id
+                    ]);
+
+                    $sdn->dncc_count = $sdn->dncc_count + 1;
+                    $sdn->sdn_delivered_shipments = $sdn->sdn_delivered_shipments + $delivery_note->delivered_shipments;
+                    $sdn->sdn_amount = $sdn->sdn_amount + $delivery_note->received_cod_amount;
+                    $sdn->sdn_net_amount = $sdn->sdn_net_amount + $delivery_note->received_cod_amount;
+                    $sdn->update();
+
+//                    $delivery_note->expense = "";
+//                    $delivery_note->net_amount = "";
+                    $delivery_note->remarks = $request->remarks;
+                    $delivery_note->dncc_status = 1;
+                    $delivery_note->update();
+
+                    return back()->with(['success'=>'DNCC added to SDN']);
+                }
+                else{
+                    return back()->with(['error'=>'Can not add DNCC to SDN']);
+                }
+            }
+            else{
+                return back()->with(['error'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return back()->with(['error'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function get_dncc_to_remove(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $delivery_note_ids = [];
+                    foreach ($sdn->delivery_notes_list as $dn_list)
+                    {
+                        $delivery_note_ids[] = $dn_list->delivery_note_id;
+                    }
+
+                    return response()->json(['status'=>1,'dncc'=>DeliveryNote::whereIn('id',$delivery_note_ids)->get()]);
+                }
+                else{
+                    return response()->json(['status'=>0,'message'=>'Can not remove DNCC from SDN']);
+                }
+            }
+            else{
+                return response()->json(['status'=>0,'message'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function remove_dncc(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $dncc_ids = explode(',', $request->dncc_id);
+                    $delivery_notes = DeliveryNote::whereIn('id', $dncc_ids)->where('dncc_status', 1);
+                    if($delivery_notes->exists())
+                    {
+                        $total_dncc = 0;
+                        $total_delivered_shipments = 0;
+                        $total_sdn_amount = 0;
+                        $total_sdn_net_amount = 0;
+                        $delivery_notes = $delivery_notes->get();
+                        foreach ($delivery_notes as $delivery_note)
+                        {
+                            $total_dncc++;
+                            $total_delivered_shipments += $delivery_note->delivered_shipments;
+                            $total_sdn_amount += $delivery_note->received_cod_amount;
+                            $total_sdn_net_amount += $delivery_note->received_cod_amount;
+
+                            $delivery_note->remarks = "";
+                            $delivery_note->dncc_status = 0;
+                            $delivery_note->update();
+
+                            DeliveryNoteStationDepositNote::where('station_deposit_note_id',$sdn->id)->where('delivery_note_id',$delivery_note->id)->delete();
+                        }
+
+                        $sdn->dncc_count = $sdn->dncc_count - $total_dncc;
+                        $sdn->sdn_delivered_shipments = $sdn->sdn_delivered_shipments - $total_delivered_shipments;
+                        $sdn->sdn_amount = $sdn->sdn_amount - $total_sdn_amount;
+                        $sdn->sdn_net_amount = $sdn->sdn_net_amount - $total_sdn_net_amount;
+                        $sdn->update();
+
+                        return back()->with(['success'=>'DNCC removed successfully']);
+                    }
+                    else{
+                        return back()->with('error', 'Invalid DNCC');
+                    }
+                }
+                else{
+                    return back()->with(['error'=>'Can not add DNCC to SDN']);
+                }
+            }
+            else{
+                return back()->with(['error'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return back()->with(['error'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function get_pncc_to_add(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $pickup_notes = RetailPickupNote::where('status',4)->where('pncc_status',0)->where('hub_id',$sdn->hub_id)->orderBy('id','desc')->get(['id']);
+                    return response()->json(['status'=>1,'dn'=>$pickup_notes]);
+                }
+                else{
+                    return response()->json(['status'=>0,'message'=>'Can not add PNCC to SDN']);
+                }
+            }
+            else{
+                return response()->json(['status'=>0,'message'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function add_pncc (Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $pickup_note = RetailPickupNote::where('pncc_status',0)->where('status',4)->where('hub_id',$sdn->hub_id)->where('id',$request->pncc_id)->first();
+
+                    PickupNoteStationDepositNote::create([
+                        'station_deposit_note_id' => $sdn->id,
+                        'retail_pickup_note_id' => $pickup_note->id
+                    ]);
+
+                    $sdn->dncc_count = $sdn->dncc_count + 1;
+                    $sdn->sdn_delivered_shipments = $sdn->sdn_delivered_shipments + $pickup_note->shipments;
+                    $sdn->sdn_amount = $sdn->sdn_amount + $pickup_note->amount;
+                    $sdn->sdn_net_amount = $sdn->sdn_net_amount + $pickup_note->amount;
+                    $sdn->update();
+
+//                    $delivery_note->expense = "";
+//                    $delivery_note->net_amount = "";
+                    $pickup_note->remarks = $request->remarks;
+                    $pickup_note->pncc_status = 1;
+                    $pickup_note->update();
+
+                    return back()->with(['success'=>'PNCC added to SDN']);
+                }
+                else{
+                    return back()->with(['error'=>'Can not add PNCC to SDN']);
+                }
+            }
+            else{
+                return back()->with(['error'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return back()->with(['error'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function get_pncc_to_remove(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $pickup_note_ids = [];
+                    foreach ($sdn->pickup_notes_list as $dn_list)
+                    {
+                        $pickup_note_ids[] = $dn_list->retail_pickup_note_id;
+                    }
+
+                    return response()->json(['status'=>1,'pncc'=>RetailPickupNote::whereIn('id',$pickup_note_ids)->get()]);
+                }
+                else{
+                    return response()->json(['status'=>0,'message'=>'Can not remove PNCC from SDN']);
+                }
+            }
+            else{
+                return response()->json(['status'=>0,'message'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'SDN Id Not Found']);
+        }
+    }
+
+    public function remove_pncc(Request $request)
+    {
+        if($request->has('sdn_id'))
+        {
+            $sdn = StationDepositNote::find($request->sdn_id);
+            if($sdn)
+            {
+                if($sdn->adjusted == 0 && $sdn->status == 0)
+                {
+                    $pncc_ids = explode(',', $request->pncc_id);
+                    $pickup_notes = RetailPickupNote::whereIn('id', $pncc_ids)->where('pncc_status', 1);
+                    if($pickup_notes->exists())
+                    {
+                        $total_pncc = 0;
+                        $total_shipments = 0;
+                        $total_sdn_amount = 0;
+                        $total_sdn_net_amount = 0;
+                        $pickup_notes = $pickup_notes->get();
+                        foreach ($pickup_notes as $pickup_note)
+                        {
+                            $total_pncc++;
+                            $total_shipments += $pickup_note->shipments;
+                            $total_sdn_amount += $pickup_note->amount;
+                            $total_sdn_net_amount += $pickup_note->amount;
+
+                            $pickup_note->remarks = "";
+                            $pickup_note->pncc_status = 0;
+                            $pickup_note->update();
+
+                            PickupNoteStationDepositNote::where('station_deposit_note_id',$sdn->id)->where('retail_pickup_note_id',$pickup_note->id)->delete();
+                        }
+
+                        $sdn->dncc_count = $sdn->dncc_count - $total_pncc;
+                        $sdn->sdn_delivered_shipments = $sdn->sdn_delivered_shipments - $total_shipments;
+                        $sdn->sdn_amount = $sdn->sdn_amount - $total_sdn_amount;
+                        $sdn->sdn_net_amount = $sdn->sdn_net_amount - $total_sdn_net_amount;
+                        $sdn->update();
+
+                        return back()->with(['success'=>'PNCC removed successfully']);
+                    }
+                    else{
+                        return back()->with('error', 'Invalid PNCC');
+                    }
+                }
+                else{
+                    return back()->with(['error'=>'Can not add PNCC to SDN']);
+                }
+            }
+            else{
+                return back()->with(['error'=>'Invalid SDN Id']);
+            }
+        }
+        else{
+            return back()->with(['error'=>'SDN Id Not Found']);
+        }
     }
 
     //for ajax select dncc
@@ -4362,9 +4691,13 @@ class DeliveryController extends Controller
 
         $sdn = StationDepositNote::
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
+            ->leftjoin('station_deposit_note_adjustments as sdna',function($join){
+                $join->on('sdna.sdn_id','station_deposit_notes.id')
+                    ->latest();
+            })
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['admins.name as resolved_by','station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type']);
+            ->select(['admins.name as resolved_by','station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type','sdna.date as adjustment_date_latest']);
         //admins.name as resolved_by to be changed before merging on sprint_78
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -4402,8 +4735,33 @@ class DeliveryController extends Controller
             ->addColumn('sdn_id_padded', function ($sdn) {
                 return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
             })
+            ->addColumn('adjusted_reference_link', function ($sdn) {
+                if($sdn->adjustment_ref != null)
+                {
+                    return $sdn->adjustment_ref;
+                }
+                else{
+                    $adjustment_count = StationDepositNoteAdjustment::where('sdn_id',$sdn->sdn)->count();
+                    if($adjustment_count > 0) {
+                        return '<button class="btn btn-sm btn-outline-info align-middle">' . $adjustment_count . '</button>';
+                    }
+                    else{
+                        return 0;
+                    }
+                }
+            })
+            ->addColumn('adjusted_reference_count', function ($sdn) {
+                if($sdn->adjustment_ref != null)
+                {
+                    return $sdn->adjustment_ref;
+                }
+                else{
+                    $adjustment_count = StationDepositNoteAdjustment::where('sdn_id',$sdn->sdn)->count();
+                    return $adjustment_count;
+                }
+            })
             ->editColumn('adjustment_date', function ($deliveries) {
-                $date = str_replace('00:00:00', '', $deliveries->adjustment_date);
+                $date = str_replace('00:00:00', '', $deliveries->adjustment_date_latest);
                 return $date;
             })
             ->addColumn('difference_amount', function($sdn){
@@ -4459,6 +4817,15 @@ class DeliveryController extends Controller
                 $adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
                 $upload_deposit_slip_button = '<button type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '" data-target="#uploadDepositSlip" data-toggle="modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Upload Deposit Slip</div></button>';
 
+                $reconcile_to_deposit = '<button type="button" class="dropdown-item update_status_deposit"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Deposit</div></button>';
+
+                $add_dncc = '<button type="button" class="dropdown-item add_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add DNCC</div></button>';
+
+                $add_pncc = '<button type="button" class="dropdown-item add_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add PNCC</div></button>';
+
+                $remove_dncc = '<button type="button" class="dropdown-item remove_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove DNCC</div></button>';
+
+                $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove PNCC</div></button>';
 
 
                 $dropdown = '
@@ -4487,6 +4854,29 @@ class DeliveryController extends Controller
                     $dropdown .= $upload_deposit_slip_button;
                 }
 
+                if($result->sdn_type == 1 && $result->status == 2 && (session('role_id') == 1 || in_array(604, session('permissions'))))
+                {
+                    $dropdown .= $reconcile_to_deposit;
+                }
+
+                if($result->status == 0 && $result->adjusted == 0 && (session('role_id') == 1 || in_array(605, session('permissions'))))
+                {
+                    if($result->sdn_type == 1)
+                    {
+                        $dropdown .= $add_dncc;
+
+                        if($result->dncc_count > 1) {
+                            $dropdown .= $remove_dncc;
+                        }
+                    }
+                    else{
+                        $dropdown .= $add_pncc;
+
+                        if($result->dncc_count > 1) {
+                            $dropdown .= $remove_pncc;
+                        }
+                    }
+                }
                 $dropdown .= '
                     </div>
                   </div>
@@ -4541,6 +4931,73 @@ class DeliveryController extends Controller
             $datatable->whereBetween('station_deposit_notes.created_at', [$from,$to]);
         }
         return $datatable->make(true);
+    }
+
+    public function back_to_deposit(Request $request)
+    {
+        $station_deposit_note = StationDepositNote::find($request->sdn_id);
+
+        if($station_deposit_note) {
+            if($station_deposit_note->status == 2) {
+                if($station_deposit_note->sdn_type == 1) {
+                    $station_deposit_note->status = 1;
+                    $station_deposit_note->status_updated_at = Carbon::now();
+                    $station_deposit_note->status_updated_by = Auth::id();
+
+                    $station_deposit_note->save();
+
+                    $delivery_note_ids = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $station_deposit_note->id)->get();
+
+                    foreach ($delivery_note_ids as $value) {
+                        foreach (DeliveryNoteShipment::where('delivery_note_id', $value->delivery_note_id)->get() as $delivery_note_shipment) {
+                            if ($delivery_note_shipment->status == 7) {
+
+                                $shipment = Shipment::where('id', $delivery_note_shipment->shipment_id);
+                                if ($shipment->exists()) {
+                                    $shipment = $shipment->first();
+                                    if ($shipment->booking_type_id == 2) {
+                                        $delivery_note_shipment->status = 4;
+                                    } else if ($shipment->booking_type_id == 3) {
+                                        $delivery_note_shipment->status = 5;
+                                    } else if ($shipment->booking_type_id == 4) {
+                                        $delivery_note_shipment->status = 6;
+                                        $shipment->walk_in_status = 0;
+                                        $shipment->save();
+                                    } else {
+                                        $delivery_note_shipment->status = 6;
+                                    }
+                                }
+
+                                $delivery_note_shipment->save();
+                            }
+                        }
+                    }
+
+                    return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Deposited']);
+                }
+                else{
+
+                }
+            }
+            else{
+                return response()->json(['status'=>0,'message'=>'Station Deposit Note Not Resolved']);
+        }
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'Station Deposit Note Not Found']);
+        }
+    }
+    public function get_petty_cash_statements(Request $request)
+    {
+        $petty_cash_list = PettyCashStatement::whereIn('status',[0,1,2,7])->where('sdn_id',$request->id)->select(['id','created_at as date','total_amount as amount']);
+
+        if($petty_cash_list->exists()) {
+            $petty_cash_list = $petty_cash_list->get();
+            return response()->json(['status' => 1, 'data' => $petty_cash_list]);
+        }
+        else{
+            return response()->json(['status' => 0,'message'=>"No Petty Cash Statements Find for Current SDN"]);
+        }
     }
 
     public function sdn_details(Request $request, $id)
@@ -4601,7 +5058,7 @@ class DeliveryController extends Controller
         foreach($deposit_rows as $row){
             $total_amount += $request->amount[$row];
         }
-        if( $sdn->sdn_amount>= $total_amount)
+        if( $sdn->sdn_amount >= $total_amount)
         {
             $sdn->sdn_deposit_amount = $total_amount;
         }
@@ -5973,14 +6430,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $previous_consignee_city_id = $shipment->consignee_city_id;
                     $new_consignee_city_id = $intercept->consignee_city_id;
 
-                    $self_collection = false;
-
-                        $shipment_self_collection = SelfCollectionShipment::where('shipment_id',$shipment->id);
-                        if ($shipment_self_collection->exists()) {
-                            if($previous_consignee_city_id == $new_consignee_city_id){
-                                $self_collection = true;
-                            }
-                        }
+                    
 
 
                     // if($shipment->self_collection == 1){
@@ -6030,13 +6480,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
-                    if($self_collection){
-                        $shipment = Shipment::find($shipment_id);
-                        $shipment->shipper_status_id = 15;
-                        $shipment->consignee_status_id = 15;
-                        $shipment->save();
-                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
-                    }
+                    
 
                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
                     if($return_assign_shipment){
@@ -6054,13 +6498,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             }
 
             if ($valid) {
-                $text = '';
-                if($self_collection){
-                    $text = 'Shipment(s) has been marked as Intercept Approved, Please note that is also marked as self collection.';
-                }
-                else{
                     $text = 'Shipment(s) has been marked as Intercept Approved';
-                }
                 return ['status' => 0, 'success' => $text, 'print' => $print];
             }
             else {
@@ -6501,25 +6939,49 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             $sdn = StationDepositNote::find($sdn_id);
             $dncc_amount= $sdn->sdn_amount;
             $deposit_amount= $sdn->sdn_deposit_amount;
-            $adjustment_amount =  $request->adjustment_amount;
+            $adjustment_amount =  $sdn->adjustment_amount;
 
+            $rows = explode(',',$request->sdn_rows);
+            foreach ($rows as $row)
+            {
+                $statement = PettyCashStatement::find($request->statement[$row]);
+                if($statement)
+                {
+                    $adjustment_amount += $statement->total_amount;
+                }
+            }
             $total = $deposit_amount + $adjustment_amount;
             if($dncc_amount == $total){
-                $sdn->adjustment_amount = $request->adjustment_amount;
-                $sdn->adjustment_date = $request->adjustment_date_formatted;
-                $sdn->adjustment_ref = $request->adjustment_ref;
+                $sdn->adjustment_amount = $adjustment_amount;
                 $sdn->adjusted = 1;
                 $sdn->sdn_net_amount = $dncc_amount - $deposit_amount - $adjustment_amount;
-                // if($request->petty_cash_select != ''){
-                $sdn->petty_cash_statement_id = $request->petty_cash_select;
-                // }
                 $sdn->save();
 
-                $petty_details = PettyCashStatement::find($request->petty_cash_select);
-                if($petty_details) {
-                    $petty_details->status = 5;
-                    $petty_details->save();
+                foreach ($rows as $row)
+                {
+                    $statement = PettyCashStatement::find($request->statement[$row]);
+                    if($statement)
+                    {
+                        $statement->status = 5;
+                        $statement->save();
+
+                        foreach ($statement->petty_cash_statement_details as $detail)
+                        {
+                            if($detail->status == 0) {
+                                $detail->status = 2;
+                                $detail->update();
+                            }
+                        }
+
+                        $sdn_adjustment = new StationDepositNoteAdjustment();
+                        $sdn_adjustment->sdn_id = $sdn->id;
+                        $sdn_adjustment->petty_cash_statement_id = $statement->id;
+                        $sdn_adjustment->date = $statement->created_at;
+                        $sdn_adjustment->amount = $statement->total_amount;
+                        $sdn_adjustment->save();
+                    }
                 }
+
 
                 return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
 

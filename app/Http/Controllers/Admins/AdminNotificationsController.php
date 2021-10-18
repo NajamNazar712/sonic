@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admins;
 
 
-use App\http\Models\AppNotification;
-use App\http\Models\AppType;
+use App\Http\Models\AppNotification;
+use App\Http\Models\AppType;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\NotificationType;
 use App\Http\Models\Rider;
@@ -778,6 +778,8 @@ class AdminNotificationsController extends Controller
                 $details['fields'] = ["consignee_name", "tracking_no", "status_name"];
             }else if($id == 9){
                 $details['fields'] = ["rider", "otp"];
+            }else if($id == 10){
+                $details['fields'] = ["time", "name"];
             }
             return $details;
         }else{

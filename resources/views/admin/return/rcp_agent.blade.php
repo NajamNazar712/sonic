@@ -72,7 +72,7 @@
                                                 <i class="icon-grid font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-right">
-                                                <h3 id="total"></h3>
+                                                <h3 id="total">0</h3>
                                                 <span>Total Assigned</span>
                                             </div>
                                         </div>
@@ -89,7 +89,7 @@
                                                 <i class="icon-hourglass text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="completed"></h3>
+                                                <h3 class="text-white" id="completed">0</h3>
                                                 <span>Total Completed</span>
                                             </div>
                                         </div>
@@ -106,7 +106,7 @@
                                                 <i class="icon-layers text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="rcp_reattempt"></h3>
+                                                <h3 class="text-white" id="rcp_reattempt">0</h3>
                                                 <span class="font-13">Re-Attempt RCP</span>
                                             </div>
                                         </div>
@@ -123,7 +123,7 @@
                                                 <i class="icon-check text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="productivity"></h3>
+                                                <h3 class="text-white" id="productivity">0</h3>
                                                 <span>Productivity %</span>
                                             </div>
                                         </div>
@@ -279,7 +279,7 @@
                 }
             });
 
-            get_rcp_cards_data();
+            // get_rcp_cards_data();
             
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -338,6 +338,9 @@
                 }
             } );
             var selected_rows = [];
+            var total_shipments = 0;
+            var reattempt_shipments = 0;
+            var dbf_shipments = 0;
             var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -388,8 +391,26 @@
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                   
+                    if(index == 0){
 
+                    total_shipments = data.total_assigning;
+                    completed_shipments = data.actual_productivity;
+                    reattempt_shipments = data.reattempt;
+                    }
+                    else{
+                    total_shipments += data.total_assigning;
+                    completed_shipments += data.actual_productivity;
+                    reattempt_shipments += data.reattempt;
+
+                    }
+                    
+                    if(index == (info.end - 1)){
+                    $('#total').text(total_shipments);
+                        $('#completed').text(completed_shipments);
+                        $('#rcp_reattempt').text(reattempt_shipments);
+                        
+                        $('#productivity').text(((completed_shipments/total_shipments)*100).toFixed(2));
+                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -419,7 +440,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-
             $('#search_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -427,48 +447,51 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
-
-                    table.draw(true);
-                    get_rcp_cards_data();
-                }
-            });
-           
-
-            function get_rcp_cards_data() {
-                var from_date = $('#search_form input[name="from_date_formatted"]').val();
-                var to_date = $('#search_form input[name="to_date_formatted"]').val();
-                var hub = $('#search_origin').val();
-                var agent = $('#search_agent').val();
-                var hub = $('#search_hub').val();
-
-                var destination = $('#search_destination').val();
-                $.ajax({
-                    url: '{!! route('admin.return.rcp_agent.data') !!}',
-                    method: 'post',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'from_date': from_date,
-                        'to_date': to_date,
-                        'agent': agent,
-                        'hub': hub,
-
-                    }
-                }).done(function (data) {
-                    if(data.status){
-                        console.log(data.stats);
-                        $('#total').text(data.stats.total);
-                        $('#completed').text(data.stats.completed);
-                        $('#rcp_reattempt').text(data.stats.rcp_reattempt);
-                        $('#productivity').text(data.stats.productivity);
-
-                    }else{  
                         $('#total').text(0);
                         $('#completed').text(0);
                         $('#rcp_reattempt').text(0);
                         $('#productivity').text(0);
-                    }
-                });
-            }
+                    table.draw(true);
+                    // get_rcp_cards_data();
+                }
+            });
+           
+
+            // function get_rcp_cards_data() {
+            //     var from_date = $('#search_form input[name="from_date_formatted"]').val();
+            //     var to_date = $('#search_form input[name="to_date_formatted"]').val();
+            //     var hub = $('#search_origin').val();
+            //     var agent = $('#search_agent').val();
+            //     var hub = $('#search_hub').val();
+
+            //     var destination = $('#search_destination').val();
+            //     $.ajax({
+            //         url: '{!! route('admin.return.rcp_agent.data') !!}',
+            //         method: 'post',
+            //         data: {
+            //             '_token': '{{ csrf_token() }}',
+            //             'from_date': from_date,
+            //             'to_date': to_date,
+            //             'agent': agent,
+            //             'hub': hub,
+
+            //         }
+            //     }).done(function (data) {
+            //         if(data.status){
+            //             console.log(data.stats);
+            //             $('#total').text(data.stats.total);
+            //             $('#completed').text(data.stats.completed);
+            //             $('#rcp_reattempt').text(data.stats.rcp_reattempt);
+            //             $('#productivity').text(data.stats.productivity);
+
+            //         }else{  
+            //             $('#total').text(0);
+            //             $('#completed').text(0);
+            //             $('#rcp_reattempt').text(0);
+            //             $('#productivity').text(0);
+            //         }
+            //     });
+            // }
 
            
 

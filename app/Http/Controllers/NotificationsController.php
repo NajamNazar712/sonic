@@ -9,13 +9,13 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
-use App\http\Models\Admin\Retail\RetailShipperInfo;
-use App\http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\SalePersonTag;
-use App\http\Models\AppNotification;
+use App\Http\Models\AppNotification;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\ConsigneeUser;
@@ -30,19 +30,19 @@ use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\Excel_reports\Debriefing;
-use App\http\Models\Excel_reports\DonePaymentsReport;
+use App\Http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\KaeNumber;
 use App\Http\Models\Excel_reports\MonthAverage;
-use App\http\Models\Excel_reports\QaReportPettyCash;
+use App\Http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
-use App\http\Models\Runner;
-use App\http\Models\RunnerDetail;
+use App\Http\Models\Runner;
+use App\Http\Models\RunnerDetail;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiecesRequest;
@@ -8305,25 +8305,21 @@ class NotificationsController extends Controller
                         $sales_person_tag = Admin::find($sales_person_tag->admin_id);
                         $sales_person_data['name'] = $sales_person_tag->name;
                         $to = $sales_person_tag->email;
-                    }
-                    else
-                    {
-                        $to = '';
-                    }
 
-                    if (strpos($body, '[Sales_Person]') !== FALSE) {
-                        $body = str_replace('[Sales_Person]', $sales_person_data['name'], $body);
-                    }
+                        if (strpos($body, '[Sales_Person]') !== FALSE) {
+                            $body = str_replace('[Sales_Person]', $sales_person_data['name'], $body);
+                        }
 
-                    if (strpos($body, '[shipment_no]') !== FALSE) {
-                        $body = str_replace('[shipment_no]', $shipment->tracking_number, $body);
-                    }
+                        if (strpos($body, '[shipment_no]') !== FALSE) {
+                            $body = str_replace('[shipment_no]', $shipment->tracking_number, $body);
+                        }
 
-                    if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $shipment->user->name, $body);
-                    }
+                        if (strpos($body, '[shipper_name]') !== FALSE) {
+                            $body = str_replace('[shipper_name]', $shipment->user->name, $body);
+                        }
 
-                    self::email($subject, $body, $to);
+                        self::email($subject, $body, $to);
+                    }
                 }
                 else if ($id == 155) {
                     $getdata = $reference_1_id;

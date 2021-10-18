@@ -50,7 +50,7 @@ class LiveRider extends Seeder
 
 
         foreach ($rider_cnic as $key => $cnic){
-            $rider = Rider::where('cnic', $cnic);
+            $rider = \App\Http\Models\Rider::where('cnic', $cnic);
             if($rider->exists()){
                 $rider = $rider->first();
                 $rider->rider_main_category_id = $rider_main_category[$key];

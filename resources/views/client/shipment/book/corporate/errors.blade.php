@@ -48,33 +48,33 @@
                                             <th>Replacement Item Description</th>
                                             <th>Replacement Item Quantity</th>
                                         @endif
-{{--                                        @if($service_type_check_id == 3 || $service_type_check_id == null)--}}
-{{--                                            <th>Item Product Type ID 1</th>--}}
-{{--                                            <th>Item Description 1</th>--}}
-{{--                                            <th>Item Quantity 1</th>--}}
-{{--                                            <th>Item Insurance 1</th>--}}
-{{--                                            <th>Item Price 1</th>--}}
-{{--                                            <th>Item Product Type ID 2</th>--}}
-{{--                                            <th>Item Description 2</th>--}}
-{{--                                            <th>Item Quantity 2</th>--}}
-{{--                                            <th>Item Insurance 2</th>--}}
-{{--                                            <th>Item Price 2</th>--}}
-{{--                                            <th>Item Product Type ID 3</th>--}}
-{{--                                            <th>Item Description 3</th>--}}
-{{--                                            <th>Item Quantity 3</th>--}}
-{{--                                            <th>Item Insurance 3</th>--}}
-{{--                                            <th>Item Price 3</th>--}}
-{{--                                            <th>Item Product Type ID 4</th>--}}
-{{--                                            <th>Item Description 4</th>--}}
-{{--                                            <th>Item Quantity 4</th>--}}
-{{--                                            <th>Item Insurance 4</th>--}}
-{{--                                            <th>Item Price 4</th>--}}
-{{--                                            <th>Item Product Type ID 5</th>--}}
-{{--                                            <th>Item Description 5</th>--}}
-{{--                                            <th>Item Quantity 5</th>--}}
-{{--                                            <th>Item Insurance 5</th>--}}
-{{--                                            <th>Item Price 5</th>--}}
-{{--                                        @endif--}}
+                                        @if($service_type_check_id == 3 )
+                                           {{-- <th>Item Product Type ID 1</th>
+                                            <th>Item Description 1</th>
+                                            <th>Item Quantity 1</th>
+                                            <th>Item Insurance 1</th>
+                                            <th>Item Price 1</th>--}}
+                                            <th>Item Product Type ID 2</th>
+                                            <th>Item Description 2</th>
+                                            <th>Item Quantity 2</th>
+                                            <th>Item Insurance 2</th>
+                                            <th>Item Price 2</th>
+                                            <th>Item Product Type ID 3</th>
+                                            <th>Item Description 3</th>
+                                            <th>Item Quantity 3</th>
+                                            <th>Item Insurance 3</th>
+                                            <th>Item Price 3</th>
+                                            <th>Item Product Type ID 4</th>
+                                            <th>Item Description 4</th>
+                                            <th>Item Quantity 4</th>
+                                            <th>Item Insurance 4</th>
+                                            <th>Item Price 4</th>
+                                            <th>Item Product Type ID 5</th>
+                                            <th>Item Description 5</th>
+                                            <th>Item Quantity 5</th>
+                                            <th>Item Insurance 5</th>
+                                            <th>Item Price 5</th>
+                                        @endif
                                         <th>Special Instructions</th>
                                         <th>Estimated Weight (kg)</th>
                                         <th>Mode of Shipment ID</th>
@@ -98,10 +98,7 @@
                                         <th>Open Shipment</th>
 {{--                                        <th>Return Address ID</th>--}}
 
-                                        @if($service_type_check_id == 1 || $service_type_check_id == null)
-                                            <th>Express Center/Franchise</th>
-                                            <th>Trax Centers/Franchises ID</th>
-                                        @endif
+                                      
                                         <th></th>
                                     </tr>
                                     </thead>
@@ -339,6 +336,31 @@
                                                 @else
                                                     <td>{!! Form::text('form[' . $no . '][item_price_4]', $ro['item_price_4'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                                 @endif
+                                                {{--@if(isset($errors[$no]['item_product_type_id_5']))
+                                                    <td>{!! Form::select('form[' . $no . '][item_product_type_id_5]',$products,null,['class' => 'form-control is-invalid item_product_type_id select2','id'=>'item_product_type_id_5','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id_5']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][item_product_type_id_5]', $ro['item_product_type_id_5'],['class' => 'form-control','style'=>'width:144px','readonly' => 'readonly']) !!}</td>
+                                                @endif
+                                                @if(isset($errors[$no]['item_description_5']))
+                                                    <td>{!! Form::textarea('form[' . $no . '][item_description_5]', $ro['item_description_5'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['item_description_5']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::textarea('form[' . $no . '][item_description_5]', $ro['item_description_5'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
+                                                @endif
+                                                @if(isset($errors[$no]['item_quantity_5']))
+                                                    <td>{!! Form::text('form[' . $no . '][item_quantity_5]', $ro['item_quantity_5'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['item_quantity_5']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][item_quantity_5]', $ro['item_quantity_5'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                                @endif
+                                                @if(isset($errors[$no]['item_insurance_5']))
+                                                    <td>{!! Form::select('form[' . $no . '][item_insurance_5]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid item_insurance select2','id'=>'item_insurance_5','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance_5']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][item_insurance_5]', $ro['item_insurance_5'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                                @endif
+                                                @if(isset($errors[$no]['item_price_5']))
+                                                    <td>{!! Form::text('form[' . $no . '][item_price_5]', $ro['item_price_5'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['item_price_5']}}</font></td>
+                                                @else
+                                                    <td>{!! Form::text('form[' . $no . '][item_price_5]', $ro['item_price_5'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                                @endif--}}
                                                 @if(isset($errors[$no]['item_product_type_id_5']))
                                                     <td>{!! Form::select('form[' . $no . '][item_product_type_id_5]',$products,null,['class' => 'form-control is-invalid item_product_type_id select2','id'=>'item_product_type_id_5','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id_5']}}</font></td>
                                                 @else
@@ -450,32 +472,7 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][open_shipment]', $ro['open_shipment'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                             @endif
-                                            @if($service_type_check_id == 1 || $service_type_check_id == null)
-                                                @if(isset($errors[$no]['self_collection']) || strtolower($ro['self_collection']) == 'yes')
-            
-                                                    @if(isset($errors[$no]['trax_center_franchise_type']))
-                                                        <td>{!! Form::text('form[' . $no . '][trax_center_franchise_type]', $ro['trax_center_franchise_type'], ['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['trax_center_franchise_type']}}</font></td>
-                                                    @else
-                                                        <td>{!! Form::text('form[' . $no . '][trax_center_franchise_type]', $ro['trax_center_franchise_type'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
-                                                    @endif
-                                                @else
-                                                    <td>{!! Form::text('form[' . $no . '][trax_center_franchise_type]', $ro['trax_center_franchise_type'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
-
-                                                @endif
-                                            @endif
-                                            @if($service_type_check_id == 1 || $service_type_check_id == null)
-                                                @if(isset($errors[$no]['self_collection']) || strtolower($ro['self_collection']) == 'yes')
-            
-                                                    @if(isset($errors[$no]['trax_center_franchise_id']))
-                                                        <td>{!! Form::text('form[' . $no . '][trax_center_franchise_id]', $ro['trax_center_franchise_id'], ['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['trax_center_franchise_id']}}</font></td>
-                                                    @else
-                                                        <td>{!! Form::text('form[' . $no . '][trax_center_franchise_id]', $ro['trax_center_franchise_id'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
-                                                    @endif
-                                                @else
-                                                    <td>{!! Form::text('form[' . $no . '][trax_center_franchise_id]', $ro['trax_center_franchise_id'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
-
-                                                @endif
-                                            @endif
+                                            
 
                                                 <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                       

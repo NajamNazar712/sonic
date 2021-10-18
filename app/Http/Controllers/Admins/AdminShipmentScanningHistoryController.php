@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
-use App\http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\City;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentScanningJourney;

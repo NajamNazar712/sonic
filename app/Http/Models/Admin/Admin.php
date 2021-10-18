@@ -2,6 +2,7 @@
 
 namespace App\Http\Models\Admin;
 
+use App\Http\Models\HR\EmployeeDesignation;
 use App\Notifications\AdminResetPasswordNotification;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -49,6 +50,11 @@ class Admin extends Authenticatable
     }
     public function tagged_shippers(){
         return $this->hasMany('App\Http\Models\Admin\SalePersonTag');
+    }
+
+    public function Edesignation()
+    {
+        return $this->belongsTo(EmployeeDesignation::class, 'designation_id', 'id');
     }
 }
 

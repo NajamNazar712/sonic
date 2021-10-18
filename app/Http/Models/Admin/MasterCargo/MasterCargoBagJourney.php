@@ -1,6 +1,6 @@
 <?php
 
-namespace App\http\Models\Admin\MasterCargo;
+namespace App\Http\Models\Admin\MasterCargo;
 
 use Illuminate\Database\Eloquent\Model;
 

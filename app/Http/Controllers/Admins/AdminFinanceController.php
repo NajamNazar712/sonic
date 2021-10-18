@@ -8,10 +8,10 @@ use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\AdjustmentType;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
-use App\Http\Models\Admin\ResolvedOutstandingShipment;
-use App\http\Models\Admin\Retail\RetailShipment;
-use App\http\Models\Admin\Retail\RetailShipperInfo;
-use App\Http\Models\Admin\RevertStatusRequest;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\ResolvedOutstandingShipment;use App\Http\Models\Admin\RevertStatusRequest;
+use App\Http\Models\Admin\StationDepositNoteAdjustment;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\ChargesModes;
@@ -27,14 +27,14 @@ use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\InternationalDhlZone;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\InternationalUsersCreditLimit;
-use App\http\models\InvoiceUploadSlip;
+use App\Http\Models\InvoiceUploadSlip;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Models\PickupAddressIbanMapping;
 use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Models\RateStatus;
-use App\http\Models\RetailAdjustmentLog;
+use App\Http\Models\RetailAdjustmentLog;
 use App\Http\Models\RetailDonePayment;
 use App\Http\Models\RetailDonePaymentCalculation;
 use App\Http\Models\RetailDonePaymentShipment;
@@ -187,6 +187,31 @@ class AdminFinanceController extends Controller
                 }
                 else {
                     return 0;
+                }
+            })
+            ->addColumn('adjusted_reference_link', function ($sdn) {
+                if($sdn->adjustment_ref != null)
+                {
+                    return $sdn->adjustment_ref;
+                }
+                else{
+                    $adjustment_count = StationDepositNoteAdjustment::where('sdn_id',$sdn->sdn_number)->count();
+                    if($adjustment_count > 0) {
+                        return '<button class="btn btn-sm btn-outline-info align-middle">' . $adjustment_count . '</button>';
+                    }
+                    else{
+                        return 0;
+                    }
+                }
+            })
+            ->addColumn('adjusted_reference_count', function ($sdn) {
+                if($sdn->adjustment_ref != null)
+                {
+                    return $sdn->adjustment_ref;
+                }
+                else{
+                    $adjustment_count = StationDepositNoteAdjustment::where('sdn_id',$sdn->sdn_number)->count();
+                    return $adjustment_count;
                 }
             })
             ->editColumn('sdn_amount', function($shipment){
@@ -6674,7 +6699,6 @@ class AdminFinanceController extends Controller
             $html .= '
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
 
                     window.print();
                   }
@@ -7104,7 +7128,6 @@ class AdminFinanceController extends Controller
             $html .= '
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
 
                     window.print();
                   }
@@ -7556,7 +7579,6 @@ class AdminFinanceController extends Controller
             $html .= '
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
 
                     window.print();
                   }
@@ -7597,7 +7619,9 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
             ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle')->whereIn('is.id',[1,2])->where('ubi.default_bank',1);
-
+            if(session('department_id') == 7){
+                $invoices->whereIn('invoices.user_id', session('tagged_shippers'));
+            }
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function($invoice) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
@@ -7787,7 +7811,9 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
             ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle')->where('is.id',3)->where('ubi.default_bank',1);
-
+            if(session('department_id') == 7){
+                $invoices->whereIn('invoices.user_id', session('tagged_shippers'));
+            }
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function($invoice) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
@@ -8480,7 +8506,6 @@ class AdminFinanceController extends Controller
             $html .= '
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
 
                     window.print();
                   }
@@ -8497,7 +8522,6 @@ class AdminFinanceController extends Controller
                 <body>No Payment(s) for the given Criteria</body>
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
                   }
                 </script>
             </html>

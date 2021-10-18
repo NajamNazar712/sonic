@@ -26,7 +26,7 @@
             </div>
         @endif
     </div>
-    
+
 
     <div class="row mb-2">
         <div class="col">
@@ -38,7 +38,8 @@
                 </select>
             </fieldset>
         </div>
-
+    </div>
+    <div class="row mb-2">
         <div class="col">
             <fieldset class="form-group">
                 <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
@@ -48,6 +49,17 @@
                 </select>
             </fieldset>
         </div>
+
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="location_id" id="location_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    @foreach($reporting_locations as $reporting_location)
+                        <option value="{{$reporting_location->id}}"> {{$reporting_location->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+
     </div>
 <div id="riderInfoDiv">
     <div class="row mb-2">
@@ -204,6 +216,10 @@
         });
         $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Shift',
+            dropdownParent: $("#addRiderForm")
+        });
+        $('#location_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Reporting Location',
             dropdownParent: $("#addRiderForm")
         });
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});

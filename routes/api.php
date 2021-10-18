@@ -140,6 +140,7 @@ Route::name('api.')->group(function () {
             Route::prefix('location')->name('location.')->group(function(){
                 Route::post('','Rider\RiderAPIController@get_rider_location')->name('get');
             });
+            Route::post('location_v2', 'Rider\RiderAPIController@get_rider_location_v2')->name('location_v2');
 
             Route::prefix('delivery')->name('delivery.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
@@ -246,6 +247,8 @@ Route::name('api.')->group(function () {
                 Route::post('mark_v2', 'AdminAPIController@mark_attendance_v2')->name('mark_v2');
                 Route::post('detail_v2', 'AdminAPIController@attendance_details_v2')->name('detail_v2');
                 Route::post('mark_api', 'AdminAPIController@mark_attendance_api')->name('mark_api');
+                Route::get('flutter_detail', 'AdminAPIController@flutter_attendance_details')->name('flutter_detail');
+                Route::post('flutter_mark', 'AdminAPIController@flutter_mark_attendance')->name('flutter_mark');
             });
 
             Route::prefix('retail')->name('retail.')->group(function () {
@@ -254,6 +257,7 @@ Route::name('api.')->group(function () {
                 Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
             Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');
+            Route::post('location_v2', 'AdminAPIController@attendance_notification')->name('location_v2');
 
         });
 

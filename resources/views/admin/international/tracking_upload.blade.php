@@ -425,6 +425,16 @@
                 //     $('#corporate_rate_type_shipper_id').val(id);
                 // }
             });
+            $('body').on('click', 'button.replace_pod',  function(){
+                var id = $(this).parents('tr').attr('id');
+                $('#pod_shipment').val(id);
+
+                $('#upload_pod_modal').modal('show');
+                // if(id){
+                //     $('#corporate_rate_type_modal').modal('show');
+                //     $('#corporate_rate_type_shipper_id').val(id);
+                // }
+            });
         });
     </script>
 @endsection
