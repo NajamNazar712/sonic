@@ -1634,27 +1634,22 @@ class AdminFinanceController extends Controller
                                 ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
                             }
 
-                            $account_type_id = $shipment->user->account_type_id;
-
-                            if ($account_type_id == 1) {
-                                $pending_payment_shipment = RetailPendingPaymentShipment::where('shipment_id', $shipment_id);
-
-                                if ($pending_payment_shipment->exists()) {
-                                    $pending_payment_shipment = $pending_payment_shipment->latest()->first();
-
-                                    $this->adjust_payment($pending_payment_shipment->retail_pending_payment_id, $shipment_id, 0, 2);
-                                }
-                                else {
-                                    $done_payment_shipment = RetailDonePaymentShipment::where('shipment_id', $shipment_id);
-
-                                    if ($done_payment_shipment->exists()) {
-                                        $done_payment_shipment = $done_payment_shipment->latest()->first();
-
-                                        $this->adjust_payment($done_payment_shipment->retail_done_payment_id, $shipment_id, 1, 2);
-                                    }
-                                }
-                            }
-                            else {
+                            // $account_type_id = $shipment->user->account_type_id;
+                            // if ($account_type_id == 1) {
+                            //     $pending_payment_shipment = RetailPendingPaymentShipment::where('shipment_id', $shipment_id);
+                            //     if ($pending_payment_shipment->exists()) {
+                            //         $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+                            //         $this->adjust_payment($pending_payment_shipment->retail_pending_payment_id, $shipment_id, 0, 2);
+                            //     }
+                            //     else {
+                            //         $done_payment_shipment = RetailDonePaymentShipment::where('shipment_id', $shipment_id);
+                            //         if ($done_payment_shipment->exists()) {
+                            //             $done_payment_shipment = $done_payment_shipment->latest()->first();
+                            //             $this->adjust_payment($done_payment_shipment->retail_done_payment_id, $shipment_id, 1, 2);
+                            //         }
+                            //     }
+                            // }
+                            // else {
                                 $payment_shipment_id = NULL;
                                 $payment_type = NULL;
                                 $invoice_shipment_id = NULL;
@@ -1703,7 +1698,7 @@ class AdminFinanceController extends Controller
                                 if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
                                     self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, 2);
                                 }
-                            }
+                            // }
 
                             if(isset($payment_type) && $payment_type == 1) {
                                 ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), '', $done_payment_id);
@@ -1957,27 +1952,22 @@ class AdminFinanceController extends Controller
                             ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
                         }
 
-                        $account_type_id = $shipment->user->account_type_id;
-
-                        if ($account_type_id == 1) {
-                            $pending_payment_shipment = RetailPendingPaymentShipment::where('shipment_id', $request->id);
-
-                            if ($pending_payment_shipment->exists()) {
-                                $pending_payment_shipment = $pending_payment_shipment->latest()->first();
-
-                                $this->adjust_payment($pending_payment_shipment->retail_pending_payment_id, $request->id, 0, 2);
-                            }
-                            else {
-                                $done_payment_shipment = RetailDonePaymentShipment::where('shipment_id', $request->id);
-
-                                if ($done_payment_shipment->exists()) {
-                                    $done_payment_shipment = $done_payment_shipment->latest()->first();
-
-                                    $this->adjust_payment($done_payment_shipment->retail_done_payment_id, $request->id, 1, 2);
-                                }
-                            }
-                        }
-                        else {
+                        // $account_type_id = $shipment->user->account_type_id;
+                        // if ($account_type_id == 1) {
+                        //     $pending_payment_shipment = RetailPendingPaymentShipment::where('shipment_id', $request->id);
+                        //     if ($pending_payment_shipment->exists()) {
+                        //         $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+                        //         $this->adjust_payment($pending_payment_shipment->retail_pending_payment_id, $request->id, 0, 2);
+                        //     }
+                        //     else {
+                        //         $done_payment_shipment = RetailDonePaymentShipment::where('shipment_id', $request->id);
+                        //         if ($done_payment_shipment->exists()) {
+                        //             $done_payment_shipment = $done_payment_shipment->latest()->first();
+                        //             $this->adjust_payment($done_payment_shipment->retail_done_payment_id, $request->id, 1, 2);
+                        //         }
+                        //     }
+                        // }
+                        // else {
                             $payment_shipment_id = NULL;
                             $payment_type = NULL;
                             $invoice_shipment_id = NULL;
@@ -2025,7 +2015,7 @@ class AdminFinanceController extends Controller
                             if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
                                 self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, 2);
                             }
-                        }
+                        // }
 
                         if(isset($payment_type) && $payment_type == 1) {
                             ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id(), '', $done_payment_id);
@@ -3592,6 +3582,9 @@ class AdminFinanceController extends Controller
     
                         if ($total_shipments == 0) {
                             $payment->delete();
+                            //for retail only 
+                             RetailPendingPaymentCalculation::where('retail_pending_payment_id', $payment->id)->delete();
+
                         }
                         else {
                             $payment->total_shipments = $total_shipments;
@@ -3608,6 +3601,13 @@ class AdminFinanceController extends Controller
                             }
     
                             $payment->save();
+                            $payment_payment_calculation = RetailPendingPaymentCalculation::where('retail_pending_payment_id', $payment->id);
+                            if($payment_payment_calculation->exists()){
+                                $payment_payment_calculation = $payment_payment_calculation->first();
+                                $payment_payment_calculation->amount = $payment_payment_calculation->amount - $payment_shipment->amount;
+                                $payment_payment_calculation->payable = $payment_payment_calculation->payable - $payment_shipment->payable;
+                                $payment_payment_calculation->save();
+                            }
                         }
     
                         $payment_shipment->delete();
@@ -3646,13 +3646,17 @@ class AdminFinanceController extends Controller
     
                         $pending_payment_shipment = new RetailPendingPaymentShipment();
     
-                        $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                        $pending_payment_shipment->retail_pending_payment_id = $pending_payment->id;
                         $pending_payment_shipment->shipment_id = $shipment_id;
                         $pending_payment_shipment->type = 2;
                         $pending_payment_shipment->amount = $amount;
                         $pending_payment_shipment->payable = $payable;
     
                         $pending_payment_shipment->save();
+                        //for retail only 
+                        
+                        self::add_pending_payment_charges($pending_payment->id, $amount, 0, 0, $payable, 0,1);
+
                         if($adjustment_type) {
                             self::adjustment_logs_add($shipment_id, $adjustment_type, $payable, NULL, $pending_payment_shipment->id, 1, 1);
                         }
@@ -3698,7 +3702,7 @@ class AdminFinanceController extends Controller
     
                         $pending_payment_shipment = new RetailPendingPaymentShipment();
     
-                        $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                        $pending_payment_shipment->retail_pending_payment_id = $pending_payment->id;
                         $pending_payment_shipment->shipment_id = $shipment_id;
                         $pending_payment_shipment->type = 2;
                         $pending_payment_shipment->amount = $amount;
