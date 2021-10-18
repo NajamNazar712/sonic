@@ -945,7 +945,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL) {
+    public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL,$shipper_name = NULL,$shipper_phone = NULL) {
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
@@ -1511,18 +1511,22 @@ class ShipperShipmentBookController extends Controller
 
 
                     }
-                    if($shipment->pickup_address->pickup_brand_name != NULL){
-                        // $company_name = $shipment->user->brand_name;
-                        $company_name = $shipment->pickup_address->pickup_brand_name;
+                    if($shipper_name == NULL) {
+                        if ($shipment->pickup_address->pickup_brand_name != NULL) {
+                            // $company_name = $shipment->user->brand_name;
+                            $company_name = $shipment->pickup_address->pickup_brand_name;
 
 
-                    }else{
-                        if($shipment->user->brand_name != NULL){
-                            $company_name = $shipment->user->brand_name;
+                        } else {
+                            if ($shipment->user->brand_name != NULL) {
+                                $company_name = $shipment->user->brand_name;
+                            } else {
+                                $company_name = $shipment->user->name;
+                            }
                         }
-                        else{
-                            $company_name = $shipment->user->name;
-                        }
+                    }
+                    else{
+                        $company_name = $shipper_name;
                     }
 
 
@@ -1584,7 +1588,12 @@ class ShipperShipmentBookController extends Controller
                         ';
 
 
-                    $phonenumber = $return_address_id == NULL ? $shipment->pickup_address->phone : $return_address_phone;
+                    if($shipper_phone == NULL) {
+                        $phonenumber = $return_address_id == NULL ? $shipment->pickup_address->phone : $return_address_phone;
+                    }
+                    else{
+                        $phonenumber = $shipper_phone;
+                    }
                     $phonenumberstyle = $return_address_id == NULL ? '<td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>' : '<td class="color secondary border twice-bottom" style="background-color: #6e6e6e !important; color: white;"><strong>Phone Number(s)</strong></td>';
                     if ($type != 'pdf') {
                         if ($shipment->booking_type_id != 4) {
@@ -2259,8 +2268,18 @@ class ShipperShipmentBookController extends Controller
                     return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids);
                 }
                 else {
-                    //dd(1);
-                    return $this->air_waybill($user_type, $user_id, $request->ids);
+                    $shipper_phone = NULL;
+                    $shipper_name = NULL;
+                    if($request->has('shipper_name'))
+                    {
+                        $shipper_name = $request->shipper_name;
+                    }
+
+                    if($request->has('shipper_phone'))
+                    {
+                        $shipper_phone = $request->shipper_phone;
+                    }
+                    return $this->air_waybill($user_type, $user_id, $request->ids,FALSE,NULL,$shipper_name,$shipper_phone);
                 }
             }
             else {
