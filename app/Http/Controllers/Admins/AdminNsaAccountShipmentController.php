@@ -1232,6 +1232,7 @@ class AdminNsaAccountShipmentController extends Controller
 
     public function carrefour_delivery_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),455);
         $routes = Route::where('status', 1);
 
         if (session('role_id') != 1) {
@@ -1541,6 +1542,7 @@ class AdminNsaAccountShipmentController extends Controller
     }
 
     public function carrefour_return_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),456);
         $routes = Route::where('status', 1);
 
         if (session('role_id') != 1) {
