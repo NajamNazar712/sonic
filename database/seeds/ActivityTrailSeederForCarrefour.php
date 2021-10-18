@@ -17,10 +17,10 @@ class ActivityTrailSeederForCarrefour extends Seeder
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Carrefour > Carrefour Bulk Delivery', 'url'=>'admin.carrefour.delivery.index', 'permission_id' => 3)
+        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Carrefour > Carrefour Bulk Delivery', 'url'=>'admin.carrefour.delivery.index', 'permission_id' => 606)
         );
 
-        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Carrefour > Carrefour Bulk Return', 'url'=>'admin.carrefour.return.index', 'permission_id' => 3)
+        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Carrefour > Carrefour Bulk Return', 'url'=>'admin.carrefour.return.index', 'permission_id' => 607)
     );
     }
 }
