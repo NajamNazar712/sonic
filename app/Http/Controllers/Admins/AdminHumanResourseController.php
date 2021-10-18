@@ -3217,13 +3217,13 @@ class AdminHumanResourseController extends Controller
                         
                         <tr class="text-center">
                             <td class="color primary border twice" colspan="2"><b>Total Addition</b></td>
-                            <td class="color primary border twice" colspan="2">'. number_format($total_addition) .'</td>
+                            <td class="color primary border twice" colspan="2">'. $total_addition .'</td>
                             <td class="color primary border twice" colspan="2"><b>Total Deduction</b></td>
-                            <td class="color primary border twice" colspan="2">'. number_format($total_deduction) .'</td>
+                            <td class="color primary border twice" colspan="2">'. $total_deduction .'</td>
                         </tr>
                         <tr class="text-left">
                             <td class="color primary border twice" colspan="6"><b>Net Salary</b></td>
-                            <td class="color primary border twice text-center" colspan="2">'. number_format($net_salary) .'</td>
+                            <td class="color primary border twice text-center" colspan="2">'. $net_salary .'</td>
                         </tr>
                         <tr class="text-left">
                             <td class="border twice" colspan="8" rowspan="5"><i>Note: This is a system generated document and does not require any signature.</i></td>

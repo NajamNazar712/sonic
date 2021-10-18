@@ -5179,7 +5179,92 @@ class AdminReportsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),170);
         }
-        $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
+
+        if (Auth::id() == 3) {
+            $connection = 'mysql';
+        }
+        else {
+            $connection = 'reports';
+        }
+
+        $count = DB::connection($connection)->table('shipments')
+        ->join('users as u','u.id','=','shipments.user_id')
+        ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id');
+
+        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+            $from = $request->get('dr_search_date_from');
+            $to = $request->get('dr_search_date_to');
+
+            $count = $count->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
+                $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->where('dr.id','=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
+            })
+            ->whereBetween('dr.created_at', [$from, $to]);
+        }
+
+        if($tracking = $request->get('search_tracking')){
+            $count = $count->where('shipments.tracking_number', '=', $tracking);
+        }
+        if($shipper = $request->get('search_shipper')){
+            $count = $count->where('u.id', '=', $shipper);
+        }
+        if($origin = $request->get('search_origin')){
+            $count = $count->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->where('oc.id', '=', $origin);
+        }
+        if($destination = $request->get('search_destination')){
+            $count = $count->where('dc.id', '=', $destination);
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $count = $count->where('shipments.booking_type_id', '=', $mode);
+        }
+        if($hub = $request->get('search_hub')){
+            $count = $count->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->where('h.id', '=', $hub);
+        }
+        if($status = $request->get('search_status')){
+            $count = $count->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->where('ss.id', '=', $status);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+
+            $count = $count->join('shipments_journey as sj', function ($join) use ($connection) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->whereBetween('sj.created_at', [$from,$to]);
+        }
+
+        if($search_business_category = $request->get('search_business_category')){
+            $count = $count->where('shipments.business_category_id', '=', $search_business_category);
+        }
+
+        if (!($request->get('search_date_from') && $request->get('search_date_to')) && !($request->get('dr_search_date_from') && $request->get('dr_search_date_to'))) {
+            $count = $count->whereRaw('false');
+        }
+
+        $count = $count->whereNotIn('shipments.shipper_status_id',[1,17])
+            ->whereNotIn('u.id', [8761, 9358]);
+
+        if (session('role_id') != 1 && session('role_id') != 4) {
+            if (session('department_id') == 7) {
+                $count = $count->whereIn('u.id', session('tagged_shippers'));
+            }
+            else {
+                $count = $count->whereIn('dc.hub_id', session('hubs'));
+            }
+        }
+
+        $count = $count->count();
+
+        $sales = DB::connection($connection)->table('shipments')
+            ->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -5188,10 +5273,10 @@ class AdminReportsController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->join('business_categories as bc' ,'shipments.business_category_id', '=' , 'bc.id')
-            ->leftjoin('zone_class_cities as zcc', function($join){
+            ->leftjoin('zone_class_cities as zcc', function($join) use ($connection) {
                 $join->on('z.id', '=', 'zcc.zone_id')
                     ->on('dc.id', '=', 'zcc.city_id')
-                    ->on('zone_classification_id', '=', DB::connection('reports')->raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
+                    ->on('zone_classification_id', '=', DB::connection($connection)->raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
             })
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
@@ -5201,30 +5286,30 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id and delivery_note_shipments.status > 3 and  delivery_note_shipments.status != 8)'));
             })
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-            ->leftJoin('shipments_journey as sj', function ($join) {
+            ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->leftJoin('pending_payment_shipments as pps', function ($join) {
+            ->leftJoin('pending_payment_shipments as pps', function ($join) use ($connection) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
                     ->where('pps.id','=',
-                        DB::connection('reports')->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id and pending_payment_shipments.type != 2)'));
+                        DB::connection($connection)->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id and pending_payment_shipments.type != 2)'));
             })
-            ->leftJoin('done_payment_shipments as dps', function ($join) {
+            ->leftJoin('done_payment_shipments as dps', function ($join) use ($connection) {
                 $join->on('dps.shipment_id', '=', 'shipments.id')
                     ->where('dps.id','=',
-                        DB::connection('reports')->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)'));
+                        DB::connection($connection)->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)'));
             })
-            ->leftJoin('pending_invoice_shipments as pis', function ($join) {
+            ->leftJoin('pending_invoice_shipments as pis', function ($join) use ($connection) {
                 $join->on('pis.shipment_id', '=', 'shipments.id')
                     ->where('pis.id','=',
-                        DB::connection('reports')->raw('(select max(id) from pending_invoice_shipments where pending_invoice_shipments.shipment_id = shipments.id and pending_invoice_shipments.type != 2)'));
+                        DB::connection($connection)->raw('(select max(id) from pending_invoice_shipments where pending_invoice_shipments.shipment_id = shipments.id and pending_invoice_shipments.type != 2)'));
             })
-            ->leftJoin('invoice_shipments as is', function ($join) {
+            ->leftJoin('invoice_shipments as is', function ($join) use ($connection) {
                 $join->on('is.shipment_id', '=', 'shipments.id')
                     ->where('is.id','=',
-                        DB::connection('reports')->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id and invoice_shipments.type != 2)'));
+                        DB::connection($connection)->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id and invoice_shipments.type != 2)'));
             });
 //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
 //            $now = Carbon::now();
@@ -5236,18 +5321,18 @@ class AdminReportsController extends Controller
             $from = $request->get('dr_search_date_from');
             $to = $request->get('dr_search_date_to');
 
-            $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to) {
+            $sales->join('shipments_journey as dr', function ($join) use ($from, $to, $connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
             });
             $sales->whereBetween('dr.created_at', [$from, $to]);
         }
         else {
-            $sales->leftJoin('shipments_journey as dr', function ($join) {
+            $sales->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)'));
             });
         }
 
@@ -5265,6 +5350,7 @@ class AdminReportsController extends Controller
         }
 
         $datatable = Datatables::of($sales)
+            ->setTotalRecords($count)
             ->editColumn('insurance_charges', function($shipment){
                 return number_format($shipment->insurance_charges, 2);
             })
@@ -5436,7 +5522,7 @@ class AdminReportsController extends Controller
                 return $class;
             })
             ->editColumn('delivered_or_returned', function($sale){
-                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                if (in_array($sale->shipment_status, [14, 20, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
                     return $sale->delivered_or_returned;
                 }
                 else {
