@@ -33,9 +33,11 @@ use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeMedicalInformation;
+use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
+use App\Http\Models\Rider;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
@@ -3440,6 +3442,37 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Email is not registered']);
             }
 
+        }
+    }
+
+    public function admin_payslip(Request $request)
+    {
+        $rules = [
+            'date' => ['required']
+        ];
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admins = Admin::find($admin_id);
+            if ($admins) {
+                $payslip = EmployeePayslip::where('trax_id', $admins->trax_id)
+                    ->whereMonth('payroll_month', Carbon::parse($request->date)->format("m"))
+                    ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
+                if ($payslip->exists()) {
+                    $payslip = $payslip->get();
+                    $month = Carbon::parse($request->date)->format("F-Y");
+                    return response()->json(['status' => 0, 'payroll_month' => $month, 'data' => $payslip]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Payslip not found"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "User not found"]);
+            }
         }
     }
 
