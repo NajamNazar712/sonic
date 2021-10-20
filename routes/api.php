@@ -256,7 +256,8 @@ Route::name('api.')->group(function () {
                 Route::post('retail_bank_info', 'AdminAPIController@retail_bank_info')->name('retail_bank_info');
                 Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
-            Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');            Route::post('location_v2', 'AdminAPIController@attendance_notification')->name('location_v2');
+            Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');
+            Route::post('location_v2', 'AdminAPIController@attendance_notification')->name('location_v2');
             Route::post('payslip', 'AdminAPIController@admin_payslip')->name('payslip');
 
         });
