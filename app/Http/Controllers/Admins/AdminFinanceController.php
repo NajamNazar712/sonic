@@ -1726,10 +1726,10 @@ class AdminFinanceController extends Controller
                             // }
 
                             if(isset($payment_type) && $payment_type == 1) {
-                                ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), '', $done_payment_id);
+                                ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), '', $done_payment_id, 1);
                             }
                             else{
-                                ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id());
+                                ShipmentsPaymentJourneyController::add($shipment_id, 4, Auth::id(), '', NULL, 1);
                             }
 
                             ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
@@ -2043,10 +2043,10 @@ class AdminFinanceController extends Controller
                         // }
 
                         if(isset($payment_type) && $payment_type == 1) {
-                            ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id(), '', $done_payment_id);
+                            ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id(), '', $done_payment_id,1);
                         }
                         else{
-                            ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id());
+                            ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id(),'', NULL, 1);
                         }
 
                         ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
