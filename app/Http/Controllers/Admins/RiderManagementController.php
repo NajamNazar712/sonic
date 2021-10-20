@@ -178,7 +178,7 @@ class RiderManagementController extends Controller
             'rider_main_category'=>'required|numeric',
             'pin' => 'required|numeric',
             'rider_shift' => 'required|numeric',
-            'location_id' => 'required|numeric'
+            'location_id' => 'nullable|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
         if ($validate->fails()) {
@@ -278,7 +278,7 @@ class RiderManagementController extends Controller
             'rider_category'=>'required|numeric',
             'rider_main_category'=>'required|numeric',
             'rider_shift'=>'required|numeric',
-            'location_id'=>'required|numeric'
+            'location_id'=>'nullable|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
 
