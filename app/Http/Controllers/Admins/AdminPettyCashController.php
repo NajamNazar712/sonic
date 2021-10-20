@@ -140,7 +140,7 @@ class AdminPettyCashController extends Controller
         if ($request->has('submit_button')) {
             $total_amount = 0;
             if (PettyCashStatement::where('reference_no', '=', $request->reference_no)->exists()) {
-                return ['status' => 0, 'error' => 'Reference No. not Unique'];
+                return redirect()->back()->with(['status' => 0, 'error' => 'Reference No. not Unique']);
             }
 
             $selected_ids = explode(',', $request->input('selected_rows'));
@@ -430,15 +430,15 @@ class AdminPettyCashController extends Controller
                     }
                     $drops .= '<option value="' . $employee->id . '" ' . $selected . '>' . $employee->trax_id . '</option>';
                 }
-                $select = '<select class="form-control form-control-sm select2 employee_select" disabled name="employee[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Employee Id is required">' . $drops . '</select>';
+                $select = '<select class="form-control form-control-sm select2 employee_select" disabled name="employee[' . $petty_details->statement_detail_id . ']">' . $drops . '</select>';
                 return $select;
             })
             ->addColumn('employee_name',function ($petty_details){
-                $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_name_data . '" name="employee_name[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Name is required">';
+                $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_name_data . '" name="employee_name[' . $petty_details->statement_detail_id . ']">';
                 return $input;
             })
             ->addColumn('employee_designation',function ($petty_details){
-                $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_designation_data . '" name="employee_designations[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Designation is required">';
+                $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_designation_data . '" name="employee_designations[' . $petty_details->statement_detail_id . ']" >';
                 return $input;
             })
             ->editColumn('date', function ($petty_details) {
@@ -464,7 +464,7 @@ class AdminPettyCashController extends Controller
                 return $amount;
             })
             ->editColumn('reference_no', function ($petty_details) {
-                $reference = '<input class="form-control form-control-sm" disabled value="' . $petty_details->reference_no . '" name="reference[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Reference No. is required">';
+                $reference = '<input class="form-control form-control-sm" disabled value="' . $petty_details->reference_no . '" name="reference[' . $petty_details->statement_detail_id . ']" >';
                 return $reference;
             })
             ->editColumn('remarks', function ($petty_details) {

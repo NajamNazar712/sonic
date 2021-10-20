@@ -184,7 +184,7 @@
             var selected_rows = [];
             var rows_count = 0;
             var table = $('#datatable').DataTable({
-                @if($petty_statement->sdn->status != 2)
+                @if($petty_statement->sdn != null && $petty_statement->sdn->status != 2)
                 @if(($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && session('department_id') == 6))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[

@@ -270,11 +270,11 @@
                 var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required"></div>';
 
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" maxlength="300" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
-                var employee_select = '<select class="form-control form-control-sm select2 employee_select" name="employee['+rows_count+']" data-rule-required="true" data-msg-required="Employee Id is required"></select>';
-                var employee_name_input = '<input class="form-control form-control-sm employee_name" readonly name="employee_name['+rows_count+']" placeholder="Employee Name"  data-rule-required="true" data-msg-required="Employee Name is required">';
-                var employee_designation_input = '<input class="form-control form-control-sm employee_designation" readonly name="employee_designation['+rows_count+']" placeholder="Employee Designation"  data-rule-required="true" data-msg-required="Employee Designation is required">';
+                var employee_select = '<select class="form-control form-control-sm select2 employee_select" name="employee['+rows_count+']"></select>';
+                var employee_name_input = '<input class="form-control form-control-sm employee_name" readonly name="employee_name['+rows_count+']" placeholder="Employee Name">';
+                var employee_designation_input = '<input class="form-control form-control-sm employee_designation" readonly name="employee_designation['+rows_count+']" placeholder="Employee Designation">';
                 var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount" data-rule-required="true" data-msg-required="Amount is required">';
-                var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Amount is required">';
+                var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No">';
                 var remarks_input = '<input class="form-control form-control-sm" name="remarks['+rows_count+']" placeholder="Remarks">';
 
                 var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" type="file" name="upload_2_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
@@ -322,6 +322,7 @@
                     data: employees,
                     placeholder:'Select Employee Id',
                     dropdownCssClass: 'form-control-sm p-0'
+                    allowClear:true,
 
                 });
                 $('select[name="city['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
@@ -482,6 +483,10 @@
                     if(data.status){
                         employee_name.val(data.name);
                         employee_designation.val(data.designation);
+                    }
+                    else{
+                        employee_name.val("");
+                        employee_designation.val("");
                     }
                 });
             });
@@ -801,11 +806,11 @@
                 var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required" data-value="'+ date +'"></div>';
 
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" maxlength="300" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">'+ expense +'</textarea>';
-                var employee_select = '<select class="form-control form-control-sm select2 employee_select" name="employee['+rows_count+']" data-rule-required="true" data-msg-required="Employee Id is required"></select>';
-                var employee_name_input = '<input class="form-control form-control-sm employee_name" readonly name="employee_name['+rows_count+']" placeholder="Employee Name" value="'+employee_name+'"  data-rule-required="true" data-msg-required="Employee Name is required">';
-                var employee_designation_input = '<input class="form-control form-control-sm employee_designation" readonly name="employee_designation['+rows_count+']" placeholder="Employee Designation" value="'+employee_designation+'"  data-rule-required="true" data-msg-required="Employee Designation is required">';
+                var employee_select = '<select class="form-control form-control-sm select2 employee_select" name="employee['+rows_count+']"></select>';
+                var employee_name_input = '<input class="form-control form-control-sm employee_name" readonly name="employee_name['+rows_count+']" placeholder="Employee Name" value="'+employee_name+'">';
+                var employee_designation_input = '<input class="form-control form-control-sm employee_designation" readonly name="employee_designation['+rows_count+']" placeholder="Employee Designation" value="'+employee_designation+'" >';
                 var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount" value="'+ amount +'" data-rule-required="true" data-msg-required="Amount is required">';
-                var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Reference No. is required" value="'+reference+'">';
+                var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No"  value="'+reference+'">';
                 var remarks_input = '<input class="form-control form-control-sm" name="remarks['+rows_count+']" placeholder="Remarks" value="'+ remarks +'">';
                 var upload_image = '<div class="text-center">';
                 if(reference_document != ''){
@@ -955,7 +960,8 @@
                     $('select[name="employee[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
                         data: employees,
                         placeholder: 'Select Employee Id',
-                        dropdownCssClass: 'form-control-sm p-0'
+                        dropdownCssClass: 'form-control-sm p-0',
+                        allowClear:true,
 
                     });
                     $('select[name="employee[' + rows_count + ']"]').val(employee_id).trigger('change');
