@@ -1575,7 +1575,11 @@ class AdminPettyCashController extends Controller
                 return number_format($shipment->total_amount);
             })
             ->addColumn('date', function ($petty) {
-                return Carbon::parse($petty->from)->toDateString() . ' - ' . Carbon::parse($petty->to)->toDateString();
+                if($petty->from != null && $petty->to != null) {
+                    return Carbon::parse($petty->from)->toDateString() . ' - ' . Carbon::parse($petty->to)->toDateString();
+                }
+
+                return "-";
             })
             ->filterColumn('date', function ($query, $keyword) {
                 if ($keyword != '') {
