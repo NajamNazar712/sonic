@@ -279,7 +279,9 @@
                     var bag_number = $(form).find('input.bag_number').val();
                     var bag_weight = $(form).find('input.bag_weight').val();
 
+                    $(form).find('input.bag_number').focus();
                     form.reset();
+
 
                     if (table.columns('.bag_number').data().eq(0).indexOf(parseInt(bag_number)) === -1) {
                         blockPagePermanently();

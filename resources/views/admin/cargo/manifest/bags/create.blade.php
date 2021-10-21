@@ -202,7 +202,7 @@
             $.validator.addMethod(
                 "seal_number",
                 function(value,element){
-                    if(element.value.length == 6 || element.value.length == 11 ||  element.value.length == 12 ||  element.value.length == 13){
+                    if(element.value.length == 6 || element.value.length == 7 || element.value.length == 14 ||  element.value.length == 12 || element.value.length == 15 ||  element.value.length == 13){
                         return true;
                     } else {
                         return false;
@@ -442,7 +442,7 @@
 
                            $('#cargo_consignment form input.seal_number').on('change', function () {
                                var seal = this.value;
-                               if (seal.length != 12 && seal.length != 13 && seal.length != 6) {
+                               if (seal.length != 12 && seal.length != 13 && seal.length != 6 && seal.length != 7 &&  && seal.length != 14 &&  && seal.length != 15) {
                                    this.value = '';
                                }
                            });
