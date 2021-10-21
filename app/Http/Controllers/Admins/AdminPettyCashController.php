@@ -389,7 +389,7 @@ class AdminPettyCashController extends Controller
             ->addColumn('city_name', function ($petty_details) {
                 $hub_id = $petty_details->hub_id;
                 $city_id = $petty_details->city_id;
-                $cities = City::where('hub',0)->where('status',1)->where('hub_id',$hub_id)->select('id','name')->get();
+                $cities = City::where('status',1)->where('hub_id',$hub_id)->select('id','name')->get();
                 $drops = '';
                 $selected = '';
                 foreach ($cities as $city) {
