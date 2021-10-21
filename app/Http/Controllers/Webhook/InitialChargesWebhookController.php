@@ -27,18 +27,19 @@ class InitialChargesWebhookController extends Controller
             $data['user_id'] = $user_id;
             $data['url'] = $subscriber->url;
             $data['tracking_number'] = $shipment->tracking_number;
-//            $data['origin'] = ;
-//            $data['destination'] = ;
-//            $data['cod_amount'] = ;
-//            $data['actual_weight'] = ;
-//            $data['chargeable_weight'] = ;
-//            $data['weight_charges'] = ;
-//            $data['cash_handling_charges'] = ;
-//            $data['insurance_charges'] = ;
-//            $data['fuel_surcharges'] = ;
-//            $data['gst'] = ;
-//            $data['total_charges'] = ;
-//            $data['net_payable'] = ;
+            $data['origin'] = $shipment->pickup_address->city->name;
+            $data['destination'] = $shipment->consignee_city->name;
+            $data['cod_amount'] = $shipment->amount;
+            $data['actual_weight'] = $shipment->actual_weight;
+            $data['chargeable_weight'] = $shipment->chargeable_weight;
+            $data['weight_charges'] = $shipment->weight_charges;
+            $data['cash_handling_charges'] = $shipment->cash_handling_charges;
+            $data['insurance_charges'] = $shipment->insurance_charges;
+            $data['fuel_surcharges'] = $shipment->fuel_surcharges;
+            $data['gst'] = $shipment->gst;
+            $total_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharges;
+            $data['total_charges'] = $total_charges;
+            $data['net_payable'] = $shipment->amount - $total_charges - $shipment->gst;
             dispatch(new ProcessInitialChargesWebhook($data));
 
         }
