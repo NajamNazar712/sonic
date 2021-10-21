@@ -724,16 +724,7 @@ class AdminCargoManifestController extends Controller
                         $city_details = City::find($shipment_details->old_consignee_city_id);
                         $hub_id = $city_details->hub_id;
                     } else {
-                        if ($shipment->shipper_status_id == 20) {
-                            if ($shipment->return_address_id != NULL) {
-                                $hub_id = $shipment->return_address->city->hub_id;
-                            } else {
-                                $hub_id = $shipment->consignee_city->hub_id;
-                            }
-                        } else {
-                            $hub_id = $shipment->consignee_city->hub_id;
-                        }
-
+                        $hub_id = $shipment->consignee_city->hub_id;
                     }
 
                     $allowed = FALSE;
