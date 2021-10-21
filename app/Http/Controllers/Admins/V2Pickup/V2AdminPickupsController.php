@@ -1028,6 +1028,10 @@ class V2AdminPickupsController extends Controller
                                 ShipmentChargesController::international_fuel_surcharge($shipment_id);
                             }
                         }
+
+                        if($shipment->walk_in_status == 0) {
+                            InitialChargesWebhookController::webhook_subscription($shipment_id);
+                        }
                     }
 
                     if ($shipment->shipment_type != 2 && $shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
