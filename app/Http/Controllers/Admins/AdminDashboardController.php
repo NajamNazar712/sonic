@@ -1394,10 +1394,11 @@ class AdminDashboardController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),1);
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
+        $segments = Segment::all();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
         $corporate_rate_types = CorporateRateType::all();
         $territories = Territory::select('id','name')->get();
-        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types,'territories' => $territories]);
+        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'segments'=>$segments,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types,'territories' => $territories]);
     }
     public function activeAccountsList(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),2);
@@ -1405,11 +1406,12 @@ class AdminDashboardController extends Controller
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
         $segments = Segment::all();
-        $sub_segments = SubCategorySegment::all();
+        $general_segments = SubCategorySegment::where('segment_id',1)->get();
+        $ecom_segments = SubCategorySegment::where('segment_id',2)->get();
         $payment_cycles = PaymentCycle::all();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
         $territories = Territory::select('id','name')->get();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'sub_segments' => $sub_segments ,'sale_tier_types' => $sale_tier_types,'territories' => $territories]);
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments,'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments ,'sale_tier_types' => $sale_tier_types,'territories' => $territories]);
 
     }
     public function blockAccountsList(){
@@ -11111,7 +11113,6 @@ class AdminDashboardController extends Controller
 //            return response()->json(['status' => 0, 'No Shipping mode found!']);
 //        }
 //     }
-
     public function add_territory(Request $request){
         $territory = $request->territory;
         $user_ids = $request->user_ids;
@@ -11133,6 +11134,27 @@ class AdminDashboardController extends Controller
             return redirect()->back()->with('error', 'Territory not added.');
         }
     }
+
+    public function add_segments(Request $request){
+        $segment_id = $request->bulk_segment;
+        $sub_segment_id = $request->bulk_sub_segment;
+        $user_ids = $request->user_ids;
+        if($user_ids){
+            $user_ids = explode(',', $user_ids);
+            foreach($user_ids as $id){
+                $user = User::find($id);
+                $user->sub_segment_id = $sub_segment_id;
+                $user->segment_id = $segment_id;
+                $user->save();
+            }
+            return redirect()->back()->with('success', 'Segments is added.');
+            }
+        else{
+            return redirect()->back()->with('error', 'Segments not added.');
+        }
+    }
+
+    
 
 
     public function todayActiveAccountsList(){
