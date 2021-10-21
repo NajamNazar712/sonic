@@ -466,7 +466,7 @@
                 $(".operation_manager_input_value").val(default_operation_manager_value);
             });
 
-            $('body').on('select2:select','.employee_id .employee_select',function () {
+            $('body').on('change','.employee_id .employee_select',function () {
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var selected_employee = $(this).find(':selected');
                 var employee = parseInt(selected_employee.val());
