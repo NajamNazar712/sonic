@@ -13,7 +13,7 @@ use App\Http\Controllers\Controller;
 
 class FinalChargesWebhookController extends Controller
 {
-    static public function webhook_subscription($shipment_id, $shipper_status_id){
+    static public function webhook_subscription($shipment_id){
 
         $date = Carbon::now()->toDateTimeString();
         $shipment = Shipment::find($shipment_id);
