@@ -1814,7 +1814,7 @@ class AdminPettyCashController extends Controller
 
                         } else {
                             if ($request->has($image_key)) {
-                                $extension = explode($image_key,'.');
+                                $extension = explode($request->input($image_key),'.');
                                 $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_cash_draft_detail->id . '.'.end($extension);
                                 //                            return $request->input($image_key);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_key), 'petty_cash_statement_details_draft/' . $filename);
@@ -1840,7 +1840,7 @@ class AdminPettyCashController extends Controller
 
                         } else {
                             if ($request->has($image_2_key)) {
-                                $extension = explode($image_2_key,'.');
+                                $extension = explode($request->input($image_2_key),'.');
                                 $filename = 'statement_2_' . $petty_cash_draft->id . '_detail_' . $petty_cash_draft_detail->id . '.'.end($extension);
                                 //                            return $request->input($image_key);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_2_key), 'petty_cash_statement_details_draft/' . $filename);
@@ -1909,7 +1909,7 @@ class AdminPettyCashController extends Controller
                         } else {
                             if ($request->has($image_key)) {
 
-                                $extension = explode($image_key,'.');
+                                $extension = explode($request->input($image_key),'.');
                                 $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.end($extension);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_key), 'petty_cash_statement_details/' . $filename);
 
@@ -1936,7 +1936,7 @@ class AdminPettyCashController extends Controller
                         } else {
                             if ($request->has($image_2_key)) {
 
-                                $extension = explode($image_2_key,'.');
+                                $extension = explode($request->input($image_2_key),'.');
                                 $filename = 'statement_2_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.end($extension);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_2_key), 'petty_cash_statement_details/' . $filename);
 
