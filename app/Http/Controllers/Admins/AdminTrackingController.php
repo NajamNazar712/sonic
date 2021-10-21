@@ -900,6 +900,7 @@ class AdminTrackingController extends Controller
 
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
+                            $journey_details['status_id'] = $journey->shipper_status_id;
                             if(in_array($journey->shipper_status_id, [1])){
                                 if($shipment->booked_by == 1){
                                     $journey_details['status'] .= ' (Main User)';
