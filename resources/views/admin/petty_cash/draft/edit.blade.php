@@ -199,7 +199,7 @@
                 },
                 initComplete: function() {
 
-                    // this.api().table().columns.adjust();
+                    this.api().table().columns.adjust();
                 }
             });
 
@@ -321,7 +321,7 @@
                 $('select[name="employee['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data: employees,
                     placeholder:'Select Employee Id',
-                    dropdownCssClass: 'form-control-sm p-0'
+                    dropdownCssClass: 'form-control-sm p-0',
                     allowClear:true,
 
                 });
@@ -466,7 +466,7 @@
                 $(".operation_manager_input_value").val(default_operation_manager_value);
             });
 
-            $('body').on('select2:select','.employee_id .employee_select',function () {
+            $('body').on('change','.employee_id .employee_select',function () {
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var selected_employee = $(this).find(':selected');
                 var employee = parseInt(selected_employee.val());
