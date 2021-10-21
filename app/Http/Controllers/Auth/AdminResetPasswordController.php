@@ -51,10 +51,10 @@ class AdminResetPasswordController extends Controller
             $admin = $admin->first();
             $environment = config('app.env');
             if($environment == 'production' || $environment == 'staging') {
-                if ($admin->otp == $request->otp) {
+                if ($admin->reset_pin_otp == $request->otp) {
                     $admin->dummy_pin = $request->pin;
                     $admin->password = bcrypt($request->pin);
-                    $admin->otp = null;
+                    $admin->reset_pin_otp = null;
                     $admin->save();
                     event(new PasswordReset($admin));
                     NotificationsController::send(159, $admin->id);

@@ -47,11 +47,9 @@ class AdminForgotPasswordController extends Controller
 
             if ($environment == 'production' || $environment == 'staging') {
                 $otp = mt_rand(100000, 999999);
-                $admin->otp = $otp;
-                $admin->last_login_attempt = Carbon::now();
+                $admin->reset_pin_otp = $otp;
                 $admin->save();
-                $data = array("otp"=>$otp,"phone_number"=>$request->phone_number);
-                NotificationsController::send(138, $admin, $data);
+                NotificationsController::send(162, $admin->id,$request->phone_number);
             }
 
             return response()->json(['status' => 1]);
