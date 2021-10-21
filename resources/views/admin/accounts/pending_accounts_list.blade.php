@@ -519,7 +519,7 @@
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             scrollX: true, scrollY: '600px',
             buttons: [
-                @if (session('role_id') == 1 || in_array(361, session('permissions')))
+                @if (session('role_id') == 1 || in_array(609, session('permissions')))
                     {
                             text: 'Bulk Segment Tagging',
                             className: 'btn btn-primary bulk_segment_tagging',

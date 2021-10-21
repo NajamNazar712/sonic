@@ -10401,7 +10401,7 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
                               <td>' . $shipment_weight   . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($done_payment_shipment->type == 1) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
                             </tr>
             ';
 
@@ -10417,9 +10417,13 @@ class AdminFinanceController extends Controller
                     else if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
                     }
+                    if($done_payment_shipment->type==2){
+                        $total_adjustments += $done_payment_shipment->payable;
+
+                    }
                 }
                 else {
-                    $total_adjustments += $done_payment_shipment->payable;
+                    // $total_adjustments += $done_payment_shipment->payable;
                 }
 
                 $total_payable += $done_payment_shipment->payable;
@@ -10429,6 +10433,9 @@ class AdminFinanceController extends Controller
                     $total_collection_amount += $done_payment_shipment->amount;
                 }
                 else if ($done_payment_shipment->type == 1) {
+                    // $total_adjustments += $done_payment_shipment->payable;
+                }
+                else if ($done_payment_shipment->type == 2) {
                     $total_adjustments += $done_payment_shipment->payable;
                 }
 

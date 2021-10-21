@@ -704,7 +704,7 @@
            dom: '<"d-inline-block"l><"pull-right"B>tipr',
            scrollX: true, scrollY: '800px',
            buttons: [
-                   @if (session('role_id') == 1 || in_array(427, session('permissions')))
+                   @if (session('role_id') == 1 || in_array(609, session('permissions')))
                     {
                         text: 'Set Commission',
                         className: 'btn btn-primary set_commission',
