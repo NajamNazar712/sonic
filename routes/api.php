@@ -262,8 +262,6 @@ Route::name('api.')->group(function () {
 
             Route::prefix('leave')->name('leave.')->group(function () {
                 Route::get('index', 'AdminAPIController@leave_index')->name('index');
-                /*Route::post('retail_bank_info', 'AdminAPIController@retail_bank_info')->name('retail_bank_info');
-                Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');*/
             });
 
         });
