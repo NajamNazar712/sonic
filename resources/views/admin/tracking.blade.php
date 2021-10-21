@@ -1482,7 +1482,7 @@
                     }
                     else
                     {
-                        toastr.error('Shipment is already updated with Status', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        toastr.error('Shipment is already updated with Status, Cannot mark it as Intercept! ', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 }
 
