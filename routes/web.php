@@ -582,6 +582,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('kam_poc_ref_tag/submit','Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
         Route::post('rate_type/submit','Admins\AdminCorporateAccountsController@rate_type_submit')->name('rate_type.submit');
         Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
+        Route::post('/add_segments', 'Admins\AdminDashboardController@add_segments')->name('add_segments');
         Route::get('active_today', 'Admins\AdminDashboardController@todayActiveAccountsList')->name('active.today');
         Route::post('active_today/ajax', 'Admins\AdminDashboardController@todayActiveAccountListAjax')->name('active.today.ajax');
         Route::get('kam_poc_ref_tag/info','Admins\AdminDashboardController@kam_poc_ref_tag_info')->name('kam_poc_ref_tag.info');

@@ -659,6 +659,7 @@
                         }
 
                         if (data.shipments != undefined) {
+                            
                             $.each(data.shipments, function (index, details) {
                                 var id = details.shipment_id;
                                 var shipment_type = details.shipment_type;
@@ -685,7 +686,7 @@
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 returnMarkStatus" id=' + id + ' data-tracking=' + details.tracking_number + '>Re-Attempt</button>';
                                 @endif
                                 @if (session('role_id') == 1 || in_array(245, session('permissions')))
-                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' + id + ' data-tracking=' + details.tracking_number + '>Intercept</button>';
+                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' + id + ' data-tracking=' + details.tracking_history[0].status_id + '>Intercept</button>';
                                 @endif
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
@@ -1470,10 +1471,19 @@
             });
             $('#tracking').on('click','.intercept', function () {
                 id = $(this).attr('id');
+                status_id = $(this).attr('data-tracking');
+                debugger;
                 if(id != ''){
                     var redirect = '{!! route('admin.intercept.index', ':id') !!}';
-                    var url = redirect.replace(':id', id);
-                    window.open(url);
+                    if(status_id==12 ||status_id==52)
+                    {
+                        var url = redirect.replace(':id', id);
+                        window.open(url);
+                    }
+                    else
+                    {
+                        toastr.error('Shipment is already updated with Status, Cannot mark it as Intercept! ', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
                 }
 
             });

@@ -52,7 +52,7 @@
 
         <div class="col">
             <fieldset class="form-group">
-                <select name="location_id" id="location_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                <select name="location_id" id="location_list" class="form-control select2" style="width: 100%;">
                     @foreach($reporting_locations as $reporting_location)
                         <option value="{{$reporting_location->id}}"> {{$reporting_location->name}}</option>
                     @endforeach
