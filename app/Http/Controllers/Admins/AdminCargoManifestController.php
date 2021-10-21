@@ -618,7 +618,7 @@ class AdminCargoManifestController extends Controller
 
         $origin_details = array();
 
-        if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 55 ){
+        if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 55 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30){
             $origin_details['id'] = $origin->id;
         }
         else{
@@ -680,7 +680,9 @@ class AdminCargoManifestController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-            if($shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id || $shipment->shipper_status_id == 20) {
+
+            if((($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30) && $shipment->consignee_city_id == Auth::user()->default_hub_id) || (($shipment->shipper_status_id != 35 && $shipment->shipper_status_id != 37 && $shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30) && $shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id))
+            {
                 $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
                 if ($on_hold_shipment->exists()) {
                     if (!in_array(Auth::id(), [10, 288, 423])) {
@@ -724,16 +726,7 @@ class AdminCargoManifestController extends Controller
                         $city_details = City::find($shipment_details->old_consignee_city_id);
                         $hub_id = $city_details->hub_id;
                     } else {
-                        if ($shipment->shipper_status_id == 20) {
-                            if ($shipment->return_address_id != NULL) {
-                                $hub_id = $shipment->return_address->city->hub_id;
-                            } else {
-                                $hub_id = $shipment->consignee_city->hub_id;
-                            }
-                        } else {
-                            $hub_id = $shipment->consignee_city->hub_id;
-                        }
-
+                        $hub_id = $shipment->consignee_city->hub_id;
                     }
 
                     $allowed = FALSE;
@@ -747,7 +740,13 @@ class AdminCargoManifestController extends Controller
                     }
 
                     if ($allowed) {
-                        if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20 && $shipment->return_address_id != NULL && $shipment->pickup_address->city->hub_id != $hub_id)) {
+                        if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20)) {
+                            if($shipment->return_address_id != NULL){
+                                if(($shipment->shipper_status_id == 20) && ($shipment->consignee_city->hub_id == $shipment->return_address->city->hub_id)){
+                                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
+                                }
+                            }
+
                             if ($request->bag_type != 0) {
                                 if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
                                     $hub_id = $shipment->consignee_city->hub_id;
