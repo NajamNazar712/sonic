@@ -211,7 +211,7 @@
                     var current = moment(contractMoment).add(3, 'days');
                     search_date_to.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
                     search_date_to.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
-                    search_date_to.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
+                    search_date_to.pickadate('picker').set('select', new Date(old_date_formatted),{muted:true});
                 }
             });
 
