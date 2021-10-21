@@ -199,7 +199,7 @@
                 },
                 initComplete: function() {
 
-                    // this.api().table().columns.adjust();
+                    this.api().table().columns.adjust();
                 }
             });
 
