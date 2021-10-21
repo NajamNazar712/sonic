@@ -118,7 +118,7 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<select name="location_id" class="select2" id="location_list" data-rule-required="true" data-msg-required="Reporting location is required">
+											<select name="location_id" class="select2" id="location_list">
 												@foreach($reporting_locations as $reporting_location)
 													@if ($reporting_location->id == $user->reporting_location_id)
 														<option value="{{$reporting_location->id}}" selected="selected"> {{$reporting_location->name}}</option>
@@ -209,7 +209,7 @@
 			@if ($user->reporting_location_id === null)
 			$('#user_form #location_list').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
-				placeholder: 'Reporting Location*'
+				placeholder: 'Reporting Location'
 			});
 			@else
 			$('#user_form #location_list').select2({
