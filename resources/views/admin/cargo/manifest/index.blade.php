@@ -304,7 +304,7 @@
                     {data: 'shipping_mode', name: 'sm.id', class: 'align-middle shipping_mode'},
                     {data: 'manifest_id', name: 'cm.id', class: 'align-middle manifest_id'},
                     {data: 'junctions', name: 'junctions', class: 'align-middle junctions'},
-                    {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles'},
+                    {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles', searchable: false, orderable: false},
                     /*{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'},*/
                     {data: 'status', name: 'bs.id', class: 'align-middle status'},
                     {data: 'manifest_created_at', name: 'cm.created_at', class: 'align-middle manifest_created_at'},
