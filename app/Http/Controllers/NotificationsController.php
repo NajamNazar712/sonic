@@ -8543,7 +8543,22 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.waqas@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
-                }            }
+                }
+                else if ($id == 162) {
+                    $admin = Admin::find($reference_1_id);
+                    if ($admin) {
+                        if (strpos($body, '[user_name]') !== FALSE) {
+                            $body = str_replace('[user_name]', $admin->name, $body);
+                        }
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $admin->reset_pin_otp, $body);
+                        }
+                        $to = $reference_2_id;
+                        self::sms($body, $to, 1);
+                    }
+                }
+
+            }
         }
     }
     static public function custom($type, $subject, $body, $to) {
