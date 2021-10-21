@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Rider\RiderAPIController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;

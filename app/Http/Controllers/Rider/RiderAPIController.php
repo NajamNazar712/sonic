@@ -9828,6 +9828,21 @@ class RiderAPIController extends Controller
 
     }
 
+    public function leave_index(Request $request){
+        $rider_id = $request->rider_id;
+        $rider = Rider::find($rider_id);
+        if($rider){
+            $data = array();
+            $data['trax_id'] = $rider->trax_id;
+            $data['name'] = $rider->name;
+            $data['designation'] = "Rider";
+            $data['department'] = "Operations";
+            $data['user_type'] = 0;
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "Rider not found"]);
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){
