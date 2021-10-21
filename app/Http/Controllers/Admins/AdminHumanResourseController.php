@@ -2357,7 +2357,8 @@ class AdminHumanResourseController extends Controller
     public function department_index(){
 
         ActivityTrailController::createActivityTrailLog(Auth::id(),392);
-        return view('admin.human_resource.department');
+        $admin = Admin::select('id', 'name')->where('status', 1)->get();
+        return view('admin.human_resource.department')->with(['admin' => $admin]);
     }
 
     public function department_list(Request $request){

@@ -9837,6 +9837,7 @@ class RiderAPIController extends Controller
             $data['name'] = $rider->name;
             $data['designation'] = "Rider";
             $data['department'] = "Operations";
+            $data['approver_email'] = "me@iam.com";
             $data['user_type'] = 0;
             return response()->json(['status' => 0, 'data' => $data]);
         }

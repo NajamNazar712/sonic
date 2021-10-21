@@ -3734,6 +3734,7 @@ class AdminAPIController extends Controller
             $data['name'] = $admin->name;
             $data['designation'] = $admin->designation;
             $data['department'] = $admin->role->department->name;
+            $data['approver_email'] = $admin->role->department->department_head->email;
             $role_id = $admin->role_id;
             if($role_id == 81){
                 $data['user_type'] = 2;
