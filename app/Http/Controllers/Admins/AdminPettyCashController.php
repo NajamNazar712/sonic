@@ -90,7 +90,7 @@ class AdminPettyCashController extends Controller
     public function make_petty_cash_statement_get_cities(Request $request)
     {
         $hub_id = $request->hub;
-        $cities = City::where('hub_id',$hub_id)->where('hub',0)->where('status',1);
+        $cities = City::where('hub_id',$hub_id)->where('status',1);
         if($cities->exists())
         {
             $data = $cities->select(['id','name'])->get();
