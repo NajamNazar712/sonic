@@ -681,7 +681,7 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if((($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 30) && $shipment->consignee_city_id == Auth::user()->default_hub_id) || (($shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30) && $shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id))
+            if((($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30) && $shipment->consignee_city_id == Auth::user()->default_hub_id) || (($shipment->shipper_status_id != 35 && $shipment->shipper_status_id != 37 && $shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30) && $shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id))
             {
                 $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
                 if ($on_hold_shipment->exists()) {
