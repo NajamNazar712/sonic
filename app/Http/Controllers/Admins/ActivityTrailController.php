@@ -25,24 +25,26 @@ class ActivityTrailController extends Controller
 
     static public function createActivityTrailLog($admin_id,$action_id,$dont_send_email = 0)
     {
-        $log = new ActivityTrailLog();
-        $log->admin_id = $admin_id;
-        $log->action_id = $action_id;
-        $log->emailed = $dont_send_email;
+        if(session('role_id') != 1) {
+            $log = new ActivityTrailLog();
+            $log->admin_id = $admin_id;
+            $log->action_id = $action_id;
+            $log->emailed = $dont_send_email;
 
-        $whip = new Whip();
-        $client_address = $whip->getValidIpAddress();
+            $whip = new Whip();
+            $client_address = $whip->getValidIpAddress();
 
-        if ($client_address != '') {
-            $log->ip_address = $client_address;
+            if ($client_address != '') {
+                $log->ip_address = $client_address;
+            }
+
+            if (Session::has('latitude') && Session::has('longitude')) {
+                $log->latitude = session('latitude');
+                $log->longitude = session('longitude');
+            }
+
+            $log->save();
         }
-
-        if (Session::has('latitude') && Session::has('longitude')) {
-            $log->latitude = session('latitude');
-            $log->longitude = session('longitude');
-        }
-
-        $log->save();
     }
 
     public function activity_trail_index ()
