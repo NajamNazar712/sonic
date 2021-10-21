@@ -659,14 +659,15 @@
                         }
 
                         if (data.shipments != undefined) {
+                            
                             $.each(data.shipments, function (index, details) {
                                 var id = details.shipment_id;
                                 var shipment_type = details.shipment_type;
                                 var shipment = '';
                                 var open_box_iocn = '';
                                 var ccd_icon = '';
-                                var roll_id = '<?php echo session('role_id') == 1?>';
-                                var department_id = '<?php echo session('department_id') == 6?>';
+                                var roll_id = @json(session('role_id') == 1);
+                                var department_id =  @json(session('department_id') == 6);
                                 if(details.open_box){
                                     open_box_iocn = '<span><i class="fas fa-box-open"></i></span>';
                                 }
@@ -685,7 +686,7 @@
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 returnMarkStatus" id=' + id + ' data-tracking=' + details.tracking_number + '>Re-Attempt</button>';
                                 @endif
                                 @if (session('role_id') == 1 || in_array(245, session('permissions')))
-                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' + id + ' data-tracking=' + details.tracking_number + '>Intercept</button>';
+                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' + id + ' data-tracking=' + details.tracking_history[0].status_id + '>Intercept</button>';
                                 @endif
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
@@ -707,7 +708,7 @@
                                         shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
 
                                     }
-                                    if((roll_id && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)|| (department_id && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)){
+                                    if((parseInt(roll_id) == 1 && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)|| (parseInt(department_id) == 6 && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)){
                                         shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary ml-1 print_pieces" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
                                     }
                                 }
@@ -720,7 +721,7 @@
                                     }else{
                                         shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                     }
-                                    if((roll_id && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1) || (department_id && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)){
+                                    if((parseInt(roll_id) == 1 && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1) || (parseInt(department_id) == 6 && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)){
                                         shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary ml-1 print_pieces" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
                                     }
                                 }
@@ -1470,10 +1471,19 @@
             });
             $('#tracking').on('click','.intercept', function () {
                 id = $(this).attr('id');
+                status_id = $(this).attr('data-tracking');
+                debugger;
                 if(id != ''){
                     var redirect = '{!! route('admin.intercept.index', ':id') !!}';
-                    var url = redirect.replace(':id', id);
-                    window.open(url);
+                    if(status_id==12 ||status_id==52)
+                    {
+                        var url = redirect.replace(':id', id);
+                        window.open(url);
+                    }
+                    else
+                    {
+                        toastr.error('Shipment is already updated with Status, Cannot mark it as Intercept! ', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
                 }
 
             });

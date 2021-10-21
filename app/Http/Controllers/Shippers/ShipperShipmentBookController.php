@@ -1179,8 +1179,19 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
+        $overall_shipment_details = '';
         $shipment_details = '';
         $page_items = 1;
+
+        $settings = ShipperAirWaybillSettings::where('user_id', session('user_id'));
+        if($settings->exists()){
+            $settings = $settings->first();
+            $prints = $settings->print_count;
+        }
+        else{
+            $prints = 1;
+        }
+
         foreach($ids as $id) {
             $shipment = Shipment::find($id);
 
@@ -2171,23 +2182,17 @@ class ShipperShipmentBookController extends Controller
                     $watermark_flag = true;
                 }
             }
+
+            $overall_shipment_details .= $shipment_details;
+
+            for ($i=1 ; $i<$prints ; $i++) {
+                $overall_shipment_details .= $shipment_details;
+            }
+
+            $shipment_details = '';
         }
 
-        $html .= $shipment_details;
-
-
-        $settings = ShipperAirWaybillSettings::where('user_id', session('user_id'));
-        if($settings->exists()){
-            $settings = $settings->first();
-            $prints = $settings->print_count;
-        }
-        else{
-            $prints = 1;
-        }
-
-        for ($i=1 ; $i<$prints ; $i++) {
-            $html .= $shipment_details;
-        }
+        $html .= $overall_shipment_details;
 
         if (!$body_only) {
             $html .= '
