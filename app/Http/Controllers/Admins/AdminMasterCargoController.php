@@ -330,7 +330,8 @@ class AdminMasterCargoController extends Controller
     }
 
     public function create_index() {
-        return view('admin.master_cargo.bag.create')->with('print', session('print'));
+        return redirect()->route('admin.access_denied');
+//        return view('admin.master_cargo.bag.create')->with('print', session('print'));
     }
 
     public function create_shipment_details(Request $request) {
@@ -837,7 +838,8 @@ class AdminMasterCargoController extends Controller
     }
 
     public function create_open_bag_index() {
-        return view('admin.master_cargo.bag.create_open_bag')->with('print', session('print'));
+        return redirect()->route('admin.access_denied');
+//        return view('admin.master_cargo.bag.create_open_bag')->with('print', session('print'));
     }
 
     public function create_open_bag_shipment_details(Request $request) {
