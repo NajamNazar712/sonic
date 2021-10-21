@@ -706,7 +706,7 @@
            buttons: [
             @if (session('role_id') == 1 || in_array(609, session('permissions')))
                     {
-                            text: 'Bulk Segment Tagging',
+                            text: 'Segment Tagging',
                             className: 'btn btn-primary bulk_segment_tagging',
                             enabled:false,
                             action: function (e, dt, node, config) {
@@ -975,7 +975,7 @@
                     @endif
                     @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
-                            text: 'Bulk Tagging',
+                            text: 'Tagging',
                             className: 'btn btn-primary bulk_tagging',
                             enabled:false,
                             action: function (e, dt, node, config) {
