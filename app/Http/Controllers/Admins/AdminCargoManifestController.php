@@ -618,7 +618,7 @@ class AdminCargoManifestController extends Controller
 
         $origin_details = array();
 
-        if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 55 ){
+        if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 55 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30a){
             $origin_details['id'] = $origin->id;
         }
         else{
