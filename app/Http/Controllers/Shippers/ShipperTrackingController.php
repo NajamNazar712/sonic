@@ -10,7 +10,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
-use App\http\Models\SubstituteUserShipment;
+use App\Http\Models\SubstituteUserShipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 

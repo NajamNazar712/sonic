@@ -67,6 +67,7 @@
 
                                 <input type="text" name="amount" class="form-control rounded-right amount" value="{{$shipment['amount']}}" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required" id="amount">
                             </div>
+                           
                         </div>
                     </div>
                     <div class="row mt-2">
@@ -109,8 +110,12 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var city = @json($shipment['consignee_city_id']);
+            var con_city = $('#consignee_city').val();
 
+           
+
+            
+            var city = @json($shipment['consignee_city_id']);
             $('#consignee_city').select2({
                 width: '100%',
                 placeholder: 'City*'

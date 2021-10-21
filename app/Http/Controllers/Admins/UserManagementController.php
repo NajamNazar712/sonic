@@ -8,6 +8,7 @@ use App\Http\Models\Admin\ModulePermission;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -201,9 +202,10 @@ class UserManagementController extends Controller
         }
         $hubs = City::where('hub', 1)->get();
         $shifts = EmployeeShift::where('status', 1)->get();
-$designations = EmployeeDesignation::where('status',1)->get();
+        $designations = EmployeeDesignation::where('status',1)->get();
+        $reporting_locations = ReportingLocation::where('status',1)->get();
 
-        return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs, 'shifts' => $shifts,'designations'=>$designations]);
+        return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs, 'shifts' => $shifts,'designations'=>$designations, 'reporting_locations' => $reporting_locations]);
     }
 
     public function user_add_store(Request $request) {
@@ -219,7 +221,8 @@ $designations = EmployeeDesignation::where('status',1)->get();
         $admin->password = bcrypt($request->input('password'));
         $admin->designation = $request->input('designation');
         $admin->shift_id = $request->input('shift_id');
-$admin->designation_id = $request->input('designation_id');
+        $admin->designation_id = $request->input('designation_id');
+        $admin->reporting_location_id = $request->input('location_id');
 
         if($request->trax_id != null){
             $trax_id = $request->trax_id;
@@ -301,10 +304,11 @@ $admin->designation_id = $request->input('designation_id');
         $user = Admin::find($id);
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();
         $shifts = EmployeeShift::where('status', 1)->get();
-$designations = EmployeeDesignation::where('status',1)->get();
+        $designations = EmployeeDesignation::where('status',1)->get();
+        $reporting_locations = ReportingLocation::where('status',1)->get();
 
         ActivityTrailController::createActivityTrailLog(Auth::id(),231,1);
-        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs, 'shifts' => $shifts,'designations'=>$designations]);
+        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs, 'shifts' => $shifts,'designations'=>$designations, 'reporting_locations' => $reporting_locations]);
         
     }
 
@@ -326,7 +330,8 @@ $designations = EmployeeDesignation::where('status',1)->get();
             $admin->trax_id = $request->trax_id;
             $admin->designation = $request->input('designation');
             $admin->shift_id = $request->input('shift_id');
-$admin->designation_id = $request->input('designation_id');
+            $admin->reporting_location_id = $request->input('location_id');
+            $admin->designation_id = $request->input('designation_id');
 
             if ($request->filled('password')) {
                 $admin->password = bcrypt($request->input('password'));

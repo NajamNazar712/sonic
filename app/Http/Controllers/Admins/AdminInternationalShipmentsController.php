@@ -61,6 +61,7 @@ class AdminInternationalShipmentsController extends Controller
                             <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                             <div class="dropdown-menu dropdown-menu-sm">
                                 <button type="button" class="dropdown-item remove"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                                <button type="button" class="dropdown-item replace_pod" data-target-id="' . $shipments->shipment_id . '" data-toggle="modal" data-target="#ReplacePOD"><i class="ft-plus-circle"></i> Replace POD</button>
                             </div>
                         </div>
                     ';
@@ -300,6 +301,7 @@ class AdminInternationalShipmentsController extends Controller
     }
 
     public function shipment_status_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),441);
         $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [3,4,5,8,14,17,18])->get();
         return view('admin.international.shipment_status')->with(['shipment_status' => $shipment_status]);
     }

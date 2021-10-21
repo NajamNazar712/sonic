@@ -26,7 +26,7 @@
             </div>
         @endif
     </div>
-    
+
 
     <div class="row mb-2">
         <div class="col">
@@ -38,6 +38,28 @@
                 </select>
             </fieldset>
         </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    @foreach($shifts as $shift)
+                        <option value="{{$shift->id}}"> {{$shift->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="location_id" id="location_list" class="form-control select2" style="width: 100%;">
+                    @foreach($reporting_locations as $reporting_location)
+                        <option value="{{$reporting_location->id}}"> {{$reporting_location->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+
     </div>
 <div id="riderInfoDiv">
     <div class="row mb-2">
@@ -74,14 +96,26 @@
     <div class="row">
         <div class="col">
             <fieldset class="form-group">
+                <select name="rider_main_category" id="category_main_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    <option value="" selected>Select a Rider Main Category</option>
+                    @foreach($main_category as $category)
+                        <option value="{{$category->id}}">{{$category->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
                 <select name="rider_category" id="category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                    <option value="" selected>Select a Rider Category</option>
+                    <option value="" selected>Select a Rider Sub Category</option>
                     @foreach($categories as $category)
                         <option value="{{$category->id}}">{{$category->name}}</option>
                     @endforeach
                 </select>
             </fieldset>
         </div>
+    </div>
+    <div class="row">
         <div class="col">
             <fieldset class="form-group">
                 <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
@@ -99,17 +133,6 @@
                     @endforeach
                 </select>
                 <div class="danger" id="rider_error" style="display:none;">This field is required</div>
-            </fieldset>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <fieldset class="form-group">
-                <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                    @foreach($shifts as $shift)
-                        <option value="{{$shift->id}}"> {{$shift->name}}</option>
-                    @endforeach
-                </select>
             </fieldset>
         </div>
     </div>
@@ -172,7 +195,7 @@
         var ccd_switchery = new Switchery(ccd_elem);
         @endif
         $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select a city',
+            placeholder:'Select City',
             dropdownParent: $("#addRiderForm")
         });
         $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
@@ -182,13 +205,21 @@
         $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Functional Category',
             dropdownParent: $("#addRiderForm")
-        });                          
+        });
         $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select a rider category',
+            placeholder:'Select Rider Sub-Category',
+            dropdownParent: $("#addRiderForm")
+        });
+        $('#category_main_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Rider Main Category',
             dropdownParent: $("#addRiderForm")
         });
         $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select a Shift',
+            placeholder:'Select Shift',
+            dropdownParent: $("#addRiderForm")
+        });
+        $('#location_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Reporting Location',
             dropdownParent: $("#addRiderForm")
         });
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});

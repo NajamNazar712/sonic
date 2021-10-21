@@ -28,15 +28,15 @@ use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
 use App\Http\Models\Rates\RateDestinationHub;
 use App\Http\Models\Rates\RateOriginHub;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
-use App\http\Models\ShipmentOrderDate;
+use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentsAirWaybillJourney;
-use App\http\Models\ShipmentShipperReference;
+use App\Http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
-use App\http\Models\SubstituteUserShipment;
+use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\ZoneClassCity;
 use App\Jobs\ProcessShipmentBookingDistributionDB;
 use Carbon\Carbon;
@@ -62,6 +62,8 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\ShipmentPiece;
@@ -164,8 +166,17 @@ class ShipperShipmentBookController extends Controller
 
         $shipment->amount = $amount;
 
-        if ($payment_mode_id == 2 && $user_id != 4758) {
-            $payment_mode_id = 1;
+        if ($payment_mode_id == 2) {
+            $settings = GlobalSettings::where('type','ccd_booking')->first();
+            $ccd_accounts = array();
+            $ccd_accounts = array_map('intval', explode(',', $settings->text));
+
+            if (in_array($user_id, $ccd_accounts)) {
+                $payment_mode_id = 2;
+            }
+            else{
+                $payment_mode_id = 1;
+            }
         }
 
         $shipment->payment_mode_id = $payment_mode_id;
@@ -366,12 +377,12 @@ class ShipperShipmentBookController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if(!in_array(session('user_id'),$ccd_account_tags))
-                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                {$payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();}
                 else
-                {$payment_modes = PaymentMode::all();}
+                {$payment_modes = PaymentMode::whereNotIn('id', [3])->get();}
             }
             else{
-                $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
             }
         $check = NonServiceArea::pluck('name')->toArray();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
@@ -552,11 +563,14 @@ class ShipperShipmentBookController extends Controller
                     if ($service_type_id == 1) {
                         if ($request->filled('self_collection')) {
                             $self_collection = TRUE;
+                          
                         } else {
+                           
                             $self_collection = FALSE;
                         }
                     }
                     else{
+                       
                         $self_collection = FALSE;
                     }
 
@@ -678,7 +692,7 @@ class ShipperShipmentBookController extends Controller
                     $business_category_id = 1;
 
                     $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id);
-
+                   
                     if(session('user_type') == 2){
                         $substitute_user_shipment = new SubstituteUserShipment();
                         $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -824,6 +838,14 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     NotificationsController::send(2, $shipment_id);
+                    $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+                    $now = Carbon::now()->format('H:i:s');
+                    $cutofftime = $settingsfortime->setting_value.":00:00";
+                    if($now>$cutofftime)
+                    {
+                        NotificationsController::send(152, $shipment_id);
+                        NotificationsController::send(153, $shipment_id);
+                    }
 
                     if ($request->filled('book_and_print')) {
                         $print = $shipment_id;
@@ -850,6 +872,14 @@ class ShipperShipmentBookController extends Controller
 
                     if ($msg_string != null) {
                         NotificationsController::send(32, $shipment_id, $msg_string);
+                        $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+                        $now = Carbon::now()->format('H:i:s');
+                        $cutofftime = $settingsfortime->setting_value.":00:00";
+                        if($now>$cutofftime)
+                        {
+                            NotificationsController::send(152, $shipment_id);
+                            NotificationsController::send(153, $shipment_id);
+                        }
                     }
                     $user = User::find($user_id);
                     if($user->logo_status){
@@ -915,7 +945,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL) {
+    public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL,$shipper_name = NULL,$shipper_phone = NULL) {
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
@@ -1149,8 +1179,19 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
+        $overall_shipment_details = '';
         $shipment_details = '';
         $page_items = 1;
+
+        $settings = ShipperAirWaybillSettings::where('user_id', session('user_id'));
+        if($settings->exists()){
+            $settings = $settings->first();
+            $prints = $settings->print_count;
+        }
+        else{
+            $prints = 1;
+        }
+
         foreach($ids as $id) {
             $shipment = Shipment::find($id);
 
@@ -1404,7 +1445,7 @@ class ShipperShipmentBookController extends Controller
                                     <td><strong>International</strong></td>
                                 ';
                                 }
-
+                               
                         $origin = $return_address_id == NULL ? 'Origin':'Return';
                         $originstyle = $return_address_id == NULL ? '<td class="color primary border twice-bottom twice-left"><strong> '.$origin.'</strong></td>':'<td style="background-color:  #6e6e6e !important; color: white;" class="color border twice-bottom twice-left" ><strong> '.$origin.'</strong></td>';
 
@@ -1417,7 +1458,7 @@ class ShipperShipmentBookController extends Controller
                                 '.$originstyle.'
                                 <td class="border twice-bottom"><strong>' . $origin_data . '</strong></td>
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name.'</strong></td>
                               </tr>';
 
                                     $table_start .='
@@ -1446,7 +1487,7 @@ class ShipperShipmentBookController extends Controller
                                     <td><strong>International</strong></td>';
                                 }
 
-
+                               
                         $table_start .= '
                                 <td class="color primary"><strong>Date</strong></td>
                                 <td>' . $shipment->created_at->format('Y-m-d') . '</td>
@@ -1455,7 +1496,7 @@ class ShipperShipmentBookController extends Controller
                                 <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
                                 <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .'</strong></td>
                               </tr>';
 
                             $table_start .='
@@ -1470,18 +1511,22 @@ class ShipperShipmentBookController extends Controller
 
 
                     }
-                    if($shipment->pickup_address->pickup_brand_name != NULL){
-                        // $company_name = $shipment->user->brand_name;
-                        $company_name = $shipment->pickup_address->pickup_brand_name;
+                    if($shipper_name == NULL) {
+                        if ($shipment->pickup_address->pickup_brand_name != NULL) {
+                            // $company_name = $shipment->user->brand_name;
+                            $company_name = $shipment->pickup_address->pickup_brand_name;
 
 
-                    }else{
-                        if($shipment->user->brand_name != NULL){
-                            $company_name = $shipment->user->brand_name;
+                        } else {
+                            if ($shipment->user->brand_name != NULL) {
+                                $company_name = $shipment->user->brand_name;
+                            } else {
+                                $company_name = $shipment->user->name;
+                            }
                         }
-                        else{
-                            $company_name = $shipment->user->name;
-                        }
+                    }
+                    else{
+                        $company_name = $shipper_name;
                     }
 
 
@@ -1543,7 +1588,12 @@ class ShipperShipmentBookController extends Controller
                         ';
 
 
-                    $phonenumber = $return_address_id == NULL ? $shipment->pickup_address->phone : $return_address_phone;
+                    if($shipper_phone == NULL) {
+                        $phonenumber = $return_address_id == NULL ? $shipment->pickup_address->phone : $return_address_phone;
+                    }
+                    else{
+                        $phonenumber = $shipper_phone;
+                    }
                     $phonenumberstyle = $return_address_id == NULL ? '<td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>' : '<td class="color secondary border twice-bottom" style="background-color: #6e6e6e !important; color: white;"><strong>Phone Number(s)</strong></td>';
                     if ($type != 'pdf') {
                         if ($shipment->booking_type_id != 4) {
@@ -1841,7 +1891,6 @@ class ShipperShipmentBookController extends Controller
 
                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                         $shipment_pieces = '';
-
                         foreach ($shipment->shipment_pieces as $piece){
                             $shipment_pieces .= '<table class="table table-sm table-bordered border twice">
                         <tbody><tr>';
@@ -1856,7 +1905,7 @@ class ShipperShipmentBookController extends Controller
                                 <td rowspan="1" class="color primary border twice-left"><strong>Origin</strong></td>
                                 <td rowspan="1" class="border">' . $shipment->pickup_address->city->name . '</td>
                                 <td rowspan="1" class="color primary border "><strong>Destination</strong></td>
-                                <td rowspan="1" class="border">' . $shipment->consignee_city->name . '</td>
+                                <td rowspan="1" class="border">' . $shipment->consignee_city->name .'</td>
                                 
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
@@ -2133,23 +2182,17 @@ class ShipperShipmentBookController extends Controller
                     $watermark_flag = true;
                 }
             }
+
+            $overall_shipment_details .= $shipment_details;
+
+            for ($i=1 ; $i<$prints ; $i++) {
+                $overall_shipment_details .= $shipment_details;
+            }
+
+            $shipment_details = '';
         }
 
-        $html .= $shipment_details;
-
-
-        $settings = ShipperAirWaybillSettings::where('user_id', session('user_id'));
-        if($settings->exists()){
-            $settings = $settings->first();
-            $prints = $settings->print_count;
-        }
-        else{
-            $prints = 1;
-        }
-
-        for ($i=1 ; $i<$prints ; $i++) {
-            $html .= $shipment_details;
-        }
+        $html .= $overall_shipment_details;
 
         if (!$body_only) {
             $html .= '
@@ -2225,8 +2268,18 @@ class ShipperShipmentBookController extends Controller
                     return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids);
                 }
                 else {
-                    
-                    return $this->air_waybill($user_type, $user_id, $request->ids);
+                    $shipper_phone = NULL;
+                    $shipper_name = NULL;
+                    if($request->has('shipper_name'))
+                    {
+                        $shipper_name = $request->shipper_name;
+                    }
+
+                    if($request->has('shipper_phone'))
+                    {
+                        $shipper_phone = $request->shipper_phone;
+                    }
+                    return $this->air_waybill($user_type, $user_id, $request->ids,FALSE,NULL,$shipper_name,$shipper_phone);
                 }
             }
             else {
@@ -2266,16 +2319,16 @@ class ShipperShipmentBookController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if(!in_array(session('user_id'),$ccd_account_tags))
-                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                {$payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();}
                 else
-                {$payment_modes = PaymentMode::all();}
+                {$payment_modes = PaymentMode::whereNotIn('id', [3])->get();}
             }
             else{
-                $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
             }
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
-        return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
+       return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
     }
 
     public function excel_store(Request $request) {
@@ -2297,7 +2350,11 @@ class ShipperShipmentBookController extends Controller
         Validator::extend('origin_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
             if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
                 $result = self::check_origin($value, $shipping_mode_id, $user_id);
                 if($result){
                     return TRUE;
@@ -2311,7 +2368,11 @@ class ShipperShipmentBookController extends Controller
         Validator::extend('destination_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
             if ($value) {
+                if($service_type_id == 5){
+                    return true;
+                }
                 $result = self::check_destination($value, $shipping_mode_id, $user_id, 1);
                 if($result){
                     return TRUE;
@@ -2390,7 +2451,8 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => 'Shipper Reference Number 3',
             'shipper_reference_number_4' => 'Shipper Reference Number 4',
             'shipper_reference_number_5' => 'Shipper Reference Number 5',
-            'open_shipment' => 'Open Shipment'
+            'open_shipment' => 'Open Shipment',
+           
         ];
 
         $messages = [
@@ -2430,6 +2492,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+         
             'open_shipment' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_date' => ['nullable', 'date_format:Y-m-d'],
 
@@ -2505,13 +2568,13 @@ class ShipperShipmentBookController extends Controller
               if(in_array($user_id,$ccd_account_tags))
               {
                 $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                $query->first();
+                $query->whereNotIn('id', [3]);
                 })];
               }
               else
               {
                 $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                $query->whereNotIn('id', [2]);
+                $query->whereNotIn('id', [2, 3]);
                 })];
               }
             }
@@ -2714,6 +2777,7 @@ class ShipperShipmentBookController extends Controller
                             }
                         }*/
 
+
                         if (!$user_shipping_info->city->status) {
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
                         }
@@ -2844,7 +2908,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     else{
                         $pickup_consignee_city = City::where('name', $row['consignee_city_name'])->first();
-
+                        
                         if (!$pickup_consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
@@ -2967,15 +3031,15 @@ class ShipperShipmentBookController extends Controller
                         $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                         if(!in_array(session('user_id'),$ccd_account_tags))
                         {
-                            $payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');
+                            $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode', 'id');
                         }
                         else
                         {
-                            $payment_modes = PaymentMode::first()->pluck('mode', 'id');
+                            $payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode', 'id');
                         }
                     }
                     else{
-                        $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
                     }
                     //$payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode', 'id');
                     $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
@@ -3012,14 +3076,28 @@ class ShipperShipmentBookController extends Controller
         $shipment->order_id = $order_id;
         $shipment->package_type = $package_type;
         $shipment->special_instructions = $special_instructions;
-        
 
         $shipment->estimated_weight = $estimated_weight;
         $shipment->shipping_mode_id = $shipping_mode_id;
         $shipment->same_day_timing_id = $same_day_timing_id;
 
         $shipment->amount = $amount;
+
+        if ($payment_mode_id == 2) {
+            $settings = GlobalSettings::where('type','ccd_booking')->first();
+            $ccd_accounts = array();
+            $ccd_accounts = array_map('intval', explode(',', $settings->text));
+
+            if (in_array($user_id, $ccd_accounts)) {
+                $payment_mode_id = 2;
+            }
+            else{
+                $payment_mode_id = 1;
+            }
+        }
+
         $shipment->payment_mode_id = $payment_mode_id;
+
         $shipment->shipper_status_id = 1;
         $shipment->consignee_status_id = 1;
         $shipment->walk_in_delivery_type_id = $delivery_type_id;
@@ -3111,15 +3189,15 @@ class ShipperShipmentBookController extends Controller
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if(!in_array(session('user_id'),$ccd_account_tags))
                 {
-                    $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                    $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
                 }
                 else
                 {
-                    $payment_modes = PaymentMode::all();
+                    $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
                 }
             }
             else{
-                $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
             }
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
@@ -3210,12 +3288,17 @@ class ShipperShipmentBookController extends Controller
                 if ($service_type_id == 1) {
                     if ($request->filled('self_collection')) {
                         $self_collection = TRUE;
+
                     } else {
                         $self_collection = FALSE;
+                        
+
                     }
                 }
                 else{
                     $self_collection = FALSE;
+                    
+
                 }
 
                 if ($service_type_id != 5) {
@@ -3331,6 +3414,7 @@ class ShipperShipmentBookController extends Controller
                 }
                 $business_category_id = 1;
                 $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
+                
                 if(session('user_type') == 2){
                     $substitute_user_shipment = new SubstituteUserShipment();
                     $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -3557,6 +3641,14 @@ class ShipperShipmentBookController extends Controller
             }
 
                 NotificationsController::send(2, $shipment_id);
+                $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+                $now = Carbon::now()->format('H:i:s');
+                $cutofftime = $settingsfortime->setting_value.":00:00";
+                if($now>$cutofftime)
+                {
+                    NotificationsController::send(152, $shipment_id);
+                    NotificationsController::send(153, $shipment_id);
+                }
 
                 if ($request->filled('book_and_print')) {
                     $print = $shipment_id;
@@ -3583,6 +3675,14 @@ class ShipperShipmentBookController extends Controller
 
             if ($msg_string != null) {
                 NotificationsController::send(32, $shipment_id, $msg_string);
+                $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+                $now = Carbon::now()->format('H:i:s');
+                $cutofftime = $settingsfortime->setting_value.":00:00";
+                if($now>$cutofftime)
+                {
+                    NotificationsController::send(152, $shipment_id);
+                    NotificationsController::send(153, $shipment_id);
+                }
             }
                 return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
@@ -4051,15 +4151,16 @@ class ShipperShipmentBookController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if (!in_array(session('user_id'), $ccd_account_tags)) {
-                    $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                    $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
                 } else {
-                    $payment_modes = PaymentMode::all();
+                    $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
                 }
             } else {
-                $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
             }
         }
-        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights,'distribution_products'=>$distribution_products]);
+
+       return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights,'distribution_products'=>$distribution_products]);
     }
 
     public function corporate_excel_distribution_index() {
@@ -4282,8 +4383,8 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => 'Shipper Reference Number 3',
             'shipper_reference_number_4' => 'Shipper Reference Number 4',
             'shipper_reference_number_5' => 'Shipper Reference Number 5',
-            'open_shipment' => 'Open Shipment'
-
+            'open_shipment' => 'Open Shipment',
+            
         ];
 
         $messages = [
@@ -4327,6 +4428,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+        
             'order_date' => ['nullable', 'date_format:Y-m-d'],
             'open_shipment' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
 
@@ -4399,13 +4501,13 @@ class ShipperShipmentBookController extends Controller
               if(in_array($user_id,$ccd_account_tags))
               {
                 $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                $query->first();
+                $query->whereNotIn('id', [3]);
                 })];
               }
               else
               {
                 $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                $query->whereNotIn('id', [2]);
+                $query->whereNotIn('id', [2, 3]);
                 })];
               }
             }
@@ -4648,8 +4750,9 @@ class ShipperShipmentBookController extends Controller
                                     $errors[$row_id]['return_address_id'] = 'Return Address ID #' . $row['return_address_id'] . ' is disabled';
                                 }
                             }
+                        
                         }
-
+  
                         if (!$user_shipping_info->city->status) {
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
                         }
@@ -4678,6 +4781,7 @@ class ShipperShipmentBookController extends Controller
                         if (!$consignee_city->zone_id) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
+                        
 
                         $pickup_city_id = $user_shipping_info->city_id;
 
@@ -4781,7 +4885,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     else{
                         $pickup_consignee_city = City::where('name', $row['consignee_city_name'])->first();
-
+                        
                         if (!$pickup_consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
@@ -4918,18 +5022,17 @@ class ShipperShipmentBookController extends Controller
                         $ccd_booking = $ccd_booking->first();
                         $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                         if(!in_array(session('user_id'),$ccd_account_tags))
-                        {$payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');}
+                        {$payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode', 'id');}
                         else
-                        {$payment_modes = PaymentMode::first()->pluck('mode', 'id');;}
+                        {$payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode', 'id');;}
                     }
                     else{
-                        $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
                     }
                 $city_name = array();
                 foreach ($cities as $city){
                     $city_name[$city->name]=$city->name;
                 }
-
                 return view('client.shipment.book.corporate.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id]);
             }
         }
@@ -6590,6 +6693,8 @@ class ShipperShipmentBookController extends Controller
         $shipping_mode_id = $request->shipping_mode_id;
         $pickup_city_id = $request->pickup_city_id;
         $consignee_city_id = $request->consignee_city_id;
+        $service_type_id = $request->service_type_id;
+
         $user_id = session('user_id');
 
         $user = User::find($user_id);
@@ -6602,10 +6707,15 @@ class ShipperShipmentBookController extends Controller
         if(!$destination_city){
             return FALSE;
         }
+
         $pickup_city = $pickup_city->id;
         $destination_city = $destination_city->id;
         $origin_city_allowed = TRUE;
         $destination_city_allowed = TRUE;
+        if($service_type_id == 5){
+            return ['origin_city_allowed' => $origin_city_allowed, 'destination_city_allowed' => $destination_city_allowed];
+        }
+
         if($user->account_type_id == 1){
             $rate_origin = RateOriginHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
             if($rate_origin->exists()){
@@ -6825,4 +6935,6 @@ class ShipperShipmentBookController extends Controller
         }
 
     }
+
+   
 }

@@ -56,7 +56,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
-
+    Route::post('get_sub_segment', 'Auth\RegisterController@get_sub_segment')->name('get_sub_segment');
+    
     Route::prefix('orders')->name('orders.')->group(function(){
         Route::get('','Shippers\ShipperDashboardController@orders_index')->name('index');
         Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
@@ -87,7 +88,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
             Route::post('check_consignee_return_ratio', 'Shippers\ShipperShipmentBookController@check_consignee_return_ratio')->name('check_consignee_return_ratio');
             Route::post('check_shipment_allowed_city', 'Shippers\ShipperShipmentBookController@check_shipment_allowed_city')->name('check_shipment_allowed_city');
-
+            
 
             Route::prefix('excel')->name('excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
@@ -393,6 +394,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('intercept')->name('intercept.')->group(function (){
         Route::get('/{row_id}','Shippers\ShipperInterceptReBookController@intercept_re_book_index')->name('index');
         Route::post('update','Shippers\ShipperInterceptReBookController@intercept_re_book_update')->name('update');
+      
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {
@@ -580,6 +582,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('kam_poc_ref_tag/submit','Admins\AdminDashboardController@kam_poc_ref_tag')->name('kam_poc_ref_tag.submit');
         Route::post('rate_type/submit','Admins\AdminCorporateAccountsController@rate_type_submit')->name('rate_type.submit');
         Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
+        Route::post('/add_segments', 'Admins\AdminDashboardController@add_segments')->name('add_segments');
         Route::get('active_today', 'Admins\AdminDashboardController@todayActiveAccountsList')->name('active.today');
         Route::post('active_today/ajax', 'Admins\AdminDashboardController@todayActiveAccountListAjax')->name('active.today.ajax');
         Route::get('kam_poc_ref_tag/info','Admins\AdminDashboardController@kam_poc_ref_tag_info')->name('kam_poc_ref_tag.info');
@@ -1141,6 +1144,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('sdn')->name('sdn.')->group(function (){
             Route::get('','Admins\DeliveryController@sdn_view')->name('index');
             Route::get('list','Admins\DeliveryController@sdn_list')->name('list');
+            Route::post('get/petty_cash_statements','Admins\DeliveryController@get_petty_cash_statements')->name('get.petty_cash_statements');
+            Route::post('get/adjustment_reference','Admins\DeliveryController@get_adjustment_reference')->name('get.adjustment_reference');
+            Route::post('back_to_deposit','Admins\DeliveryController@back_to_deposit')->name('back_to_deposit');
             Route::post('dn','Admins\DeliveryController@sdn_dncc_list')->name('dn');
             Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
             Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');
@@ -1155,6 +1161,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function() {
                 Route::get('{id}/details','Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
                 Route::get('{id}/ajax','Admins\Retail\RetailCompletedDeliveries@sdn_details_ajax')->name('ajax');
+            });
+
+            Route::prefix('dncc')->name('dncc.')->group(function() {
+                Route::post('add','Admins\DeliveryController@add_dncc')->name('add');
+                Route::post('get/dncc','Admins\DeliveryController@get_dncc_to_add')->name('get.add');
+                Route::post('remove','Admins\DeliveryController@remove_dncc')->name('remove');
+                Route::post('get/dncc/remove','Admins\DeliveryController@get_dncc_to_remove')->name('get.remove');
+            });
+
+            Route::prefix('pncc')->name('pncc.')->group(function() {
+                Route::post('add','Admins\DeliveryController@add_pncc')->name('add');
+                Route::post('get/pncc','Admins\DeliveryController@get_pncc_to_add')->name('get.add');
+                Route::post('remove','Admins\DeliveryController@remove_pncc')->name('remove');
+                Route::post('get/pncc/remove','Admins\DeliveryController@get_pncc_to_remove')->name('get.remove');
             });
         });
         Route::prefix('misroute')->name('misroute.')->group(function (){
@@ -1259,7 +1279,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
         Route::post('excel/store','Admins\ReturnController@excel_store')->name('excel.store');
+        Route::post('excel/assign_agent_excel','Admins\ReturnController@assign_agent_excel')->name('excel.assign_agent_excel');
         Route::post('assign/agent','Admins\ReturnController@assign_agent')->name('assign.agent');   
+        Route::post('unassign/agent','Admins\ReturnController@unassign_agent')->name('unassign.agent');   
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
@@ -1316,6 +1338,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\ReturnController@return_deliveries_list')->name('list');
             Route::get('app_shipment_list', 'Admins\ReturnController@return_deliveries_app_shipments_list')->name('app_shipment_list');
             Route::get('dbf_shipment_list', 'Admins\ReturnController@return_deliveries_dbf_shipments_list')->name('dbf_shipment_list');
+
+        });
+
+        Route::prefix('rcp_agent')->name('rcp_agent.')->group(function () {
+            Route::get('', 'Admins\ReturnController@rcp_agent_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@rcp_agent_list')->name('list');
+            Route::post('data', 'Admins\ReturnController@rcp_agent_data')->name('data');
 
         });
     });
@@ -1755,6 +1784,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('walk_in_index', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_index')->name('walk_in_index');
             Route::get('walk_in_list', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_list')->name('walk_in_list');
             Route::put('walk_in_resolved', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_resolved')->name('walk_in_resolved');
+            Route::post('walk_in_bulk_resolved', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_bulk_resolved')->name('walk_in_bulk_resolved');
             Route::put('revert_request_shipments_check', 'Admins\AdminFinanceController@revert_request_shipments_check')->name('revert_request_shipments_check');
             Route::post('revert_request_submit', 'Admins\AdminFinanceController@revert_request_submit')->name('revert_request_submit');
             Route::get('revert_requested/{image_id}', 'Admins\AdminFinanceController@revert_requested_image')->name('revert_requested_image');
@@ -1900,6 +1930,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('make')->name('make.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@make_petty_cash_statement_index')->name('index');
             Route::post('destination', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_destination')->name('destination');
+            Route::post('hubs', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_hubs')->name('hubs');
+            Route::post('cities', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_cities')->name('cities');
+            Route::post('employee', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_employee')->name('employee');
             Route::post('reference', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_reference')->name('reference');
             Route::post('titles', 'Admins\AdminPettyCashController@make_petty_cash_statement_titles')->name('titles');
             Route::post('submit', 'Admins\AdminPettyCashController@make_petty_cash_statement_submit')->name('submit');
@@ -2049,6 +2082,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('status', 'Admins\AdminNotificationsController@status')->name('status');
         Route::post('edit', 'Admins\AdminNotificationsController@edit')->name('edit');
         Route::post('send_custom_notification', 'Admins\AdminNotificationsController@send_custom_notification')->name('send_custom_notification');
+    });
+
+    Route::prefix('app_notifications')->name('app_notifications.')->group(function () {
+        Route::get('', 'Admins\AdminNotificationsController@app_notification_index')->name('index');
+        Route::get('list', 'Admins\AdminNotificationsController@app_notification_list')->name('list');
+        Route::post('status', 'Admins\AdminNotificationsController@app_notification_status')->name('status');
+        Route::post('details', 'Admins\AdminNotificationsController@app_notification_details')->name('details');
+        Route::post('edit', 'Admins\AdminNotificationsController@app_notification_edit')->name('edit');
     });
 
     //Reports start
@@ -3012,7 +3053,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('intercept')->name('intercept.')->group(function (){
         Route::get('/{row_id}','Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_index')->name('index');
         Route::post('update','Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_update')->name('update');
+        Route::post('get_express_centers', 'Admins\AdminInterceptRebookRequestHistoryController@get_express_centers')->name('get_express_centers');
+
     });
+
     Route::prefix('resources')->name('resources.')->group(function (){
         Route::get('','Admins\AdminResourcesController@index')->name('index');
         Route::get('city_list','Admins\AdminResourcesController@get_network_list')->name('city_list');
@@ -3173,6 +3217,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('arrival')->name('arrival.')->group(function () {
             Route::get('', 'Admins\AdminNsaAccountShipmentController@carrefour_arrival_index')->name('index');
             Route::post('store', 'Admins\AdminNsaAccountShipmentController@carrefour_arrival_submit')->name('submit');
+        });
+        Route::prefix('delivery')->name('delivery.')->group(function () {
+            Route::get('', 'Admins\AdminNsaAccountShipmentController@carrefour_delivery_index')->name('index');
+            Route::post('store', 'Admins\AdminNsaAccountShipmentController@carrefour_delivery_submit')->name('submit');
+        });
+        Route::prefix('return')->name('return.')->group(function () {
+            Route::get('', 'Admins\AdminNsaAccountShipmentController@carrefour_return_index')->name('index');
+            Route::post('store', 'Admins\AdminNsaAccountShipmentController@carrefour_return_submit')->name('submit');
         });
     });
 

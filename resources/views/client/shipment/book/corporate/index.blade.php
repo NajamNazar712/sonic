@@ -161,6 +161,8 @@
                                             <label class="d-block">Self Collection</label>
                                             <input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
                                         </div>
+
+                                      
                                     </div>
 
                                     <div id="order_information_header_div" class="col col_custom_middle">
@@ -579,6 +581,7 @@
         $(document).ready(function() {
             $('#open_shipment').checkboxpicker();
 
+          
 
             var order_date = $('#order_date').pickadate({
                 firstDay: 1,
@@ -1188,6 +1191,7 @@
                             'shipping_mode_id': shipping_mode_id,
                             'consignee_city_id': consignee_city_id,
                             'pickup_city_id': pickup_city_id,
+                            'service_type_id': service_type
                         }
                     }).done(function (data) {
                         if(data.origin_city_allowed == true){
@@ -1241,12 +1245,15 @@
 
             $('#information_display').checkboxpicker();
             $('#self_collection').checkboxpicker();
+           
 
             $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'City*'
             }).bind('change', function() {
                 $(this).valid();
+               
+
 
                 shipping_modes();
 
@@ -1260,6 +1267,9 @@
                 var consignee_city = $(this).val();
 
                 shipping_mode_same_day(pickup_city, consignee_city);
+
+
+
             });
 
             $('#product_type').select2({

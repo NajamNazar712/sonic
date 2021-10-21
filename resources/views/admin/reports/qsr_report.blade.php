@@ -122,7 +122,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
-                        <th class="border-primary border-darken-1">Remark</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">History Status</th>
                         <th class="border-primary border-darken-1">Service</th>
@@ -133,6 +133,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Product Type</th>
                         <th class="border-primary border-darken-1">Product Description</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
@@ -305,7 +306,7 @@
                             head.push('Consignee Name');
                             head.push('Status');
                             head.push('Reason');
-                            head.push('Remark');
+                            head.push('Remarks');
                             head.push('Total Attempt');
                             head.push('History Status');
                             head.push('Service Type');
@@ -316,6 +317,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Product Type');
                             head.push('Product Description');
                             head.push('Amount');
@@ -333,7 +335,7 @@
                                 row.push(values.name);
                                 row.push(values.status);
                                 row.push(values.reason);
-                                row.push(values.remark);
+                                row.push(values.remarks);
                                 row.push(values.total_attempt);
                                 row.push(values.history_status);
                                 row.push(values.service_type);
@@ -344,6 +346,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.zone);
                                 row.push(values.product_type);
                                 row.push(values.description);
                                 row.push(values.amount);
@@ -399,7 +402,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[9, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -409,7 +412,7 @@
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'remark', name: 'sjr.remark', class: 'align-middle remark'},
+                    {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks'},
                     {data:'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
@@ -420,6 +423,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
                     {data: 'description', name: 'si.description', class: 'align-middle description'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},

@@ -259,6 +259,18 @@ class Permission
             'delivery.completed.dncc.list' => 41,
             'delivery.sdn.index' => 42,
             'delivery.sdn.list' => 42,
+            
+            'delivery.sdn.back_to_deposit' => 604,
+
+            'delivery.sdn.dncc.add' => 605,
+            'delivery.sdn.dncc.get.add' => 605,
+            'delivery.sdn.dncc.remove' => 605,
+            'delivery.sdn.dncc.get.remove' => 605,
+            'delivery.sdn.pncc.add' => 605,
+            'delivery.sdn.pncc.get.add' => 605,
+            'delivery.sdn.pncc.remove' => 605,
+            'delivery.sdn.pncc.get.remove' => 605,
+
             'delivery.sdn.dn' => 42,
             'delivery.sdn.shipments' => 42,
             'delivery.sdn.details' => 42,
@@ -657,9 +669,16 @@ class Permission
             'notifications.index' => 100,
             'notifications.list' => 100,
             'notifications.send_custom_email' => 103,
+            'notifications.send_custom_notification' => 103,
             'notifications.details' => 101,
             'notifications.status' => 102,
             'notifications.edit' => 101,
+
+            'app_notifications.index' => 601,
+            'app_notifications.list' => 601,
+            'app_notifications.details' => 602,
+            'app_notifications.edit' => 602,
+            'app_notifications.status' => 603,
 
             'crm.permissions' => 188,
             'crm.list' => 188,
@@ -951,6 +970,10 @@ class Permission
 
             'carrefour.arrival.index' => 579,
             'carrefour.arrival.submit' => 579,
+            'carrefour.delivery.index' => 606,
+            'carrefour.delivery.submit' => 606,
+            'carrefour.return.index' => 607,
+            'carrefour.return.submit' => 607,
 
 
             'leads.index' => 416,
@@ -1074,7 +1097,9 @@ class Permission
             'settings.ccd_booking.index' => 558,
 
             'human_resource.payslip.index' => 596,
-
+            
+            'return.rcp_agent.index' => 600,
+            'return.rcp_agent.list' => 600,
 
         ],
 
@@ -1166,7 +1191,7 @@ class Permission
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
 
-
+            
 
             
 

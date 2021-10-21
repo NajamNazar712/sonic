@@ -127,6 +127,10 @@
             width: auto !important;
             text-align: left;
         }
+        .selectize-control {
+			width: 460px !important;
+            position: absolute !important;
+		}
     </style>
 @endsection
 
