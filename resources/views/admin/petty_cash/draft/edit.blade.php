@@ -321,7 +321,7 @@
                 $('select[name="employee['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data: employees,
                     placeholder:'Select Employee Id',
-                    dropdownCssClass: 'form-control-sm p-0'
+                    dropdownCssClass: 'form-control-sm p-0',
                     allowClear:true,
 
                 });
