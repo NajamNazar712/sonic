@@ -260,6 +260,12 @@ Route::name('api.')->group(function () {
             Route::post('location_v2', 'AdminAPIController@attendance_notification')->name('location_v2');
             Route::post('payslip', 'AdminAPIController@admin_payslip')->name('payslip');
 
+            Route::prefix('leave')->name('leave.')->group(function () {
+                Route::get('index', 'AdminAPIController@leave_index')->name('index');
+                /*Route::post('retail_bank_info', 'AdminAPIController@retail_bank_info')->name('retail_bank_info');
+                Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');*/
+            });
+
         });
 
     });

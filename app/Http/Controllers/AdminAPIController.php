@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Rider\RiderAPIController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
@@ -40,6 +41,7 @@ use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\V2Pickup\V2PickupNote;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Support\Facades\Auth;
@@ -3720,6 +3722,28 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => "User not found"]);
             }
         }
+    }
+
+    public function leave_index(Request $request){
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            $data = array();
+            $data['trax_id'] = $admin->trax_id;
+            $data['name'] = $admin->name;
+            $data['designation'] = $admin->designation;
+            $data['department'] = $admin->role->department->name;
+            $role_id = $admin->role_id;
+            if($role_id == 81){
+                $data['user_type'] = 2;
+            }elseif(in_array($role_id, [1,2,3,4,5,6,35,52,58,70,81])){
+                $data['user_type'] = 1;
+            }else{
+                $data['user_type'] = 0;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "User not found"]);
     }
 
 }
