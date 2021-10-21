@@ -680,7 +680,7 @@ class AdminCargoManifestController extends Controller
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-            if($shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id || $shipment->shipper_status_id == 20) {
+            if($shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id || $shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 30) {
                 $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
                 if ($on_hold_shipment->exists()) {
                     if (!in_array(Auth::id(), [10, 288, 423])) {
