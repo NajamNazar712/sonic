@@ -310,6 +310,14 @@
                         this_table.api().table().columns.adjust();
                     });
 
+                    $(".employee_select").select2({
+                        placeholder: "Select Employee Id",
+                        width:'100%'
+                    }).bind('change', function() {
+                        this_table.api().table().columns.adjust();
+                    });
+
+
                     $(".amount_input").inputmask({
                         'alias': 'decimal',
                         'allowMinus': false,

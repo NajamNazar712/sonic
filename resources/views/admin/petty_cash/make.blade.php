@@ -261,7 +261,7 @@
                 },
                 initComplete: function() {
 
-                    // this.api().table().columns.adjust();
+                    this.api().table().columns.adjust();
                 }
             });
 
@@ -594,12 +594,14 @@
                 $(".operation_manager_input_value").val(default_operation_manager_value);
             });
 
-            $('body').on('select2:select','.employee_id .employee_select',function () {
+            $('body').on('change','.employee_id .employee_select',function () {
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var selected_employee = $(this).find(':selected');
                 var employee = parseInt(selected_employee.val());
                 var employee_name = selected_employee.closest('td').next('td').find('.employee_name');
                 var employee_designation = employee_name.closest('td').next('td').find('.employee_designation');
+                employee_name.val("");
+                employee_designation.val("");
                 $.ajax({
                     url:'{!! route('admin.petty_cash.make.employee') !!}',
                     type:'POST',
@@ -611,10 +613,6 @@
                     if(data.status){
                         employee_name.val(data.name);
                         employee_designation.val(data.designation);
-                    }
-                    else{
-                        employee_name.val("");
-                        employee_designation.val("");
                     }
                 });
             });

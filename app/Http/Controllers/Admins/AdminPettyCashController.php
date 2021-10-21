@@ -42,6 +42,7 @@ class AdminPettyCashController extends Controller
     //Petty Cash Statement Status 0 -> Pending,  1 -> Station Approved,  2 -> Operation Approved,  3 -> Finance Approved,  4 -> Paid, 5 -> Adjusted, 6 -> Rejected  7 -> Received Statement
     public function make_petty_cash_statement_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),457);
         $head = PettyCashAccountHead::where('status', 1)->select('id', 'name')->get();
         $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
@@ -420,7 +421,7 @@ class AdminPettyCashController extends Controller
             ->addColumn('employee_trax_id', function ($petty_details) {
                 $employee_id = $petty_details->employee_id;
                 $employees = Admin::where('status',1)->where('trax_id','!=',null)->select('id','trax_id')->get();
-                $drops = '';
+                $drops = '<option value=""></option>';
                 $selected = '';
                 foreach ($employees as $employee) {
                     if ($employee->id == $employee_id) {
@@ -1574,7 +1575,11 @@ class AdminPettyCashController extends Controller
                 return number_format($shipment->total_amount);
             })
             ->addColumn('date', function ($petty) {
-                return Carbon::parse($petty->from)->toDateString() . ' - ' . Carbon::parse($petty->to)->toDateString();
+                if($petty->from != null && $petty->to != null) {
+                    return Carbon::parse($petty->from)->toDateString() . ' - ' . Carbon::parse($petty->to)->toDateString();
+                }
+
+                return "-";
             })
             ->filterColumn('date', function ($query, $keyword) {
                 if ($keyword != '') {
@@ -1809,7 +1814,7 @@ class AdminPettyCashController extends Controller
 
                         } else {
                             if ($request->has($image_key)) {
-                                $extension = explode($image_key,'.');
+                                $extension = explode($request->input($image_key),'.');
                                 $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_cash_draft_detail->id . '.'.end($extension);
                                 //                            return $request->input($image_key);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_key), 'petty_cash_statement_details_draft/' . $filename);
@@ -1835,7 +1840,7 @@ class AdminPettyCashController extends Controller
 
                         } else {
                             if ($request->has($image_2_key)) {
-                                $extension = explode($image_2_key,'.');
+                                $extension = explode($request->input($image_2_key),'.');
                                 $filename = 'statement_2_' . $petty_cash_draft->id . '_detail_' . $petty_cash_draft_detail->id . '.'.end($extension);
                                 //                            return $request->input($image_key);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_2_key), 'petty_cash_statement_details_draft/' . $filename);
@@ -1904,7 +1909,7 @@ class AdminPettyCashController extends Controller
                         } else {
                             if ($request->has($image_key)) {
 
-                                $extension = explode($image_key,'.');
+                                $extension = explode($request->input($image_key),'.');
                                 $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.end($extension);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_key), 'petty_cash_statement_details/' . $filename);
 
@@ -1931,7 +1936,7 @@ class AdminPettyCashController extends Controller
                         } else {
                             if ($request->has($image_2_key)) {
 
-                                $extension = explode($image_2_key,'.');
+                                $extension = explode($request->input($image_2_key),'.');
                                 $filename = 'statement_2_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.end($extension);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_2_key), 'petty_cash_statement_details/' . $filename);
 
@@ -1984,6 +1989,7 @@ class AdminPettyCashController extends Controller
             $consignee = Admin::find($petty_cash_statement_detail->operation_manager_id);
             $consignee_name = $consignee->name;
             $consignee_number = $consignee->phone_number;
+            $consignee_email = $consignee->email ?? "-";
             $consignee_city_id = $consignee->default_hub_id ?? $petty_cash_statement_detail->hub_id;
             $consignee_city_name = City::where('id',$consignee_city_id)->pluck("name")->first();
 
@@ -2003,7 +2009,7 @@ class AdminPettyCashController extends Controller
                 $pickup_address_id = $this->add_pickup_address($user_id, $address, $poc, $poc_phone, $poc_email, $city_id);
             }
 
-            $shipment = $this->book($user_id, 1, $pickup_address_id, 1, $consignee_city_id,$consignee_name, 'Trax Office '.$consignee_city_name, $consignee_number, NULL, $user->email, NULL, 0, Carbon::now(), $special_instructions, 1, 1, NULL, 0, 1, 2, 2);
+            $shipment = $this->book($user_id, 1, $pickup_address_id, 1, $consignee_city_id,$consignee_name, 'Trax Office '.$consignee_city_name, $consignee_number, NULL, $consignee_email, NULL, 0, Carbon::now(), $special_instructions, 1, 1, NULL, 0, 1, 2, 2);
 
             $tracking_number = $this->generate_tracking_number($shipment->id, $city_id, $consignee_city_id);
             $this->add_item($shipment->id, 24, $special_instructions, 1, null, 0, 0);
