@@ -704,6 +704,103 @@
            dom: '<"d-inline-block"l><"pull-right"B>tipr',
            scrollX: true, scrollY: '800px',
            buttons: [
+            @if (session('role_id') == 1 || in_array(609, session('permissions')))
+                    {
+                            text: 'Bulk Segment Tagging',
+                            className: 'btn btn-primary bulk_segment_tagging',
+                            enabled:false,
+                            action: function (e, dt, node, config) {
+                                if(selected_rows != ''){
+                           $('.user_ids').val(selected_rows);
+                           $('#SegmentTagModal').modal('show');
+
+                       }else{
+                           var error = "Atleast Select One Shipper";
+                           toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                       }
+                        //    if(selected_rows != ''){
+                              
+                        //         $('#SegmentTagModal').modal('show');
+                        //         // console.log(selected_rows);
+                        //         $('#segmentTagSubmit1').on('click',function () {
+                        //             var assign = parseInt($('#saletag1').val());
+                        //             swal({
+                        //                 text: 'Are you sure, you want to Tag?',
+                        //                 icon: 'info',
+                        //                 buttons: {
+                        //                     cancel: {
+                        //                         text: 'No',
+                        //                         value: null,
+                        //                         visible: true,
+                        //                         closeModal: true,
+                        //                     },
+                        //                     confirm: {
+                        //                         text: 'Yes',
+                        //                         value: true,
+                        //                         visible: true,
+                        //                         closeModal: true
+                        //                     }
+                        //                 },
+                        //                 closeOnClickOutside: false,
+                        //                 closeOnEsc: false,
+                        //                 dangerMode: true
+                        //             }).then(function(confirm) {
+                        //                 if (confirm) {
+                        //                     if (assign) {
+                        //                         $.ajax({
+                        //                             url: '{!! route('admin.accounts.tag.submit.bulk') !!}',
+                        //                             method: 'POST',
+                        //                             data: {
+                        //                                 'admin_id': assign,
+                        //                                 'shipper_ids[]': selected_rows,
+                        //                                 '_token': '{{ csrf_token() }}'
+                        //                             }
+                        //                         })
+                        //                             .done(function (data) {
+                        //                                 if (data.status == 1) {
+                        //                                     $('#SegmentTagModal').modal('hide');
+                        //                                     toastr.success(data.success, 'Success!', {
+                        //                                         positionClass: 'toast-bottom-center',
+                        //                                         containerId: 'toast-bottom-center'
+                        //                                     });
+                        //                                 } else {
+                        //                                     toastr.error(data.error, 'Error!', {
+                        //                                         positionClass: 'toast-top-center',
+                        //                                         containerId: 'toast-top-center'
+                        //                                     });
+                        //                                 }
+                        //                                 selected_rows = [];
+
+                        //                                 table.rows().deselect();
+                        //                                 $('#saletag1').val('').trigger('change');
+                        //                                 $('#SegmentTagModal').modal('hide');
+                        //                                 table.draw(true);
+                        //                                 table.button('.bulk_tagging').disable();
+                        //                                 table.button('.bulk_segment_tagging').disable();
+                        //                                 table.button('.set_commission').disable();
+                        //                                 table.button('.tag').disable();
+                        //                                 table.button('.approve_commission').disable();
+                        //                                 table.button('.territory_tag').disable();
+
+                        //                             });
+                        //                     } else {
+                        //                         var error = "Account Not Selected!";
+                        //                         toastr.error(error, 'Error!', {
+                        //                             positionClass: 'toast-top-center',
+                        //                             containerId: 'toast-top-center'
+                        //                         });
+                        //                     }
+                        //                 }
+                        //             });
+                        //         });
+
+                        //     }else{
+                        //         var error = "Account Not selected!";
+                        //         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        //     }
+                        }
+                    },
+                    @endif
                    @if (session('role_id') == 1 || in_array(427, session('permissions')))
                     {
                         text: 'Set Commission',
@@ -964,103 +1061,7 @@
                             }
                         }
                     },
-                    @if (session('role_id') == 1 || in_array(609, session('permissions')))
-                    {
-                            text: 'Bulk Segment Tagging',
-                            className: 'btn btn-primary bulk_segment_tagging',
-                            enabled:false,
-                            action: function (e, dt, node, config) {
-                                if(selected_rows != ''){
-                           $('.user_ids').val(selected_rows);
-                           $('#SegmentTagModal').modal('show');
 
-                       }else{
-                           var error = "Atleast Select One Shipper";
-                           toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                       }
-                        //    if(selected_rows != ''){
-                              
-                        //         $('#SegmentTagModal').modal('show');
-                        //         // console.log(selected_rows);
-                        //         $('#segmentTagSubmit1').on('click',function () {
-                        //             var assign = parseInt($('#saletag1').val());
-                        //             swal({
-                        //                 text: 'Are you sure, you want to Tag?',
-                        //                 icon: 'info',
-                        //                 buttons: {
-                        //                     cancel: {
-                        //                         text: 'No',
-                        //                         value: null,
-                        //                         visible: true,
-                        //                         closeModal: true,
-                        //                     },
-                        //                     confirm: {
-                        //                         text: 'Yes',
-                        //                         value: true,
-                        //                         visible: true,
-                        //                         closeModal: true
-                        //                     }
-                        //                 },
-                        //                 closeOnClickOutside: false,
-                        //                 closeOnEsc: false,
-                        //                 dangerMode: true
-                        //             }).then(function(confirm) {
-                        //                 if (confirm) {
-                        //                     if (assign) {
-                        //                         $.ajax({
-                        //                             url: '{!! route('admin.accounts.tag.submit.bulk') !!}',
-                        //                             method: 'POST',
-                        //                             data: {
-                        //                                 'admin_id': assign,
-                        //                                 'shipper_ids[]': selected_rows,
-                        //                                 '_token': '{{ csrf_token() }}'
-                        //                             }
-                        //                         })
-                        //                             .done(function (data) {
-                        //                                 if (data.status == 1) {
-                        //                                     $('#SegmentTagModal').modal('hide');
-                        //                                     toastr.success(data.success, 'Success!', {
-                        //                                         positionClass: 'toast-bottom-center',
-                        //                                         containerId: 'toast-bottom-center'
-                        //                                     });
-                        //                                 } else {
-                        //                                     toastr.error(data.error, 'Error!', {
-                        //                                         positionClass: 'toast-top-center',
-                        //                                         containerId: 'toast-top-center'
-                        //                                     });
-                        //                                 }
-                        //                                 selected_rows = [];
-
-                        //                                 table.rows().deselect();
-                        //                                 $('#saletag1').val('').trigger('change');
-                        //                                 $('#SegmentTagModal').modal('hide');
-                        //                                 table.draw(true);
-                        //                                 table.button('.bulk_tagging').disable();
-                        //                                 table.button('.bulk_segment_tagging').disable();
-                        //                                 table.button('.set_commission').disable();
-                        //                                 table.button('.tag').disable();
-                        //                                 table.button('.approve_commission').disable();
-                        //                                 table.button('.territory_tag').disable();
-
-                        //                             });
-                        //                     } else {
-                        //                         var error = "Account Not Selected!";
-                        //                         toastr.error(error, 'Error!', {
-                        //                             positionClass: 'toast-top-center',
-                        //                             containerId: 'toast-top-center'
-                        //                         });
-                        //                     }
-                        //                 }
-                        //             });
-                        //         });
-
-                        //     }else{
-                        //         var error = "Account Not selected!";
-                        //         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        //     }
-                        }
-                    },
-                    @endif
                {
                    text: 'Sales Tier Tagging',
                    className: 'btn btn-primary tag',
