@@ -600,6 +600,8 @@
                 var employee = parseInt(selected_employee.val());
                 var employee_name = selected_employee.closest('td').next('td').find('.employee_name');
                 var employee_designation = employee_name.closest('td').next('td').find('.employee_designation');
+                employee_name.val("");
+                employee_designation.val("");
                 $.ajax({
                     url:'{!! route('admin.petty_cash.make.employee') !!}',
                     type:'POST',
@@ -611,10 +613,6 @@
                     if(data.status){
                         employee_name.val(data.name);
                         employee_designation.val(data.designation);
-                    }
-                    else{
-                        employee_name.val("");
-                        employee_designation.val("");
                     }
                 });
             });
