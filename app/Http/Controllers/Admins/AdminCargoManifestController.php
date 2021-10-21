@@ -18,7 +18,7 @@ use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Fleet;
-use App\http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\FleetDriver;
