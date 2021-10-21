@@ -149,27 +149,27 @@
                             <div class="col">
                                 <div class="form-group text-center  mb-1 p-1 border border-light rounded">
                                     <label class="mr-1">Volumetric Weight</label>
-                                    <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
+                                    <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm" id="weight_toggle">
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                                    <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled" id="length"  data-rule-volumecheck="true" data-msg-volumecheck="Volumetric weight cannot be less than 0.1">
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                                    <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled" id="breadth" data-rule-volumecheck="true" data-msg-volumecheck="Volumetric weight cannot be less than 0.1">
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
+                                    <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled" id="height" data-rule-volumecheck="true" data-msg-volumecheck="Volumetric weight cannot be less than 0.1">
                                 </div>
                             </div>
                             <div class="col-1">
                                 <div class="form-group ml-1">
-                                    <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
+                                    <button type="submit" name="add" class="btn btn-primary add" id="add" value="Add">Add</button>
                                 </div>
                             </div>
                         </div>
@@ -271,6 +271,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
@@ -467,9 +468,31 @@
                 'allowPlus': false,
                 'digits': 2
             });
+
+
+            $('#add_shipment_weight_form #add').on('click',function(){
+                $.validator.addMethod('volumecheck', function() {
+
+                    var length = $('#length').val();
+                    var breadth = $('#breadth').val();
+                    var height = $('#height').val();
+
+                    var weight = (length * breadth * height)/ 5000;
+                    if(weight > 0.1){
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
+                });
+
+            });
+
+
             var unassigned_pickup_request_ids = [];
             var unassigned_pickups = false;
             $('#add_shipment_form').validate({
+
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
@@ -1137,5 +1160,10 @@
             $('#add_shipment_form input.tracking_number').focus();
 
         }
+
+
+
+
+
     </script>
 @endsection

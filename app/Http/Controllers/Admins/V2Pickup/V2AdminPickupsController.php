@@ -1373,6 +1373,10 @@ class V2AdminPickupsController extends Controller
                     } else {
                         if (empty($request->weight)) {
                             $actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+
+                            if($actual_weight < 0.1){
+                                return ['status' => 1, 'error' => 'Volumetric weight cannot be less than 0.1'];
+                            }
                             $shipment->length = $request->length;
                             $shipment->breadth = $request->breadth;
                             $shipment->height = $request->height;

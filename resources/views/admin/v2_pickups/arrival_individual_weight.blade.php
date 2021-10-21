@@ -21,42 +21,65 @@
                                 <div id="camera_view" class="camera_view"></div>
                             </div>
 
-                            <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                            <form id="add_shipment_form" class="mb-1 justify-content-center" novalidate="novalidate">
 
-                                <div class="form-group">
-                                    <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                <div class="row justify-content-center">
+                                    <div class="col-3 pl-5">
 
-                                    <div class="d-inline-block ml-1">
-                                        <a href="#" id="camera_scan_initiate" tabindex="-1">
-                                            <i class="ft-camera h1"></i>
-                                        </a>
+                                          {{--  <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+
+                                            <div class="d-inline-block" style="position:absolute;">
+                                                <a href="#" id="camera_scan_initiate" tabindex="-1">
+                                                    <i class="ft-camera h1"></i>
+                                                </a>
+                                            </div>--}}
+                                        <div class="form-group float-left">
+                                            <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                        </div>
+                                        <div class="d-inline-block pl-2">
+                                            <a href="#" id="camera_scan_initiate" tabindex="-1">
+                                                <i class="ft-camera h1"></i>
+                                            </a>
+                                        </div>
+                                      
                                     </div>
-                                </div>
+                                    <div class="col-3">
+                                        <div class="form-group ">
+                                            <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group text-center mb-1 p-1 border border-light rounded">
+                                            <label class="mr-1">Volumetric Weight</label>
+                                            <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm" >
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group ml-1 volumetric_weights">
+                                            <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Volumetric weight cannot be less than 0.1" id="length">
+                                        </div>
+                                    </div>
 
-                                <div class="form-group ml-1">
-                                    <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
                                 </div>
+                                 <div class="row justify-content-center mt-2">
 
-                                <div class="form-group text-center mt-1 mb-1 ml-1 p-1 border border-light rounded">
-                                    <label class="mr-1">Volumetric Weight</label>
-                                    <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
-                                </div>
+                                     <div class="col-3">
+                                         <div class="form-group ml-1 volumetric_weights">
+                                             <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Volumetric weight cannot be less than 0.1" id="breadth">
+                                         </div>
+                                     </div>
+                                     <div class="col-3">
+                                         <div class="form-group ml-1 volumetric_weights">
+                                             <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Volumetric weight cannot be less than 0.1" id="height">
+                                         </div>
 
-                                <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                </div>
-
-                                <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                </div>
-
-                                <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                </div>
-
-                                <div class="form-group ml-1">
-                                    <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
-                                </div>
+                                     </div>
+                                     <div class="col-3">
+                                         <div class="form-group ml-1">
+                                             <button type="submit" name="add" class="btn btn-primary add" id="add" value="Add">Add</button>
+                                         </div>
+                                     </div>
+                                 </div>
                             </form>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -465,7 +488,7 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('form'));
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
                     $('#add_shipment_form button.add').prop('disabled', true);
@@ -1106,5 +1129,22 @@
                 $('#add_shipment_form input.length').focus();
             }
         }
+
+        $('#add_shipment_form #add').on('click',function(){
+            $.validator.addMethod('volumecheck', function() {
+
+                var length = $('#length').val();
+                var breadth = $('#breadth').val();
+                var height = $('#height').val();
+                var weight = (length * breadth * height)/ 5000;
+                console.log(length,breadth,height,weight);
+                if(weight < 0.1){
+                    return false;
+                }
+                return true;
+            });
+
+        });
+
     </script>
 @endsection
