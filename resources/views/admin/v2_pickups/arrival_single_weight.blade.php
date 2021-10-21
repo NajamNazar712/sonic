@@ -140,14 +140,14 @@
                         <input type="hidden" name="rider_id" class="rider_id">
                         <input type="hidden" name="pickup_request_ids" class="pickup_request_ids">
 
-                        <div class="row">
+                        <div class="row align-items-center">
                             <div class="col">
                                 <div class="form-group ml-1">
                                     <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
                                 </div>
                             </div>
-                            <div class="col">
-                                <div class="form-group text-center  mb-1 p-1 border border-light rounded">
+                            <div class="col-auto">
+                                <div class="form-group text-center p-1 border border-light rounded">
                                     <label class="mr-1">Volumetric Weight</label>
                                     <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm" id="weight_toggle">
                                 </div>
@@ -167,7 +167,7 @@
                                     <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled" id="height" data-rule-volumecheck="true" data-msg-volumecheck="Volumetric weight cannot be less than 0.1">
                                 </div>
                             </div>
-                            <div class="col-1">
+                            <div class="col">
                                 <div class="form-group ml-1">
                                     <button type="submit" name="add" class="btn btn-primary add" id="add" value="Add">Add</button>
                                 </div>
@@ -469,25 +469,25 @@
                 'digits': 2
             });
 
+            $.validator.addMethod('volumecheck', function() {
+               var length = $('#add_shipment_weight_form #length').val().trim();
+               var breadth = $('#add_shipment_weight_form #breadth').val().trim();
+               var height = $('#add_shipment_weight_form #height').val().trim();
 
-            $('#add_shipment_weight_form #add').on('click',function(){
-                $.validator.addMethod('volumecheck', function() {
-
-                    var length = $('#length').val();
-                    var breadth = $('#breadth').val();
-                    var height = $('#height').val();
-
-                    var weight = (length * breadth * height)/ 5000;
-                    if(weight > 0.1){
-                        return true;
-                    }
-                    else{
-                        return false;
-                    }
-                });
-
+               if (length.length > 0 && breadth.length > 0 && height.length > 0) {
+                   var weight = (length * breadth * height) / 5000;
+                   
+                   if (weight < 0.1) {
+                       return false;
+                   }
+                   else {
+                       return true;
+                   }
+               }
+               else {
+                   return true;
+               }
             });
-
 
             var unassigned_pickup_request_ids = [];
             var unassigned_pickups = false;
@@ -496,7 +496,8 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('form'));
+                    console.log(element);
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
                     $('#add_shipment_form button.add').prop('disabled', true);
