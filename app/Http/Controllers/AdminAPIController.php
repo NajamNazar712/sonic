@@ -3938,10 +3938,11 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function leave_index(Request $request){
+    public function leave_index(Request $request)
+    {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
-        if($admin){
+        if ($admin) {
             $data = array();
             $data['trax_id'] = $admin->trax_id;
             $data['name'] = $admin->name;
@@ -3950,11 +3951,11 @@ class AdminAPIController extends Controller
             $data['approver_email'] = $admin->role->department->department_head->email;
             $data['approver_name'] = $admin->role->department->department_head->name;
             $role_id = $admin->role_id;
-            if($role_id == 81){
+            if ($role_id == 81) {
                 $data['user_type'] = 2;
-            }elseif(in_array($role_id, [1,2,3,4,5,6,35,52,58,70,63])){
+            } elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
                 $data['user_type'] = 1;
-            }else{
+            } else {
                 $data['user_type'] = 0;
             }
             return response()->json(['status' => 0, 'data' => $data]);
@@ -3964,11 +3965,11 @@ class AdminAPIController extends Controller
 
     public function leave_apply(Request $request)
     {
-
         $rules = [
             'from' => ['required'],
             'to' => ['nullable'],
-            'reason' => ['required', 'string'],
+            'reason' => ['required', 'max:500'],
+            'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
         ];
 
         $admin_id = $request->admin_id;
@@ -3980,38 +3981,187 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $admin = Admin::find($admin_id);
-            if($admin){
-                $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1,2]);
+            if ($admin) {
+                if($request->has('leave_id')){
+                    $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2])->where('id', '<>', $request->leave_id);
+                }else{
+                    $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
+                }
                 if ($leave->exists()) {
                     return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
                 } else {
-                    $leave_request = new EmployeeLeave();
-                    $leave_request->employee_id = $admin_id;
-                    $leave_request->employee_type_id = 1;
+                    if ($request->has('leave_id')){
+                        $leave_request = EmployeeLeave::where('id', $request->leave_id);
+                        if($leave_request->exists()){
+                            $leave_request = $leave_request->first();
+                            $message = "Leave Request edited successfully";
+                        }else{
+                            return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
+                        }
+                    }else{
+                        $leave_request = new EmployeeLeave();
+                        $leave_request->employee_id = $admin_id;
+                        $leave_request->employee_type_id = 1;
+                        $leave_request->reporter_id = $admin->role->department->department_head_id;
+                        $message = "Leave Request submitted successfully";
+                    }
+
                     $leave_request->from = $request->from;
                     $leave_request->to = $request->to;
                     $leave_request->applied_reason = $request->reason;
-                    $leave_request->reporter_id = $admin->role->department->department_head_id;
-                    return response()->json(['status' => 0, 'apply_message' => 'Request for leave submitted successfully']);
+                    $leave_request->save();
+                    return response()->json(['status' => 0, 'apply_message' => $message]);
                 }
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'User Not Found']);
             }
         }
 
     }
 
-    public function employee_leave_list(Request $request){
+    public function employee_leave_list(Request $request)
+    {
         $admin_id = $request->admin_id;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
             ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
             ->where('employee_id', $admin_id)
             ->where('employee_type_id', 1);
-        if($employee_leaves->exists()){
+        if ($employee_leaves->exists()) {
             $employee_leaves = $employee_leaves->get();
             return response()->json(['status' => 0, 'response' => $employee_leaves]);
         }
         return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+    }
+
+    public function approver_leave_list(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if ($admin) {
+            $admin_role = $admin->role_id;
+            if ($admin_role == 63) {
+                $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status')
+                    ->where('employee_leaves.status', 2);
+            } elseif (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
+                $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status')
+                    ->where('employee_leaves.status', 1)
+                    ->where('employee_leaves.reporter_id', $admin_id);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Invalid Role"]);
+            }
+            if ($employee_leaves->exists()) {
+                $employee_leaves = $employee_leaves->get();
+                return response()->json(['status' => 0, 'response' => $employee_leaves]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+        }
+    }
+
+    public function leave_approve(Request $request)
+    {
+        $rules = [
+            'leave_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                $admin_role = $admin->role_id;
+                $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+                if ($employee_leaves->exists()) {
+                    $employee_leaves = $employee_leaves->first();
+                    if ($admin_role == 63) {
+                        $employee_leaves->status = 4;
+                        $employee_leaves->updated_by = $admin_id;
+                    } elseif (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
+                        $employee_leaves->status = 2;
+                        $employee_leaves->updated_by = $admin_id;
+                    } else {
+                        return response()->json(['status' => 1, 'message' => "Invalid Role"]);
+                    }
+                    $employee_leaves->save();
+                    return response()->json(['status' => 0, 'message' => "Leave request has been approved!"]);
+                }
+                return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+            }
+        }
+    }
+
+    public function leave_reject(Request $request)
+    {
+        $rules = [
+            'leave_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+            'rejection_reason' => ['required', 'max:500'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                $admin_role = $admin->role_id;
+                $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+                if ($employee_leaves->exists()) {
+                    $employee_leaves = $employee_leaves->first();
+                    if ($admin_role == 63) {
+                        $employee_leaves->status = 5;
+                    } elseif (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
+                        $employee_leaves->status = 3;
+                    } else {
+                        return response()->json(['status' => 1, 'message' => "Invalid Role"]);
+                    }
+                    $employee_leaves->rejected_reason = $request->rejection_reason;
+                    $employee_leaves->updated_by = $admin_id;
+                    $employee_leaves->save();
+                    return response()->json(['status' => 0, 'message' => "Leave request has been rejected!"]);
+                }
+                return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+            }
+        }
+    }
+
+    public function hr_leave_edit(Request $request)
+    {
+
+        $rules = [
+            'leave_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+            'from' => ['required'],
+            'to' => ['nullable'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $leave = EmployeeLeave::where('id', $request->leave_id);
+            if ($leave->exists()) {
+                $leave = $leave->first();
+                $leave->from = $request->from;
+                $leave->to = $request->to;
+                $leave->updated_by = $admin_id;
+                $leave->save();
+                return response()->json(['status' => 0, 'message' => 'Leave Request Edited Successfully']);
+            }
+            return response()->json(['status' => 1, 'message' => 'Invalid Leave Id']);
+        }
     }
 
 }

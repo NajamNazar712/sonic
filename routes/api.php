@@ -279,6 +279,11 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'AdminAPIController@leave_index')->name('index');
                 Route::post('apply', 'AdminAPIController@leave_apply')->name('apply');
                 Route::get('list', 'AdminAPIController@employee_leave_list')->name('list');
+                Route::get('approver_list', 'AdminAPIController@approver_leave_list')->name('approver_list');
+                Route::post('approve', 'AdminAPIController@leave_approve')->name('approve');
+                Route::post('reject', 'AdminAPIController@leave_reject')->name('reject');
+                Route::post('detail', 'AdminAPIController@leave_detail')->name('detail');
+                Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
             });
 
         });
