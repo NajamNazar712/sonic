@@ -4744,4 +4744,9 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+    public function sales_incentive()
+    {
+        $status='1';
+        return view('admin.settings.sales.incentive')->with(['status' => $status]);
+    }
 }

@@ -498,7 +498,45 @@
         </div>
     </div>
 </div>
+{{-- edit territory --}}
+<div class="modal fade" id="editterritory" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editterritory"
+     aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="add_remarks_title">Edit Territory</h4>
 
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body text-center" id="editterritoryDiv">
+
+            </div>
+                
+        </div>
+    </div>
+</div>
+
+{{-- edit designation --}}
+<div class="modal fade" id="editdesignation" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editdesignation"
+     aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="add_remarks_title">Edit Designation</h4>
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body text-center" id="editdesignationDiv">
+
+            </div>
+                
+        </div>
+    </div>
+</div>
 
 {{-- edit retail user --}}
 <div class="modal fade" id="editRetailUser" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editRetailUser"

@@ -2257,7 +2257,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@app_efficiency_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@app_efficiency_list')->name('app_efficiency_list');
         });
-
+        Route::prefix('sales_incentive')->name('sales_incentive.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@sales_incentive_index')->name('index');
+            Route::get('consolidated', 'Admins\AdminReportsController@consolidated_sales_incentive_index')->name('consolidated');
+        });
         Route::prefix('month_closing')->name('month_closing.')->group(function(){
             Route::prefix('individual')->name('individual.')->group(function (){
                 Route::get('', 'Admins\AdminMonthClosingReportsController@month_closing_individual_index')->name('index');
@@ -2344,6 +2347,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset')->name('password.reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
+
+    Route::prefix('sales')->name('sales.')->group(function () {
+        Route::prefix('territory')->name('territory.')->group(function () {
+            Route::get('', 'Admins\SalesIncentiveController@territoryindex')->name('territoryindex');
+            Route::get('list', 'Admins\SalesIncentiveController@territory_list')->name('list');
+            Route::post('add', 'Admins\SalesIncentiveController@territory_add')->name('add');
+            Route::get('edit/{id}', 'Admins\SalesIncentiveController@territory_edit')->name('edit');
+            Route::put('update/{id}', 'Admins\SalesIncentiveController@territory_update')->name('update');
+            Route::post('status', 'Admins\SalesIncentiveController@territory_enable_disable')->name('status');
+        });
+        Route::prefix('designation')->name('designation.')->group(function () {
+            Route::get('', 'Admins\SalesIncentiveController@designationindex')->name('designationindex');
+            Route::get('list', 'Admins\SalesIncentiveController@designation_list')->name('list');
+            Route::post('add', 'Admins\SalesIncentiveController@designation_add')->name('add');
+            Route::get('edit/{id}', 'Admins\SalesIncentiveController@designation_edit')->name('edit');
+            Route::put('update/{id}', 'Admins\SalesIncentiveController@designation_update')->name('update');
+            Route::post('status', 'Admins\SalesIncentiveController@designation_enable_disable')->name('status');
+        });
+    });
 
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::prefix('pickup')->name('pickup.')->group(function () {
@@ -2562,6 +2584,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
         });
         Route::prefix('sales')->name('sales.')->group(function () {
+            Route::prefix('incentive')->name('incentive.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@sales_incentive')->name('index');
+            });
             Route::prefix('targets')->name('targets.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@sales_person_targets')->name('index');
                 Route::post('', 'Admins\GlobalSettingsController@sales_person_targets_submit')->name('update');

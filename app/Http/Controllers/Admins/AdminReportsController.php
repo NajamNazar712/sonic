@@ -9456,5 +9456,14 @@ class AdminReportsController extends Controller
 
         return $datatable->make(true);
     }
+
+    public function sales_incentive_index()
+    {
+        return view('admin.reports.sales_incentive');
+    }
+    public function consolidated_sales_incentive_index()
+    {
+        return view('admin.reports.consolidated_sales_incentive');
+    }
 }
 
