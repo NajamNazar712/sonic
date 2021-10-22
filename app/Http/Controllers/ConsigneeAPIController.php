@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\CRM\CRMController;
+use App\Http\Models\Admin\Fleet;
 use App\Http\Models\City;
 use App\Http\Models\ConsigneeOtp;
 use App\Http\Models\ConsigneeInfo;
@@ -238,8 +239,8 @@ class ConsigneeAPIController extends Controller
         $consignee_info = ConsigneeUser::find($consignee_id);
         $consignee_shipments = Shipment::join('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
             ->wherein('consignee_phone_number_1', [$consignee_info->phone_number_1, $consignee_info->phone_number_2])
-            ->wherein('shipments.shipper_status_id', [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11])
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route', 'shipments.pickup_address_id as pickup_address_id', 'shipments.consignee_address as consignee_address', 'shipments.consignee_latitude as consignee_latitude', 'shipments.consignee_longitude as consignee_longitude')
+            ->wherein('shipments.shipper_status_id', [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11, 49])
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route', 'shipments.pickup_address_id as pickup_address_id', 'shipments.consignee_address as consignee_address', 'shipments.consignee_latitude as consignee_latitude', 'shipments.consignee_longitude as consignee_longitude', 'shipments.consignee_city_id as consignee_city_id')
             ->orderBy('shipments.id', 'DESC');
 
         if ($consignee_shipments->exists()) {
@@ -263,17 +264,17 @@ class ConsigneeAPIController extends Controller
                     ->where('launched_by', 3)
                     ->where('shipment_id', $consignee_shipment->shipment_id)
                     ->orderBy('id', 'DESC');
-                if($consignee_crm->exists()){
+                if ($consignee_crm->exists()) {
                     $consignee_crm = $consignee_crm->first();
                     $request_status = $consignee_crm->status_id;
-                    if(in_array($request_status, [1,2,5])){
+                    if (in_array($request_status, [1, 2, 5])) {
                         $datum['request_status'] = 0;
-                    }else{
+                    } else {
                         $datum['request_status'] = 1;
                         $datum['request_latitude'] = $consignee_shipment->consignee_latitude;
                         $datum['request_longitude'] = $consignee_shipment->consignee_longitude;
                     }
-                }else{
+                } else {
                     $datum['request_status'] = 1;
                     $datum['request_latitude'] = $consignee_shipment->consignee_latitude;
                     $datum['request_longitude'] = $consignee_shipment->consignee_longitude;
@@ -288,29 +289,41 @@ class ConsigneeAPIController extends Controller
                 if ($consignee_shipment->status_id == 5) {
                     $datum['latitude'] = $consignee_shipment->consignee_latitude;
                     $datum['longitude'] = $consignee_shipment->consignee_longitude;
-                }
-                elseif ($consignee_shipment->status_id == 3){
+                } elseif (in_array($consignee_shipment->status_id, [3, 49])) {
 
                     $origin_city = City::where('id', $pickup_address->city_id);
-                    if($origin_city->exists()){
+                    if ($origin_city->exists()) {
                         $origin_city = $origin_city->first();
                         $datum['origin'] = $origin_city->name;
                     }
 
                     $destination_city = City::where('id', $consignee_shipment->consignee_city_id);
-                    if($destination_city->exists()){
+                    if ($destination_city->exists()) {
                         $destination_city = $destination_city->first();
                         $datum['destination'] = $destination_city->name;
+                        $datum['latitude'] = $destination_city->location_latitude;
+                        $datum['longitude'] = $destination_city->location_longitude;
                     }
-                }
-                else {
+
+                    $fleet = Fleet::leftjoin('cargo_manifests as cm', 'fleets.id', '=', 'cm.vehicle_id')
+                        ->leftjoin('manifest_bags as mb', 'cm.id', '=', 'mb.cargo_manifest_id')
+                        ->leftjoin('cargo_manifest_bag_shipments as cs', 'mb.cargo_manifest_bag_id', '=', 'cs.cargo_manifest_bag_id')
+                        ->select('fleets.tracking_id as runner_id')
+                        ->where('cs.shipment_id', $consignee_shipment->shipment_id)
+                        ->where('cm.status_id', 1)
+                        ->where('mb.status', 0);
+                    if ($fleet->exists()) {
+                        $fleet = $fleet->first();
+                        $datum['runner_id'] = $fleet->runner_id;
+                    }
+                } else {
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $consignee_shipment->shipment_id)
                         ->where('shipper_status_id', $consignee_shipment->status_id)
                         ->orderBy('id', 'DESC');
                     if ($shipment_journey->exists()) {
                         $shipment_journey = $shipment_journey->first();
                         $city = City::where('id', $shipment_journey->city_id);
-                        if($city->exists()){
+                        if ($city->exists()) {
                             $city = $city->first();
                             $datum['latitude'] = $city->location_latitude;
                             $datum['longitude'] = $city->location_longitude;
@@ -519,5 +532,18 @@ class ConsigneeAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
             }
         }
+    }
+
+    public function test(Request $request)
+    {
+        $shipment = Shipment::where('tracking_number', $request->tr_no)->first();
+        $fleet = Fleet::leftjoin('cargo_manifests as cm', 'fleets.id', '=', 'cm.vehicle_id')
+            ->leftjoin('manifest_bags as mb', 'cm.id', '=', 'mb.cargo_manifest_id')
+            ->leftjoin('cargo_manifest_bag_shipments as cs', 'mb.cargo_manifest_bag_id', '=', 'cs.cargo_manifest_bag_id')
+            ->select('fleets.tracking_id as runner_id')
+            ->where('cs.shipment_id', $shipment->id)
+            ->where('cm.status_id', 1)
+            ->where('mb.status', 0);
+        return response()->json(['status' => 1, 'data' => $fleet->get()]);
     }
 }

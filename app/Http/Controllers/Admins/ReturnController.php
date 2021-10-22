@@ -1570,7 +1570,7 @@ class ReturnController extends Controller
                     }else
                         if($request->has('hub_id') && ($destination_id == $request->hub_id)){
                             $same_city_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
-                            if ($destination_id == $origin && ($shipment->return_address_id == NULL && (in_array($shipment->shipper_status_id, $same_city_statuses))) || ($shipment->return_address_id != NULL && (in_array($shipment->shipper_status_id, $return_note_statuses)))) {
+                            if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $same_city_statuses))) {
                                 if($shipment->return_address_id != NULL){
                                     $destination_city_id = $shipment->return_address->city_id;
                                 }
@@ -3216,7 +3216,7 @@ class ReturnController extends Controller
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins', 'admins.id', '=', 'return_notes.admin_id')
             ->leftjoin('admins as sb', 'sb.id', '=', 'return_notes.updated_by')
-            ->select(['return_notes.id as return_note', 'return_notes.id as return_note_id', 'oc.name as hub', 'riders.name as rider', 'admins.name as assigned_by', 'return_notes.created_at', 'return_notes.shipments_count', 'return_notes.shipments_count as shipments_count_link', 'return_notes.status', 'sb.name as submitted_by', 'return_notes.updated_at', 'return_notes.updated_at as submitted_at', 'return_notes.image', DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')]);
+            ->select(['return_notes.id as return_note', 'return_notes.id as return_note_id', 'oc.name as hub', 'riders.name as rider', 'admins.name as assigned_by', 'return_notes.created_at', 'return_notes.shipments_count', 'return_notes.shipments_count as shipments_count_link', 'return_notes.status', 'sb.name as submitted_by', 'return_notes.updated_at', 'return_notes.updated_at as submitted_at', 'return_notes.image', DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id in (25,31,38) and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')]);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));

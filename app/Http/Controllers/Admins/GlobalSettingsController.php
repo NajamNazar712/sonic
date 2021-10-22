@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+
+use App\Http\Models\FleetDriver;
+use App\Http\Models\FleetVendor;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -4208,7 +4211,9 @@ class GlobalSettingsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),246);
         $vehicles = VehicleType::all();
-        return view('admin.settings.fleet_index')->with('vehicles', $vehicles);
+        $drivers = FleetDriver::all();
+        $vendor = FleetVendor::all();
+        return view('admin.settings.fleet_index')->with(['vehicles'=> $vehicles,'drivers' => $drivers,'vendors' => $vendor]);
     }
 
     public function fleet_list(Request $request)
@@ -4219,7 +4224,9 @@ class GlobalSettingsController extends Controller
         }
         // $fleet = Fleet::all();
         $fleet = Fleet::leftjoin('vehicle_types as vt','fleets.vehicle_type_id','=','vt.id')
-            ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type'])
+            ->leftjoin('fleet_drivers as fd','fd.id','=','fleets.driver_id')
+            ->leftjoin('fleet_vendors as fv','fv.id','=','fleets.vendor_id')
+            ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type','fd.name as driver','fv.name as vendor'])
             ->orderBy('fleets.created_at','desc');
         // ->select();
 
@@ -4282,6 +4289,8 @@ class GlobalSettingsController extends Controller
             $fleet->reg_number = $request->reg_number;
             $fleet->vehicle_type_id = $request->vehicle_select;
             $fleet->tracking_id = $request->tracking_id;
+            $fleet->driver_id = $request->driver;
+            $fleet->vendor_id = $request->vendor;
             $fleet->status = 1;
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Added successfully!');
@@ -4292,12 +4301,14 @@ class GlobalSettingsController extends Controller
     public function fleet_edit($id){
         $vehicles = VehicleType::all();
         $fleet = Fleet::find($id);
-        return view('admin.settings.fleet_edit', compact('fleet','vehicles'));
+        $drivers = FleetDriver::all();
+        $vendors = FleetVendor::all();
+        return view('admin.settings.fleet_edit', compact('fleet','vehicles','drivers','vendors'));
 
     }
 
     public function fleet_update(Request $request, $id)
-    {
+    {  
         $vehicle_select = $request->vehicle_select;
         if ($vehicle_select == 'other') {
             $vehicle_type = new VehicleType;
@@ -4308,6 +4319,8 @@ class GlobalSettingsController extends Controller
             $fleet->reg_number = $request->reg_number;
             $fleet->vehicle_type_id = $vehicle_type->id;
             $fleet->tracking_id = $request->tracking_id;
+            $fleet->driver_id = $request->driver;
+            $fleet->vendor_id = $request->vendor;
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Updated successfully!');
 
@@ -4316,6 +4329,8 @@ class GlobalSettingsController extends Controller
             $fleet->reg_number = $request->reg_number;
             $fleet->vehicle_type_id = $request->vehicle_select;
             $fleet->tracking_id = $request->tracking_id;
+            $fleet->driver_id = $request->driver;
+            $fleet->vendor_id = $request->vendor;
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Updated successfully!');
 
@@ -4617,6 +4632,47 @@ class GlobalSettingsController extends Controller
         }
     }
 
+    public function fleet_store_driver(Request $request){
+
+        $driver = new FleetDriver();
+        $driver->name = $request->driver_name;
+        $driver->phone_no = $request->phone_number;
+        $driver->cnic_no = $request->cnic;
+        $driver->save();
+
+        return redirect()->back()->with('success', 'Driver Added!');
+    }
+
+    public function fleet_cnic_unique(Request $request)
+    {
+        if ($request->filled('cnic')) {
+            $driver = FleetDriver::where('cnic_no', $request->input('cnic'));
+
+            if (!$driver->exists()) {
+                return 'true';
+            } else {
+                return 'false';
+            }
+        } else {
+            return 'true';
+        }
+    }
+
+    public function fleet_store_vendor(Request $request){
+
+        $vendors = FleetVendor::pluck('name')->toArray();
+        $vendor_names = explode(',', $request->vendor_name);
+
+        foreach($vendor_names as $vendor_name){
+            if(!in_array($vendor_name,$vendors)){
+                FleetVendor::create([
+                    'name' => $vendor_name,
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Vendor Added!');
+    }
     public function rider_shipment_attempt_settings_index()
     {
         $settings = GlobalSettings::whereIn('type', ['rider_shipment_attempt_count', 'rider_shipment_attempt_waiting_duration'])->get();

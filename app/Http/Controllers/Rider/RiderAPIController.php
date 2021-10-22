@@ -23,7 +23,7 @@ use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\RiderType;
-use App\http\Models\AppNotification;
+use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\CityDelivery;

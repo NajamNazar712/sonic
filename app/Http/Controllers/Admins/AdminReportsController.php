@@ -9228,7 +9228,47 @@ class AdminReportsController extends Controller
             });
         return $datatables->make(true);
     }
+    public function manifest_short_received_shipments_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),406);
+        return view('admin.reports.manifest_short_received_shipments_reports');
+    }
 
+    public function manifest_short_received_shipments_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),407);
+        }
+        $short_received_shipments = DB::connection('reports')->table('cargo_manifest_bags')->leftjoin('cargo_manifest_bag_shipments as cmbs', 'cmbs.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
+            ->join('manifest_bags as mb',function($join){
+                $join->on('mb.cargo_manifest_bag_id','=','cargo_manifest_bags.id')
+                    ->where('mb.created_at','=',DB::raw('(select max(created_at) from manifest_bags where manifest_bags.cargo_manifest_bag_id = cargo_manifest_bags.id)'));
+            })
+            ->join('cargo_manifests as cm', 'cm.id', '=', 'mb.cargo_manifest_id')
+            ->leftjoin('cities as oc', 'oc.id', '=', 'cargo_manifest_bags.origin_hub_id')
+            ->leftjoin('cities as dc', 'dc.id', '=', 'cargo_manifest_bags.destination_hub_id')
+            ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'cm.shipping_mode_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'cmbs.shipment_id')
+            ->select('s.tracking_number as tracking_number','cargo_manifest_bags.id as bag','oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'cargo_manifest_bags.type as bag_type','cm.id as manifest_id','cm.created_at as transited_at','cargo_manifest_bags.seal_number')
+            ->where('cargo_manifest_bags.status_id', 9)
+            ->whereIn('s.shipper_status_id', [3, 21])->get();
+
+        $datatables = Datatables::of($short_received_shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('id_padded_link', function ($master_cargo) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($master_cargo->manifest_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->editColumn('bag_type',function ($shipments){
+                if($shipments->bag_type == 1){
+                    return 'Normal';
+                }else{
+                    return 'Return';
+                }
+            });
+        return $datatables->make(true);
+    }
     public function shipper_insurance_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),255);
         $shipper_name = User::select('id','name')->get();
