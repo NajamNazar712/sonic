@@ -2566,6 +2566,10 @@ class AdminHumanResourseController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
         $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban','total_salary');
+        if(!in_array(596, session('permissions'))){
+            $payslips->whereRaw('false');
+        }
+
         $datatable = Datatables::of($payslips)
             ->addColumn('action', function () {
                 $dropdown = '
