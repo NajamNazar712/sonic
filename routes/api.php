@@ -216,7 +216,7 @@ Route::name('api.')->group(function () {
 
             Route::prefix('leave')->name('leave.')->group(function () {
                 Route::get('index', 'Rider\RiderAPIController@leave_index')->name('index');
-                Route::get('apply', 'Rider\RiderAPIController@leave_apply')->name('apply');
+                Route::post('apply', 'Rider\RiderAPIController@leave_apply')->name('apply');
             });
 		});
 
@@ -276,7 +276,7 @@ Route::name('api.')->group(function () {
 
             Route::prefix('leave')->name('leave.')->group(function () {
                 Route::get('index', 'AdminAPIController@leave_index')->name('index');
-                Route::get('apply', 'AdminAPIController@leave_apply')->name('apply');
+                Route::post('apply', 'AdminAPIController@leave_apply')->name('apply');
             });
 
         });
