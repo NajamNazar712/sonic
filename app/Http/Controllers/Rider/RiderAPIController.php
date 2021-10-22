@@ -9903,7 +9903,7 @@ class RiderAPIController extends Controller
             $employee_leaves = $employee_leaves->get();
             return response()->json(['status' => 0, 'response' => $employee_leaves]);
         }
-        return response()->json(['status' => 1, 'messgae' => "No Leave Found!"]);
+        return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
