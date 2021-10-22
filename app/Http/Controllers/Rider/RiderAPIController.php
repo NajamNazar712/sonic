@@ -43,6 +43,7 @@ use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeGender;
+use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
@@ -9831,17 +9832,66 @@ class RiderAPIController extends Controller
     public function leave_index(Request $request){
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
-        if($rider){
-            $data = array();
-            $data['trax_id'] = $rider->trax_id;
-            $data['name'] = $rider->name;
-            $data['designation'] = "Rider";
-            $data['department'] = "Operations";
-            $data['approver_email'] = "me@iam.com";
-            $data['user_type'] = 0;
-            return response()->json(['status' => 0, 'data' => $data]);
+        $department = AdminDepartment::find(6);
+        if($department){
+            if($rider){
+                $data = array();
+                $data['trax_id'] = $rider->trax_id;
+                $data['name'] = $rider->name;
+                $data['designation'] = "Rider";
+                $data['department'] = "Operations";
+                $data['approver_email'] = $department->department_head->email;
+                $data['approver_name'] = $department->department_head->name;
+                $data['user_type'] = 0;
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "Rider not found"]);
         }
-        return response()->json(['status' => 1, 'message' => "Rider not found"]);
+        return response()->json(['status' => 1, 'message' => "Department Not Found"]);
+    }
+
+    public function leave_apply(Request $request)
+    {
+
+        $rules = [
+            'from' => ['required'],
+            'to' => ['nullable'],
+            'reason' => ['required', 'string'],
+        ];
+
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::find($rider_id);
+            $department = AdminDepartment::find(6);
+            if($department){
+                if($rider){
+                    $leave = EmployeeLeave::where('employee_id', $rider_id)->where('employee_type_id', 2)->whereIn('status', [1,2]);
+                    if ($leave->exists()) {
+                        return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                    } else {
+                        $leave_request = new EmployeeLeave();
+                        $leave_request->employee_id = $rider_id;
+                        $leave_request->employee_type_id = 2;
+                        $leave_request->from = $request->from;
+                        $leave_request->to = $request->to;
+                        $leave_request->applied_reason = $request->reason;
+                        $leave_request->reporter_id = $department->department_head_id;
+                        return response()->json(['status' => 0, 'message' => 'Request for leave submitted successfully']);
+                    }
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'User Not Found']);
+                }
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Department Not Found']);
+            }
+        }
+
     }
 
     /*public function delivery_packaging_material_update($tracking_number){

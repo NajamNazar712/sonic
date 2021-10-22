@@ -19,7 +19,7 @@ class CreateEmployeeLeavesTable extends Migration
             $table->integer('employee_type_id')->index();
             $table->integer('reporter_id')->index();
             $table->date('from');
-            $table->date('to');
+            $table->date('to')->nullable();
             $table->integer('updated_by')->index()->nullable();
             $table->string('applied_reason', 500);
             $table->string('rejected_reason', 500)->nullable();

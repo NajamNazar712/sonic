@@ -4,10 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
-use App\Http\Controllers\Rider\RiderAPIController;
 use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
@@ -35,19 +32,17 @@ use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
+use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
-use App\Http\Models\Rider;
 use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\V2Pickup\V2PickupNote;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -3735,6 +3730,7 @@ class AdminAPIController extends Controller
             $data['designation'] = $admin->designation;
             $data['department'] = $admin->role->department->name;
             $data['approver_email'] = $admin->role->department->department_head->email;
+            $data['approver_name'] = $admin->role->department->department_head->name;
             $role_id = $admin->role_id;
             if($role_id == 81){
                 $data['user_type'] = 2;
@@ -3746,6 +3742,45 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'data' => $data]);
         }
         return response()->json(['status' => 1, 'message' => "User not found"]);
+    }
+
+    public function leave_apply(Request $request)
+    {
+
+        $rules = [
+            'from' => ['required'],
+            'to' => ['nullable'],
+            'reason' => ['required', 'string'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::find($admin_id);
+            if($admin){
+                $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1,2]);
+                if ($leave->exists()) {
+                    return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                } else {
+                    $leave_request = new EmployeeLeave();
+                    $leave_request->employee_id = $admin_id;
+                    $leave_request->employee_type_id = 1;
+                    $leave_request->from = $request->from;
+                    $leave_request->to = $request->to;
+                    $leave_request->applied_reason = $request->reason;
+                    $leave_request->reporter_id = $admin->role->department->department_head_id;
+                    return response()->json(['status' => 0, 'message' => 'Request for leave submitted successfully']);
+                }
+            }else{
+                return response()->json(['status' => 1, 'message' => 'User Not Found']);
+            }
+        }
+
     }
 
 }
