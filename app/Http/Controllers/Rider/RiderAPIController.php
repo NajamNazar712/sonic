@@ -9882,7 +9882,7 @@ class RiderAPIController extends Controller
                         $leave_request->to = $request->to;
                         $leave_request->applied_reason = $request->reason;
                         $leave_request->reporter_id = $department->department_head_id;
-                        return response()->json(['status' => 0, 'message' => 'Request for leave submitted successfully']);
+                        return response()->json(['status' => 0, 'apply_message' => 'Request for leave submitted successfully']);
                     }
                 }else{
                     return response()->json(['status' => 1, 'message' => 'User Not Found']);
@@ -9891,7 +9891,19 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Department Not Found']);
             }
         }
+    }
 
+    public function employee_leave_list(Request $request){
+        $rider_id = $request->rider_id;
+        $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
+            ->where('employee_id', $rider_id)
+            ->where('employee_type_id', 2);
+        if($employee_leaves->exists()){
+            $employee_leaves = $employee_leaves->get();
+            return response()->json(['status' => 0, 'response' => $employee_leaves]);
+        }
+        return response()->json(['status' => 1, 'messgae' => "No Leave Found!"]);
     }
 
     /*public function delivery_packaging_material_update($tracking_number){

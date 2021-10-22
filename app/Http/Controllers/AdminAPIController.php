@@ -6,9 +6,6 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AdminHub;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
@@ -18,8 +15,6 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\MasterCargo\Bag;
-use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -50,7 +45,6 @@ use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Shipment;
-use App\Http\Models\Rider;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
@@ -59,7 +53,6 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use PharIo\Manifest\Manifest;
 use Password;
 
 class AdminAPIController extends Controller
@@ -3959,7 +3952,7 @@ class AdminAPIController extends Controller
             $role_id = $admin->role_id;
             if($role_id == 81){
                 $data['user_type'] = 2;
-            }elseif(in_array($role_id, [1,2,3,4,5,6,35,52,58,70,81,63])){
+            }elseif(in_array($role_id, [1,2,3,4,5,6,35,52,58,70,63])){
                 $data['user_type'] = 1;
             }else{
                 $data['user_type'] = 0;
@@ -3999,13 +3992,26 @@ class AdminAPIController extends Controller
                     $leave_request->to = $request->to;
                     $leave_request->applied_reason = $request->reason;
                     $leave_request->reporter_id = $admin->role->department->department_head_id;
-                    return response()->json(['status' => 0, 'message' => 'Request for leave submitted successfully']);
+                    return response()->json(['status' => 0, 'apply_message' => 'Request for leave submitted successfully']);
                 }
             }else{
                 return response()->json(['status' => 1, 'message' => 'User Not Found']);
             }
         }
 
+    }
+
+    public function employee_leave_list(Request $request){
+        $admin_id = $request->admin_id;
+        $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
+            ->where('employee_id', $admin_id)
+            ->where('employee_type_id', 1);
+        if($employee_leaves->exists()){
+            $employee_leaves = $employee_leaves->get();
+            return response()->json(['status' => 0, 'response' => $employee_leaves]);
+        }
+        return response()->json(['status' => 1, 'messgae' => "No Leave Found!"]);
     }
 
 }
