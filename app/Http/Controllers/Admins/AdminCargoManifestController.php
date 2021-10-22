@@ -1653,12 +1653,11 @@ class AdminCargoManifestController extends Controller
         $manifest_ids = explode(',',$cargo_manifest_ids);
         
         foreach($manifest_ids as $id) {
-
-
             $cargo = CargoManifest::find($id);
-            $sender = $cargo->sender;
-            $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
-            $html .= '</head>
+            if($cargo){
+                $sender = $cargo->sender;
+                $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
+                $html .= '</head>
                   <body>
                     <div>
                       <div class="cargo_slip">
@@ -1692,13 +1691,13 @@ class AdminCargoManifestController extends Controller
                           
                          
                               ';
-            /*  if($master_cargo->onward_forwarding == 1){
-                  $html .= '<td class="color secondary"><strong>Onward Forwarding Cargo No.</strong></td>';
-              }
-              else{
-                  $html .= '<td class="color secondary"><strong>Master Cargo No.</strong></td>';
-              }*/
-            $html .= '
+                /*  if($master_cargo->onward_forwarding == 1){
+                      $html .= '<td class="color secondary"><strong>Onward Forwarding Cargo No.</strong></td>';
+                  }
+                  else{
+                      $html .= '<td class="color secondary"><strong>Master Cargo No.</strong></td>';
+                  }*/
+                $html .= '
                             
                             <tr>
                               <td class="color secondary"><strong>No. of Bags</strong></td>
@@ -1806,13 +1805,13 @@ class AdminCargoManifestController extends Controller
                               <td class="color primary"><strong>Actual Weight</strong></td>
       ';
 
-            $serial_number = 1;
+                $serial_number = 1;
 
-            foreach ($cargo->manifest_bags as $manifest_cargo_bag) {
-                $bag = $manifest_cargo_bag->bag;
+                foreach ($cargo->manifest_bags as $manifest_cargo_bag) {
+                    $bag = $manifest_cargo_bag->bag;
 
 
-                $html .= '
+                    $html .= '
                             <tr>
                               <td>' . $serial_number . '</td>
                               <td>' . $bag->seal_number . '</td>
@@ -1824,25 +1823,26 @@ class AdminCargoManifestController extends Controller
                             </tr>
         ';
 
-                $serial_number++;
-            }
+                    $serial_number++;
+                }
 
-            $html .= '
+                $html .= '
                           </tbody>
                         </table>
                         <hr>';
 
-            if ($type == 1) {
+                if ($type == 1) {
 
-                $html .= '
+                    $html .= '
                         
                       </div>
                     </div>
                   </body>
                 </html>
       ';
-                $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
-                return $pdf;
+                    $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+                    return $pdf;
+                }
             }
         }
 
