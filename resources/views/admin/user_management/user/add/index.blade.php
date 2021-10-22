@@ -100,6 +100,16 @@
 										</div>
 									</div>
 
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<select name="location_id" class="select2" id="location_list">
+												@foreach($reporting_locations as $reporting_location)
+													<option value="{{$reporting_location->id}}"> {{$reporting_location->name}}</option>
+												@endforeach
+											</select>
+										</div>
+									</div>
+
 
 									<div class="col-12">
 										<h4 class="form-section mb-2">Hubs</h4>
@@ -173,6 +183,11 @@
 			$('#user_form #shift_list').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Working Shift*'
+			});
+
+			$('#user_form #location_list').prepend('<option value="" selected="selected"></option>').select2({
+				width: '100%',
+				placeholder: 'Reporting Location'
 			});
 
 			$('#user_form #cnic').inputmask({

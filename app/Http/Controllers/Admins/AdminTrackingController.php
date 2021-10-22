@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\CargoManifest\CargoManifest;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\KeyAccountDailyShipment;
 use App\Http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\MasterCargo\BagShipment;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailShipment;
@@ -171,6 +176,7 @@ class AdminTrackingController extends Controller
 
                         $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                         $journey_details['status'] = $journey->shipment_status_shipper->name;
+                        $journey_details['status_id'] = $journey->shipper_status_id;
                         if(in_array($journey->shipper_status_id, [1])){
                             if($shipment->booked_by == 1){
                                 $journey_details['status'] .= ' (Main User)';
@@ -189,7 +195,21 @@ class AdminTrackingController extends Controller
                                     $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle return_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
                                 }
                                 else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
-                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                    $bag = CargoManifestBag::where('seal_number',$journey->reference_1_id);
+                                    if($journey->shipper_status_id == 11 && $bag->exists()){
+                                        $bag = $bag->first();
+                                        $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
+                                        if($cargo_manifest->exists()){
+
+                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                        }
+                                        else{
+                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                        }
+                                    }
+                                    else{
+                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                    }
                                 }
                                 else{
                                     $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
@@ -900,6 +920,7 @@ class AdminTrackingController extends Controller
 
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
+                            $journey_details['status_id'] = $journey->shipper_status_id;
                             if(in_array($journey->shipper_status_id, [1])){
                                 if($shipment->booked_by == 1){
                                     $journey_details['status'] .= ' (Main User)';
@@ -911,9 +932,12 @@ class AdminTrackingController extends Controller
 
                             if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
                                 if ($journey->shipper_status_id == 3 || $journey->shipper_status_id == 21) {
-                                    $bag = Bag::where('id', $journey->reference_1_id);
-                                    if($bag->exists()){
-                                        $bag = $bag->first();
+                                    $bag_shipment = BagShipment::where('shipment_id', $shipment->id);
+                                    $cargo_bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment->id);
+
+                                    if($bag_shipment->exists()){
+                                        $bag_shipment = $bag_shipment->first();
+                                        $bag = Bag::find($bag_shipment->bag_id);
                                         $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
                                         if($master_cargo_bags->exists()){
                                             $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
@@ -922,7 +946,21 @@ class AdminTrackingController extends Controller
                                             $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
                                         }
                                     }
+                                    else if($cargo_bag_shipment->exists()){
+                                        $bag_shipment = $cargo_bag_shipment->first();
+                                        $bag = CargoManifestBag::find($bag_shipment->cargo_manifest_bag_id);
+                                        $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
+                                        if($cargo_manifest->exists()){
+
+                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                        }
+                                        else{
+                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                        }
+
+                                    }
                                     else{
+
                                         $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
                                     }
                                 }
@@ -940,7 +978,21 @@ class AdminTrackingController extends Controller
                                         }
                                     }
                                     else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
-                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                        $bag = CargoManifestBag::where('seal_number',$journey->reference_1_id);
+                                        if($journey->shipper_status_id == 11 && $bag->exists()){
+                                            $bag = $bag->first();
+                                            $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
+                                            if($cargo_manifest->exists()){
+
+                                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                            }
+                                            else{
+                                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                            }
+                                        }
+                                        else{
+                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                        }
                                     }
                                     else{
                                         $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);

@@ -5661,6 +5661,7 @@ class NotificationsController extends Controller
                         $to[] = 'shafay.tariq@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'jahanzaib.qamar@trax.pk';
+                        $to[] = 'zakee.rasheed@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
@@ -8178,8 +8179,46 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
+                }
+				else if($id == 148){
+                    $hub = City::find($reference_1_id);
+                    $date = Carbon::now()->toDateString();
+                    $subject = $notification->subject;
+                    $body = $notification->body;
 
-                } else if ($id == 149) {
+                    $hub_id = $hub->id;
+
+                    if (strpos($subject, '[hub]') !== FALSE) {
+                        $subject = str_replace('[hub]', $hub->name, $subject);
+                    }
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
+                    }
+
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = array();
+
+                    $to_admins = Admin::whereIn('role_id', [23, 30, 10, 9, 25])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+                        $query->where('hub_id', $hub_id);
+                    });
+                    if ($to_admins->exists()) {
+                        $to = array_merge($to, $to_admins->pluck('email')->toArray());
+                    }
+
+                    self::email($subject, $body, $to);
+                }
+            
+                else if ($id == 149){
                     $user_id = $reference_1_id;
 
                     $user = User::find($user_id);

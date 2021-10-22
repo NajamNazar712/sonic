@@ -752,7 +752,7 @@
                     // { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
                     { data:'deposited_by' ,name: 'admins.name', class: 'align-middle deposited_by'},
                     { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
-                    { data:'resolved_by' ,name: 'resolved_by', class: 'align-middle resolved_by'},
+                    { data:'resolved_by' ,name: 'admins.name', class: 'align-middle resolved_by'},
                     { data:'status' ,name: 'status', class: 'align-middle status'},
                     { data:'adjustment_date' ,name: 'sdna.date', class: 'align-middle adjustment_date'},
                     { data:'sdn_adjustment_amount' ,name: 'station_deposit_notes.adjustment_amount', class: 'align-middle adjustment_amount'},

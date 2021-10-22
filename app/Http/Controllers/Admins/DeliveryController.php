@@ -36,6 +36,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\Admin\AgentCallMonitoring;
 
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
@@ -3347,11 +3348,14 @@ class DeliveryController extends Controller
                             }
                         }
                     }
+                    //For Debriefing
+                    $this->agent_call_completed($delivery_note->id);
+
                     if($delivery_note->updated_by == NULL){
                         $delivery_note->updated_by = Auth::id();
                         $delivery_note->save();
                     }
-
+                    
                     if(count($lost_shipments_array) > 0){
                         NotificationsController::send(150, $lost_shipments_array);
                     }
@@ -3391,6 +3395,11 @@ class DeliveryController extends Controller
 
     }
 
+    //For Debriefing
+    public function agent_call_completed($deliverynote)
+    {
+        $agents_check = AgentCallMonitoring::where('delivery_note_id', '=', $deliverynote)->where('completed','=','0')->update(array('completed' => 1));   
+    }
     //print dncc
     public function dncc_print(Request $request)
     {
