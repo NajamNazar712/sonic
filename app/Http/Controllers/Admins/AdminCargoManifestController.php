@@ -24,6 +24,7 @@ use App\Http\Models\City;
 use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
 use App\Http\Models\InterceptReBookRequest;
+use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPiece;
@@ -684,10 +685,10 @@ class AdminCargoManifestController extends Controller
 
 
             if($shipment->shipper_status_id == 55){
-                $intercept_re_book = InterceptReBookRequest::where('shipment_id',$shipment->id)->first();
-                if($intercept_re_book){
-                    $intercept_re_book_history_hub = $intercept_re_book->old_consignee_city->city->hub_id;
-                }
+               $intercept_rebook_history = InterceptReBookRequestHistory::where('shipment_id',$shipment->id)->first();
+               if($intercept_rebook_history){
+                   $intercept_re_book_history_hub = $intercept_rebook_history->old_consignee_city->hub_id;
+               }
             }
 
             if((($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30) && $shipment->consignee_city->hub_id == Auth::user()->default_hub_id) || (($shipment->shipper_status_id != 35 && $shipment->shipper_status_id != 37 && $shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30 && $shipment->shipper_status_id != 55) && $shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id) || ($shipment->shipper_status_id == 55 && $intercept_re_book_history_hub == Auth::user()->default_hub_id))
