@@ -695,7 +695,8 @@ class AdminCargoManifestController extends Controller
             if($shipment->shipper_status_id == 49){
                 $misrouted_history = MisroutedHistory::where('shipment_id',$shipment->id)->latest()->first();
                 if($misrouted_history){
-                    $misrouted_history_hub = $misrouted_history->old_consignee_city_id->hub_id;
+                    $city = City::where('id',$misrouted_history->old_consignee_city_id)->first();
+                    $misrouted_history_hub = $city->hub_id;
                 }
             }
 
