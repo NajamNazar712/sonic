@@ -567,11 +567,11 @@ class AdminPettyCashController extends Controller
             ->whereIn('petty_cash_statements.status', [0, 1, 2, 7]);
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))
-                ->orWhere(function ($query) {
-                $query->whereIn('petty_cash_statements.destination_hub_id', session('hubs'));
-            })
-                ->orWhere('petty_cash_statements.created_by', Auth::id());
+            $petty = $petty->where(function ($query) {
+                    $query->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))
+                    ->orWhereIn('petty_cash_statements.destination_hub_id', session('hubs'))
+                    ->orWhere('petty_cash_statements.created_by', Auth::id());
+                });
         }
 
         $petty = Datatables::of($petty)
