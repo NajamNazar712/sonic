@@ -1346,7 +1346,6 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Tracking No.</strong></td>
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Item Qty</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
@@ -1390,7 +1389,6 @@ class DeliveryController extends Controller
                             <td class="'.$class.'">' . $tracking_number  . '</td>
                             <td class="'.$class .'">' . $user_details . '</td>
                             <td class="'.$class.' ' . $details_change_class .'">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td class="'.$class.' ' . $details_change_class .'">' . $shipment->consignee_address . '</td>
                 ';
 
                 if ($shipment->booking_type_id == 1) {
@@ -3813,7 +3811,6 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>S. No.</strong></td>
                             <td class="color primary"><strong>Tracking No.</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Status</strong></td>
@@ -3837,7 +3834,6 @@ class DeliveryController extends Controller
                             <td>' . $total_shipments . '</td>
                             <td>' . $shipment->tracking_number . '</td>
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td>' . $shipment->consignee_address . '</td>
                             <td>' . $shipment->booking_type->booking_type . '</td>
                             <td>' . $user_details . '</td>
                             <td>' . $status->name . '</td>
@@ -5488,7 +5484,6 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>S. No.</strong></td>
                             <td class="color primary"><strong>Tracking No.</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Weight</strong></td>
@@ -5512,7 +5507,6 @@ class DeliveryController extends Controller
                             <td>' . $total_shipments . '</td>
                             <td>' . $shipment->tracking_number . '</td>
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td>' . $shipment->consignee_address . '</td>
                             <td>' . $shipment->booking_type->booking_type . '</td>
                             <td>' . $user_details . '</td>
                             <td>' . (($shipment->booking_type_id == 2) ? $shipment->replacement_weight : $shipment->actual_weight) . '</td>
