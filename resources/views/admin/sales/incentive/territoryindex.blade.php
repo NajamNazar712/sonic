@@ -58,6 +58,18 @@
                         <div class="form-group">
                             <input type="text" name="code" id="code" class="form-control" placeholder="Territory Code*" data-rule-required="true" data-msg-required="Code is required">
                         </div>
+
+                        @if(count($designations) > 0)
+                            @foreach($designations as $designation)
+                                <div class="form-group">
+                                    <select name="designation_{{$designation->id}}" id="designation_{{$designation->id}}" class="form-control select2">
+                                        @foreach($admins as $admin)
+                                            <option value="{{$admin->id}}"> {{$admin->name}} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endforeach
+                        @endif
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
                         </div>

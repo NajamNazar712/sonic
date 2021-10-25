@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\Admin;
 use Illuminate\Http\Request;
 use App\Http\Models\Admin\SalesTerritory;
 use App\Http\Models\Admin\SalesDesignation;
@@ -22,9 +23,10 @@ class SalesIncentiveController extends Controller
     }
 
     public function territoryindex(){
-        
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->get();
-        return view('admin.sales.incentive.territoryindex')->with(['hubs' => $hubs]);
+        $designations = SalesDesignation::where('status', 1)->get();
+        $admins = Admin::join('admin_roles as ad', 'ad.id', '=', 'admins.role_id')->where('ad.department_id', 7)->select('admins.id', 'admins.name')->get();
+        return view('admin.sales.incentive.territoryindex')->with(['hubs' => $hubs, 'designations' => $designations, 'admins' => $admins]);
     }
 
     public function territory_list(Request $request){
