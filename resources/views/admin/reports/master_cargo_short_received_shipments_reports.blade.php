@@ -26,7 +26,6 @@
                     </tr>
                     </thead>
                 </table>
-
             </div>
         </div>
     </div>
@@ -230,7 +229,7 @@
                 console.log(cargo_id);
 
                 if ($(this).hasClass('print')) {
-                  
+
                     print(cargo_id);
                 }
                         @if (session('role_id') == 1 || in_array(31, session('permissions')))

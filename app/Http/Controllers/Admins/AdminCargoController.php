@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\CargoManifest\CargoManifest;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
@@ -912,9 +915,12 @@ class AdminCargoController extends Controller
     }
 
     public function in_transit_print(Request $request) {
+       
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
         $bag = Bag::where('seal_number', $request->id);
+        $cargo_manifest_bag = CargoManifestBag::where('seal_number', $request->id);
         if($bag->exists()){
+
             $bag = $bag->first();
             $master_cargo_bag = MasterCargoBag::where('bag_id', $bag->id);
             if($master_cargo_bag->exists()){
@@ -1110,6 +1116,246 @@ class AdminCargoController extends Controller
                 foreach ($master_cargo->master_bags as $master_cargo_bag) {
                     $bag = $master_cargo_bag->bag;
 
+
+                    $html .= '
+                        <tr>
+                          <td>' . $serial_number . '</td>
+                          <td>' . $bag->seal_number . '</td>
+                          <td>' . $bag->shipments . '</td>
+                          <td>' . $bag->destination_hub->name . '</td>
+                          <td>' . $bag->actual_weight . '</td>
+                        </tr>
+    ';
+
+                    $serial_number++;
+                }
+
+                $html .= '
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <script>
+                  window.onload = function() {
+                    window.print();
+                  }
+                </script>
+              </body>
+            </html>
+  ';
+
+                return $html;
+            }
+        }
+        else if($cargo_manifest_bag->exists()){
+           
+            $bag = $cargo_manifest_bag->first();
+            $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id', $bag->id);
+            if($cargo_manifest->exists()){
+                $cargo_manifest = $cargo_manifest->first();
+                $cargo_manifest = CargoManifest::find($cargo_manifest->cargo_manifest_id);
+                if($cargo_manifest->vehicle_number != NULL){
+                    $vehicle_number =  $cargo_manifest->vehicle_number;
+                }
+                else{
+                  $vehicle_number = $cargo_manifest->fleet->reg_number;
+                }
+
+                // <td class="text-center">' . $master_cargo->origin_hub->name . ' - ' . (($master_cargo->junction_hub_1_id) ? ($master_cargo->junction_hub_1->name . ' - ') : '') . ' - ' . (($master_cargo->junction_hub_2_id) ? ($master_cargo->junction_hub_2->name . ' - ') : '') . $master_cargo->destination_hub->name . '</td>
+
+
+                $sender = $cargo_manifest->sender;
+                $receiver = ($cargo_manifest->received_by) ? $cargo_manifest->receiver : NULL;
+
+                $html = '
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                <title>Manifest Slip & Checklist</title>
+
+                <style>
+                  @page {
+                    size: A4 portrait;
+                  }
+
+                  * {
+                    -webkit-print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                  }
+
+                  body {
+                    background: none !important;
+                    color: #09262e !important;
+                    font-size: 0.9rem !important;
+                  }
+
+                  hr {
+                    border-top: 1px dashed #000000;
+                  }
+
+                  table.table-bordered tbody tr td {
+                    border: 1px solid #09262e !important;
+                  }
+
+                  .color.primary {
+                    background: #c8c8c8 !important;
+                  }
+
+                  .color.secondary {
+                    background: #ebebeb !important;
+                  }
+
+                  .border {
+                    border: 1px solid #09262e !important;
+                  }
+                </style>
+              </head>
+              <body>
+                <div>
+                  <div class="cargo_slip">
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                          <td class="text-center align-middle color primary"><strong>Manifest Slip</strong></td>
+                          <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(\Illuminate\Support\Facades\Auth::user()->name) . '</td>
+                          </tr>
+                        <tr>
+                          <td class="color secondary"><strong>Destination Hub</strong></td>
+                          <td>' . $cargo_manifest->destination_hub->name . '</td>
+                          <td rowspan="9" class="text-center align-middle">
+                            <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo_manifest->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                            <span><strong>' . str_pad($cargo_manifest->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>Transit Date</strong></td>
+                          <td>' . $cargo_manifest->created_at . '</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>Shipping Mode</strong></td>
+                          <td>' . $cargo_manifest->shipping_mode->mode . '</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>Transport Mode</strong></td>
+                          <td>' . $cargo_manifest->transport_mode->name . '</td>
+                        </tr> 
+                        <tr>
+                          <td class="color secondary"><strong>Vendor</strong></td>
+                          <td>' . $cargo_manifest->vendor_name . '</td>
+                        </tr>
+                         <tr>
+                          <td class="color secondary"><strong>No of Bags</strong></td>
+                          <td>' . $cargo_manifest->bags . '</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td colspan="2" class="color primary"><strong>Sender Information</strong></td>
+                          <td colspan="2" class="color primary"><strong>Receiver Information</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>Name</strong></td>
+                          <td>' . $sender['name'] . '</td>
+                          <td class="color secondary"><strong>Name</strong></td>
+                          <td>' . (($receiver) ? $receiver['name'] : '') . '</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>Role</strong></td>
+                          <td>' . $sender->role->name  . ' - ' . $sender->role->department->name . '</td>
+                          <td class="color secondary"><strong>Role</strong></td>
+                          <td>' . (($receiver) ? $receiver->role->department->name : '') . '</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>Phone No.</strong></td>
+                          <td>' . $sender['phone_number'] . '</td>
+                          <td class="color secondary"><strong>Phone No.</strong></td>
+                          <td>' . (($receiver) ? $receiver['phone_number'] : '') . '</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="color primary"><strong>Route Information</strong></td>
+                        </tr>
+                        <tr>
+                        <td class="text-center">' . $cargo_manifest->origin_hub->name . $cargo_manifest->destination_hub->name . '</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div class="cargo_checklist">
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                          <td class="text-center align-middle color primary"><strong>Manifest Checklist</strong></td>
+                          <td class="text-center align-middle  color secondary" colspan="3">Printed at ' . Carbon::now() . '</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>Origin Hub</strong></td>
+                          <td>' . $cargo_manifest->origin_hub->name . '</td>
+                           <td class="color secondary"><strong>Driver Name</strong></td>
+                          <td>' . $cargo_manifest->driver_name . '</td> 
+                         
+                          <td rowspan="6" class="text-center align-middle">
+                            <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo_manifest->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                            <span><strong>' . str_pad($cargo_manifest->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>Destination Hub</strong></td>
+                          <td>' . $cargo_manifest->destination_hub->name . '</td>
+                           <td class="color secondary"><strong>Vehicle Number</strong></td>
+                          <td>' . $vehicle_number . '</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>Transit Date</strong></td>
+                          <td>' . $cargo_manifest->created_at . '</td>
+                           <td class="color secondary"><strong>Contact Phone</strong></td>
+                          <td>' . $cargo_manifest->driver_phone . '</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>No. of Bags</strong></td>
+                          <td>' . $cargo_manifest->bags . '</td>
+                        </tr> 
+                        <tr>
+                          <td class="color secondary"><strong>No. of Shipments</strong></td>
+                          <td>' . $cargo_manifest->shipments . '</td>
+                        </tr>
+                         <tr>
+                          <td class="color secondary"><strong>Actual Weight</strong></td>
+                          <td>' . $cargo_manifest->actual_weight . '</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="color primary"><strong>S. No.</strong></td>
+                          <td class="color primary"><strong>Bag No.</strong></td>
+                          <td class="color primary"><strong>No. of Shipments</strong></td>
+                          <td class="color primary"><strong>Destination</strong></td>
+                          <td class="color primary"><strong>Actual Weight</strong></td>
+  ';
+
+                $serial_number = 1;
+
+                foreach ($cargo_manifest->manifest_bags as $manifest_cargo_bag) {
+                    $bag = $manifest_cargo_bag->bag;
 
                     $html .= '
                         <tr>

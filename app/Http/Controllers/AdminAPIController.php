@@ -3,13 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Rider\RiderAPIController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Models\Admin\CargoManifest\CargoManifest;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
+use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -20,6 +29,7 @@ use App\Http\Models\Admin\Retail\RetailTraxBox;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
+use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
@@ -36,6 +46,7 @@ use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
+use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
@@ -45,6 +56,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use PharIo\Manifest\Manifest;
 use Password;
 
 class AdminAPIController extends Controller
@@ -2879,6 +2891,217 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
     }
 
+    public function master_cargo(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $bag_no = $request->bag_no;
+        $admin = Admin::find($admin_id);
+        $cargos = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
+            ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
+            ->leftjoin('v2_junction_mappings as jm', 'cargo_manifests.junction_mapping_id', '=', 'jm.id')
+            ->where('cargo_manifests.status_id', 1)
+            ->select('cargo_manifests.id as cargo_id', 'cargo_manifests.bags as bags', 'cargo_manifests.shipments as shipments', 'dh.name as destination', 'oh.name as origin', 'cargo_manifests.vehicle_number as vehicle_no', 'cargo_manifests.destination_hub_id as destination_id', 'cargo_manifests.junction_mapping_id as junction_mapping_id', 'jm.destination_id as j_dest_id');
+
+        if ($bag_no != null) {
+            $cargos = $cargos->join('manifest_bags as mb', 'cargo_manifests.id', '=', 'mb.cargo_manifest_id')
+                ->join('cargo_manifest_bags as b', 'mb.cargo_manifest_bag_id', '=', 'b.id')
+                ->where('b.seal_number', $bag_no)
+                ->whereIn('b.status_id', [2, 4, 6, 8, 9, 10])
+                ->groupBy('cargo_manifests.id');
+        }
+        if ($cargos->exists()) {
+            $cargos = $cargos->get();
+            $data = array();
+            foreach ($cargos as $cargo) {
+                $junctions = V2Junctions::where('junction_mapping_id', $cargo->junction_mapping_id)->pluck('junction_id')->toArray();
+                if ($cargo->destination_id == $admin->default_hub_id || $cargo->j_dest_id == $admin->default_hub_id || in_array($admin->default_hub_id, $junctions)) {
+                    $datum = array();
+                    $datum['cargo_id'] = $cargo->cargo_id;
+                    $datum['bags'] = $cargo->bags;
+                    $datum['shipments'] = $cargo->shipments;
+                    $datum['destination'] = $cargo->destination;
+                    $datum['origin'] = $cargo->origin;
+                    $datum['vehicle_no'] = $cargo->vehicle_no;
+                    $data[] = $datum;
+                }
+            }
+            if(!empty($data)){
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "No cargo found!"]);
+        }
+        return response()->json(['status' => 1, 'message' => "No cargo found!"]);
+    }
+
+    public function cargo_bags(Request $request)
+    {
+        $cargo_id = $request->cargo_id;
+        $cargo_bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
+            ->where('mb.cargo_manifest_id', $cargo_id)
+            ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
+            ->select('cargo_manifest_bags.seal_number as bag_no');
+        if ($cargo_bags->exists()) {
+            $cargo_bags = $cargo_bags->get();
+            return response()->json(['status' => 0, 'bags' => $cargo_bags]);
+        }
+        return response()->json(['status' => 1, 'message' => "No bags found!"]);
+    }
+
+    public function cargo_bags_validator(Request $request)
+    {
+        $bag_id = $request->bag_no;
+        $bags = CargoManifestBag::where('seal_number', $bag_id)
+            ->whereIn('status_id',[2, 4, 6, 8, 9, 10]);
+
+        if ($bags->exists()) {
+            $bags = $bags->latest()->first();
+            return response()->json(['status' => 0, 'bag_no' => $bags->seal_number, 'message' => "Valid Bag No."]);
+        }
+        return response()->json(['status' => 0, 'bag_no' => null, 'message' => "Invalid Bag No."]);
+    }
+
+    public function cargo_bags_details(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        $bag_ids = explode(',', $request->bags);
+        $bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
+            ->join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
+            ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
+            ->join('v2_junction_mappings as jm', 'cargo_manifest_bags.junction_mapping_id', '=', 'jm.id')
+            ->join('cargo_manifests as cm', 'mb.cargo_manifest_id', '=', 'cm.id')
+            ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
+            ->whereIn('cargo_manifest_bags.seal_number', $bag_ids)
+            ->where('cm.status_id', 1)
+            ->where('mb.status', 0)
+            ->select('cargo_manifest_bags.seal_number as bag_no', 'mb.cargo_manifest_id as manifest_id', 'dh.name as destination', 'oh.name as origin', 'cargo_manifest_bags.destination_hub_id as dest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'jm.destination_id as j_dest_id');
+        if ($bags->exists()) {
+            $bags = $bags->get();
+            $data = array();
+            foreach ($bags as $bag) {
+                $datum = array();
+                $datum["bag_no"] = $bag->bag_no;
+                $datum["manifest_id"] = $bag->manifest_id;
+                $datum["destination"] = $bag->destination;
+                $datum["destination_id"] = $bag->dest_id;
+                $datum["origin"] = $bag->origin;
+                $junctions = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id);
+                $datum["misroute"] = 1;
+                if ($bag->dest_id == $admin->default_hub_id) {
+                    $datum["misroute"] = 0;
+                }
+                if ($bag->j_dest_id == $admin->default_hub_id) {
+                    $datum["misroute"] = 0;
+                }
+                if ($junctions->exists()) {
+                    $junctions = $junctions->pluck('junction_id')->toArray();
+                    if (in_array($admin->default_hub_id, $junctions)) {
+                        $datum["misroute"] = 0;
+                    }
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No details found!"]);
+    }
+
+    public function cargo_bag_recieve(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if ($request->has('bags')) {
+            $bag_details = json_decode($request->bags, true);
+            $bag_numbers = array();
+            foreach ($bag_details as $bag_detail) {
+                $bag_no = $bag_detail['bag_no'];
+                $destination_id = $bag_detail['destination_id'];
+                $manifest_id = $bag_detail['manifest_id'];
+                $status = $bag_detail['status'];
+                $cargo_manifest_bags = CargoManifestBag::where('seal_number', $bag_no);
+                if ($cargo_manifest_bags->exists()) {
+                    $cargo_manifest_bags = $cargo_manifest_bags->latest()->first();
+                    if ($status == 1) {
+                        $cargo_manifest_bags->status_id = 5;
+                        $cargo_manifest_bags->junction_mapping_id = null;
+                        $cargo_manifest_bags->save();
+                        $cargo_manifest_bags_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id', $cargo_manifest_bags->id)->pluck('shipment_id')->toArray();
+                        $shipments = Shipment::whereIn('id', $cargo_manifest_bags_shipments);
+                        if ($shipments->exists()) {
+                            $shipments = $shipments->get();
+                            foreach ($shipments as $shipment) {
+                                $shipment->shipper_status_id = 11;
+                                $shipment->consignee_status_id = 11;
+                                $shipment->save();
+                                ShipmentsJourneyController::add($shipment->id, 11, 11, NULL, NULL, NULL, $admin_id, NULL, NULL, 1, NULL, NULL);
+                            }
+                        }
+                    } else {
+                        if ($destination_id == $admin->default_hub_id) {
+                            $cargo_manifest_bags->status_id = 7;
+                            $cargo_manifest_bags->save();
+                        } else {
+                            $cargo_manifest_bags->status_id = 3;
+                            $cargo_manifest_bags->save();
+                        }
+                    }
+                }
+                CargoManifestBagJourneyController::add($cargo_manifest_bags->id, $bag_no, $cargo_manifest_bags->status_id, $admin_id);
+                $manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $cargo_manifest_bags->id)
+                    ->where('cargo_manifest_id', $manifest_id)->update(['status' => 1]);
+                array_push($bag_numbers, $bag_no);
+            }
+            $bag_short_received = array();
+            foreach ($bag_numbers as $bag_id) {
+                $bag = CargoManifestBag::where('seal_number', $bag_id)->latest()->first();
+                $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb', function ($join) use ($bag) {
+                    $join->on('mb.cargo_manifest_id', 'cargo_manifests.id');
+                })
+                    ->select(['cargo_manifests.*', 'mb.cargo_manifest_bag_id'])
+                    ->where('cargo_manifests.status_id', 1)
+                    ->where('mb.cargo_manifest_bag_id', $bag->id);
+
+                if ($cargo_bag->exists()) {
+                    $cargo_bag = $cargo_bag->first();
+                    $manifest_bags = ManifestBag::where('cargo_manifest_id', $cargo_bag->id)->get();
+                    $bag_short_received_count = 0;
+                    $cargo_short_received = array();
+                    foreach ($manifest_bags as $manifest_bag) {
+                        if ($manifest_bag->status == 0) {
+                            if (!in_array($manifest_bag->cargo_manifest_bag_id, $bag_short_received)) {
+                                $short_received_bag = CargoManifestBag::find($manifest_bag->cargo_manifest_bag_id);
+                                $short_received_bag->status_id = 9;
+                                $short_received_bag->update();
+                                CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, $admin_id);
+                                $bag_short_received_count++;
+                                array_push($bag_short_received, $short_received_bag->id);
+                                array_push($cargo_short_received, $short_received_bag->id);
+                            } else {
+                                $bag_short_received_count++;
+                            }
+                        }
+                    }
+
+                    if ($bag_short_received_count == 0) {
+                        CargoManifest::find($cargo_bag->id)->update(['status_id' => 2]);
+                    }
+                    if (count($cargo_short_received) > 0) {
+                        foreach ($cargo_short_received as $cargo_short) {
+                            $bag_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id', $cargo_short)->get(['shipment_id']);
+                            $shipments = array();
+                            foreach ($bag_shipments as $shipment) {
+                                array_push($shipments, $shipment->shipment_id);
+                            }
+
+                            DisputeController::add_cargo_short_received($cargo_bag->id, $shipments, null, 2, $admin_id);
+                        }
+                    }
+                }
+            }
+            return response()->json(['status' => 0, 'message' => "Bags Recieved!"]);
+        }
+    }
+
     public function admin_signup_v2(Request $request)
     {
         if ($request->isMethod('post')) {
@@ -3443,6 +3666,250 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function attendance_notification(Request $request)
+    {
+        $rules = [
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $notification = AppNotification::find(10);
+            if ($notification) {
+                if ($notification->status) {
+                    $title = $notification->title;
+                    $body = $notification->body;
+                    $admin_id = $request->admin_id;
+                    $admin = Admin::find($admin_id);
+                    if ($admin) {
+                        if ($admin->reporting_location_id) {
+                            $reporting_location = ReportingLocation::join('admins as a', 'reporting_locations.id', 'a.reporting_location_id')
+                                ->where('a.id', $admin_id);
+                        } else {
+                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                                ->join('admins as a', 'e.id', 'a.employee_id')
+                                ->where('a.id', $admin_id);
+                        }
+                        if ($reporting_location->exists()) {
+                            $reporting_location = $reporting_location->first();
+                            $reporting_location->radius;
+                            $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                            $origin = $request->latitude . ',' . $request->longitude;
+                            $distance = $this->distance($origin, $destination);
+                            if ($distance <= $reporting_location->radius / 1000) {
+                                if ($admin->shift_id) {
+                                    $shift = EmployeeShift::where('id', $admin->shift_id);
+                                } else {
+                                    $shift = EmployeeShift::join('employees as e', 'employee_shifts.id', '=', 'e.shift_id')
+                                        ->where('e.id', $admin->employee_id);
+                                }
+                                if ($shift->exists()) {
+                                    $shift = $shift->first();
+                                    $now_time = Carbon::createFromFormat("H:i:s", Carbon::now()->format("H:i") . ':00');
+                                    $grace_time = $shift->extension_minutes;
+                                    if (strpos($body, '[time]') !== FALSE) {
+                                        $body = str_replace('[time]', Carbon::parse($shift->start_time)->addMinutes($grace_time + 1)->toTimeString(), $body);
+                                    }
+                                    if (strpos($body, '[name]') !== FALSE) {
+                                        $body = str_replace('[name]', $admin->name, $body);
+                                    }
+                                    $attendance = EmployeeAttendance::where('employee_id', $admin_id)->where('employee_type', 1)->whereDate('attendance_date', Carbon::now()->format("Y-m-d"))
+                                        ->whereNotNull('clock_in_datetime');
+                                    if (!$attendance->exists()) {
+                                        if ($now_time->diffInMinutes(Carbon::parse($shift->start_time)) == 0) {
+                                            $notification_history = new EmployeeNotificationHistory();
+                                            $notification_history->employee_id = $admin_id;
+                                            $notification_history->employee_type_id = 1;
+                                            $notification_history->title = $title;
+                                            $notification_history->message = $body;
+                                            $notification_history->save();
+                                            return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
+                                        } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(ceil($grace_time / 2))) == 0) {
+                                            $notification_history = new EmployeeNotificationHistory();
+                                            $notification_history->employee_id = $admin_id;
+                                            $notification_history->employee_type_id = 1;
+                                            $notification_history->title = $title;
+                                            $notification_history->message = $body;
+                                            $notification_history->save();
+                                            return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
+                                        } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(($grace_time - 1))) == 0) {
+                                            $notification_history = new EmployeeNotificationHistory();
+                                            $notification_history->employee_id = $admin_id;
+                                            $notification_history->employee_type_id = 1;
+                                            $notification_history->title = $title;
+                                            $notification_history->message = $body;
+                                            $notification_history->save();
+                                            return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
+                                        } else {
+                                            return response()->json(['status' => 1, 'message' => 'Time error', 'notification' => 1]);
+                                        }
+                                    } else {
+                                        return response()->json(['status' => 1, 'message' => 'Attendance already marked', 'notification' => 1]);
+                                    }
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Shift not found!', 'notification' => 1]);
+                                }
+                            } else {
+                                return response()->json(['status' => 1, 'message' => 'User is off-site', 'notification' => 1]);
+                            }
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Reporting location not found', 'notification' => 1]);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'User Not Found!', 'notification' => 1]);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Notification Disabled', 'notification' => 1]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Notification Not Found!', 'notification' => 1]);
+            }
+        }
+    }
+
+    public function flutter_mark_attendance(Request $request)
+    {
+
+        $rules = [
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            //Date Decision
+            $admin = Admin::find($admin_id);
+            $attendance_date = Carbon::now()->format("Y-m-d");
+            $admin_shift = EmployeeShift::where('id', $admin->shift_id);
+            if ($admin_shift->exists()) {
+                $admin_shift = $admin_shift->first();
+                $shift_time = Carbon::createFromFormat('H:i:s', $admin_shift->start_time);
+                if (Carbon::now()->lt($shift_time)) {
+                    $attendance_date = Carbon::now()->subDays(1)->format("Y-m-d");
+                }
+            }
+            //-------------
+
+            //Location Check
+            $location_status = 0;
+            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                ->join('admins as a', 'e.id', 'a.employee_id')
+                ->where('a.id', $admin_id);
+            if($reporting_location->exists()){
+                $reporting_location = $reporting_location->first();
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $request->latitude . ',' . $request->longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance > $reporting_location->radius / 1000) {
+                    $location_status = 1;
+                } else {
+                    $location_status = 2;
+                }
+            }
+            //-------------
+
+            //15 Seconds Check
+            $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 1)->select('action_date')->orderBy('id', 'DESC');
+            if($admin_attendance_action->exists()){
+                $admin_attendance_action = $admin_attendance_action->first();
+                $last_action = Carbon::parse($admin_attendance_action->action_date);
+                if(Carbon::now()->diffInSeconds($last_action) < 15){
+                    return response()->json(['status' => 1, 'message' => 'Wait for 15 Seconds']);
+                }
+            }
+            //-------------
+            $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 1);
+            $admin_attendance_action = new EmployeeAttendanceActionLog();
+            if ($admin_attendance->exists()) {
+                $admin_attendance = $admin_attendance->first();
+            } else {
+                $admin_attendance = new EmployeeAttendance();
+                $admin_attendance->employee_id = $admin_id;
+                $admin_attendance->employee_type = 1;
+                $admin_attendance->attendance_date = $attendance_date;
+            }
+            if ($request->action == 1) {
+                $admin_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance->clock_in_latitude = $request->latitude;
+                $admin_attendance->clock_in_longitude = $request->longitude;
+                $admin_attendance->clock_in_location = $location_status;
+                $admin_attendance->save();
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance_action->attendance_date = $attendance_date;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
+                $admin_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
+            } elseif ($request->action == 2) {
+                $admin_attendance->clock_out_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance->clock_out_latitude = $request->latitude;
+                $admin_attendance->clock_out_longitude = $request->longitude;
+                $admin_attendance->clock_out_location = $location_status;
+                $admin_attendance->save();
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance_action->attendance_date = $attendance_date;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
+                $admin_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action]);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
+        }
+
+    }
+
+    public function flutter_attendance_details(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        $date = Carbon::now()->format("Y-m-d");
+        $admin_shift = EmployeeShift::where('id', $admin->shift_id);
+        if ($admin_shift->exists()) {
+            $admin_shift = $admin_shift->first();
+            $shift_time = Carbon::createFromFormat('H:i:s', $admin_shift->start_time);
+            if (Carbon::now()->lt($shift_time)) {
+                $date = Carbon::now()->subDays(1)->format("Y-m-d");
+            }
+        }
+        $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+            ->whereDate('attendance_date', $date)
+            ->where('employee_type', 1)
+            ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status', 'attendance_date')
+            ->orderBy('action_date', 'ASC');
+        if ($admin_attendance_action->exists()) {
+            $admin_attendance_action = $admin_attendance_action->get();
+            return response()->json(['status' => 0, 'attendance_details' => $admin_attendance_action]);
+        }
+        return response()->json(['status' => 0, 'attendance_details' => []]);
+    }
 
 }
