@@ -679,6 +679,8 @@ class AdminCargoManifestController extends Controller
     }
 
     public function create_shipment_details(Request $request) {
+        $misrouted_history_hub = 0;
+        $intercept_re_book_history_hub = 0;
 
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
         if ($shipment->exists()) {
