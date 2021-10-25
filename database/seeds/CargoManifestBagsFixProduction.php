@@ -77,7 +77,7 @@ class CargoManifestBagsFixProduction extends Seeder
                         $mater_cargo_bags->cargo_manifest_id = $master_cargo_id;
                         $mater_cargo_bags->cargo_manifest_bag_id = $bag_id;
                         $bag = CargoManifestBag::find($bag_id);
-                        if($bag->status == 7){
+                        if($bag->status_id == 7){
                             $mater_cargo_bags->status = 1;
                             $received_bags++;
                         }
