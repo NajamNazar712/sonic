@@ -35,9 +35,9 @@ class InitialChargesWebhookController extends Controller
             $data['weight_charges'] = $shipment->weight_charges;
             $data['cash_handling_charges'] = $shipment->cash_handling_charges;
             $data['insurance_charges'] = $shipment->insurance_charges;
-            $data['fuel_surcharges'] = $shipment->fuel_surcharges;
+            $data['fuel_surcharges'] = $shipment->fuel_surcharge;
             $data['gst'] = $shipment->gst;
-            $total_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharges;
+            $total_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
             $data['total_charges'] = $total_charges;
             $data['net_payable'] = $shipment->amount - $total_charges - $shipment->gst;
             dispatch(new ProcessInitialChargesWebhook($data));
@@ -56,20 +56,21 @@ class InitialChargesWebhookController extends Controller
                         'tracking_number' => $data['tracking_number'],
                         'origin' => $data['origin'],
                         'destination' => $data['destination'],
-                        'cod_amount' => $data['cod_amount'],
-                        'actual_weight' => $data['actual_weight'],
-                        'chargeable_weight' => $data['chargeable_weight'],
-                        'weight_charges' => $data['weight_charges'],
-                        'cash_handling_charges' => $data['cash_handling_charges'],
-                        'insurance_charges' => $data['insurance_charges'],
-                        'fuel_surcharges' => $data['fuel_surcharges'],
-                        'gst' => $data['gst'],
-                        'total_charges' => $data['total_charges'],
-                        'net_payable' => $data['net_payable'],
+                        'cod_amount' => $data['cod_amount'] ?? 0,
+                        'actual_weight' => $data['actual_weight'] ?? 0,
+                        'chargeable_weight' => $data['chargeable_weight'] ?? 0,
+                        'weight_charges' => $data['weight_charges'] ?? 0,
+                        'cash_handling_charges' => $data['cash_handling_charges'] ?? 0,
+                        'insurance_charges' => $data['insurance_charges'] ?? 0,
+                        'fuel_surcharges' => $data['fuel_surcharges'] ?? 0,
+                        'gst' => $data['gst'] ?? 0,
+                        'total_charges' => $data['total_charges'] ?? 0,
+                        'net_payable' => $data['net_payable'] ?? 0,
                     ]
                 ]);
                 $status_code = $response->getStatusCode();
                 if ($status_code != 200) {
+
                     if($i == 4){
                         InitialChargesSubscription::where('user_id', $user_id)->update(['status' => 0]);
                         break;

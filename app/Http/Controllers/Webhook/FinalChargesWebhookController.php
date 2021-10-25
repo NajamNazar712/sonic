@@ -35,7 +35,7 @@ class FinalChargesWebhookController extends Controller
             $data['weight_charges'] = $shipment->weight_charges;
             $data['cash_handling_charges'] = $shipment->cash_handling_charges;
             $data['insurance_charges'] = $shipment->insurance_charges;
-            $data['fuel_surcharges'] = $shipment->fuel_surcharges;
+            $data['fuel_surcharges'] = $shipment->fuel_surcharge;
             $data['packaging_charges'] = $shipment->packaging_material_charges;
             $data['return_charges'] = $shipment->return_charges;
             $data['replacement_charges'] = $shipment->replacement_charges;
@@ -43,7 +43,7 @@ class FinalChargesWebhookController extends Controller
             $data['intercept_charges'] = $shipment->intercept_charges;
             $data['nsa_charges'] = $shipment->nsa_osa_charges;
             $data['gst'] = $shipment->gst;
-            $total_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharges + $shipment->packaging_material_charges + $shipment->return_charges + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges;
+            $total_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->packaging_material_charges + $shipment->return_charges + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges;
             $data['total_charges'] = $total_charges;
             $data['net_payable'] = $shipment->amount - $total_charges - $shipment->gst;
             dispatch(new ProcessFinalChargesWebhook($data));
@@ -62,22 +62,22 @@ class FinalChargesWebhookController extends Controller
                         'tracking_number' => $data['tracking_number'],
                         'origin' => $data['origin'],
                         'destination' => $data['destination'],
-                        'cod_amount' => $data['cod_amount'],
-                        'actual_weight' => $data['actual_weight'],
-                        'chargeable_weight' => $data['chargeable_weight'],
-                        'weight_charges' => $data['weight_charges'],
-                        'cash_handling_charges' => $data['cash_handling_charges'],
-                        'insurance_charges' => $data['insurance_charges'],
-                        'fuel_surcharges' => $data['fuel_surcharges'],
-                        'packaging_charges' => $data['packaging_charges'],
-                        'return_charges' => $data['return_charges'],
-                        'replacement_charges' => $data['replacement_charges'],
-                        'try_buy_charges' => $data['try_buy_charges'],
-                        'intercept_charges' => $data['intercept_charges'],
-                        'nsa_charges' => $data['nsa_charges'],
-                        'gst' => $data['gst'],
-                        'total_charges' => $data['total_charges'],
-                        'net_payable' => $data['net_payable'],
+                        'cod_amount' => $data['cod_amount'] ?? 0,
+                        'actual_weight' => $data['actual_weight'] ?? 0,
+                        'chargeable_weight' => $data['chargeable_weight'] ?? 0,
+                        'weight_charges' => $data['weight_charges'] ?? 0,
+                        'cash_handling_charges' => $data['cash_handling_charges'] ?? 0,
+                        'insurance_charges' => $data['insurance_charges'] ?? 0,
+                        'fuel_surcharges' => $data['fuel_surcharges'] ?? 0,
+                        'packaging_charges' => $data['packaging_charges'] ?? 0,
+                        'return_charges' => $data['return_charges'] ?? 0,
+                        'replacement_charges' => $data['replacement_charges'] ?? 0,
+                        'try_buy_charges' => $data['try_buy_charges'] ?? 0,
+                        'intercept_charges' => $data['intercept_charges'] ?? 0,
+                        'nsa_charges' => $data['nsa_charges'] ?? 0,
+                        'gst' => $data['gst'] ?? 0,
+                        'total_charges' => $data['total_charges'] ?? 0,
+                        'net_payable' => $data['net_payable'] ?? 0,
                     ]
                 ]);
                 $status_code = $response->getStatusCode();
