@@ -23,6 +23,9 @@ use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
+use App\Http\Models\InterceptReBookRequest;
+use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Models\MisroutedHistory;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPiece;
@@ -681,8 +684,27 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if((($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30) && $shipment->consignee_city->hub_id == Auth::user()->default_hub_id) || (($shipment->shipper_status_id != 35 && $shipment->shipper_status_id != 37 && $shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30) && $shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id) || ($shipment->shipper_status_id == 55))
+
+            if($shipment->shipper_status_id == 55){
+               $intercept_rebook_history = InterceptReBookRequestHistory::where('shipment_id',$shipment->id)->latest()->first();
+               if($intercept_rebook_history){
+                   $intercept_re_book_history_hub = $intercept_rebook_history->old_consignee_city->hub_id;
+               }
+            }
+
+            if($shipment->shipper_status_id == 49){
+                $misrouted_history = MisroutedHistory::where('shipment_id',$shipment->id)->latest()->first();
+                if($misrouted_history){
+                    $city = City::where('id',$misrouted_history->old_consignee_city_id)->first();
+                    $misrouted_history_hub = $city->hub_id;
+                }
+            }
+
+
+            if((($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30) && $shipment->consignee_city->hub_id == Auth::user()->default_hub_id) || (($shipment->shipper_status_id != 35 && $shipment->shipper_status_id != 37 && $shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30 && $shipment->shipper_status_id != 55 && $shipment->shipper_status_id != 49) && $shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id) || ($shipment->shipper_status_id == 55 && $intercept_re_book_history_hub == Auth::user()->default_hub_id) || ($shipment->shipper_status_id == 49 &&  $misrouted_history_hub == Auth::user()->default_hub_id))
             {
+
+
                 $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
                 if ($on_hold_shipment->exists()) {
                     if (!in_array(Auth::id(), [10, 288, 423])) {
@@ -2583,21 +2605,31 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if ($shipment->shipper_status_id != 3 && $shipment->shipper_status_id != 21) {
+            if ($shipment->shipper_status_id != 3 && $shipment->shipper_status_id != 21 &&  $shipment->shipper_status_id != 26 && $shipment->shipper_status_id != 32) {
                 return ['status' => 1, 'error' => 'Given Tracking Number has already been modified!'];
             }
             $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment->id);
+           
             if ($bag_shipment->exists()) {
                 $bag_shipment = $bag_shipment->where('status', 0);
 
                 if ($bag_shipment->exists()) {
                     $bag_shipment = $bag_shipment->latest()->first();
                     $bag = $bag_shipment->bag;
-                    if(session('role_id') != 1){
-                            if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
-                                return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
-                            }
+                    if($bag){
+                        $cargo_manifest_bag = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first();
+                        if(!$cargo_manifest_bag){
+                            return ['status' => 1, 'error' => 'No Bag exists for the following shipment'];
                         }
+                    }
+
+                      /*  if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
+                            return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
+                        }*/
+                        if($bag->destination_hub->hub_id != Auth::user()->default_hub_id){
+                            return ['status' => 1, 'error' => 'Default hub is different'];
+                        }
+
                         if(!$request->has('pieces_confirm')){
                             if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                                 $details = array();
