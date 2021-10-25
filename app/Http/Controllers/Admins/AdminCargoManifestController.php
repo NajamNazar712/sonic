@@ -2605,21 +2605,31 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if ($shipment->shipper_status_id != 3 && $shipment->shipper_status_id != 21) {
+            if ($shipment->shipper_status_id != 3 && $shipment->shipper_status_id != 21 &&  $shipment->shipper_status_id != 26 && $shipment->shipper_status_id != 32) {
                 return ['status' => 1, 'error' => 'Given Tracking Number has already been modified!'];
             }
             $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment->id);
+           
             if ($bag_shipment->exists()) {
                 $bag_shipment = $bag_shipment->where('status', 0);
 
                 if ($bag_shipment->exists()) {
                     $bag_shipment = $bag_shipment->latest()->first();
                     $bag = $bag_shipment->bag;
-                    if(session('role_id') != 1){
-                            if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
-                                return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
-                            }
+                    if($bag){
+                        $cargo_manifest_bag = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first();
+                        if(!$cargo_manifest_bag){
+                            return ['status' => 1, 'error' => 'No Bag exists for the following shipment'];
                         }
+                    }
+
+                      /*  if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
+                            return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
+                        }*/
+                        if($bag->destination_hub->hub_id != Auth::user()->default_hub_id){
+                            return ['status' => 1, 'error' => 'Default hub is different'];
+                        }
+
                         if(!$request->has('pieces_confirm')){
                             if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                                 $details = array();

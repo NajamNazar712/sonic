@@ -4686,10 +4686,10 @@ class DeliveryController extends Controller
         }
 
         $sdn = StationDepositNote::
-        join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
-            ->leftjoin('station_deposit_note_adjustments as sdna',function($join){
-                $join->on('sdna.sdn_id','station_deposit_notes.id')
-                    ->latest();
+            join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
+            ->leftjoin('station_deposit_note_adjustments as sdna', function($join){
+                $join->on('sdna.sdn_id', '=','station_deposit_notes.id')
+                    ->latest('id');
             })
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
