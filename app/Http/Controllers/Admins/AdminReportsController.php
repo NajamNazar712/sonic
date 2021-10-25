@@ -9585,10 +9585,12 @@ class AdminReportsController extends Controller
 
     public function sales_incentive_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),461);
         return view('admin.reports.sales_incentive');
     }
     public function consolidated_sales_incentive_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),462);
         return view('admin.reports.consolidated_sales_incentive');
     }
 }

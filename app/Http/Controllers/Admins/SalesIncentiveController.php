@@ -22,7 +22,7 @@ class SalesIncentiveController extends Controller
     }
 
     public function territoryindex(){
-        
+        ActivityTrailController::createActivityTrailLog(Auth::id(),458);
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->get();
         return view('admin.sales.incentive.territoryindex')->with(['hubs' => $hubs]);
     }
@@ -31,7 +31,7 @@ class SalesIncentiveController extends Controller
         
         if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),373);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),463);
         }
         $franchise = SalesTerritory::leftjoin('cities as c', 'c.id', '=', 'sales_territories.cityid')
             ->join('admins as a', 'a.id', '=', 'sales_territories.created_by')
@@ -135,7 +135,7 @@ class SalesIncentiveController extends Controller
         return $territory->id;
     }
     public function designationindex(){
-        
+        ActivityTrailController::createActivityTrailLog(Auth::id(),459);
         $roles = AdminRole::where('department_id', '=', 7)->get();
         return view('admin.sales.incentive.designationindex')->with(['roles' => $roles]);
     }
@@ -143,7 +143,7 @@ class SalesIncentiveController extends Controller
         
         if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),373);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),464);
         }
         $franchise = SalesDesignation::join('admins as a', 'a.id', '=', 'sales_designations.created_by')
             ->join('admins as b', 'b.id', '=', 'sales_designations.updated_by')
