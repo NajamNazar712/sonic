@@ -915,6 +915,7 @@ class AdminTrackingController extends Controller
                         $details['order_information']['instructions'] = $shipment->special_instructions;
                         $details['order_information']['pieces'] = $shipment->pieces;
                         $details['order_information']['business_category'] = $shipment->business_category->name;
+                        $manifest_bag_seal_number = 0;
                         foreach ($shipment->shipment_journey as $journey) {
                             $journey_details = array();
 
@@ -947,7 +948,8 @@ class AdminTrackingController extends Controller
                                         }
                                     }
                                     else if($cargo_bag_shipment->exists()){
-                                        $bag_shipment = $cargo_bag_shipment->first();
+                                        $bag_shipment = $cargo_bag_shipment->orderBy('id','desc')->skip($manifest_bag_seal_number)->take(1)->first();
+                                        $manifest_bag_seal_number++;
                                         $bag = CargoManifestBag::find($bag_shipment->cargo_manifest_bag_id);
                                         $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
                                         if($cargo_manifest->exists()){

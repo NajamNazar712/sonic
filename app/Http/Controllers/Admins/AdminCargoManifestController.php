@@ -23,6 +23,9 @@ use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
+use App\Http\Models\InterceptReBookRequest;
+use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Models\MisroutedHistory;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPiece;
@@ -681,8 +684,27 @@ class AdminCargoManifestController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if((($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30) && $shipment->consignee_city_id == Auth::user()->default_hub_id) || (($shipment->shipper_status_id != 35 && $shipment->shipper_status_id != 37 && $shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30) && $shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id))
+
+            if($shipment->shipper_status_id == 55){
+               $intercept_rebook_history = InterceptReBookRequestHistory::where('shipment_id',$shipment->id)->latest()->first();
+               if($intercept_rebook_history){
+                   $intercept_re_book_history_hub = $intercept_rebook_history->old_consignee_city->hub_id;
+               }
+            }
+
+            if($shipment->shipper_status_id == 49){
+                $misrouted_history = MisroutedHistory::where('shipment_id',$shipment->id)->latest()->first();
+                if($misrouted_history){
+                    $city = City::where('id',$misrouted_history->old_consignee_city_id)->first();
+                    $misrouted_history_hub = $city->hub_id;
+                }
+            }
+
+
+            if((($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30) && $shipment->consignee_city->hub_id == Auth::user()->default_hub_id) || (($shipment->shipper_status_id != 35 && $shipment->shipper_status_id != 37 && $shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30 && $shipment->shipper_status_id != 55 && $shipment->shipper_status_id != 49) && $shipment->pickup_address->city->hub_id == Auth::user()->default_hub_id) || ($shipment->shipper_status_id == 55 && $intercept_re_book_history_hub == Auth::user()->default_hub_id) || ($shipment->shipper_status_id == 49 &&  $misrouted_history_hub == Auth::user()->default_hub_id))
             {
+
+
                 $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
                 if ($on_hold_shipment->exists()) {
                     if (!in_array(Auth::id(), [10, 288, 423])) {
@@ -1653,12 +1675,11 @@ class AdminCargoManifestController extends Controller
         $manifest_ids = explode(',',$cargo_manifest_ids);
         
         foreach($manifest_ids as $id) {
-
-
             $cargo = CargoManifest::find($id);
-            $sender = $cargo->sender;
-            $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
-            $html .= '</head>
+            if($cargo){
+                $sender = $cargo->sender;
+                $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
+                $html .= '</head>
                   <body>
                     <div>
                       <div class="cargo_slip">
@@ -1692,13 +1713,13 @@ class AdminCargoManifestController extends Controller
                           
                          
                               ';
-            /*  if($master_cargo->onward_forwarding == 1){
-                  $html .= '<td class="color secondary"><strong>Onward Forwarding Cargo No.</strong></td>';
-              }
-              else{
-                  $html .= '<td class="color secondary"><strong>Master Cargo No.</strong></td>';
-              }*/
-            $html .= '
+                /*  if($master_cargo->onward_forwarding == 1){
+                      $html .= '<td class="color secondary"><strong>Onward Forwarding Cargo No.</strong></td>';
+                  }
+                  else{
+                      $html .= '<td class="color secondary"><strong>Master Cargo No.</strong></td>';
+                  }*/
+                $html .= '
                             
                             <tr>
                               <td class="color secondary"><strong>No. of Bags</strong></td>
@@ -1806,13 +1827,13 @@ class AdminCargoManifestController extends Controller
                               <td class="color primary"><strong>Actual Weight</strong></td>
       ';
 
-            $serial_number = 1;
+                $serial_number = 1;
 
-            foreach ($cargo->manifest_bags as $manifest_cargo_bag) {
-                $bag = $manifest_cargo_bag->bag;
+                foreach ($cargo->manifest_bags as $manifest_cargo_bag) {
+                    $bag = $manifest_cargo_bag->bag;
 
 
-                $html .= '
+                    $html .= '
                             <tr>
                               <td>' . $serial_number . '</td>
                               <td>' . $bag->seal_number . '</td>
@@ -1824,25 +1845,26 @@ class AdminCargoManifestController extends Controller
                             </tr>
         ';
 
-                $serial_number++;
-            }
+                    $serial_number++;
+                }
 
-            $html .= '
+                $html .= '
                           </tbody>
                         </table>
                         <hr>';
 
-            if ($type == 1) {
+                if ($type == 1) {
 
-                $html .= '
+                    $html .= '
                         
                       </div>
                     </div>
                   </body>
                 </html>
       ';
-                $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
-                return $pdf;
+                    $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest_' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+                    return $pdf;
+                }
             }
         }
 
