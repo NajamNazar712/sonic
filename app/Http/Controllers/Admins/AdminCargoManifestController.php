@@ -2622,14 +2622,14 @@ class AdminCargoManifestController extends Controller
                             return ['status' => 1, 'error' => 'No Bag exists for the following shipment'];
                         }
                     }
-                    if(session('role_id') != 1){
+
                       /*  if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
                             return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
                         }*/
                         if($bag->destination_hub->hub_id != Auth::user()->default_hub_id){
                             return ['status' => 1, 'error' => 'Default hub is different'];
                         }
-                    }
+
                         if(!$request->has('pieces_confirm')){
                             if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                                 $details = array();
