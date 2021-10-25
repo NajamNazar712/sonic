@@ -9852,16 +9852,15 @@ class RiderAPIController extends Controller
 
     public function leave_apply(Request $request)
     {
-
         $rules = [
             'from' => ['required'],
             'to' => ['nullable'],
-            'reason' => ['required', 'string'],
+            'reason' => ['required', 'max:500'],
+            'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
         ];
 
         $rider_id = $request->rider_id;
         $validate = Validator::make($request->all(), $rules, $this->messages);
-
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
@@ -9870,36 +9869,55 @@ class RiderAPIController extends Controller
             $rider = Rider::find($rider_id);
             $department = AdminDepartment::find(6);
             if($department){
-                if($rider){
-                    $leave = EmployeeLeave::where('employee_id', $rider_id)->where('employee_type_id', 2)->whereIn('status', [1,2]);
+                if ($rider) {
+                    if($request->has('leave_id')){
+                        $leave = EmployeeLeave::where('employee_id', $rider_id)->where('employee_type_id', 2)->whereIn('status', [1, 2])->where('id', '<>', $request->leave_id);
+                    }else{
+                        $leave = EmployeeLeave::where('employee_id', $rider_id)->where('employee_type_id', 2)->whereIn('status', [1, 2]);
+                    }
                     if ($leave->exists()) {
                         return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
                     } else {
-                        $leave_request = new EmployeeLeave();
-                        $leave_request->employee_id = $rider_id;
-                        $leave_request->employee_type_id = 2;
+                        if ($request->has('leave_id')){
+                            $leave_request = EmployeeLeave::where('id', $request->leave_id);
+                            if($leave_request->exists()){
+                                $leave_request = $leave_request->first();
+                                $message = "Leave Request edited successfully";
+                            }else{
+                                return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
+                            }
+                        }else{
+                            $leave_request = new EmployeeLeave();
+                            $leave_request->employee_id = $rider_id;
+                            $leave_request->employee_type_id = 2;
+                            $leave_request->reporter_id = $department->department_head_id;
+                            $message = "Leave Request submitted successfully";
+                        }
+
                         $leave_request->from = $request->from;
                         $leave_request->to = $request->to;
                         $leave_request->applied_reason = $request->reason;
-                        $leave_request->reporter_id = $department->department_head_id;
-                        return response()->json(['status' => 0, 'apply_message' => 'Request for leave submitted successfully']);
+                        $leave_request->save();
+                        return response()->json(['status' => 0, 'apply_message' => $message]);
                     }
-                }else{
+                } else {
                     return response()->json(['status' => 1, 'message' => 'User Not Found']);
                 }
-            }else{
+            }else {
                 return response()->json(['status' => 1, 'message' => 'Department Not Found']);
             }
         }
+
     }
 
-    public function employee_leave_list(Request $request){
+    public function employee_leave_list(Request $request)
+    {
         $rider_id = $request->rider_id;
         $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
             ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
             ->where('employee_id', $rider_id)
             ->where('employee_type_id', 2);
-        if($employee_leaves->exists()){
+        if ($employee_leaves->exists()) {
             $employee_leaves = $employee_leaves->get();
             return response()->json(['status' => 0, 'response' => $employee_leaves]);
         }

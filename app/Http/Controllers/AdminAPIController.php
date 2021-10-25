@@ -4002,7 +4002,12 @@ class AdminAPIController extends Controller
                         $leave_request = new EmployeeLeave();
                         $leave_request->employee_id = $admin_id;
                         $leave_request->employee_type_id = 1;
-                        $leave_request->reporter_id = $admin->role->department->department_head_id;
+                        if (in_array($admin->role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])){
+                            $reporter_id = 8;
+                        }else{
+                            $reporter_id = $admin->role->department->department_head_id;
+                        }
+                        $leave_request->reporter_id = $reporter_id;
                         $message = "Leave Request submitted successfully";
                     }
 
