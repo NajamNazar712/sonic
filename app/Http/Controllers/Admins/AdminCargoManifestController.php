@@ -18,6 +18,7 @@ use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Fleet;
+use App\Http\Models\Admin\MasterCargo\BagShipment;
 use App\Http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
@@ -2349,7 +2350,7 @@ class AdminCargoManifestController extends Controller
                             $short_received_bag->update();
                             CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
                             $bag_short_received_count++;
-                            array_push($bag_short_received, $short_received_bag->seal_number);
+                            array_push($bag_short_received, $manifest_bag->cargo_manifest_bag_id);
                             array_push($cargo_short_received, $short_received_bag->id);
                         }
                         else{
@@ -2404,7 +2405,7 @@ class AdminCargoManifestController extends Controller
                             $short_received_bag->update();
                             CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
                             $bag_short_received_count++;
-                            array_push($bag_short_received, $short_received_bag->seal_number);
+                            array_push($bag_short_received, $manifest_bag->cargo_manifest_bag_id);
                             array_push($cargo_short_received, $short_received_bag->id);
                         }
                         else{
@@ -2470,9 +2471,10 @@ class AdminCargoManifestController extends Controller
         if(count($bag_short_received) > 0)
         {
             $bag_short_received_error = "Following Bag(s) are short received.<br><ul>";
-            foreach ($bag_short_received as $v)
+            foreach ($bag_short_received as $bag_id)
             {
-                $bag_short_received_error .= "<li>".$v."</li>";
+                $bag = CargoManifestBag::find($bag_id);
+                $bag_short_received_error .= "<li>". $bag->seal_number."</li>";
             }
             $bag_short_received_error .= "</ul>";
         }
@@ -2699,6 +2701,9 @@ class AdminCargoManifestController extends Controller
     {
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $bag_ids = array();
+        $shipment_ids_array = array();
+        $short_received_shipments_array = array();
+
         foreach ($shipment_ids as $shipment_id) {
             $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)->where('status', 0);
 
@@ -2711,6 +2716,8 @@ class AdminCargoManifestController extends Controller
 
                 $shipment = Shipment::find($shipment_id);
                 $bag = $bag_shipment->bag;
+
+                array_push($shipment_ids_array,$shipment->tracking_number);
 
                 $shipper_status_id = NULL;
                 $consignee_status_id = NULL;
@@ -2768,7 +2775,8 @@ class AdminCargoManifestController extends Controller
             }
         }
 
-        $all_bag_ids = '';
+
+
         foreach ($bag_ids as $bag_id){
             $bag = CargoManifestBag::find($bag_id);
             $bag->received_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id', $bag_id)->where('status', 1)->count();
@@ -2800,12 +2808,12 @@ class AdminCargoManifestController extends Controller
             }
 
 //        end dispute short received
-            if($all_bag_ids == ''){
+           /* if($all_bag_ids == ''){
                 $all_bag_ids = $all_bag_ids . $bag->seal_number;
             }
             else{
                 $all_bag_ids = $all_bag_ids . ', ' .$bag->seal_number;
-            }
+            }*/
         }
 
         foreach ($bag_ids as $bag_id)
@@ -2826,8 +2834,50 @@ class AdminCargoManifestController extends Controller
             }
 
             $manifest->update();
+
+
         }
-        return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
+
+        $bag_shipments = CargoManifestBagShipments::whereIn('cargo_manifest_bag_id',$bag_ids)->where('status',0);
+        if($bag_shipments->exists()){
+            $shipment_ids = $bag_shipments->pluck('shipment_id')->toArray();
+            foreach ($shipment_ids as $shipment_id){
+               $shipment = Shipment::find($shipment_id);
+               if(!in_array($shipment->tracking_number,$short_received_shipments_array)){
+                   array_push($short_received_shipments_array,$shipment->tracking_number);
+               }
+            }
+
+        }
+
+        $received_html = '';
+        $sr_html = '';
+      
+        if(count($short_received_shipments_array) > 0)
+        {
+            $sr_html = "Following Shipments(s) are marked as short received.<br><ul>";
+            foreach ($short_received_shipments_array as $v)
+            {
+                $sr_html .= "<li>".$v."</li>";
+            }
+            $sr_html .= "</ul>";
+        }
+
+        if(count($shipment_ids_array) > 0)
+        {
+            $received_html = "Following Shipments(s) are marked as received.<br><ul>";
+            foreach ($shipment_ids_array as $v)
+            {
+                $received_html .= "<li>".$v."</li>";
+            }
+            $received_html .= "</ul>";
+        }
+        
+
+        //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
+        return back()->with(['sr_html'=> $sr_html,'received_html'=>$received_html]);
+
+
     }
     public function manifest_bags(Request $request){
         $cargo = CargoManifest::find($request->manifest_id);
