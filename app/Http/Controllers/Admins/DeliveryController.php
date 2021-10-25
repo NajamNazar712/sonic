@@ -4690,7 +4690,7 @@ class DeliveryController extends Controller
             ->leftjoin('station_deposit_note_adjustments as sdna',function($join){
                 $join->on('sdna.sdn_id', '=','station_deposit_notes.id')
                     ->where('sdna.id', '=',
-                        DB::raw('(select max(id) from station_deposit_note_adjustments where station_deposit_note_adjustments.sdn_id = station_deposit_notes.id.id)'));
+                        DB::raw('(select max(id) from station_deposit_note_adjustments where station_deposit_note_adjustments.sdn_id = station_deposit_notes.id)'));
             })
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
