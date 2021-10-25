@@ -44,6 +44,7 @@ use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
+use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
@@ -4046,11 +4047,11 @@ class AdminAPIController extends Controller
             $admin_role = $admin->role_id;
             if ($admin_role == 63) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
-                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status')
+                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id')
                     ->where('employee_leaves.status', 2);
             } elseif (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
-                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status')
+                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id')
                     ->where('employee_leaves.status', 1)
                     ->where('employee_leaves.reporter_id', $admin_id);
             } else {
@@ -4058,6 +4059,31 @@ class AdminAPIController extends Controller
             }
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->get();
+                $data = array();
+                foreach ($employee_leaves as $employee_leave) {
+                    $datum = array();
+                    $datum['id'] = $employee_leave->id;
+                    $datum['from'] = $employee_leave->from;
+                    $datum['to'] = $employee_leave->to;
+                    $datum['applied_reason'] = $employee_leave->applied_reason;
+                    $datum['status_id'] = $employee_leave->status_id;
+                    $datum['status'] = $employee_leave->status;
+                    if ($employee_leave->type_id == 1) {
+                        $admin = Admin::find($employee_leave->employee_id);
+                        if ($admin) {
+                            $datum['name'] = $admin->name;
+                            $datum['trax_id'] = $admin->trax_id;
+                            $data[] = $datum;
+                        }
+                    } elseif ($employee_leave->type_id == 2) {
+                        $rider = Rider::find($employee_leave->employee_id);
+                        if ($rider) {
+                            $datum['name'] = $rider->name;
+                            $datum['trax_id'] = $rider->trax_id;
+                            $data[] = $datum;
+                        }
+                    }
+                }
                 return response()->json(['status' => 0, 'response' => $employee_leaves]);
             }
             return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
