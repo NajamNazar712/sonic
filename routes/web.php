@@ -2667,6 +2667,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::prefix('incentive')->name('incentive.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@sales_incentive')->name('index');
+            Route::post('add', 'Admins\GlobalSettingsController@sales_incentive_add')->name('add');
             });
             Route::prefix('targets')->name('targets.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@sales_person_targets')->name('index');
