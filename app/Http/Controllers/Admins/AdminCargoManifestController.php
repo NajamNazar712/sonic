@@ -2862,7 +2862,7 @@ class AdminCargoManifestController extends Controller
 
         if(count($shipment_ids_array) > 0)
         {
-            $received_html = "Following Shipments(s) are marked as received.<br><ul>";
+            $received_html = "Shipment has been Added ! .<br><ul>";
             foreach ($shipment_ids_array as $v)
             {
                 $received_html .= "<li>".$v."</li>";
