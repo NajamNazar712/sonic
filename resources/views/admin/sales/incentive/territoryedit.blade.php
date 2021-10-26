@@ -18,6 +18,20 @@
     <div class="form-group">
         <input type="text" name="edit_code" id="edit_code" class="form-control" value="{{$territory->code}}" placeholder="Territory Code*" data-rule-required="true" data-msg-required="Territory Code is required">
     </div>
+
+    @if(count($designations) > 0)
+        @foreach($designations as $designation)
+            <div class="form-group">
+                <select name="designations[{{$designation->id}}][]" id="designation_{{$designation->id}}" class="form-control select2" multiple="multiple">
+                    @foreach($admins as $admin)
+                        @if($admin->role_id == $designation->designation)
+                            <option value="{{$admin->id}}"> {{$admin->name}} </option>
+                        @endif
+                    @endforeach
+                </select>
+            </div>
+        @endforeach
+    @endif
     <div class="form-group ml-1">
         <button type="submit" name="update" class="btn btn-primary add" value="Update">Update</button>
     </div>
@@ -30,6 +44,25 @@
             allowClear:false,
             dropdownParent:$('#edit_territory_form')
         });
+
+        @if(count($designations) > 0)
+            @foreach($designations as $designation)
+                var designation_id = @json($designation->id);
+                var designation_code = @json($designation->code);
+                $('#edit_territory_form #designation_' + designation_id).select2({
+                    width: '100%',
+                    placeholder: 'Select ' + designation_code,
+                    allowClear:false,
+                    dropdownParent:$('#edit_territory_form')
+                });
+            @endforeach
+            @foreach($territory_admins as $territory_admin)
+                var designation_id = @json($territory_admin->designation_id);
+                var admin_id = @json($territory_admin->admin_id);
+
+                $('#edit_territory_form #designation_' + designation_id).val(admin_id).trigger('change');
+            @endforeach
+        @endif
 
         $('#edit_territory_form').validate({
             ignore: ":not(:visible),:disabled",

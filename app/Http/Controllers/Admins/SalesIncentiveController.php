@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\SalesTerritoryAdmin;
 use Illuminate\Http\Request;
 use App\Http\Models\Admin\SalesTerritory;
 use App\Http\Models\Admin\SalesDesignation;
@@ -23,9 +24,10 @@ class SalesIncentiveController extends Controller
     }
 
     public function territoryindex(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),458);
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->get();
         $designations = SalesDesignation::where('status', 1)->get();
-        $admins = Admin::join('admin_roles as ad', 'ad.id', '=', 'admins.role_id')->where('ad.department_id', 7)->select('admins.id', 'admins.name')->get();
+        $admins = Admin::join('admin_roles as ad', 'ad.id', '=', 'admins.role_id')->where('ad.department_id', 7)->select('admins.id', 'admins.name', 'admins.role_id')->get();
         return view('admin.sales.incentive.territoryindex')->with(['hubs' => $hubs, 'designations' => $designations, 'admins' => $admins]);
     }
 
@@ -33,7 +35,7 @@ class SalesIncentiveController extends Controller
         
         if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),373);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),463);
         }
         $franchise = SalesTerritory::leftjoin('cities as c', 'c.id', '=', 'sales_territories.cityid')
             ->join('admins as a', 'a.id', '=', 'sales_territories.created_by')
@@ -75,8 +77,22 @@ class SalesIncentiveController extends Controller
 
         if (!$territory->exists()) {
 
-            $this->add_territory($request->name,$request->city,$request->code);
-
+            $territory_id = $this->add_territory($request->name,$request->city,$request->code);
+            if($request->has('designations')){
+                if(count($request->designations) > 0){
+                    foreach ($request->designations as $designation_id => $admin_ids){
+                        if(count($admin_ids) > 0){
+                            foreach ($admin_ids as $admin_id){
+                                $territory_admins = new SalesTerritoryAdmin();
+                                $territory_admins->territory_id = $territory_id;
+                                $territory_admins->designation_id = $designation_id;
+                                $territory_admins->admin_id = $admin_id;
+                                $territory_admins->save();
+                            }
+                        }
+                    }
+                }
+            }
             return redirect()->back()->with('success', 'Territory Added Successfully!');
         } else {
             return redirect()->back()->with('success', 'Territory already exists!');
@@ -86,7 +102,10 @@ class SalesIncentiveController extends Controller
     {
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->get();
         $territory = SalesTerritory::find($id);
-        return view('admin.sales.incentive.territoryedit')->with(['territory' => $territory,'hubs'=>$hubs]);
+        $territory_admins = SalesTerritoryAdmin::where('territory_id', $territory->id)->get();
+        $designations = SalesDesignation::where('status', 1)->get();
+        $admins = Admin::join('admin_roles as ad', 'ad.id', '=', 'admins.role_id')->where('ad.department_id', 7)->select('admins.id', 'admins.name', 'admins.role_id')->get();
+        return view('admin.sales.incentive.territoryedit')->with(['territory' => $territory, 'territory_admins' => $territory_admins, 'hubs'=>$hubs, 'designations'=>$designations, 'admins'=>$admins]);
     }
     public function territory_update(Request $request, $id)
     {
@@ -137,7 +156,7 @@ class SalesIncentiveController extends Controller
         return $territory->id;
     }
     public function designationindex(){
-        
+        ActivityTrailController::createActivityTrailLog(Auth::id(),459);
         $roles = AdminRole::where('department_id', '=', 7)->get();
         return view('admin.sales.incentive.designationindex')->with(['roles' => $roles]);
     }
@@ -145,7 +164,7 @@ class SalesIncentiveController extends Controller
         
         if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),373);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),464);
         }
         $franchise = SalesDesignation::join('admins as a', 'a.id', '=', 'sales_designations.created_by')
             ->join('admins as b', 'b.id', '=', 'sales_designations.updated_by')

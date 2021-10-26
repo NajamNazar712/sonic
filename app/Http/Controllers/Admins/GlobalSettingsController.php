@@ -4802,7 +4802,7 @@ class GlobalSettingsController extends Controller
     }
     public function sales_incentive()
     {
-        $status='1';
-        return view('admin.settings.sales.incentive')->with(['status' => $status]);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),460);
+        return view('admin.settings.sales.incentive');
     }
 }

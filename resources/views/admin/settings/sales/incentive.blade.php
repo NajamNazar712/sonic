@@ -20,44 +20,44 @@
                                 {{ csrf_field() }}
                                 <div class="row justify-content-center">
                                     <div class="col-3 form-group">
-                                        <label><strong>Class A</strong></label>
+                                        <label><strong>BDM</strong></label>
                                         <div class="input-group">
-                                            <input type="text" name="classA" class="form-control decimal" placeholder="Class A*" value="100000">
+                                            <input type="text" name="BDM" class="form-control decimal" placeholder="BDM*" value="100000">
                                             <div class="input-group-append">
-                                                <span class="input-group-text">Rs</span>
+                                                <span class="input-group-text">%</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row justify-content-center">
                                     <div class="col-3 form-group">
-                                        <label><strong>Class B</strong></label>
+                                        <label><strong>TM</strong></label>
                                         <div class="input-group">
-                                            <input type="text" name="classB" class="form-control decimal" placeholder="Class B*" value="100000">
+                                            <input type="text" name="TM" class="form-control decimal" placeholder="TM*" value="100000">
                                             <div class="input-group-append">
-                                                <span class="input-group-text">Rs</span>
+                                                <span class="input-group-text">%</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row justify-content-center">
                                     <div class="col-3 form-group">
-                                        <label><strong>Class C</strong></label>
+                                        <label><strong>AM</strong></label>
                                         <div class="input-group">
-                                            <input type="text" name="classC" class="form-control decimal" placeholder="Class C*" value="100000">
+                                            <input type="text" name="ZM" class="form-control decimal" placeholder="AM*" value="100000">
                                             <div class="input-group-append">
-                                                <span class="input-group-text">Rs</span>
+                                                <span class="input-group-text">%</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row justify-content-center">
                                     <div class="col-3 form-group">
-                                        <label><strong>Class D</strong></label>
+                                        <label><strong>ZM</strong></label>
                                         <div class="input-group">
-                                            <input type="text" name="classD" class="form-control decimal" placeholder="Class D*" value="3000">
+                                            <input type="text" name="ZM" class="form-control decimal" placeholder="ZM*" value="3000">
                                             <div class="input-group-append">
-                                                <span class="input-group-text">Rs</span>
+                                                <span class="input-group-text">%</span>
                                             </div>
                                         </div>
                                     </div>

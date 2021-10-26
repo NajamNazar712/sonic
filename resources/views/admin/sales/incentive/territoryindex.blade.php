@@ -62,9 +62,11 @@
                         @if(count($designations) > 0)
                             @foreach($designations as $designation)
                                 <div class="form-group">
-                                    <select name="designation_{{$designation->id}}" id="designation_{{$designation->id}}" class="form-control select2">
+                                    <select name="designations[{{$designation->id}}][]" id="designation_{{$designation->id}}" class="form-control select2" multiple="multiple">
                                         @foreach($admins as $admin)
-                                            <option value="{{$admin->id}}"> {{$admin->name}} </option>
+                                            @if($admin->role_id == $designation->designation)
+                                                <option value="{{$admin->id}}"> {{$admin->name}} </option>
+                                            @endif
                                         @endforeach
                                     </select>
                                 </div>
@@ -123,6 +125,20 @@
                 allowClear:false,
                 dropdownParent:$('#add_territory_form')
             });
+
+            @if(count($designations) > 0)
+                @foreach($designations as $designation)
+                    var designation_id = @json($designation->id);
+                    var designation_code = @json($designation->code);
+                    $('#add_territory_form #designation_' + designation_id).select2({
+                        width: '100%',
+                        placeholder: 'Select ' + designation_code,
+                        allowClear:false,
+                        dropdownParent:$('#add_territory_form')
+                    });
+                @endforeach
+            @endif
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
