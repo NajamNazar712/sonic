@@ -14,7 +14,7 @@ class UpdateUsersForSegmentSubCategory extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->integer('sub_segment_id')->nullable();
+            $table->integer('sub_segment_id')->nullable()->index();
         });
     }
 
