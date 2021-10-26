@@ -1071,11 +1071,12 @@ class AdminCargoManifestController extends Controller
                 unset($shipment_ids[$key]);
             }
         }
+
         $bag_numbers = '';
         if (!empty($shipment_ids)) {
             foreach ($shipment_ids as $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
-                if($shipment->shipper_status_id == 2){
+                if(in_array($shipment->shipper_status_id, [2, 30, 37, 49, 55])){
                     $bag_type = 1;
                     $destination = $shipment->consignee_city->hub_id;
                 }
@@ -1089,7 +1090,6 @@ class AdminCargoManifestController extends Controller
                 $bag->origin_hub_id = Auth::user()->default_hub_id;
                 $bag->destination_hub_id = $destination;
                 $bag->shipments = 1;
-                //$bag->quantity = $quantity;
                 $bag->quantity = count($shipment->items);
                 $bag->shipments_weight = $shipment->actual_weight;
                 $bag->actual_weight = $shipment->actual_weight;
