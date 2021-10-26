@@ -42,10 +42,12 @@ class FinalChargesWebhookController extends Controller
             $data['try_buy_charges'] = $shipment->try_and_buy_charges;
             $data['intercept_charges'] = $shipment->intercept_charges;
             $data['nsa_charges'] = $shipment->nsa_osa_charges;
-            $data['gst'] = $shipment->gst;
             $total_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->packaging_material_charges + $shipment->return_charges + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges;
+            $gst = 0;
+            $gst = (($total_charges * $shipment->pickup_address->city->zone->gst)) ?? 0;
+            $data['gst'] = $gst;
             $data['total_charges'] = $total_charges;
-            $data['net_payable'] = $shipment->amount - $total_charges - $shipment->gst;
+            $data['net_payable'] = $shipment->amount - $total_charges - $gst;
             dispatch(new ProcessFinalChargesWebhook($data));
 
         }

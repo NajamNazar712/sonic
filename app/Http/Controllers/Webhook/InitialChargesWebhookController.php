@@ -36,10 +36,12 @@ class InitialChargesWebhookController extends Controller
             $data['cash_handling_charges'] = $shipment->cash_handling_charges;
             $data['insurance_charges'] = $shipment->insurance_charges;
             $data['fuel_surcharges'] = $shipment->fuel_surcharge;
-            $data['gst'] = $shipment->gst;
             $total_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
+            $gst = 0;
+            $gst = (($total_charges * $shipment->pickup_address->city->zone->gst)) ?? 0;
+            $data['gst'] = $gst;
             $data['total_charges'] = $total_charges;
-            $data['net_payable'] = $shipment->amount - $total_charges - $shipment->gst;
+            $data['net_payable'] = $shipment->amount - $total_charges - $gst;
             dispatch(new ProcessInitialChargesWebhook($data));
 
         }
