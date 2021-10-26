@@ -4047,7 +4047,12 @@ class AdminReportsController extends Controller
 //            ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('pcs.hub_id', session('hubs'));
+            $petty = $petty->where(function ($query) {
+                $query->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))
+                    ->orWhereIn('petty_cash_statements.destination_hub_id', session('hubs'))
+                    ->orWhere('petty_cash_statements.created_by', Auth::id())
+                    ->orWhereIn('petty_cash_statements.hub_id', session('hubs'));
+            });
         }
 
         $petty = Datatables::of($petty)
