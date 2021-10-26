@@ -229,6 +229,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                autoWidth: false,
                 language: {
                     processing: data_table_loader
                 },

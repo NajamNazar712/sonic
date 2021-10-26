@@ -179,6 +179,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                autoWidth: false,
                 ajax:{
                     url: '{{ route('admin.sales.designation.list') }}',
                 },

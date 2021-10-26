@@ -101,6 +101,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ReturnSheetReceive',
         'App\Console\Commands\RiderDeactivateAutomatically',
         'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
+        'App\Console\Commands\SaleIncentiveReport',
     ];
 
     /**
@@ -349,6 +350,7 @@ class Kernel extends ConsoleKernel
             $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
         }
 
+        $schedule->command('report:SalesIncentive')->dailyAt('04:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

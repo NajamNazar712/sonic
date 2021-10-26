@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\SalesIncentive;
+use App\Http\Models\Admin\SalesIncentiveShipper;
 use App\Http\Models\Admin\SalesTerritoryAdmin;
+use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Models\Admin\SalesTerritory;
 use App\Http\Models\Admin\SalesDesignation;
@@ -304,4 +307,135 @@ class SalesIncentiveController extends Controller
         return $designation->id;
     }
 
+    static public function sale_incentive_report_calculation(){
+
+        $from = Carbon::today()->subMonth(1)->firstOfYear()->toDateTimeString();
+        $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
+        $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftJoin('pending_payment_shipments as pps', function ($join) {
+                $join->on('pps.shipment_id', '=', 'shipments.id')
+                    ->where('pps.id','=',
+                        DB::connection('reports')->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id and pending_payment_shipments.type != 2)'));
+            })
+            ->leftJoin('done_payment_shipments as dps', function ($join) {
+                $join->on('dps.shipment_id', '=', 'shipments.id')
+                    ->where('dps.id','=',
+                        DB::connection('reports')->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)'));
+            })
+            ->leftJoin('sale_person_tags as spt', function($join){
+                $join->on('spt.user_id', '=', 'u.id')
+                    ->where('spt.id', '=', DB::raw('(select max(id) from sale_person_tags where sale_person_tags.user_id = u.id and sale_person_tags.status = 0)'));
+            })
+            ->select('u.id as account_no','oc.id as origin_id','pps.charges as p_total_charges','dps.charges as d_total_charges', 'spt.admin_id as admin_id')
+            ->whereNotIn('shipments.shipper_status_id',[1,17])
+            ->whereNotIn('u.id', [8761, 9358])
+            ->whereBetween('sj.created_at', [$from,$to])
+            ->get();
+
+        $incentive_data = array();
+        $admin_territories = SalesTerritoryAdmin::join('sales_territories as st', 'st.id', '=', 'sales_territory_admins.territory_id')
+            ->join('sales_designations as sd', 'sd.id', '=', 'sales_territory_admins.designation_id')
+            ->select('st.id as territory_id', 'st.cityid as city_id', 'sales_territory_admins.admin_id as admin_id', 'sd.id as designation_id')
+            ->where('st.status', 1)->get();
+        foreach ($admin_territories as $admin_territory){
+            if(array_key_exists($admin_territory->city_id, $incentive_data)){
+                if(!array_key_exists($admin_territory->admin_id, $incentive_data[$admin_territory->city_id])){
+                    $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['territory_id'] = $admin_territory->territory_id;
+                    $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['designation_id'] = $admin_territory->designation_id;
+                    $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['shipments'] = 0;
+                    $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['revenue'] = 0;
+                    $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['commission'] = 0.01;
+                    $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['total_shippers'] = array();
+                }
+            }
+            else{
+                $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['territory_id'] = $admin_territory->territory_id;
+                $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['designation_id'] = $admin_territory->designation_id;
+                $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['shipments'] = 0;
+                $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['revenue'] = 0;
+                $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['commission'] = 0.01;
+                $incentive_data[$admin_territory->city_id][$admin_territory->admin_id]['total_shippers'] = array();
+            }
+        }
+        foreach ($sales as $index => $sale)
+        {
+            $total = '';
+            if ($sale->p_total_charges != null) {
+                $total = $sale->p_total_charges;
+            } else if ($sale->d_total_charges != null) {
+                $total = $sale->d_total_charges;
+            }
+            if($total != ''){
+                if(array_key_exists($sale->origin_id, $incentive_data)){
+                    if(array_key_exists($sale->admin_id, $incentive_data[$sale->origin_id])) {
+                        if (!in_array($sale->account_no, $incentive_data[$sale->origin_id][$sale->admin_id]['total_shippers'])) {
+                            $incentive_data[$sale->origin_id][$sale->admin_id]['total_shippers'][] = $sale->account_no;
+                        }
+                        $incentive_data[$sale->origin_id][$sale->admin_id]['revenue'] += $total;
+                        $incentive_data[$sale->origin_id][$sale->admin_id]['shipments']++;
+                    }
+                }
+            }
+        }
+        $date = Carbon::yesterday()->format('Y-m-d');
+        foreach ($incentive_data as $city_wise_data){
+            foreach ($city_wise_data as $admin_id => $data){
+                $commission = $data['revenue'] * $data['commission'];
+                $existing_incentive = SalesIncentive::where('territory_id', $data['territory_id'])
+                    ->where('designation_id', $data['designation_id'])
+                    ->where('admin_id', $admin_id)
+                    ->where('from', '<=', $date)
+                    ->where('to', '>=', $date);
+                if($existing_incentive->exists()){
+                    $incentive = $existing_incentive->first();
+                    $incentive_shippers = SalesIncentiveShipper::where('incentive_id', $incentive->id)->pluck('shipper_id')->toArray();
+                    $extra_shippers = array_diff($data['total_shippers'], $incentive_shippers);
+                    if(count($extra_shippers) > 0){
+                        foreach ($extra_shippers as $shipper_id){
+                            $incentive_shipper = new SalesIncentiveShipper();
+                            $incentive_shipper->incentive_id = $incentive->id;
+                            $incentive_shipper->shipper_id = $shipper_id;
+                        }
+                        $incentive_shippers = array_merge($incentive_shippers, $extra_shippers);
+                    }
+                    $total_shipments = $incentive->shipment_count + $data['shipments'];
+                    $revenue = $incentive->revenue + $data['revenue'];
+                    $incentive->shipper_count = count($incentive_shippers);
+                    $incentive->shipment_count = $total_shipments;
+                    $incentive->revenue = $revenue;
+                    $incentive->commission = $commission;
+                    $incentive->save();
+                }
+                else{
+                    $total_shipments = $data['shipments'];
+                    $revenue = $data['revenue'];
+                    $incentive = new SalesIncentive();
+                    $incentive->territory_id = $data['territory_id'];
+                    $incentive->designation_id = $data['designation_id'];
+                    $incentive->admin_id = $admin_id;
+                    $incentive->shipper_count = count($data['total_shippers']);
+                    $incentive->shipment_count = $total_shipments;
+                    $incentive->revenue = $revenue;
+                    $incentive->commission = $commission;
+                    $incentive->from = $from;
+                    $incentive->to = $to;
+                    $incentive->save();
+                    if(count($data['total_shippers']) > 0){
+                        foreach ($data['total_shippers'] as $shipper_id){
+                            $incentive_shipper = new SalesIncentiveShipper();
+                            $incentive_shipper->incentive_id = $incentive->id;
+                            $incentive_shipper->shipper_id = $shipper_id;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
