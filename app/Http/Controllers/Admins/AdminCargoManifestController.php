@@ -2657,7 +2657,7 @@ class AdminCargoManifestController extends Controller
                         $details['amount'] = number_format($shipment->amount);
                         $details['service_type'] = $shipment->booking_type->booking_type;
                         ShipmentScanningJourneyController::add($shipment->id,20,1,Auth::id(),null,null);
-                        return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
+                        return ['status' => 0, 'success' => 'Shipment has been Added!', 'details' => $details];
                 }
                 else {
                     return ['status' => 1, 'error' => 'Given Bag Number\'s has already been Received'];
@@ -2862,7 +2862,7 @@ class AdminCargoManifestController extends Controller
 
         if(count($shipment_ids_array) > 0)
         {
-            $received_html = "Shipment has been Added ! .<br><ul>";
+            $received_html = "Following Shipments(s) are marked as received. .<br><ul>";
             foreach ($shipment_ids_array as $v)
             {
                 $received_html .= "<li>".$v."</li>";
