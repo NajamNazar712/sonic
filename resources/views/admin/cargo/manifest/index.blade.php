@@ -67,7 +67,7 @@
                                     <th class="border-primary border-darken-1">Manifest Created At</th>
                                     <th class="border-primary border-darken-1">Transited Date</th>
                                     <th class="border-primary border-darken-1">Transited By</th>
-                                    <th class="border-primary border-darken-1">Updated By</th>
+                                    <th class="border-primary border-darken-1">Seal Updated By</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -228,7 +228,7 @@
                             head.push('Status');
                             head.push('Manifest Created At');
                             head.push('Transited By');
-                            head.push('Updated By');
+                            head.push('Seal Updated By');
 
 
                             $.each(result.data, function(index, values) {

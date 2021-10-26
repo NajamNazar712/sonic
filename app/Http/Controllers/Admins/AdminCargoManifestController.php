@@ -1067,12 +1067,7 @@ class AdminCargoManifestController extends Controller
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
-            if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
-                $shipments++;
-                $shipments_weight += $shipment->actual_weight;
-                $quantity = $quantity + count($shipment->items);
-            }
-            else {
+            if (!in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
                 unset($shipment_ids[$key]);
             }
         }
@@ -1093,10 +1088,11 @@ class AdminCargoManifestController extends Controller
                 $bag->seal_number = $shipment->tracking_number;
                 $bag->origin_hub_id = Auth::user()->default_hub_id;
                 $bag->destination_hub_id = $destination;
-                $bag->shipments = $shipments;
-                $bag->quantity = $quantity;
-                $bag->shipments_weight = $shipments_weight;
-                $bag->actual_weight = $shipments_weight;
+                $bag->shipments = 1;
+                //$bag->quantity = $quantity;
+                $bag->quantity = count($shipment->items);
+                $bag->shipments_weight = $shipment->actual_weight;
+                $bag->actual_weight = $shipment->actual_weight;
                 $bag->created_by = Auth::id();
                 $bag->type = $bag_type;
                 $bag->transport_mode_id = 2;
