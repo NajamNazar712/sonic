@@ -570,7 +570,8 @@ class AdminPettyCashController extends Controller
             $petty = $petty->where(function ($query) {
                     $query->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))
                     ->orWhereIn('petty_cash_statements.destination_hub_id', session('hubs'))
-                    ->orWhere('petty_cash_statements.created_by', Auth::id());
+                    ->orWhere('petty_cash_statements.created_by', Auth::id())
+                    ->orWhereIn('petty_cash_statements.hub_id', session('hubs'));
                 });
         }
 
