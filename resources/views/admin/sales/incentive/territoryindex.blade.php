@@ -20,6 +20,7 @@
                         <th class="border-primary border-darken-1">Name</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Code</th>
+                        <th class="border-primary border-darken-1">Users</th>
                         <th class="border-primary border-darken-1">Created by</th>
                         <th class="border-primary border-darken-1">Created at</th>
                         <th class="border-primary border-darken-1">Updated by</th>
@@ -78,6 +79,25 @@
                     </form>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="users" role="dialog" aria-labelledby="users_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="users_title">User(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -223,6 +243,7 @@
                     { data:'name' ,name: 'sales_territories.name', class: 'align-middle text-center name'},
                     { data:'city' ,name: 'c.name', class: 'align-middle text-center city'},
                     { data:'code' ,name: 'sales_territories.code', class: 'align-middle text-center code'},
+                    { data:'users' ,name: 'users', class: 'align-middle text-center users', orderable: false, searchable: false},
                     { data:'created_by' ,name: 'a.name', class: 'align-middle text-center created_by'},
                     { data:'created_at' ,name: 'sales_territories.created_at', class: 'align-middle text-center created_at'},
                     { data:'updated_by' ,name: 'b.name', class: 'align-middle text-center updated_by'},
@@ -348,6 +369,40 @@
                         $("#editterritoryDiv").html(data);
                     });
                 }
+            });
+
+            $('#datatable tbody').on('click','tr td.users button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#users .modal-body').html('');
+                $.ajax({
+                    url: '{!! route('admin.sales.territory.users') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status == 1) {
+                            var admins = '';
+                            if (data.details) {
+                                $.each(data.details, function(index, detail) {
+                                    admins += '<b>' + detail.designation + ' (' + detail.code + ')</b><br>';
+                                    $.each(detail.admins, function(index, admin) {
+                                        admins += admin + '<br>';
+                                    });
+                                    admins += '<br>'
+                                });
+                            }
+                            $('#users .modal-body').html(admins);
+                            $('#users').modal('show');
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        }
+                    });
+
             });
         });
 

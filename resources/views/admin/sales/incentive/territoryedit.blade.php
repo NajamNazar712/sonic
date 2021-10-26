@@ -46,6 +46,7 @@
         });
 
         @if(count($designations) > 0)
+            var designation_admins = [];
             @foreach($designations as $designation)
                 var designation_id = @json($designation->id);
                 var designation_code = @json($designation->code);
@@ -55,13 +56,16 @@
                     allowClear:false,
                     dropdownParent:$('#edit_territory_form')
                 });
+                designation_admins[designation_id] = [];
             @endforeach
             @foreach($territory_admins as $territory_admin)
                 var designation_id = @json($territory_admin->designation_id);
                 var admin_id = @json($territory_admin->admin_id);
-
-                $('#edit_territory_form #designation_' + designation_id).val(admin_id).trigger('change');
+                designation_admins[designation_id].push(admin_id);
             @endforeach
+            $.each(designation_admins, function(designation_id, admin_ids) {
+                $('#edit_territory_form #designation_' + designation_id).val(admin_ids).trigger('change');
+            });
         @endif
 
         $('#edit_territory_form').validate({
