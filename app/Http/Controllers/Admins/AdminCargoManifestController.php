@@ -2580,19 +2580,20 @@ class AdminCargoManifestController extends Controller
                 }
             });
 
-//        if(($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != ''){
-//            $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
-//                ->join('bags as b', 'b.id', '=', 'mcb.bag_id');
-//            if ($tracking_number = $request->get('tracking_number')) {
-//                $datatables->join('bag_shipments as bs', 'b.id', '=', 'bs.bag_id')
-//                    ->join('shipments as s', 'bs.shipment_id', '=', 's.id')
-//                    ->where('s.tracking_number', '=', $tracking_number);
-//            }
-//
-//            if ($bag_number = $request->get('bag_number')) {
-//                $datatables->where('b.seal_number', '=', $bag_number);
-//            }
-//        }
+        if(($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != ''){
+            $datatables->join('manifest_bags as mb', 'cargo_manifests.id', '=', 'mb.cargo_manifest_id')
+                ->join('cargo_manifest_bags as b', 'b.id', '=', 'mb.cargo_manifest_bag_id');
+
+            if ($tracking_number = $request->get('tracking_number')) {
+                $datatables->join('cargo_manifest_bag_shipments as bs', 'b.id', '=', 'bs.cargo_manifest_bag_id')
+                    ->join('shipments as s', 'bs.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking_number);
+            }
+
+            if ($bag_number = $request->get('bag_number')) {
+                $datatables->where('b.seal_number', '=', $bag_number);
+            }
+        }
 
         return $datatables->make(true);
     }

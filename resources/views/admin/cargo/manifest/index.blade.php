@@ -19,7 +19,7 @@
 
                             <div class="text-center">
                                 <form id="manifest_number_search_form" class="d-inline-block form-inline mb-1 justify-content-center text-left" novalidate="novalidate">
-                                    <div class="form-group">
+                                    <div class="form-group mr-1">
                                         <input type="text" name="manifest_number" class="form-control manifest_number" id="manifest_number" placeholder="Manifest Number">
                                     </div>
                                 </form>
