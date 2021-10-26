@@ -689,6 +689,10 @@ class AdminCargoManifestController extends Controller
 
 
             if($shipment->shipper_status_id == 55){
+                if($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id){
+                    return ['status' => 1, 'error' => 'Cannot create bag for same hub'];
+                }
+                
                $intercept_rebook_history = InterceptReBookRequestHistory::where('shipment_id',$shipment->id)->latest()->first();
                if($intercept_rebook_history){
                    $intercept_re_book_history_hub = $intercept_rebook_history->old_consignee_city->hub_id;
@@ -1076,7 +1080,7 @@ class AdminCargoManifestController extends Controller
         if (!empty($shipment_ids)) {
             foreach ($shipment_ids as $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
-                if(in_array($shipment->shipper_status_id, [2, 30, 37, 49, 55])){
+                if(in_array($shipment->shipper_status_id, [2, 49, 55])){
                     $bag_type = 1;
                     $destination = $shipment->consignee_city->hub_id;
                 }
