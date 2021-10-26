@@ -119,6 +119,26 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                  <span class="">From</span>
+                              </span>
+                            </div>
+                            <input type="text" name="arrival_time_from" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_from" value="12:00 AM" id="arrival_time_from" placeholder="Arrival Time From*">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                              <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                  <span class="">To</span>
+                              </span>
+                            </div>
+                            <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to" value="11:30 PM" id="arrival_time_to" placeholder="Arrival Time To*">
+                        </div>
+                    </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -140,6 +160,7 @@
                         <th class="border-primary border-darken-1">Payment ID</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -248,6 +269,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.time.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
@@ -298,7 +320,27 @@
                 placeholder:"Select Multiple Shippers",
                 allowClear:true,
             });
+            $('.arrival_time_from').pickatime({
+                clear: '',
+                format: 'h:i A',
+                interval: 30,
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#arrival_time_to').pickatime('picker').set('min', $('#arrival_time_from').pickatime('picker').get('select'));
+                    }
+                }
 
+            });
+            $('.arrival_time_to').pickatime({
+                clear: '',
+                format: 'h:i A',
+                interval: 30,
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#arrival_time_from').pickatime('picker').set('max', $('#arrival_time_to').pickatime('picker').get('select'));
+                    }
+                }
+            });
             var submission_date = $('#submission_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -314,7 +356,6 @@
                 onSet: function(context) {
                 }
             });
-
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -374,6 +415,7 @@
                             head.push('Payment ID');
                             head.push('Service Type');
                             head.push('Arrival Date');
+                            head.push('Rider');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -424,6 +466,7 @@
                                 row.push(values.payment_id);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
+                                row.push(values.ridername);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -505,6 +548,8 @@
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_business_category = $('#search_business_category').val();
+                        d.arrival_time_from= $('input[name="arrival_time_from"]').val();
+                        d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                     }
                 },
                 order: [[13, 'desc']],
@@ -522,7 +567,8 @@
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
-                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
+                    { data:'arrival_date' ,name: 'sjr.created_at', class: 'align-middle arrival_date'},
+                    { data:'ridername' ,name: 'r.name', class: 'align-middle ridername'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
