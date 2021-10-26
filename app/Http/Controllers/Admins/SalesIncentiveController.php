@@ -50,6 +50,9 @@ class SalesIncentiveController extends Controller
                     return 'In-Active';
                 }
             })
+            ->addColumn('users', function ($data) {
+                return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-users align-middle"></i> <span class="align-middle">View</span></button>';
+            })
             ->addColumn('action', function ($data) {
                 $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -69,6 +72,23 @@ class SalesIncentiveController extends Controller
         });
           
         return $datatables->make(true);
+    }
+
+    public function territory_users(Request $request){
+        $territory_admins = SalesTerritoryAdmin::where('territory_id', $request->id);
+        if($territory_admins->exists()){
+            $territory_admins = $territory_admins->get();
+            $details = array();
+            foreach ($territory_admins as $territory_admin){
+                $details[$territory_admin->designation_id]['designation'] = $territory_admin->sale_designation->role->name;
+                $details[$territory_admin->designation_id]['code'] = $territory_admin->sale_designation->code;
+                $details[$territory_admin->designation_id]['admins'][] = $territory_admin->user->name;
+            }
+            return ['status' => 1, 'details' => $details];
+        }
+        else{
+            return ['status' => 0, 'error' => 'Users not found!'];
+        }
     }
 
     public function territory_add(Request $request)
@@ -115,6 +135,24 @@ class SalesIncentiveController extends Controller
         $territory->code = $request->edit_code;
         $territory->updated_by = Auth::id();
         $territory->save();
+
+        SalesTerritoryAdmin::where('territory_id', $territory->id)->delete();
+
+        if($request->has('designations')){
+            if(count($request->designations) > 0){
+                foreach ($request->designations as $designation_id => $admin_ids){
+                    if(count($admin_ids) > 0){
+                        foreach ($admin_ids as $admin_id){
+                            $territory_admins = new SalesTerritoryAdmin();
+                            $territory_admins->territory_id = $territory->id;
+                            $territory_admins->designation_id = $designation_id;
+                            $territory_admins->admin_id = $admin_id;
+                            $territory_admins->save();
+                        }
+                    }
+                }
+            }
+        }
 
         return redirect()->back()->with('success', 'Territory Updated Successfully!');
 

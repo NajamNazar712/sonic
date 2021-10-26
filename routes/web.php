@@ -2430,6 +2430,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('territory')->name('territory.')->group(function () {
             Route::get('', 'Admins\SalesIncentiveController@territoryindex')->name('territoryindex');
             Route::get('list', 'Admins\SalesIncentiveController@territory_list')->name('list');
+            Route::post('users', 'Admins\SalesIncentiveController@territory_users')->name('users');
             Route::post('add', 'Admins\SalesIncentiveController@territory_add')->name('add');
             Route::get('edit/{id}', 'Admins\SalesIncentiveController@territory_edit')->name('edit');
             Route::put('update/{id}', 'Admins\SalesIncentiveController@territory_update')->name('update');
