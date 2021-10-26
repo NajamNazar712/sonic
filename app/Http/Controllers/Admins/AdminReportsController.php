@@ -3347,7 +3347,14 @@ class AdminReportsController extends Controller
         $from = Carbon::parse($from)->setTimeFromTimeString($arrival_from);
         $to = $request->get('search_date_to');
         $to = Carbon::parse($to)->setTimeFromTimeString($arrival_to);
-        //dd($from,$to);
+
+        // $from = $request->get('search_date_from');
+        // $from = Carbon::parse($from)->setTimeFromTimeString('13:00:00');
+        // $to = $request->get('search_date_to');
+        // $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('13:30:00');
+
+        // dd($from,$to);
+        
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
