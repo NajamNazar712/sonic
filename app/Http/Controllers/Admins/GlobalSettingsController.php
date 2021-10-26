@@ -90,6 +90,8 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
+use App\Http\Models\Admin\SalesDesignationJourney;
+use App\Http\Models\Admin\SalesDesignation;
 use Carbon\Carbon;
 use http\Env\Response;
 use Illuminate\Http\Request;
@@ -4803,6 +4805,36 @@ class GlobalSettingsController extends Controller
     public function sales_incentive()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),460);
-        return view('admin.settings.sales.incentive');
+        $incentives = SalesDesignation::join('admin_roles as ad', 'ad.id', '=', 'sales_designations.designation')->select('ad.name as role', 'sales_designations.incentive as incentive','sales_designations.from_date as fromdate','sales_designations.to_date as todate')->get();
+        
+        return view('admin.settings.sales.incentive')->with(['incentives' => $incentives]);;
+    }
+
+    public function sales_incentive_add(Request $request)
+    {
+        $incentive=$request->BDM;
+        $designations = SalesDesignation::where('designation', 12)->first();
+       
+        if($designations)
+        {
+            $sales_designation_journeys = new SalesDesignationJourney();
+            $sales_designation_journeys->sales_designation_id = $designations->id;
+            $sales_designation_journeys->incentive = $incentive;
+            $sales_designation_journeys->from_date = $request->search_date_from_formatted;
+            $sales_designation_journeys->to_date = $request->search_date_to_formatted;
+            $sales_designation_journeys->updated_by = Auth::id();
+            $sales_designation_journeys->save();
+
+            $designations->incentive=$incentive;
+            $designations->from_date = $request->search_date_from_formatted;
+            $designations->to_date = $request->search_date_to_formatted;
+            $designations->save();
+
+            return redirect()->back()->with('success', 'Incentive Added Successfully!');
+        }
+        else
+        {
+            return redirect()->back()->with('error', 'Incentive Not Added Successfully!');
+        }
     }
 }

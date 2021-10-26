@@ -18,6 +18,9 @@ class CreateSalesDesignationsTable extends Migration
             $table->integer('designation')->index();
             $table->string('code');
             $table->integer('status');
+            $table->integer('incentive')->nullable();
+            $table->DateTime('from_date')->nullable();
+            $table->DateTime('to_date')->nullable();
             $table->integer('created_by');
             $table->integer('updated_by')->nullable();
             $table->timestamps();
