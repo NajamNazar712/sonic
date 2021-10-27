@@ -7,6 +7,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\RiderType;
@@ -22,6 +23,7 @@ use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
+use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
@@ -3253,5 +3255,108 @@ class AdminHumanResourseController extends Controller
         $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
         return array('status' => 1, 'image' => $pdf_file);
 
+    }
+
+    public function leave_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),392);
+        return view('admin.human_resource.leave');
+    }
+
+    public function leave_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),116);
+        }
+        $employee_leaves = EmployeeLeave::leftjoin('admins as a', 'a.id', 'employee_leaves.employee_id')
+            ->join('leave_statuses as ls', 'ls.id', 'employee_leaves.status')
+            ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
+            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
+            ->leftjoin('riders as r', 'r.id', 'employee_leaves.employee_id')
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id','employee_leaves.from as from', 'employee_leaves.to as to','employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at');
+
+        $datatable = Datatables::of($employee_leaves)
+            ->editColumn('trax_id', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_trax_id;
+                } else {
+                    return $employee->trax_id;
+                }
+            })
+            ->editColumn('name', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_name;
+                } else {
+                    return $employee->admin_name;
+                }
+            })
+            ->editColumn('employee_type', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return "Rider";
+                } else {
+                    return "Staff";
+                }
+            })
+            ->editColumn('designation', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return "Rider";
+                } else {
+                    return $employee->designation;
+                }
+            })
+            ->editColumn('department', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return "Operations";
+                } else {
+                    return $employee->department;
+                }
+            })
+            ->editColumn('cnic', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_cnic;
+                } else {
+                    return $employee->admin_cnic;
+                }
+            })
+            ->editColumn('requested', function ($employee) {
+                $date = Carbon::parse($employee->requested_date)->format("Y-m-d");
+                return $date;
+            })
+            ->editColumn('updated', function ($employee) {
+                $date = Carbon::parse($employee->updated_at)->format("Y-m-d");
+                return $date;
+            })
+            ->editColumn('leave_count', function ($employee) {
+                $leave_count  = EmployeeAttendance::where('employee_type', $employee->employee_type)
+                    ->where('employee_id', $employee->employee_id)
+                    ->where('leave_status', 1)->count();
+                return $leave_count;
+            })
+            ->addColumn("action", function ($employee) {
+                if($employee->status_id == 2){
+                    if(session('role_id') == 1 || in_array(485, session('permissions'))){
+                        $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                        $dropdown .= '
+                </div>
+              </div>
+            ';
+                        return $dropdown;
+                    }
+                    else{
+                        return '';
+                    }
+                }else{
+                    return '';
+                }
+
+            });
+            return $datatable->make(true);
     }
 }
