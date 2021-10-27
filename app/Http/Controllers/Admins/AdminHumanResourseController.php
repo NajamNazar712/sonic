@@ -3269,11 +3269,12 @@ class AdminHumanResourseController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),116);
         }
         $employee_leaves = EmployeeLeave::leftjoin('admins as a', 'a.id', 'employee_leaves.employee_id')
+            ->leftjoin('admins as u', 'u.id', 'employee_leaves.updated_by')
             ->join('leave_statuses as ls', 'ls.id', 'employee_leaves.status')
             ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
             ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
             ->leftjoin('riders as r', 'r.id', 'employee_leaves.employee_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id','employee_leaves.from as from', 'employee_leaves.to as to','employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at');
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id','employee_leaves.from as from', 'employee_leaves.to as to','employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at','u.name as updated_by');
 
         $datatable = Datatables::of($employee_leaves)
             ->editColumn('trax_id', function ($employee) {

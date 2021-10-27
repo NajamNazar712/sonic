@@ -29,6 +29,7 @@
                                     <th class="border-primary border-darken-1">Leave From</th>
                                     <th class="border-primary border-darken-1">Leave TO</th>
                                     <th class="border-primary border-darken-1">Request Date</th>
+                                    <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -203,6 +204,7 @@
                     {data: 'from', name: 'employee_leaves.from', class: 'align-middle from'},
                     {data: 'to', name: 'employee_leaves.to', class: 'align-middle to'},
                     {data: 'requested', name: 'employee_leaves.created_at', class: 'align-middle requested'},
+                    {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
                     {data: 'updated', name: 'employee_leaves.updated_at', class: 'align-middle updated'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
