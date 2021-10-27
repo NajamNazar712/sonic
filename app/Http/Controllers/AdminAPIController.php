@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
@@ -3941,27 +3942,75 @@ class AdminAPIController extends Controller
 
     public function leave_index(Request $request)
     {
-        $admin_id = $request->admin_id;
-        $admin = Admin::find($admin_id);
-        if ($admin) {
-            $data = array();
-            $data['trax_id'] = $admin->trax_id;
-            $data['name'] = $admin->name;
-            $data['designation'] = $admin->designation;
-            $data['department'] = $admin->role->department->name;
-            $data['approver_email'] = $admin->role->department->department_head->email;
-            $data['approver_name'] = $admin->role->department->department_head->name;
-            $role_id = $admin->role_id;
-            if ($role_id == 81) {
-                $data['user_type'] = 2;
-            } elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
-                $data['user_type'] = 1;
-            } else {
-                $data['user_type'] = 0;
+        if ($request->has('leave_id')) {
+            $leave = EmployeeLeave::find($request->leave_id);
+            if ($leave) {
+                if ($leave->employee_type_id == 1) {
+                    $admin = Admin::find($leave->employee_id);
+                    if ($admin) {
+                        $data = array();
+                        $data['trax_id'] = $admin->trax_id;
+                        $data['name'] = $admin->name;
+                        $data['designation'] = $admin->designation;
+                        $data['department'] = $admin->role->department->name;
+                        $data['approver_email'] = $admin->role->department->department_head->email;
+                        $data['approver_name'] = $admin->role->department->department_head->name;
+                        $role_id = $admin->role_id;
+                        if ($role_id == 81) {
+                            $data['user_type'] = 2;
+                        } elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
+                            $data['user_type'] = 1;
+                        } else {
+                            $data['user_type'] = 0;
+                        }
+                        return response()->json(['status' => 0, 'data' => $data]);
+                    }
+                    return response()->json(['status' => 1, 'message' => "User not found"]);
+                } elseif ($leave->employee_type_id == 2) {
+                    $rider = Rider::find($leave->employee_id);
+                    $department = AdminDepartment::find(6);
+                    if ($department) {
+                        if ($rider) {
+                            $data = array();
+                            $data['trax_id'] = $rider->trax_id;
+                            $data['name'] = $rider->name;
+                            $data['designation'] = "Rider";
+                            $data['department'] = "Operations";
+                            $data['approver_email'] = $department->department_head->email;
+                            $data['approver_name'] = $department->department_head->name;
+                            $data['user_type'] = 0;
+                            return response()->json(['status' => 0, 'data' => $data]);
+                        }
+                        return response()->json(['status' => 1, 'message' => "Rider not found"]);
+                    }
+                    return response()->json(['status' => 1, 'message' => "Department Not Found"]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Failed"]);
+                }
             }
-            return response()->json(['status' => 0, 'data' => $data]);
+        } else {
+            $admin_id = $request->admin_id;
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                $data = array();
+                $data['trax_id'] = $admin->trax_id;
+                $data['name'] = $admin->name;
+                $data['designation'] = $admin->designation;
+                $data['department'] = $admin->role->department->name;
+                $data['approver_email'] = $admin->role->department->department_head->email;
+                $data['approver_name'] = $admin->role->department->department_head->name;
+                $role_id = $admin->role_id;
+                if ($role_id == 81) {
+                    $data['user_type'] = 2;
+                } elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
+                    $data['user_type'] = 1;
+                } else {
+                    $data['user_type'] = 0;
+                }
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "User not found"]);
         }
-        return response()->json(['status' => 1, 'message' => "User not found"]);
     }
 
     public function leave_apply(Request $request)
