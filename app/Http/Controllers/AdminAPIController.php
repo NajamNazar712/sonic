@@ -4167,7 +4167,7 @@ class AdminAPIController extends Controller
                         }else{
                             $user = Rider::find($employee_leaves->employee_id);
                         }
-                        $shift = EmployeeShift::find('id', $user->shift_id);
+                        $shift = EmployeeShift::find($user->shift_id);
                         if($employee_leaves->to) {
                             $dates = $this->generateDateRange($employee_leaves->from, $employee_leaves->to);
                             dd($dates);
