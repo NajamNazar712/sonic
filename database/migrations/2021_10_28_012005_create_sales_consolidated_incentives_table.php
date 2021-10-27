@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSalesIncentivesTable extends Migration
+class CreateSalesConsolidatedIncentivesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,8 @@ class CreateSalesIncentivesTable extends Migration
      */
     public function up()
     {
-        Schema::create('sales_incentives', function (Blueprint $table) {
+        Schema::create('sales_consolidated_incentives', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('territory_id')->index();
-            $table->integer('designation_id')->index();
             $table->integer('admin_id')->index();
             $table->integer('shipper_count');
             $table->integer('shipment_count');
@@ -34,6 +32,6 @@ class CreateSalesIncentivesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sales_incentives');
+        Schema::dropIfExists('sales_consolidated_incentives');
     }
 }

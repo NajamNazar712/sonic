@@ -20,23 +20,14 @@
                                 {{ csrf_field() }}
                                 <div class="row justify-content-center">
                                     <div class="col-4 form-group">
+                                        <label><strong>To Date</strong></label>
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                             </div>
-                                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" value="{{ Carbon\Carbon::parse($incentives[0]->fromdate)->format('F d Y') }}" data-rule-required="true" data-msg-required="Date is required">
-                                        </div>
-                                    </div>
-                                    <div class="col-4 form-group">
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="la la-calendar-o"></span>
-                                            </span>
-                                            </div>
-                                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" value="{{ Carbon\Carbon::parse($incentives[0]->todate)->format('F d Y') }}" data-rule-required="true" data-msg-required="Date is required">
+                                            <input type="text" name="date" class="form-control pickadate bg-primary border-primary white rounded-right" id="date" placeholder="To Date*" data-value="{{$date}}" data-rule-required="true" data-msg-required="Date is required">
                                         </div>
                                     </div>
                                 </div>
@@ -92,32 +83,14 @@
                 'min': 0,
                 'max': 100
             });
-            $('#search_date_from').pickadate({
+            $('#date').pickadate({
                 firstDay: 1,
+                today: '{{$date}}',
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
-                    }
-                }
-            });
-
-            $('#search_date_to').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
-                    }
-                }
             });
 
             $('#sales_incentive_settings').validate({
@@ -130,7 +103,7 @@
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
                     swal({
                         title: 'Please Wait!',
-                        text: 'Rate settings are being updated!',
+                        text: 'Incentives are being updated!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

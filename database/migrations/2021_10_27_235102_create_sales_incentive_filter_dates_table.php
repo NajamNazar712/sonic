@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSalesIncentiveShippersTable extends Migration
+class CreateSalesIncentiveFilterDatesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,9 @@ class CreateSalesIncentiveShippersTable extends Migration
      */
     public function up()
     {
-        Schema::create('sales_incentive_shippers', function (Blueprint $table) {
+        Schema::create('sales_incentive_filter_dates', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('incentive_id')->index();
-            $table->integer('shipper_id')->index();
+            $table->string('date');
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ class CreateSalesIncentiveShippersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sales_incentive_shippers');
+        Schema::dropIfExists('sales_incentive_filter_dates');
     }
 }

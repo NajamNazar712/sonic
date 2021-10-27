@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\Http\Models\Admin\SalesIncentiveDate;
 use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
 use App\Http\Controllers\Admins\ActivityTrailController;
@@ -4806,12 +4807,19 @@ class GlobalSettingsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),460);
         $incentives = SalesDesignation::where('status', 1)->get();
-        if($incentives){
-            return view('admin.settings.sales.incentive')->with(['incentives' => $incentives]);
+        $date = SalesIncentiveDate::first();
+        if($date){
+            $date = Carbon::parse($date->to)->toDateString();
         }
         else{
-            return redirect()->back()->with('error', 'Sales Designations not set!');
+            $date = Carbon::now()->toDateString();
         }
+//        if($incentives){
+            return view('admin.settings.sales.incentive')->with(['incentives' => $incentives, 'date' => $date]);
+//        }
+//        else{
+//            return redirect()->back()->with('error', 'Sales Designations not set!');
+//        }
 
     }
 
@@ -4823,18 +4831,24 @@ class GlobalSettingsController extends Controller
                 $sales_designation_journeys = new SalesDesignationJourney();
                 $sales_designation_journeys->sales_designation_id = $designation_id;
                 $sales_designation_journeys->incentive = $incentive;
-                $sales_designation_journeys->from_date = $request->search_date_from_formatted;
-                $sales_designation_journeys->to_date = $request->search_date_to_formatted;
                 $sales_designation_journeys->updated_by = Auth::id();
                 $sales_designation_journeys->save();
 
                 $designations = SalesDesignation::find($designation_id);
-                $designations->incentive=$incentive;
-                $designations->from_date = $request->search_date_from_formatted;
-                $designations->to_date = $request->search_date_to_formatted;
+                $designations->incentive = $incentive;
                 $designations->updated_by = Auth::id();
                 $designations->save();
             }
+            SalesIncentiveDate::truncate();
+            $to_date = Carbon::parse($request->date_formatted)->endOfDay();
+            $cron_day = Carbon::parse($request->date_formatted)->addDay()->format('d');
+            $from_date = Carbon::parse($request->date_formatted)->subMonth()->addDay()->startOfDay();
+            $sale_incentive_date = new SalesIncentiveDate();
+            $sale_incentive_date->from = $from_date;
+            $sale_incentive_date->to = $to_date;
+            $sale_incentive_date->cron_day = $cron_day;
+            $sale_incentive_date->save();
+
 
             return redirect()->back()->with('success', 'Incentive Added Successfully!');
         }

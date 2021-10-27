@@ -64,11 +64,11 @@
                             @foreach($designations as $designation)
                                 <div class="form-group">
                                     <select name="designations[{{$designation->id}}][]" id="designation_{{$designation->id}}" class="form-control select2" multiple="multiple">
-                                        @foreach($admins as $admin)
-                                            @if($admin->role_id == $designation->designation)
-                                                <option value="{{$admin->id}}"> {{$admin->name}} </option>
-                                            @endif
-                                        @endforeach
+{{--                                        @foreach($admins as $admin)--}}
+{{--                                            @if($admin->role_id == $designation->designation)--}}
+{{--                                                <option value="{{$admin->id}}"> {{$admin->name}} </option>--}}
+{{--                                            @endif--}}
+{{--                                        @endforeach--}}
                                     </select>
                                 </div>
                             @endforeach
@@ -139,13 +139,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#add_territory_form #city').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Select City*',
-                allowClear:false,
-                dropdownParent:$('#add_territory_form')
-            });
-
             @if(count($designations) > 0)
                 @foreach($designations as $designation)
                     var designation_id = @json($designation->id);
@@ -158,6 +151,46 @@
                     });
                 @endforeach
             @endif
+
+                $('#add_territory_form #city').prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: 'Select City*',
+                    allowClear:false,
+                    dropdownParent:$('#add_territory_form')
+                }).bind('select2:select', function () {
+                    var city_id = parseInt($(this).val());
+                    if(city_id != null && city_id != ''){
+                        $.ajax({
+                            url: '{!! route('admin.sales.territory.city_admins') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'city_id': city_id,
+                            }
+                        })
+                            .done(function(data) {
+                                @if(count($designations) > 0)
+                                    @foreach($designations as $designation)
+                                    var designation_id = @json($designation->id);
+                                    var designation_code = @json($designation->code);
+                                    $('#add_territory_form #designation_' + designation_id).html('').select2('destroy');
+
+                                    $('#add_territory_form #designation_' + designation_id).select2({
+                                        width: '100%',
+                                        placeholder: 'Select ' + designation_code,
+                                        allowClear:false,
+                                        dropdownParent:$('#add_territory_form')
+                                    });
+                                    if(data.designations.hasOwnProperty(designation_id)){
+                                        $.each(data.designations[designation_id].admins, function (index, admin) {
+                                            $('#add_territory_form #designation_' + designation_id).append('<option value="' + admin['id'] + '">' + admin['name'] + '</option>');
+                                        });
+                                    }
+                                    @endforeach
+                                @endif
+                            });
+                    }
+                });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {

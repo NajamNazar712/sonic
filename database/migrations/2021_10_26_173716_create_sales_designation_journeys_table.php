@@ -16,9 +16,7 @@ class CreateSalesDesignationJourneysTable extends Migration
         Schema::create('sales_designation_journeys', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('sales_designation_id')->index();
-            $table->integer('incentive');
-            $table->DateTime('from_date');
-            $table->DateTime('to_date');
+            $table->decimal('incentive');
             $table->integer('updated_by')->index();
             $table->timestamps();
         });

@@ -2330,7 +2330,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('sales_incentive')->name('sales_incentive.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@sales_incentive_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@sales_incentive_list')->name('list');
             Route::get('consolidated', 'Admins\AdminReportsController@consolidated_sales_incentive_index')->name('consolidated');
+            Route::get('consolidated_list', 'Admins\AdminReportsController@consolidated_sales_incentive_list')->name('consolidated_list');
         });
         Route::prefix('month_closing')->name('month_closing.')->group(function(){
             Route::prefix('individual')->name('individual.')->group(function (){
@@ -2434,6 +2436,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\SalesIncentiveController@territory_add')->name('add');
             Route::get('edit/{id}', 'Admins\SalesIncentiveController@territory_edit')->name('edit');
             Route::put('update/{id}', 'Admins\SalesIncentiveController@territory_update')->name('update');
+            Route::post('city_admins', 'Admins\SalesIncentiveController@territory_city_admins')->name('city_admins');
             Route::post('status', 'Admins\SalesIncentiveController@territory_enable_disable')->name('status');
         });
         Route::prefix('designation')->name('designation.')->group(function () {
