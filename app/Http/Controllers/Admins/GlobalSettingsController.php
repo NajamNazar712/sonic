@@ -4805,30 +4805,36 @@ class GlobalSettingsController extends Controller
     public function sales_incentive()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),460);
-        $incentives = SalesDesignation::join('admin_roles as ad', 'ad.id', '=', 'sales_designations.designation')->select('ad.name as role', 'sales_designations.incentive as incentive','sales_designations.from_date as fromdate','sales_designations.to_date as todate')->get();
-        
-        return view('admin.settings.sales.incentive')->with(['incentives' => $incentives]);;
+        $incentives = SalesDesignation::where('status', 1)->get();
+        if($incentives){
+            return view('admin.settings.sales.incentive')->with(['incentives' => $incentives]);
+        }
+        else{
+            return redirect()->back()->with('error', 'Sales Designations not set!');
+        }
+
     }
 
     public function sales_incentive_add(Request $request)
     {
-        $incentive=$request->BDM;
-        $designations = SalesDesignation::where('designation', 12)->first();
-       
-        if($designations)
+        if(count($request->designations) > 0)
         {
-            $sales_designation_journeys = new SalesDesignationJourney();
-            $sales_designation_journeys->sales_designation_id = $designations->id;
-            $sales_designation_journeys->incentive = $incentive;
-            $sales_designation_journeys->from_date = $request->search_date_from_formatted;
-            $sales_designation_journeys->to_date = $request->search_date_to_formatted;
-            $sales_designation_journeys->updated_by = Auth::id();
-            $sales_designation_journeys->save();
+            foreach ($request->designations as $designation_id => $incentive){
+                $sales_designation_journeys = new SalesDesignationJourney();
+                $sales_designation_journeys->sales_designation_id = $designation_id;
+                $sales_designation_journeys->incentive = $incentive;
+                $sales_designation_journeys->from_date = $request->search_date_from_formatted;
+                $sales_designation_journeys->to_date = $request->search_date_to_formatted;
+                $sales_designation_journeys->updated_by = Auth::id();
+                $sales_designation_journeys->save();
 
-            $designations->incentive=$incentive;
-            $designations->from_date = $request->search_date_from_formatted;
-            $designations->to_date = $request->search_date_to_formatted;
-            $designations->save();
+                $designations = SalesDesignation::find($designation_id);
+                $designations->incentive=$incentive;
+                $designations->from_date = $request->search_date_from_formatted;
+                $designations->to_date = $request->search_date_to_formatted;
+                $designations->updated_by = Auth::id();
+                $designations->save();
+            }
 
             return redirect()->back()->with('success', 'Incentive Added Successfully!');
         }

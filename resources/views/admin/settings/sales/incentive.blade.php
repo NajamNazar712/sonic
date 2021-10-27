@@ -40,17 +40,19 @@
                                         </div>
                                     </div>
                                 </div>
+                                @foreach($incentives as $incentive)
                                 <div class="row justify-content-center">
                                     <div class="col-3 form-group">
-                                        <label><strong>BDM</strong></label>
+                                        <label><strong>{{$incentive->code}}</strong></label>
                                         <div class="input-group">
-                                            <input type="text" name="BDM" class="form-control amount" placeholder="BDM*" value="{{ $incentives[0]->incentive }}" data-rule-required="true" data-msg-required="BDM incentive is required">
+                                            <input type="text" name="designations[{{$incentive->id}}]" class="form-control percentage" placeholder="{{$incentive->code}}*" value="{{ $incentive->incentive }}" data-rule-required="true" data-msg-required="{{$incentive->code}} incentive is required" max="100" min="0">
                                             <div class="input-group-append">
                                                 <span class="input-group-text">%</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+                                @endforeach
                                 
                                 <div class="row justify-content-center">
                                     <button type="submit" class="btn btn-primary">Update</button>
@@ -82,13 +84,13 @@
     <script>
         $(document).ready(function() {
             
-            $('#sales_incentive_settings .amount').inputmask({
-                'alias': 'integer',
+            $('#sales_incentive_settings .percentage').inputmask({
+                'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false,
                 'min': 0,
-                'max': 10000000
+                'max': 100
             });
             $('#search_date_from').pickadate({
                 firstDay: 1,

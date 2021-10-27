@@ -17,12 +17,12 @@ class CreateSalesDesignationsTable extends Migration
             $table->increments('id');
             $table->integer('designation')->index();
             $table->string('code');
-            $table->integer('status');
-            $table->integer('incentive')->nullable();
+            $table->integer('status')->index();
+            $table->decimal('incentive')->nullable();
             $table->DateTime('from_date')->nullable();
             $table->DateTime('to_date')->nullable();
-            $table->integer('created_by');
-            $table->integer('updated_by')->nullable();
+            $table->integer('created_by')->index();
+            $table->integer('updated_by')->index()->nullable();
             $table->timestamps();
         });
     }

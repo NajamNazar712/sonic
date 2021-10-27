@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\Month;
 use App\Http\Models\Admin\SalesIncentive;
 use App\Http\Models\Admin\SalesIncentiveShipper;
 use App\Http\Models\Admin\SalesTerritoryAdmin;
@@ -308,7 +309,30 @@ class SalesIncentiveController extends Controller
     }
 
     static public function sale_incentive_report_calculation(){
-
+        $day = Carbon::today()->format('d');
+        $day = 15;
+        if($day == 15){
+            $date = Carbon::today();
+            $i=1;
+            $all_months = array();
+            while ($i <= 12){
+                $date = Carbon::parse($date)->addMonth();
+                $month = Carbon::parse($date)->month;
+                $days = Carbon::parse($date)->daysInMonth;
+                $all_months[$i]['month'] = $month;
+                $all_months[$i]['name'] = Carbon::parse($date)->format('F');
+                $all_months[$i]['days'] = $days;
+                $i++;
+            }
+            foreach($all_months as $month_data){
+                $month = new Month();
+                $month->month = $month_data['month'];
+                $month->name = $month_data['name'];
+                $month->days = $month_data['days'];
+                $month->save();
+            }
+            dd(1);
+        }
         $from = Carbon::today()->subMonth(1)->firstOfYear()->toDateTimeString();
         $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
