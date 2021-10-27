@@ -4135,6 +4135,7 @@ class AdminAPIController extends Controller
                             $attendance_action->longitude = $mark_attendance->clock_out_longitude;
                             $attendance_action->save();
                         }
+                        $leave_request->save();
                         $message = "Leave Request Edit & Approve Successfully";
                     }
                     return response()->json(['status' => 0, 'apply_message' => $message]);
