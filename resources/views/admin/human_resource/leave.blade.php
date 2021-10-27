@@ -134,21 +134,41 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.human_resource.department.list') }}',
+                        url: '{{ route('admin.human_resource.leave.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Department ID');
-                            head.push('Department Name');
-                            head.push('Department Head');
+                            head.push('Trax ID');
+                            head.push('Name');
+                            head.push('Designation');
+                            head.push('Department');
+                            head.push('Employee Type');
+                            head.push('CNIC');
+                            head.push('Availed Leaves');
+                            head.push('Status');
+                            head.push('Leave From');
+                            head.push('Leave To');
+                            head.push('Requested Date');
+                            head.push('Updated By');
+                            head.push('Updated At');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.code);
+                                row.push(values.trax_id);
                                 row.push(values.name);
-                                row.push(values.head);
+                                row.push(values.designation);
+                                row.push(values.department);
+                                row.push(values.employee_type);
+                                row.push(values.cnic);
+                                row.push(values.leave_count);
+                                row.push(values.status);
+                                row.push(values.from);
+                                row.push(values.to);
+                                row.push(values.requested);
+                                row.push(values.updated_by);
+                                row.push(values.updated);
                                 body.push(row);
                             });
                         },
@@ -161,15 +181,6 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(485, session('permissions')))
-                    {
-                        text: 'Add Department',
-                        className: 'btn btn-primary add_department',
-                        action: function (e, dt, node, config) {
-                            $('#addDepartmentModal').modal('show');
-                        }
-                    },
-                        @endif
                     {
                         extend: 'excel',
                         title: 'Department',
