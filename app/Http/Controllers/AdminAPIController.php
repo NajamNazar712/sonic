@@ -3948,6 +3948,9 @@ class AdminAPIController extends Controller
                 if ($leave->employee_type_id == 1) {
                     $admin = Admin::find($leave->employee_id);
                     if ($admin) {
+                        if(!$admin->role->department->department_head_id){
+                            return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+                        }
                         $data = array();
                         $data['trax_id'] = $admin->trax_id;
                         $data['name'] = $admin->name;
@@ -3971,6 +3974,9 @@ class AdminAPIController extends Controller
                     $department = AdminDepartment::find(6);
                     if ($department) {
                         if ($rider) {
+                            if(!$department->department_head_id){
+                                return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+                            }
                             $data = array();
                             $data['trax_id'] = $rider->trax_id;
                             $data['name'] = $rider->name;
@@ -3992,6 +3998,9 @@ class AdminAPIController extends Controller
             $admin_id = $request->admin_id;
             $admin = Admin::find($admin_id);
             if ($admin) {
+                if(!$admin->role->department->department_head_id){
+                    return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+                }
                 $data = array();
                 $data['trax_id'] = $admin->trax_id;
                 $data['name'] = $admin->name;
@@ -4065,6 +4074,69 @@ class AdminAPIController extends Controller
                     $leave_request->to = $request->to;
                     $leave_request->applied_reason = $request->reason;
                     $leave_request->save();
+                    if ($leave_request->status == 2) {
+                        $leave_request->status = 4;
+                        $leave_request->updated_by = $admin_id;
+                        if($leave_request->employee_id == 1){
+                            $user = Admin::find($leave_request->employee_id);
+                        }else{
+                            $user = Rider::find($leave_request->employee_id);
+                        }
+                        $shift = EmployeeShift::find($user->shift_id);
+                        if($leave_request->to) {
+                            $dates = $this->generateDateRange($leave_request->from, $leave_request->to);
+                        }else {
+                            $dates[] = $leave_request->from;
+                        }
+                        foreach ($dates as $date){
+                            $date = Carbon::parse($date)->format("Y-m-d");
+                            $mark_attendance = EmployeeAttendance::where('employee_id', $leave_request->employee_id)
+                                ->where('employee_type', $leave_request->employee_type_id)
+                                ->whereDate('attendance_date', $date);
+                            if ($mark_attendance->exists()){
+                                $mark_attendance = $mark_attendance->first();
+                            }else{
+                                $mark_attendance = new EmployeeAttendance();
+                            }
+                            $mark_attendance->attendance_date = $date;
+                            $mark_attendance->employee_id = $leave_request->employee_id;
+                            $mark_attendance->employee_type = $leave_request->employee_type_id;
+                            $mark_attendance->clock_in_latitude = "24.85758065592256";
+                            $mark_attendance->clock_in_longitude = "67.12476908400743";
+                            $mark_attendance->clock_out_latitude = "24.85758065592256";
+                            $mark_attendance->clock_out_longitude = "67.12476908400743";
+                            if($shift){
+                                $mark_attendance->clock_in_datetime = $date.' '.$shift->start_time;
+                                $mark_attendance->clock_out_datetime = $date.' '.$shift->end_time;
+                            }else{
+                                $mark_attendance->clock_in_datetime = $date.' 09:00:00';
+                                $mark_attendance->clock_out_datetime = $date.' 18:00:00';
+                            }
+                            $mark_attendance->leave_status = 1;
+                            $mark_attendance->save();
+
+                            $attendance_action = new EmployeeAttendanceActionLog();
+                            $attendance_action->employee_id = $mark_attendance->employee_id;
+                            $attendance_action->employee_type = $mark_attendance->employee_type;
+                            $attendance_action->action_id = 1;
+                            $attendance_action->action_date = $mark_attendance->clock_in_datetime;
+                            $attendance_action->attendance_date = $date;
+                            $attendance_action->latitude = $mark_attendance->clock_in_latitude;
+                            $attendance_action->longitude = $mark_attendance->clock_in_longitude;
+                            $attendance_action->save();
+
+                            $attendance_action = new EmployeeAttendanceActionLog();
+                            $attendance_action->employee_id = $mark_attendance->employee_id;
+                            $attendance_action->employee_type = $mark_attendance->employee_type;
+                            $attendance_action->action_id = 2;
+                            $attendance_action->action_date = $mark_attendance->clock_out_datetime;
+                            $attendance_action->attendance_date = $date;
+                            $attendance_action->latitude = $mark_attendance->clock_out_latitude;
+                            $attendance_action->longitude = $mark_attendance->clock_out_longitude;
+                            $attendance_action->save();
+                        }
+                        $message = "Leave Request Edit & Approve Successfully";
+                    }
                     return response()->json(['status' => 0, 'apply_message' => $message]);
                 }
             } else {
@@ -4155,11 +4227,10 @@ class AdminAPIController extends Controller
         } else {
             $admin = Admin::find($admin_id);
             if ($admin) {
-                $admin_role = $admin->role_id;
                 $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();
-                    if ($admin_role == 63) {
+                    if ($employee_leaves->status == 2) {
                         $employee_leaves->status = 4;
                         $employee_leaves->updated_by = $admin_id;
                         if($employee_leaves->employee_id == 1){
@@ -4175,7 +4246,14 @@ class AdminAPIController extends Controller
                         }
                             foreach ($dates as $date){
                                 $date = Carbon::parse($date)->format("Y-m-d");
-                                $mark_attendance = new EmployeeAttendance();
+                                $mark_attendance = EmployeeAttendance::where('employee_id', $employee_leaves->employee_id)
+                                    ->where('employee_type', $employee_leaves->employee_type_id)
+                                    ->whereDate('attendance_date', $date);
+                                if ($mark_attendance->exists()){
+                                    $mark_attendance = $mark_attendance->first();
+                                }else{
+                                    $mark_attendance = new EmployeeAttendance();
+                                }
                                 $mark_attendance->attendance_date = $date;
                                 $mark_attendance->employee_id = $employee_leaves->employee_id;
                                 $mark_attendance->employee_type = $employee_leaves->employee_type_id;
@@ -4188,7 +4266,7 @@ class AdminAPIController extends Controller
                                     $mark_attendance->clock_out_datetime = $date.' '.$shift->end_time;
                                 }else{
                                     $mark_attendance->clock_in_datetime = $date.' 09:00:00';
-                                    $mark_attendance->clock_out_datetime = $date.' 06:00:00';
+                                    $mark_attendance->clock_out_datetime = $date.' 18:00:00';
                                 }
                                 $mark_attendance->leave_status = 1;
                                 $mark_attendance->save();
@@ -4214,7 +4292,7 @@ class AdminAPIController extends Controller
                                 $attendance_action->save();
                             }
 
-                    } elseif (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
+                    } elseif ($employee_leaves->status == 1) {
                         $employee_leaves->status = 2;
                         $employee_leaves->updated_by = $admin_id;
                     } else {
@@ -4249,9 +4327,9 @@ class AdminAPIController extends Controller
                 $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();
-                    if ($admin_role == 63) {
+                    if ($employee_leaves->status == 2) {
                         $employee_leaves->status = 5;
-                    } elseif (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
+                    } elseif ($employee_leaves->status == 1) {
                         $employee_leaves->status = 3;
                     } else {
                         return response()->json(['status' => 1, 'message' => "Invalid Role"]);

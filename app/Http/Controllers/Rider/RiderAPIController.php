@@ -9834,6 +9834,9 @@ class RiderAPIController extends Controller
         $rider = Rider::find($rider_id);
         $department = AdminDepartment::find(6);
         if($department){
+            if(!$department->department_head_id){
+                return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+            }
             if($rider){
                 $data = array();
                 $data['trax_id'] = $rider->trax_id;
