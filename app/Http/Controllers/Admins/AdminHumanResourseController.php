@@ -2357,8 +2357,8 @@ class AdminHumanResourseController extends Controller
     public function department_index(){
 
         ActivityTrailController::createActivityTrailLog(Auth::id(),392);
-        $admin = Admin::select('id', 'name')->where('status', 1)->get();
-        return view('admin.human_resource.department')->with(['admin' => $admin]);
+        $admin = Admin::select('id', 'name', 'trax_id')->where('status', 1)->get();
+        return view('admin.human_resource.department')->with(['admins' => $admin]);
     }
 
     public function department_list(Request $request){
@@ -2366,7 +2366,8 @@ class AdminHumanResourseController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),393);
         }
-        $departments = AdminDepartment::select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description']);
+        $departments = AdminDepartment::leftjoin('admins as a', 'a.id', '=', 'admin_departments.department_head_id')
+        ->select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description', 'a.name as head', 'admin_departments.department_head_id as head_id']);
 
         return Datatables::of($departments)
             ->addColumn("action", function ($data) {
@@ -2396,6 +2397,7 @@ class AdminHumanResourseController extends Controller
         $department = new AdminDepartment();
         $department->name = $request->name;
         $department->description = $request->description;
+        $department->department_head_id = $request->head_id;
         $department->save();
 
         $department->code = 'Dep'. str_pad($department->id, 3, '0', STR_PAD_LEFT);
@@ -2407,6 +2409,7 @@ class AdminHumanResourseController extends Controller
         $department = AdminDepartment::find($request->department_id);
         $department->name = $request->name;
         $department->description = $request->description;
+        $department->department_head_id = $request->head_id;
         $department->save();
         return redirect()->back()->with('success', 'Department Updated Successfully!');
     }
