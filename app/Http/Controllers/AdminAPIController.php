@@ -4184,11 +4184,11 @@ class AdminAPIController extends Controller
                                 $mark_attendance->clock_out_latitude = "24.85758065592256";
                                 $mark_attendance->clock_out_longitude = "67.12476908400743";
                                 if($shift){
-                                    $mark_attendance->clock_in_datetime = $date.$shift->start_time;
-                                    $mark_attendance->clock_out_datetime = $date.$shift->end_time;
+                                    $mark_attendance->clock_in_datetime = $date.' '.$shift->start_time;
+                                    $mark_attendance->clock_out_datetime = $date.' '.$shift->end_time;
                                 }else{
-                                    $mark_attendance->clock_in_datetime = $date.'09:00:00';
-                                    $mark_attendance->clock_out_datetime = $date.'06:00:00';
+                                    $mark_attendance->clock_in_datetime = $date.' 09:00:00';
+                                    $mark_attendance->clock_out_datetime = $date.' 06:00:00';
                                 }
                                 $mark_attendance->leave_status = 1;
                                 $mark_attendance->save();
