@@ -24,8 +24,8 @@
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
-                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Availed Leaves</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Leave From</th>
                                     <th class="border-primary border-darken-1">Leave TO</th>
                                     <th class="border-primary border-darken-1">Request Date</th>
@@ -188,7 +188,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.leave.list') }}',
-                order: [[0, 'asc']],
+                order: [[11, 'desc']],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
@@ -199,8 +199,8 @@
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {data: 'employee_type', name: 'employee_leaves.employee_type_id', class: 'align-middle employee_type'},
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic'},
-                    {data: 'status', name: 'ls.name', class: 'align-middle status'},
                     {data: 'leave_count', name: 'ls.name', class: 'align-middle leave_count', orderable: false, searchable: false},
+                    {data: 'status', name: 'ls.name', class: 'align-middle status'},
                     {data: 'from', name: 'employee_leaves.from', class: 'align-middle from'},
                     {data: 'to', name: 'employee_leaves.to', class: 'align-middle to'},
                     {data: 'requested', name: 'employee_leaves.created_at', class: 'align-middle requested'},
