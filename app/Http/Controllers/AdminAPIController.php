@@ -4084,7 +4084,7 @@ class AdminAPIController extends Controller
                         }
                     }
                 }
-                return response()->json(['status' => 0, 'response' => $employee_leaves]);
+                return response()->json(['status' => 0, 'approver_response' => $data]);
             }
             return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
         }
