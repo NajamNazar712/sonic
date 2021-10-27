@@ -19,7 +19,7 @@
 
                             <div class="text-center">
                                 <form id="manifest_number_search_form" class="d-inline-block form-inline mb-1 justify-content-center text-left" novalidate="novalidate">
-                                    <div class="form-group">
+                                    <div class="form-group mr-1">
                                         <input type="text" name="manifest_number" class="form-control manifest_number" id="manifest_number" placeholder="Manifest Number">
                                     </div>
                                 </form>
@@ -67,7 +67,7 @@
                                     <th class="border-primary border-darken-1">Manifest Created At</th>
                                     <th class="border-primary border-darken-1">Transited Date</th>
                                     <th class="border-primary border-darken-1">Transited By</th>
-                                    <th class="border-primary border-darken-1">Updated By</th>
+                                    <th class="border-primary border-darken-1">Seal Updated By</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -228,7 +228,7 @@
                             head.push('Status');
                             head.push('Manifest Created At');
                             head.push('Transited By');
-                            head.push('Updated By');
+                            head.push('Seal Updated By');
 
 
                             $.each(result.data, function(index, values) {

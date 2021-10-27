@@ -429,7 +429,7 @@
                     url: '{!! route('admin.cargo_manifest.print') !!}',
                     method: 'POST',
                     data: {
-                        'ids': manifest_id,
+                        'cargo_manifest_ids': manifest_id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })

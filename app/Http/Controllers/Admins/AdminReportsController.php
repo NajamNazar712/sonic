@@ -4036,7 +4036,7 @@ class AdminReportsController extends Controller
         }
         $petty = DB::connection('reports')->table('petty_cash_statement_details')->join('petty_cash_statements as pcs','pcs.id','=','petty_cash_statement_details.petty_cash_statement_id')
             ->join('cities as dc','dc.id','=', 'petty_cash_statement_details.hub_id')
-            ->join('cities as h','h.id','=', 'pcs.hub_id')
+            ->leftjoin('cities as h','h.id','=', 'pcs.hub_id')
             ->join('admins as cb','cb.id','=', 'pcs.created_by')
             ->leftjoin('admins as sub', 'sub.id', '=', 'petty_cash_statement_details.updated_by')
             ->leftjoin('petty_cash_account_heads as pch', 'pch.id','=','petty_cash_statement_details.account_head_id')
@@ -4047,7 +4047,12 @@ class AdminReportsController extends Controller
 //            ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('pcs.hub_id', session('hubs'));
+            $petty = $petty->where(function ($query) {
+                $query->whereIn('pcs.origin_hub_id', session('hubs'))
+                    ->orWhereIn('pcs.destination_hub_id', session('hubs'))
+                    ->orWhere('pcs.created_by', Auth::id())
+                    ->orWhereIn('pcs.hub_id', session('hubs'));
+            });
         }
 
         $petty = Datatables::of($petty)

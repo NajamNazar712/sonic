@@ -1346,7 +1346,6 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Tracking No.</strong></td>
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Item Qty</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
@@ -1390,7 +1389,6 @@ class DeliveryController extends Controller
                             <td class="'.$class.'">' . $tracking_number  . '</td>
                             <td class="'.$class .'">' . $user_details . '</td>
                             <td class="'.$class.' ' . $details_change_class .'">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td class="'.$class.' ' . $details_change_class .'">' . $shipment->consignee_address . '</td>
                 ';
 
                 if ($shipment->booking_type_id == 1) {
@@ -3814,7 +3812,6 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>S. No.</strong></td>
                             <td class="color primary"><strong>Tracking No.</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Status</strong></td>
@@ -3838,7 +3835,6 @@ class DeliveryController extends Controller
                             <td>' . $total_shipments . '</td>
                             <td>' . $shipment->tracking_number . '</td>
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td>' . $shipment->consignee_address . '</td>
                             <td>' . $shipment->booking_type->booking_type . '</td>
                             <td>' . $user_details . '</td>
                             <td>' . $status->name . '</td>
@@ -4691,10 +4687,11 @@ class DeliveryController extends Controller
         }
 
         $sdn = StationDepositNote::
-        join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
+            join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->leftjoin('station_deposit_note_adjustments as sdna',function($join){
-                $join->on('sdna.sdn_id','station_deposit_notes.id')
-                    ->latest();
+                $join->on('sdna.sdn_id', '=','station_deposit_notes.id')
+                    ->where('sdna.id', '=',
+                        DB::raw('(select max(id) from station_deposit_note_adjustments where station_deposit_note_adjustments.sdn_id = station_deposit_notes.id)'));
             })
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
@@ -5488,7 +5485,6 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>S. No.</strong></td>
                             <td class="color primary"><strong>Tracking No.</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Weight</strong></td>
@@ -5512,7 +5508,6 @@ class DeliveryController extends Controller
                             <td>' . $total_shipments . '</td>
                             <td>' . $shipment->tracking_number . '</td>
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td>' . $shipment->consignee_address . '</td>
                             <td>' . $shipment->booking_type->booking_type . '</td>
                             <td>' . $user_details . '</td>
                             <td>' . (($shipment->booking_type_id == 2) ? $shipment->replacement_weight : $shipment->actual_weight) . '</td>
