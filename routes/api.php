@@ -215,7 +215,7 @@ Route::name('api.')->group(function () {
             Route::post('fake_status', 'Rider\RiderAPIController@fake_status_count')->name('fake_status');
 
             Route::prefix('leave')->name('leave.')->group(function () {
-                Route::get('index', 'Rider\RiderAPIController@leave_index')->name('index');
+                Route::post('index', 'Rider\RiderAPIController@leave_index')->name('index');
                 Route::post('apply', 'Rider\RiderAPIController@leave_apply')->name('apply');
                 Route::get('list', 'Rider\RiderAPIController@employee_leave_list')->name('list');
             });
