@@ -902,6 +902,21 @@ class DeliveryController extends Controller
                     $rider_attendance_action->latitude = '0';
                     $rider_attendance_action->longitude = '0';
                     $rider_attendance_action->save();
+                }else{
+                    $rider_attendance = $rider_attendance->get()->first();
+                    $rider_attendance->clock_in_datetime = $attendance_datetime;
+                    $rider_attendance->save();
+
+
+                    $rider_attendance_action = new EmployeeAttendanceActionLog();
+                    $rider_attendance_action->employee_id = $rider->id;
+                    $rider_attendance_action->employee_type = 2;
+                    $rider_attendance_action->action_id = 1;
+                    $rider_attendance_action->attendance_date = $attendance_date;
+                    $rider_attendance_action->action_date = $attendance_datetime;
+                    $rider_attendance_action->latitude = '0';
+                    $rider_attendance_action->longitude = '0';
+                    $rider_attendance_action->save();
                 }
             }
             //rider attendance end
@@ -7082,6 +7097,22 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                                 
                                 $rider_attendance_action = new EmployeeAttendanceActionLog();
                                 $rider_attendance_action->employee_id = $rider_id;
+                                $rider_attendance_action->employee_type = 2;
+                                $rider_attendance_action->action_id = 1;
+                                $rider_attendance_action->attendance_date = $attendance_date;
+                                $rider_attendance_action->action_date = $attendance_datetime;
+                                $rider_attendance_action->latitude = '0';
+                                $rider_attendance_action->longitude = '0';
+                                $rider_attendance_action->save();
+                            }else{
+                                $rider_attendance = $rider_attendance->get()->first();
+
+                                $rider_attendance->clock_in_datetime = $attendance_datetime;
+                                $rider_attendance->save();
+            
+            
+                                $rider_attendance_action = new EmployeeAttendanceActionLog();
+                                $rider_attendance_action->employee_id = $rider->id;
                                 $rider_attendance_action->employee_type = 2;
                                 $rider_attendance_action->action_id = 1;
                                 $rider_attendance_action->attendance_date = $attendance_date;
