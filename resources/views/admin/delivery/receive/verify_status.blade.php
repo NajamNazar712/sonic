@@ -42,6 +42,7 @@
                             <th class="border-primary border-darken-1">Received/Refused By</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Open Box</th>
+                            <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Rider Status</th>
                             <th class="border-primary border-darken-1">Rider Reason</th>
                             <th class="border-primary border-darken-1">Fake Status</th>
@@ -413,6 +414,9 @@
                     {data:'received_or_refused_by',name: 'sj.received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
                     {data:'open_box',name: 'open_box', class: 'align-middle text-center open_box',orderable: false, searchable: false},
+                    
+                    {data:'rider_name',name: 'riders', class: 'align-middle status form-group rider_name',orderable: false, searchable: false},
+
                     {data:'rider_status',name: 'rss.name', class: 'align-middle status form-group rider_status',orderable: false, searchable: false},
                     {data:'rider_reason',name: 'rssr.name', class: 'align-middle reason form-group rider_reason',orderable: false, searchable: false},
                     {data:'fake_status',name: 'fake_status', class: 'align-middle fake_status',orderable: false, searchable: false},
