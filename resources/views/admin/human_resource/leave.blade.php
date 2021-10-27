@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
 
-@section('title', 'Department')
+@section('title', 'Employee Leaves')
 
 @section('content')
-    <h1>Department</h1>
+    <h1>Employee Leaves</h1>
 
     <section>
         <div class="row">
@@ -118,14 +118,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#head_list').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Department Head *',
-                dropdownParent: $("#addDepartmentForm")
-            });
-            $('#edit_head_list').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Department Head *',
-                dropdownParent: $("#editDepartmentForm")
-            });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -183,7 +175,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Department',
+                        title: 'Employee Leaves',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
