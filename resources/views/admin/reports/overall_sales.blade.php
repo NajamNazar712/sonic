@@ -567,7 +567,7 @@
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
-                    { data:'arrival_date' ,name: 'sjr.created_at', class: 'align-middle arrival_date'},
+                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'ridername' ,name: 'r.name', class: 'align-middle ridername'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
