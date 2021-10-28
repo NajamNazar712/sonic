@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\AdminAPIController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
@@ -3335,7 +3336,7 @@ class AdminHumanResourseController extends Controller
                         }
                         $shift = EmployeeShift::find($user->shift_id);
                         if ($leave_request->to) {
-                            $dates = $this->generateDateRange($leave_request->from, $leave_request->to);
+                            $dates = AdminAPIController::generateDateRange($leave_request->from, $leave_request->to);
                         } else {
                             $dates[] = $leave_request->from;
                         }
