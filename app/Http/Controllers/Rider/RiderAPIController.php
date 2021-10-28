@@ -9922,6 +9922,7 @@ class RiderAPIController extends Controller
             ->where('employee_id', $rider_id)
             ->where('employee_type_id', 2);
         if ($employee_leaves->exists()) {
+            $employee_leaves = $employee_leaves->get();
             $data = array();
             foreach ($employee_leaves as $employee_leave) {
                 $datum = array();
