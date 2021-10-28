@@ -3346,7 +3346,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('leave')->name('leave.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@leave_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@leave_list')->name('list');
-            Route::post('edit', 'Admins\AdminHumanResourseController@leave_edit')->name('approve');
+            Route::post('edit', 'Admins\AdminHumanResourseController@leave_edit')->name('edit');
             Route::post('approve', 'Admins\AdminHumanResourseController@leave_approve')->name('approve');
             Route::post('reject', 'Admins\AdminHumanResourseController@leave_reject')->name('reject');
         });
