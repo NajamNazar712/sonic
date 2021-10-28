@@ -4190,6 +4190,11 @@ class AdminAPIController extends Controller
                     $datum['rejected_reason'] = $employee_leave->rejected_reason;
                     $datum['status_id'] = $employee_leave->status_id;
                     $datum['status'] = $employee_leave->status;
+                    if ($admin_role == 63){
+                        $datum['role'] = 0;
+                    }else{
+                        $datum['role'] = 1;
+                    }
                     if($employee_leave->to){
                         $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                         $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
