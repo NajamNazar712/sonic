@@ -4354,6 +4354,43 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function view_calender(Request $request)
+    {
+        $rules = [
+            'leave_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+            if ($employee_leaves->exists()) {
+                $employee_leaves = $employee_leaves->first();
+                if ($employee_leaves->to) {
+                    $dates = self::generateDateRange($employee_leaves->from, $employee_leaves->to);
+                    $data = array();
+                    foreach ($dates as $date) {
+                        $datum = array();
+                        $datum['date'] = $date;
+                        $datum['status'] = $employee_leaves->status;
+                        $data[] = $datum;
+                    }
+                } else {
+                    $datum = array();
+                    $datum['date'] = $employee_leaves->from;
+                    $datum['status'] = $employee_leaves->status;
+                    $data[] = $datum;
+                }
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+
+        }
+    }
+
     public function hr_leave_edit(Request $request)
     {
 

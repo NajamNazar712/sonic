@@ -283,6 +283,7 @@ Route::name('api.')->group(function () {
                 Route::post('approve', 'AdminAPIController@leave_approve')->name('approve');
                 Route::post('reject', 'AdminAPIController@leave_reject')->name('reject');
                 Route::post('detail', 'AdminAPIController@leave_detail')->name('detail');
+                Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
             });
 
