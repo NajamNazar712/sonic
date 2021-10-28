@@ -1729,6 +1729,9 @@
                         @if (session('role_id') == 1 || in_array(596, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(596, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.leave.index')}}">Employee Leaves</a></li>
+                        @endif
                    
 
                 </ul>
