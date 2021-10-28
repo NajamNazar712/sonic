@@ -281,7 +281,7 @@
                 $('#edit_to').val(to);
                 $('#edit_reason').val(reason);
                 // $('#edit_head_list').val(head_id).trigger('change');
-                $('#editDepartmentModal').modal('show');
+                $('#editLeaveModal').modal('show');
             });
 
             $("#addDepartmentForm").validate({
