@@ -94,9 +94,8 @@
                         <div class="form-group">
                             <input type="text" name="department" id="edit_department" class="form-control" readonly>
                         </div>
-                        <label for="edit_from">From Date<span class="danger">*</span></label>
+                        <label for="edit_from" class="text-left">From Date<span class="danger">*</span></label>
                         <div class="form-group input-group ">
-                            <label for="edit_from">From Date<span class="danger">*</span></label>
                             <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                         <span class="la la-calendar-o"></span>
@@ -106,7 +105,7 @@
                                    class="form-control pickadate bg-primary border-primary white rounded-right"
                                    id="edit_from" placeholder="Leave Date (From)" data-rule-required="true" data-msg-required="Leave-From Date is required">
                         </div>
-                        <label for="edit_to">To Date<span class="danger">*</span></label>
+                        <label for="edit_to" class="text-left">To Date</label>
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -115,7 +114,7 @@
                             </div>
                             <input type="text" name="to"
                                    class="form-control pickadate bg-primary border-primary white rounded-right"
-                                   id="edit_to" placeholder="Leave Date (To)"  data-rule-required="true" data-msg-required="Leave-To Date is required">
+                                   id="edit_to" placeholder="Leave Date (To)">
                         </div>
                         <div class="form-group">
                             <textarea name="reason" class="form-control" id="edit_reason" placeholder="Reason" readonly></textarea>
