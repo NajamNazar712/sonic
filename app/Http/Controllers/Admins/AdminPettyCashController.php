@@ -570,7 +570,8 @@ class AdminPettyCashController extends Controller
             $petty = $petty->where(function ($query) {
                     $query->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))
                     ->orWhereIn('petty_cash_statements.destination_hub_id', session('hubs'))
-                    ->orWhere('petty_cash_statements.created_by', Auth::id());
+                    ->orWhere('petty_cash_statements.created_by', Auth::id())
+                    ->orWhereIn('petty_cash_statements.hub_id', session('hubs'));
                 });
         }
 
@@ -937,8 +938,11 @@ class AdminPettyCashController extends Controller
             ->whereIn('petty_cash_statements.status', [3, 4, 5]);
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))->orWhere(function ($query) {
-                $query->whereIn('petty_cash_statements.destination_hub_id', session('hubs'));
+            $petty = $petty->where(function ($query) {
+                $query->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))
+                ->orWhereIn('petty_cash_statements.destination_hub_id', session('hubs'))
+                ->orWhere('petty_cash_statements.created_by', Auth::id())
+                ->orWhereIn('petty_cash_statements.hub_id', session('hubs'));
             });
         }
 
@@ -1018,7 +1022,12 @@ class AdminPettyCashController extends Controller
             ->select('petty_cash_statements.*','hubs.name as hub_name');
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('petty_cash_statements.hub_id', session('hubs'));
+            $petty = $petty->where(function ($query) {
+                $query->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))
+                ->orWhereIn('petty_cash_statements.destination_hub_id', session('hubs'))
+                ->orWhere('petty_cash_statements.created_by', Auth::id())
+                ->orWhereIn('petty_cash_statements.hub_id', session('hubs'));
+            });
         }
 
         if(!$petty->exists())
@@ -1147,8 +1156,11 @@ class AdminPettyCashController extends Controller
             ->where('petty_cash_statements.status', 6);
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))->orWhere(function ($query) {
-                $query->whereIn('petty_cash_statements.destination_hub_id', session('hubs'));
+            $petty = $petty->where(function ($query) {
+                $query->whereIn('petty_cash_statements.origin_hub_id', session('hubs'))
+                ->orWhereIn('petty_cash_statements.destination_hub_id', session('hubs'))
+                ->orWhere('petty_cash_statements.created_by', Auth::id())
+                ->orWhereIn('petty_cash_statements.hub_id', session('hubs'));
             });
         }
 
@@ -1566,8 +1578,11 @@ class AdminPettyCashController extends Controller
             ->select('petty_cash_statement_drafts.id as draft_id', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statement_drafts.reference_no', 'petty_cash_statement_drafts.from', 'petty_cash_statement_drafts.to', 'cb.name as created_by', 'petty_cash_statement_drafts.created_at', 'petty_cash_statement_drafts.total_amount');
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('petty_cash_statement_drafts.origin_hub_id', session('hubs'))->orWhere(function ($query) {
-                $query->whereIn('petty_cash_statement_drafts.destination_hub_id', session('hubs'));
+            $petty = $petty->where(function ($query) {
+                $query->whereIn('petty_cash_statement_drafts.origin_hub_id', session('hubs'))
+                ->orWhereIn('petty_cash_statement_drafts.destination_hub_id', session('hubs'))
+                ->orWhere('petty_cash_statement_drafts.created_by', Auth::id())
+                ->orWhereIn('petty_cash_statement_drafts.hub_id', session('hubs'));
             });
         }
 
