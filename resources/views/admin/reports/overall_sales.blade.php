@@ -375,7 +375,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
