@@ -143,7 +143,7 @@
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="reject_leave_id" value="">
                         <div class="form-group">
-                            <textarea name="reason" class="form-control" id="reject_reason" placeholder="Reason"></textarea>
+                            <textarea name="reason" class="form-control" id="reject_reason" placeholder="Reason" rows="8"></textarea>
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="reject" class="btn btn-primary" value="reject">Reject</button>
