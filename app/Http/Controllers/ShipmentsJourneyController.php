@@ -122,7 +122,7 @@ class ShipmentsJourneyController extends Controller
               ShipmentStatusWebhookController::webhook_subscription($shipment_id, $shipper_status_id);
           }
 
-          if($shipper_status_id == 14 || $shipper_status_id == 20)
+          if($shipper_status_id == 20)
           {
               FinalChargesWebhookController::webhook_subscription($shipment_id);
           }
