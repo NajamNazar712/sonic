@@ -18,6 +18,7 @@
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S No.</th>
+                                    <th class="border-primary border-darken-1">Leave ID</th>
                                     <th class="border-primary border-darken-1">Trax ID</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">Designation</th>
@@ -211,6 +212,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Leave ID');
                             head.push('Trax ID');
                             head.push('Name');
                             head.push('Designation');
@@ -228,6 +230,7 @@
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
+                                row.push(values.leave_id);
                                 row.push(values.trax_id);
                                 row.push(values.name);
                                 row.push(values.designation);
@@ -276,6 +279,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
                     },
+                    {data: 'leave_id', name: 'employee_leaves.id', class: 'align-middle leave_id'},
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id'},
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
                     {data: 'designation', name: 'a.designation', class: 'align-middle designation'},

@@ -3127,6 +3127,9 @@ class AdminHumanResourseController extends Controller
                     return $employee->trax_id;
                 }
             })
+            ->editColumn('leave_id', function ($employee) {
+                    return $employee->leave_id;
+            })
             ->editColumn('name', function ($employee) {
                 if ($employee->employee_type == 2) {
                     return $employee->rider_name;
@@ -3177,7 +3180,7 @@ class AdminHumanResourseController extends Controller
                 return $leave_count;
             })
             ->addColumn("action", function ($employee) {
-                if ($employee->status_id == 2) {
+                if (in_array($employee->status_id, [1,2,3])) {
                     if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions'))) {
                         $dropdown = '
               <div class="btn-group">
@@ -3217,7 +3220,7 @@ class AdminHumanResourseController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
-                if ($employee_leaves->status == 2) {
+                if (in_array($employee_leaves->status, [1,2,3])) {
                     $employee_leaves->status = 4;
                     $employee_leaves->updated_by = $admin_id;
                     if ($employee_leaves->employee_id == 1) {
@@ -3298,7 +3301,7 @@ class AdminHumanResourseController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
-                if ($employee_leaves->status == 2) {
+                if (in_array($employee_leaves->status, [1,2,3])) {
                     $employee_leaves->status = 5;
                     $employee_leaves->rejected_reason = $request->reason;
                     $employee_leaves->updated_by = $admin_id;
@@ -3320,7 +3323,7 @@ class AdminHumanResourseController extends Controller
                 $leave_request = EmployeeLeave::where('id', $request->leave_id);
                 if ($leave_request->exists()) {
                     $leave_request = $leave_request->first();
-                    if ($leave_request->status == 2) {
+                    if (in_array($leave_request->status, [1,2,3])) {
                         $leave_request->from = $request->from_formatted;
                         $leave_request->to = $request->to_formatted;
                         $leave_request->applied_reason = $request->reason;
