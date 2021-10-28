@@ -1110,7 +1110,6 @@ class AdminCRMController extends Controller
                 return strip_tags($request->description);
             })
             ->addColumn('added_by', function($requests){
-                return 1;
                 if($requests->launched_added_by == 0) {
                     return 'Admin';
                 }
@@ -1123,7 +1122,6 @@ class AdminCRMController extends Controller
                 else if($requests->launched_added_by == 3){
                     return 'Consignee';
                 }
-
                 return $requests->launched_added_by;
             })
             ->addColumn('current_tat', function ($requests){
