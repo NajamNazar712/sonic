@@ -68,28 +68,45 @@
             </div>
         </div>
     </div>
-    <div class="modal fade text-left" id="editDepartmentModal" data-backdrop="static" tabindex="-1" role="dialog"
-         aria-labelledby="editDepartmentModal" aria-hidden="true">
+    <div class="modal fade text-left" id="editLeaveModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="editLeaveModal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel8">Edit Department</h4>
+                    <h4 class="modal-title" id="myModalLabel8">Edit Leave</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form action="{{route('admin.human_resource.department.edit')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="editDepartmentForm" novalidate="novalidate">
+                    <form action="{{route('admin.human_resource.leave.edit')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="editLeaveForm" novalidate="novalidate">
                         {{csrf_field()}}
-                        <input type="hidden" name="department_id" id="department_id" value="">
+                        <input type="hidden" name="leave_id" id="leave_id" value="">
                         <div class="form-group">
-                            <input type="text" name="name" id="edit_name" class="form-control" placeholder="Department Name*" data-rule-required="true" data-msg-required="Name is required">
+                            <input type="text" name="name" id="edit_name" class="form-control" readonly>
                         </div>
                         <div class="form-group">
-                            <textarea name="description" class="form-control" id="edit_description" placeholder="Description"></textarea>
+                            <input type="text" name="trax_id" id="edit_trax_id" class="form-control" readonly>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="designation" id="edit_designation" class="form-control" readonly>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="department" id="edit_department" class="form-control" readonly>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <input type="text" name="from" id="edit_from" class="form-control" data-rule-required="true" data-msg-required="From Date is required">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="to" id="edit_to" class="form-control" data-rule-required="true" data-msg-required="To Date is required">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <textarea name="reason" class="form-control" id="edit_reason" placeholder="Reason" readonly></textarea>
                         </div>
                         <div class="form-group ml-1">
-                            <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>
+                            <button type="submit" name="edit" class="btn btn-primary" value="edit">Edit & Approve</button>
                         </div>
                     </form>
                 </div>
@@ -249,12 +266,21 @@
             $('body').on('click', '.edit', function (e) {
                 var id = $(this).data('target-id');
                 var name = table.row($(this).parents('tr')).data().name;
-                var description = table.row($(this).parents('tr')).data().description;
-                var head_id = table.row($(this).parents('tr')).data().head_id;
-                $('#department_id').val(id);
+                var trax_id = table.row($(this).parents('tr')).data().trax_id;
+                var designation = table.row($(this).parents('tr')).data().designation;
+                var department = table.row($(this).parents('tr')).data().department;
+                var from = table.row($(this).parents('tr')).data().from;
+                var to = table.row($(this).parents('tr')).data().to;
+                var reason = table.row($(this).parents('tr')).data().applied_reason;
+                $('#leave_id').val(id);
                 $('#edit_name').val(name);
-                $('#edit_description').val(description);
-                $('#edit_head_list').val(head_id).trigger('change');
+                $('#edit_trax_id').val(trax_id);
+                $('#edit_department').val(department);
+                $('#edit_designation').val(designation);
+                $('#edit_from').val(from);
+                $('#edit_to').val(to);
+                $('#edit_reason').val(reason);
+                // $('#edit_head_list').val(head_id).trigger('change');
                 $('#editDepartmentModal').modal('show');
             });
 
