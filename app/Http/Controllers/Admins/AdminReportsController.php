@@ -9607,7 +9607,7 @@ class AdminReportsController extends Controller
     {
         if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),268);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),467);
         }
         $incentive = DB::connection('reports')->table('sales_incentives')
             ->join('sales_territories as st', 'st.id', '=', 'sales_incentives.territory_id')
@@ -9648,7 +9648,7 @@ class AdminReportsController extends Controller
     {
         if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),268);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),468);
         }
         $incentive = DB::connection('reports')->table('sales_consolidated_incentives')
             ->join('admins as a', 'a.id', '=', 'sales_consolidated_incentives.admin_id')

@@ -19,6 +19,8 @@ class UpdateActivityTrailSeederForSalesIncentive extends Seeder
             array('id' => 462, 'screen_name' => 'Sales Incentive - Consolidated Report', 'action'=> 'View'),
             array('id' => 463, 'screen_name' => 'Sales Incentive - Territory', 'action'=> 'Excel Download'),
             array('id' => 464, 'screen_name' => 'Sales Incentive - Designation', 'action'=> 'Excel Download'),
+            array('id' => 467, 'screen_name' => 'Sales Incentive - Report', 'action'=> 'Excel Download'),
+            array('id' => 468, 'screen_name' => 'Sales Incentive - Consolidated Report', 'action'=> 'Excel Download'),
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
