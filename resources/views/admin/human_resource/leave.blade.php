@@ -94,7 +94,7 @@
                         <div class="form-group">
                             <input type="text" name="department" id="edit_department" class="form-control" readonly>
                         </div>
-                        <div class="col">
+                        <div class="row">
                             <div class="col">
                                 <div class="form-group input-group ">
                                     <div class="input-group-prepend">
