@@ -9940,6 +9940,7 @@ class RiderAPIController extends Controller
                 }else{
                     $datum['days_count'] = 1;
                 }
+                $data[] = $datum;
             }
             return response()->json(['status' => 0, 'response' => $data]);
         }
