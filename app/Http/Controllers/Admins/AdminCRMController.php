@@ -874,11 +874,11 @@ class AdminCRMController extends Controller
                     return 'Shipper Substitute User';
                 }
                 else if($requests->launched_added_by == 3){
-                    return 'Consignee';
+                    return 'Retail';
                 }
                 else if($requests->launched_added_by == 4)
                 {
-                    return 'External';
+                    return 'Consignee';
                 }
             })
             ->editColumn('last_comment_name', function($requests){
@@ -1130,6 +1130,9 @@ class AdminCRMController extends Controller
                     return 'Shipper Substitute User';
                 }
                 else if($requests->launched_added_by == 3){
+                    return 'Retail';
+                }
+                else if($requests->launched_added_by == 4){
                     return 'Consignee';
                 }
                 return $requests->launched_added_by;
@@ -1567,6 +1570,9 @@ class AdminCRMController extends Controller
                     return 'Shipper Substitute User';
                 }
                 else if($requests->launched_added_by == 3){
+                    return 'Retail';
+                }
+                else if($requests->launched_added_by == 4){
                     return 'Consignee';
                 }
             })
@@ -1878,6 +1884,9 @@ class AdminCRMController extends Controller
                     return 'Shipper Substitute User';
                 }
                 else if($requests->launched_added_by == 3){
+                    return 'Retail';
+                }
+                else if($requests->launched_added_by == 4){
                     return 'Consignee';
                 }
             })
@@ -2915,6 +2924,10 @@ class AdminCRMController extends Controller
                 $join->on('su.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(2));
             })
+            ->leftjoin('retail_users as ru', function ($join) {
+                $join->on('ru.id', '=', 'crm_requests.launched_by_id')
+                    ->where('crm_requests.launched_by', '=', DB::raw(3));
+            })
             ->leftjoin('consignee_users as cu', function ($join) {
                 $join->on('cu.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(3));
@@ -2963,7 +2976,7 @@ class AdminCRMController extends Controller
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
             })
             ->leftjoin('crm_consignee_info_prints as ccip', 'ccip.crm_request_id', '=', 'crm_requests.id')
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone', 'dc.id as consignee_city_id', 's.shipper_Status_id as current_status_id','consolidations.consolidation_id', 's.intercepted as intercepted','s.shipping_mode_id as shipping_mode_id', 'crcnt.id as case_nature_type_id', 's.id as shipment_id', 'ccip.id as print_id', 's.booking_type_id as booking_type_id','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description', 'at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone', 'dc.id as consignee_city_id', 's.shipper_Status_id as current_status_id','consolidations.consolidation_id', 's.intercepted as intercepted','s.shipping_mode_id as shipping_mode_id', 'crcnt.id as case_nature_type_id', 's.id as shipment_id', 'ccip.id as print_id', 's.booking_type_id as booking_type_id','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude')
             ->where('crm_requests.status_id', 2)
             ->whereIn('crcnt.id', [11, 12, 13])
             ->groupBy('crm_requests.id');
@@ -3046,6 +3059,9 @@ class AdminCRMController extends Controller
                     return 'Shipper Substitute User';
                 }
                 else if($requests->launched_added_by == 3){
+                    return 'Retail';
+                }
+                else if($requests->launched_added_by == 4){
                     return 'Consignee';
                 }
             })
@@ -3197,6 +3213,8 @@ class AdminCRMController extends Controller
                 }else if($requests->launched_added_by == 2){
                     $name = $requests->sub_shipper;
                 }else if($requests->launched_added_by == 3){
+                    $name = $requests->retail_user;
+                }else if($requests->launched_added_by == 4){
                     $name = $requests->consignee_user;
                 }
                 return $name;
