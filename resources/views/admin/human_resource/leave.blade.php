@@ -41,33 +41,6 @@
             </div>
         </div>
     </section>
-    <div class="modal fade text-left" id="addDepartmentModal" data-backdrop="static" tabindex="-1" role="dialog"
-         aria-labelledby="addDepartmentModal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel8">Add Department</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form action="{{route('admin.human_resource.department.add')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="addDepartmentForm" novalidate="novalidate">
-                        {{csrf_field()}}
-                        <div class="form-group">
-                            <input type="text" name="name" id="name" class="form-control" placeholder="Department Name*" data-rule-required="true" data-msg-required="Name is required">
-                        </div>
-                        <div class="form-group">
-                            <textarea name="description" class="form-control" id="description" placeholder="Description"></textarea>
-                        </div>
-                        <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="modal fade text-left" id="editLeaveModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="editLeaveModal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
@@ -143,11 +116,31 @@
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="reject_leave_id" value="">
                         <div class="form-group">
-                            <textarea name="reason" class="form-control" id="reject_reason" placeholder="Reason" rows="8"></textarea>
+                            <textarea name="reason" class="form-control" id="reject_reason" placeholder="Reason" rows="6" maxlength="255"></textarea>
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="reject" class="btn btn-primary" value="reject">Reject</button>
                         </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="approveLeaveModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="approveLeaveModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Approve Leave</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.leave.approve')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="approveLeaveForm" novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="leave_id" id="approve_leave_id" value="">
                     </form>
                 </div>
             </div>
@@ -396,6 +389,39 @@
 
                     form.submit();
                 }
+            });
+
+            $('body').on('click', '.approve', function (e) {
+                var id = $(this).data('target-id');
+                $('#approveLeaveForm #approve_leave_id').val(id);
+                atext = "Select Yes to Approve Request!";
+                swal({
+                    title: 'Are You Sure?',
+                    text: atext,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $('#approveLeaveForm').submit();
+                    }
+                });
+
             });
         });
     </script>
