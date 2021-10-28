@@ -128,6 +128,32 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="rejectLeaveModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="rejectLeaveModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Reject Leave</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.leave.reject')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="rejectLeaveForm" novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="leave_id" id="reject_leave_id" value="">
+                        <div class="form-group">
+                            <textarea name="reason" class="form-control" id="reject_reason" placeholder="Reason"></textarea>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="reject" class="btn btn-primary" value="reject">Reject</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -302,10 +328,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-            $('#addDepartmentModal').on('hide.bs.modal', function () {
-                $('#name').val('');
-                $('#description').val('');
-            });
 
             $('body').on('click', '.edit', function (e) {
                 var id = $(this).data('target-id');
@@ -324,11 +346,21 @@
                 $('#edit_from').val(from);
                 $('#edit_to').val(to);
                 $('#edit_reason').val(reason);
-                // $('#edit_head_list').val(head_id).trigger('change');
                 $('#editLeaveModal').modal('show');
             });
 
-            $("#addDepartmentForm").validate({
+            $('body').on('click', '.reject', function (e) {
+                var id = $(this).data('target-id');
+                $('#reject_leave_id').val(id);
+                $('#rejectLeaveModal').modal('show');
+            });
+
+            $('#rejectLeaveModal').on('hide.bs.modal', function () {
+                $('#reject_leave_id').val('');
+                $('#reject_reason').val('');
+            });
+
+            $("#rejectLeaveForm").validate({
                 errorClass: "danger",
                 errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
@@ -336,7 +368,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Please Wait!',
-                        text: 'Department is being added!',
+                        text: 'Leave is being reject!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
@@ -346,7 +378,8 @@
                     form.submit();
                 }
             });
-            $("#editDepartmentForm").validate({
+
+            $("#editLeaveForm").validate({
                 errorClass: "danger",
                 errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
@@ -354,7 +387,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Please Wait!',
-                        text: 'Department is being Updated!',
+                        text: 'Leave is being Updated!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

@@ -3299,7 +3299,7 @@ class AdminHumanResourseController extends Controller
                 $employee_leaves = $employee_leaves->first();
                 if ($employee_leaves->status == 2) {
                     $employee_leaves->status = 5;
-                    $employee_leaves->rejected_reason = $request->rejection_reason;
+                    $employee_leaves->rejected_reason = $request->reason;
                     $employee_leaves->updated_by = $admin_id;
                     $employee_leaves->save();
                     return redirect()->back()->with('success', 'Leave Reject Successfully');
