@@ -9922,8 +9922,25 @@ class RiderAPIController extends Controller
             ->where('employee_id', $rider_id)
             ->where('employee_type_id', 2);
         if ($employee_leaves->exists()) {
-            $employee_leaves = $employee_leaves->get();
-            return response()->json(['status' => 0, 'response' => $employee_leaves]);
+            $data = array();
+            foreach ($employee_leaves as $employee_leave) {
+                $datum = array();
+                $datum['id'] = $employee_leave->id;
+                $datum['from'] = $employee_leave->from;
+                $datum['to'] = $employee_leave->to;
+                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['rejected_reason'] = $employee_leave->rejected_reason;
+                $datum['status_id'] = $employee_leave->status_id;
+                $datum['status'] = $employee_leave->status;
+                if($employee_leave->to){
+                    $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
+                    $datum['days_count'] = $start_date->diffInDays($end_date);
+                }else{
+                    $datum['days_count'] = 1;
+                }
+            }
+            return response()->json(['status' => 0, 'response' => $data]);
         }
         return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
     }
