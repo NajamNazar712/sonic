@@ -3324,8 +3324,8 @@ class AdminHumanResourseController extends Controller
                 if ($leave_request->exists()) {
                     $leave_request = $leave_request->first();
                     if ($leave_request->status == 2) {
-                        $leave_request->from = $request->from;
-                        $leave_request->to = $request->to;
+                        $leave_request->from = $request->from_formatted;
+                        $leave_request->to = $request->to_formatted;
                         $leave_request->applied_reason = $request->reason;
                         $leave_request->status = 4;
                         $leave_request->updated_by = $admin_id;

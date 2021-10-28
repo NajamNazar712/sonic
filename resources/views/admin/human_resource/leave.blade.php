@@ -95,11 +95,29 @@
                             <input type="text" name="department" id="edit_department" class="form-control" readonly>
                         </div>
                         <div class="col">
-                            <div class="form-group">
-                                <input type="text" name="from" id="edit_from" class="form-control" data-rule-required="true" data-msg-required="From Date is required">
+                            <div class="col">
+                                <div class="form-group input-group ">
+                                    <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                    </div>
+                                    <input type="text" name="from"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="edit_from" placeholder="Leave Date (From)" data-rule-required="true" data-msg-required="Leave-From Date is required">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <input type="text" name="to" id="edit_to" class="form-control" data-rule-required="true" data-msg-required="To Date is required">
+                            <div class="col">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                    </div>
+                                    <input type="text" name="to"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="edit_to" placeholder="Leave Date (To)"  data-rule-required="true" data-msg-required="Leave-To Date is required">
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
@@ -135,6 +153,32 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#editLeaveForm #edit_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#editLeaveForm #edit_from').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#editLeaveForm #edit_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#editLeaveForm #edit_to').pickadate('picker').set('max', $('#editLeaveForm #edit_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
