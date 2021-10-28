@@ -330,7 +330,7 @@
                 placeholder: 'Select Shipper',
                 allowClear:true
             });
-            $('#search_shipper').select2({
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Shipper",
                 allowClear:true,
