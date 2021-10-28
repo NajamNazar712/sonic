@@ -3102,14 +3102,14 @@ class AdminHumanResourseController extends Controller
     public function leave_index()
     {
 
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 392);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
         return view('admin.human_resource.leave');
     }
 
     public function leave_list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 116);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 466);
         }
         $employee_leaves = EmployeeLeave::leftjoin('admins as a', 'a.id', 'employee_leaves.employee_id')
             ->leftjoin('admins as u', 'u.id', 'employee_leaves.updated_by')
@@ -3178,17 +3178,17 @@ class AdminHumanResourseController extends Controller
             })
             ->addColumn("action", function ($employee) {
                 if ($employee->status_id == 2) {
-                    if (session('role_id') == 1 || in_array(485, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions'))) {
                         $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                        if (session('role_id') == 1 || in_array(485, session('permissions'))) {
+                        if (session('role_id') == 1 || in_array(614, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                         }
-                        if (session('role_id') == 1 || in_array(485, session('permissions'))) {
+                        if (session('role_id') == 1 || in_array(615, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
                         }
