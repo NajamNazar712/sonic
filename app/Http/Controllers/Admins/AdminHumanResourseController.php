@@ -3321,6 +3321,7 @@ class AdminHumanResourseController extends Controller
             } else {
                 $leave_request = EmployeeLeave::where('id', $request->leave_id);
                 if ($leave_request->exists()) {
+                    $leave_request = $leave_request->first();
                     if ($leave_request->status == 2) {
                         $leave_request->from = $request->from;
                         $leave_request->to = $request->to;
