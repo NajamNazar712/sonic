@@ -107,7 +107,7 @@ class AdminAPIController extends Controller
         return $distance;
     }
 
-    public function generateDateRange($start_date, $end_date)
+    public static function generateDateRange($start_date, $end_date)
     {
         $start_date = Carbon::parse($start_date);
         $end_date = Carbon::parse($end_date);
