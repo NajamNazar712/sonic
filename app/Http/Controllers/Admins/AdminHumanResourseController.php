@@ -3317,10 +3317,6 @@ class AdminHumanResourseController extends Controller
         $admin_id = Auth::id();
         $admin = Admin::find($admin_id);
         if ($admin) {
-            $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2])->where('id', '<>', $request->leave_id);
-            if ($leave->exists()) {
-                return redirect()->back()->with('error', 'Leave Request Already Submitted & Pending for Approval');
-            } else {
                 $leave_request = EmployeeLeave::where('id', $request->leave_id);
                 if ($leave_request->exists()) {
                     $leave_request = $leave_request->first();
@@ -3395,6 +3391,5 @@ class AdminHumanResourseController extends Controller
                 }
                 return redirect()->back()->with('error', 'Invalid Leave ID');
             }
-        }
     }
 }
