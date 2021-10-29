@@ -6268,7 +6268,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
 
                     ]);*/
 
-                    $shipment_journey = $shipment->shipment_journey->latest()->first();
+                    $shipment_journey = $shipment->shipment_journey()->latest()->first();
 
                     $default_hub_id = Admin::find($shipment_journey->admin_id)->default_hub_id;
                     MisroutedHistory::create([
