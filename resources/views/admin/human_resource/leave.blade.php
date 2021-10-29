@@ -97,7 +97,7 @@
                             <textarea name="reason" class="form-control" id="edit_reason" placeholder="Reason" readonly></textarea>
                         </div>
                         <div class="form-group ml-1">
-                            <button type="submit" name="edit" class="btn btn-primary" value="edit">Edit & Approve</button>
+                            <button type="submit" name="edit" class="btn btn-primary" value="edit">Edit</button>
                         </div>
                     </form>
                 </div>

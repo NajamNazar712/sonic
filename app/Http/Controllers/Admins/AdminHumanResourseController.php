@@ -3169,9 +3169,9 @@ class AdminHumanResourseController extends Controller
                 if($employee->to){
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee->from);
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee->to);
-                    $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                    return $start_date->diffInDays($end_date) + 1;
                 }else{
-                    $datum['days_count'] = 1;
+                    return 1;
                 }
             })
             ->editColumn('requested', function ($employee) {
