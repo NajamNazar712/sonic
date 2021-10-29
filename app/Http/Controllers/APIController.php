@@ -543,7 +543,7 @@ class APIController extends Controller
                 //     $query->whereNotIn('id', [3]);
                 // })],
                 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function ($query) {
-                    $query->whereIn('id', [3]);
+                    $query->whereIn('id', [4]);
                 })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
