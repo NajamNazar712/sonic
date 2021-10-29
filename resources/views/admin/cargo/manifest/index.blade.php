@@ -19,7 +19,7 @@
 
                             <div class="text-center">
                                 <form id="manifest_number_search_form" class="d-inline-block form-inline mb-1 justify-content-center text-left" novalidate="novalidate">
-                                    <div class="form-group">
+                                    <div class="form-group mr-1">
                                         <input type="text" name="manifest_number" class="form-control manifest_number" id="manifest_number" placeholder="Manifest Number">
                                     </div>
                                 </form>
@@ -67,7 +67,7 @@
                                     <th class="border-primary border-darken-1">Manifest Created At</th>
                                     <th class="border-primary border-darken-1">Transited Date</th>
                                     <th class="border-primary border-darken-1">Transited By</th>
-                                    <th class="border-primary border-darken-1">Updated By</th>
+                                    <th class="border-primary border-darken-1">Seal Updated By</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -228,7 +228,7 @@
                             head.push('Status');
                             head.push('Manifest Created At');
                             head.push('Transited By');
-                            head.push('Updated By');
+                            head.push('Seal Updated By');
 
 
                             $.each(result.data, function(index, values) {
@@ -304,7 +304,7 @@
                     {data: 'shipping_mode', name: 'sm.id', class: 'align-middle shipping_mode'},
                     {data: 'manifest_id', name: 'cm.id', class: 'align-middle manifest_id'},
                     {data: 'junctions', name: 'junctions', class: 'align-middle junctions'},
-                    {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles'},
+                    {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles', searchable: false, orderable: false},
                     /*{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'},*/
                     {data: 'status', name: 'bs.id', class: 'align-middle status'},
                     {data: 'manifest_created_at', name: 'cm.created_at', class: 'align-middle manifest_created_at'},

@@ -1479,7 +1479,6 @@ class ShipperFinanceController extends Controller
             $html .= '
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
 
                     window.print();
                   }
@@ -2042,7 +2041,6 @@ class ShipperFinanceController extends Controller
             $html .= '
                 <script>
                   window.onload = function() {
-                    history.replaceState(history.state, "", "/");
 
                     window.print();
                   }

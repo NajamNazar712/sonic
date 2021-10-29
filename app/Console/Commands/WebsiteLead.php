@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\NotificationsController;
-use App\http\Models\Admin\Lead\Lead;
-use App\http\Models\Admin\Lead\LeadLog;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Lead\LeadLog;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;

@@ -31,13 +31,14 @@ use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\HR\EmployeeType;
-use App\http\Models\ReportingLocation;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\RouteType;
 use App\Http\Models\Zone;
+use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -206,12 +207,13 @@ class AdminHumanResourseController extends Controller
         $route = Route::all();
         $operation_rider_category = OperationRidersCategory::all();
         $rider_categories = RiderCategory::all();
+        $rider_main_categories = RiderMainCategory::all();
         $route_types = RouteType::all();
         $employee_types = EmployeeType::all();
         $employee_statuses = EmployeeStatus::all();
         $employee_department = AdminDepartment::all();
         $city = City::where('business_category_id', 1)->get();
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department]);
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories]);
     }
 
     public function employee_directory_list(Request $request){
@@ -315,16 +317,13 @@ class AdminHumanResourseController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                    if (session('role_id') == 1 || in_array(468, session('permissions'))) {
-                        $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
-                        $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
-                    }
+
                     if($result->request_status_id == 1 || $result->request_status_id == 2){
                         if (session('role_id') == 1 || in_array(469, session('permissions'))) {
 
-                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
 
-                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
 
                         }
                     }
@@ -377,7 +376,10 @@ class AdminHumanResourseController extends Controller
                         }
                     }
 
-
+                    if (session('role_id') == 1 || in_array(468, session('permissions'))) {
+                        $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
+                        $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
+                    }
 
                     $dropdown .= '
                 </div>
@@ -394,6 +396,15 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_pin(Request $request)
     {
+        $validations = [
+            'pin' => 'required|integer|digits:4'
+        ];
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
         $employee = Employee::find($request->employee_id);
         if($employee)
         {
@@ -595,6 +606,7 @@ class AdminHumanResourseController extends Controller
             'address'=>'required|max:255',
             'route_id'=>'required',
             'rider_category'=>'required|numeric',
+            'rider_main_category'=>'required|numeric',
             'pin' => 'required|integer|digits:4',
             'rider_type' => "required|numeric",
             'category' => "required|numeric"
@@ -653,6 +665,7 @@ class AdminHumanResourseController extends Controller
         $rider->route_id = $route_id;
         $rider->operation_rider_id = $request->category;
         $rider->rider_category_id = $request->rider_category;
+        $rider->rider_main_category_id = $request->rider_main_category;
         $rider->update();
 
         if($rider){
@@ -811,7 +824,8 @@ class AdminHumanResourseController extends Controller
         $attachments = $employee->attachments;
         $place_of_birth_cities = City::where('business_category_id',1)->get();
         $reporting_locations = ReportingLocation::where('status',1)->get();
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities','reporting_locations'));
+        $shifts = EmployeeShift::where('status', 1)->get();
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities','reporting_locations', 'shifts'));
     }
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
@@ -849,6 +863,7 @@ class AdminHumanResourseController extends Controller
         $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->reporting_location_id = $request->reporting_location;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+        $employee->shift_id = $request->shift_id;
         $employee->update();
 
         if($employee->employee_type_id == 1)
@@ -2550,6 +2565,10 @@ class AdminHumanResourseController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
         $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban','total_salary');
+        if(!in_array(596, session('permissions'))){
+            $payslips->whereRaw('false');
+        }
+
         $datatable = Datatables::of($payslips)
             ->addColumn('action', function () {
                 $dropdown = '
@@ -2782,7 +2801,7 @@ class AdminHumanResourseController extends Controller
                     $updated = 0;
                     $not_updated = 0;
 
-                    $payroll_cut_off_date = Carbon::parse($payroll_month)->startOfMonth()->addDays(25)->toDateString();
+                    $payroll_cut_off_date = Carbon::parse($payroll_month)->startOfMonth()->addDays(24)->toDateString();
 
                     foreach ($rows as $key => $row) {
                         $payslip = new EmployeePayslip();
@@ -2894,10 +2913,10 @@ class AdminHumanResourseController extends Controller
             }
         }
 
-        $basic_salary = ($payslip->basic_salary != NULL) ? $payslip->basic_salary:'-';
-        $house_rent = ($payslip->house_rent != NULL) ? $payslip->house_rent:'-';
-        $medical = ($payslip->medical != NULL) ? $payslip->medical:'-';
-        $gross_salary = ($payslip->gross_salary != NULL) ? $payslip->gross_salary:'-';
+        $basic_salary = ($payslip->basic_salary != NULL) ? number_format($payslip->basic_salary) :'-';
+        $house_rent = ($payslip->house_rent != NULL) ? number_format($payslip->house_rent) :'-';
+        $medical = ($payslip->medical != NULL) ? number_format($payslip->medical) :'-';
+        $gross_salary = ($payslip->gross_salary != NULL) ? number_format($payslip->gross_salary) :'-';
         $payroll_days = ($payslip->payroll_days != NULL) ? $payslip->payroll_days:'-';
         $present_days = ($payslip->present_days != NULL) ? $payslip->present_days:'-';
         $absent_days = ($payslip->absent_days != NULL) ? $payslip->absent_days:'-';
@@ -2906,43 +2925,43 @@ class AdminHumanResourseController extends Controller
         $fuel_days = ($payslip->fuel_days != NULL) ? $payslip->fuel_days:'-';
 
 
-        $mobile_allowance = ($payslip->mobile_allowance != NULL) ? $payslip->mobile_allowance : '-';
-        $vehicle_allowance = ($payslip->vehicle_allowance != NULL) ? $payslip->vehicle_allowance : '-';
-        $fuel_allowance = ($payslip->fuel_allowance != NULL) ? $payslip->fuel_allowance : '-';
-        $conveyance_allowance = ($payslip->conveyance_allowance != NULL) ? $payslip->conveyance_allowance : '-';
-        $vehicle_maintenance = ($payslip->vehicle_maintenance != NULL) ? $payslip->vehicle_maintenance : '-';
-        $fixed_incentive = ($payslip->fixed_incentive != NULL) ? $payslip->fixed_incentive : '-';
-        $holiday_allowance = ($payslip->holiday_allowance != NULL) ? $payslip->holiday_allowance : '-';
-        $overtime = ($payslip->overtime != NULL) ? $payslip->overtime : '-';
-        $bonus = ($payslip->bonus != NULL) ? $payslip->bonus : '-';
-        $arrears = ($payslip->arrears != NULL) ? $payslip->arrears : '-';
-        $pickup_incentive = ($payslip->pickup_incentive != NULL) ? $payslip->pickup_incentive : '-';
-        $delivery_incentive = ($payslip->delivery_incentive != NULL) ? $payslip->delivery_incentive : '-';
-        $operations_incentive = ($payslip->operation_incentive != NULL) ? $payslip->operation_incentive : '-';
-        $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? $payslip->extra_duty_allowance : '-';
-        $others_addition = ($payslip->others_addition != NULL) ? $payslip->others_addition : '-';
+        $mobile_allowance = ($payslip->mobile_allowance != NULL) ? number_format($payslip->mobile_allowance) : '-';
+        $vehicle_allowance = ($payslip->vehicle_allowance != NULL) ? number_format($payslip->vehicle_allowance) : '-';
+        $fuel_allowance = ($payslip->fuel_allowance != NULL) ? number_format($payslip->fuel_allowance) : '-';
+        $conveyance_allowance = ($payslip->conveyance_allowance != NULL) ? number_format($payslip->conveyance_allowance) : '-';
+        $vehicle_maintenance = ($payslip->vehicle_maintenance != NULL) ? number_format($payslip->vehicle_maintenance) : '-';
+        $fixed_incentive = ($payslip->fixed_incentive != NULL) ? number_format($payslip->fixed_incentive) : '-';
+        $holiday_allowance = ($payslip->holiday_allowance != NULL) ? number_format($payslip->holiday_allowance) : '-';
+        $overtime = ($payslip->overtime != NULL) ? number_format($payslip->overtime) : '-';
+        $bonus = ($payslip->bonus != NULL) ? number_format($payslip->bonus) : '-';
+        $arrears = ($payslip->arrears != NULL) ? number_format($payslip->arrears) : '-';
+        $pickup_incentive = ($payslip->pickup_incentive != NULL) ? number_format($payslip->pickup_incentive) : '-';
+        $delivery_incentive = ($payslip->delivery_incentive != NULL) ? number_format($payslip->delivery_incentive) : '-';
+        $operations_incentive = ($payslip->operation_incentive != NULL) ? number_format($payslip->operation_incentive) : '-';
+        $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? number_format($payslip->extra_duty_allowance) : '-';
+        $others_addition = ($payslip->others_addition != NULL) ? number_format($payslip->others_addition) : '-';
 
-        $total_addition = $payslip->total_salary;
+        $total_addition = ($payslip->total_salary != NULL) ? number_format($payslip->total_salary) : '-';
 
-        $paycut = ($payslip->paycut != NULL) ? $payslip->paycut : '-';
-        $absent = ($payslip->absent != NULL) ? $payslip->absent : '-';
-        $late_deduction = ($payslip->late_deduction != NULL) ? $payslip->late_deduction : '-';
-        $income_tax = ($payslip->income_tax != NULL) ? $payslip->income_tax : '-';
-        $eobi = ($payslip->eobi != NULL) ? $payslip->eobi : '-';
-        $advance_salary = ($payslip->advance_salary != NULL) ? $payslip->advance_salary : '-';
-        $month_closing = ($payslip->month_closing != NULL) ? $payslip->month_closing : '-';
-        $loan = ($payslip->loan != NULL) ? $payslip->loan : '-';
-        $fuel_card = ($payslip->fuel_card != NULL) ? $payslip->fuel_card : '-';
-        $open_parcel = ($payslip->open_parcel != NULL) ? $payslip->open_parcel : '-';
-        $phone_call = ($payslip->phone_call != NULL) ? $payslip->phone_call : '-';
-        $recovery = ($payslip->recovery != NULL) ? $payslip->recovery : '-';
-        $auction_sale = ($payslip->auction_sale != NULL) ? $payslip->auction_sale : '-';
-        $penalty = ($payslip->penalty != NULL) ? $payslip->penalty : '-';
-        $van_deduction = ($payslip->van_deduction != NULL) ? $payslip->van_deduction : '-';
-        $others_deduction = ($payslip->others_deduction != NULL) ? $payslip->others_deduction : '-';
+        $paycut = ($payslip->paycut != NULL) ? number_format($payslip->paycut) : '-';
+        $absent = ($payslip->absent != NULL) ? number_format($payslip->absent) : '-';
+        $late_deduction = ($payslip->late_deduction != NULL) ? number_format($payslip->late_deduction) : '-';
+        $income_tax = ($payslip->income_tax != NULL) ? number_format($payslip->income_tax) : '-';
+        $eobi = ($payslip->eobi != NULL) ? number_format($payslip->eobi) : '-';
+        $advance_salary = ($payslip->advance_salary != NULL) ? number_format($payslip->advance_salary) : '-';
+        $month_closing = ($payslip->month_closing != NULL) ? number_format($payslip->month_closing) : '-';
+        $loan = ($payslip->loan != NULL) ? number_format($payslip->loan) : '-';
+        $fuel_card = ($payslip->fuel_card != NULL) ? number_format($payslip->fuel_card) : '-';
+        $open_parcel = ($payslip->open_parcel != NULL) ? number_format($payslip->open_parcel) : '-';
+        $phone_call = ($payslip->phone_call != NULL) ? number_format($payslip->phone_call) : '-';
+        $recovery = ($payslip->recovery != NULL) ? number_format($payslip->recovery) : '-';
+        $auction_sale = ($payslip->auction_sale != NULL) ? number_format($payslip->auction_sale) : '-';
+        $penalty = ($payslip->penalty != NULL) ? number_format($payslip->penalty) : '-';
+        $van_deduction = ($payslip->van_deduction != NULL) ? number_format($payslip->van_deduction) : '-';
+        $others_deduction = ($payslip->others_deduction != NULL) ? number_format($payslip->others_deduction) : '-';
 
-        $total_deduction = ($payslip->total_deduction != NULL) ? $payslip->total_deduction : '-';
-        $net_salary = ($payslip->net_salary != NULL) ? $payslip->net_salary : '-';
+        $total_deduction = ($payslip->total_deduction != NULL) ? number_format($payslip->total_deduction) : '-';
+        $net_salary = ($payslip->net_salary != NULL) ? number_format($payslip->net_salary) : '-';
 
         $html = '<!doctype html>
                 <html lang="en">
@@ -3029,7 +3048,7 @@ class AdminHumanResourseController extends Controller
                     
                     <tbody>
                         <tr class="text-center">
-                            <td class="color primary border twice" colspan="8">Employee Information</td>
+                            <td class="color primary border twice" colspan="8"><b>Employee Information</b></td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Employee ID</td>
@@ -3068,7 +3087,7 @@ class AdminHumanResourseController extends Controller
                             <td colspan="2"  class="border twice-right">'. $payslip->iban .'</td>
                         </tr>
                         <tr class="text-center">
-                            <td class="color primary border twice" colspan="8">Salary Breakup</td>
+                            <td class="color primary border twice" colspan="8"><b>Salary Breakup</b></td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Basic Salary</td>
@@ -3100,8 +3119,8 @@ class AdminHumanResourseController extends Controller
                             <td colspan="4"  class="border twice-right"></td>
                         </tr>
                         <tr class="text-center">
-                            <td class="color primary border twice" colspan="4">Addition</td>
-                            <td class="color primary border twice" colspan="4">Deduction</td>
+                            <td class="color primary border twice" colspan="4"><b>Addition</b></td>
+                            <td class="color primary border twice" colspan="4"><b>Deduction</b></td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Mobile Allowance</td>
@@ -3201,14 +3220,14 @@ class AdminHumanResourseController extends Controller
                         </tr>
                         
                         <tr class="text-center">
-                            <td class="color primary border twice" colspan="2">Total Addition</td>
-                            <td class="color primary border twice" colspan="2">'. number_format($total_addition) .'</td>
-                            <td class="color primary border twice" colspan="2">Total Deduction</td>
-                            <td class="color primary border twice" colspan="2">'. number_format($total_deduction) .'</td>
+                            <td class="color primary border twice" colspan="2"><b>Total Addition</b></td>
+                            <td class="color primary border twice" colspan="2">'. $total_addition .'</td>
+                            <td class="color primary border twice" colspan="2"><b>Total Deduction</b></td>
+                            <td class="color primary border twice" colspan="2">'. $total_deduction .'</td>
                         </tr>
                         <tr class="text-left">
-                            <td class="color primary border twice" colspan="6">Net Salary</td>
-                            <td class="color primary border twice" colspan="2">'. number_format($net_salary) .'</td>
+                            <td class="color primary border twice" colspan="6"><b>Net Salary</b></td>
+                            <td class="color primary border twice text-center" colspan="2">'. $net_salary .'</td>
                         </tr>
                         <tr class="text-left">
                             <td class="border twice" colspan="8" rowspan="5"><i>Note: This is a system generated document and does not require any signature.</i></td>

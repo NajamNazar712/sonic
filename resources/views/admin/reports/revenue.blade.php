@@ -486,7 +486,8 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Revenue Report',
+                        filename: 'Revenue Report',
+                        title: '',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],

@@ -6,11 +6,12 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\GlobalSettings;
-use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\Rider\RidersIncentive;
@@ -25,6 +26,7 @@ use App\Http\Models\SmsHistoryRider;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\RiderMainCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -47,7 +49,8 @@ class RiderManagementController extends Controller
 
         ActivityTrailController::createActivityTrailLog(Auth::id(),58);
         $category = RiderCategory::all();
-        return view('admin.management.riders.permanent_index')->with(['categories'=>$category]);
+        $main_category = RiderMAinCategory::all();
+        return view('admin.management.riders.permanent_index')->with(['categories'=>$category,'main_categories'=>$main_category]);
     }
 
     public function permanent_list(Request $request){
@@ -59,10 +62,11 @@ class RiderManagementController extends Controller
             ->join('cities as c','cities.hub_id','=','c.id')
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('routes','routes.id','=','riders.route_id')
+            ->leftjoin('rider_main_categories','riders.rider_main_category_id','=','rider_main_categories.id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
         ->where('riders.rider_type_id', 1)
         ->where('riders.blacklist', 0);
         if (session('role_id') != 1) {
@@ -77,6 +81,14 @@ class RiderManagementController extends Controller
             ->editColumn('trax_id', function ($rider) {
                 if($rider->trax_id != null){
                     return $rider->trax_id;
+                }
+                else{
+                    return '-';
+                }
+
+            })->editColumn('main_category', function ($rider) {
+                if($rider->main_category != null){
+                    return $rider->main_category;
                 }
                 else{
                     return '-';
@@ -144,11 +156,13 @@ class RiderManagementController extends Controller
     public function addRiderView($type){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
+        $main_category = RiderMainCategory::all();
         $route_types = RouteType::all();
         $operation_riders = OperationRidersCategory::all();
         $shifts = EmployeeShift::where('status', 1)->get();
+        $reporting_locations = ReportingLocation::where('status',1)->get();
 
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type, 'shifts' => $shifts]);
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type, 'shifts' => $shifts,'main_category' => $main_category, 'reporting_locations' => $reporting_locations]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -161,8 +175,10 @@ class RiderManagementController extends Controller
             'route_id'=>'required',
             'operation_rider_id'=>'required',
             'rider_category'=>'required|numeric',
+            'rider_main_category'=>'required|numeric',
             'pin' => 'required|numeric',
-            'rider_shift' => 'required|numeric'
+            'rider_shift' => 'required|numeric',
+            'location_id' => 'nullable|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
         if ($validate->fails()) {
@@ -207,6 +223,7 @@ class RiderManagementController extends Controller
             'cnic'=>$request->cnic,
             'address'=>$request->address,
             'route_id'=>$route_id,
+            'rider_main_category_id'=>$request->rider_main_category,
             'rider_category_id'=>$request->rider_category,
             'operation_rider_id'=>$request->operation_rider_id,
             'status'=>1,
@@ -216,7 +233,8 @@ class RiderManagementController extends Controller
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
             'rider_type_id' => $type,
-            'shift_id' => $request->rider_shift
+            'shift_id' => $request->rider_shift,
+            'reporting_location_id' => $request->location_id,
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -240,12 +258,14 @@ class RiderManagementController extends Controller
     public function editRiderView($id, $type){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
+        $main_category = RiderMainCategory::all();
         $route_types = RouteType::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
         $operation_rider_ids =  OperationRidersCategory::all();
         $shifts =  EmployeeShift::where('status', 1)->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts]);
+        $reporting_locations = ReportingLocation::where('status',1)->get();
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts,'main_category' => $main_category, 'reporting_locations' => $reporting_locations]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
@@ -256,7 +276,9 @@ class RiderManagementController extends Controller
             'address'=>'required|max:255',
             'route_id'=>'required',
             'rider_category'=>'required|numeric',
-            'rider_shift'=>'required|numeric'
+            'rider_main_category'=>'required|numeric',
+            'rider_shift'=>'required|numeric',
+            'location_id'=>'nullable|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -276,9 +298,11 @@ class RiderManagementController extends Controller
         $rider->address = $request->address;
         $rider->trax_id = $request->trax_id;
         $rider->shift_id = $request->rider_shift;
+        $rider->reporting_location_id = $request->location_id;
 
 
         $rider->rider_category_id = $request->rider_category;
+        $rider->rider_main_category_id = $request->rider_main_category;
 
         if($request->has('special_rider_checkbox')){
             $rider->special_rider = 1;
@@ -460,7 +484,8 @@ class RiderManagementController extends Controller
     public function incentive_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),59);
         $category = RiderCategory::all();
-        return view('admin.management.riders.incentive_index')->with(['categories'=>$category]);
+        $main_category = RiderMainCategory::all();
+        return view('admin.management.riders.incentive_index')->with(['categories'=>$category,'main_categories'=>$main_category]);
     }
 
     public function incentive_list(Request $request){
@@ -473,9 +498,10 @@ class RiderManagementController extends Controller
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
+            ->leftjoin('rider_main_categories','riders.rider_main_category_id','=','rider_main_categories.id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_main_categories.name as main_category','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
             ->where('riders.rider_type_id', 2)
             ->where('riders.blacklist', 0);
 
@@ -498,6 +524,15 @@ class RiderManagementController extends Controller
             })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->editColumn('main_category', function ($rider) {
+                if($rider->main_category != null){
+                    return $rider->main_category;
+                }
+                else{
+                    return '-';
+                }
+
             })
             ->filterColumn('route',function($query, $keyword){
                 $keyword = strtolower($keyword);
@@ -554,7 +589,8 @@ class RiderManagementController extends Controller
     public function blacklist_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),350);
         $category = RiderCategory::all();
-        return view('admin.management.riders.blacklisted')->with(['categories'=>$category]);
+        $main_category = RiderMainCategory::all();
+        return view('admin.management.riders.blacklisted')->with(['categories'=>$category,'main_categories'=>$main_category]);
     }
     public function blacklist_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
@@ -566,12 +602,12 @@ class RiderManagementController extends Controller
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
+            ->leftjoin('rider_main_categories','riders.rider_main_category_id','=','rider_main_categories.id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist', 'rt.name as rider_type')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist', 'rt.name as rider_type')
             ->where('riders.blacklist', 1);
-
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
         }
@@ -583,6 +619,15 @@ class RiderManagementController extends Controller
             ->editColumn('trax_id', function ($rider) {
                 if($rider->trax_id != null){
                     return $rider->trax_id;
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->editColumn('main_category', function ($rider) {
+                if($rider->main_category != null){
+                    return $rider->main_category;
                 }
                 else{
                     return '-';
@@ -675,10 +720,11 @@ class RiderManagementController extends Controller
         $rider_type = RiderType::all();
         $city = City::where('business_category_id', 1)->get();
         $category = RiderCategory::all();
+        $main_category = RiderMainCategory::all();
         $route = Route::all();
         $operation_rider_category = OperationRidersCategory::all();
         $shifts = EmployeeShift::where('status', 1)->get();
-        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city,'operation_rider_category' => $operation_rider_category, 'shifts' => $shifts]);
+        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city,'operation_rider_category' => $operation_rider_category, 'shifts' => $shifts,'main_category' =>$main_category]);
     }
 
     public function rider_request_list(Request $request)
@@ -735,6 +781,7 @@ class RiderManagementController extends Controller
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric',
+            'rider_main_category'=>'required|numeric',
             'pin' => 'required|integer|digits:4',
             'rider_request_id' => 'required',
             'rider_type' => "required|numeric",
@@ -779,6 +826,7 @@ class RiderManagementController extends Controller
             'address'=>$request->address,
             'route_id'=>$request->route_id,
             'rider_category_id'=>$request->rider_category,
+            'rider_main_category_id'=>$request->rider_main_category,
             'status'=>1,
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),

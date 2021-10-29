@@ -10,15 +10,15 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
-use App\http\Models\Admin\BookingSmsForShippers;
+use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RetailPickupNote;
-use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\SalePersonTag;
-use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
-use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
@@ -29,7 +29,7 @@ use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
@@ -267,6 +267,24 @@ class V2AdminPickupsController extends Controller
                         return '';
                     }
             })
+            ->addColumn('aging',function ($pickup_requests){
+                $requested_date=$pickup_requests->requested_date;
+                $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $days =Carbon::createFromTime($settings->setting_value, '0', '0', 'Asia/Karachi');
+                   
+                    $startTime = Carbon::parse($requested_date);
+                    $endTime = Carbon::parse($days);
+
+                    $totalDuration =  $startTime->diffInHours($endTime).' Hrs';
+                   
+                    //$difference =  $requested_date->diff($days)->format('%H:%I:%S')." Minutes";
+                    //$difference=$requested_date-$days;
+                    return $totalDuration;
+                }
+                //$days = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+            })
             ->editColumn('brand_name', function ($pickup_requests) {
                 if($pickup_requests->brand_name==null){
                     $shipper = User::find($pickup_requests->user_id);
@@ -426,7 +444,8 @@ class V2AdminPickupsController extends Controller
 
                 $pickups++;
                 self::retail_pickup_assign($pickup_request_id, $rider_id);
-            } else {
+            }
+            else {
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if ($pickup_request->current_rider_id == $rider_id) {
                     continue;
@@ -467,45 +486,14 @@ class V2AdminPickupsController extends Controller
                     }
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
-
-                if ($previous_rider_id != null) {
-                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $previous_rider_id)
-                        ->where('employee_type_id', 2)
-                        ->select('device_token');
-                    if ($rider_device_token->exists()) {
-                        $rider_device_token = $rider_device_token->first();
-                        $device_token = $rider_device_token->device_token;
-                        $title = "Pickup Request Reassigned";
-                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Reassigned To " . $pickup_request->rider->name;
-                        NotificationsController::bolt_app_notification($previous_rider_id, 2, $device_token, $title, $message);
-                    }
-                }
-
-                if ($rider_id != null && $previous_rider_id == null) {
-                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
-                        ->where('employee_type_id', 2)
-                        ->select('device_token');
-                    if ($rider_device_token->exists()) {
-                        $rider_device_token = $rider_device_token->first();
-                        $device_token = $rider_device_token->device_token;
-                        $title = "Pickup Request Assigned";
-                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Assigned To You";
-                        NotificationsController::bolt_app_notification($rider_id, 2, $device_token, $title, $message);
-                    }
-                } elseif ($rider_id != null && $previous_rider_id != null) {
-                    $previous_rider = Rider::where('id', $previous_rider_id)->select('name')->first();
-                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
-                        ->where('employee_type_id', 2)
-                        ->select('device_token');
-                    if ($rider_device_token->exists()) {
-                        $rider_device_token = $rider_device_token->first();
-                        $device_token = $rider_device_token->device_token;
-                        $title = "Pickup Request Ressigned";
-                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Ressigned To You From " . $previous_rider->name;
-                        NotificationsController::bolt_app_notification($rider_id, 2, $device_token, $title, $message);
-                    }
-                }
-
+            }
+            if ($previous_rider_id != NULL) {
+                NotificationsController::app_notification(2, $previous_rider_id, 2, $pickup_request->current_rider_id, $pickup_request->shipper_id);
+            }
+            if ($rider_id != NULL && $previous_rider_id == NULL) {
+                NotificationsController::app_notification(3, $rider_id, 2, $pickup_request->shipper_id);
+            } elseif ($rider_id != NULL && $previous_rider_id != NULL) {
+                NotificationsController::app_notification(1, $rider_id, 2, $previous_rider_id, $pickup_request->shipper_id);
             }
         }
         if (count($allowed_pickup_requests) > 0) {
@@ -2855,8 +2843,30 @@ class V2AdminPickupsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 69);
         }
+
+        $from = $request->get('search_date_from');
+        $to = strval(Carbon::parse($request->get('search_date_to'))->addDay());
+
+        $count = DB::table('v2_pickup_notes')
+            ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id');
+
+        if ($city = $request->get('search_city')) {
+            $count = $count->join('cities as c', function ($join) use ($city) {
+                $join->where('r.city_id', $city);
+            });
+        }
+
+        if ($search_rider = $request->get('search_rider')) {
+            $count = $count->where('r.id', '=', $search_rider);
+        }
+
+        $count = $count->whereBetween('v2_pickup_notes.created_at', [$from, $to]);
+
+        $count = $count->count();
+
         $rider = V2PickupNote::join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
-            ->select('v2_pickup_notes.id as note_id', 'v2_pickup_notes.id as id', 'v2_pickup_notes.created_at as date', 'r.name as rider', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment_count'), DB::raw('(SELECT COUNT(vpnr2.shipment_id) FROM v2_pickup_received_shipments AS vpnr2 WHERE vpnr2.pickup_note_id = v2_pickup_notes.id AND vpnr2.pickup_note_id is not null) AS total_arrived_count'), DB::raw('(SELECT SUM(vrp.shipments) FROM v2_rider_pickups as vrp WHERE vrp.pickup_note_id = v2_pickup_notes.id) AS rider_picked'))
+            ->select('v2_pickup_notes.id as note_id', 'v2_pickup_notes.id as id', 'v2_pickup_notes.created_at as date', 'r.name as rider', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) AS total_shipment_count'), DB::raw('(SELECT COUNT(vpnr2.shipment_id) FROM v2_pickup_received_shipments AS vpnr2 WHERE vpnr2.pickup_note_id = v2_pickup_notes.id AND vpnr2.pickup_note_id is not null and vpnr2.created_at between "' . $from . '" and "' . $to . '") AS total_arrived_count'), DB::raw('(SELECT SUM(vrp.shipments) FROM v2_rider_pickups as vrp WHERE vrp.pickup_note_id = v2_pickup_notes.id) AS rider_picked'))
+            ->whereBetween('v2_pickup_notes.created_at', [$from, $to])
             ->groupBy('v2_pickup_notes.id');
 
         if ($city = $request->get('search_city')) {
@@ -2869,13 +2879,8 @@ class V2AdminPickupsController extends Controller
             $rider = $rider->where('r.id', '=', $search_rider);
         }
 
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = strval(Carbon::parse($request->get('search_date_to'))->addDay());
-            $rider = $rider->whereBetween('v2_pickup_notes.created_at', [$from, $to]);
-        }
-
         $datatable = Datatables::of($rider)
+            ->setTotalRecords($count)
             ->editColumn('note_id', function ($rider) {
                 if ($rider->note_id != null) {
                     return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($rider->note_id, 6, '0', STR_PAD_LEFT) . '</span></button>'

@@ -166,6 +166,7 @@ class Kernel extends ConsoleKernel
         if ($daily_pickup_sales_cron_time) {
             $schedule->command('email:dailypickupsalesreportrm')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
             $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+            $schedule->command('email:dailypickupsalesreportindividualforkae')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
         }
 
         $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
@@ -282,7 +283,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00')->runInBackground();
         $schedule->command('email:outstandingsdnreport')->dailyAt('09:00')->runInBackground();
         $schedule->command('email:telenorsalesreport')->dailyAt('09:00')->runInBackground();
-        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
+//        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
         $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
         if ($settings->exists()) {
             $settings = $settings->first();

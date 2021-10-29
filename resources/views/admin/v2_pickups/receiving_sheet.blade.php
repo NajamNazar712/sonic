@@ -206,9 +206,12 @@
                 formatSubmit: 'yyyy-mm-dd 06:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #search_date_to').pickadate('picker').set('min', $('#track_form #search_date_from').pickadate('picker').get('select'));
-                    }
+                    var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(3, 'days');
+                    search_date_to.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    search_date_to.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    search_date_to.pickadate('picker').set('select', new Date(old_date_formatted),{muted:true});
                 }
             });
 
@@ -220,9 +223,9 @@
                 formatSubmit: 'yyyy-mm-dd 06:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #search_date_from').pickadate('picker').set('max', $('#track_form #search_date_to').pickadate('picker').get('select'));
-                    }
+                    // if (context.select) {
+                    //     $('#track_form #search_date_from').pickadate('picker').set('max', $('#track_form #search_date_to').pickadate('picker').get('select'));
+                    // }
                 }
             });
 

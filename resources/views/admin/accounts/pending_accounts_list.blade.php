@@ -87,6 +87,8 @@
                                         <th class="border-primary border-darken-1">Duplicate</th>
                                         <th class="border-primary border-darken-1">Intl Rate Status</th>
                                         <th class="border-primary border-darken-1">Intl Rate Status Remarks</th>
+                                        <th class="border-primary border-darken-1">Segment</th>
+                                        <th class="border-primary border-darken-1">Sub Category Segment</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -292,6 +294,45 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="SegmentTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SegmentTagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Tag Segments</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <form id="set_segments" action="{{route('admin.accounts.add_segments')}}" method="post">
+                            @csrf
+                            @method('post')
+                            <input type="text" hidden name="user_ids" class="user_ids">
+
+                            <div class="form-group text-center">
+                                <select name="bulk_segment" id="bulk_segment1" class="form-control select2" data-rule-required="true" data-msg-required="Segment is required">
+                                    @foreach($segments as $seg)
+                                        <option value="{{ $seg->id }}" > {{ $seg->name }} </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group text-center">
+                                <select name="bulk_sub_segment" id="bulk_sub_segment1" class="form-control select2" data-rule-required="true" data-msg-required="Sub Segment is required">
+                                </select>
+                            </div>
+                            <div class="mt-2" style="text-align: center">
+                                <button type="submit" class="btn btn-success" id="segmentTagSubmit1">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    {{-- <button type="button" class="btn btn-success" id="segmentTagSubmit1">Submit</button> --}}
+                    {{-- <button type="button" class="btn btn-info" data-dismiss="modal">Close</button> --}}
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -329,6 +370,45 @@
             width:'100%',
             dropdownParent:$('#TerritoryTag')
         });
+
+        $("#bulk_sub_segment1").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Sub Segment",
+            width:'100%',
+            dropdownParent:$('#set_segments')
+        });
+        
+        $("#bulk_segment1").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Segment",
+            width:'100%',
+            dropdownParent:$('#set_segments')
+        }).bind('change', function() {
+                var id = parseInt($(this).val());
+                $.ajax({
+						url: '{!! route('cod.get_sub_segment') !!}',
+						method: 'POST',
+						data: {
+							'segment_id': id,
+							'_token': '{{ csrf_token() }}'
+						}
+					})
+					.done(function(data) {
+                    $("#bulk_sub_segment1").html('');
+
+							if (data.status == 0) {
+								var sub_segment = data.sub_segments;
+
+                                $.each(data.sub_segments, function (index, sub_segment) {
+									console.log(index);	
+									console.log(sub_segment);	
+                                    $('#bulk_sub_segment1').append('<option value="' + sub_segment['id'] + '" class="select2">' + sub_segment['name'] + '</option>');
+									});
+
+                            }
+
+
+                });
+            });
+           
 
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
@@ -385,6 +465,8 @@
                         head.push('Documents Rejected At');
                         head.push('Documents Status');
                         head.push('Documents Rejection Reason');
+                        head.push('Segment');
+                        head.push('Sub Category Segment');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -419,6 +501,8 @@
                             row.push(values.documents_rejected_at);
                             row.push(values.documents_status);
                             row.push(values.documents_rejection_reason);
+                            row.push(values.segment);
+                            row.push(values.sub_segment);
 
                             body.push(row);
                         });
@@ -435,6 +519,103 @@
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             scrollX: true, scrollY: '600px',
             buttons: [
+                @if (session('role_id') == 1 || in_array(609, session('permissions')))
+                    {
+                            text: 'Bulk Segment Tagging',
+                            className: 'btn btn-primary bulk_segment_tagging',
+                            enabled:false,
+                            action: function (e, dt, node, config) {
+                                if(selected_rows != ''){
+                           $('.user_ids').val(selected_rows);
+                           $('#SegmentTagModal').modal('show');
+
+                       }else{
+                           var error = "Atleast Select One Shipper";
+                           toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                       }
+                        //    if(selected_rows != ''){
+                              
+                        //         $('#SegmentTagModal').modal('show');
+                        //         // console.log(selected_rows);
+                        //         $('#segmentTagSubmit1').on('click',function () {
+                        //             var assign = parseInt($('#saletag1').val());
+                        //             swal({
+                        //                 text: 'Are you sure, you want to Tag?',
+                        //                 icon: 'info',
+                        //                 buttons: {
+                        //                     cancel: {
+                        //                         text: 'No',
+                        //                         value: null,
+                        //                         visible: true,
+                        //                         closeModal: true,
+                        //                     },
+                        //                     confirm: {
+                        //                         text: 'Yes',
+                        //                         value: true,
+                        //                         visible: true,
+                        //                         closeModal: true
+                        //                     }
+                        //                 },
+                        //                 closeOnClickOutside: false,
+                        //                 closeOnEsc: false,
+                        //                 dangerMode: true
+                        //             }).then(function(confirm) {
+                        //                 if (confirm) {
+                        //                     if (assign) {
+                        //                         $.ajax({
+                        //                             url: '{!! route('admin.accounts.tag.submit.bulk') !!}',
+                        //                             method: 'POST',
+                        //                             data: {
+                        //                                 'admin_id': assign,
+                        //                                 'shipper_ids[]': selected_rows,
+                        //                                 '_token': '{{ csrf_token() }}'
+                        //                             }
+                        //                         })
+                        //                             .done(function (data) {
+                        //                                 if (data.status == 1) {
+                        //                                     $('#SegmentTagModal').modal('hide');
+                        //                                     toastr.success(data.success, 'Success!', {
+                        //                                         positionClass: 'toast-bottom-center',
+                        //                                         containerId: 'toast-bottom-center'
+                        //                                     });
+                        //                                 } else {
+                        //                                     toastr.error(data.error, 'Error!', {
+                        //                                         positionClass: 'toast-top-center',
+                        //                                         containerId: 'toast-top-center'
+                        //                                     });
+                        //                                 }
+                        //                                 selected_rows = [];
+
+                        //                                 table.rows().deselect();
+                        //                                 $('#saletag1').val('').trigger('change');
+                        //                                 $('#SegmentTagModal').modal('hide');
+                        //                                 table.draw(true);
+                        //                                 table.button('.bulk_tagging').disable();
+                        //                                 table.button('.bulk_segment_tagging').disable();
+                        //                                 table.button('.set_commission').disable();
+                        //                                 table.button('.tag').disable();
+                        //                                 table.button('.approve_commission').disable();
+                        //                                 table.button('.territory_tag').disable();
+
+                        //                             });
+                        //                     } else {
+                        //                         var error = "Account Not Selected!";
+                        //                         toastr.error(error, 'Error!', {
+                        //                             positionClass: 'toast-top-center',
+                        //                             containerId: 'toast-top-center'
+                        //                         });
+                        //                     }
+                        //                 }
+                        //             });
+                        //         });
+
+                        //     }else{
+                        //         var error = "Account Not selected!";
+                        //         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        //     }
+                        }
+                    },
+                    @endif
                     /*{
                         text: 'Set Commission',
                         className: 'btn btn-primary set_commission',
@@ -542,6 +723,8 @@
                                                         $('#SalesTagModal1').modal('hide');
                                                         table.draw(true);
                                                         table.button('.assign_rider').disable();
+                                                        table.button('.bulk_segment_tagging').disable();
+                                                        
                                                         table.button('.tag').disable();
 
 
@@ -632,6 +815,8 @@
                                                     table.draw(true);
                                                     table.button('.tag').disable();
                                                     table.button('.assign_rider').disable();
+                                                    table.button('.bulk_segment_tagging').disable();
+                                                    
 
 
                                                 });
@@ -699,6 +884,8 @@
                                         }
 
                                         table.button('.assign_rider').enable();
+                                        table.button('.bulk_segment_tagging').enable();
+                                        
                                         table.button('.territory_tag').enable();
                                         table.button('.tag').enable();
 
@@ -729,6 +916,8 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.assign_rider').disable();
+                                        table.button('.bulk_segment_tagging').disable();
+                                        
                                         table.button('.tag').disable();
                                         table.button('.territory_tag').disable();
 
@@ -763,7 +952,7 @@
             serverSide: true,
             deferLoading: 0,
             rowId: 'id',
-            order: [[2, 'desc']],
+            order: [[10, 'desc']],
             ajax: {
                 url: '{{ route('admin.accounts.pending.ajax') }}',
                 type: "POST",
@@ -811,6 +1000,8 @@
                 {data: 'duplication', name: 'duplication', class: 'align-middle duplicate', orderable: false, searchable: false},
                 {data: 'international_rate_status', name: 'international_rate_status', class: 'align-middle international_rate_status', orderable: false, searchable: false},
                 {data: 'international_rejected_reason', name: 'international_rejected_reason', class: 'align-middle international_rejected_reason', orderable: false, searchable: false},
+                {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
+                {data: 'sub_segment', name: 'seg_sub.name', class: 'align-middle sub_segment'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {
@@ -926,6 +1117,8 @@
 
                     if (selected_rows.length == 0) {
                         table.button('.assign_rider').disable();
+                        table.button('.bulk_segment_tagging').disable();
+                        
                         table.button('.tag').disable();
 
                         hub_ids.splice(index, 1);
@@ -1258,11 +1451,15 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.assign_rider').enable();
+                    table.button('.bulk_segment_tagging').enable();
+                    
                     table.button('.territory_tag').enable();
                     table.button('.tag').enable();
                 }
                 else {
                     table.button('.assign_rider').disable();
+                    table.button('.bulk_segment_tagging').disable();
+                    
                     table.button('.territory_tag').disable();
                     table.button('.tag').disable();
                 }
@@ -1321,6 +1518,21 @@
         });
 
         $( "#set_territory" ).validate({
+            errorClass:"danger",
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+
+                form.submit();
+
+            }
+        });
+
+        $( "#set_segments" ).validate({
             errorClass:"danger",
             normalizer: function(value) {
                 return $.trim(value);

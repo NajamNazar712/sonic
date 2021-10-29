@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\Retail\RetailUser;
 use Closure;
 
 class RetailUserAPIToken

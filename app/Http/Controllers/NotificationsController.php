@@ -9,14 +9,16 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
-use App\http\Models\Admin\Retail\RetailShipperInfo;
-use App\http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\AppNotification;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
+use App\Http\Models\ConsigneeUser;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
@@ -24,25 +26,28 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\DeliveryNoteOtpSms;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\Excel_reports\Debriefing;
-use App\http\Models\Excel_reports\DonePaymentsReport;
+use App\Http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
+use App\Http\Models\Excel_reports\KaeNumber;
 use App\Http\Models\Excel_reports\MonthAverage;
-use App\http\Models\Excel_reports\QaReportPettyCash;
+use App\Http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
-use App\http\Models\Runner;
-use App\http\Models\RunnerDetail;
+use App\Http\Models\Runner;
+use App\Http\Models\RunnerDetail;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\ShipmentsPaymentJourney;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -200,7 +205,8 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to, $cc);
-                } else if ($id == 2) {
+                }
+                else if ($id == 2) {
                     $fields = ['order_id' => 'order_id', 'pickup_date' => 'pickup_date', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
 
                     $shipment = Shipment::find($reference_1_id);
@@ -3635,7 +3641,8 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.yousuf@trax.pk'];
 
                     self::email($subject, $body, $to, $cc, $bcc);
-                } else if ($id == 47) {
+                }
+                else if ($id == 47) {
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
                     }
@@ -3777,7 +3784,8 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.waqas@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
-                } else if ($id == 48) {
+                }
+                else if ($id == 48) {
 
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
@@ -3871,7 +3879,8 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $email);
                     }
 
-                } else if ($id == 49) {
+                }
+                else if ($id == 49) {
                     $reference_1_id = Carbon::parse($reference_1_id)->subDay()->toDateString();
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
@@ -3981,7 +3990,8 @@ class NotificationsController extends Controller
 //                 }
 //
 //                 self::email($subject, $body, $to);
-                } else if ($id == 50) {
+                }
+                else if ($id == 50) {
                     $done = "Done";
                     $not_done = "Not Done";
                     // $pickup_note = PickupNote::find($reference_1_id);
@@ -7026,7 +7036,8 @@ class NotificationsController extends Controller
                         $sale_person = $person['new_sale_person']->name;
                         self::sms($body, $to);
                     }
-                } else if ($id == 120) {
+                }
+                else if ($id == 120) {
                     $date = Carbon::yesterday()->format('Y-m-d');
 
                     if (strpos($subject, '[date]') !== FALSE) {
@@ -7056,7 +7067,8 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $sale_person_email);
                     }
 
-                } else if ($id == 121) {
+                }
+                else if ($id == 121) {
                     $date = Carbon::yesterday()->format('Y-m-d');
 
                     if (strpos($subject, '[date]') !== FALSE) {
@@ -8292,6 +8304,61 @@ class NotificationsController extends Controller
                     }
 
                 }
+                else if ($id == 152)
+                {                    
+                    $shipment = Shipment::find($reference_1_id);
+
+                    $shipper = $shipment->user;
+                    
+                    $to = $shipper->phone;
+
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    
+                    self::sms($body, $to);
+                } 
+                else if ($id == 153)
+                {                    
+                    $shipment = Shipment::find($reference_1_id);
+
+                    $shipper = $shipment->user;
+                    
+                    $to = $shipper->email;
+
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+
+                    self::email($subject, $body, $to);
+
+                } else if ($id == 154){
+                    $shipment = Shipment::find($reference_1_id);
+                    
+                    $shipper = $shipment->user;
+                   
+                    $sales_person_data = array();
+                    $sales_person_tag = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
+                    if($sales_person_tag){
+                        $sales_person_tag = Admin::find($sales_person_tag->admin_id);
+                        $sales_person_data['name'] = $sales_person_tag->name;
+                        $to = $sales_person_tag->email;
+
+                        if (strpos($body, '[Sales_Person]') !== FALSE) {
+                            $body = str_replace('[Sales_Person]', $sales_person_data['name'], $body);
+                        }
+
+                        if (strpos($body, '[shipment_no]') !== FALSE) {
+                            $body = str_replace('[shipment_no]', $shipment->tracking_number, $body);
+                        }
+
+                        if (strpos($body, '[shipper_name]') !== FALSE) {
+                            $body = str_replace('[shipper_name]', $shipment->user->name, $body);
+                        }
+
+                        self::email($subject, $body, $to);
+                    }
+                }
                 else if ($id == 155) {
                     $getdata = $reference_1_id;
 
@@ -8352,38 +8419,165 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 }
-                else if ($id == 154){
-                    $shipment = Shipment::find($reference_1_id);
-                    
-                    $shipper = $shipment->user;
-                   
-                    $sales_person_data = array();
-                    $sales_person_tag = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
-                    if($sales_person_tag){
-                        $sales_person_tag = Admin::find($sales_person_tag->admin_id);
-                        $sales_person_data['name'] = $sales_person_tag->name;
-                        $to = $sales_person_tag->email;
-                    }
-                    else
-                    {
-                        $to = '';
+				else if ($id == 157) {
+                    $date = Carbon::yesterday()->format('Y-m-d');
+
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $date, $subject);
                     }
 
-                    if (strpos($body, '[Sales_Person]') !== FALSE) {
-                        $body = str_replace('[Sales_Person]', $sales_person_data['name'], $body);
+                    if (strpos($body, '[date]') !== FALSE) {
+                        $body = str_replace('[date]', $date, $body);
                     }
 
-                    if (strpos($body, '[shipment_no]') !== FALSE) {
-                        $body = str_replace('[shipment_no]', $shipment->tracking_number, $body);
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($subject, '[link]') !== FALSE) {
+                        $subject = str_replace('[link]', $link, $subject);
                     }
 
-                    if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $shipment->user->name, $body);
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
                     }
 
-                    self::email($subject, $body, $to);
+                    $to = array();
+
+
+                    $sale_person_email = Admin::find($reference_1_id)->email;
+
+                    if ($sale_person_email) {
+                        self::email($subject, $body, $sale_person_email);
+                    }
+
+                }				else if ($id == 158){
+                    $rider = Rider::find($reference_1_id);
+                    if($rider){
+                        if (strpos($body, '[rider_name]') !== FALSE) {
+                            $body = str_replace('[rider_name]', $rider->name, $body);
+                        }
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $rider->reset_pin_otp, $body);
+                        }
+                        $to = $rider->phone;
+                        self::sms($body, $to, 1);
+                    }
                 }
-            }
+                else if ($id == 159){
+                    $admin = Admin::find($reference_1_id);
+                    if($admin){
+                        $to = $admin->email;
+                        self::email($subject,$body, $to);
+                    }
+                }				else if ($id == 160) {
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $reference_1_id, $subject);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    $date = Carbon::today()->startOfDay()->toDateTimeString();
+                    $date_end = Carbon::today()->endOfDay()->toDateTimeString();
+                    $sale_person_number_data = KaeNumber::whereBetween('created_at', [$date, $date_end])->orderBy('shipments', 'desc')->get();
+                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Admin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Achieved Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Achieved %</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Achieved Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Achieved %</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Contribution</strong></th></tr></thead><tbody>';
+                    $serial = 1;
+                    $shipments_count = 0;
+                    $revenue_count = 0;
+                    $avg_revenue_count = 0;
+                    $contribution_count = 0;
+                    $total_target_shipments = 0;
+                    $total_target_shipments_achieved = 0;
+                    $total_target_revenue = 0;
+                    $total_target_revenue_achieved = 0;
+                    $sum_total_target_revenue_achieved = 0;
+                    $total_target_revenue_avg = 0;
+                    foreach ($sale_person_number_data as $sale_person_number) {
+                        $all_shipments_target_revenue = 0;
+                        $target_shipments_achieved = 0;
+                        $target_revenue_achieved = 0;
+                        $target_shipments = $sale_person_number->target_shipments;
+                        if ($target_shipments > 0) {
+                            $target_shipments_achieved = ($sale_person_number->shipments / $target_shipments) * 100;
+                        }
+                        $target_revenue = $sale_person_number->target_revenue;
+                        if ($target_revenue > 0) {
+                            $all_shipments_target_revenue = $target_revenue * $target_shipments;
+                            $total_target_revenue_avg += $all_shipments_target_revenue;
+                            if ($all_shipments_target_revenue > 0) {
+                                $target_revenue_achieved = ($sale_person_number->revenue / $all_shipments_target_revenue) * 100;
+                            } else {
+                                $target_revenue_achieved = 0;
+                            }
+                        }
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        if ($sale_person_number->admin_id == 0) {
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Walk-In</td>';
+                        } else {
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $sale_person_number->sales_person->name . '</td>';
+                        }
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->shipments) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($sale_person_number->target_shipments) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($target_shipments_achieved) . '%</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->revenue)) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($all_shipments_target_revenue) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($target_revenue_achieved) . '%</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->avg_revenue)) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->contribution, 2, '.', '') . '%</td>';
+                        $html .= '</tr>';
+                        $shipments_count = $shipments_count + $sale_person_number->shipments;
+                        $revenue_count = $revenue_count + $sale_person_number->revenue;
+                        $contribution_count = $contribution_count + $sale_person_number->contribution;
+                        $total_target_shipments += $sale_person_number->target_shipments;
+                        $total_target_revenue += $sale_person_number->target_revenue;
+                        $sum_total_target_revenue_achieved += $target_revenue_achieved;
+                        $serial++;
+                    }
+                    if ($total_target_shipments > 0) {
+                        $total_target_shipments_achieved = ($shipments_count / $total_target_shipments) * 100;
+                    }
+                    $total_all_shipments_target_revenue = 0;
+                    if ($total_target_revenue_avg > 0) {
+                        $total_target_revenue_achieved = ($revenue_count / $total_target_revenue_avg) * 100;
+                    }
+                    if ($shipments_count != 0) {
+                        $avg_revenue_count = $revenue_count / $shipments_count;
+                    } else {
+                        $avg_revenue_count = 0;
+                    }
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($total_target_shipments) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($total_target_shipments_achieved) . '%</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($revenue_count)) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format(round($total_target_revenue_avg)) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($total_target_revenue_achieved) . '%</td>';
+
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_count)) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ceil($contribution_count) . '%</td>';
+                    $html .= '</tr>';
+
+                    $html .= '</tr>';
+                    $html .= '</tbody></table>';
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+
+                    $to = array();
+
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk'];
+
+                    $cc = array();
+                    $bcc = array();
+                    $bcc = ['muhammad.waqas@trax.pk'];
+                    self::email($subject, $body, $to, $cc, $bcc);
+
+                }            }
         }
     }
     static public function custom($type, $subject, $body, $to) {
@@ -8440,7 +8634,7 @@ class NotificationsController extends Controller
         }
 
         $to = $phone_number;
-        self::sms($body, $to);
+        self::sms($body, $to, 1);
     }
 
     static public function trax_otp_verification($phone_number, $pin)
@@ -8452,6 +8646,124 @@ class NotificationsController extends Controller
 
         $to = $phone_number;
         self::sms($body, $to);
+    }
+
+    static public function app_notification($id, $employee_id, $employee_type, $reference1_id, $reference2_id = NULL)
+    {
+        $push_notification = AppNotification::find($id);
+        if ($push_notification) {
+            if ($push_notification->status) {
+                $title = $push_notification->title;
+                $body = $push_notification->body;
+                if ($id == 1) {
+                    $rider = Rider::find($reference1_id);
+                    $shipper = User::find($reference2_id);
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    if (strpos($body, '[rider]') !== FALSE) {
+                        $body = str_replace('[rider]', $rider->name, $body);
+                    }
+                } else if ($id == 2) {
+                    $rider = Rider::find($reference1_id);
+                    $shipper = User::find($reference2_id);
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    if (strpos($body, '[rider]') !== FALSE) {
+                        $body = str_replace('[rider]', $rider->name, $body);
+                    }
+                } else if ($id == 3) {
+                    $shipper = User::find($reference1_id);
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                } else if ($id == 4) {
+                    $shipper = User::find($reference1_id);
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                } else if ($id == 5) {
+                    if (strpos($body, '[note_id]') !== FALSE) {
+                        $body = str_replace('[note_id]', $reference1_id, $body);
+                    }
+                } else if ($id == 6) {
+                    if (strpos($body, '[note_id]') !== FALSE) {
+                        $body = str_replace('[note_id]', $reference1_id, $body);
+                    }
+                } else if ($id == 7) {
+                    $shipment = Shipment::find($reference1_id);
+                    $status = ShipmentStatus::find($reference2_id);
+                    $shipper = User::find($employee_id);
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    if (strpos($body, '[tracking_no]') !== FALSE) {
+                        $body = str_replace('[tracking_no]', $shipment->tracking_number, $body);
+                    }
+                    if (strpos($body, '[status_name]') !== FALSE) {
+                        $body = str_replace('[status_name]', $status->name, $body);
+                    }
+                } else if ($id == 8) {
+                    $shipment = Shipment::find($reference1_id);
+                    $status = ShipmentStatus::find($reference2_id);
+                    $consignee_user = ConsigneeUser::find($employee_id);
+                    if (strpos($body, '[consignee_name]') !== FALSE) {
+                        $body = str_replace('[consignee_name]', $consignee_user->name, $body);
+                    }
+                    if (strpos($body, '[tracking_no]') !== FALSE) {
+                        $body = str_replace('[tracking_no]', $shipment->tracking_number, $body);
+                    }
+                    if (strpos($body, '[status_name]') !== FALSE) {
+                        $body = str_replace('[status_name]', $status->name, $body);
+                    }
+                } else if ($id == 9) {
+                    $rider = Rider::find($employee_id);
+                    if (strpos($body, '[rider]') !== FALSE) {
+                        $body = str_replace('[rider]', $rider->name, $body);
+                    }
+                    if (strpos($body, '[otp]') !== FALSE) {
+                        $body = str_replace('[otp]', $reference1_id, $body);
+                    }
+                }
+                $employee_device_token = EmployeeDeviceToken::where('employee_id', $employee_id)
+                    ->where('employee_type_id', $employee_type)
+                    ->select('device_token');
+                if ($employee_device_token->exists()) {
+                    $employee_device_token = $employee_device_token->first();
+                    $device_token = $employee_device_token->device_token;
+                    $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
+                    $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
+
+                    $message = [
+                        'data' => [
+                            'title' => $title,
+                            'body' => $body
+                        ],
+                        'to' => $device_token
+                    ];
+
+                    $client = new Client(['base_uri' => $fcmUrl, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
+
+                    $response = $client->post('', [
+                        'headers' => [
+                            'Content-Type' => 'application/json',
+                            'Authorization' => 'key=' . $server_key,
+                        ],
+                        'body' => json_encode($message)
+                    ]);
+                    $response = json_decode($response->getBody()->getContents(), true);
+                    if ($response['success'] != 0) {
+                        $notification_history = new EmployeeNotificationHistory();
+                        $notification_history->employee_id = $employee_id;
+                        $notification_history->employee_type_id = $employee_type;
+                        $notification_history->title = $title;
+                        $notification_history->message = $body;
+                        $notification_history->save();
+                    }
+                }
+            }
+        }
     }
 
 }

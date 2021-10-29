@@ -11,18 +11,19 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
-use App\http\Models\Admin\Retail\RetailCashDeposit;
-use App\http\Models\Admin\Retail\RetailCashDepositShipment;
-use App\http\Models\Admin\Retail\RetailPaymentMode;
-use App\http\Models\Admin\Retail\RetailShipment;
-use App\http\Models\Admin\Retail\RetailShipperInfo;
-use App\http\Models\Admin\Retail\RetailShippingMode;
-use App\http\Models\Admin\Retail\RetailTraxBox;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\Http\Models\Admin\Retail\RetailPaymentMode;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
+use App\Http\Models\Admin\Retail\RetailTraxBox;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\RiderType;
+use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\CityDelivery;
@@ -51,7 +52,7 @@ use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Product;
-use App\http\Models\ReportingLocation;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderDelivery;
@@ -64,7 +65,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Zone;
@@ -1432,10 +1433,10 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
 
-        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
+        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0)->orderBy('id', 'DESC');
 
         if ($pickup_note->exists()) {
-            $pickup_note = $pickup_note->latest('id')->first();
+            $pickup_note = $pickup_note->first();
 
             $information = array();
 
@@ -4309,6 +4310,7 @@ class RiderAPIController extends Controller
             }
             if ($request->action == 1) {
                 $rider_attendance->clock_in = $attendance_time;
+                $rider_attendance->clock_in_datetime = $attendance_datetime;
                 $rider_attendance->clock_in_latitude = $request->latitude;
                 $rider_attendance->clock_in_longitude = $request->longitude;
                 $rider_attendance->clock_in_location = $location_status;
@@ -4317,6 +4319,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->employee_id = $rider_id;
                 $rider_attendance_action->employee_type = 2;
                 $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->attendance_date = $attendance_date;
                 $rider_attendance_action->action_date = $attendance_datetime;
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
@@ -4326,6 +4329,7 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action]);
             } elseif ($request->action == 2) {
                 $rider_attendance->clock_out = $attendance_time;
+                $rider_attendance->clock_out_datetime = $attendance_datetime;
                 $rider_attendance->clock_out_latitude = $request->latitude;
                 $rider_attendance->clock_out_longitude = $request->longitude;
                 $rider_attendance->clock_out_location = $location_status;
@@ -4334,6 +4338,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->employee_id = $rider_id;
                 $rider_attendance_action->employee_type = 2;
                 $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->attendance_date = $attendance_date;
                 $rider_attendance_action->action_date = $attendance_datetime;
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
@@ -4901,6 +4906,7 @@ class RiderAPIController extends Controller
                         $information['cargo_user'] = 0;
 
                         if($request->has('device_token')){
+                            EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
                             $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
                                 ->where('employee_type_id', 2);
                             if ($employee_device_token->exists()) {
@@ -8123,10 +8129,17 @@ class RiderAPIController extends Controller
                                 $return_note_data->save();
                             }
 
-                            $updated_shipments_count = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
+                            $updated_shipments = ReturnNoteShipment::where('return_note_id', $request->return_note_id);
+                            $updated_shipments_count = $updated_shipments->where('status', 0)->count();
+                            $total_shipments_count = $updated_shipments->count();
+                            $undelivered_shipments_count = $updated_shipments->where('status', 1)->count();
 
                             if ($updated_shipments_count == 0) {
-                                $return_note_data->status = 3;
+                                if($total_shipments_count == $undelivered_shipments_count){
+                                    $return_note_data->status = 1;
+                                }else{
+                                    $return_note_data->status = 3;
+                                }
                                 $return_note_data->updated_at = Carbon::now();
                                 $return_note_data->save();
                             }
@@ -9600,6 +9613,219 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => "Rider not found"]);
             }
         }
+    }
+
+    public function forget_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                if($rider->status){
+                    $pin = rand(1000, 9999);
+                    $rider->reset_pin_otp = $pin;
+                    $rider->save();
+                    NotificationsController::send(158, $rider->id);
+                    return response()->json(['status' => 0, 'message' => 'Pin has been sent to your registered number', 'otp' => $pin]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function reset_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'otp' => ['required', 'integer', 'digits:4'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                if($request->input('otp') == $rider->reset_pin_otp){
+                    $rider->pin = bcrypt($request->pin);
+                    $rider->reset_pin_otp = NULL;
+                    $rider->save();
+                    return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
+                }else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function fake_status_count(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $fake_status_count = NULL;
+        $month = NULL;
+        if ($request->has('date')) {
+            $r_current_date = Carbon::createFromFormat("Y-m-d H:i:s", $request->date . '-26 23:59:59')->toDateTimeString();
+            $r_previous_month = Carbon::parse($r_current_date)->subMonth()->addDay()->format("Y-m-d 00:00:00");
+
+            $fake_status_count = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
+                ->whereBetween('dn.status_verified_at', [$r_previous_month, $r_current_date])
+                ->where('rider_id', $rider_id)
+                ->where('update_type', 1)
+                ->where('fake_status', 1)->count('fake_status');
+            $month = Carbon::parse($request->date)->format("F-Y");
+        }
+        $current_month = Carbon::now()->format("Y-m");
+        $current_date = Carbon::createFromFormat("Y-m-d H:i:s", $current_month . '-26 23:59:59')->toDateTimeString();
+        $previous_month = Carbon::parse($current_date)->subMonth()->addDay()->format("Y-m-d 00:00:00");
+
+        $current_fake_status_count = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
+            ->whereBetween('dn.status_verified_at', [$previous_month, $current_date])
+            ->where('rider_id', $rider_id)
+            ->where('update_type', 1)
+            ->where('fake_status', 1)->count('fake_status');
+        $c_month = Carbon::now()->format("F-Y");
+        return response()->json(['status' => 0, 'current_count' => $current_fake_status_count, 'current_month' => $c_month, 'count' => $fake_status_count, 'month' => $month]);
+    }
+
+    public function get_rider_location_v2(Request $request)
+    {
+        $rules = [
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_id = $request->rider_id;
+            $rider = Rider::find($rider_id);
+            if ($rider) {
+                $latitude = $request->latitude;
+                $longitude = $request->longitude;
+
+                $log = RiderLocationLog::where('rider_id', $rider_id);
+
+                if ($log->exists()) {
+                    $log = $log->first();
+                } else {
+                    $log = new RiderLocationLog();
+                    $log->rider_id = $rider_id;
+                }
+                $log->latitude = $latitude;
+                $log->longitude = $longitude;
+                $log->save();
+                $notification = AppNotification::find(10);
+                if ($notification) {
+                    if ($notification->status) {
+                        $title = $notification->title;
+                        $body = $notification->body;
+                        if ($rider->reporting_location_id) {
+                            $reporting_location = ReportingLocation::join('riders as r', 'reporting_locations.id', 'r.reporting_location_id')
+                                ->where('r.id', $rider_id);
+                        } else {
+                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                                ->join('riders as r', 'e.id', 'r.employee_id')
+                                ->where('r.id', $rider_id);
+                        }
+                        if ($reporting_location->exists()) {
+                            $reporting_location = $reporting_location->first();
+                            $reporting_location->radius;
+                            $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                            $origin = $request->latitude . ',' . $request->longitude;
+                            $distance = $this->distance($origin, $destination);
+                            if ($distance <= $reporting_location->radius / 1000) {
+                                if ($rider->shift_id) {
+                                    $shift = EmployeeShift::where('id', $rider->shift_id);
+                                } else {
+                                    $shift = EmployeeShift::join('employees as e', 'employee_shifts.id', '=', 'e.shift_id')
+                                        ->where('e.id', $rider->employee_id);
+                                }
+                                if ($shift->exists()) {
+                                    $shift = $shift->first();
+                                    $now_time = Carbon::createFromFormat("H:i:s", Carbon::now()->format("H:i") . ':00');
+                                    $grace_time = $shift->extension_minutes;
+                                    if (strpos($body, '[time]') !== FALSE) {
+                                        $body = str_replace('[time]', Carbon::parse($shift->start_time)->addMinutes($grace_time + 1)->toTimeString(), $body);
+                                    }
+                                    if (strpos($body, '[name]') !== FALSE) {
+                                        $body = str_replace('[name]', $rider->name, $body);
+                                    }
+                                    $attendance = EmployeeAttendance::where('employee_id', $rider_id)->where('employee_type', 2)->whereDate('attendance_date', Carbon::now()->format("Y-m-d"))
+                                        ->whereNotNull('clock_in_datetime');
+                                    if (!$attendance->exists()) {
+                                        if ($now_time->diffInMinutes(Carbon::parse($shift->start_time)) == 0) {
+                                            $notification_history = new EmployeeNotificationHistory();
+                                            $notification_history->employee_id = $rider_id;
+                                            $notification_history->employee_type_id = 2;
+                                            $notification_history->title = $title;
+                                            $notification_history->message = $body;
+                                            $notification_history->save();
+                                            return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
+                                        } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(ceil($grace_time / 2))) == 0) {
+                                            $notification_history = new EmployeeNotificationHistory();
+                                            $notification_history->employee_id = $rider_id;
+                                            $notification_history->employee_type_id = 2;
+                                            $notification_history->title = $title;
+                                            $notification_history->message = $body;
+                                            $notification_history->save();
+                                            return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
+                                        } elseif ($now_time->diffInMinutes(Carbon::parse($shift->start_time)->addMinutes(($grace_time - 1))) == 0) {
+                                            $notification_history = new EmployeeNotificationHistory();
+                                            $notification_history->employee_id = $rider_id;
+                                            $notification_history->employee_type_id = 2;
+                                            $notification_history->title = $title;
+                                            $notification_history->message = $body;
+                                            $notification_history->save();
+                                            return response()->json(['status' => 0, 'data' => ['body' => $body, 'title' => $title], 'notification' => 0, 'message' => "success"]);
+                                        } else {
+                                            return response()->json(['status' => 1, 'message' => 'Time error', 'notification' => 1]);
+                                        }
+                                    } else {
+                                        return response()->json(['status' => 1, 'message' => 'Attendance Already Marked', 'notification' => 1]);
+                                    }
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Shift not found!', 'notification' => 1]);
+                                }
+                            } else {
+                                return response()->json(['status' => 1, 'message' => 'User is off-site', 'notification' => 1]);
+                            }
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Reporting location not found', 'notification' => 1]);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Notification Disabled', 'notification' => 1]);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Notification not found', 'notification' => 1]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'User Not Found!', 'notification' => 1]);
+            }
+        }
+
     }
 
     /*public function delivery_packaging_material_update($tracking_number){

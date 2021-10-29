@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\http\Models\Admin\MasterCargo\MasterCargoBagJourney;
+use App\Http\Models\Admin\MasterCargo\MasterCargoBagJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 

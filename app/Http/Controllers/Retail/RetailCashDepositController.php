@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Retail;
 
-use App\http\Models\Admin\Retail\RetailCashDeposit;
-use App\http\Models\Admin\Retail\RetailCashDepositShipment;
-use App\http\Models\Admin\Retail\RetailShippingMode;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;

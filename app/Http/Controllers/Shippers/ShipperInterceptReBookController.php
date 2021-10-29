@@ -6,12 +6,14 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\City;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
-use App\http\Models\RestrictedCityIntercept;
+use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\SelfCollectionShipment;
+use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\Facades\Auth;
 
 class ShipperInterceptReBookController extends Controller
@@ -63,7 +65,7 @@ class ShipperInterceptReBookController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = session('user_id');
         $intercept_type = $request->consignee;
-
+        
         $shipment_status = $shipment->status_shipper->name;
 
         if ($shipment['shipper_status_id'] == 12) {
@@ -96,6 +98,7 @@ class ShipperInterceptReBookController extends Controller
                         ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
                     }
                     else{
+                        
                         InterceptReBookRequestHistory::create([
                             'shipment_id' =>$request->shipment_id,
                             'old_consignee_city_id' => $shipment->consignee_city_id,
@@ -120,9 +123,8 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->save();
 
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
+                        
                     }
-
-
 
 
                     return redirect()->route('cod.return.pending.index')->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);

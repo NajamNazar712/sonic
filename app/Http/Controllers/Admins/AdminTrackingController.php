@@ -7,21 +7,22 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
-use App\http\Models\Admin\KeyAccountDailyShipment;
-use App\http\Models\Admin\KeyAccountDailySummary;
+use App\Http\Models\Admin\KeyAccountDailyShipment;
+use App\Http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\BagShipment;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
-use App\http\Models\Admin\Retail\RetailFranchise;
-use App\http\Models\Admin\Retail\RetailShipment;
-use App\http\Models\Admin\Retail\RetailShipperInfo;
-use App\http\Models\Admin\Retail\RetailTraxCenter;
-use App\http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\Retail\RetailFranchise;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\ResolvedOutstandingShipment;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\http\Models\CRM\CrmSettings;
-use App\http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\CRM\CrmSettings;
+use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\ShipmentInformationLog;
@@ -30,7 +31,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Shipment;
 use App\Http\Models\Rider;
@@ -59,8 +60,9 @@ class AdminTrackingController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
-
-        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
+        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
+        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
+        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims,'return_confirm_reasons' => $return_confirm_reasons]);
     }
 
     public function track(Request $request) {
@@ -174,6 +176,7 @@ class AdminTrackingController extends Controller
 
                         $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                         $journey_details['status'] = $journey->shipment_status_shipper->name;
+                        $journey_details['status_id'] = $journey->shipper_status_id;
                         if(in_array($journey->shipper_status_id, [1])){
                             if($shipment->booked_by == 1){
                                 $journey_details['status'] .= ' (Main User)';
@@ -185,6 +188,7 @@ class AdminTrackingController extends Controller
 
                         if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
                             if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
+
                                 $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
                             }
                             else {
@@ -247,10 +251,9 @@ class AdminTrackingController extends Controller
                     }
 
                     $shipment_payment_journey = $shipment->shipment_payment_journey;
-
                     if ($shipment_payment_journey) {
+                        $journey_details = array();
                         foreach ($shipment_payment_journey as $journey) {
-                            $journey_details = array();
                             $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             if($journey->payment_id == null){
@@ -443,9 +446,10 @@ class AdminTrackingController extends Controller
                         ->leftjoin('admins as a', 'a.id', '=', 'crsh.agent_id')
                         ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
                         ->leftjoin('retail_users as ru', 'ru.id', '=', 'crm_requests.launched_by_id')
+                        ->leftjoin('consignee_users as cu', 'cu.id', '=', 'crm_requests.launched_by_id')
                         ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
                         ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crsh.status_id')
-                        ->select('crm_requests.id as id', 'crs.name as status', 'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user', 'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by', 'ru.name as created_by_retail_user')
+                        ->select('crm_requests.id as id', 'crs.name as status', 'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user', 'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by', 'ru.name as created_by_retail_user', 'cu.name as created_by_consignee_user')
                         ->where('crm_requests.shipment_id', $shipment->id);
 
                     if($crm_requests->exists()){
@@ -464,11 +468,14 @@ class AdminTrackingController extends Controller
                                 else if($crm_request->launched_added_by == 1){
                                     $crm_request_journey['created_by'] = $crm_request->created_by_user . ' (Shipper)';
                                 }
+                                else if($crm_request->launched_added_by == 2){
+                                    $crm_request_journey['created_by'] = $crm_request->created_by_sub_user . ' (Substitute Shipper)';
+                                }
                                 else if($crm_request->launched_added_by == 3){
                                     $crm_request_journey['created_by'] = $crm_request->created_by_retail_user . ' (Retail User)';
                                 }
-                                else{
-                                    $crm_request_journey['created_by'] = $crm_request->created_by_sub_user . ' (Substitute Shipper)';
+                                else if($crm_request->launched_added_by == 4){
+                                    $crm_request_journey['created_by'] = $crm_request->created_by_consignee_user . ' (Consignee)';
                                 }
                             }
                             else{
@@ -913,11 +920,13 @@ class AdminTrackingController extends Controller
                         $details['order_information']['instructions'] = $shipment->special_instructions;
                         $details['order_information']['pieces'] = $shipment->pieces;
                         $details['order_information']['business_category'] = $shipment->business_category->name;
+                        $manifest_bag_seal_number = 0;
                         foreach ($shipment->shipment_journey as $journey) {
                             $journey_details = array();
 
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
+                            $journey_details['status_id'] = $journey->shipper_status_id;
                             if(in_array($journey->shipper_status_id, [1])){
                                 if($shipment->booked_by == 1){
                                     $journey_details['status'] .= ' (Main User)';
@@ -926,11 +935,12 @@ class AdminTrackingController extends Controller
                                     $journey_details['status'] .= ' (Substitute User)';
                                 }
                             }
+                            $cargo_bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment->id);
 
                             if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
                                 if ($journey->shipper_status_id == 3 || $journey->shipper_status_id == 21) {
                                     $bag_shipment = BagShipment::where('shipment_id', $shipment->id);
-                                    $cargo_bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment->id);
+
 
                                     if($bag_shipment->exists()){
                                         $bag_shipment = $bag_shipment->first();
@@ -944,7 +954,8 @@ class AdminTrackingController extends Controller
                                         }
                                     }
                                     else if($cargo_bag_shipment->exists()){
-                                        $bag_shipment = $cargo_bag_shipment->first();
+                                        $bag_shipment = $cargo_bag_shipment->orderBy('id','desc')->skip($manifest_bag_seal_number)->take(1)->first();
+                                        $manifest_bag_seal_number++;
                                         $bag = CargoManifestBag::find($bag_shipment->cargo_manifest_bag_id);
                                         $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
                                         if($cargo_manifest->exists()){
@@ -962,7 +973,24 @@ class AdminTrackingController extends Controller
                                     }
                                 }
                                 elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
-                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                  
+                                    if($cargo_bag_shipment->exists()){
+                                        $bag_shipment = $cargo_bag_shipment->orderBy('id','desc')->skip($manifest_bag_seal_number)->take(1)->first();
+                                        $manifest_bag_seal_number++;
+                                        $bag = CargoManifestBag::find($bag_shipment->cargo_manifest_bag_id);
+                                        $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
+                                        if($cargo_manifest->exists()){
+
+                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                        }
+                                        else{
+                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                        }
+                                    }
+                                        else{
+                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+
+                                    }
                                 }
                                 else {
                                     if(in_array($journey->shipper_status_id, [23, 24, 25, 28, 29, 31, 44, 45, 47, 48])){
@@ -1208,6 +1236,17 @@ class AdminTrackingController extends Controller
                             }
                         }
 
+                        $resolved_outstanding_shipments = ResolvedOutstandingShipment::where('shipment_id', $shipment->id);
+                        if($resolved_outstanding_shipments->exists()){
+                            $resolved_outstanding_shipments = $resolved_outstanding_shipments->get();
+                            $outstanding_details = array();
+                            foreach ($resolved_outstanding_shipments as $resolved_outstanding_shipment) {
+                                $outstanding_details['date_time'] = Carbon::parse($resolved_outstanding_shipment->created_at)->toDateTimeString();
+                                $outstanding_details['resolved_by'] = $resolved_outstanding_shipment->admin->name;
+                                $details['outstanding_history'][] = $outstanding_details;
+                            }
+                        }
+
                         $complain = CrmRequest::where('shipment_id', $shipment->id)->whereIn('status_id', [2, 3, 5]);
 
                         if ($complain->exists()) {
@@ -1311,11 +1350,12 @@ class AdminTrackingController extends Controller
                             ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.agent_id')
                             ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
                             ->leftjoin('retail_users as ru', 'ru.id', '=', 'crm_requests.launched_by_id')
+                            ->leftjoin('consignee_users as cu', 'cu.id', '=', 'crm_requests.launched_by_id')
                             ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
                             ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crsh.status_id')
                             ->select('crm_requests.id as id', 'crs.name as status', 'a.id as admin_id',
                             'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user',
-                             'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by','crm_requests.launched_by_id', 'ru.name as created_by_retail_user')
+                             'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by','crm_requests.launched_by_id', 'ru.name as created_by_retail_user', 'cu.name as created_by_consignee_user')
                             ->where('crm_requests.shipment_id', $shipment->id);
 
                         if($crm_requests->exists()){
@@ -1329,16 +1369,19 @@ class AdminTrackingController extends Controller
                                 $crm_request_journey['status'] = $crm_request->status;
                                 if($crm_request->status_id == 1){
                                     if($crm_request->launched_added_by == 0){
-                                           $crm_request_journey['created_by'] = Admin::find($crm_request->launched_by_id)->name . ' (Admin)';
+                                        $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
                                     }
                                     else if($crm_request->launched_added_by == 1){
                                         $crm_request_journey['created_by'] = $crm_request->created_by_user . ' (Shipper)';
                                     }
+                                    else if($crm_request->launched_added_by == 2){
+                                        $crm_request_journey['created_by'] = $crm_request->created_by_sub_user . ' (Substitute Shipper)';
+                                    }
                                     else if($crm_request->launched_added_by == 3){
                                         $crm_request_journey['created_by'] = $crm_request->created_by_retail_user . ' (Retail User)';
                                     }
-                                    else{
-                                        $crm_request_journey['created_by'] = $crm_request->created_by_sub_user . ' (Substitute Shipper)';
+                                    else if($crm_request->launched_added_by == 4){
+                                        $crm_request_journey['created_by'] = $crm_request->created_by_consignee_user . ' (Consignee)';
                                     }
                                 }
                                 else{
@@ -1457,8 +1500,8 @@ class AdminTrackingController extends Controller
                 $barcodes .= '
             <div class="pwrapper p-1">
                 <div class="row justify-content-center">
-                    <div class="col-5">
-                        <div class="row mb-2">
+                    <div class="col">
+                        <div class="row mt-2 mb-2">
                             <div class="col-5 logo text-left">
                                 <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-inline" style="filter: brightness(1) !important;">
                             </div>

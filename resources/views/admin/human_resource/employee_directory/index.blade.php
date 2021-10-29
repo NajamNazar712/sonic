@@ -20,16 +20,16 @@
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
-                                    <th class="border-primary border-darken-1">Employee Name</th>
+                                    <th class="border-primary border-darken-1">Employee FullName</th>
                                     <th class="border-primary border-darken-1">Gender</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
+                                    <th class="border-primary border-darken-1">Staff Department</th>
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
-                                    <th class="border-primary border-darken-1">Staff Department</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -130,6 +130,16 @@
                         <div class="row">
                             <div class="col">
                                 <fieldset class="form-group">
+                                    <select name="rider_main_category" id="main_category_list" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($rider_main_categories as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col">
+                                <fieldset class="form-group">
                                     <select name="rider_category" id="category_list" class="form-control select2"
                                             data-rule-required="true" data-msg-required="This field is required">
                                         @foreach($rider_categories as $category)
@@ -138,6 +148,8 @@
                                     </select>
                                 </fieldset>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col">
                                 <fieldset class="form-group">
                                     <select name="category" id="category" class="form-control select2"
@@ -229,7 +241,7 @@
                         {{csrf_field()}}
                         <input type="hidden" name="employee_id" id="employee_id" value="">
                         <div class="form-group">
-                            <input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required">
+                            <input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" data-rule-minlength="4" data-rule-maxlength="4">
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>
@@ -283,9 +295,14 @@
                 placeholder: 'Select Route',
                 dropdownParent: $('#editRiderModal')
             });
+            $('#main_category_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Rider Main Category',
+                dropdownParent: $('#editRiderModal')
+            });
             $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Rider Category',
+                placeholder: 'Select Rider Sub-Category',
                 dropdownParent: $('#editRiderModal')
             });
 
@@ -367,16 +384,16 @@
                             head = [];
                             head.push('S.No');
                             head.push('Employee ID');
-                            head.push('Employee Name');
+                            head.push('Employee FullName');
                             head.push('Gender');
                             head.push('City');
                             head.push('CNIC');
                             head.push('Phone No.');
                             head.push('Employee Type');
+                            head.push('Department Name');
                             head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
-                            head.push('Department Name');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -388,10 +405,10 @@
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
                                 row.push(values.employee_type);
+                                row.push(values.department_name);
                                 row.push(values.request_status);
                                 row.push(values.status);
                                 row.push(values.requested_at);
-                                row.push(values.department_name);
                                 body.push(row);
                             });
                         },
@@ -619,7 +636,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[11, 'desc']],
+                order: [[12, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -632,10 +649,10 @@
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
+                    {data: 'department_name', name: 'ads.id', class: 'align-middle department_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
-                    {data: 'department_name', name: 'ads.id', class: 'align-middle department_name'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -893,7 +910,8 @@
                 if(check_bit != null)
                 {
                     var rider_type = table.row($(this).parents('tr')).data().active_rider_type_id;
-                    $('#category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
+                    $('#main_category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
+                     $('#category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
                     $('#category').val(table.row($(this).parents('tr')).data().operation_id).trigger('change');
                     route_id = table.row($(this).parents('tr')).data().route_id;
                 }
@@ -912,8 +930,12 @@
 
             });
 
-            $('#UpdatePinModal #pin').inputmask({
-                'mask': '9999',
+            $("#UpdatePinModal #pin").inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'mask':"9999",
                 'clearIncomplete': true,
             });
 
@@ -935,6 +957,7 @@
                 $('#city_list').val(null).trigger('change');
                 $('#rider_type_list').val(null).trigger('change');
                 $('#route_list').val(null).trigger('change');
+                $('#main_category_list').val(null).trigger('change');
                 $('#category_list').val(null).trigger('change');
                 $('#category').val(null).trigger('change');
 

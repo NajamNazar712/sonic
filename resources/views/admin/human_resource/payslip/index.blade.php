@@ -52,7 +52,7 @@
                                 </div>
                             </form>
 
-                            <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                            <form id="search_form" class="form-inline mb-1 row" novalidate="novalidate">
 
                                 <div class="col-3">
                                     <div class="form-group input-group ml-1">
@@ -67,7 +67,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group col-2 mt-2 justify-content-center">
+                                <div class="form-group col-2 mt-2">
                                     <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search
                                     </button>
                                 </div>

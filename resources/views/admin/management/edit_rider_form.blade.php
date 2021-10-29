@@ -34,6 +34,7 @@
             </div>
         @endif
     </div>
+
     <div class="row mb-2">
         <div class="col">
             <fieldset class="form-group">
@@ -41,6 +42,28 @@
                     {{--<option value="{{$rider->city->id}}" selected>{{$rider->city->name}}</option>--}}
                     @foreach($cities as $city)
                         <option value="{{$city->id}}">{{$city->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    @foreach($shifts as $shift)
+                        <option value="{{$shift->id}}"> {{$shift->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="location_id" id="location_list" class="form-control select2" style="width: 100%;">
+                    @foreach($reporting_locations as $reporting_location)
+                        <option value="{{$reporting_location->id}}"> {{$reporting_location->name}}</option>
                     @endforeach
                 </select>
             </fieldset>
@@ -86,6 +109,15 @@
         <div class="row">
             <div class="col">
                 <fieldset class="form-group">
+                    <select name="rider_main_category" id="main_category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+
+                        @foreach($main_category as $category)
+                            <option value="{{$category->id}}">{{$category->name}}</option>
+                        @endforeach
+                    </select>
+                </fieldset>
+            </div> <div class="col">
+                <fieldset class="form-group">
                     <select name="rider_category" id="category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
 
                         @foreach($categories as $category)
@@ -94,7 +126,9 @@
                     </select>
                 </fieldset>
             </div>
-            <div class="col">
+            </div>
+        <div class="row">
+        <div class="col">
                 <fieldset class="form-group">
                     <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                         @foreach($routes as $route)
@@ -109,18 +143,6 @@
                     <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                         @foreach($operation_rider_ids as $operation)
                             <option value="{{$operation->id}}">{{$operation->name}}</option>
-                        @endforeach
-                    </select>
-                </fieldset>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col">
-                <fieldset class="form-group">
-                    <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                        @foreach($shifts as $shift)
-                            <option value="{{$shift->id}}"> {{$shift->name}}</option>
                         @endforeach
                     </select>
                 </fieldset>
@@ -188,6 +210,16 @@
         });
         var category_id = {{$rider->rider_category_id}};
         $('#category_list').val(category_id).trigger('change');
+        @if($rider->rider_main_category_id != null)
+        var main_category_id = {{$rider->rider_main_category_id}};
+        $('#main_category_list').val(main_category_id).trigger('change');
+        @else
+        $('#main_category_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Rider Main Category',
+            dropdownParent: $("#editRiderForm")
+        });
+        @endif
+
         $("input[name='pin']").inputmask({
             'alias': 'integer',
             'allowMinus': false,
@@ -212,7 +244,16 @@
         $('#shift_list').val({!! $rider->shift_id !!}).trigger('change');
         @else
         $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select a Shift',
+            placeholder:'Select Shift',
+            dropdownParent: $("#editRiderForm")
+        });
+        @endif
+
+        @if($rider->reporting_location_id != Null)
+        $('#location_list').val({!! $rider->reporting_location_id !!}).trigger('change');
+        @else
+        $('#location_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Reporting Location',
             dropdownParent: $("#editRiderForm")
         });
         @endif

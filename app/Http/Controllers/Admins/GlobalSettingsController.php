@@ -10,13 +10,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
-use App\http\Models\Admin\BookingSmsForShippers;
+use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Fleet;
-use App\Http\Models\Admin\FuelFactorHistory;
+use App\Http\Models\Admin\Fuel\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\MonthClosingStatus;
 use App\Http\Models\Admin\MonthClosingType;
@@ -32,11 +32,11 @@ use App\Http\Models\Admin\RouteManagement;
 use App\Http\Models\Admin\RouteManagementJunction;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
-use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
+use App\Http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\VehicleType;
-use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
-use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\Blacklist\BlacklistCondition;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
@@ -50,6 +50,9 @@ use App\Http\Models\Blacklist\BlacklistSettingCondition;
 use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
+use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
@@ -69,16 +72,16 @@ use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
-use App\http\Models\RestrictedCityIntercept;
-use App\http\Models\RestrictParcelsAttempt;
+use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Rider\RidersIncentiveSetting;
 use App\Http\Models\Rider\RidersShipmentPaymentType;
 use App\Http\Models\Rider\RidersShipmentWeightRange;
 use App\Http\Models\Rider\RiderTickerImage;
-use App\http\Models\Runner;
-use App\http\Models\RunnerJunction;
+use App\Http\Models\Runner;
+use App\Http\Models\RunnerJunction;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
@@ -871,7 +874,12 @@ class GlobalSettingsController extends Controller
                             if ($user->account_type_id == 1) {
                                 $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                             } else {
-                                $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null){
+                                    $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                }
+                                else{
+                                    $rate_status = CorporateDefaultRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                }
                             }
 
                             if ($rate_status->exists()) {
@@ -880,7 +888,12 @@ class GlobalSettingsController extends Controller
                                 if ($user->account_type_id == 1) {
                                     $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                 } else {
-                                    $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                    if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
+                                        $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                    }
+                                    else{
+                                        $fuel_surcharge = CorporateDefaultFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                    }
                                 }
                                 if ($fuel_surcharge->exists()) {
                                     $fuel_surcharge = $fuel_surcharge->first();
@@ -904,7 +917,12 @@ class GlobalSettingsController extends Controller
                                     if ($user->account_type_id == 1) {
                                         $fuel_surcharge_history = new HistoryFuelSurcharge();
                                     } else {
-                                        $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
+                                        if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
+                                            $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
+                                        }
+                                        else{
+                                            $fuel_surcharge_history = new CorporateDefaultHistoryFuelSurcharge();
+                                        }
                                     }
 
                                     $fuel_surcharge_history->user_id = $user->id;
@@ -913,6 +931,10 @@ class GlobalSettingsController extends Controller
                                     $fuel_surcharge_history->save();
 
                                 } else {
+                                    if($fuel_factor < 0) {
+                                        $fuel_factor = 0;
+                                    }
+
                                     $rate_status->fuel_charges = 1;
                                     $rate_status->save();
                                     if ($user->account_type_id == 1) {
@@ -922,11 +944,20 @@ class GlobalSettingsController extends Controller
                                         $fuel_surcharge->fuel_surcharge = $fuel_factor;
                                         $fuel_surcharge->save();
                                     } else {
-                                        $fuel_surcharge = new CorporateFuelSurcharge();
-                                        $fuel_surcharge->user_id = $user->id;
-                                        $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
-                                        $fuel_surcharge->fuel_surcharge = $fuel_factor;
-                                        $fuel_surcharge->save();
+                                        if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
+                                            $fuel_surcharge = new CorporateFuelSurcharge();
+                                            $fuel_surcharge->user_id = $user->id;
+                                            $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                            $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                            $fuel_surcharge->save();
+                                        }
+                                        else{
+                                            $fuel_surcharge = new CorporateDefaultFuelSurcharge();
+                                            $fuel_surcharge->user_id = $user->id;
+                                            $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                            $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                            $fuel_surcharge->save();
+                                        }
                                     }
 
                                 }
@@ -955,7 +986,12 @@ class GlobalSettingsController extends Controller
                                 if ($user->account_type_id == 1) {
                                     $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                 } else {
-                                    $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                    if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
+                                        $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                    }
+                                    else{
+                                        $rate_status = CorporateDefaultRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                    }
                                 }
 
                                 if ($rate_status->exists()) {
@@ -964,7 +1000,12 @@ class GlobalSettingsController extends Controller
                                     if ($user->account_type_id == 1) {
                                         $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                     } else {
-                                        $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                        if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
+                                            $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                        }
+                                        else{
+                                            $fuel_surcharge = CorporateDefaultFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
+                                        }
                                     }
                                     if ($fuel_surcharge->exists()) {
                                         $fuel_surcharge = $fuel_surcharge->first();
@@ -988,7 +1029,12 @@ class GlobalSettingsController extends Controller
                                         if ($user->account_type_id == 1) {
                                             $fuel_surcharge_history = new HistoryFuelSurcharge();
                                         } else {
-                                            $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
+                                            if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
+                                                $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
+                                            }
+                                            else{
+                                                $fuel_surcharge_history = new CorporateDefaultHistoryFuelSurcharge();
+                                            }
                                         }
 
                                         $fuel_surcharge_history->user_id = $user->id;
@@ -997,6 +1043,10 @@ class GlobalSettingsController extends Controller
                                         $fuel_surcharge_history->save();
 
                                     } else {
+                                        if($fuel_factor < 0) {
+                                            $fuel_factor = 0;
+                                        }
+
                                         $rate_status->fuel_charges = 1;
                                         $rate_status->save();
                                         if ($user->account_type_id == 1) {
@@ -1006,11 +1056,20 @@ class GlobalSettingsController extends Controller
                                             $fuel_surcharge->fuel_surcharge = $fuel_factor;
                                             $fuel_surcharge->save();
                                         } else {
-                                            $fuel_surcharge = new CorporateFuelSurcharge();
-                                            $fuel_surcharge->user_id = $user->id;
-                                            $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
-                                            $fuel_surcharge->fuel_surcharge = $fuel_factor;
-                                            $fuel_surcharge->save();
+                                            if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
+                                                $fuel_surcharge = new CorporateFuelSurcharge();
+                                                $fuel_surcharge->user_id = $user->id;
+                                                $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                                $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                                $fuel_surcharge->save();
+                                            }
+                                            else{
+                                                $fuel_surcharge = new CorporateDefaultFuelSurcharge();
+                                                $fuel_surcharge->user_id = $user->id;
+                                                $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
+                                                $fuel_surcharge->fuel_surcharge = $fuel_factor;
+                                                $fuel_surcharge->save();
+                                            }
                                         }
 
                                     }
@@ -1520,8 +1579,8 @@ class GlobalSettingsController extends Controller
     {
         $case_nature_types = CrmRequestCaseNatureType::leftjoin('crm_request_case_nature as crcs', 'crcs.id', '=', 'crm_request_case_nature_types.nature_id')
             ->select('crm_request_case_nature_types.id','crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type', 'crm_request_case_nature_types.status_id as status');
-            
-            $datatable = Datatables::of($case_nature_types)   
+
+        $datatable = Datatables::of($case_nature_types)
             ->editColumn('status', function($case_nature_types) {
                 if($case_nature_types->status==1){
                     return 'Enable';
@@ -1547,19 +1606,19 @@ class GlobalSettingsController extends Controller
                 }else{
                     $dropdown = '';
 
-          }
-                    return $dropdown;
-                
+                }
+                return $dropdown;
+
             });
-            return $datatable->make(true);
+        return $datatable->make(true);
     }
 
     public function crm_case_nature_types_status(Request $request){
         $crm_case_nature_type = CrmRequestCaseNatureType::find($request->id);
         if ($request->status == 1) {
-                $crm_case_nature_type->status_id = 1;
-                $crm_case_nature_type->save();
-                return response()->json(['status' => 1, 'success' => 'Case Nature Type Enabled Successfully']);
+            $crm_case_nature_type->status_id = 1;
+            $crm_case_nature_type->save();
+            return response()->json(['status' => 1, 'success' => 'Case Nature Type Enabled Successfully']);
         } elseif ($request->status == 0) {
             $crm_case_nature_type->status_id = 0;
             $crm_case_nature_type->save();
@@ -2164,10 +2223,10 @@ class GlobalSettingsController extends Controller
 
     public function projection_shipments_list(Request $request)
     {
-    if($request->get('excel') && $request->get('excel') == true)
-    {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),343);
-    }
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),343);
+        }
         $shipments = BusinessProjectionShipment::join('users as u', 'u.id', '=', 'business_projection_shipments.user_id')->select('u.name as shipper', 'business_projection_shipments.shipment');
         if (session('department_id') == 7) {
             if (session('role_id') != 4) {
@@ -2921,9 +2980,9 @@ class GlobalSettingsController extends Controller
     public function holidays_list(Request $request)
     {
         if($request->get('excel') && $request->get('excel') == true)
-    {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),367);
-    }
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),367);
+        }
         $holidays = Holiday::leftjoin('admins as a', 'a.id', '=', 'holidays.created_by')
             ->select('holidays.reason as reason', 'holidays.holiday as holiday', 'holidays.created_at as created_at', 'a.name as created_by');
 
@@ -3054,6 +3113,7 @@ class GlobalSettingsController extends Controller
 
     public function carrefour_account_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),444);
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
         $settings = GlobalSettings::where('type', 'carrefour_accounts');
@@ -3163,7 +3223,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function restrict_parcels_attempt_index()
-{        ActivityTrailController::createActivityTrailLog(Auth::id(),356);
+    {        ActivityTrailController::createActivityTrailLog(Auth::id(),356);
         $already_restricted_shippers = RestrictParcelsAttempt::pluck('shipper_id')->toArray();
         $shippers = User::where('status', 3)->whereNotIn('id', $already_restricted_shippers)->get();
         return view('admin.settings.retrun_parcels_after_attempts')->with('shippers', $shippers);
@@ -3763,9 +3823,9 @@ class GlobalSettingsController extends Controller
     public function international_standard_dhl_rates_list(Request $request)
     {
         if($request->get('excel') && $request->get('excel') == true)
-    {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),382);
-    }
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),382);
+        }
         $rates_list = InternationalStandardDhlRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
 
         return Datatables::of($rates_list)->make(true);
@@ -4168,7 +4228,7 @@ class GlobalSettingsController extends Controller
             ->leftjoin('fleet_vendors as fv','fv.id','=','fleets.vendor_id')
             ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type','fd.name as driver','fv.name as vendor'])
             ->orderBy('fleets.created_at','desc');
-                // ->select();
+        // ->select();
 
         $datatable = Datatables::of($fleet)
             ->editColumn('status', function ($fleet) {
@@ -4179,7 +4239,7 @@ class GlobalSettingsController extends Controller
                 }
             })
             // ->editColumn('vehicle_type_id', function ($fleet) {
-                
+
             //         return $fleet->vehicle_type->name;
             // })
             ->addColumn('action', function ($fleet) {
@@ -4190,7 +4250,7 @@ class GlobalSettingsController extends Controller
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
-                 $dropdown .= '<button type="button" class="dropdown-item edit_fleet" data-target-id=' . $fleet->id . ' rel="edit_fleet"  data-toggle="modal" data-target="#editFleet"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                $dropdown .= '<button type="button" class="dropdown-item edit_fleet" data-target-id=' . $fleet->id . ' rel="edit_fleet"  data-toggle="modal" data-target="#editFleet"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                 if ($fleet->status == 0) {
                     $dropdown .= $enable;
@@ -4218,7 +4278,7 @@ class GlobalSettingsController extends Controller
             $fleet->vehicle_type_id = $vehicle_type->id;
             $fleet->tracking_id = $request->tracking_id;
             $fleet->status = 1;
-            
+
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Added successfully!');
 
@@ -4237,7 +4297,7 @@ class GlobalSettingsController extends Controller
 
         }
     }
-    
+
     public function fleet_edit($id){
         $vehicles = VehicleType::all();
         $fleet = Fleet::find($id);
@@ -4273,9 +4333,9 @@ class GlobalSettingsController extends Controller
             $fleet->vendor_id = $request->vendor;
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Updated successfully!');
-    
+
         }
-        
+
     }
     public function fleet_enable_disable(Request $request){
         $id = $request->id;
@@ -4311,7 +4371,7 @@ class GlobalSettingsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),248);
         $cities = City::where('status', 1)->where('hub', 1)->get();
         return view('admin.settings.route_management_index')->with('cities', $cities);
-    
+
     }
 
 
@@ -4322,7 +4382,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function route_management_update(Request $request, $id){
-       
+
         $route_management = RouteManagement::find($id);
         $route_management->route_code = $request->route_code;
         $route_management->route_title = $request->route_title;
@@ -4348,52 +4408,52 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),249);
         }
         $route_management = RouteManagement::leftjoin('cities as stp','route_managements.starting_point_id','stp.id')
-        ->leftjoin('cities as endp','route_managements.end_point_id','endp.id')
-        ->select('route_managements.id','route_managements.created_at','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.hub_location_latitude as starting_lat', 'stp.hub_location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.hub_location_latitude as end_lat', 'endp.hub_location_longitude as end_long')
-        ->orderBy('route_managements.created_at','desc');
+            ->leftjoin('cities as endp','route_managements.end_point_id','endp.id')
+            ->select('route_managements.id','route_managements.created_at','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.hub_location_latitude as starting_lat', 'stp.hub_location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.hub_location_latitude as end_lat', 'endp.hub_location_longitude as end_long')
+            ->orderBy('route_managements.created_at','desc');
         $datatable = Datatables::of($route_management)
-        ->editColumn('status', function ($route_management) {
-            if ($route_management->status == 1) {
-                return 'Enable';
-            } else {
-                return 'Disable';
-            }
-        })->editColumn('starting_id', function ($route_management) {
-            // $route_management->starting_id.'-'.
-            return "<a href='https://www.google.com/maps/?q=".$route_management->starting_lat.",".$route_management->starting_long."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$route_management->starting_name;
-        })
-        ->editColumn('end_id', function ($route_management) {
-            return "<a href='https://www.google.com/maps/?q=".$route_management->end_lat.",".$route_management->end_long."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$route_management->end_name;
-            
-            return $route_management->end_id.'-'.$route_management->end_name;
-        })
-            
+            ->editColumn('status', function ($route_management) {
+                if ($route_management->status == 1) {
+                    return 'Enable';
+                } else {
+                    return 'Disable';
+                }
+            })->editColumn('starting_id', function ($route_management) {
+                // $route_management->starting_id.'-'.
+                return "<a href='https://www.google.com/maps/?q=".$route_management->starting_lat.",".$route_management->starting_long."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$route_management->starting_name;
+            })
+            ->editColumn('end_id', function ($route_management) {
+                return "<a href='https://www.google.com/maps/?q=".$route_management->end_lat.",".$route_management->end_long."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$route_management->end_name;
+
+                return $route_management->end_id.'-'.$route_management->end_name;
+            })
+
             ->addColumn('junctions', function ($route_management) {
                 $junctions = RouteManagementJunction::where('route_management_id',$route_management->id)->get();
                 $junction_data = '';
 
-                
-                    foreach ($junctions as $junction) {
-                        $city = City::find($junction->junction_id);
-                        $junction_data.= "<a href='https://www.google.com/maps/?q=".$city->hub_location_latitude.",".$city->hub_location_longitude."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$city->name ."<br><br>";
 
-                    }
-                    return $junction_data;
-                    // return $route_management->id;
+                foreach ($junctions as $junction) {
+                    $city = City::find($junction->junction_id);
+                    $junction_data.= "<a href='https://www.google.com/maps/?q=".$city->hub_location_latitude.",".$city->hub_location_longitude."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$city->name ."<br><br>";
+
+                }
+                return $junction_data;
+                // return $route_management->id;
             })
             ->addColumn('excel_junctions', function ($route_management) {
                 $junctions = RouteManagementJunction::where('route_management_id',$route_management->id)->get();
                 $junction_data = '';
 
-                
-                    foreach ($junctions as $value) {
-                        $junction_data.= $value->junction->name.' , ';
 
-                    }
-                    return $junction_data;
-                    // return $route_management->id;
+                foreach ($junctions as $value) {
+                    $junction_data.= $value->junction->name.' , ';
+
+                }
+                return $junction_data;
+                // return $route_management->id;
             })
-            
+
             ->addColumn('action', function ($fleet) {
                 $enable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 $disable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
@@ -4440,13 +4500,13 @@ class GlobalSettingsController extends Controller
         $route_management->end_point_id = $request->end_point_id;
         $route_management->status = 1;
         $route_management->save();
-        
+
         foreach ($request->junction as $junction_id) {
             $route_management_junction = new RouteManagementJunction;
             $route_management_junction->junction_id = $junction_id;
             $route_management_junction->route_management_id = $route_management->id;
             $route_management_junction->save();
-            }
+        }
         return redirect()->back()->with('success', 'Route Added successfully!');
 
     }
@@ -4467,6 +4527,8 @@ class GlobalSettingsController extends Controller
     }
 
     public function debriefing_time_setting_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),445);
         $settings = GlobalSettings::where('type', 'debriefing_time_setting');
 
         if ($settings->exists()) {
@@ -4501,6 +4563,7 @@ class GlobalSettingsController extends Controller
 
     public function shipment_status_eta_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),449);
         $shipment_status = ShipmentStatus::whereNotIn('id', [1, 17])->where('status', 1)->select(['id', 'name'])->get();
 
         return view('admin.settings.telenor.shipment_status_eta')->with(['shipment_status' => $shipment_status]);
@@ -4630,8 +4693,8 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-	public function last_mile_cron_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),416);
+    public function last_mile_cron_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),446);
         $settings = GlobalSettings::where('type', 'last_mile_cron_time')->first();
 
         $default_time = NULL;
@@ -4660,7 +4723,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function dhl_sync_time_index(){
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),447);
         $settings = GlobalSettings::where('type', 'dhl_sync_time_1')->first();
 
         $default_time_1 = NULL;
@@ -4710,7 +4773,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function international_automation_user_index(){
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),448);
         $settings = GlobalSettings::where('type', 'dhl_user_id')->first();
 
         $dhl_user_id = NULL;

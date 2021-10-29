@@ -13,13 +13,10 @@
                 <div class="text-center mb-2">
                     <h4><b>Tracking Number: {{$shipment->tracking_number}}</b></h4>
                 </div>
-                <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
-
-                </div>
+                
                 <form id="intercept_form" class="form-horizontal" method="post" action="{{route('cod.intercept.update')}}">
                 @csrf
-
-                    <div class="form-group col-5  mb-2 text-center" style="margin: auto;">
+                    <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
                         <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
                             <option value="1" selected>Different Consignee</option>
                             <option value="2">Same Consignee</option>
@@ -71,6 +68,7 @@
 
                                 <input type="text" name="amount"  id="amount" class="form-control rounded-right amount" value="{{$shipment['amount']}}" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
                             </div>
+                           
                         </div>
                     </div>
                     <div class="row mt-2">
@@ -113,6 +111,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            var con_city = $('#consignee_city').val();
+
+
+           
 
             var city = @json($shipment['consignee_city_id']);
             var name = @json($shipment['consignee_name']);
