@@ -350,7 +350,7 @@
                 var from = table.row($(this).parents('tr')).data().from;
                 var to = table.row($(this).parents('tr')).data().to;
                 var reason = table.row($(this).parents('tr')).data().applied_reason;
-                from_date.pickadate('picker').set(new Date(from));
+                from_date.pickadate('picker').set('select',new Date(2021,2,3));
                 $('#leave_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_trax_id').val(trax_id);
