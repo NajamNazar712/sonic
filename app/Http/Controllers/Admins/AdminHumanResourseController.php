@@ -3117,7 +3117,7 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
             ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
             ->leftjoin('riders as r', 'r.id', 'employee_leaves.employee_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason');
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.reject_reason as reject_reason');
 
         $datatable = Datatables::of($employee_leaves)
             ->editColumn('trax_id', function ($employee) {
@@ -3163,6 +3163,15 @@ class AdminHumanResourseController extends Controller
                     return $employee->rider_cnic;
                 } else {
                     return $employee->admin_cnic;
+                }
+            })
+            ->editColumn('days', function ($employee) {
+                if($employee->to){
+                    $start_date = Carbon::createFromFormat('Y-m-d', $employee->from);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $employee->to);
+                    $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                }else{
+                    $datum['days_count'] = 1;
                 }
             })
             ->editColumn('requested', function ($employee) {
@@ -3227,6 +3236,9 @@ class AdminHumanResourseController extends Controller
                         $user = Admin::find($employee_leaves->employee_id);
                     } else {
                         $user = Rider::find($employee_leaves->employee_id);
+                    }
+                    if(!$user){
+                        return redirect()->back()->with('error', 'Invalid Employee ID');
                     }
                     $shift = EmployeeShift::find($user->shift_id);
                     if ($employee_leaves->to) {
@@ -3324,8 +3336,8 @@ class AdminHumanResourseController extends Controller
                 if ($leave_request->exists()) {
                     $leave_request = $leave_request->first();
                     if (in_array($leave_request->status, [1,2,3])) {
-                        $leave_request->from = $request->from_formatted;
-                        $leave_request->to = $request->to_formatted;
+                        $leave_request->from = Carbon::Parse($request->from)->format("Y-m-d");
+                        $leave_request->to = Carbon::Parse($request->to)->format("Y-m-d");
                         $leave_request->applied_reason = $request->reason;
                         $leave_request->updated_by = $admin_id;
                         $leave_request->save();

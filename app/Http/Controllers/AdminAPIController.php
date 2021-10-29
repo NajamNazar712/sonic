@@ -4105,7 +4105,7 @@ class AdminAPIController extends Controller
                 if($employee_leave->to){
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
-                    $datum['days_count'] = $start_date->diffInDays($end_date);
+                    $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
                 }else{
                     $datum['days_count'] = 1;
                 }
@@ -4153,7 +4153,7 @@ class AdminAPIController extends Controller
                     if($employee_leave->to){
                         $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                         $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
-                        $datum['days_count'] = $start_date->diffInDays($end_date);
+                        $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
                     }else{
                         $datum['days_count'] = 1;
                     }

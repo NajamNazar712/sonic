@@ -27,8 +27,11 @@
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Availed Leaves</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Leave Purpose</th>
+                                    <th class="border-primary border-darken-1">Reject Reason</th>
                                     <th class="border-primary border-darken-1">Leave From</th>
                                     <th class="border-primary border-darken-1">Leave TO</th>
+                                    <th class="border-primary border-darken-1">Days</th>
                                     <th class="border-primary border-darken-1">Request Date</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Updated At</th>
@@ -221,8 +224,12 @@
                             head.push('CNIC');
                             head.push('Availed Leaves');
                             head.push('Status');
+                            head.push('Leave Purpose');
+                            head.push('Reject Reason');
+                            head.push('Status');
                             head.push('Leave From');
                             head.push('Leave To');
+                            head.push('Days');
                             head.push('Requested Date');
                             head.push('Updated By');
                             head.push('Updated At');
@@ -239,8 +246,12 @@
                                 row.push(values.cnic);
                                 row.push(values.leave_count);
                                 row.push(values.status);
+                                row.push(values.applied_reason);
+                                row.push(values.reject_reason);
+                                row.push(values.status);
                                 row.push(values.from);
                                 row.push(values.to);
+                                row.push(values.days);
                                 row.push(values.requested);
                                 row.push(values.updated_by);
                                 row.push(values.updated);
@@ -274,7 +285,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.leave.list') }}',
-                order: [[11, 'desc']],
+                order: [[1, 'desc']],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
@@ -288,8 +299,11 @@
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic'},
                     {data: 'leave_count', name: 'ls.name', class: 'align-middle leave_count', orderable: false, searchable: false},
                     {data: 'status', name: 'ls.name', class: 'align-middle status'},
+                    {data: 'applied_reason', name: 'employee_leaves.applied_reason', class: 'align-middle applied_reason', orderable: false, searchable: false},
+                    {data: 'reject_reason', name: 'employee_leaves.reject_reason', class: 'align-middle reject_reason', orderable: false, searchable: false},
                     {data: 'from', name: 'employee_leaves.from', class: 'align-middle from'},
                     {data: 'to', name: 'employee_leaves.to', class: 'align-middle to'},
+                    {data: 'days', name: '', class: 'align-middle days', orderable: false, searchable: false},
                     {data: 'requested', name: 'employee_leaves.created_at', class: 'align-middle requested'},
                     {data: 'updated_by', name: 'u.name', class: 'align-middle updated_by'},
                     {data: 'updated', name: 'employee_leaves.updated_at', class: 'align-middle updated'},
