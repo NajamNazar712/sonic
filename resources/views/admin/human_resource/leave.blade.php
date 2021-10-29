@@ -322,12 +322,22 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var status_filter = '<select name="status_filter" id="status_filter" class="select2 form-control"></select>';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var employee_type = '<select name="employee_type" id="employee_type" class="select2 form-control">' +
+                        '<option value="1">Staff</option>' +
+                        '<option value="2">Rider</option>' +
+                        '</select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
+                        }
+                        else if ($(header).is('.employee_type')) {
+                            $(employee_type).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
                         }
                         else if ($(header).is('.status')) {
                             $(status_filter).appendTo($(search))
@@ -345,6 +355,14 @@
                             }
                         }
                     });
+
+                    $('#employee_type').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Employee Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     var data = $.map({!! $leave_statuses !!}, function (obj) {
                         obj.id = obj.id;
                         obj.text = obj.name;
