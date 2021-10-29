@@ -183,10 +183,6 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    var calendar = this;
-                    calendar.setDate(2020, 2, 14);
-                },
                 onSet: function(context) {
                     if (context.select) {
                         $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
@@ -354,13 +350,13 @@
                 var from = table.row($(this).parents('tr')).data().from;
                 var to = table.row($(this).parents('tr')).data().to;
                 var reason = table.row($(this).parents('tr')).data().applied_reason;
+                $('#edit_from').attr('data-value', from);
+                $('#edit_to').attr('data-value', to);
                 $('#leave_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_trax_id').val(trax_id);
                 $('#edit_department').val(department);
                 $('#edit_designation').val(designation);
-                $('#edit_from').val(from);
-                $('#edit_to').val(to);
                 $('#edit_reason').val(reason);
                 $('#editLeaveModal').modal('show');
             });
