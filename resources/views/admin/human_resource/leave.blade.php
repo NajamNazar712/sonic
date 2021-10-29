@@ -183,6 +183,10 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    var calendar = this;
+                    calendar.setDate(2020, 2, 14);
+                },
                 onSet: function(context) {
                     if (context.select) {
                         $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
@@ -350,8 +354,6 @@
                 var from = table.row($(this).parents('tr')).data().from;
                 var to = table.row($(this).parents('tr')).data().to;
                 var reason = table.row($(this).parents('tr')).data().applied_reason;
-                from_date.pickadate('picker').set('select', from);
-                to_date.pickadate('picker').set('select', to);
                 $('#leave_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_trax_id').val(trax_id);
