@@ -34,6 +34,7 @@ use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\HR\EmployeeType;
+use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
@@ -3101,9 +3102,9 @@ class AdminHumanResourseController extends Controller
 
     public function leave_index()
     {
-
         ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
-        return view('admin.human_resource.leave');
+        $leave_statuses = LeaveStatus::select('id', 'name')->get();
+        return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses]);
     }
 
     public function leave_list(Request $request)

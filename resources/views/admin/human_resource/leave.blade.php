@@ -299,7 +299,7 @@
                     {data: 'employee_type', name: 'employee_leaves.employee_type_id', class: 'align-middle employee_type'},
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic'},
                     {data: 'leave_count', name: 'ls.name', class: 'align-middle leave_count', orderable: false, searchable: false},
-                    {data: 'status', name: 'ls.name', class: 'align-middle status'},
+                    {data: 'status', name: 'ls.id', class: 'align-middle status'},
                     {data: 'applied_reason', name: 'employee_leaves.applied_reason', class: 'align-middle applied_reason', orderable: false, searchable: false},
                     {data: 'reject_reason', name: 'employee_leaves.rejected_reason', class: 'align-middle reject_reason', orderable: false, searchable: false},
                     {data: 'from', name: 'employee_leaves.from', class: 'align-middle from'},
@@ -320,6 +320,7 @@
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var status_filter = '<select name="status_filter" id="status_filter" class="select2 form-control"></select>';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
@@ -327,7 +328,14 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        }else {
+                        }
+                        else if ($(header).is('.status')) {
+                            $(status_filter).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -336,6 +344,20 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+                    var data = $.map({!! $leave_statuses !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $('#status_id').prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }
