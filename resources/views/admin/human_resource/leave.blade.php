@@ -352,7 +352,7 @@
                         return obj;
                     });
 
-                    $('#status_id').prepend('<option value="" selected></option>').select2({
+                    $('#status_filter').prepend('<option value="" selected></option>').select2({
                         data:data,
                         placeholder: "Select Status",
                         width:'100%',
