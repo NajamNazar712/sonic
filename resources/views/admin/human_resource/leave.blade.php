@@ -355,6 +355,8 @@
                 $('#leave_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_trax_id').val(trax_id);
+                $('#edit_from').val(from);
+                $('#edit_to').val(to);
                 $('#edit_department').val(department);
                 $('#edit_designation').val(designation);
                 $('#edit_reason').val(reason);
