@@ -185,7 +185,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
+                        $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from'));
                     }
                 }
             });
@@ -198,8 +198,8 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
-                        $('#editLeaveForm #edit_from').pickadate('picker').set('max', $('#editLeaveForm #edit_to').pickadate('picker').get('select'));
+                        $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from'));
+                        $('#editLeaveForm #edit_from').pickadate('picker').set('max', $('#editLeaveForm #edit_to'));
                     }
                 }
             });
