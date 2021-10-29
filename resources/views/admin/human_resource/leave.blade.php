@@ -350,12 +350,11 @@
                 var from = table.row($(this).parents('tr')).data().from;
                 var to = table.row($(this).parents('tr')).data().to;
                 var reason = table.row($(this).parents('tr')).data().applied_reason;
-                $('#edit_from').attr('data-value', from);
-                $('#edit_to').attr('data-value', to);
+                from_date.set(new Date(from));
                 $('#leave_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_trax_id').val(trax_id);
-                $('#edit_from').val(from);
+                // $('#edit_from').val(from);
                 $('#edit_to').val(to);
                 $('#edit_department').val(department);
                 $('#edit_designation').val(designation);
