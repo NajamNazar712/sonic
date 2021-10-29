@@ -300,7 +300,7 @@
                     {data: 'leave_count', name: 'ls.name', class: 'align-middle leave_count', orderable: false, searchable: false},
                     {data: 'status', name: 'ls.name', class: 'align-middle status'},
                     {data: 'applied_reason', name: 'employee_leaves.applied_reason', class: 'align-middle applied_reason', orderable: false, searchable: false},
-                    {data: 'reject_reason', name: 'employee_leaves.reject_reason', class: 'align-middle reject_reason', orderable: false, searchable: false},
+                    {data: 'reject_reason', name: 'employee_leaves.rejected_reason', class: 'align-middle reject_reason', orderable: false, searchable: false},
                     {data: 'from', name: 'employee_leaves.from', class: 'align-middle from'},
                     {data: 'to', name: 'employee_leaves.to', class: 'align-middle to'},
                     {data: 'days', name: '', class: 'align-middle days', orderable: false, searchable: false},
