@@ -351,8 +351,8 @@
                 var from = table.row($(this).parents('tr')).data().from;
                 var to = table.row($(this).parents('tr')).data().to;
                 var reason = table.row($(this).parents('tr')).data().applied_reason;
-                from_date.pickadate('picker').set('select',new Date(from));
-                to_date.pickadate('picker').set('select',new Date(to));
+                from_date.pickadate('picker').set('select',new Date(from).pickadate('picker').get('select'));
+                to_date.pickadate('picker').set('select',new Date(to).pickadate('picker').get('select'));
                 from_date.pickadate('picker').set('max', $('#editLeaveForm #edit_to').pickadate('picker').get('select'));
                 $('#leave_id').val(id);
                 $('#edit_name').val(name);
