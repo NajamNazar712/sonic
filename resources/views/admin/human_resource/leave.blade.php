@@ -176,6 +176,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var from = table.row($(this).parents('tr')).data().from;
+            var to = table.row($(this).parents('tr')).data().to;
             $('#editLeaveForm #edit_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -183,6 +185,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
+                select: from,
                 onSet: function(context) {
                     if (context.select) {
                         $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
@@ -196,6 +199,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
+                select: to,
                 onSet: function(context) {
                     if (context.select) {
                         $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
