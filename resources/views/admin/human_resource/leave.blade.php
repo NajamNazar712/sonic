@@ -176,30 +176,26 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var from = table.row($(this).parents('tr')).data().from;
-            var to = table.row($(this).parents('tr')).data().to;
-            $('#editLeaveForm #edit_from').pickadate({
+            var from_date = $('#editLeaveForm #edit_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                select: from,
                 onSet: function(context) {
                     if (context.select) {
                         $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
                     }
                 }
             });
-            $('#editLeaveForm #edit_to').pickadate({
+            var to_date = $('#editLeaveForm #edit_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                select: to,
                 onSet: function(context) {
                     if (context.select) {
                         $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
@@ -345,6 +341,7 @@
             });
 
             $('body').on('click', '.edit', function (e) {
+
                 var id = $(this).data('target-id');
                 var name = table.row($(this).parents('tr')).data().name;
                 var trax_id = table.row($(this).parents('tr')).data().trax_id;
@@ -353,6 +350,8 @@
                 var from = table.row($(this).parents('tr')).data().from;
                 var to = table.row($(this).parents('tr')).data().to;
                 var reason = table.row($(this).parents('tr')).data().applied_reason;
+                from_date.pickadate('picker').set('select', from);
+                to_date.pickadate('picker').set('select', to);
                 $('#leave_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_trax_id').val(trax_id);
