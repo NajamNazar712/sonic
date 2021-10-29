@@ -185,7 +185,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#editLeaveForm #edit_to').pickadate('picker').set('min', $('#editLeaveForm #edit_from').pickadate('picker').get('select'));
+                        $('#editLeaveForm #edit_from').pickadate('picker').set('max', $('#editLeaveForm #edit_to').pickadate('picker').get('select'));
                     }
                 }
             });
@@ -350,8 +350,8 @@
                 var from = table.row($(this).parents('tr')).data().from;
                 var to = table.row($(this).parents('tr')).data().to;
                 var reason = table.row($(this).parents('tr')).data().applied_reason;
-                $('#editLeaveForm #edit_from').pickadate('picker').set('select',new Date(from));
-                $('#editLeaveForm #edit_to').pickadate('picker').set('select',new Date(to));
+                from_date.pickadate('picker').set('select',new Date(from));
+                to_date.pickadate('picker').set('select',new Date(to));
                 $('#leave_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_trax_id').val(trax_id);
