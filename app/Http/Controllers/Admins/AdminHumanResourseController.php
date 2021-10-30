@@ -3247,7 +3247,6 @@ class AdminHumanResourseController extends Controller
                     } else {
                         $dates[] = $employee_leaves->from;
                     }
-                    dd($dates);
                     foreach ($dates as $date) {
                         try{
                         $date = Carbon::parse($date)->format("Y-m-d");
