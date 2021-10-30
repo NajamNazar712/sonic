@@ -3247,6 +3247,7 @@ class AdminHumanResourseController extends Controller
                     } else {
                         $dates[] = $employee_leaves->from;
                     }
+                    dd($dates);
                     foreach ($dates as $date) {
                         $date = Carbon::parse($date)->format("Y-m-d");
                         $mark_attendance = EmployeeAttendance::where('employee_id', $employee_leaves->employee_id)
