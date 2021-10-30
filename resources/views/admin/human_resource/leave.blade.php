@@ -60,15 +60,19 @@
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="leave_id" value="">
                         <div class="form-group">
+                            <label for="edit_name" class="text-left">Name</label>
                             <input type="text" name="name" id="edit_name" class="form-control" readonly>
                         </div>
                         <div class="form-group">
+                            <label for="edit_trax_id" class="text-left">Trax ID</label>
                             <input type="text" name="trax_id" id="edit_trax_id" class="form-control" readonly>
                         </div>
                         <div class="form-group">
+                            <label for="edit_designation" class="text-left">Designation</label>
                             <input type="text" name="designation" id="edit_designation" class="form-control" readonly>
                         </div>
                         <div class="form-group">
+                            <label for="edit_department" class="text-left">Department</label>
                             <input type="text" name="department" id="edit_department" class="form-control" readonly>
                         </div>
                         <label for="edit_from" class="text-left">From Date<span class="danger">*</span></label>
@@ -300,8 +304,8 @@
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic'},
                     {data: 'leave_count', name: 'ls.name', class: 'align-middle leave_count', orderable: false, searchable: false},
                     {data: 'status', name: 'ls.id', class: 'align-middle status'},
-                    {data: 'applied_reason', name: 'employee_leaves.applied_reason', class: 'align-middle applied_reason', orderable: false, searchable: false},
-                    {data: 'reject_reason', name: 'employee_leaves.rejected_reason', class: 'align-middle reject_reason', orderable: false, searchable: false},
+                    {data: 'applied_reason', name: 'employee_leaves.applied_reason', class: 'align-middle applied_reason', orderable: false},
+                    {data: 'reject_reason', name: 'employee_leaves.rejected_reason', class: 'align-middle reject_reason', orderable: false},
                     {data: 'from', name: 'employee_leaves.from', class: 'align-middle from'},
                     {data: 'to', name: 'employee_leaves.to', class: 'align-middle to'},
                     {data: 'days', name: '', class: 'align-middle days', orderable: false, searchable: false},
@@ -330,7 +334,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.days') || $(header).is('.leave_count')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.employee_type')) {

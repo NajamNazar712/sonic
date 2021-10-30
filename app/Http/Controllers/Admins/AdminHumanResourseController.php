@@ -3248,7 +3248,6 @@ class AdminHumanResourseController extends Controller
                         $dates[] = $employee_leaves->from;
                     }
                     foreach ($dates as $date) {
-                        try{
                         $date = Carbon::parse($date)->format("Y-m-d");
                         $mark_attendance = EmployeeAttendance::where('employee_id', $employee_leaves->employee_id)
                             ->where('employee_type', $employee_leaves->employee_type_id)
@@ -3296,12 +3295,8 @@ class AdminHumanResourseController extends Controller
                         $attendance_action->save();
 
                         $employee_leaves->save();
-                        }catch (Exception $ex){
-                            dd($ex);
-                        }
-
-                        return redirect()->back()->with('success', 'Leave Approved Successfully');
                     }
+                    return redirect()->back()->with('success', 'Leave Approved Successfully');
                 } else {
                     return redirect()->back()->with('error', 'Leave Already Approved');
                 }
