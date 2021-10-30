@@ -258,6 +258,17 @@
                                                 </select>
                                             </div>
                                         </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Working Shift<span class="text-danger">*</span></label>
+                                                <select name="shift_id" id="shift_list" data-rule-required="true"  data-msg-required="Shift is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($shifts as $shift)
+                                                        <option value="{{$shift->id}}">{{$shift->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -2130,6 +2141,12 @@
                 width:'100%',
             });
             $("#reporting_location").val("{{$employee->reporting_location_id ?? ''}}").trigger('change');
+
+            $("#shift_list").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Working Shift",
+                width:'100%',
+            });
+            $("#shift_list").val("{{$employee->shift_id ?? ''}}").trigger('change');
 
             $("#place_of_birth").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Place of Birth",

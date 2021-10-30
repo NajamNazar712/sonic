@@ -11,6 +11,7 @@ use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\Rider\RidersIncentive;
@@ -159,8 +160,9 @@ class RiderManagementController extends Controller
         $route_types = RouteType::all();
         $operation_riders = OperationRidersCategory::all();
         $shifts = EmployeeShift::where('status', 1)->get();
+        $reporting_locations = ReportingLocation::where('status',1)->get();
 
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type, 'shifts' => $shifts,'main_category' => $main_category]);
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type, 'shifts' => $shifts,'main_category' => $main_category, 'reporting_locations' => $reporting_locations]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -175,7 +177,8 @@ class RiderManagementController extends Controller
             'rider_category'=>'required|numeric',
             'rider_main_category'=>'required|numeric',
             'pin' => 'required|numeric',
-            'rider_shift' => 'required|numeric'
+            'rider_shift' => 'required|numeric',
+            'location_id' => 'nullable|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
         if ($validate->fails()) {
@@ -230,7 +233,8 @@ class RiderManagementController extends Controller
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
             'rider_type_id' => $type,
-            'shift_id' => $request->rider_shift
+            'shift_id' => $request->rider_shift,
+            'reporting_location_id' => $request->location_id,
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -260,7 +264,8 @@ class RiderManagementController extends Controller
         $route = Route::where('city_id',$rider->city_id)->get();
         $operation_rider_ids =  OperationRidersCategory::all();
         $shifts =  EmployeeShift::where('status', 1)->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts,'main_category' => $main_category]);
+        $reporting_locations = ReportingLocation::where('status',1)->get();
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts,'main_category' => $main_category, 'reporting_locations' => $reporting_locations]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
@@ -272,7 +277,8 @@ class RiderManagementController extends Controller
             'route_id'=>'required',
             'rider_category'=>'required|numeric',
             'rider_main_category'=>'required|numeric',
-            'rider_shift'=>'required|numeric'
+            'rider_shift'=>'required|numeric',
+            'location_id'=>'nullable|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -292,6 +298,7 @@ class RiderManagementController extends Controller
         $rider->address = $request->address;
         $rider->trax_id = $request->trax_id;
         $rider->shift_id = $request->rider_shift;
+        $rider->reporting_location_id = $request->location_id;
 
 
         $rider->rider_category_id = $request->rider_category;

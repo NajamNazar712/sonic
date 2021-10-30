@@ -14,11 +14,7 @@ class RiderCategoryTableSeeder extends Seeder
         DB::table('rider_categories')->truncate();
         DB::table('rider_categories')->insert(array(
             array('name'=>'Light'),
-            array('name'=>'Heavy'),
-            array('name'=>'Pickup'),
-            array('name'=>'Express'),
-            array('name'=>'Other'),
-
+            array('name'=>'Heavy')
         ));
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\CRM\CRMController;
+use App\Http\Models\Admin\Fleet;
 use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
@@ -166,7 +167,7 @@ class ShipperAPIController extends Controller
                     $shipment_info['runner_id'] = null;
                     $shipment_info['pickup_request_id'] = null;
                     $pickup_address = $shipment->pickup_address;
-                    if (in_array($shipment->shipper_status_id, [1, 2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11])) {
+                    if (in_array($shipment->shipper_status_id, [1, 2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11, 49])) {
                         $shipment_info['track'] = 1;
                         if ($shipment->shipper_status_id == 5) {
                             $shipment_info['latitude'] = $shipment->consignee_latitude;
@@ -178,16 +179,33 @@ class ShipperAPIController extends Controller
                             $shipment_info['latitude'] = $pickup_address->location_latitude;
                             $shipment_info['longitude'] = $pickup_address->location_longitude;
                             $shipment_info['pickup_address'] = $pickup_address->pickup_address;
-                            if($pickup_request->exists()){
+                            if ($pickup_request->exists()) {
                                 $pickup_request = $pickup_request->first();
                                 if ($pickup_request->pickup_in_route == 1) {
                                     $shipment_info['in_route'] = 2;
                                     $shipment_info['pickup_request_id'] = $pickup_request->id;
                                 }
                             }
-                        } elseif ($shipment->shipper_status_id == 3) {
+                        } elseif (in_array($shipment->shipper_status_id, [3, 49])) {
                             $shipment_info['origin'] = $pickup_address->city->name;
-                            $shipment_info['destination'] = $shipment->consignee_city->name;
+                            $destination_city = City::where('id', $shipment->consignee_city_id);
+                            if ($destination_city->exists()) {
+                                $destination_city = $destination_city->first();
+                                $shipment_info['destination'] = $destination_city->name;
+                                $shipment_info['latitude'] = $destination_city->location_latitude;
+                                $shipment_info['longitude'] = $destination_city->location_longitude;
+                            }
+                            $fleet = Fleet::leftjoin('cargo_manifests as cm', 'fleets.id', '=', 'cm.vehicle_id')
+                                ->leftjoin('manifest_bags as mb', 'cm.id', '=', 'mb.cargo_manifest_id')
+                                ->leftjoin('cargo_manifest_bag_shipments as cs', 'mb.cargo_manifest_bag_id', '=', 'cs.cargo_manifest_bag_id')
+                                ->select('fleets.tracking_id as runner_id')
+                                ->where('cs.shipment_id', $shipment->id)
+                                ->where('cm.status_id', 1)
+                                ->where('mb.status', 0);
+                            if ($fleet->exists()) {
+                                $fleet = $fleet->first();
+                                $shipment_info['runner_id'] = $fleet->runner_id;
+                            }
                         } else {
                             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
                                 ->where('shipper_status_id', $shipment->shipper_status_id)
@@ -400,5 +418,18 @@ class ShipperAPIController extends Controller
             return response()->json(['status' => 0,'receiving_sheet_id' => $receiving_sheet_id, 'error_message'=>'Receiving Sheet does not exists']);
         }
         return response()->json(['status' => 1,'message'=>'No Shipments Found']);
+    }
+
+    public function test(Request $request)
+    {
+        $shipment = Shipment::where('tracking_number', $request->tr_no)->first();
+        $fleet = Fleet::leftjoin('cargo_manifests as cm', 'fleets.id', '=', 'cm.vehicle_id')
+            ->leftjoin('manifest_bags as mb', 'cm.id', '=', 'mb.cargo_manifest_id')
+            ->leftjoin('cargo_manifest_bag_shipments as cs', 'mb.cargo_manifest_bag_id', '=', 'cs.cargo_manifest_bag_id')
+            ->select('fleets.tracking_id as runner_id')
+            ->where('cs.shipment_id', $shipment->id)
+            ->where('cm.status_id', 1)
+            ->where('mb.status', 0);
+        return response()->json(['status' => 1, 'data' => $fleet->get()]);
     }
 }
