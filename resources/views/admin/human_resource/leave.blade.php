@@ -110,46 +110,67 @@
                     <form action="{{route('admin.human_resource.leave.edit')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="editLeaveForm" novalidate="novalidate">
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="leave_id" value="">
-                        <div class="form-group">
-                            <label for="edit_name" class="text-left">Employee Name</label>
-                            <input type="text" name="name" id="edit_name" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_trax_id" class="text-left">Employee ID</label>
-                            <input type="text" name="trax_id" id="edit_trax_id" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_designation" class="text-left">Designation</label>
-                            <input type="text" name="designation" id="edit_designation" class="form-control" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit_department" class="text-left">Department</label>
-                            <input type="text" name="department" id="edit_department" class="form-control" readonly>
-                        </div>
-                        <label for="edit_from" class="text-left">From Date<span class="danger">*</span></label>
-                        <div class="form-group input-group ">
-                            <div class="input-group-prepend">
+                        <div class="row mb-2 justify-content-center">
+                            <div class="col-6 mt-1">
+                                <div class="form-group">
+                                    <label for="edit_name" class="text-left">Employee Name</label>
+                                    <input type="text" name="name" id="edit_name" class="form-control" readonly>
+                                </div>
+                            </div>
+                            <div class="col-6 mt-1">
+                                <div class="form-group">
+                                    <label for="edit_trax_id" class="text-left">Employee ID</label>
+                                    <input type="text" name="trax_id" id="edit_trax_id" class="form-control" readonly>
+                                </div>
+                            </div>
+
+                            <div class="col-6 mt-1">
+                                <div class="form-group">
+                                    <label for="edit_designation" class="text-left">Designation</label>
+                                    <input type="text" name="designation" id="edit_designation" class="form-control" readonly>
+                                </div>
+                            </div>
+
+                            <div class="col-6 mt-1">
+                                <div class="form-group">
+                                    <label for="edit_department" class="text-left">Department</label>
+                                    <input type="text" name="department" id="edit_department" class="form-control" readonly>
+                                </div>
+                            </div>
+
+                            <div class="col-6 mt-1">
+                                <label for="edit_from" class="text-left">From Date<span class="danger">*</span></label>
+                                <div class="form-group input-group ">
+                                    <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                         <span class="la la-calendar-o"></span>
                                     </span>
+                                    </div>
+                                    <input type="text" name="from"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="edit_from" placeholder="Leave Date (From)" data-rule-required="true" data-msg-required="Leave-From Date is required">
+                                </div>
                             </div>
-                            <input type="text" name="from"
-                                   class="form-control pickadate bg-primary border-primary white rounded-right"
-                                   id="edit_from" placeholder="Leave Date (From)" data-rule-required="true" data-msg-required="Leave-From Date is required">
-                        </div>
-                        <label for="edit_to" class="text-left">To Date</label>
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
+
+                            <div class="col-6 mt-1">
+                                <label for="edit_to" class="text-left">To Date</label>
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                         <span class="la la-calendar-o"></span>
                                     </span>
+                                    </div>
+                                    <input type="text" name="to"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="edit_to" placeholder="Leave Date (To)">
+                                </div>
                             </div>
-                            <input type="text" name="to"
-                                   class="form-control pickadate bg-primary border-primary white rounded-right"
-                                   id="edit_to" placeholder="Leave Date (To)">
-                        </div>
-                        <div class="form-group">
-                            <textarea name="reason" class="form-control" id="edit_reason" placeholder="Reason" readonly></textarea>
+                            <div class="col mt-1">
+                                <div class="form-group">
+                                    <textarea name="reason" class="form-control" id="edit_reason" placeholder="Reason" readonly></textarea>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary" value="edit">Edit</button>
