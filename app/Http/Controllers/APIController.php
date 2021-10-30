@@ -1475,8 +1475,9 @@ class APIController extends Controller
                 }
             }
             $total_charges_without_gst = array_sum($charges);
-            $gst = $shipment->gst;
-            $total_charges = $shipment->gst + $total_charges_without_gst;
+            $gst = $shipment->pickup_address->city->zone->gst;
+            $gst = $gst * $total_charges_without_gst;
+            $total_charges = $gst + $total_charges_without_gst;
             $charges['total_charges'] = $total_charges_without_gst;
             $charges['gst'] = $gst;
             $charges['net_payable'] = $total_charges;
