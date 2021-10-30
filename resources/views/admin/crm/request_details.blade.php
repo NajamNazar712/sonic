@@ -802,11 +802,9 @@
                                     </tr>
                                 @endforeach
                             @endif
-                                    @php $index=$index+1; @endphp
 
                                 @if(!empty($crm_details->case_nature_type_id))
                                     <tr class="border-bottom-success border-custom-color">
-                                        <td><b>{{$index}}</b></td>
                                         <td><b>{{$crm_details->nature->name}}</b></td>
                                         <td><b>{{$crm_details->nature_type->type}}</b></td>
                                     </tr>

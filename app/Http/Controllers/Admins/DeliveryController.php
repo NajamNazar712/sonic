@@ -5271,7 +5271,8 @@ class DeliveryController extends Controller
     }
 
     public function misroute_list(Request $request)
-    {     if($request->get('excel') && $request->get('excel') == true)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),323);
     }
