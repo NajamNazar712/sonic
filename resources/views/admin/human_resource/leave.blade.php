@@ -466,6 +466,10 @@
                 }
             });
 
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
+            });
+
             $('body').on('click', '.edit', function (e) {
 
                 var id = $(this).data('target-id');
