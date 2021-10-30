@@ -4208,6 +4208,9 @@ class AdminAPIController extends Controller
                         }else{
                             $user = Rider::find($employee_leaves->employee_id);
                         }
+                        if(!$user){
+                            return response()->json(['status' => 1, 'message' => "Invalid Employee ID"]);
+                        }
                         $shift = EmployeeShift::find($user->shift_id);
                         if($employee_leaves->to) {
                             $dates = $this->generateDateRange($employee_leaves->from, $employee_leaves->to);
