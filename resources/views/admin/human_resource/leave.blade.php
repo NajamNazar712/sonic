@@ -14,13 +14,64 @@
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
 
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12 ">
+                                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                        <div class="col-6 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_admin" id="search_admin" class="form-control select2">
+                                                    @foreach($admins as $admin)
+                                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-6 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_rider" id="search_rider" class="form-control select2">
+                                                    @foreach($riders as $rider)
+                                                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-5 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_trax_id" id="search_trax_id" class="form-control select2">
+                                                    @foreach($trax_ids as $trax_id)
+                                                        <option value="{{$trax_id}}">{{$trax_id}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-5 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_cnic" id="search_cnic" class="form-control select2">
+                                                    @foreach($cnics as $cnic)
+                                                        <option value="{{$cnic}}">{{$cnic}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-2 mt-1">
+                                            <div class="form-group">
+                                                <button type="button" id="search_filter_btn"
+                                                        class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                                    Search
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Leave ID</th>
-                                    <th class="border-primary border-darken-1">Trax ID</th>
-                                    <th class="border-primary border-darken-1">Name</th>
+                                    <th class="border-primary border-darken-1">Employee ID</th>
+                                    <th class="border-primary border-darken-1">Employee Name</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
@@ -60,11 +111,11 @@
                         {{csrf_field()}}
                         <input type="hidden" name="leave_id" id="leave_id" value="">
                         <div class="form-group">
-                            <label for="edit_name" class="text-left">Name</label>
+                            <label for="edit_name" class="text-left">Employee Name</label>
                             <input type="text" name="name" id="edit_name" class="form-control" readonly>
                         </div>
                         <div class="form-group">
-                            <label for="edit_trax_id" class="text-left">Trax ID</label>
+                            <label for="edit_trax_id" class="text-left">Employee ID</label>
                             <input type="text" name="trax_id" id="edit_trax_id" class="form-control" readonly>
                         </div>
                         <div class="form-group">
@@ -180,6 +231,27 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_admin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Staff',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Rider',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_trax_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Employee ID',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_cnic').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search CNIC',
+                width:'100%',
+                allowClear:true
+            });
+
             var from_date = $('#editLeaveForm #edit_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -221,8 +293,8 @@
                             head = [];
                             head.push('S.No');
                             head.push('Leave ID');
-                            head.push('Trax ID');
-                            head.push('Name');
+                            head.push('Employee ID');
+                            head.push('Employee Name');
                             head.push('Designation');
                             head.push('Department');
                             head.push('Employee Type');
@@ -289,19 +361,28 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.human_resource.leave.list') }}',
+                ajax: {
+                    url: '{{ route('admin.human_resource.leave.list') }}',
+                    data: function (d) {
+
+                        d.search_admin = $('#search_admin').val();
+                        d.search_rider = $('#search_rider').val();
+                        d.search_trax_id = $('#search_trax_id').val();
+                        d.search_cnic = $('#search_cnic').val();
+                    }
+                },
                 order: [[1, 'desc']],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
                     },
                     {data: 'leave_id', name: 'employee_leaves.id', class: 'align-middle leave_id'},
-                    {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id'},
-                    {data: 'name', name: 'a.name', class: 'align-middle name'},
+                    {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id', searchable: false},
+                    {data: 'name', name: 'a.name', class: 'align-middle name', searchable: false},
                     {data: 'designation', name: 'a.designation', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {data: 'employee_type', name: 'employee_leaves.employee_type_id', class: 'align-middle employee_type'},
-                    {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic'},
+                    {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic', searchable: false},
                     {data: 'leave_count', name: 'ls.name', class: 'align-middle leave_count', orderable: false, searchable: false},
                     {data: 'status', name: 'ls.id', class: 'align-middle status'},
                     {data: 'applied_reason', name: 'employee_leaves.applied_reason', class: 'align-middle applied_reason', orderable: false},
@@ -334,7 +415,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.days') || $(header).is('.leave_count')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.days') || $(header).is('.leave_count') || $(header).is('.name') || $(header).is('.trax_id') || $(header).is('.cnic')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.employee_type')) {

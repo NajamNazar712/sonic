@@ -3102,9 +3102,17 @@ class AdminHumanResourseController extends Controller
 
     public function leave_index()
     {
+        $users = Admin::where('status', 1)->select('id', 'name')->get();
+        $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
+        $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
+        $trax_ids = array_merge($trax_id, $rider_trax_id);
+        $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
+        $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
+        $cnic = array_merge($admin_cnic, $rider_cnic);
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
         ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
         $leave_statuses = LeaveStatus::select('id', 'name')->get();
-        return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses]);
+        return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
     }
 
     public function leave_list(Request $request)
@@ -3219,6 +3227,24 @@ class AdminHumanResourseController extends Controller
                 }
 
             });
+        if ($search_admin = $request->get('search_admin')) {
+            $datatable->where('a.id', $search_admin)->where('employee_type',1);
+        }
+        if ($search_rider = $request->get('search_rider')) {
+            $datatable->where('r.id', $search_rider)->where('employee_type',2);
+        }
+        if ($search_trax_id = $request->get('search_trax_id')) {
+            $datatable->where(function($q) use ($search_trax_id){
+                $q->where([['a.trax_id', $search_trax_id],['employee_type',1]])
+                    ->orWhere([['r.trax_id', $search_trax_id],['employee_type',2]]);
+            });
+        }
+        if ($search_cnic = $request->get('search_cnic')) {
+            $datatable->where(function($q) use ($search_cnic){
+                $q->where([['a.cnic', $search_cnic],['employee_type',1]])
+                    ->orWhere([['r.cnic', $search_cnic],['employee_type',2]]);
+            });
+        }
         return $datatable->make(true);
     }
 
