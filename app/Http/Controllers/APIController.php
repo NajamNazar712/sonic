@@ -1429,6 +1429,10 @@ class APIController extends Controller
                 if ($shipment->nsa_osa_charges) {
                     $charges['nsa_osa_charges'] = $shipment->nsa_osa_charges;
                 }
+
+                if ($shipment->packaging_charges) {
+                    $charges['packing_charges'] = $shipment->packaging_charges;
+                }
             } else if (in_array($current_status_id, [20, 21, 22, 23, 24, 25, 44])) {
                 if ($shipment->weight_charges) {
                     $charges['weight_charges'] = $shipment->weight_charges;
@@ -1449,6 +1453,10 @@ class APIController extends Controller
                 if ($shipment->intercept_charges) {
                     $charges['intercept_charges'] = $shipment->intercept_charges;
                 }
+
+                if ($shipment->packaging_charges) {
+                    $charges['packing_charges'] = $shipment->packaging_charges;
+                }
             } else {
                 if ($shipment->weight_charges) {
                     $charges['weight_charges'] = $shipment->weight_charges;
@@ -1461,8 +1469,17 @@ class APIController extends Controller
                 if ($shipment->fuel_surcharge) {
                     $charges['fuel_surcharge'] = $shipment->fuel_surcharge;
                 }
-            }
 
+                if ($shipment->packaging_charges) {
+                    $charges['packing_charges'] = $shipment->packaging_charges;
+                }
+            }
+            $total_charges_without_gst = array_sum($charges);
+            $gst = $shipment->gst;
+            $total_charges = $shipment->gst + $total_charges_without_gst;
+            $charges['total_charges'] = $total_charges_without_gst;
+            $charges['gst'] = $gst;
+            $charges['net_payable'] = $total_charges;
             if (!empty($charges)) {
                 return response()->json(['status' => 0, 'message' => 'Charges of Shipment #' . $tracking_number, 'charges' => $charges]);
             } else {
@@ -1933,6 +1950,15 @@ class APIController extends Controller
             } else {
                 $information['charges']['fuel_surcharge'] = 0;
             }
+
+            $city = City::find($origin_city);
+            $gst = $city->zone->gst;
+            $total_charges_without_gst = array_sum($information['charges']);
+            $gst = $gst * $total_charges_without_gst;
+            $net_payable = $total_charges_without_gst + $gst;
+            $information['charges']['total_charges'] = $total_charges_without_gst;
+            $information['charges']['gst'] = $gst;
+            $information['charges']['net_payable'] = $net_payable;
 
             return response()->json(['status' => 0, 'message' => 'Charges Calculated', 'information' => $information]);
         }
