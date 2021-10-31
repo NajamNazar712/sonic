@@ -81,6 +81,10 @@
                                                     <input type="radio" class="custom-control-input bg-danger add_both" value="only_shipper" name="packaging_type" id="colorRadio7">
                                                     <label class="custom-control-label" for="colorRadio7">Selected Shipper</label>
                                                 </div>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-danger add_marco" value="marco" name="packaging_type" id="colorRadio4">
+                                                    <label class="custom-control-label" for="colorRadio4">Marco</label>
+                                                </div>
                                             </fieldset>
                                         </div>
                                         <div class="card-body" id="shippers_select">
