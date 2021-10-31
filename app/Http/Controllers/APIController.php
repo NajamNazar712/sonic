@@ -1490,9 +1490,9 @@ class APIController extends Controller
             $gst = $shipment->pickup_address->city->zone->gst;
             $gst = $gst * $total_charges_without_gst;
             $total_charges = $shipment->amount-($gst + $total_charges_without_gst);
-            $charges['total_charges'] = number_format(ROUND($total_charges_without_gst, 0, PHP_ROUND_HALF_DOWN));
-            $charges['gst'] = number_format(ROUND($gst, 0, PHP_ROUND_HALF_DOWN));
-            $charges['net_payable'] = number_format(ROUND($total_charges, 0, PHP_ROUND_HALF_DOWN));
+            $charges['total_charges'] = number_format(ROUND($total_charges_without_gst, 2, PHP_ROUND_HALF_DOWN));
+            $charges['gst'] = number_format(ROUND($gst, 2, PHP_ROUND_HALF_DOWN));
+            $charges['net_payable'] = number_format(ROUND($total_charges, 2, PHP_ROUND_HALF_DOWN));
             if (!empty($charges)) {
                 return response()->json(['status' => 0, 'message' => 'Charges of Shipment #' . $tracking_number, 'charges' => $charges]);
             } else {
@@ -1969,9 +1969,9 @@ class APIController extends Controller
             $total_charges_without_gst = array_sum($information['charges']);
             $gst = $gst * $total_charges_without_gst;
             $net_payable = $request->amount-($total_charges_without_gst + $gst);
-            $information['charges']['total_charges'] = number_format(ROUND($total_charges_without_gst, 0, PHP_ROUND_HALF_DOWN));
-            $information['charges']['gst'] = number_format(ROUND($gst, 0, PHP_ROUND_HALF_DOWN));
-            $information['charges']['net_payable'] = number_format(ROUND($net_payable, 0, PHP_ROUND_HALF_DOWN));
+            $information['charges']['total_charges'] = number_format(ROUND($total_charges_without_gst, 2, PHP_ROUND_HALF_DOWN));
+            $information['charges']['gst'] = number_format(ROUND($gst, 2, PHP_ROUND_HALF_DOWN));
+            $information['charges']['net_payable'] = number_format(ROUND($net_payable, 2, PHP_ROUND_HALF_DOWN));
 
             return response()->json(['status' => 0, 'message' => 'Charges Calculated', 'information' => $information]);
         }
