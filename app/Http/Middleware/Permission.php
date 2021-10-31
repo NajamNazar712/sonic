@@ -1045,6 +1045,9 @@ class Permission
 
 			'attendance.index' => 465,
             'attendance.list' => 465,
+            'attendance.horizontal.index' => 465,
+            'attendance.horizontal.table' => 465,
+            'attendance.horizontal.list' => 465,
             'accounts.active.today' => 470,
             'accounts.active.today.ajax' => 470,
 
