@@ -1490,9 +1490,9 @@ class APIController extends Controller
             $gst = $shipment->pickup_address->city->zone->gst;
             $gst = $gst * $total_charges_without_gst;
             $total_charges = $shipment->amount-($gst + $total_charges_without_gst);
-            $charges['total_charges'] = number_format(ROUND($total_charges_without_gst, 2, PHP_ROUND_HALF_DOWN));
-            $charges['gst'] = number_format(ROUND($gst, 2, PHP_ROUND_HALF_DOWN));
-            $charges['net_payable'] = number_format(ROUND($total_charges, 2, PHP_ROUND_HALF_DOWN));
+            $charges['total_charges'] = number_format($total_charges_without_gst, 2);
+            $charges['gst'] = number_format($gst, 2);
+            $charges['net_payable'] = number_format($total_charges, 2);
             if (!empty($charges)) {
                 return response()->json(['status' => 0, 'message' => 'Charges of Shipment #' . $tracking_number, 'charges' => $charges]);
             } else {
@@ -1964,14 +1964,13 @@ class APIController extends Controller
                 $information['charges']['fuel_surcharge'] = 0;
             }
 
-            $city = City::find($origin_city);
-            $gst = $city->zone->gst;
+            $gst = $origin_city->zone->gst;
             $total_charges_without_gst = array_sum($information['charges']);
             $gst = $gst * $total_charges_without_gst;
             $net_payable = $request->amount-($total_charges_without_gst + $gst);
-            $information['charges']['total_charges'] = number_format(ROUND($total_charges_without_gst, 2, PHP_ROUND_HALF_DOWN));
-            $information['charges']['gst'] = number_format(ROUND($gst, 2, PHP_ROUND_HALF_DOWN));
-            $information['charges']['net_payable'] = number_format(ROUND($net_payable, 2, PHP_ROUND_HALF_DOWN));
+            $information['charges']['total_charges'] = number_format($total_charges_without_gst, 2);
+            $information['charges']['gst'] = number_format($gst, 2);
+            $information['charges']['net_payable'] = number_format($net_payable, 2);
 
             return response()->json(['status' => 0, 'message' => 'Charges Calculated', 'information' => $information]);
         }
