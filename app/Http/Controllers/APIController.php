@@ -1430,6 +1430,10 @@ class APIController extends Controller
                     $charges['nsa_osa_charges'] = $shipment->nsa_osa_charges;
                 }
 
+                if ($shipment->cash_handling_charges) {
+                    $charges['cash_handling_charges'] = $shipment->cash_handling_charges;
+                }
+
                 if ($shipment->packaging_charges) {
                     $charges['packing_charges'] = $shipment->packaging_charges;
                 }
@@ -1454,6 +1458,10 @@ class APIController extends Controller
                     $charges['intercept_charges'] = $shipment->intercept_charges;
                 }
 
+                if ($shipment->cash_handling_charges) {
+                    $charges['cash_handling_charges'] = $shipment->cash_handling_charges;
+                }
+
                 if ($shipment->packaging_charges) {
                     $charges['packing_charges'] = $shipment->packaging_charges;
                 }
@@ -1470,6 +1478,10 @@ class APIController extends Controller
                     $charges['fuel_surcharge'] = $shipment->fuel_surcharge;
                 }
 
+                if ($shipment->cash_handling_charges) {
+                    $charges['cash_handling_charges'] = $shipment->cash_handling_charges;
+                }
+
                 if ($shipment->packaging_charges) {
                     $charges['packing_charges'] = $shipment->packaging_charges;
                 }
@@ -1477,10 +1489,10 @@ class APIController extends Controller
             $total_charges_without_gst = array_sum($charges);
             $gst = $shipment->pickup_address->city->zone->gst;
             $gst = $gst * $total_charges_without_gst;
-            $total_charges = $gst + $total_charges_without_gst;
-            $charges['total_charges'] = $total_charges_without_gst;
-            $charges['gst'] = $gst;
-            $charges['net_payable'] = $total_charges;
+            $total_charges = $shipment->amount-($gst + $total_charges_without_gst);
+            $charges['total_charges'] = number_format(ROUND($total_charges_without_gst, 0, PHP_ROUND_HALF_DOWN));
+            $charges['gst'] = number_format(ROUND($gst, 0, PHP_ROUND_HALF_DOWN));
+            $charges['net_payable'] = number_format(ROUND($total_charges, 0, PHP_ROUND_HALF_DOWN));
             if (!empty($charges)) {
                 return response()->json(['status' => 0, 'message' => 'Charges of Shipment #' . $tracking_number, 'charges' => $charges]);
             } else {
