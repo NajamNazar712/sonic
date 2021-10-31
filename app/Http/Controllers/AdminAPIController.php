@@ -4041,41 +4041,36 @@ class AdminAPIController extends Controller
         } else {
             $admin = Admin::find($admin_id);
             if ($admin) {
-                if($request->has('leave_id')){
-                    $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2])->where('id', '<>', $request->leave_id);
-                }else{
-                    $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
-                }
-                if ($leave->exists()) {
-                    return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
-                } else {
-                    if ($request->has('leave_id')){
-                        $leave_request = EmployeeLeave::where('id', $request->leave_id);
-                        if($leave_request->exists()){
-                            $leave_request = $leave_request->first();
-                            $message = "Leave Request edited successfully";
-                        }else{
-                            return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
-                        }
-                    }else{
-                        $leave_request = new EmployeeLeave();
-                        $leave_request->employee_id = $admin_id;
-                        $leave_request->employee_type_id = 1;
-                        if (in_array($admin->role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])){
-                            $reporter_id = 8;
-                        }else{
-                            $reporter_id = $admin->role->department->department_head_id;
-                        }
-                        $leave_request->reporter_id = $reporter_id;
-                        $message = "Leave Request submitted successfully";
+                if ($request->has('leave_id')) {
+                    $leave_request = EmployeeLeave::where('id', $request->leave_id);
+                    if ($leave_request->exists()) {
+                        $leave_request = $leave_request->first();
+                        $message = "Leave Request edited successfully";
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
                     }
-
-                    $leave_request->from = $request->from;
-                    $leave_request->to = $request->to;
-                    $leave_request->applied_reason = $request->reason;
-                    $leave_request->save();
-                    return response()->json(['status' => 0, 'apply_message' => $message]);
+                } else {
+                    $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
+                    if ($leave->exists()) {
+                        return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                    }
+                    $leave_request = new EmployeeLeave();
+                    $leave_request->employee_id = $admin_id;
+                    $leave_request->employee_type_id = 1;
+                    if (in_array($admin->role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])) {
+                        $reporter_id = 8;
+                    } else {
+                        $reporter_id = $admin->role->department->department_head_id;
+                    }
+                    $leave_request->reporter_id = $reporter_id;
+                    $message = "Leave Request submitted successfully";
                 }
+
+                $leave_request->from = $request->from;
+                $leave_request->to = $request->to;
+                $leave_request->applied_reason = $request->reason;
+                $leave_request->save();
+                return response()->json(['status' => 0, 'apply_message' => $message]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'User Not Found']);
             }
