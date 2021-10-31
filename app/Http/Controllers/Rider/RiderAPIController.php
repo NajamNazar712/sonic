@@ -4,10 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\AdminAPIController;
 use App\Http\Controllers\Admins\AdminPickupsController;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
-use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
@@ -30,7 +27,6 @@ use App\Http\Models\Admin\RiderType;
 use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
-use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
@@ -55,48 +51,65 @@ use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
-use App\Http\Models\PickupNote;
-use App\Http\Models\PickupNoteRequest;
-use App\Http\Models\PickupRequest;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
-use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
-use App\Http\Models\Rider\RiderRequest;
-use App\Http\Models\Rider\RiderReturnDelivery;
-use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
-use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RidersIncentive;
-use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\RiderDelivery;
-use App\Http\Models\RiderPickup;
-use App\Http\Models\RiderPickupActionLog;
-use App\Http\Models\Shipment;
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Rider\RiderTickerImage;
+use App\Http\Models\Rider\RiderReturnNoteStatus;
+use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\ShipmentDistributionProduct;
-use App\Http\Models\ShipmentItem;
-use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\V2Pickup\V2PickupNote;
-use App\Http\Models\V2Pickup\V2PickupNoteRequest;
-use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
+use App\Http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStockRequest;
+use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Zone;
-use App\Jobs\ProcessAgentCallMonitoring;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
-use Carbon\Carbon;
-use DB;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
+use Psy\Util\Json;
 use Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Storage;
+
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\ShipmentsJourneyController;
+
+use App\Http\Models\City;
+use App\Http\Models\Rider;
+use App\Http\Models\Rider\RiderRequest;
+use App\Http\Models\PickupNote;
+use App\Http\Models\PickupRequestAssignedShipment;
+use App\Http\Models\PickupRequest;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentPiece;
+use App\Http\Models\RiderPickup;
+use App\Http\Models\PickupNoteRequest;
+use App\Http\Models\RiderPickupActionLog;
+use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
+use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use App\Jobs\ProcessAgentCallMonitoring;
+use DB;
 
 class RiderAPIController extends Controller
 {
@@ -9859,38 +9872,42 @@ class RiderAPIController extends Controller
         } else {
             $rider = Rider::find($rider_id);
             $department = AdminDepartment::find(6);
-            if ($department) {
+            if($department){
                 if ($rider) {
-                    if ($request->has('leave_id')) {
-                        $leave_request = EmployeeLeave::where('id', $request->leave_id);
-                        if ($leave_request->exists()) {
-                            $leave_request = $leave_request->first();
-                            $message = "Leave Request edited successfully";
-                        } else {
-                            return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
-                        }
-                    } else {
+                    if($request->has('leave_id')){
+                        $leave = EmployeeLeave::where('employee_id', $rider_id)->where('employee_type_id', 2)->whereIn('status', [1, 2])->where('id', '<>', $request->leave_id);
+                    }else{
                         $leave = EmployeeLeave::where('employee_id', $rider_id)->where('employee_type_id', 2)->whereIn('status', [1, 2]);
-                        if ($leave->exists()) {
-                            return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
-                        }
-                        $leave_request = new EmployeeLeave();
-                        $leave_request->employee_id = $rider_id;
-                        $leave_request->employee_type_id = 2;
-                        $leave_request->reporter_id = $department->department_head_id;
-                        $message = "Leave Request submitted successfully";
                     }
+                    if ($leave->exists()) {
+                        return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                    } else {
+                        if ($request->has('leave_id')){
+                            $leave_request = EmployeeLeave::where('id', $request->leave_id);
+                            if($leave_request->exists()){
+                                $leave_request = $leave_request->first();
+                                $message = "Leave Request edited successfully";
+                            }else{
+                                return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
+                            }
+                        }else{
+                            $leave_request = new EmployeeLeave();
+                            $leave_request->employee_id = $rider_id;
+                            $leave_request->employee_type_id = 2;
+                            $leave_request->reporter_id = $department->department_head_id;
+                            $message = "Leave Request submitted successfully";
+                        }
 
-                    $leave_request->from = $request->from;
-                    $leave_request->to = $request->to;
-                    $leave_request->applied_reason = $request->reason;
-                    $leave_request->save();
-                    return response()->json(['status' => 0, 'apply_message' => $message]);
-
+                        $leave_request->from = $request->from;
+                        $leave_request->to = $request->to;
+                        $leave_request->applied_reason = $request->reason;
+                        $leave_request->save();
+                        return response()->json(['status' => 0, 'apply_message' => $message]);
+                    }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'User Not Found']);
                 }
-            } else {
+            }else {
                 return response()->json(['status' => 1, 'message' => 'Department Not Found']);
             }
         }
