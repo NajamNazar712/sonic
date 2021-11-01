@@ -8735,10 +8735,10 @@ class NotificationsController extends Controller
                     }
                     $leave = EmployeeLeave::find($reference1_id);
                     if($user && $leave){
-                        if($leave->status_id == 1){
+                        if($leave->status == 1){
                             $status = "Submitted";
                         }else{
-                            $leave_status = LeaveStatus::find($leave->status_id);
+                            $leave_status = LeaveStatus::find($leave->status);
                             $status = $leave_status->name;
                         }
                         if (strpos($body, '[form]') !== FALSE) {
