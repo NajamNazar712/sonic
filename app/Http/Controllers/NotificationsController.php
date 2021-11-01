@@ -8741,11 +8741,17 @@ class NotificationsController extends Controller
                             $leave_status = LeaveStatus::find($leave->status);
                             $status = $leave_status->name;
                         }
-                        if (strpos($body, '[form]') !== FALSE) {
+                        if (strpos($body, '[from]') !== FALSE) {
                             $body = str_replace('[from]', $leave->from, $body);
                         }
-                        if (strpos($body, '[to]') !== FALSE) {
-                            $body = str_replace('[to]', $leave->to, $body);
+                        if($leave->to){
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->to, $body);
+                            }
+                        }else{
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->from, $body);
+                            }
                         }
                         if (strpos($body, '[status]') !== FALSE) {
                             $body = str_replace('[status]', $status, $body);
@@ -8765,11 +8771,17 @@ class NotificationsController extends Controller
                         if (strpos($body, '[trax_id]') !== FALSE) {
                             $body = str_replace('[trax_id]', $user->trax_id, $body);
                         }
-                        if (strpos($body, '[form]') !== FALSE) {
+                        if (strpos($body, '[from]') !== FALSE) {
                             $body = str_replace('[from]', $leave->from, $body);
                         }
-                        if (strpos($body, '[to]') !== FALSE) {
-                            $body = str_replace('[to]', $leave->to, $body);
+                        if($leave->to){
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->to, $body);
+                            }
+                        }else{
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->from, $body);
+                            }
                         }
                     }
                 }else if ($id == 13) {
@@ -8786,11 +8798,17 @@ class NotificationsController extends Controller
                         if (strpos($body, '[trax_id]') !== FALSE) {
                             $body = str_replace('[trax_id]', $user->trax_id, $body);
                         }
-                        if (strpos($body, '[form]') !== FALSE) {
+                        if (strpos($body, '[from]') !== FALSE) {
                             $body = str_replace('[from]', $leave->from, $body);
                         }
-                        if (strpos($body, '[to]') !== FALSE) {
-                            $body = str_replace('[to]', $leave->to, $body);
+                        if($leave->to){
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->to, $body);
+                            }
+                        }else{
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->from, $body);
+                            }
                         }
                     }
                 }
