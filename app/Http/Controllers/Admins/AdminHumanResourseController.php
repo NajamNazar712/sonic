@@ -3102,6 +3102,7 @@ class AdminHumanResourseController extends Controller
 
     public function leave_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
         $users = Admin::where('status', 1)->select('id', 'name')->get();
         $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
@@ -3110,7 +3111,6 @@ class AdminHumanResourseController extends Controller
         $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
         $cnic = array_merge($admin_cnic, $rider_cnic);
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
         $leave_statuses = LeaveStatus::select('id', 'name')->get();
         return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
     }
@@ -3127,6 +3127,13 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
             ->leftjoin('riders as r', 'r.id', 'employee_leaves.employee_id')
             ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason');
+
+        if(session('role_id') != 1 && session('role_id') != 63){
+            $employee_leaves->where('ad.id', session('department_id'));
+            if(session('department_id') != 6){
+                $employee_leaves->where('employee_leaves.employee_type_id', 1);
+            }
+        }
 
         $datatable = Datatables::of($employee_leaves)
             ->editColumn('trax_id', function ($employee) {

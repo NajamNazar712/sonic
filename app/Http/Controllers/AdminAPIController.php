@@ -4069,6 +4069,10 @@ class AdminAPIController extends Controller
                 $leave_request->from = $request->from;
                 $leave_request->to = $request->to;
                 $leave_request->applied_reason = $request->reason;
+
+                if ($leave_request->status == 2) {
+                    $leave_request->updated_by = $admin_id;
+                }
                 $leave_request->save();
                 return response()->json(['status' => 0, 'apply_message' => $message]);
             } else {

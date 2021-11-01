@@ -1458,10 +1458,6 @@ class APIController extends Controller
                     $charges['intercept_charges'] = $shipment->intercept_charges;
                 }
 
-                if ($shipment->cash_handling_charges) {
-                    $charges['cash_handling_charges'] = $shipment->cash_handling_charges;
-                }
-
                 if ($shipment->packaging_charges) {
                     $charges['packing_charges'] = $shipment->packaging_charges;
                 }
