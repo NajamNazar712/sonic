@@ -16,7 +16,16 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
+                            @if(session('received_html'))
+                                <div class="alert alert-success">
+                                    {!! session('received_html') !!}
+                                </div>
+                            @endif
+                            @if(session('sr_html'))
+                                <div class="alert alert-danger">
+                                    {!! session('sr_html') !!}
+                                </div>
+                            @endif
                             <div id="camera_scan" class="d-none">
                                 <div id="camera_view" class="camera_view"></div>
                             </div>

@@ -193,7 +193,7 @@
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
                                 row.push(values.updated_by);
-                                row.push(values.arrival_date);
+                                row.push(values.created_at);
                                 row.push(values.walk_in_status);
                                 row.push(values.aging);
                                 row.push(values.resolved_at);

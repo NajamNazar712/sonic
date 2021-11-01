@@ -25,7 +25,7 @@
                                 </div></div>--}}
                             <div class="col-4">
                                 <fieldset class="form-group pb-1">
-                                    <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                    <select name="search_shipper" id="search_shipper" class="form-control select2" required data-rule-required="true" data-msg-required="This field is required">
                                         @foreach($shippers as $shipper)
                                             <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                         @endforeach
@@ -330,7 +330,7 @@
                 placeholder: 'Select Shipper',
                 allowClear:true
             });
-            $('#search_shipper').select2({
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Shipper",
                 allowClear:true,
