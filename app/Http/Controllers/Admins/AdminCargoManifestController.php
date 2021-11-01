@@ -2463,7 +2463,7 @@ class AdminCargoManifestController extends Controller
             $bag_not_exists_error = "Following Bag(s) doesn\'t exists.<br><ul>";
             foreach ($bag_not_exists as $v)
             {
-                $bag_not_exists_error .= "<li>".CargoManifestBag::find($bag_id)->seal_number."</li>";
+                $bag_not_exists_error .= "<li>".$v."</li>";
             }
             $bag_not_exists_error .= "</ul>";
         }
@@ -2472,7 +2472,7 @@ class AdminCargoManifestController extends Controller
             $bag_not_exists_in_manifest_error = "Following Bag(s) doesn\'t exists in any manifest.<br><ul>";
             foreach ($bag_not_exists_in_manifest as $v)
             {
-                $bag_not_exists_in_manifest_error .= "<li>".CargoManifestBag::find($bag_id)->seal_number."</li>";
+                $bag_not_exists_in_manifest_error .= "<li>".CargoManifestBag::find($v)->seal_number."</li>";
             }
             $bag_not_exists_in_manifest_error .= "</ul>";
         }
