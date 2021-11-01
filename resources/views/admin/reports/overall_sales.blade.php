@@ -85,7 +85,15 @@
                             </select>
                         </fieldset>
                     </div>
-
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_business_category" id="search_business_category" class="form-control select2">
+                                @foreach($business_categories as $bc)
+                                    <option value="{{$bc->id}}">{{$bc->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-4">
 
                         <div class="form-group input-group">
@@ -109,15 +117,6 @@
                             <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
 
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_business_category" id="search_business_category" class="form-control select2">
-                                @foreach($business_categories as $bc)
-                                    <option value="{{$bc->id}}">{{$bc->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
                     </div>
                     <div class="col-2">
                         <div class="form-group input-group">
