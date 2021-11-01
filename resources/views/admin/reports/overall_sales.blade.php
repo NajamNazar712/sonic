@@ -119,21 +119,21 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-2">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                               <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                  <span class="">From</span>
+                                  <span class="">Arrival Time From</span>
                               </span>
                             </div>
                             <input type="text" name="arrival_time_from" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_from" value="12:00 AM" id="arrival_time_from" placeholder="Arrival Time From*">
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-2">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                               <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                  <span class="">To</span>
+                                  <span class="">Arrival Time To</span>
                               </span>
                             </div>
                             <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to" value="11:30 PM" id="arrival_time_to" placeholder="Arrival Time To*">
