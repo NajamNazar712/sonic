@@ -3130,9 +3130,6 @@ class AdminHumanResourseController extends Controller
 
         if(session('role_id') != 1 && session('role_id') != 63){
             $employee_leaves = $employee_leaves->where('ad.id', session('department_id'));
-            if(session('department_id') != 6){
-                $employee_leaves = $employee_leaves->where('employee_leaves.employee_type_id', 1);
-            }
         }
 
         $datatable = Datatables::of($employee_leaves)
