@@ -291,6 +291,10 @@ class AdminPettyCashController extends Controller
     public function edit_petty_cash_statement_index(Request $request, $id)
     {
         $petty = PettyCashStatement::find($id);
+        if(!in_array($petty->status,[0, 1, 2, 7]))
+        {
+            return back()->with(['info'=>'Statement Already Approved']);
+        }
         $head = PettyCashAccountHead::select('id', 'name')->get();
         $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();

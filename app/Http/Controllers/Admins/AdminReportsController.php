@@ -4037,13 +4037,15 @@ class AdminReportsController extends Controller
         $petty = DB::connection('reports')->table('petty_cash_statement_details')->join('petty_cash_statements as pcs','pcs.id','=','petty_cash_statement_details.petty_cash_statement_id')
             ->join('cities as dc','dc.id','=', 'petty_cash_statement_details.hub_id')
             ->leftjoin('cities as h','h.id','=', 'pcs.hub_id')
+            ->leftjoin('admins as employee','employee.id','=', 'petty_cash_statement_details.employee_id')
+            ->leftjoin('station_deposit_notes as sdn','sdn.id','=','pcs.sdn_id')
             ->join('admins as cb','cb.id','=', 'pcs.created_by')
             ->leftjoin('admins as sub', 'sub.id', '=', 'petty_cash_statement_details.updated_by')
             ->leftjoin('petty_cash_account_heads as pch', 'pch.id','=','petty_cash_statement_details.account_head_id')
             ->leftjoin('petty_cash_account_titles as pct', 'pct.id','=','petty_cash_statement_details.account_title_id')
             ->leftjoin('shipments','shipments.id','=','pcs.shipment_id')
             ->leftjoin('admins as chb','chb.id','=', 'pcs.checked_by')
-            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by');
+            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by','employee.trax_id as employee_id','petty_cash_statement_details.employee_name','petty_cash_statement_details.employee_designation','sdn.id as sdn_id','sdn.dncc_count');
 //            ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
@@ -4065,6 +4067,30 @@ class AdminReportsController extends Controller
             })
             ->addColumn('entry_date',function($petty){
                 return Carbon::parse($petty->entry_date)->toDateString();
+            })
+            ->editColumn('sdn_id_link', function ($sdn) {
+                if($sdn->sdn_id != null) {
+                    return "<a href='javascript:void(0);' class='printSDN' data-sdn_id='".$sdn->sdn_id."'><u>" . str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->addColumn('sdn_id_padded', function ($sdn) {
+                if($sdn->sdn_id != null) {
+                    return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->addColumn('dncc_link', function($pickup_notes) {
+                if ($pickup_notes->dncc_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" data-sdn_id="'.$pickup_notes->sdn_id.'">' . $pickup_notes->dncc_count . '</button>';
+                }
+                else {
+                    return 0;
+                }
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
