@@ -33,7 +33,13 @@ class FinalChargesWebhookController extends Controller
             $data['actual_weight'] = $shipment->actual_weight;
             $data['chargeable_weight'] = $shipment->chargeable_weight;
             $data['weight_charges'] = $shipment->weight_charges;
-            $data['cash_handling_charges'] = $shipment->cash_handling_charges;
+            if($shipment->shipper_status_id == 20)
+            {
+                $data['cash_handling_charges'] = 0;
+            }
+            else{
+                $data['cash_handling_charges'] = $shipment->cash_handling_charges;
+            }
             $data['insurance_charges'] = $shipment->insurance_charges;
             $data['fuel_surcharges'] = $shipment->fuel_surcharge;
             $data['packaging_charges'] = $shipment->packaging_material_charges;
