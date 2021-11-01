@@ -2463,7 +2463,7 @@ class AdminCargoManifestController extends Controller
             $bag_not_exists_error = "Following Bag(s) doesn\'t exists.<br><ul>";
             foreach ($bag_not_exists as $v)
             {
-                $bag_not_exists_error .= "<li>".$v."</li>";
+                $bag_not_exists_error .= "<li>".CargoManifestBag::find($v)->seal_number ?? $v."</li>";
             }
             $bag_not_exists_error .= "</ul>";
         }
