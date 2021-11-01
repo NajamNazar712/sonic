@@ -248,16 +248,6 @@
                                                 <input type="email" id="official_email" class="form-control border-primary" value="{{$employee->official_email}}" name="official_email" >
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Reporting Location</label>
-                                                <select name="reporting_location" id="reporting_location" class="select2 form-control " style="width: 100%">
-                                                    @foreach($reporting_locations as $reporting_location)
-                                                        <option value="{{$reporting_location->id}}">{{$reporting_location->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
 
                                         <div class="col-md-12">
                                             <div class="form-group">
@@ -2135,12 +2125,6 @@
             });
             $("#city").val("{{$employee->city_id ?? ''}}").trigger('change');
 
-
-            $("#reporting_location").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Reporting Location",
-                width:'100%',
-            });
-            $("#reporting_location").val("{{$employee->reporting_location_id ?? ''}}").trigger('change');
 
             $("#shift_list").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Working Shift",

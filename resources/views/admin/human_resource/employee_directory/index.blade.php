@@ -22,6 +22,7 @@
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Employee FullName</th>
                                     <th class="border-primary border-darken-1">Gender</th>
+                                    <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
@@ -57,33 +58,43 @@
                     <div class="modal-body">
                         <div id="unEditableFields">
                             <div class="row">
-                            <div class="col">
-                                <fieldset class="form-group">
-                                    <select name="rider_type" id="rider_type_list" class="form-control select2"
-                                            data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($rider_types as $rider_type)
-                                            <option value="{{$rider_type->id}}">{{$rider_type->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
-                            </div>
-                        </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="rider_type" id="rider_type_list" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($rider_types as $rider_type)
+                                                <option value="{{$rider_type->id}}">{{$rider_type->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="city_id" id="city_list" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="shift_id" id="shift_list" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($employee_shifts as $shift)
+                                                <option value="{{$shift->id}}">{{$shift->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
 
-                            <div class="row">
-                            <div class="col">
-                                <fieldset class="form-group">
-                                    <select name="city_id" id="city_list" class="form-control select2"
-                                            data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($cities as $city)
-                                            <option value="{{$city->id}}">{{$city->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
                             </div>
-                        </div>
+
+
                             <input type="hidden" name="employee_id" id="employee_id">
                             <div>
-                            <div class="row mb-2">
+                                <div class="row mb-2">
                                 <div class="col">
                                     <fieldset class="form-group">
                                         <input type="text" class="form-control" name="rider_name" id="rider_name"
@@ -115,7 +126,7 @@
                                     </fieldset>
                                 </div>
                             </div>
-                        </div>
+                            </div>
 
                             <div class="row mb-2">
                             <div class="col">
@@ -290,6 +301,12 @@
                 placeholder: 'Select City',
                 dropdownParent: $('#editRiderModal')
             });
+
+            $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Shift',
+                dropdownParent: $('#editRiderModal')
+            });
             $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Route',
@@ -386,6 +403,7 @@
                             head.push('Employee ID');
                             head.push('Employee FullName');
                             head.push('Gender');
+                            head.push('Hub');
                             head.push('City');
                             head.push('CNIC');
                             head.push('Phone No.');
@@ -401,6 +419,7 @@
                                 row.push(values.trax_id);
                                 row.push(values.employee_name);
                                 row.push(values.gender);
+                                row.push(values.employee_hub);
                                 row.push(values.city);
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
@@ -636,7 +655,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[12, 'desc']],
+                order: [[13, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -645,6 +664,7 @@
                     {data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
                     {data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name'},
                     {data: 'gender', name: 'eg.name', class: 'align-middle gender'},
+                    {data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
@@ -677,7 +697,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')|| $(header).is('.employee_hub')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.employee_type'))
@@ -905,8 +925,10 @@
                 var pin = table.row($(this).parents('tr')).data().pin;
                 var address = table.row($(this).parents('tr')).data().address;
                 var city_id = table.row($(this).parents('tr')).data().city_id;
+                var shift_id = table.row($(this).parents('tr')).data().shift_id;
                 var check_bit = table.row($(this).parents('tr')).data().check_if_rider_present_bit;
                 $('#city_list').val(city_id).trigger('change');
+                $('#shift_list').val(shift_id).trigger('change');
                 if(check_bit != null)
                 {
                     var rider_type = table.row($(this).parents('tr')).data().active_rider_type_id;

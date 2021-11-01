@@ -230,6 +230,7 @@ class RiderManagementController extends Controller
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'ccd' => ($request->has('ccd_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
+            'dummy_pin'=> $request->pin,
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
             'rider_type_id' => $type,
@@ -237,6 +238,23 @@ class RiderManagementController extends Controller
             'reporting_location_id' => $request->location_id,
         ]);
         if($rider){
+            $employee = new Employee();
+            $employee->city_id = $request->city_id;
+            $employee->name = $request->rider_name;
+            $employee->official_phone_number = $request->phone;
+            $employee->cnic = $request->cnic;
+            $employee->employee_type_id = 2;
+            $employee->request_status_id = 3;
+            $employee->status_id = 3;
+            $employee->address = $request->address;
+            $employee->pin =  $request->pin;
+            $employee->shift_id = $request->shift_id;
+            $employee->trax_id = $trax_id;
+            $employee->save();
+
+            $rider->employee_id = $employee->id;
+            $rider->update();
+
             NotificationsController::send(61, $rider->id, $request->pin);
             return redirect()->back()->with('success','Rider added successfully');
         }
@@ -318,6 +336,7 @@ class RiderManagementController extends Controller
 
         $rider->updated_by = Auth::id();
 
+
         if($request->route_id == 'other'){
             $route = new Route();
             $route->city_id = $request->city_id;
@@ -346,6 +365,21 @@ class RiderManagementController extends Controller
 
         $rider->save();
 
+
+        $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+        if($employee->exists())
+        {
+            $employee = $employee->first();
+            $employee->city_id = $rider->city_id;
+            $employee->name = $rider->name;
+            $employee->official_phone_number = $rider->phone;
+            $employee->cnic = $rider->cnic;
+            $employee->address = $rider->address;
+            $employee->pin = $rider->dummy_pin;
+            $employee->shift_id = $rider->shift_id;
+            $employee->save();
+        }
+
         if($rider){
             return redirect()->back()->with('success','Rider updated successfully');
         }
@@ -355,11 +389,25 @@ class RiderManagementController extends Controller
         $status = $request->status;
         if($status == 'riderActive'){
             $rider = Rider::where('id',$id)->update(['status'=>1]);
+            $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+            if($employee->exists())
+            {
+                $employee = $employee->first();
+                $employee->status_id = AdminHumanResourseController::GetStatusOfEmployee($employee->id);
+                $employee->update();
+            }
             if($rider){
                 return redirect()->back()->with('success','Rider is activated successfully');
             }
         }else if($status == 'riderInactive'){
             $rider =Rider::where('id',$id)->update(['status'=>0]);
+            $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+            if($employee->exists())
+            {
+                $employee = $employee->first();
+                $employee->status_id = 2;
+                $employee->update();
+            }
             if($rider){
                 return redirect()->back()->with('success','Route is now inactive');
             }
@@ -417,9 +465,29 @@ class RiderManagementController extends Controller
             if($rider){
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 2){
+                    $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+                    if ($global_setting->exists()) {
+                        $global_setting = $global_setting->first();
+                        $trax_id = $global_setting->setting_value + 1;
+                        $global_setting->setting_value = $trax_id;
+                        $global_setting->save();
+                        $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    } else {
+                        $trax_id = null;
+                    }
+
+                    $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+                    if($employee->exists())
+                    {
+                        $employee->trax_id = $trax_id;
+                        $employee->update();
+                    }
+                    $rider->trax_id = $trax_id;
                     $rider->rider_type_id = 1;
                     $rider->updated_by = Auth::id();
                     $rider->save();
+
                     return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                 }
                 return response()->json(['status' => 1, 'error' => 'Rider already Marked as Permanent Rider!']);

@@ -77,7 +77,8 @@
 										<th class="border-primary border-darken-1">Employee Id</th>
 										<th class="border-primary border-darken-1">Name</th>
 										<th class="border-primary border-darken-1">Phone Number</th>
-										<th class="border-primary border-darken-1">Email</th>
+										<th class="border-primary border-darken-1">Official Phone Number</th>
+										<th class="border-primary border-darken-1">Outlook ID</th>
 										<th class="border-primary border-darken-1">CNIC</th>
 										<th class="border-primary border-darken-1">Designation</th>
 										<th class="border-primary border-darken-1">Role</th>
@@ -174,7 +175,8 @@
                             head.push('Employee Id');
                             head.push('Name');
                             head.push('Phone Number');
-                            head.push('Email');
+                            head.push('Official Phone Number');
+                            head.push('Outlook ID');
                             head.push('CNIC');
                             head.push('Designation');
                             head.push('Role');
@@ -188,6 +190,7 @@
                                 row.push(values.trax_id);
                                 row.push(values.name);
                                 row.push(values.phone_number);
+                                row.push(values.official_phone_number);
                                 row.push(values.email);
                                 row.push(values.cnic);
                                 row.push(values.designation);
@@ -315,13 +318,14 @@
 				}
 				},
 				rowId: 'id',
-				order: [[10, 'desc']],
+				order: [[11, 'desc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'trax_id', name: 'admins.trax_id', class: 'align-middle trax_id'},
 					{data: 'name', name: 'admins.name', class: 'align-middle name'},
 					{data: 'phone_number', name: 'admins.phone_number', class: 'align-middle phone_number'},
+					{data: 'official_phone_number', name: 'admins.official_phone_number', class: 'align-middle official_phone_number'},
 					{data: 'email', name: 'admins.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'admins.cnic', class: 'align-middle cnic'},
 					{data: 'designation', name: 'admins.designation', class: 'align-middle designation'},

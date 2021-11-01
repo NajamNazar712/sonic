@@ -3912,4 +3912,156 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'attendance_details' => []]);
     }
 
+public function login_v3(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+            'device_token' => ['nullable']
+        ];
+
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $user = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($user->exists()) {
+                $user = $user->first();
+                if($user->status == 0){
+                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                }
+                if (Hash::check($request->input('pin'), $user->password)) {
+                    $employee = Employee::where('trax_id', $user->trax_id);
+                    $information = array();
+
+                    $information['id'] = $user->id;
+                    $information['name'] = $user->name;
+                    $information['phone'] = $user->phone_number;
+                    $information['cnic'] = $user->cnic;
+                    $information['cargo_user'] = ($user->role_id == 11) ? 1 : 0;
+                    if ($employee->exists()) {
+                        $employee = $employee->first();
+                        $information['address'] = ($employee->address) ? $employee->address : "" ;
+                    } else {
+                        $information['address'] = '';
+                    }
+                    $information['role'] = 'staff';
+
+                    if($request->has('device_token')){
+                        $employee_device_token = EmployeeDeviceToken::where('employee_id', $user->id)
+                            ->where('employee_type_id', 1);
+                        if ($employee_device_token->exists()) {
+                            $employee_device_token = $employee_device_token->first();
+                        } else {
+                            $employee_device_token = new EmployeeDeviceToken();
+                            $employee_device_token->employee_id = $user->id;
+                            $employee_device_token->employee_type_id = 1;
+                        }
+                        $employee_device_token->device_token = $request->get('device_token');
+                        $employee_device_token->save();
+                    }
+
+                    $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                        ->join('admins as a', 'e.id', 'a.employee_id')
+                        ->where('a.id', $user->id);
+
+                    if ($reporting_location->exists()) {
+                        $reporting_location = $reporting_location->first();
+                        $information['distance'] = $reporting_location->radius;
+                        $information['lat'] = $reporting_location->lat;
+                        $information['long'] = $reporting_location->long;
+                    }else{
+                        $information['distance'] = 0;
+                        $information['lat'] = 0;
+                        $information['long'] = 0;
+                    }
+
+                    if ($user->api_token) {
+                        $information['api_token'] = $user->api_token;
+                    } else {
+                        $api_token = uniqid(base64_encode(str_random(60)));
+
+                        $user->api_token = $api_token;
+
+                        $user->save();
+
+                        $information['api_token'] = $api_token;
+                    }
+
+                    return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid Password']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Wrong Email/Password!']);
+            }
+        }
+    }
+
+    public function forget_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admins = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($admins->exists()) {
+                $admins = $admins->first();
+                if($admins->status == 1){
+                    $pin = rand(100000, 999999);
+                    $admins->reset_pin_otp = $pin;
+                    $admins->save();
+                    NotificationsController::send(162, $admins->id, $request->phone_number);
+                    return response()->json(['status' => 0, 'message' => 'Pin has been sent to your phone number', 'otp' => $pin]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function reset_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'otp' => ['required', 'integer', 'digits:6'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($admin->exists()) {
+                $admin = $admin->first();
+                if($request->input('otp') == $admin->reset_pin_otp){
+                    $admin->password = bcrypt($request->pin);
+                    $admin->reset_pin_otp = NULL;
+                    $admin->save();
+                    return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
+                }else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
 }

@@ -1690,6 +1690,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status', 'Admins\UserManagementController@user_status')->name('status');
             Route::post('assign_hubs', 'Admins\UserManagementController@user_assign_hub')->name('assign_hubs');
 
+            Route::get('validate_phone','Admins\UserManagementController@validate_phone')->name('validate_phone');
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@user_add_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@user_add_store')->name('store');
@@ -2419,7 +2420,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/accounts/pending/{id}/rates' ,'Admins\AdminDashboardController@viewShipperRates');
     //Reset Password
     Route::post('password/email','Auth\AdminForgotPasswordController@sendResetLinkEmail')->name('password.email');
+    Route::post('get/otp','Auth\AdminForgotPasswordController@GenerateOTP')->name('password.generate.otp');
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
+    Route::post('password/reset/pin','Auth\AdminResetPasswordController@reset_pin')->name('password.reset.pin');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset')->name('password.reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
 

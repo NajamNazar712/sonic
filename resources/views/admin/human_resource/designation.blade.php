@@ -35,7 +35,7 @@
     </section>
     <div class="modal fade text-left" id="addDesignationModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="addDesignationModal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel8">Add Designation</h4>
@@ -61,6 +61,17 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <select name="hub_id[]" id="hubs" multiple class="select2 form-control " data-rule-required="true" data-msg-required="Hub(s) is required" style="width: 100%">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" id="selectAll" class="btn btn-success">Select All</button>
+                            <button type="button" id="unselectAll" class="btn btn-danger">Un-Select All</button>
+                        </div>
+                        <div class="form-group">
                             <textarea name="description" class="form-control" id="description" placeholder="Description"></textarea>
                         </div>
                         <div class="form-group ml-1">
@@ -73,7 +84,7 @@
     </div>
     <div class="modal fade text-left" id="editDesignationModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="editDesignationModal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel8">Edit Designation</h4>
@@ -99,6 +110,17 @@
                         <div class="form-group">
                             <select name="role_id" id="role_edit" class="select2 form-control " data-rule-required="true" data-msg-required="Role is required" style="width: 100%">
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <select name="hub_id[]" id="hubs_edit" multiple class="select2 form-control " data-rule-required="true" data-msg-required="Hub(s) is required" style="width: 100%">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" id="selectAll" class="btn btn-success">Select All</button>
+                            <button type="button" id="unselectAll" class="btn btn-danger">Un-Select All</button>
                         </div>
                         <div class="form-group">
                             <textarea name="description" class="form-control" id="edit_description" placeholder="Description"></textarea>
@@ -267,10 +289,17 @@
                 var department_id = table.row($(this).parents('tr')).data().department_id;
                 var role_id = table.row($(this).parents('tr')).data().role_id;
                 var description = table.row($(this).parents('tr')).data().description;
+                var hubs_array = table.row($(this).parents('tr')).data().hubs;
+                let hubs = [];
+                $.each(hubs_array,function (i,v){
+                    hubs.push(v['hub_id']);
+                });
+                console.log(hubs);
                 $('#designation_id').val(id);
                 $('#edit_name').val(name);
                 $('#department_edit').val(department_id).trigger('change');
                 $('#edit_description').val(description);
+                $("#hubs_edit").val(hubs).trigger('change');
                 $('#role_dummy').val(role_id);
                 $('#editDesignationModal').modal('show');
             });
@@ -401,17 +430,58 @@
 
             $("#addDesignationForm #department").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department*",
-                width:'100%'
+                width:'100%',
+                dropdownParent: $("#addDesignationForm")
+            });
+
+            $("#addDesignationForm #hubs").select2({
+                placeholder: "Select Hubs*",
+                width:'100%',
+                dropdownParent: $("#addDesignationForm")
+            });
+
+            $("#addDesignationForm #selectAll").on('click',function (){
+                $("#addDesignationForm #hubs > option").prop("selected","selected");
+                $("#addDesignationForm #hubs").trigger("change");
+            });
+
+            $("#addDesignationForm #unselectAll").on('click',function (){
+                $("#addDesignationForm #hubs > option").prop("selected","");
+                $("#addDesignationForm #hubs").trigger("change");
             });
 
             $("#editDesignationForm #department_edit").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department*",
-                width:'100%'
+                width:'100%',
+                dropdownParent: $("#editDesignationForm")
             });
 
-            $("#editDesignationForm #role_edit,#addDesignationForm #role").prepend('<option value="" selected></option>').select2({
+            $("#editDesignationForm #role_edit").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Role*",
-                width:'100%'
+                width:'100%',
+                dropdownParent: $("#editDesignationForm")
+            });
+
+            $("#addDesignationForm #role").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Role*",
+                width:'100%',
+                dropdownParent: $("#addDesignationForm")
+            });
+
+            $("#editDesignationForm #hubs_edit").select2({
+                placeholder: "Select Hubs*",
+                width:'100%',
+                dropdownParent: $("#editDesignationForm")
+            });
+
+            $("#editDesignationForm #selectAll").on('click',function (){
+                $("#editDesignationForm #hubs_edit > option").prop("selected","selected");
+                $("#editDesignationForm #hubs_edit").trigger("change");
+            });
+
+            $("#editDesignationForm #unselectAll").on('click',function (){
+                $("#editDesignationForm #hubs_edit > option").prop("selected","");
+                $("#editDesignationForm #hubs_edit").trigger("change");
             });
 
 

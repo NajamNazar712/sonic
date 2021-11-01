@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
@@ -42,6 +43,39 @@ class AdminResetPasswordController extends Controller
     {
         $this->middleware('guest:admin');
     }
+
+    public function reset_pin(Request $request)
+    {
+        $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number',$request->phone_number);
+        if ($admin->exists()) {
+            $admin = $admin->first();
+            $environment = config('app.env');
+            if($environment == 'production' || $environment == 'staging') {
+                if ($admin->reset_pin_otp == $request->otp) {
+                    $admin->dummy_pin = $request->pin;
+                    $admin->password = bcrypt($request->pin);
+                    $admin->reset_pin_otp = null;
+                    $admin->save();
+                    event(new PasswordReset($admin));
+                    NotificationsController::send(159, $admin->id);
+                    return redirect()->route('admin.login')->with('success', 'Pin Reset Successfully');
+                } else {
+                    return back()->with(['error' => 'Invalid OTP']);
+                }
+            }
+            else{
+                $admin->dummy_pin = $request->pin;
+                $admin->password = bcrypt($request->pin);
+                $admin->save();
+                event(new PasswordReset($admin));
+                NotificationsController::send(159, $admin->id);
+                return redirect()->route('admin.login')->with('success','Pin Reset Successfully');
+            }
+        } else {
+            return back()->with(['error' => 'Invalid Credentials']);
+        }
+    }
+
     public function showResetForm(Request $request, $token = null)
     {
         return view('admin.auth.passwords.reset')->with(['token' => $token, 'email' => $request->email]);
