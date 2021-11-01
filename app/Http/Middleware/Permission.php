@@ -824,7 +824,7 @@ class Permission
             'settings.escalation.tagging.edit.store' => 350,
 
             'settings.default_agent.index' => 351,
-
+            
             'settings.holidays.index' => 358,
             'settings.holidays.list' => 358,
             'settings.holidays.add' => 358,
@@ -1103,6 +1103,10 @@ class Permission
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
+
+            'settings.auto_assigning.index' => 616,
+            'settings.auto_assigning.list' => 616,
+
 
         ],
 

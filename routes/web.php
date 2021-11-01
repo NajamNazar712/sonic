@@ -2714,6 +2714,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@crm_default_agent_store')->name('store');
         });
 
+        Route::prefix('auto_assigning')->name('auto_assigning.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@crm_auto_assigning_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@crm_auto_assigning_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@crm_auto_assigning_submit')->name('submit');
+            Route::post('data', 'Admins\GlobalSettingsController@crm_auto_assigning_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@crm_auto_assigning_update')->name('update');
+            Route::post('delete', 'Admins\GlobalSettingsController@crm_auto_assigning_delete')->name('delete');
+        });
+
         Route::prefix('blacklist')->name('blacklist.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@blacklist_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@blacklist_list')->name('list');
