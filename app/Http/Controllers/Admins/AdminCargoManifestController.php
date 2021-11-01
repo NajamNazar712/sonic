@@ -2460,10 +2460,10 @@ class AdminCargoManifestController extends Controller
         $bag_short_received_error = false;
         if(count($bag_not_exists) > 0)
         {
-            $bag_not_exists_error = "Following Bag(s) doesn\'t exists.<br><ul>";
+            $bag_not_exists_error = "Following Bag(s) already received or doesn\'t exists.<br><ul>";
             foreach ($bag_not_exists as $v)
             {
-                $bag_not_exists_error .= "<li>".CargoManifestBag::find($bag_id)->seal_number."</li>";
+                $bag_not_exists_error .= "<li>".CargoManifestBag::find($v)->seal_number ?? $v."</li>";
             }
             $bag_not_exists_error .= "</ul>";
         }
@@ -2472,7 +2472,7 @@ class AdminCargoManifestController extends Controller
             $bag_not_exists_in_manifest_error = "Following Bag(s) doesn\'t exists in any manifest.<br><ul>";
             foreach ($bag_not_exists_in_manifest as $v)
             {
-                $bag_not_exists_in_manifest_error .= "<li>".CargoManifestBag::find($bag_id)->seal_number."</li>";
+                $bag_not_exists_in_manifest_error .= "<li>".CargoManifestBag::find($v)->seal_number."</li>";
             }
             $bag_not_exists_in_manifest_error .= "</ul>";
         }
@@ -2481,7 +2481,7 @@ class AdminCargoManifestController extends Controller
             $bag_not_exists_in_mapping_error = "Following Bag(s) doesn\'t associated with any mapping.<br><ul>";
             foreach ($bag_not_exists_in_mapping as $v)
             {
-                $bag_not_exists_in_mapping_error .= "<li>".$v."</li>";
+                $bag_not_exists_in_mapping_error .= "<li>".CargoManifestBag::find($v)->seal_number."</li>";
             }
             $bag_not_exists_in_mapping_error .= "</ul>";
         }
@@ -2490,8 +2490,7 @@ class AdminCargoManifestController extends Controller
             $bag_short_received_error = "Following Bag(s) are short received.<br><ul>";
             foreach ($bag_short_received as $bag_id)
             {
-                $bag = CargoManifestBag::find($bag_id);
-                $bag_short_received_error .= "<li>". $bag->seal_number."</li>";
+                $bag_short_received_error .= "<li>". CargoManifestBag::find($bag_id)->seal_number."</li>";
             }
             $bag_short_received_error .= "</ul>";
         }

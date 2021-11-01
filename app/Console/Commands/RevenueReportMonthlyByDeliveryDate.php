@@ -13,7 +13,7 @@ class RevenueReportMonthlyByDeliveryDate extends Command
      *
      * @var string
      */
-    protected $signature = 'report:revenuereportbydeliverydate';
+    protected $signature = 'email:revenuereportbydeliverydate';
 
     /**
      * The console command description.
