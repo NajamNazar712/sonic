@@ -330,7 +330,8 @@ class AdminMasterCargoController extends Controller
     }
 
     public function create_index() {
-        return view('admin.master_cargo.bag.create')->with('print', session('print'));
+        return redirect()->route('admin.access_denied');
+//        return view('admin.master_cargo.bag.create')->with('print', session('print'));
     }
 
     public function create_shipment_details(Request $request) {
@@ -403,7 +404,7 @@ class AdminMasterCargoController extends Controller
                 if ($allowed) {
                     if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20)) {
                         if($shipment->return_address_id != NULL){
-                            if(($shipment->shipper_status_id == 20) && ($shipment->pickup_address->city->hub_id == $shipment->return_address->city->hub_id)){
+                            if(($shipment->shipper_status_id == 20) && ($shipment->consignee_city->hub_id == $shipment->return_address->city->hub_id)){
                                 return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
                             }
                         }
@@ -837,7 +838,8 @@ class AdminMasterCargoController extends Controller
     }
 
     public function create_open_bag_index() {
-        return view('admin.master_cargo.bag.create_open_bag')->with('print', session('print'));
+        return redirect()->route('admin.access_denied');
+//        return view('admin.master_cargo.bag.create_open_bag')->with('print', session('print'));
     }
 
     public function create_open_bag_shipment_details(Request $request) {
@@ -913,7 +915,7 @@ class AdminMasterCargoController extends Controller
                     if ($allowed) {
                         if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20)) {
                             if($shipment->return_address_id != NULL){
-                                if(($shipment->shipper_status_id == 20) && ($shipment->pickup_address->city->hub_id == $shipment->return_address->city->hub_id)){
+                                if(($shipment->shipper_status_id == 20) && ($shipment->consignee_city->hub_id == $shipment->return_address->city->hub_id)){
                                     return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
                                 }
                             }

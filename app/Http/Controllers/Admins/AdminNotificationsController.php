@@ -539,7 +539,7 @@ class AdminNotificationsController extends Controller
         }
 		else if ($id == 132)
         {
-            $details['fields'] = ['tracking_number','rider'];
+            $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider'];
         }
 		else if ($id == 133)
         {
@@ -548,6 +548,10 @@ class AdminNotificationsController extends Controller
 		else if ($id == 134)
         {
             $details['fields'] = ['company_name','preview'];
+        }
+        else if ($id == 135)
+        {
+            $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider'];
         }
         else if ($id == 136)
         {
@@ -778,6 +782,8 @@ class AdminNotificationsController extends Controller
                 $details['fields'] = ["consignee_name", "tracking_no", "status_name"];
             }else if($id == 9){
                 $details['fields'] = ["rider", "otp"];
+            }else if($id == 10){
+                $details['fields'] = ["time", "name"];
             }
             return $details;
         }else{

@@ -283,7 +283,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00')->runInBackground();
         $schedule->command('email:outstandingsdnreport')->dailyAt('09:00')->runInBackground();
         $schedule->command('email:telenorsalesreport')->dailyAt('09:00')->runInBackground();
-        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
+//        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
         $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
         if ($settings->exists()) {
             $settings = $settings->first();
@@ -304,7 +304,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-        $schedule->command('email:report:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(2, '01:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');

@@ -48,7 +48,14 @@ class ProcessAgentCallMonitoring implements ShouldQueue
             $admin_ids = AdminHub::where('hub_id',$delivery_note->hub_id)->pluck('admin_id')->toArray();
             if(count($admin_ids) > 0){
 
-                $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();
+              // $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();previous
+               
+                $admins = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.id')
+                ->whereIn('admins.id', $admin_ids)
+                ->where('admins.role_id', 18)
+                ->where('admins.status',1)
+                ->where('ea.clock_out_datetime','=',null)
+                ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))->pluck('admins.id')->toArray();
 
                 $recs = array();
                 if(count($admins) > 0){

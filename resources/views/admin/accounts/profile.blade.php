@@ -126,6 +126,14 @@
                                         </td>
                                     </tr>
                                 @endif
+                                @if($user->sub_segment_id != null)
+                                    <tr>
+                                        <td><b>Sub Segment</b></td>
+                                        <td>{{$user->sub_segment->name}}
+                                        </td>
+                                    </tr>
+                                @endif
+                                
                                 <tr>
                                     <td><b>API Key</b></td>
                                     <td>{{$user->api_token}}</td>
@@ -452,13 +460,39 @@
 
                                     <select name="segment_id" id="segment_id" class="select2 form-control required" style="width: 100%">
                                         @foreach($segments as $segment)
-                                            <option value="{{$segment->id}}">{{$segment->name}}</option>
+                                            @if ($user->segment_id == $segment->id)
+                                              <option value="{{$segment->id}}" selected>{{$segment->name}}</option>
+                                            @else
+                                                <option value="{{$segment->id}}">{{$segment->name}}</option>
+                                            @endif
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <div class="form-group col-md-9">
+                                    <label for="sub_segments">Sub Segments:
+                                        <span class="danger">*</span>
+                                    </label>
 
+                                    <select name="sub_segment_id" id="sub_segment_id" class="select2 form-control required" style="width: 100%" >
+                                        @if ($sub_segments->count() > 0)
+                                            @foreach($sub_segments as $sub_segment)
+                                                @if ($sub_segment->id == $user->sub_segment_id)
+                                                <option value="{{$sub_segment->id}}" selected>{{$sub_segment->name}}</option>
+                                                    
+                                                @else
+                                                    
+                                                <option value="{{$sub_segment->id}}">{{$sub_segment->name}}</option>
+                                                @endif
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="form-group row">
                                 <div class="col-md-9">
@@ -759,7 +793,10 @@
             $('#segments').select2({
                 width: '100%',
             });
-
+            $('#sub_segments').select2({
+                width: '100%',
+            });
+            
             var weekly = [1, 2, 3, 4, 5, 6, 7];
             var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
             var cycle = '{!! $user_bank_default->invoicing_cycle_id !!}';
@@ -842,14 +879,57 @@
             });
             
 
-            $('#segment_id').prepend('<option value="" selected></option>').select2({
+            $('#segment_id').select2({
                 placeholder: "Select Segment",
                 width:'100%',
+            }).bind('change', function() {
+                var id = $(this).val();
+                $(this).valid();
+                console.log(id);
+                $.ajax({
+                    url: '{!! route('cod.get_sub_segment') !!}',
+                    method: 'POST',
+                    data: {
+                        'segment_id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    console.log(data);
+                   if (data.status == 0) {
+                    // $('#sub_segment_id').prop("disabled", false);
+                       $('#sub_segment_id').children().remove();
+                                    $('#sub_segment_id').prepend('<option value="" selected="selected"></option>')
+                                $.each(data.sub_segments, function (index, sub_segments) {
+                                    $('#sub_segment_id').append('<option value="'+sub_segments.id+'" id="trax_center">'+sub_segments.name+'</option>')
+                                });
+                   }
+                });
             });
-            @if($user->segment_id != null)
-            var segment_id = {!! $user->segment_id !!};
-            $('#segment_id').val(segment_id).trigger('change');
-            @endif
+
+
+            // $('#segment_id').prepend('<option value="" selected></option>').select2({
+            //     placeholder: "Select Segment",
+            //     width:'100%',
+            // });
+            
+            // @if($user->segment_id != null)
+            // var segment_id = {!! $user->segment_id !!};
+            // $('#segment_id').val(segment_id).trigger('change');
+            // @endif
+
+
+            $('#sub_segment_id').select2({
+                placeholder: "Select Sub Segment",
+                width:'100%',
+            });
+            // @if($user->sub_segment_id != null)
+            // var sub_segment_id = {!! $user->sub_segment_id !!};
+            
+            // $('#sub_segment_id').val(sub_segment_id).trigger('change');
+            // @endif
+
+
+            
             $('#cancel-button-profile').click(function () {
                 $("#profile-form").hide();
                 $("#profile-form").validate().resetForm();
@@ -858,6 +938,7 @@
                 $("#city_id").val("{{$user->city_id}}").trigger('change');
                 $("#product_id").val("{{$user->product_id}}").trigger('change');
                 $("#segment_id").val(segment_id).trigger('change');
+                $("#sub_segment_id").val(sub_segment_id).trigger('change');
                 $("#tabs").show();
             });
             $('#cancel-button-bank').click(function () {

@@ -824,7 +824,8 @@ class AdminHumanResourseController extends Controller
         $attachments = $employee->attachments;
         $place_of_birth_cities = City::where('business_category_id',1)->get();
         $reporting_locations = ReportingLocation::where('status',1)->get();
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities','reporting_locations'));
+        $shifts = EmployeeShift::where('status', 1)->get();
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities','reporting_locations', 'shifts'));
     }
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
@@ -862,6 +863,7 @@ class AdminHumanResourseController extends Controller
         $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->reporting_location_id = $request->reporting_location;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+        $employee->shift_id = $request->shift_id;
         $employee->update();
 
         if($employee->employee_type_id == 1)
@@ -2563,6 +2565,10 @@ class AdminHumanResourseController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
         $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban','total_salary');
+        if(!in_array(596, session('permissions'))){
+            $payslips->whereRaw('false');
+        }
+
         $datatable = Datatables::of($payslips)
             ->addColumn('action', function () {
                 $dropdown = '
@@ -3215,13 +3221,13 @@ class AdminHumanResourseController extends Controller
                         
                         <tr class="text-center">
                             <td class="color primary border twice" colspan="2"><b>Total Addition</b></td>
-                            <td class="color primary border twice" colspan="2">'. number_format($total_addition) .'</td>
+                            <td class="color primary border twice" colspan="2">'. $total_addition .'</td>
                             <td class="color primary border twice" colspan="2"><b>Total Deduction</b></td>
-                            <td class="color primary border twice" colspan="2">'. number_format($total_deduction) .'</td>
+                            <td class="color primary border twice" colspan="2">'. $total_deduction .'</td>
                         </tr>
                         <tr class="text-left">
                             <td class="color primary border twice" colspan="6"><b>Net Salary</b></td>
-                            <td class="color primary border twice text-center" colspan="2">'. number_format($net_salary) .'</td>
+                            <td class="color primary border twice text-center" colspan="2">'. $net_salary .'</td>
                         </tr>
                         <tr class="text-left">
                             <td class="border twice" colspan="8" rowspan="5"><i>Note: This is a system generated document and does not require any signature.</i></td>

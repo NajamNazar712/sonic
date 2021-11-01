@@ -24,4 +24,18 @@ class PettyCashStatementDetail extends Model
     public function location() {
         return $this->belongsTo('App\Http\Models\City', 'hub_id', 'id');
     }
+
+
+    public function zone() {
+        return $this->belongsTo('App\Http\Models\Zone', 'zone_id', 'id');
+    }
+
+
+    public function city() {
+        return $this->belongsTo('App\Http\Models\City', 'city_id', 'id');
+    }
+
+    public function employee() {
+        return $this->belongsTo('App\Http\Models\Admin\Admin', 'employee_id', 'id');
+    }
 }

@@ -140,6 +140,7 @@ Route::name('api.')->group(function () {
             Route::prefix('location')->name('location.')->group(function(){
                 Route::post('','Rider\RiderAPIController@get_rider_location')->name('get');
             });
+            Route::post('location_v2', 'Rider\RiderAPIController@get_rider_location_v2')->name('location_v2');
 
             Route::prefix('delivery')->name('delivery.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@delivery_summary')->name('delivery_summary');
@@ -246,6 +247,8 @@ Route::name('api.')->group(function () {
                 Route::post('mark_v2', 'AdminAPIController@mark_attendance_v2')->name('mark_v2');
                 Route::post('detail_v2', 'AdminAPIController@attendance_details_v2')->name('detail_v2');
                 Route::post('mark_api', 'AdminAPIController@mark_attendance_api')->name('mark_api');
+                Route::get('flutter_detail', 'AdminAPIController@flutter_attendance_details')->name('flutter_detail');
+                Route::post('flutter_mark', 'AdminAPIController@flutter_mark_attendance')->name('flutter_mark');
             });
 
             Route::prefix('retail')->name('retail.')->group(function () {
@@ -253,7 +256,17 @@ Route::name('api.')->group(function () {
                 Route::post('retail_bank_info', 'AdminAPIController@retail_bank_info')->name('retail_bank_info');
                 Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
+
+            Route::prefix('master_cargo')->name('master_cargo.')->group(function () {
+                Route::post('list', 'AdminAPIController@master_cargo')->name('list');
+                Route::post('bags', 'AdminAPIController@cargo_bags')->name('bags');
+                Route::post('bags/validate', 'AdminAPIController@cargo_bags_validator')->name('bags.validate');
+                Route::post('bags/details', 'AdminAPIController@cargo_bags_details')->name('bags.details');
+                Route::post('recieve', 'AdminAPIController@cargo_bag_recieve')->name('recieve');
+            });
+
             Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');
+            Route::post('location_v2', 'AdminAPIController@attendance_notification')->name('location_v2');
 
         });
 
@@ -276,6 +289,7 @@ Route::name('api.')->group(function () {
 
     Route::prefix('consignee')->name('consignee.')->group(function() {
         Route::post('get_info', 'ConsigneeAPIController@consignee_info')->name('get_info');
+        Route::post('test', 'ConsigneeAPIController@test')->name('test');
         Route::post('consignee_otp', 'ConsigneeAPIController@consignee_otp')->name('consignee_otp');
         Route::post('otp_verify', 'ConsigneeAPIController@consignee_otp_verification')->name('otp_verify');
         Route::post('consignee_signup', 'ConsigneeAPIController@consignee_signup')->name('consignee_signup');
@@ -296,6 +310,7 @@ Route::name('api.')->group(function () {
 
     Route::prefix('shipper')->name('shipper.')->group(function () {
         Route::post('login', 'ShipperAPIController@login')->name('login');
+        Route::post('test', 'ShipperAPIController@test')->name('test');
         Route::middleware('ShipperAPIToken')->group(function () {
             Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
 

@@ -3548,9 +3548,13 @@ class APIController extends Controller
         $user_id = $request->user_id;
 
         $rules = [
-            'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+            'tracking_number' => ['required_without:order_id', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })],
+            'order_id' => ['required_without:tracking_number', 'regex:/^[A-Za-z0-9\-\_]+$/u', 'max:20', Rule::exists('shipments', 'order_id')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -3560,51 +3564,107 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $tracking_number = $request->tracking_number;
+            if($request->tracking_number)
+            {
+                $tracking_number = $request->tracking_number;
 
-            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+                $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
-            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
-            if (!$shipment_journey) {
-                return response()->json(['status' => 1, 'message' => 'No data found!']);
-            }
-
-            $current_status_id = $shipment_journey->shipper_status_id;
-            $current_status_time = $shipment_journey->created_at;
-            $current_reason_id = $shipment_journey->status_reason_id;
-
-            $details = array();
-
-            $duration = TelenorShipmentStatusEstimatedTime::where('shipper_status_id', $current_status_id);
-            if ($duration->exists()) {
-                $duration = $duration->first();
-                $estimated_eta = $duration->eta;
-
-                $actual_eta = Carbon::now()->diffInDays($current_status_time);
-
-                $difference_eta = $estimated_eta - $actual_eta;
-                if ($difference_eta < 0) {
-                    $difference_eta = 0;
+                if (!$shipment_journey) {
+                    return response()->json(['status' => 1, 'message' => 'No data found!']);
                 }
-                $details['tracking_number'] = $tracking_number;
-                $details['status'] = ShipmentStatus::find($current_status_id)->name;
-                $details['ETA'] = $difference_eta . ' days';
 
-                if ($difference_eta == 0) {
-                    if ($current_reason_id != null) {
-                        $details['reason'] = ShipmentStatusReason::find($current_reason_id)->name . '. Please call us at 021-111-118-729 for queries and updates.';
-                    } else {
-                        $details['reason'] = '';
+                $current_status_id = $shipment_journey->shipper_status_id;
+                $current_status_time = $shipment_journey->created_at;
+                $current_reason_id = $shipment_journey->status_reason_id;
+
+                $details = array();
+
+                $duration = TelenorShipmentStatusEstimatedTime::where('shipper_status_id', $current_status_id);
+                if ($duration->exists()) {
+                    $duration = $duration->first();
+                    $estimated_eta = $duration->eta;
+
+                    $actual_eta = Carbon::now()->diffInDays($current_status_time);
+
+                    $difference_eta = $estimated_eta - $actual_eta;
+                    if ($difference_eta < 0) {
+                        $difference_eta = 0;
+                    }
+                    $details['tracking_number'] = $tracking_number;
+                    $details['status'] = ShipmentStatus::find($current_status_id)->name;
+                    $details['ETA'] = $difference_eta . ' days';
+
+                    if ($difference_eta == 0) {
+                        if ($current_reason_id != null) {
+                            $details['reason'] = ShipmentStatusReason::find($current_reason_id)->name . '. Please call us at 021-111-118-729 for queries and updates.';
+                        } else {
+                            $details['reason'] = '';
+                        }
+                    }
+
+                }
+
+                if (!empty($details)) {
+                    return response()->json(['status' => 0, 'message' => 'ETA of Shipment #' . $tracking_number, 'details' => $details]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'No data found!']);
+                }
+            }
+            else if($request->order_id) 
+            {
+                $detail = array();
+                $order_id = $request->order_id;
+                $shipments = Shipment::where('order_id', $order_id)->where('user_id', $user_id)->get();
+
+                foreach($shipments as $shipment)
+                {
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+                    
+                    if (!$shipment_journey) {
+                        return response()->json(['status' => 1, 'message' => 'No data found!']);
+                    }
+                    
+                    $current_status_id = $shipment_journey->shipper_status_id;
+                    $current_status_time = $shipment_journey->created_at;
+                    $current_reason_id = $shipment_journey->status_reason_id;
+    
+
+                    $duration = TelenorShipmentStatusEstimatedTime::where('shipper_status_id', $current_status_id);
+                    if ($duration->exists()) {
+                        
+                        $duration = $duration->first();
+                        $estimated_eta = $duration->eta;
+    
+                        $actual_eta = Carbon::now()->diffInDays($current_status_time);
+    
+                        $difference_eta = $estimated_eta - $actual_eta;
+                        if ($difference_eta < 0) {
+                            $difference_eta = 0;
+                        }
+                        $details = array();
+                        $details['order_id'] = $order_id;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['status'] = ShipmentStatus::find($current_status_id)->name;
+                        $details['ETA'] = $difference_eta . ' days';
+    
+                        if ($difference_eta == 0) {
+                            if ($current_reason_id != null) {
+                                $details['reason'] = ShipmentStatusReason::find($current_reason_id)->name . '. Please call us at 021-111-118-729 for queries and updates.';
+                            } else {
+                                $details['reason'] = '';
+                            }
+                        }
+                        $detail[] = $details;
                     }
                 }
-
-            }
-
-            if (!empty($details)) {
-                return response()->json(['status' => 0, 'message' => 'ETA of Shipment #' . $tracking_number, 'details' => $details]);
-            } else {
-                return response()->json(['status' => 1, 'message' => 'No data found!']);
+                if (!empty($detail)) {
+                    return response()->json(['status' => 0, 'message' => 'ETA of Order #' . $order_id, 'details' => $detail]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'No data found!']);
+                }
             }
         }
     }

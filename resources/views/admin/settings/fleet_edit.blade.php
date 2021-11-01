@@ -18,8 +18,8 @@
              </select>
             </div>
 
-            <div class="col-12 form-group d-none" id="other_picker_name_div_edit">
-             <div class="form-group col-md">
+            <div class="col-12 d-none" id="other_picker_name_div_edit">
+             <div class="form-group">
                  <input type="text" name="vehicle_type_name" id="vehicle_type_name" class="form-control" placeholder="New Vehicle Type" data-rule-required="true" data-msg-required="Vehicle Type is required">
              </div>
              </div>
@@ -29,6 +29,24 @@
                  <input type="text" value="{{$fleet->tracking_id}}" name="tracking_id" id="tracking_id" class="form-control tracking_id" placeholder="Tracking ID*" data-rule-required="true" data-msg-required="Tracking ID is required">
              </div>
          </div>
+        <div class="row justify-content-center">
+            <div class="col-12 form-group">
+                <select class="form-control driver_select" id="driver_select" name="driver" data-rule-required="true" data-msg-required="Driver is required">
+                    @foreach($drivers as $driver)
+                        <option value="{{ $driver->id }}">{{ $driver->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 form-group">
+                <select class="form-control vendor_select" id="vendor_select" name="vendor" data-rule-required="true" data-msg-required="Vendor is required">
+                    @foreach($vendors as $vendor)
+                        <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
         
     </div>
     
@@ -66,6 +84,27 @@
 
                 var id = @json($fleet->vehicle_type_id);
                 $('.vehicle_select').val(id).trigger('change');
+
+        $('.driver_select').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Driver*',
+            dropdownParent:$('#editFleetForm')
+        });
+
+                
+        var driver_id = @json($fleet->driver_id);
+        $('.driver_select').val(driver_id).trigger('change');
+
+
+        $('.vendor_select').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Vendor*',
+            dropdownParent:$('#editFleetForm')
+        });
+
+
+        var vendor_id = @json($fleet->vendor_id);
+        $('.vendor_select').val(vendor_id).trigger('change');
 
 
         var errors = 0;

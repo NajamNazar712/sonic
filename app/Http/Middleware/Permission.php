@@ -138,6 +138,12 @@ class Permission
             'cargo.mapping.store' => 198,
             'cargo.mapping.edit' => 198,
             'cargo.mapping.update' => 198,
+            'cargo.mapping.manifest.index' => 544,
+            'cargo.mapping.manifest.list' => 544,
+            'cargo.mapping.manifest.store' => 548,
+            'cargo.mapping.manifest.edit' => 549,
+            'cargo.mapping.manifest.update' => 549,
+            'cargo.mapping.manifest.status' => 550,
             'cargo.receive.quick.index' => 31,
             'cargo.receive.quick.shipment_details' => 31,
             'cargo.receive.quick.store' => 31,
@@ -194,6 +200,25 @@ class Permission
             'master_cargo.receive.quick.list.details' => 31,
             'master_cargo.receive.quick.list.ajax' => 31,
 
+
+            'cargo_manifest.bags.pending.index' => 545,
+            'cargo_manifest.bags.pending.list' => 545,
+            'cargo_manifest.bags.create.index' => 546,
+            'cargo_manifest.bags.create.open_bag.index' => 559,
+            'cargo_manifest.bags.history.index' => 547,
+            'cargo_manifest.bags.history.list' => 547,
+            'cargo_manifest.create' => 551,
+            'cargo_manifest.store' => 551,
+            'cargo_manifest.index' => 564,
+            'cargo_manifest.list' => 564,
+            'cargo_manifest.receive.index' => 554,
+            'cargo_manifest.receive.store' => 554,
+            'cargo_manifest.history' => 556,
+            'cargo_manifest.history.list' => 556,
+
+
+
+
             'sameday.index' => 32,
             'sameday.list' => 32,
 
@@ -234,6 +259,18 @@ class Permission
             'delivery.completed.dncc.list' => 41,
             'delivery.sdn.index' => 42,
             'delivery.sdn.list' => 42,
+            
+            'delivery.sdn.back_to_deposit' => 604,
+
+            'delivery.sdn.dncc.add' => 605,
+            'delivery.sdn.dncc.get.add' => 605,
+            'delivery.sdn.dncc.remove' => 605,
+            'delivery.sdn.dncc.get.remove' => 605,
+            'delivery.sdn.pncc.add' => 605,
+            'delivery.sdn.pncc.get.add' => 605,
+            'delivery.sdn.pncc.remove' => 605,
+            'delivery.sdn.pncc.get.remove' => 605,
+
             'delivery.sdn.dn' => 42,
             'delivery.sdn.shipments' => 42,
             'delivery.sdn.details' => 42,
@@ -520,6 +557,9 @@ class Permission
             'reports.master_cargo.bag.in_transit.list' => 472,
             'reports.master_cargo.short_received_shipments.index' =>476,
             'reports.master_cargo.short_received_shipments.list' => 476,
+
+            'reports.manifest.short_received_shipments.index' =>555,
+            'reports.manifest.short_received_shipments.list' => 555,
 
             'reports.retail_sales.index' =>493,
             'reports.retail_sales.list' => 493,
@@ -930,6 +970,10 @@ class Permission
 
             'carrefour.arrival.index' => 579,
             'carrefour.arrival.submit' => 579,
+            'carrefour.delivery.index' => 606,
+            'carrefour.delivery.submit' => 606,
+            'carrefour.return.index' => 607,
+            'carrefour.return.submit' => 607,
 
 
             'leads.index' => 416,
