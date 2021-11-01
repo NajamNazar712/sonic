@@ -9878,6 +9878,10 @@ class RiderAPIController extends Controller
                             $leave_request = EmployeeLeave::where('id', $request->leave_id);
                             if($leave_request->exists()){
                                 $leave_request = $leave_request->first();
+                                $leave_request->from = $request->from;
+                                $leave_request->to = $request->to;
+                                $leave_request->applied_reason = $request->reason;
+                                $leave_request->save();
                                 $message = "Leave Request edited successfully";
                             }else{
                                 return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
@@ -9891,13 +9895,14 @@ class RiderAPIController extends Controller
                             $leave_request->employee_id = $rider_id;
                             $leave_request->employee_type_id = 2;
                             $leave_request->reporter_id = $department->department_head_id;
+                            $leave_request->from = $request->from;
+                            $leave_request->to = $request->to;
+                            $leave_request->applied_reason = $request->reason;
+                            $leave_request->save();
+                            NotificationsController::app_notification(11, $rider_id, 2, $leave_request->id);
+                            NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
                             $message = "Leave Request submitted successfully";
                         }
-
-                        $leave_request->from = $request->from;
-                        $leave_request->to = $request->to;
-                        $leave_request->applied_reason = $request->reason;
-                        $leave_request->save();
                         return response()->json(['status' => 0, 'apply_message' => $message]);
                 } else {
                     return response()->json(['status' => 1, 'message' => 'User Not Found']);

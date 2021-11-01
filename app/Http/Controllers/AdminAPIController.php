@@ -4045,6 +4045,14 @@ class AdminAPIController extends Controller
                     $leave_request = EmployeeLeave::where('id', $request->leave_id);
                     if ($leave_request->exists()) {
                         $leave_request = $leave_request->first();
+                        $leave_request->from = $request->from;
+                        $leave_request->to = $request->to;
+                        $leave_request->applied_reason = $request->reason;
+
+                        if ($leave_request->status == 2) {
+                            $leave_request->updated_by = $admin_id;
+                        }
+                        $leave_request->save();
                         $message = "Leave Request edited successfully";
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
@@ -4063,17 +4071,14 @@ class AdminAPIController extends Controller
                         $reporter_id = $admin->role->department->department_head_id;
                     }
                     $leave_request->reporter_id = $reporter_id;
+                    $leave_request->from = $request->from;
+                    $leave_request->to = $request->to;
+                    $leave_request->applied_reason = $request->reason;
+                    $leave_request->save();
                     $message = "Leave Request submitted successfully";
+                    NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
+                    NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
                 }
-
-                $leave_request->from = $request->from;
-                $leave_request->to = $request->to;
-                $leave_request->applied_reason = $request->reason;
-
-                if ($leave_request->status == 2) {
-                    $leave_request->updated_by = $admin_id;
-                }
-                $leave_request->save();
                 return response()->json(['status' => 0, 'apply_message' => $message]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'User Not Found']);
@@ -4267,10 +4272,18 @@ class AdminAPIController extends Controller
                     } elseif ($employee_leaves->status == 1) {
                         $employee_leaves->status = 2;
                         $employee_leaves->updated_by = $admin_id;
+                        $hr_admins = Admin::where('role_id', 63);
+                        if($hr_admins->exists()){
+                            $hr_admins = $hr_admins->get();
+                            foreach ($hr_admins as $hr_admin){
+                                NotificationsController::app_notification(13, $hr_admin->id, 1, $employee_leaves->id);
+                            }
+                        }
                     } else {
                         return response()->json(['status' => 1, 'message' => "Invalid Role"]);
                     }
                     $employee_leaves->save();
+                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     return response()->json(['status' => 0, 'message' => "Leave request has been approved!"]);
                 }
                 return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
@@ -4309,6 +4322,7 @@ class AdminAPIController extends Controller
                     $employee_leaves->rejected_reason = $request->rejection_reason;
                     $employee_leaves->updated_by = $admin_id;
                     $employee_leaves->save();
+                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     return response()->json(['status' => 0, 'message' => "Leave request has been rejected!"]);
                 }
                 return response()->json(['status' => 1, 'message' => "No Leave Found!"]);

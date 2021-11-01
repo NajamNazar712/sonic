@@ -3329,6 +3329,7 @@ class AdminHumanResourseController extends Controller
 
                         $employee_leaves->save();
                     }
+                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     return redirect()->back()->with('success', 'Leave Approved Successfully');
                 } else {
                     return redirect()->back()->with('error', 'Leave Already Approved');
@@ -3351,6 +3352,7 @@ class AdminHumanResourseController extends Controller
                     $employee_leaves->rejected_reason = $request->reason;
                     $employee_leaves->updated_by = $admin_id;
                     $employee_leaves->save();
+                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
                     return redirect()->back()->with('success', 'Leave Reject Successfully');
                 } else {
                     return redirect()->back()->with('error', 'Leave Already Rejected');
