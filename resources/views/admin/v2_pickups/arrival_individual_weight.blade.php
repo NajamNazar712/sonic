@@ -48,17 +48,17 @@
                                     </div>
                                     <div class="col">
                                         <div class="form-group ml-1 volumetric_weights">
-                                            <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="length">
+                                            <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,794]" data-msg-range="Length needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="length">
                                         </div>
                                     </div>
                                      <div class="col">
                                          <div class="form-group ml-1 volumetric_weights">
-                                             <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Breadth needs to be from 0.1 to 375" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="breadth">
+                                             <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,794]" data-msg-range="Breadth needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="breadth">
                                          </div>
                                      </div>
                                      <div class="col">
                                          <div class="form-group ml-1 volumetric_weights">
-                                             <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Height needs to be from 0.1 to 375" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="height">
+                                             <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,794]" data-msg-range="Height needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="height">
                                          </div>
 
                                      </div>
