@@ -3032,6 +3032,7 @@ class DeliveryController extends Controller
                                                 }
                                                 ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
 
+
                                             } else {
                                                 if ($parcel->packaging_material_charges != null) {
                                                     ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
@@ -3203,7 +3204,7 @@ class DeliveryController extends Controller
                                         AdminFinanceController::done_payment($shipment, 0);
                                     }
 
-                                    if($shipper_status_id == 14 || $shipper_status_id == 30 || $shipper_status_id == 36 || $shipper_status_id == 37)
+                                    if($shipper_status_details->shipper_status_id == 14 || $shipper_status_details->shipper_status_id == 30 || $shipper_status_details->shipper_status_id == 36 || $shipper_status_details->shipper_status_id == 37)
                                     {
                                         FinalChargesWebhookController::webhook_subscription($shipment);
                                     }
