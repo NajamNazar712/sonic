@@ -3353,6 +3353,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\AdminHumanResourseController@department_edit')->name('edit');
         });
 
+        Route::prefix('leave')->name('leave.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@leave_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@leave_list')->name('list');
+            Route::post('edit', 'Admins\AdminHumanResourseController@leave_edit')->name('edit');
+            Route::post('approve', 'Admins\AdminHumanResourseController@leave_approve')->name('approve');
+            Route::post('reject', 'Admins\AdminHumanResourseController@leave_reject')->name('reject');
+        });
+
         Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@rider_incentive_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@rider_incentive_list')->name('list');
