@@ -3415,6 +3415,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/mark', 'Admins\Attendance\AdminAttendanceController@mark_attendance_index')->name('mark');
         Route::post('/mark/submit', 'Admins\Attendance\AdminAttendanceController@mark_attendance_submit')->name('mark.submit');
         Route::get('/mark/list', 'Admins\Attendance\AdminAttendanceController@mark_attendance_list')->name('mark.list');
+        Route::prefix('horizontal')->name('horizontal.')->group(function () {
+            Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_horizontal_index')->name('index');
+            Route::post('table', 'Admins\Attendance\AdminAttendanceController@admin_attendance_horizontal_table')->name('table');
+            Route::post('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_horizontal_list')->name('list');
+        });
     });
 
     Route::prefix('rider_delivery_note_otp')->name('rider_delivery_note_otp.')->group(function () {

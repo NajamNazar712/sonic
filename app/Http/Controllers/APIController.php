@@ -1230,7 +1230,15 @@ class APIController extends Controller
 
             if ($type == 0) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
-
+                if($shipment_journey->status_reason_id)
+                {
+                    $reasonID = $shipment_journey->status_reason_id;
+                    $reason = ShipmentStatusReason::find($reasonID)->name;
+                }
+                else
+                {
+                    $reason=null;
+                }
                 if ($shipment_journey) {
                     $current_status = $shipment_journey->shipment_status_shipper->name;
                 } else {
@@ -1238,7 +1246,15 @@ class APIController extends Controller
                 }
             } else {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
-
+                if($shipment_journey->status_reason_id)
+                {
+                    $reasonID = $shipment_journey->status_reason_id;
+                    $reason = ShipmentStatusReason::find($reasonID)->name;
+                }
+                else
+                {
+                    $reason=null;
+                }           
                 if ($shipment_journey) {
                     $current_status = $shipment_journey->shipment_status_consignee->name;
                 } else {
@@ -1246,7 +1262,7 @@ class APIController extends Controller
                 }
             }
 
-            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status]);
+            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason]);
         }
     }
 

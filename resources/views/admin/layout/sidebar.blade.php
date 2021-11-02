@@ -1695,7 +1695,9 @@
                     @endif
                     @if (session('role_id') == 1 || in_array(465, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.attendance.index')}}">Employee Attendance</a></li>
+                        <li><a class="menu-item" href="{{ route('admin.attendance.horizontal.index')}}">Employee Attendance (Horizontal)</a></li>
                     @endif
+
 
                         @if (session('role_id') == 1 || in_array(467, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.employee_directory.index')}}">Employee Directory</a></li>
