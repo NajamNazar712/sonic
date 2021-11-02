@@ -125,7 +125,7 @@
                                   <span class="">Arrival Time From</span>
                               </span>
                             </div>
-                            <input type="text" name="arrival_time_from" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_from" value="12:00 AM" id="arrival_time_from" placeholder="Arrival Time From*">
+                            <input type="text" name="arrival_time_from" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_from" value="12:00 AM" id="arrival_time_from" placeholder="From">
                         </div>
                     </div>
                     <div class="col-2">
@@ -135,7 +135,7 @@
                                   <span class="">Arrival Time To</span>
                               </span>
                             </div>
-                            <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to" value="11:30 PM" id="arrival_time_to" placeholder="Arrival Time To*">
+                            <input type="text" name="arrival_time_to" class="form-control bg-primary border-primary white rounded-right pickatime arrival_time_to" value="11:30 PM" id="arrival_time_to" placeholder="To">
                         </div>
                     </div>
                     <div class="col-2">
@@ -324,8 +324,16 @@
                 format: 'h:i A',
                 interval: 30,
                 onSet: function(context) {
-                    if (context.select) {
+                    if($('input[name="search_date_from_formatted"]').val()==$('input[name="search_date_to_formatted"]').val())
+                    {
+                        if (context.select) {
                         $('#arrival_time_to').pickatime('picker').set('min', $('#arrival_time_from').pickatime('picker').get('select'));
+                        }
+                    }
+                    else{
+                        if (context.select) {
+                        $('#arrival_time_to').pickatime('picker').set('min', '');
+                        }
                     }
                 }
 
@@ -335,8 +343,16 @@
                 format: 'h:i A',
                 interval: 30,
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#arrival_time_from').pickatime('picker').set('max', $('#arrival_time_to').pickatime('picker').get('select'));
+                    if($('input[name="search_date_from_formatted"]').val()==$('input[name="search_date_to_formatted"]').val())
+                    {
+                        if (context.select) {
+                            $('#arrival_time_from').pickatime('picker').set('max', $('#arrival_time_to').pickatime('picker').get('select'));
+                        }
+                    }
+                    else{
+                        if (context.select) {
+                            $('#arrival_time_from').pickatime('picker').set('max', '');
+                        }
                     }
                 }
             });
@@ -365,6 +381,8 @@
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                        $('#arrival_time_from').pickatime('picker').clear();
+                        $('#arrival_time_to').pickatime('picker').clear();
                     }
                 }
             });
@@ -379,6 +397,8 @@
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                        $('#arrival_time_from').pickatime('picker').clear();
+                        $('#arrival_time_to').pickatime('picker').clear();
                     }
                 }
             });
