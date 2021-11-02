@@ -70,6 +70,8 @@
                         <th class="border-primary border-darken-1">Email Address</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
                         <th class="border-primary border-darken-1">Meeting Feedback</th>
+                        <th class="border-primary border-darken-1">City</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1">Photo of Location</th>
                         <th class="border-primary border-darken-1">Photo of Business Card</th>
@@ -220,6 +222,8 @@
                             head.push('Email Address');
                             head.push('Lead Status');
                             head.push('Meeting Feedback');
+                            head.push('City');
+                            head.push('Zone');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
@@ -232,6 +236,8 @@
                                 row.push(values.email);
                                 row.push(values.lead_status);
                                 row.push(values.feedback);
+                                row.push(values.city);
+                                row.push(values.zone);
                                 body.push(row);
                             });
                         },
@@ -281,6 +287,8 @@
                     { data:'email' ,name: 'daily_visits.email', class: 'align-middle email'},
                     { data:'lead_status' ,name: 'dvls.name', class: 'align-middle lead_status'},
                     { data:'feedback' ,name: 'daily_visits.feedback', class: 'align-middle feedback'},
+                    { data:'city' ,name: 'c.name', class: 'align-middle city'},
+                    { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data:'location' ,name: 'location', class: 'align-middle location', sortable: false, orderable: false, searchable: false},
                     { data:'l_photo' ,name: 'l_photo', class: 'align-middle l_photo', sortable: false, orderable: false, searchable: false},
                     { data:'b_c_photo' ,name: 'b_c_photo', class: 'align-middle b_c_photo', sortable: false, orderable: false, searchable: false},
