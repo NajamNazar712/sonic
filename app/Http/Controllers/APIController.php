@@ -1489,9 +1489,13 @@ class APIController extends Controller
             $gst = $shipment->pickup_address->city->zone->gst;
             $gst = $gst * $total_charges_without_gst;
             $total_charges = $shipment->amount-($gst + $total_charges_without_gst);
+            if($current_status_id == 1){
+                $charges['net_payable'] = 0.0;
+            }else{
+                $charges['net_payable'] = number_format($total_charges, 2);
+            }
             $charges['total_charges'] = number_format($total_charges_without_gst, 2);
             $charges['gst'] = number_format($gst, 2);
-            $charges['net_payable'] = number_format($total_charges, 2);
             if (!empty($charges)) {
                 return response()->json(['status' => 0, 'message' => 'Charges of Shipment #' . $tracking_number, 'charges' => $charges]);
             } else {
