@@ -7085,6 +7085,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                             $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
                                 ->whereDate('attendance_date', $attendance_date)
                                 ->where('employee_type', 2);
+                                
                             if (!$rider_attendance->exists()) {
                                 $rider_attendance = new EmployeeAttendance();
                                 $rider_attendance->employee_id = $rider_id;
