@@ -1091,7 +1091,7 @@ class AdminCRMController extends Controller
                 });
             });
         }
-        else if (in_array(session('role_id'), [67, 43])){
+        else if (in_array(session('role_id'), [16])){
             $in_process_request = $in_process_request->where('at.id', Auth::id());
         }
         else if (session('department_id') == 7){
@@ -1533,7 +1533,7 @@ class AdminCRMController extends Controller
                 });
             });
         }
-        else if (in_array(session('role_id'), [67, 43])){
+        else if (in_array(session('role_id'), [16])){
             $resolved_request = $resolved_request->where('at.id', Auth::id());
         }
         else if (session('department_id') == 7){
