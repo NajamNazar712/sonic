@@ -232,7 +232,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
-                                                <input type="text" id="bolt_pin" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" class="form-control border-primary" value="{{$employee->pin}}" name="bolt_pin" data-rule-minlength="4" data-rule-maxlength="4">
+                                                <input type="password" id="bolt_pin" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" class="form-control border-primary" value="{{$employee->pin}}" name="bolt_pin" data-rule-minlength="4" data-rule-maxlength="4">
                                             </div>
                                         </div>
                                         <div class="col-md-12">

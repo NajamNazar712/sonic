@@ -304,8 +304,8 @@ class AdminHumanResourseController extends Controller
 
                 }
             })
-->editColumn('employee_name',function ($user){
-                return $user->employee_name.' '.$user->father_name;
+            ->editColumn('employee_name',function ($user){
+                return $user->employee_name;
             })
             ->filterColumn('ads.name',function ($query,$keyword){
 
@@ -886,9 +886,11 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
     {
+
+//        return $request;
         $request->validate([
             'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id),Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
-            'official_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id),Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
+            'official_number'=> 'bail|nullable|'.Rule::unique('employees', 'phone_number')->ignore($employee->id).'|'.Rule::unique('employees', 'official_phone_number')->ignore($employee->id).'',
             'cnic'=> [Rule::unique('employees', 'cnic')->ignore($employee->id)],
         ]);
 

@@ -20,7 +20,7 @@
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
-                                    <th class="border-primary border-darken-1">Employee FullName</th>
+                                    <th class="border-primary border-darken-1">Employee Name</th>
                                     <th class="border-primary border-darken-1">Gender</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
@@ -252,7 +252,7 @@
                         {{csrf_field()}}
                         <input type="hidden" name="employee_id" id="employee_id" value="">
                         <div class="form-group">
-                            <input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" data-rule-minlength="4" data-rule-maxlength="4">
+                            <input type="password" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" data-rule-minlength="4" data-rule-maxlength="4">
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>
@@ -401,7 +401,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('Employee ID');
-                            head.push('Employee FullName');
+                            head.push('Employee Name');
                             head.push('Gender');
                             head.push('Hub');
                             head.push('City');

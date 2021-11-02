@@ -35,7 +35,7 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="official_phone_number" id="official_phone_number" class="form-control unique_phone" placeholder="Official Phone Number*" data-rule-required="true" data-msg-required="Official Phone Number is required" data-rule-remote="{{ route('admin.user_management.users.validate_phone',['id'=>$user->id]) }}" data-msg-remote="Official Phone Number is not unique" value="{{ $user->official_phone_number }}">
+											<input type="text" name="official_phone_number" id="official_phone_number" class="form-control unique_phone" placeholder="Official Phone Number" data-rule-remote="{{ route('admin.user_management.users.validate_phone',['id'=>$user->id]) }}" data-msg-remote="Official Phone Number is not unique" value="{{ $user->official_phone_number }}">
 										</div>
 									</div>
 
@@ -53,7 +53,7 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters">
+											<input type="password" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters">
 										</div>
 									</div>
 
@@ -112,20 +112,6 @@
 														<option value="{{$shift->id}}" selected="selected"> {{$shift->name}}</option>
 													@else
 														<option value="{{$shift->id}}"> {{$shift->name}}</option>
-													@endif
-												@endforeach
-											</select>
-										</div>
-									</div>
-
-									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-										<div class="form-group">
-											<select name="location_id" class="select2" id="location_list">
-												@foreach($reporting_locations as $reporting_location)
-													@if ($reporting_location->id == $user->reporting_location_id)
-														<option value="{{$reporting_location->id}}" selected="selected"> {{$reporting_location->name}}</option>
-													@else
-														<option value="{{$reporting_location->id}}"> {{$reporting_location->name}}</option>
 													@endif
 												@endforeach
 											</select>

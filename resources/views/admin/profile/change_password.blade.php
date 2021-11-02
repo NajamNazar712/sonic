@@ -17,10 +17,10 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="password">Enter Password:<span class="danger">*</span>
+                                        <label for="password">Enter Pin:<span class="danger">*</span>
                                         </label>
                                         <div class="form-group position-relative">
-                                            <input type="password" class="form-control required" id="new_password" placeholder="Minimum 6 Character" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
+                                            <input type="password" id="new_password" data-rule-required="true" data-msg-required="Pin is required" class="form-control border-primary" value="" name="password" data-rule-minlength="4" data-rule-maxlength="4" placeholder="Enter New Pin">
                                             <div class="form-control-position" id="peye">
                                                 <i class="la la-eye success"></i>
                                             </div>
@@ -33,10 +33,10 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="password">Confirm Password:<span class="danger">*</span>
+                                        <label for="password">Confirm Pin:<span class="danger">*</span>
                                         </label>
                                         <div class="form-group position-relative">
-                                            <input type="password" class="form-control required" id="confirm_password" placeholder="Minimum 6 Character" value="" name="confirm_password">
+                                            <input type="password" class="form-control required" id="confirm_password" placeholder="Confirm Pin" value="" data-rule-minlength="4" data-rule-maxlength="4" name="confirm_password">
                                             <div class="form-control-position" id="cpeye">
                                                 <i class="la la-eye success"></i>
                                             </div>
@@ -98,7 +98,7 @@
                     if(new_password === confirm_password){
                         swal({
                             title: 'Are You Sure?',
-                            text: 'Select Yes to update password',
+                            text: 'Select Yes to update pin',
                             icon: 'warning',
                             buttons: {
                                 cancel: {
@@ -124,11 +124,20 @@
                         });
                     }
                     else{
-                        var error = "The password and confirmation password do not match";
+                        var error = "The pin and confirmation pin do not match";
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
                 }
+            });
+
+            $('#new_password , #confirm_password').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'mask': '9999',
+                'clearIncomplete': true,
             });
         });
     </script>
