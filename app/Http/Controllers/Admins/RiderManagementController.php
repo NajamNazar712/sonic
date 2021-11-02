@@ -109,7 +109,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -133,6 +133,13 @@ class RiderManagementController extends Controller
                     }
                     if (session('role_id') == 1 || in_array(382, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
+                    }
+
+
+                    if (session('role_id') == 1 || in_array(620, session('permissions'))) {
+                        if($rider->status == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
+                        }
                     }
 
 
@@ -409,12 +416,54 @@ class RiderManagementController extends Controller
                 $employee->update();
             }
             if($rider){
-                return redirect()->back()->with('success','Route is now inactive');
+                return redirect()->back()->with('success','Rider is now inactive');
             }
 
         }
 
     }
+
+    public function rejoin(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+        $employee = Rider::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+
+        $staff = Employee::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Rider not associated with any Employee!']);
+        }
+        $staff = $staff->first();
+
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+        if ($global_setting->exists()) {
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+        } else {
+            $trax_id = null;
+        }
+
+        $employee->status = 1;
+        $employee->updated_by = Auth::id();
+        $employee->trax_id = $trax_id;
+        $employee->save();
+
+        $staff->status_id = AdminHumanResourseController::GetStatusOfEmployee($staff->id);
+        $staff->trax_id = $trax_id;
+        $staff->save();
+        return response()->json(['status' => 0, 'success' => 'Rider Rejoined Successfully!']);
+    }
+
     public function rider_phone_unique(Request $request) {
         if ($request->filled('phone')) {
             if ($request->input('phone') == '0213-8772222') {
@@ -613,7 +662,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -637,6 +686,12 @@ class RiderManagementController extends Controller
                     }
                     if (session('role_id') == 1 || in_array(382, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
+                    }
+
+                    if (session('role_id') == 1 || in_array(620, session('permissions'))) {
+                        if($rider->status == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
+                        }
                     }
 
 

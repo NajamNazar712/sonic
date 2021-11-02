@@ -394,6 +394,69 @@
 				table.draw();
 			});
 
+			$('body').on('click', '.rejoin', function (e) {
+				var id = $(this).data('target-id');
+				console.log(id);
+				swal({
+					title: 'Are You Sure?',
+					text: 'Select Yes To Rejoin Admin!',
+					icon: 'warning',
+					buttons: {
+						cancel: {
+							text: 'No',
+							value: null,
+							visible: true,
+							closeModal: true,
+						},
+						confirm: {
+							text: 'Yes',
+							value: true,
+							visible: true,
+							closeModal: true
+						}
+					},
+					closeOnClickOutside: false,
+					closeOnEsc: false,
+					dangerMode: true
+				}).then(function (confirm) {
+					if (confirm) {
+						swal({
+							title: 'Please Wait!',
+							text: 'Admin is being Rejoin',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+
+						$.ajax({
+							url: '{!! route('admin.user_management.users.rejoin') !!}',
+							method: 'POST',
+							data: {
+								'employee_id': id,
+								'_token': '{{ csrf_token() }}'
+							}
+						})
+								.done(function (data) {
+									if (data.status == 0) {
+										toastr.success(data.success, 'Success!', {
+											positionClass: 'toast-bottom-center',
+											containerId: 'toast-bottom-center'
+										});
+									} else {
+										toastr.error(data.error, 'Error!', {
+											positionClass: 'toast-top-center',
+											containerId: 'toast-top-center'
+										});
+									}
+									swal.close();
+									table.draw('false');
+								});
+					}
+				});
+			});
+
+
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 

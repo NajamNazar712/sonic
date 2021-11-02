@@ -317,7 +317,7 @@ class AdminHumanResourseController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                if(session('role_id') == 1 || in_array(468, session('permissions')) || in_array(469, session('permissions'))  || in_array(98, session('permissions')) || in_array(381, session('permissions'))){
+                if(session('role_id') == 1 || in_array(468, session('permissions')) || in_array(469, session('permissions'))  || in_array(98, session('permissions')) || in_array(381, session('permissions')) || in_array(620, session('permissions'))){
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -339,8 +339,14 @@ class AdminHumanResourseController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
                         }
 
-                        if ($result->status_id == 2 && (session('role_id') == 1 || in_array(591, session('permissions')))) {
-                            $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
+                        if ($result->status_id == 2) {
+                            if(session('role_id') == 1 || in_array(591, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
+                            }
+
+                            if(session('role_id') == 1 || in_array(620, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Staff</div></button>';
+                            }
                         }
                     }
 
@@ -378,6 +384,10 @@ class AdminHumanResourseController extends Controller
                         {
                             if (session('role_id') == 1 || in_array(99, session('permissions'))) {
                                 $dropdown .= '<button type="button" class="dropdown-item activate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                            }
+
+                            if(session('role_id') == 1 || in_array(620, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
                             }
                         }
                     }
@@ -440,6 +450,52 @@ class AdminHumanResourseController extends Controller
             return back()->with(['success'=>'Employee Pin Updated Successfully']);
         }
         return back()->with(['error'=>'Employee Not Found']);
+    }
+
+    public function rejoin_employee(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Employee not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Employee not found!']);
+        }
+
+        if($employee->employee_type_id == 1)
+        {
+            $staff = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+        }
+        else{
+            $staff = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+        }
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Employee not found!']);
+        }
+        $staff = $staff->first();
+
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+        if ($global_setting->exists()) {
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+        } else {
+            $trax_id = null;
+        }
+
+        $staff->status = 1;
+        $staff->updated_by = Auth::id();
+        $staff->trax_id = $trax_id;
+        $staff->save();
+
+        $employee->status_id = self::GetStatusOfEmployee($employee->id);
+        $employee->trax_id = $trax_id;
+        $employee->save();
+        return response()->json(['status' => 0, 'success' => 'Employee Rejoined Successfully!']);
     }
 
     public function employee_directory_make_rider_incentive(Request $request)

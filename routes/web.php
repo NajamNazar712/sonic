@@ -738,6 +738,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add/{type?}', 'Admins\RiderManagementController@addRiderView')->name('add');
             Route::get('categoryAjax', 'Admins\RiderManagementController@categoryListAjax')->name('category.ajax');
             Route::post('/add', 'Admins\RiderManagementController@addRiderDetails')->name('add');
+            Route::post('rejoin', 'Admins\RiderManagementController@rejoin')->name('rejoin');
             Route::get('{id}/edit/{type?}', 'Admins\RiderManagementController@editRiderView')->name('edit');
             Route::put('{id}/edit', 'Admins\RiderManagementController@editRiderDetails')->name('edit');
             Route::put('/status', 'Admins\RiderManagementController@riderStatus')->name('status');
@@ -1684,6 +1685,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('user_management')->name('user_management.')->group(function() {
         Route::prefix('users')->name('users.')->group(function() {
             Route::get('', 'Admins\UserManagementController@user_index')->name('index');
+            Route::post('rejoin', 'Admins\UserManagementController@rejoin')->name('rejoin');
             Route::get('list', 'Admins\UserManagementController@user_list')->name('list');
             Route::get('email', 'Admins\UserManagementController@user_email')->name('email');
             Route::get('trax_id', 'Admins\UserManagementController@user_trax_id')->name('trax_id');
@@ -3286,6 +3288,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
 
         Route::prefix('employee_directory')->name('employee_directory.')->group(function () {
+            Route::post('rejoin', 'Admins\AdminHumanResourseController@rejoin_employee')->name('rejoin');
             Route::post('pin', 'Admins\AdminHumanResourseController@employee_directory_pin')->name('pin');
             Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');

@@ -33,6 +33,47 @@ class UserManagementController extends Controller
       $this->middleware('Permission');
     }
 
+    public function rejoin(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Admin not found!']);
+        }
+        $employee = Admin::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Admin not found!']);
+        }
+
+        $staff = Employee::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Admin not associated with any Employee!']);
+        }
+        $staff = $staff->first();
+
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+        if ($global_setting->exists()) {
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+        } else {
+            $trax_id = null;
+        }
+
+        $employee->status = 1;
+        $employee->updated_by = Auth::id();
+        $employee->trax_id = $trax_id;
+        $employee->save();
+
+        $staff->status_id = AdminHumanResourseController::GetStatusOfEmployee($staff->id);
+        $staff->trax_id = $trax_id;
+        $staff->save();
+        return response()->json(['status' => 0, 'success' => 'Admin Rejoined Successfully!']);
+    }
+
     public function user_index() {
       ActivityTrailController::createActivityTrailLog(Auth::id(),358);
       $hubs=City::select('id','name')->where('hub',1)->get();
@@ -69,12 +110,15 @@ class UserManagementController extends Controller
         })
         ->removeColumn('department')
         ->addColumn('action', function($user) {
-            if (session('role_id') == 1 || count(array_intersect([83, 84, 542], session('permissions'))) !== 0) {
+            if (session('role_id') == 1 || count(array_intersect([83, 84, 542,620], session('permissions'))) !== 0) {
                 $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
                 $phone_edit_button = '<button type="button" class="dropdown-item phone"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Phone No. Update</div></button>';
+
+                $rejoin_button = '<button type="button" class="dropdown-item rejoin" data-target-id="'.$user->id.'"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Rejoin Admin</div></button>';
+
                 $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -96,6 +140,13 @@ class UserManagementController extends Controller
 
                 if (session('role_id') == 1 || in_array(542, session('permissions'))) {
                     $dropdown .= $phone_edit_button;
+                }
+
+
+                if (session('role_id') == 1 || in_array(620, session('permissions'))) {
+                    if($user->status == 0) {
+                        $dropdown .= $rejoin_button;
+                    }
                 }
 
                 $dropdown .= '
