@@ -1397,6 +1397,9 @@ class APIController extends Controller
 
             if ($shipment->packaging_material_request) {
                 $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
+                if ($shipment->packaging_charges) {
+                    $charges['packing_charges'] = $shipment->packaging_charges;
+                }
             } else if (in_array($current_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
                 if ($shipment->weight_charges) {
                     $charges['weight_charges'] = $shipment->weight_charges;
