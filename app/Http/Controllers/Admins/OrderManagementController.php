@@ -340,7 +340,7 @@ class OrderManagementController extends Controller
                                 $packaging_request_history->updated_by = Auth::id();
                                 $packaging_request_history->save();
                             }
-                    }
+                        }
 
                         NotificationsController::send(15, 0, $shipment_id);
                         NotificationsController::send(16, 0, $shipment_id);

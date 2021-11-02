@@ -4043,7 +4043,7 @@ class AdminReportsController extends Controller
         }
         $petty = DB::connection('reports')->table('petty_cash_statement_details')->join('petty_cash_statements as pcs','pcs.id','=','petty_cash_statement_details.petty_cash_statement_id')
             ->join('cities as dc','dc.id','=', 'petty_cash_statement_details.hub_id')
-            ->join('cities as h','h.id','=', 'pcs.hub_id')
+            ->leftjoin('cities as h','h.id','=', 'pcs.hub_id')
             ->join('admins as cb','cb.id','=', 'pcs.created_by')
             ->leftjoin('admins as sub', 'sub.id', '=', 'petty_cash_statement_details.updated_by')
             ->leftjoin('petty_cash_account_heads as pch', 'pch.id','=','petty_cash_statement_details.account_head_id')
@@ -4054,7 +4054,12 @@ class AdminReportsController extends Controller
 //            ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
-            $petty = $petty->whereIn('pcs.hub_id', session('hubs'));
+            $petty = $petty->where(function ($query) {
+                $query->whereIn('pcs.origin_hub_id', session('hubs'))
+                    ->orWhereIn('pcs.destination_hub_id', session('hubs'))
+                    ->orWhere('pcs.created_by', Auth::id())
+                    ->orWhereIn('pcs.hub_id', session('hubs'));
+            });
         }
 
         $petty = Datatables::of($petty)
@@ -6545,14 +6550,14 @@ class AdminReportsController extends Controller
             $toDays = $to;
         }
 
-        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
-        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
-        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
-        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
-        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
+        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',1)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
+        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
         $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[25])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
         $stats['return_intransit'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',21)->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
-        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
+        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49,52])->whereBetween('created_at',[$fromDays,$toDays])->where('user_id', $shipper);
         if ($origin) {
             $stats['total'] = $stats['total']->whereExists(function($query) use ($origin) {
                 $query->from('user_shipping_infos')
@@ -6689,7 +6694,7 @@ class AdminReportsController extends Controller
               $shipments->where('shipments.user_id', '=', null);
           }*/
         if($search_shipper = $request->get('search_shipper')){
-            $shipments = $shipments->whereIn('shipments.user_id',  $search_shipper);
+            $shipments = $shipments->where('shipments.user_id',  $search_shipper);
         }
         else{
             $shipments->where('shipments.user_id', '=', null);

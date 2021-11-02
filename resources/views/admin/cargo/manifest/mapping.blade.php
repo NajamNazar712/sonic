@@ -208,9 +208,9 @@
                 order: [5, 'desc'],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'origin_display',  class: 'align-middle origin' ,orderable: false, searchable: false},
-                    {data: 'destination_display',  class: 'align-middle destination',orderable: false, searchable: false},
-                    {data: 'junctions_display',  class: 'align-middle junctions',orderable: false, searchable: false},
+                    {data: 'origin_display', name:"oc.name",  class: 'align-middle origin' ,orderable: false},
+                    {data: 'destination_display', name:"dc.name", class: 'align-middle destination',orderable: false},
+                    {data: 'junctions_display', class: 'align-middle junctions',orderable: false},
                     {data: 'status', name:"status",  class: 'align-middle status'},
                     {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
@@ -236,7 +236,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.origin') || $(header).is('.destination') || $(header).is('.junctions')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')|| $(header).is('.junctions')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.status')){

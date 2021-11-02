@@ -419,6 +419,16 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@subscription_submit')->name('store');
         });
 
+        Route::prefix('initial_charges_subscription')->name('initial_charges_subscription.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@initial_charges_subscription_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@initial_charges_subscription_submit')->name('store');
+        });
+
+        Route::prefix('final_charges_subscription')->name('final_charges_subscription.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@final_charges_subscription_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@final_charges_subscription_submit')->name('store');
+        });
+
         Route::prefix('payment_subscription')->name('payment_subscription.')->group(function () {
             Route::get('', 'Shippers\ShipperGlobalSettingsController@payment_subscription_index')->name('index');
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@payment_subscription_submit')->name('store');
@@ -3407,6 +3417,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/mark', 'Admins\Attendance\AdminAttendanceController@mark_attendance_index')->name('mark');
         Route::post('/mark/submit', 'Admins\Attendance\AdminAttendanceController@mark_attendance_submit')->name('mark.submit');
         Route::get('/mark/list', 'Admins\Attendance\AdminAttendanceController@mark_attendance_list')->name('mark.list');
+        Route::prefix('horizontal')->name('horizontal.')->group(function () {
+            Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_horizontal_index')->name('index');
+            Route::post('table', 'Admins\Attendance\AdminAttendanceController@admin_attendance_horizontal_table')->name('table');
+            Route::post('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_horizontal_list')->name('list');
+        });
     });
 
     Route::prefix('rider_delivery_note_otp')->name('rider_delivery_note_otp.')->group(function () {

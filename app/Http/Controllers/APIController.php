@@ -1230,7 +1230,15 @@ class APIController extends Controller
 
             if ($type == 0) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
-
+                if($shipment_journey->status_reason_id)
+                {
+                    $reasonID = $shipment_journey->status_reason_id;
+                    $reason = ShipmentStatusReason::find($reasonID)->name;
+                }
+                else
+                {
+                    $reason=null;
+                }
                 if ($shipment_journey) {
                     $current_status = $shipment_journey->shipment_status_shipper->name;
                 } else {
@@ -1238,7 +1246,15 @@ class APIController extends Controller
                 }
             } else {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
-
+                if($shipment_journey->status_reason_id)
+                {
+                    $reasonID = $shipment_journey->status_reason_id;
+                    $reason = ShipmentStatusReason::find($reasonID)->name;
+                }
+                else
+                {
+                    $reason=null;
+                }           
                 if ($shipment_journey) {
                     $current_status = $shipment_journey->shipment_status_consignee->name;
                 } else {
@@ -1246,7 +1262,7 @@ class APIController extends Controller
                 }
             }
 
-            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status]);
+            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason]);
         }
     }
 
@@ -2160,10 +2176,10 @@ class APIController extends Controller
                             $shipment->consignee_status_id = 20;
                             $shipment->save();
                             $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, null);
                             ShipmentChargesController::return ($shipment->id);
 
                             AdminFinanceController::add_payment($shipment->id, 1);
+                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, null);
                             return response()->json(['status' => 0, 'message' => "Shipment successfully marked as Shipment - Return Confirm"]);
                         } else {
                             return response()->json(['status' => 1, 'message' => "Shipment is not ready for Return Confirm"]);
@@ -3922,12 +3938,12 @@ class APIController extends Controller
                         if (!$shipment->packaging_material_request) {
                             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                             $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, $remark, $user_id, null);
+                            ShipmentChargesController::return ($shipment->id);
                             //                NotificationsController::send(15, 0, $request->shipment_id);
                             //                NotificationsController::send(16, 0, $request->shipment_id);
 
-                            ShipmentChargesController::return ($shipment->id);
                             AdminFinanceController::add_payment($shipment->id, 1);
+                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, $remark, $user_id, null);
                         } else {
                             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
                             $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
