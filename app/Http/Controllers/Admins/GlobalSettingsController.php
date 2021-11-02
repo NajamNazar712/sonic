@@ -56,10 +56,12 @@ use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\CrmAgent;
+use App\Http\Models\CrmAgentLog;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Holiday;
@@ -4804,8 +4806,74 @@ class GlobalSettingsController extends Controller
     }
 
     public function crm_auto_assigning_index(){
-        $agents = CrmAgent::join('admins as ad', 'ad.id', '<>', 'crm_agents.admin_id')
-        ->select('ad.id', 'ad.name')->get();
+        //testing auto_assigning
+        // $crm_agents = CrmAgent::all();
+        // // // foreach ($crm_agents as $crm_agent) {
+        // // //     $crm_agent_log = new CrmAgentLog();
+        // // //     $crm_agent_log->admin_id = $crm_agent->admin_id;
+        // // //     $crm_agent_log->case_nature_id = $crm_agent->case_nature_id;
+        // // //     $crm_agent_log->zone_id = $crm_agent->zone_id;
+        // // //     $crm_agent_log->assigned_date = Carbon::today();
+        // // //     $crm_agent_log->assinged_requests = 0;
+        // // //     $crm_agent_log->save();
+
+        // // // }
+
+        // $crm_requests = CrmRequest::leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+        //                             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+        //                             ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
+        //                             ->select('crm_requests.id as id', 'crm_requests.case_nature_id as case_nature_id','z.id as zone_id')
+        //                             ->where('crm_requests.agent_id','=',Null)
+        //                             ->where('crm_requests.case_nature_id','<>',3)
+        //                             ->get();
+
+        //     dump($crm_requests->count());
+            
+        // foreach ($crm_requests as $value) {
+        //     //checking for claim of all zones
+        //     if($value->case_nature_id == 4){
+        //         $agent_log = CrmAgentLog::where('case_nature_id',$value->case_nature_id)
+        //         ->where('assinged_requests','<',90)
+        //         ->whereDate('assigned_date',Carbon::today()->toDateString())
+        //         ->orderBy('assinged_requests', 'asc')->get()->first();
+                
+        //        if($agent_log){
+        //         $agent_log->assinged_requests = $agent_log->assinged_requests+1;
+        //         $agent_log->save();
+        //         dump('crm_data');
+        //         dump($value);
+        //         $value->agent_id = $agent_log->admin_id;
+        //         $value->save();
+        //         dump('log_Data');
+        //         dump($value);
+        //        }
+        //     }else{
+        //         $agent_log = CrmAgentLog::where('zone_id',$value->zone_id)
+        //         ->where('case_nature_id',$value->case_nature_id)
+        //         ->where('assinged_requests','<',90)
+        //         ->whereDate('assigned_date',Carbon::today()->toDateString())
+        //         ->orderBy('assinged_requests', 'asc')->get()->first();
+                
+        //        if($agent_log){
+        //         $agent_log->assinged_requests = $agent_log->assinged_requests+1;
+        //         $agent_log->save();
+        //         dump('crm_data');
+        //         dump($value);
+        //         $value->agent_id = $agent_log->admin_id;
+        //         $value->save();
+        //         dump('log_Data');
+        //         dump($value);
+        //        }
+        //     }
+                
+                
+        //         // dump(Carbon::today()->toDateString());
+        // }
+
+        // dd($crm_agents);
+        //testing auto_assigning end
+        
+        $agents = Admin::select('id', 'name')->whereIn('role_id',[37,28])->get();//37,28 role
         $zones = Zone::where('status',1)->get();
         $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
 
@@ -4839,9 +4907,16 @@ class GlobalSettingsController extends Controller
     }
 
     public function crm_auto_assigning_submit(Request $request){
-        CrmAgent::create($request->all());
+        $crm_agent = CrmAgent::where('admin_id',$request->admin_id);
+        if(!$crm_agent->exists()){
 
-        return redirect()->back()->with('success', 'Agent Added!');
+            CrmAgent::create($request->all());
+            return redirect()->back()->with('success', 'Agent Added!');
+        }else{
+            return redirect()->back()->with('error', 'Agent Already Exists!');
+
+        }
+
 
     }
 

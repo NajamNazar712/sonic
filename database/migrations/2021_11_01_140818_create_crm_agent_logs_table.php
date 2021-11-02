@@ -17,7 +17,9 @@ class CreateCrmAgentLogsTable extends Migration
             $table->increments('id');
             $table->date('assigned_date');
             $table->integer('admin_id')->index();
-            $table->integer('assinged_requests');
+            $table->integer('case_nature_id')->index();
+            $table->integer('zone_id')->index();
+            $table->integer('assinged_requests')->default(0);
             $table->timestamps();
         });
     }

@@ -250,16 +250,6 @@
                         }
                     });
 
-               
-
-                    // $("#departments_select").prepend('<option value="" selected></option>').select2({
-                    //     data:data1,
-                    //     placeholder: "Select Department",
-                    //     width:'100%',
-                    //     containerCssClass: 'select-xs',
-                    //     dropdownCssClass: 'form-control-sm p-0'
-                    // });
-
                     this.api().table().columns.adjust();
                 }
             });
@@ -276,15 +266,13 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
-                    console.log(data);
-                    $('#edit_agent_id').val(data.agent_id);
-                    $('#edit_zone_id').val(data.zone_id);
-                    $('#edit_case_nature_id').val(data.case_nature_id);
+                    $('#edit_agent_id').val(data.agent_id).change();
+                    $('#edit_zone_id').val(data.zone_id).change();
+                    $('#edit_case_nature_id').val(data.case_nature_id).change();
                     $('#crm_agent_id').val(data.crm_agent_id);
                     
                     $('#EditAgentModal').modal('show');
 
-                    // $('#shipment_charges_modal_heading span').text(shipment_id);
                 })
                 
             });

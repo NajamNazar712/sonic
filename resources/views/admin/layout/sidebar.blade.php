@@ -1449,7 +1449,7 @@
                                     @endif
 
                                     @if (session('role_id') == 1 || in_array(616, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.settings.default_agent.index') }}">Auto Assigning</a></li>
+                                        <li><a class="menu-item" href="{{ route('admin.settings.auto_assigning.index') }}">Auto Assigning</a></li>
                                     @endif
                                     
 
