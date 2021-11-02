@@ -8487,6 +8487,10 @@ class AdminDashboardController extends Controller
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.reimbursement_setting.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Corporate Reimbursement Setting</div></button>';
                     }
 
+                    if (session('role_id') == 1 || in_array(619, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
+                    }
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -8831,6 +8835,10 @@ class AdminDashboardController extends Controller
 
                 if($result->account_type_id == 2 && (session('role_id') == 1 || count(array_intersect([598, 599], session('permissions'))) !== 0)) {
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.reimbursement_setting.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Corporate Reimbursement Setting</div></button>';
+                }
+
+                if (session('role_id') == 1 || in_array(619, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
                 }
 
                 $dropdown .= '
@@ -11214,6 +11222,25 @@ class AdminDashboardController extends Controller
         }
         else{
             return 1;
+        }
+    }
+
+    public function restrict_order_id_info(Request $request){
+        $user = User::find($request->user_id);
+        return response()->json(['status'=>$user->restrict_order_id]);
+    }
+
+    public function restrict_order_id_submit(Request $request){
+        $user = User::find($request->user_id);
+        if ($request->has('restrict_order_id_checkbox')){
+            $user->restrict_order_id = 1;
+            $user->save();
+            return redirect()->back()->with('success', 'Order ID restricted successfully!');
+        }
+        else{
+            $user->restrict_order_id = 0;
+            $user->save();
+            return redirect()->back()->with('success', 'Order ID restriction removed successfully!');
         }
     }
 

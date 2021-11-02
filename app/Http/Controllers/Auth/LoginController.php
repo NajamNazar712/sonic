@@ -209,6 +209,9 @@ class LoginController extends Controller
 
             $shipper_user_id = $user->user_id;
         }
+        if($user->restrict_order_id == 1){
+            session(['restrict_order_id' => true]);
+        }
         $shipment_pre_book = ShipmentPrebook::where('user_id', $shipper_user_id);
         if($shipment_pre_book->exists()){
             $shipment_pre_book = $shipment_pre_book->first();
