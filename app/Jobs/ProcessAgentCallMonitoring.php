@@ -67,21 +67,18 @@ class ProcessAgentCallMonitoring implements ShouldQueue
                         $time = $settings->text;
                     }
                     else {
-                        $time = '00:00:00';
+                        $time = 0;
                     }
 
-                    $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
-                    if(Carbon::now() > $time){
-                        $time = $time->addDays(1);
-                    }
-
+                   $next_time = Carbon::today()->addHours($time);
+                   $prev_time = Carbon::today()->addHours($time)->subDays(1);
                     foreach($admins as $admin_id) {
 
                         $rec = array();
                         $rec['admin_id'] = $admin_id;
 
-                        if(AgentCallMonitoring::where('agent_id',$admin_id)->where('created_at','>=',Carbon::today())->where('created_at','<=', $time)->exists()){
-                            $rec['count'] = AgentCallMonitoring::where('agent_id',$admin_id)->where('created_at','>=',Carbon::today())->where('created_at','<=', $time)->count();
+                        if(AgentCallMonitoring::where('agent_id',$admin_id)->where('created_at','>=',$prev_time)->where('created_at','<=', $next_time)->exists()){
+                            $rec['count'] = AgentCallMonitoring::where('agent_id',$admin_id)->where('created_at','>=',$prev_time)->where('created_at','<=', $next_time)->count();
                         }
                         else{
                             $rec['count'] = 0;
