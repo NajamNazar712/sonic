@@ -381,8 +381,10 @@
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
-                        $('#arrival_time_from').pickatime('picker').clear();
-                        $('#arrival_time_to').pickatime('picker').clear();
+                        // $('#arrival_time_from').pickatime('picker').clear();
+                        // $('#arrival_time_to').pickatime('picker').clear();
+                        $('input[name="arrival_time_from"]').val('12:00 AM');
+                        $('input[name="arrival_time_to"]').val('11:30 PM');
                     }
                 }
             });
@@ -397,8 +399,10 @@
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
-                        $('#arrival_time_from').pickatime('picker').clear();
-                        $('#arrival_time_to').pickatime('picker').clear();
+                        // $('#arrival_time_from').pickatime('picker').clear();
+                        // $('#arrival_time_to').pickatime('picker').clear();
+                        $('input[name="arrival_time_from"]').val('12:00 AM');
+                        $('input[name="arrival_time_to"]').val('11:30 PM');
                     }
                 }
             });
