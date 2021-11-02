@@ -4889,18 +4889,31 @@ class GlobalSettingsController extends Controller
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
             if (session('role_id') == 1 || in_array(618, session('permissions'))) {
-                return '<div class="btn-group">
-                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                      <div class="dropdown-menu dropdown-menu-sm">
-                      <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
-                      <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>
-                      </div>
+                if($roles->id == 1 || $roles->id == 2){
+                    return '-';
+                }else{
+                    return '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>
                     </div>
-            ';
+                  </div>
+          ';
+                }
+               
             }
             else {
                 return '';
             }
+        })
+        ->editColumn('zone_name', function($roles) {
+                if($roles->id == 1 || $roles->id == 2){
+                    return '-';
+                }else{
+                    return $roles->zone_name;
+                }
+               
         });
 
     return $datatables->make(true);
