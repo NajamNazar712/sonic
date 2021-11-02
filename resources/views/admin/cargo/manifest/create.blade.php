@@ -42,7 +42,7 @@
                                         </a>
                                     </div>
 
-                                    <input type="text" name="bag_weight" class="form-control bag_weight ml-1" placeholder="Bag Weight*" data-rule-required="true" data-msg-required="Bag Weight is required">
+                                   {{-- <input type="text" name="bag_weight" class="form-control bag_weight ml-1" placeholder="Bag Weight*" data-rule-required="true" data-msg-required="Bag Weight is required">--}}
                                 </div>
 
                                 <div class="form-group ml-1">
@@ -58,7 +58,7 @@
                                     <th class="border-primary border-darken-1">Shipments</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
-                                    <th class="border-primary border-darken-1">Bag Weight</th>
+                                   {{-- <th class="border-primary border-darken-1">Bag Weight</th>--}}
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -224,7 +224,7 @@
                     {name: 'shipments', class: 'align-middle shipments', orderable: false},
                     {name: 'origin', class: 'align-middle origin', orderable: false},
                     {name: 'destination', class: 'align-middle destination', orderable: false},
-                    {name: 'bag_weight', class: 'align-middle bag_weight', orderable: false},
+                  /*  {name: 'bag_weight', class: 'align-middle bag_weight', orderable: false},*/
                     {name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -260,12 +260,12 @@
                 'allowPlus': false
             });
 
-            $('#add_bag_form input.bag_weight').inputmask({
+           /* $('#add_bag_form input.bag_weight').inputmask({
                 'alias': 'decimal',
                 'digits': 2,
                 'allowMinus': false,
                 'allowPlus': false
-            });
+            });*/
 
             $('#add_bag_form').validate({
                 errorClass: 'danger',
@@ -277,7 +277,7 @@
                     $('#add_bag_form button.add').prop('disabled', true);
 
                     var bag_number = $(form).find('input.bag_number').val();
-                    var bag_weight = $(form).find('input.bag_weight').val();
+                  /*  var bag_weight = $(form).find('input.bag_weight').val();*/
 
                     $(form).find('input.bag_number').focus();
                     form.reset();
@@ -290,7 +290,7 @@
                             method: 'POST',
                             data: {
                                 'bag_number': bag_number,
-                                'bag_weight': bag_weight,
+                               /* 'bag_weight': bag_weight,*/
                                 '_token': '{{ csrf_token() }}'
                             },
                             timeout: 5000,
@@ -309,7 +309,7 @@
                                     if (index === -1) {
                                         var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a>';
                                         var rowNo = table.rows().count();
-                                        table.row.add([rowNo+1, data.details.bag_number, data.details.shipments, data.details.origin, data.details.destination, data.details.bag_weight,remove]).node().id = data.details.id;
+                                        table.row.add([rowNo+1, data.details.bag_number, data.details.shipments, data.details.origin, data.details.destination,remove]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         bag_ids.push(data.details.id);
@@ -343,9 +343,9 @@
             $('#master_cargo_consignment_confirm').bind('click', function() {
 
                 let total_weight = 0;
-                table.columns('.bag_weight').data().eq(0).each(function (v){
+               /* table.columns('.bag_weight').data().eq(0).each(function (v){
                         total_weight += parseFloat(v);
-                });
+                });*/
 
                 $("#cargo_details #total_weight").val(total_weight);
 

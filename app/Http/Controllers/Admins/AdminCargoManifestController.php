@@ -1316,7 +1316,7 @@ class AdminCargoManifestController extends Controller
                 }
 
                 if ($allowed) {
-                        $bag->actual_weight = $request->bag_weight;
+                        $bag->actual_weight = $bag->shipments_weight ;
                         $bag->update();
                         $details = array();
 
@@ -1328,7 +1328,7 @@ class AdminCargoManifestController extends Controller
                         $details['shipments'] = $bag->shipments;
                         $details['origin'] = $origin->name;
                         $details['destination'] = $destination->name;
-                        $details['bag_weight'] = $request->bag_weight;
+                     /*   $details['bag_weight'] = $bag->shipments_weight;*/
 
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                 }
@@ -1443,7 +1443,7 @@ class AdminCargoManifestController extends Controller
                 if (in_array($bag->status_id, [1, 3, 5])) {
                     $bags++;
                     $bags_weight += $bag->shipments_weight;
-                    $actual_weight += $bag->actual_weight;
+                    $actual_weight += $bag->shipments_weight;
                     $shipments += $bag->shipments;
 
                 } else {
