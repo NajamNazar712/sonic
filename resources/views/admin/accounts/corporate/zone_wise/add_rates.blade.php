@@ -305,6 +305,20 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            <div class="col-md-6 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <h3>DWS Weight</h3>
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text" >Try &amp; Buy</span>
+                                                        </div>
+                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[1][0]->try_and_buy_charges}}" name="on_tnb_charges">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text" >%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
                                         </div>
                                         <hr>
                                         <div class="row">
