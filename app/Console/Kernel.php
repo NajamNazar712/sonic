@@ -351,10 +351,10 @@ class Kernel extends ConsoleKernel
             $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
         }
 
-        $incentive_date = SalesIncentiveDate::first();
-        if($incentive_date){
-            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
-        }
+//        $incentive_date = SalesIncentiveDate::first();
+//        if($incentive_date){
+//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
+//        }
     }
     /**
      * Register the commands for the application.
