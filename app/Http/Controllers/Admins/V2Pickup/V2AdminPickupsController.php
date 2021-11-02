@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
@@ -1027,6 +1028,10 @@ class V2AdminPickupsController extends Controller
                                 ShipmentChargesController::international_fuel_surcharge($shipment_id);
                             }
                         }
+
+                        if($shipment->walk_in_status == 0) {
+                            InitialChargesWebhookController::webhook_subscription($shipment_id);
+                        }
                     }
 
                     if ($shipment->shipment_type != 2 && $shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
@@ -1756,7 +1761,13 @@ class V2AdminPickupsController extends Controller
                                 ShipmentChargesController::international_fuel_surcharge($shipment_id);
                             }
                         }
+
+                        if($shipment->walk_in_status == 0) {
+                            InitialChargesWebhookController::webhook_subscription($shipment_id);
+                        }
                     }
+
+
 
                     if ($shipment->shipment_type != 2 && $shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
