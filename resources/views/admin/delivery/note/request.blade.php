@@ -13,6 +13,20 @@
                     @include('admin.inc.messages')
                     <div class="card-content">
                         <div class="card-body card-dashboard">
+                            <div id="search_form" class="row mb-2 justify-content-center">
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_hub" id="search_hub" class="form-control select2">
+                                            @foreach($hubs as $hub)
+                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                </div>
+                            </div>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
@@ -171,7 +185,11 @@
     <script>
 
         $(document).ready(function() {
-
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Hub',
+                width:'100%',
+                allowClear:true
+            });
             $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Rider',
                 width:'100%',
@@ -294,6 +312,13 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.delivery.note.request_list') }}',
+                    method:'get',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: function (d) {
+                        d.search_hub = $('#search_hub').val();
+                    }
                 },
                 rowId: 'shId',
                 order: [[5, 'desc']],
@@ -397,7 +422,9 @@
                 $('#request_modal #dncc').val('');
             });
 
-
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
         });
         
 
