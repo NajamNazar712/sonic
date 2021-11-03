@@ -1986,7 +1986,7 @@ class APIController extends Controller
             $gst = $origin_city->zone->gst;
             $total_charges_without_gst = array_sum($information['charges']);
             $gst = ROUND(($gst * $total_charges_without_gst), 2, PHP_ROUND_HALF_DOWN);
-            $net_payable = $request->amount-($total_charges_without_gst + $gst);
+            $net_payable = ROUND(($request->amount-($total_charges_without_gst + $gst)), 2, PHP_ROUND_HALF_DOWN);
             $information['charges']['total_charges'] = $total_charges_without_gst;
             $information['charges']['gst'] = $gst;
             $information['charges']['net_payable'] = $net_payable;
