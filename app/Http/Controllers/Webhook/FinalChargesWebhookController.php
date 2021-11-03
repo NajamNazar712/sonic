@@ -35,22 +35,25 @@ class FinalChargesWebhookController extends Controller
             $data['weight_charges'] = $shipment->weight_charges;
             if($shipment->shipper_status_id == 20)
             {
-                $data['cash_handling_charges'] = 0;
-                $data['replacement_charges'] = 0;
-                $data['try_buy_charges'] = 0;
+                $cash_handling_charges = 0;
+                $replacement_charges = 0;
+                $try_buy_charges = 0;
             }
             else{
-                $data['cash_handling_charges'] = $shipment->cash_handling_charges;
-                $data['replacement_charges'] = $shipment->replacement_charges;
-                $data['try_buy_charges'] = $shipment->try_and_buy_charges;
+                $cash_handling_charges = $shipment->cash_handling_charges;
+                $replacement_charges = $shipment->replacement_charges;
+                $try_buy_charges = $shipment->try_and_buy_charges;
             }
+            $data['cash_handling_charges'] = $cash_handling_charges;
+            $data['replacement_charges'] = $replacement_charges;
+            $data['try_buy_charges'] = $try_buy_charges;
             $data['insurance_charges'] = $shipment->insurance_charges;
             $data['fuel_surcharges'] = $shipment->fuel_surcharge;
             $data['packaging_charges'] = $shipment->packaging_material_charges;
             $data['return_charges'] = $shipment->return_charges;
             $data['intercept_charges'] = $shipment->intercept_charges;
             $data['nsa_charges'] = $shipment->nsa_osa_charges;
-            $total_charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->packaging_material_charges + $shipment->return_charges + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges;
+            $total_charges = $shipment->weight_charges + $cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->packaging_material_charges + $shipment->return_charges + $replacement_charges + $try_buy_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges;
             $gst = 0;
             $gst = (($total_charges * $shipment->pickup_address->city->zone->gst)) ?? 0;
             $data['gst'] = $gst;
