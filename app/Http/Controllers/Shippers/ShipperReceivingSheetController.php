@@ -50,7 +50,7 @@ class ShipperReceivingSheetController extends Controller
             $shipment = Shipment::find($shipment_id);
 
             if ($shipment->shipper_status_id != 1) {
-                unset($shipments[$key]);
+                unset($shipment_ids[$key]);
 
                 // return ['status' => 1, 'error' => $shipment->tracking_number . ' can no longer be added to a Receiving Sheet'];
             }
