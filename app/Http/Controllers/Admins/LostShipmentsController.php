@@ -295,6 +295,7 @@ class LostShipmentsController extends Controller
                     }
 
                     if (in_array($shipment_details->shipper_status_id, $intransit_status_array)) {
+
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
                         if ($cargo_consignment_shipment->exists()) {
                             $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
@@ -302,6 +303,7 @@ class LostShipmentsController extends Controller
                             $cargo = CargoConsignment::find($cargo_consignment_shipment);
                             $cargo->cargo_consignment_shipments()->where('shipment_id', $shipment_details->id)->delete();
                             if (in_array($cargo->status_id, [1, 2, 6, 7])) {
+
                                 $shipments_count = $cargo->shipments;
                                 $shipment_weight = $cargo->shipment_weight;
                                 $shipments_count = $shipments_count - 1;
@@ -312,6 +314,7 @@ class LostShipmentsController extends Controller
                                 }
                                 $cargo->save();
                             } else if ($cargo->status_id == 4) {
+
                                 $shipments_count = $cargo->shipments;
                                 $shipments_received_count = $cargo->received_shipments;
                                 $shipment_weight = $cargo->shipment_weight;
@@ -325,6 +328,7 @@ class LostShipmentsController extends Controller
                                 }
                                 $cargo->save();
                             }
+
                             $shipment_details->shipper_status_id = 18;
                             $shipment_details->save();
                             ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment],NULL,Auth::id());
@@ -338,15 +342,23 @@ class LostShipmentsController extends Controller
                         $lost_shipments_array[] = $shipment;
                     }
 
-                    if($shipment_details->shipper_status_id == 3){
-                        $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_details->id)->first();
+                    if($shipment_details->shipper_status_id == 3 || $shipment_details->shipper_status_id == 18 ){
+                        $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_details->id)->latest()->first();
                         if($cargo_manifest_bag_shipments){
                             $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
                             if($bag){
-                              $bag_total_shipments = $bag->shipments;
+                              if($cargo_manifest_bag_shipments->status == 1){
+                                  $bag_total_shipments = $bag->shipments;
+                                  $shipments_count = $bag_total_shipments - 1;
+                                  $bag->shipments = $shipments_count;
+                              }
+                              else{
+                                  $bag_total_shipments = $bag->short_received_shipments;
+                                  $shipments_count = $bag_total_shipments - 1;
+                                  $bag->short_received_shipments = $shipments_count;
+                              }
                               $shipment_weight = $bag->shipment_weight;
-                              $shipments_count = $bag_total_shipments - 1;
-                              $bag->shipments = $shipments_count;
+
                               $bag->actual_weight = $shipment_weight - $shipment_details->actual_weight;
                                 if ($shipments_count == 0) {
                                     $bag->status_id = 10;

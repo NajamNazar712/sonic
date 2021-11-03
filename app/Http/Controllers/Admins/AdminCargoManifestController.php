@@ -2109,7 +2109,7 @@ class AdminCargoManifestController extends Controller
               $cargo_manifest_shipment_ids[] = $shipments->shipment_id;
           }
 
-          $trackings = Shipment::whereIn('id',$cargo_manifest_shipment_ids)->select('tracking_number')->get();
+          $trackings = Shipment::whereIn('id',$cargo_manifest_shipment_ids)->where('shipper_status_id','!=',18)->select('tracking_number')->get();
           foreach ($trackings as $number){
               $tracking_numbers[]  = $number->tracking_number;
           }
@@ -2126,7 +2126,7 @@ class AdminCargoManifestController extends Controller
             $cargo_manifest_shipment_ids[] = $shipments->shipment_id;
         }
 
-        $trackings = Shipment::whereIn('id',$cargo_manifest_shipment_ids)->select('tracking_number')->get();
+        $trackings = Shipment::whereIn('id',$cargo_manifest_shipment_ids)->where('shipper_status_id','!=',18)->select('tracking_number')->get();
         foreach ($trackings as $number){
             $tracking_numbers[]  = $number->tracking_number;
         }
@@ -2720,16 +2720,17 @@ class AdminCargoManifestController extends Controller
         $bag_ids = array();
         $shipment_ids_array = array();
         $short_received_shipments_array = array();
-
         foreach ($shipment_ids as $shipment_id) {
-            $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)->where('status', 0);
+            $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/;
 
             if ($bag_shipment->exists()) {
-                $bag_shipment = $bag_shipment->first();
+                $bag_shipment = $bag_shipment->latest()->first();
 
-                $bag_shipment->status = 1;
+                if($bag_shipment->status == 0){
+                    $bag_shipment->status = 1;
+                    $bag_shipment->save();
+                }
 
-                $bag_shipment->save();
 
                 $shipment = Shipment::find($shipment_id);
                 $bag = $bag_shipment->bag;
