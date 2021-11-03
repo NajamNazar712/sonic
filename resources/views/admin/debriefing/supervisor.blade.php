@@ -106,7 +106,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="assign_agent_form" class="form-horizontal" action="{{ route('admin.debriefing.supervisor.assign_agents') }}" method="POST" novalidate="novalidate">
+                <form id="assign_agent_form" class="form-horizontal" novalidate="novalidate">
                     @csrf
                     <div class="modal-body">
                         <input type="hidden" name="delivery_note_id" id="delivery_note_id_input">
@@ -125,7 +125,7 @@
                         <div class="row justify-content-center">
                             <div class="col-6 form-group d-none" id="agend_input">
                                 <label for="end_point_id">Agents</label>
-                                <select class="form-control" name="agent_id" id="agent_id" data-rule-required="true" data-msg-required="Agent is required">
+                                <select class="form-control" name="agent_id" id="assign_agent_id" data-rule-required="true" data-msg-required="Agent is required">
                                 </select>
                             </div>
                         </div>
@@ -245,7 +245,7 @@
         $(document).ready(function () {
 
             
-            $('#agent_id').prepend('<option value="" selected="selected"></option>').select2({
+            $('#assign_agent_id').prepend('<option value="" selected="selected"></option>').select2({
 				placeholder: 'Select Agent *',
 				width: '100%',
 			});
@@ -268,10 +268,10 @@
                         .done(function (data) {
 
                             if(data.status){
-                                $('#agent_id').empty().append('<option selected="selected" placeholder="Select Hub *" value="">text</option>');
+                                $('#assign_agent_id').empty().append('<option selected="selected" placeholder="Select Hub *" value="">text</option>');
                                 $('#agend_input').removeClass('d-none');
                                 $.each(data.agents, function (index, agent) {
-                                    $('#agent_id').append('<option value="'+agent.id+'" >'+agent.name+'</option>')
+                                    $('#assign_agent_id').append('<option value="'+agent.id+'" >'+agent.name+'</option>')
                                 });
                             }else{
                                 $('#agend_input').addClass('d-none');
@@ -663,6 +663,8 @@
                             });
                     }
                 }
+
+
             });
 
             $('#send_sms_form').validate({
@@ -754,6 +756,68 @@
                     });
             }
 
+
+            $('#assign_agent_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-control'));
+                },
+                submitHandler: function(form) {
+
+
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'You want to assign this delivery note!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+
+                            var delivery_note_id = $('#delivery_note_id_input').val();
+                            var assign_agent_id = $('#assign_agent_id').val();
+                            $.ajax({
+                                url: '{!! route('admin.debriefing.supervisor.assign_agents') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'delivery_note_id': delivery_note_id,
+                                    'agent_id': assign_agent_id
+                                }
+                            })
+                            .done(function (data){
+                                if(data.status == 0){
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
+                                else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                                $('#agent_assign_modal').modal('hide');
+                            });
+                        }
+                    });
+
+                }
+            });
            
         });
     </script>

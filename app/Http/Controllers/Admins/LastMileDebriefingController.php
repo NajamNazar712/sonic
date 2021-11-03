@@ -112,14 +112,14 @@ class LastMileDebriefingController extends Controller
                     }
                     $agent_call_monitor->save();
                 }
-                return redirect()->back()->with('success', 'Agent Assign successfully.');
+                return response()->json(['status' => 0, 'success' => 'Agent Assign successfully.']);
             }
             else{
-                return redirect()->back()->with('error', 'Undelivered shipments not found!');
+                return response()->json(['status' => 1, 'error' => 'Undelivered shipments not found!']);
             }
         }
         else{
-            return redirect()->back()->with('error', 'Delivery note already verified!');
+            return response()->json(['status' => 1, 'error' => 'Delivery note already verified!']);
         }
     }
 
