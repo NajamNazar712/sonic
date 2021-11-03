@@ -56,7 +56,7 @@ class LastMileDebriefingController extends Controller
 
         $next_time = Carbon::today()->endOfDay()->addHours($time);
           
-        $prev_time = Carbon::today()->addHours($time)->subDays(1);
+        $prev_time = Carbon::today()->addHours($time);
 
 
         $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
@@ -144,7 +144,7 @@ class LastMileDebriefingController extends Controller
         // $next_time = Carbon::today()->addHours($time);
         $next_time = Carbon::today()->endOfDay()->addHours($time);
           
-        $prev_time = Carbon::today()->addHours($time)->subDays(1);
+        $prev_time = Carbon::today()->addHours($time);
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -298,7 +298,7 @@ class LastMileDebriefingController extends Controller
         $next_time = Carbon::today()->endOfDay()->addHours($time);
           
         // $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time)->subDays(1);
+        $prev_time = Carbon::today()->addHours($time);
         $data = AgentCallMonitoring::join('admins as agent','agent.id','=','agent_call_monitorings.agent_id')
             ->leftjoin('cities as hub','hub.id','=','agent.default_hub_id')
             ->select(['agent.id as agent_id','agent.name as agent_name','hub.name as hub'])
@@ -390,7 +390,7 @@ class LastMileDebriefingController extends Controller
         $next_time = Carbon::today()->endOfDay()->addHours($time);
           
         // $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time)->subDays(1);
+        $prev_time = Carbon::today()->addHours($time);
 
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
             ->where('completed',0)->where('skip',0)->where('created_at','>=',$prev_time)
