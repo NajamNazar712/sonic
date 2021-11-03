@@ -58,7 +58,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
 
            $next_time = Carbon::today()->endOfDay()->addHours($time);
           
-           $prev_time = Carbon::today()->addHours($time)->subDays(1);
+           $prev_time = Carbon::today()->addHours($time);
 
            if(AgentCallMonitoring::where('delivery_note_id',$delivery_note->id)->where('shipment_id', $shipment_id)->where('created_at','>=',$prev_time)->where('created_at','<=', $next_time)->exists()){
                 return false;
