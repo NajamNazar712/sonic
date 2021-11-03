@@ -33,6 +33,7 @@ use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\HR\EmployeeType;
+use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\Rider\RidersIncentive;
@@ -216,7 +217,8 @@ class AdminHumanResourseController extends Controller
         $employee_department = AdminDepartment::all();
         $employee_shifts = EmployeeShift::where('status',1)->get(['id','name']);
         $city = City::where('business_category_id', 1)->get();
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts]);
+        $staff_categories = StaffCategory::all();
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts, 'staff_categories' =>$staff_categories]);
     }
 
     public function employee_directory_list(Request $request){
@@ -937,7 +939,8 @@ class AdminHumanResourseController extends Controller
         $attachments = $employee->attachments;
         $place_of_birth_cities = City::where('business_category_id',1)->get();
         $shifts = EmployeeShift::where('status', 1)->get();
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts'));
+        $staff_categories = StaffCategory::all();
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories'));
     }
 
     public function employee_directory_profile_update (Employee $employee, Request $request)

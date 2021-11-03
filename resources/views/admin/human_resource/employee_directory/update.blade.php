@@ -211,6 +211,7 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        @if($employee->employee_type_id == 1)
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Department<span class="text-danger">*</span></label>
@@ -221,7 +222,6 @@
                                                 </select>
                                             </div>
                                         </div>
-
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Designation<span class="text-danger">*</span></label>
@@ -229,6 +229,18 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Staff Category<span class="text-danger">*</span></label>
+                                                <select name="staff_category" id="staff_category" data-rule-required="true" data-msg-required="Staff Category is Required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($staff_categories as $staff_category)
+                                                        <option value="{{$staff_category->id}}">{{$staff_category->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        @endif
+
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
@@ -2118,6 +2130,12 @@
                 width:'100%',
             });
             $("#designation").val("{{$employee->designation_id ?? ''}}").trigger('change');
+
+            $("#staff_category").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Staff Category",
+                width:'100%',
+            });
+            $("#designation").val("{{$employee->staff_category_id ?? ''}}").trigger('change');
 
             $("#city").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select City",
