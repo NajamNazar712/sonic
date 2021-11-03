@@ -54,7 +54,8 @@ class LastMileDebriefingController extends Controller
             $time = 0;
         }
 
-        $next_time = Carbon::today()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time);
+          
         $prev_time = Carbon::today()->addHours($time)->subDays(1);
 
         $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
@@ -138,7 +139,9 @@ class LastMileDebriefingController extends Controller
             $time = 0;
         }
 
-        $next_time = Carbon::today()->addHours($time);
+        // $next_time = Carbon::today()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time);
+          
         $prev_time = Carbon::today()->addHours($time)->subDays(1);
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
@@ -290,7 +293,9 @@ class LastMileDebriefingController extends Controller
         else {
             $time = 0;
         }
-        $next_time = Carbon::today()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time);
+          
+        // $next_time = Carbon::today()->addHours($time);
         $prev_time = Carbon::today()->addHours($time)->subDays(1);
         $data = AgentCallMonitoring::join('admins as agent','agent.id','=','agent_call_monitorings.agent_id')
             ->leftjoin('cities as hub','hub.id','=','agent.default_hub_id')
@@ -380,7 +385,9 @@ class LastMileDebriefingController extends Controller
         //     $time->addDays(1);
         // }
 
-        $next_time = Carbon::today()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time);
+          
+        // $next_time = Carbon::today()->addHours($time);
         $prev_time = Carbon::today()->addHours($time)->subDays(1);
 
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
