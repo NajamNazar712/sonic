@@ -4538,7 +4538,7 @@ class GlobalSettingsController extends Controller
         else {
             $time = 0;
         }
-
+       
         return view('admin.settings.debriefing_time_setting_index')->with(['time' => $time]);
 
     }
