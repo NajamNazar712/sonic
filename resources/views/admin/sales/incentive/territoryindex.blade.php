@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Territory')
+@section('title', 'Sales Territory')
 
 @section('content')
     <h1 class="mb-1">
-        Territory
+        Sales Territory
     </h1>
 
     <div class="card">
@@ -47,7 +47,7 @@
                     <form id="add_territory_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.sales.territory.add') }}" novalidate="novalidate">
                         {{ csrf_field()  }}
                         <div class="form-group">
-                            <input type="text" name="name" id="name" class="form-control" placeholder="Territory Name*" data-rule-required="true" data-msg-required="Name is required">
+                            <input type="text" name="name" id="name" class="form-control" placeholder="Territory Name*" maxlength="50" data-rule-required="true" data-msg-required="Name is required">
                         </div>
                         <div class="form-group">
                             <select name="city" id="city" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
@@ -57,7 +57,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <input type="text" name="code" id="code" class="form-control" placeholder="Territory Code*" data-rule-required="true" data-msg-required="Code is required">
+                            <input type="text" name="code" id="code" class="form-control" placeholder="Territory Code*" maxlength="50" data-rule-required="true" data-msg-required="Territory Code is required">
                         </div>
 
                         @if(count($designations) > 0)
@@ -270,7 +270,7 @@
                 ajax:{
                     url: '{{ route('admin.sales.territory.list') }}',
                 },
-                order: [[5, 'desc']],
+                order: [[8, 'desc']],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

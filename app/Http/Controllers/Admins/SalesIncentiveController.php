@@ -126,6 +126,9 @@ class SalesIncentiveController extends Controller
 
         if (!$territory->exists()) {
 
+            if($request->name==null || $request->code==null){
+                return redirect()->back()->with('error', 'Please fill out valid details for Territory Name and Code!');
+            }
             $territory_id = $this->add_territory($request->name,$request->city,$request->code);
             if($request->has('designations')){
                 if(count($request->designations) > 0){
@@ -144,7 +147,7 @@ class SalesIncentiveController extends Controller
             }
             return redirect()->back()->with('success', 'Territory Added Successfully!');
         } else {
-            return redirect()->back()->with('success', 'Territory with same City already exists!');
+            return redirect()->back()->with('error', 'Territory with same City already exists!');
         }
     }
     public function territory_edit($id)
@@ -158,9 +161,10 @@ class SalesIncentiveController extends Controller
     }
     public function territory_update(Request $request, $id)
     {
-        $territory = SalesTerritory::where('cityid', $request->city)->where('id', '!=', $id);
+        //dd($request);
+        $territory = SalesTerritory::where('cityid', $request->edit_city)->where('id', '!=', $id);
         if($territory->exists()){
-            return redirect()->back()->with('success', 'Territory with same City already exists!');
+            return redirect()->back()->with('error', 'Territory with same City already exists!');
         }
         else{
             $territory = SalesTerritory::find($id);
@@ -279,11 +283,14 @@ class SalesIncentiveController extends Controller
 
         if (!$designation->exists()) {
 
+            if($request->code==null){
+                return redirect()->back()->with('error', 'Please fill out valid Designation Code!');
+            }
             $this->add_designation($request->designation,$request->code);
 
             return redirect()->back()->with('success', 'Designation Added Successfully!');
         } else {
-            return redirect()->back()->with('success', 'Designation already exists!');
+            return redirect()->back()->with('error', 'Designation already exists!');
         }
     }
     public function designation_edit($id)

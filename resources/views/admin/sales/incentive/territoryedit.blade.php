@@ -2,7 +2,7 @@
     {{ method_field('PUT') }}
     {{ csrf_field()  }}
     <div class="form-group">
-        <input type="text" name="edit_name" id="edit_name" class="form-control" value="{{$territory->name}}" placeholder="Territory Name*" data-rule-required="true" data-msg-required="Territory Name is required" data-msg-remote="Territory Name must be unique">
+        <input type="text" name="edit_name" id="edit_name" class="form-control" value="{{$territory->name}}" maxlength="50" placeholder="Territory Name*" data-rule-required="true" data-msg-required="Territory Name is required" data-msg-remote="Territory Name must be unique">
     </div>
     <div class="form-group">
         <select name="edit_city" id="edit_city" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
@@ -16,7 +16,7 @@
         </select>
     </div>
     <div class="form-group">
-        <input type="text" name="edit_code" id="edit_code" class="form-control" value="{{$territory->code}}" placeholder="Territory Code*" data-rule-required="true" data-msg-required="Territory Code is required">
+        <input type="text" name="edit_code" id="edit_code" class="form-control" maxlength="50" value="{{$territory->code}}" placeholder="Territory Code*" data-rule-required="true" data-msg-required="Territory Code is required">
     </div>
 
     @if(count($designations) > 0)

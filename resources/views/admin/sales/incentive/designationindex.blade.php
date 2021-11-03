@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Designation')
+@section('title', 'Sales Designation')
 
 @section('content')
     <h1 class="mb-1">
-        Designation
+        Sales Designation
     </h1>
 
     <div class="card">
@@ -45,14 +45,14 @@
                     <form id="add_designation_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.sales.designation.add') }}" novalidate="novalidate">
                         {{ csrf_field()  }}
                         <div class="form-group">
-                            <select name="designation" id="designation" class="form-control select2" data-rule-required="true" data-msg-required="Designation Name is required">
+                            <select name="designation" id="designation" class="form-control select2"  data-rule-required="true" data-msg-required="Designation Name is required">
                                 @foreach($roles as $designation)
                                     <option value="{{$designation->id}}"> {{$designation->name}} </option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-group">
-                            <input type="text" name="code" id="code" class="form-control" placeholder="Designation Code*" data-rule-required="true" data-msg-required="Code is required">
+                            <input type="text" name="code" id="code" class="form-control" maxlength="50" placeholder="Designation Code*" data-rule-required="true" data-msg-required="Designation Code is required">
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
@@ -183,7 +183,7 @@
                 ajax:{
                     url: '{{ route('admin.sales.designation.list') }}',
                 },
-                order: [[4, 'desc']],
+                order: [[6, 'desc']],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

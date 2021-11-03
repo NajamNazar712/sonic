@@ -13,7 +13,7 @@
         </select>
     </div>
     <div class="form-group">
-        <input type="text" name="edit_code" id="edit_code" class="form-control" value="{{$designation->code}}" placeholder="Designation Code*" data-rule-required="true" data-msg-required="Designation Code is required">
+        <input type="text" name="edit_code" id="edit_code" maxlength="50" class="form-control" value="{{$designation->code}}" placeholder="Designation Code*" data-rule-required="true" data-msg-required="Designation Code is required">
     </div>
     <div class="form-group ml-1">
         <button type="submit" name="update" class="btn btn-primary add" value="Update">Update</button>
