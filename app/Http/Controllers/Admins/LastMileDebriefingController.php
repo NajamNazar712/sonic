@@ -58,6 +58,7 @@ class LastMileDebriefingController extends Controller
           
         $prev_time = Carbon::today()->addHours($time)->subDays(1);
 
+
         $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
 
 
@@ -110,7 +111,7 @@ class LastMileDebriefingController extends Controller
                         $agent_call_monitor = new AgentCallMonitoring;
                         $agent_call_monitor->agent_id = $request->agent_id;
                         $agent_call_monitor->shipment_id = $delivery_note_shipment->shipment_id;
-                        $agent_call_monitor->delivery_note_id = $delivery_note_shipment->delivery_note_id;
+                        $agent_call_monitor->delivery_note_id = $delivery_note_details->id;
                     }
                     $agent_call_monitor->save();
                 }
@@ -232,7 +233,7 @@ class LastMileDebriefingController extends Controller
                 $call_ratio = 0;
                 if($call_overall_count > 0){
                     $call_ratio = ($call_completed_count / $call_overall_count) * 100;
-                    $call_ratio = $call_ratio . '%';
+                    $call_ratio = round($call_ratio, 2) . '%';
                 }
 
                 return $call_ratio;
@@ -243,7 +244,7 @@ class LastMileDebriefingController extends Controller
                 $total_shipments = $deliveries->shipments_count;
                 if($total_shipments > 0){
                     $verify_shipments_ratio = ($verify_shipments_count / $total_shipments) * 100;
-                    $verify_shipments_ratio = $verify_shipments_ratio . '%';
+                    $verify_shipments_ratio = round($verify_shipments_ratio, 2) . '%';
                 }
 
                 return $verify_shipments_ratio;
@@ -685,7 +686,7 @@ class LastMileDebriefingController extends Controller
         $shipment_ids = $request->shipment_ids;
         $updated_shipments = FALSE;
         if(count($shipment_ids) > 0){
-            foreach ($shipment_ids as $shipment_id => $status){
+            foreach ($shipment_ids as $shipment_id){
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('reference_1_id', $delivery_note_id)->latest()->first();
 
 
@@ -725,13 +726,13 @@ class LastMileDebriefingController extends Controller
 
             }
             if($updated_shipments){
-                return redirect()->back()->with('success', 'SMS send successfully!');
+                return response()->json(['status' => 0, 'success' => 'SMS send successfully!']);
             }
             else{
-                return redirect()->back()->with('error', 'SMS could not send!');
+                return response()->json(['status' => 1, 'error' => 'SMS could not send!']);
             }
         }
-        return redirect()->back()->with('error', 'Something went wrong, try again!');
+        return response()->json(['status' => 1, 'error' => 'Something went wrong, try again!']);
 
     }
 }

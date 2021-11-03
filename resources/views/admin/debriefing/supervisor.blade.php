@@ -149,7 +149,7 @@
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form id="send_sms_form" action="{{ route('admin.debriefing.supervisor.send_sms') }}" method="post">
+                <form id="send_sms_form">
                 <div class="modal-body text-center">
 
                         @csrf
@@ -253,10 +253,8 @@
             $('#hub_id').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Select Hub *'
-			}).bind('change', function(asd) {
-				
-                
-                console.log($(this).val());
+			}).bind('select2:select', function() {
+
                 $.ajax({
                         url: '{!! route('admin.debriefing.supervisor.agents') !!}',
                         method: 'POST',
@@ -271,6 +269,7 @@
                                 $('#assign_agent_id').empty().append('<option selected="selected" placeholder="Select Hub *" value="">text</option>');
                                 $('#agend_input').removeClass('d-none');
                                 $.each(data.agents, function (index, agent) {
+
                                     $('#assign_agent_id').append('<option value="'+agent.id+'" >'+agent.name+'</option>')
                                 });
                             }else{
@@ -346,6 +345,7 @@
                         extend: 'excel',
                         title: 'Supervisor Dashboard',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                        className: 'btn btn-primary'
                     },
                     'reset'
                 ],
@@ -610,7 +610,7 @@
                                             $row += '<td>'+ shipment.status +'</td>';
                                             $row += '<td>'+ shipment.reason +'</td>';
                                             $row += '<td>'+ shipment.reattempt +'</td>';
-                                            $row += '<td><input type="checkbox" name="shipment_ids['+index+']" class="form-control sms_checkbox" checked></td>';
+                                            $row += '<td><input type="checkbox" name="shipment_ids['+index+']" data-id="'+ index +'" class="form-control sms_checkbox" checked></td>';
                                             $row += '</tr>';
                                             html += $row;
                                         });
@@ -706,21 +706,48 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
-                                swal({
-                                    title: 'Please Wait!',
-                                    text: 'SMS are being sent!',
-                                    icon: 'info',
-                                    buttons: false,
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
+                                var shipment_ids = [];
+                                $('td input.sms_checkbox').each(function (index, box){
+                                    if($(box).is(':checked')){
+                                        shipment_ids.push($(box).data('id'));
+                                    }
                                 });
-                                form.submit();
+
+                                var sms_delivery_note_id = $('#sms_delivery_note_id').val();
+
+
+                                $.ajax({
+                                    url: '{!! route('admin.debriefing.supervisor.send_sms') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'delivery_note_id': sms_delivery_note_id,
+                                        'shipment_ids': shipment_ids,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                })
+                                .done(function (data){
+                                    if(data.status == 0){
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                    else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                    $('#shipments_sms_modal').modal('hide');
+                                    table.draw(false);
+                                });
                             }
                         });
                     }
                 }
             });
-            
+
+            $('#AssignAgentModal').on('hide.bs.modal', function (){
+               $('#assign_agent_form #hub_id').val('').trigger('change');
+                $('#agend_input').addClass('d-none');
+            });
 
             $('body').on('click','.printdeliverynote',function () {
                 var deliverynote = $(this).parents('tr').attr('id');
@@ -811,7 +838,8 @@
                                 else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
-                                $('#agent_assign_modal').modal('hide');
+                                $('#AssignAgentModal').modal('hide');
+                                table.draw(false);
                             });
                         }
                     });
