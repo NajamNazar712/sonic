@@ -1018,6 +1018,8 @@ class Permission
             'human_resource.designation.list' => 481,
             'human_resource.department.index' => 484,
             'human_resource.department.list' => 484,
+            'human_resource.leave.index' => 613,
+            'human_resource.leave.list' => 613,
 
             'human_resource.rider_incentive.index' => 492,
             'human_resource.rider_incentive.list' => 492,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Http\Controllers\AdminAPIController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Models\Admin\Admin;
@@ -43,6 +44,7 @@ use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeGender;
+use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
@@ -9826,6 +9828,160 @@ class RiderAPIController extends Controller
             }
         }
 
+    }
+
+    public function leave_index(Request $request){
+        $rider_id = $request->rider_id;
+        $rider = Rider::find($rider_id);
+        $department = AdminDepartment::find(6);
+        if($department){
+            if(!$department->department_head_id){
+                return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+            }
+            if($rider){
+                $data = array();
+                $data['trax_id'] = $rider->trax_id;
+                $data['name'] = $rider->name;
+                $data['designation'] = "Rider";
+                $data['department'] = "Operations";
+                $data['approver_email'] = $department->department_head->email;
+                $data['approver_name'] = $department->department_head->name;
+                $data['user_type'] = 0;
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "Rider not found"]);
+        }
+        return response()->json(['status' => 1, 'message' => "Department Not Found"]);
+    }
+
+    public function leave_apply(Request $request)
+    {
+        $rules = [
+            'from' => ['required'],
+            'to' => ['nullable'],
+            'reason' => ['required', 'max:500'],
+            'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+        ];
+
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::find($rider_id);
+            $department = AdminDepartment::find(6);
+            if($department){
+                if ($rider) {
+                        if ($request->has('leave_id')){
+                            $leave_request = EmployeeLeave::where('id', $request->leave_id);
+                            if($leave_request->exists()){
+                                $leave_request = $leave_request->first();
+                                $leave_request->from = $request->from;
+                                $leave_request->to = $request->to;
+                                $leave_request->applied_reason = $request->reason;
+                                $leave_request->save();
+                                $message = "Leave Request edited successfully";
+                            }else{
+                                return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
+                            }
+                        }else{
+                            $leave = EmployeeLeave::where('employee_id', $rider_id)->where('employee_type_id', 2)->whereIn('status', [1, 2]);
+                            if ($leave->exists()) {
+                                return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                            }
+                            $leave_request = new EmployeeLeave();
+                            $leave_request->employee_id = $rider_id;
+                            $leave_request->employee_type_id = 2;
+                            $leave_request->reporter_id = $department->department_head_id;
+                            $leave_request->from = $request->from;
+                            $leave_request->to = $request->to;
+                            $leave_request->applied_reason = $request->reason;
+                            $leave_request->save();
+                            NotificationsController::app_notification(11, $rider_id, 2, $leave_request->id);
+                            NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+                            $message = "Leave Request submitted successfully";
+                        }
+                        return response()->json(['status' => 0, 'apply_message' => $message]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'User Not Found']);
+                }
+            }else {
+                return response()->json(['status' => 1, 'message' => 'Department Not Found']);
+            }
+        }
+
+    }
+
+    public function employee_leave_list(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
+            ->where('employee_id', $rider_id)
+            ->where('employee_type_id', 2);
+        if ($employee_leaves->exists()) {
+            $employee_leaves = $employee_leaves->get();
+            $data = array();
+            foreach ($employee_leaves as $employee_leave) {
+                $datum = array();
+                $datum['id'] = $employee_leave->id;
+                $datum['from'] = $employee_leave->from;
+                $datum['to'] = $employee_leave->to;
+                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['rejected_reason'] = $employee_leave->rejected_reason;
+                $datum['status_id'] = $employee_leave->status_id;
+                $datum['status'] = $employee_leave->status;
+                if($employee_leave->to){
+                    $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
+                    $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                }else{
+                    $datum['days_count'] = 1;
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'response' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+    }
+
+    public function view_calender(Request $request)
+    {
+        $rules = [
+            'leave_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+            if ($employee_leaves->exists()) {
+                $employee_leaves = $employee_leaves->first();
+                if ($employee_leaves->to) {
+                    $dates = AdminAPIController::generateDateRange($employee_leaves->from, $employee_leaves->to);
+                    $data = array();
+                    foreach ($dates as $date) {
+                        $datum = array();
+                        $datum['date'] = $date;
+                        $datum['status'] = $employee_leaves->status;
+                        $data[] = $datum;
+                    }
+                } else {
+                    $datum = array();
+                    $datum['date'] = $employee_leaves->from;
+                    $datum['status'] = $employee_leaves->status;
+                    $data[] = $datum;
+                }
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+
+        }
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
