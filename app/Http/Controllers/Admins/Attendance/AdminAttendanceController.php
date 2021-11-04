@@ -65,6 +65,32 @@ class AdminAttendanceController extends Controller
         return view('admin.attendance.admin.index')->with(["departments" => $departments, "cities" => $cities, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
     }
 
+    public function admin_attendance_horizontal_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),453);
+
+        if(in_array(session('role_id'), [1, 63, 70])){
+            $departments = AdminDepartment::select('id','name')->get();
+            $users = Admin::where('status', 1)->select('id','name')->get();
+            $riders = Rider::where('status', 1)->select('id', 'name')->get();
+            $trax_id = Admin::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
+            $rider_trax_id = Rider::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
+            $trax_ids = array_merge($trax_id, $rider_trax_id);
+        }
+        else{
+            $departments = AdminDepartment::select('id','name')->where('id', session('department_id'))->get();
+            $users = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
+                ->join('admin_departments as ad','ad.id','=','ar.department_id')
+                ->where('ad.id', session('department_id'))
+                ->select('admins.id','admins.name')->get();
+            $riders = Rider::where('status', 1)->select('id', 'name')->get();
+            $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
+            $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
+            $trax_ids = array_merge($trax_id, $rider_trax_id);
+        }
+
+        return view('admin.attendance.admin.horizontal')->with(["departments" => $departments, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders]);
+    }
+
     public function admin_attendance_list(Request $request)
     {
         if($request->get('excel') && $request->get('excel') == true)
@@ -244,6 +270,160 @@ class AdminAttendanceController extends Controller
         return $datatable->make(true);
     }
 
+    public function admin_attendance_horizontal_table(Request $request,$array = false)
+    {
+        $date = Carbon::createFromFormat('M Y',$request->get('search_month'));
+        $from = new \DateTime($date->startOfMonth()->toDateString());
+        $to = new \DateTime($date->endOfMonth()->toDateString());
+        $to = $to->modify( '+1 day' );
+        $period = array();
+
+        $interval = new \DateInterval('P1D');;
+        $daterange = new \DatePeriod($from, $interval ,$to);
+
+        foreach ($daterange as $date) {
+            if($array)
+            {
+                $period['search'][] = $date->format('Y-m-d');
+                $period['display'][] = $date->format('d/m/Y');
+            }
+            else{
+                $period[] = $date->format('d/m/Y');
+            }
+        }
+
+        if($array)
+        {
+            return $period;
+        }
+        return response()->json(['status'=>1,'period'=>$period]);
+
+    }
+
+    public function admin_attendance_horizontal_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),454);
+        }
+
+        $attendances = EmployeeAttendance::leftjoin('admins as a', 'a.id', 'employee_attendances.employee_id')
+            ->leftjoin('cities as c', 'c.id', 'a.default_hub_id')
+            ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
+            ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
+            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
+            ->leftjoin('employee_designations as ed', 'ed.id', 'a.designation_id')
+            ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
+            ->select('employee_attendances.employee_id','a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation','ed.name as designation_name', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type');
+
+        if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
+            $attendances->where('ad.id', session('department_id'));
+            if(session('department_id') != 6){
+                $attendances->where('employee_attendances.employee_type', 1);
+            }
+            $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
+        }
+
+
+        if ($request->get('search_month')) {
+            $date = Carbon::createFromFormat('M Y',$request->get('search_month'));
+            $from = $date->startOfMonth()->toDateString();
+            $to = $date->endOfMonth()->toDateString();
+            $attendances->whereBetween('employee_attendances.attendance_date', [$from, $to]);
+        }
+
+        $attendances->groupBy('employee_attendances.employee_id');
+
+        $periods =  $this->admin_attendance_horizontal_table($request,true);
+
+        $datatable = Datatables::of($attendances)
+            ->editColumn('trax_id', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_trax_id;
+                } else {
+                    return $employee->trax_id;
+                }
+            })
+            ->editColumn('name', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_name;
+                } else {
+                    return $employee->admin_name;
+                }
+            })
+            ->editColumn('designation', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_type;
+                } else {
+                    if($employee->designation_name != null)
+                    {
+                        return $employee->designation_name;
+                    }
+                    return $employee->designation;
+                }
+            })
+            ->editColumn('department', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return "Operations";
+                } else {
+                    return $employee->department;
+                }
+            });
+            foreach($periods['display'] as $key => $period)
+            {
+                $datatable->addColumn($period, function ($employee) use ($key, $periods) {
+                    $data = EmployeeAttendance::where('employee_id',$employee->employee_id)
+                        ->where('attendance_date',$periods['search'][$key])->first();
+
+                    if($data) {
+                        if ($data->clock_in_datetime) {
+                            $time = Carbon::parse($data->clock_in_datetime)->format("H:i");
+                        } else {
+                            $time = $data->clock_in;
+                        }
+
+                        $time .= " <br> ";
+
+                        if ($data->clock_out_datetime) {
+                            $time .= Carbon::parse($data->clock_out_datetime)->format("H:i");
+                        } else {
+                            $time .= $data->clock_out;
+                        }
+                    }
+                    else{
+                        $time = "-";
+                    }
+
+                    return $time;
+
+                });
+            }
+
+        if ($search_admin = $request->get('search_admin')) {
+            $datatable->where('a.id', $search_admin)->where('employee_type',1);
+        }
+        if ($search_rider = $request->get('search_rider')) {
+            $datatable->where('r.id', $search_rider)->where('employee_type',2);
+        }
+        if ($search_department = $request->get('search_department')) {
+            if($search_department != 6) {
+                $datatable->where('ad.id', $search_department)->where('employee_type',1);
+            }
+            else{
+                $datatable->where('employee_type',2);
+            }
+        }
+
+        if ($search_trax_id = $request->get('search_trax_id')) {
+            $datatable->where(function($q) use ($search_trax_id){
+                $q->where([['a.trax_id', $search_trax_id],['employee_type',1]])
+                    ->orWhere([['r.trax_id', $search_trax_id],['employee_type',2]]);
+            });
+        }
+
+        return $datatable->make(true);
+    }
+
     private function distance($origin, $destination)
     {
         return $this->vincenty_distance($origin, $destination);
@@ -407,11 +587,12 @@ class AdminAttendanceController extends Controller
 
         $datatable = Datatables::of($admin_attendance_action)
             ->editColumn('latitude', function ($action) {
-                $api = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=' . $action->latitude . ',' . $action->longitude . '&key=AIzaSyAIg5c-H5DaYBwF_D0HuWliQZQ6XzKj8Nk';
-                $data = json_decode(file_get_contents($api));
-                $data_array = get_object_vars($data);
-                $result = $data_array['results'][0]->formatted_address;
-                return $result;
+                if ($action->latitude && $action->longitude) {
+                    $action = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/search/?api=1&query=' . $action->latitude . ',' . $action->longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                } else {
+                    $action = '-';
+                }
+                return $action;
             })
             ->editColumn('attendance_date', function ($data) {
                 return Carbon::parse($data->attendance_date)->format("Y-m-d");

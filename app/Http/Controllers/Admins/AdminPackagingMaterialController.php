@@ -1360,6 +1360,9 @@ class AdminPackagingMaterialController extends Controller
         }else if($request->has('packaging_type') && $request->packaging_type == 'only_shipper'){
             $packaging_type = 4;
         }
+        else if($request->has('packaging_type') && $request->packaging_type == 'marco'){
+            $packaging_type = 5;
+        }
 
         $type = new PackagingMaterialTypes();
         $type->type = $request->type;
@@ -1494,6 +1497,9 @@ class AdminPackagingMaterialController extends Controller
             $packaging_type_edit = 1;
         }else if($request->has('packaging_type_edit') && $request->packaging_type_edit == 'only_shipper'){
             $packaging_type_edit = 4;
+        }
+        else if($request->has('packaging_type_edit') && $request->packaging_type_edit == 'marco'){
+            $packaging_type_edit = 5;
         }
         
         $type = PackagingMaterialTypes::where('id',$request->id)->first();
