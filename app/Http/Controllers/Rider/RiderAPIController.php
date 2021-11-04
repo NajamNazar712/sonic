@@ -4427,7 +4427,7 @@ class RiderAPIController extends Controller
     public function signup_data(Request $request)
     {
         $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
-        $designation = EmployeeDesignation::select('id', 'name')->get();
+        $designation = EmployeeDesignation::where('status', 1)->select('id', 'name', 'department_id')->get();
         $domicile = EmployeeDomicile::select('id', 'name')->get();
         $marital_status = EmployeeMaritalStatus::select('id', 'name')->get();
         $nationality = EmployeeNationality::select('id', 'name')->get();
@@ -4441,7 +4441,14 @@ class RiderAPIController extends Controller
         $banks = BanksList::select('id', 'name')->where('status', 1)->get();
         $rider_type = RiderType::select('id', 'name')->get();
         $staff_categories = StaffCategory::select('id', 'name')->get();
-        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories]);
+        $shifts = EmployeeShift::where('name', 'Default')->select('id', 'name', 'start_time', 'end_time')->get();
+        $shift_data = array();
+        foreach($shifts as $shift){
+            $datum = array();
+            $datum['id'] = $shift->id;
+            $datum['name'] = $shift->name. '( '.$shift->start_time.' - '. $shift->end_time.' )';
+        }
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts', $shift_data]);
     }
 
     public function rider_signup_v2(Request $request)
