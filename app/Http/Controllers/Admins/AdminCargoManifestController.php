@@ -795,7 +795,7 @@ class AdminCargoManifestController extends Controller
                             }
 
                             if ($request->hub_id == 0 || $request->hub_id == $hub_id) {
-                               if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {
+                             /*  if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {*/
                                     $details = array();
 
                                     if ($request->bag_type != 0) {
@@ -925,10 +925,10 @@ class AdminCargoManifestController extends Controller
                                     ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null);
 
                                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
-                               }
+                               /*}
                                else {
                                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment\'s Shipment Mode is different'];
-                                    }
+                                    }*/
                             }
                             else {
                                 return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
@@ -1316,7 +1316,7 @@ class AdminCargoManifestController extends Controller
                 }
 
                 if ($allowed) {
-                        $bag->actual_weight = $request->bag_weight;
+                        $bag->actual_weight = $bag->shipments_weight ;
                         $bag->update();
                         $details = array();
 
@@ -1328,7 +1328,7 @@ class AdminCargoManifestController extends Controller
                         $details['shipments'] = $bag->shipments;
                         $details['origin'] = $origin->name;
                         $details['destination'] = $destination->name;
-                        $details['bag_weight'] = $request->bag_weight;
+                     /*   $details['bag_weight'] = $bag->shipments_weight;*/
 
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                 }
@@ -1443,7 +1443,7 @@ class AdminCargoManifestController extends Controller
                 if (in_array($bag->status_id, [1, 3, 5])) {
                     $bags++;
                     $bags_weight += $bag->shipments_weight;
-                    $actual_weight += $bag->actual_weight;
+                    $actual_weight += $bag->shipments_weight;
                     $shipments += $bag->shipments;
 
                 } else {
