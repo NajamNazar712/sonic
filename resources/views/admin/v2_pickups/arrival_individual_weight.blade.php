@@ -21,42 +21,53 @@
                                 <div id="camera_view" class="camera_view"></div>
                             </div>
 
-                            <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                            <form id="add_shipment_form" class="mb-1 justify-content-center" novalidate="novalidate">
 
-                                <div class="form-group">
-                                    <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                <div class="row text-center justify-content-center align-items-center">
+                                    <div class="col-auto">
+                                        <div class="form-group float-left">
+                                            <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                        </div>
+                                        <div class="d-inline-block pl-2">
+                                            <a href="#" id="camera_scan_initiate" tabindex="-1">
+                                                <i class="ft-camera h1"></i>
+                                            </a>
+                                        </div>
 
-                                    <div class="d-inline-block ml-1">
-                                        <a href="#" id="camera_scan_initiate" tabindex="-1">
-                                            <i class="ft-camera h1"></i>
-                                        </a>
                                     </div>
-                                </div>
+                                    <div class="col">
+                                        <div class="form-group ">
+                                            <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="form-group text-center mb-1 p-1 border border-light rounded">
+                                            <label class="mr-1">Volumetric Weight</label>
+                                            <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm" >
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group ml-1 volumetric_weights">
+                                            <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,794]" data-msg-range="Length needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="length">
+                                        </div>
+                                    </div>
+                                     <div class="col">
+                                         <div class="form-group ml-1 volumetric_weights">
+                                             <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,794]" data-msg-range="Breadth needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="breadth">
+                                         </div>
+                                     </div>
+                                     <div class="col">
+                                         <div class="form-group ml-1 volumetric_weights">
+                                             <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,794]" data-msg-range="Height needs to be from 0.1 to 794" disabled="disabled" data-rule-volumecheck="true" data-msg-volumecheck="Total weight cannot be less than 0.1" id="height">
+                                         </div>
 
-                                <div class="form-group ml-1">
-                                    <input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
-                                </div>
-
-                                <div class="form-group text-center mt-1 mb-1 ml-1 p-1 border border-light rounded">
-                                    <label class="mr-1">Volumetric Weight</label>
-                                    <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
-                                </div>
-
-                                <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                </div>
-
-                                <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                </div>
-
-                                <div class="form-group ml-1 volumetric_weights">
-                                    <input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,375]" data-msg-range="Length needs to be from 0.1 to 375" disabled="disabled">
-                                </div>
-
-                                <div class="form-group ml-1">
-                                    <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
-                                </div>
+                                     </div>
+                                     <div class="col text-right">
+                                         <div class="form-group ml-1">
+                                             <button type="submit" name="add" class="btn btn-primary add" id="add" value="Add">Add</button>
+                                         </div>
+                                     </div>
+                                 </div>
                             </form>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -246,6 +257,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
@@ -459,13 +471,40 @@
                 'allowPlus': false,
                 'digits': 2
             });
+
+
+            $.validator.addMethod('volumecheck', function() {
+                var length = $('#add_shipment_form #length').val().trim();
+                var breadth = $('#add_shipment_form #breadth').val().trim();
+                var height = $('#add_shipment_form #height').val().trim();
+
+                if (length.length > 0 && breadth.length > 0 && height.length > 0) {
+                    var weight = (length * breadth * height) / 5000;
+
+                    if (weight < 0.1) {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    return true;
+                }
+            });
+
+          
+
             var unassigned_pickup_request_ids = [];
             var unassigned_pickups = false;
             $('#add_shipment_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
+                /*errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },*/
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('form'));
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
                     $('#add_shipment_form button.add').prop('disabled', true);
@@ -714,6 +753,8 @@
                 $('#try_and_buy_confirm').prop('disabled', false);
                 print(id);
             });
+
+
 
             $('#add_try_and_buy_shipment_form').validate({
                 errorClass: 'danger',
@@ -1106,5 +1147,8 @@
                 $('#add_shipment_form input.length').focus();
             }
         }
+
+
+
     </script>
 @endsection

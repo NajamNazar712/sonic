@@ -299,7 +299,6 @@ class ShipperReturnController extends Controller
                 if (!$parcel->packaging_material_request) {
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
                     $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
-                    ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
 
 
 //                NotificationsController::send(15, 0, $request->shipment_id);
@@ -308,6 +307,7 @@ class ShipperReturnController extends Controller
                     ShipmentChargesController::return($request->shipment_id);
 
                     AdminFinanceController::add_payment($request->shipment_id, 1);
+                    ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
 
                 }
                 else {
@@ -357,7 +357,6 @@ class ShipperReturnController extends Controller
 
                         $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                         Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                        ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
 
 //                    NotificationsController::send(15, 0, $shipment);
 //                    NotificationsController::send(16, 0, $shipment);
@@ -365,6 +364,7 @@ class ShipperReturnController extends Controller
                         ShipmentChargesController::return($shipment);
 
                         AdminFinanceController::add_payment($shipment, 1);
+                        ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, session('user_id'), NULL);
                     }
                     else {
                         $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();

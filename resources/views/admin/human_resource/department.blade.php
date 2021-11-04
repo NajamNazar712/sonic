@@ -20,6 +20,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Department ID</th>
                                     <th class="border-primary border-darken-1">Department Name</th>
+                                    <th class="border-primary border-darken-1">Department Head</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -49,6 +50,13 @@
                         <div class="form-group">
                             <textarea name="description" class="form-control" id="description" placeholder="Description"></textarea>
                         </div>
+                        <div class="form-group text-left">
+                            <select name="head_id" id="head_list" class="form-control select2 text-left" style="width: 100%;" data-rule-required="true" data-msg-required="Department Head is required">
+                                @foreach($admins as $admin)
+                                    <option value="{{$admin->id}}"> {{"$admin->name | $admin->trax_id"}}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
                         </div>
@@ -76,6 +84,13 @@
                         </div>
                         <div class="form-group">
                             <textarea name="description" class="form-control" id="edit_description" placeholder="Description"></textarea>
+                        </div>
+                        <div class="form-group text-left">
+                            <select name="head_id" id="edit_head_list" class="form-control select2" style="width: 100%;" data-rule-required="true" data-msg-required="Department Head is required">
+                                @foreach($admins as $admin)
+                                    <option value="{{$admin->id}}"> {{"$admin->name | $admin->trax_id"}}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>
@@ -107,6 +122,14 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#head_list').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Department Head *',
+                dropdownParent: $("#addDepartmentForm")
+            });
+            $('#edit_head_list').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Department Head *',
+                dropdownParent: $("#editDepartmentForm")
+            });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -122,12 +145,14 @@
                             head.push('S.No');
                             head.push('Department ID');
                             head.push('Department Name');
+                            head.push('Department Head');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.code);
                                 row.push(values.name);
+                                row.push(values.head);
                                 body.push(row);
                             });
                         },
@@ -174,6 +199,7 @@
                     },
                     {data: 'code', name: 'admin_departments.code', class: 'align-middle code'},
                     {data: 'name', name: 'admin_departments.name', class: 'align-middle name'},
+                    {data: 'head', name: 'a.name', class: 'align-middle head'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -215,9 +241,11 @@
                 var id = $(this).data('target-id');
                 var name = table.row($(this).parents('tr')).data().name;
                 var description = table.row($(this).parents('tr')).data().description;
+                var head_id = table.row($(this).parents('tr')).data().head_id;
                 $('#department_id').val(id);
                 $('#edit_name').val(name);
                 $('#edit_description').val(description);
+                $('#edit_head_list').val(head_id).trigger('change');
                 $('#editDepartmentModal').modal('show');
             });
 
