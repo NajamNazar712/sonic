@@ -795,7 +795,7 @@ class AdminCargoManifestController extends Controller
                             }
 
                             if ($request->hub_id == 0 || $request->hub_id == $hub_id) {
-                               if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {
+                             /*  if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {*/
                                     $details = array();
 
                                     if ($request->bag_type != 0) {
@@ -925,10 +925,10 @@ class AdminCargoManifestController extends Controller
                                     ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null);
 
                                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
-                               }
+                               /*}
                                else {
                                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment\'s Shipment Mode is different'];
-                                    }
+                                    }*/
                             }
                             else {
                                 return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
