@@ -1238,6 +1238,36 @@ class RetailShipmentBookController extends Controller
 
         $html .= '
               </body>
+              <div id="watermark_" class="watermark_">
+                    <h1 style="
+                   text-align: center;  
+                   text-transform: uppercase;                  
+                   overflow: hidden;
+                   position: fixed;
+                   margin-top: -270px;
+                   margin-left: 300px;
+                   opacity: 0.3;
+                   transform: rotate(350deg);
+                   font-size: 700%; 
+                   color: #636e72; 
+                   font-stretch: extra-expanded;"     
+                    >RETAIL</h1>
+                  </div>
+                  <div id="watermark_" class="watermark_">
+                    <h1 style="
+                   text-align: center;  
+                   text-transform: uppercase;                  
+                   overflow: hidden;
+                   position: fixed;
+                   margin-top: -820px;
+                   margin-left: 300px;
+                   opacity: 0.4;
+                   transform: rotate(350deg);
+                   font-size: 700%; 
+                   color: #636e72; 
+                   font-stretch: extra-expanded;"     
+                    >RETAIL</h1>
+                  </div>
             </html>
         ';
 
