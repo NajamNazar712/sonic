@@ -46,29 +46,36 @@ class ShipperReceivingSheetController extends Controller
     static public function create($shipment_ids, $user_id) {
         $pickup_address_id = 0;
 
-        foreach ($shipment_ids as $shipment_id) {
+        foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
             if ($shipment->shipper_status_id != 1) {
-                return ['status' => 1, 'error' => $shipment->tracking_number . ' can no longer be added to a Receiving Sheet'];
-            }
+                unset($shipment_ids[$key]);
 
-            if ($shipment->user_id != $user_id) {
-                return ['status' => 1, 'error' => $shipment->tracking_number . ' doesn\'t belong to you'];
-            }
-
-            if (ReceivingSheetShipment::where('shipment_id', $shipment_id)->exists()) {
-                return ['status' => 1, 'error' => $shipment->tracking_number . ' is already in a Receiving Sheet'];
-            }
-
-            if ($pickup_address_id == 0) {
-                $pickup_address_id = $shipment->pickup_address_id;
+                // return ['status' => 1, 'error' => $shipment->tracking_number . ' can no longer be added to a Receiving Sheet'];
             }
             else {
-                if ($pickup_address_id != $shipment->pickup_address_id) {
-                    return ['status' => 1, 'error' => 'Given Shipments Pickup Addresses are different from one another and cannot be added to the same Receiving Sheet'];
+                if ($shipment->user_id != $user_id) {
+                    return ['status' => 1, 'error' => $shipment->tracking_number . ' doesn\'t belong to you'];
+                }
+
+                if (ReceivingSheetShipment::where('shipment_id', $shipment_id)->exists()) {
+                    return ['status' => 1, 'error' => $shipment->tracking_number . ' is already in a Receiving Sheet'];
+                }
+
+                if ($pickup_address_id == 0) {
+                    $pickup_address_id = $shipment->pickup_address_id;
+                }
+                else {
+                    if ($pickup_address_id != $shipment->pickup_address_id) {
+                        return ['status' => 1, 'error' => 'Given Shipments Pickup Addresses are different from one another and cannot be added to the same Receiving Sheet'];
+                    }
                 }
             }
+        }
+
+        if (!count($shipment_ids)) {
+            return ['status' => 1, 'error' => 'No Shipment Selected'];
         }
 
         $receiving_sheet = new ReceivingSheet();
