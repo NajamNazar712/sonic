@@ -24,6 +24,7 @@ use App\Http\Models\HR\EmployeeDesignationHub;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
+use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
@@ -823,15 +824,26 @@ class AdminHumanResourseController extends Controller
                 $employee = Employee::find($employee_id);
                 if(in_array($employee->request_status_id, [1, 2])) {
                     if($employee->trax_id == null) {
-
-                        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
-
+                        if($employee->employee_type_id == 1){
+                            if($employee->staff_category_id == 1){
+                                $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                                $trax_id_prefix = 'Trax';
+                            }elseif ($employee->staff_category_id == 2){
+                                $global_setting = GlobalSettings::where('type', 'latest_intern_id');
+                                $trax_id_prefix = 'TraxI';
+                            }else{
+                                return response()->json(['status' => 1, 'error' => 'Invalid Staff Category']);
+                            }
+                        }else{
+                            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                            $trax_id_prefix = 'Trax';
+                        }
                         if ($global_setting->exists()) {
                             $global_setting = $global_setting->first();
                             $trax_id = $global_setting->setting_value + 1;
                             $global_setting->setting_value = $trax_id;
                             $global_setting->save();
-                            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                            $trax_id = $trax_id_prefix . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
                         } else {
                             $trax_id = null;
                         }
@@ -940,7 +952,8 @@ class AdminHumanResourseController extends Controller
         $place_of_birth_cities = City::where('business_category_id',1)->get();
         $shifts = EmployeeShift::where('status', 1)->get();
         $staff_categories = StaffCategory::all();
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories'));
+        $genders = EmployeeGender::all();
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders'));
     }
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
@@ -981,6 +994,7 @@ class AdminHumanResourseController extends Controller
         $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->shift_id = $request->shift_id;
+        $employee->staff_category_id = $request->staff_category;
         $employee->update();
 
         if($employee->employee_type_id == 1)

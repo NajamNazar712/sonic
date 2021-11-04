@@ -3912,7 +3912,7 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'attendance_details' => []]);
     }
 
-public function login_v3(Request $request)
+    public function login_v3(Request $request)
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],

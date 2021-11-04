@@ -65,6 +65,48 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
+                                                <label>Personal Number<span class="text-danger">*</span></label>
+                                                <input type="text" id="personal_number" class="form-control border-primary" value="{{$employee->phone_number}}" data-rule-required="true" data-msg-required="Phone Number is required" name="personal_number">
+                                            </div>
+                                        </div>
+                                        @if($employee->employee_type_id == 1)
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Personal Email</label>
+                                                    <input type="email" id="personal_email" class="form-control border-primary" value="{{$employee->personal_email}}" name="personal_email">
+                                                </div>
+                                            </div>
+                                        @endif
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>CNIC<span class="text-danger">*</span></label>
+                                                <input type="text" id="cnic" data-rule-required="true"  data-msg-required="CNIC is required" class="form-control border-primary" value="{{$employee->cnic}}" name="cnic">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Address<span class="text-danger">*</span></label>
+                                                <textarea data-rule-required="true" data-msg-required="Address is required"  class="form-control border-primary" id="address" name="address">{{$employee->address}}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Emergency Contact<span class="text-danger">*</span></label>
+                                                <input type="text" id="emergency_contact" data-rule-required="true"  data-msg-required="Emergency Contact is required" class="form-control border-primary" value="{{$employee->emergency_contact}}" name="emergency_contact">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Gender<span class="text-danger">*</span></label>
+                                                <select name="gender" id="gender" data-rule-required="true"  data-msg-required="Gender is required" class="select2 form-control " style="width: 100%" >
+                                                    @foreach($genders as $gender)
+                                                        <option value="{{$gender->id}}">{{$gender->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
                                                 <label>Religion</label>
                                                 <select name="religion" id="religion" class="select2 form-control " style="width: 100%">
                                                     @foreach($religions as $religion)
@@ -85,20 +127,20 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Domicile</label>
-                                                <select name="domicile" id="domicile" class="select2 form-control " style="width: 100%">
-                                                    @foreach($domiciles as $domicile)
-                                                        <option value="{{$domicile->id}}">{{$domicile->name}}</option>
+                                                <label>Marital Status</label>
+                                                <select name="marital_status" id="marital_status" class="select2 form-control " style="width: 100%">
+                                                    @foreach($maritial_statuses as $maritial_status)
+                                                        <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Marital Status</label>
-                                                <select name="marital_status" id="marital_status" class="select2 form-control " style="width: 100%">
-                                                    @foreach($maritial_statuses as $maritial_status)
-                                                        <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
+                                                <label>Domicile</label>
+                                                <select name="domicile" id="domicile" class="select2 form-control " style="width: 100%">
+                                                    @foreach($domiciles as $domicile)
+                                                        <option value="{{$domicile->id}}">{{$domicile->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -114,40 +156,6 @@
                                             </div>
                                         </div>
                                         <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Personal Number<span class="text-danger">*</span></label>
-                                                <input type="text" id="personal_number" class="form-control border-primary" value="{{$employee->phone_number}}" data-rule-required="true" data-msg-required="Phone Number is required" name="personal_number">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Personal Email</label>
-                                                <input type="email" id="personal_email" class="form-control border-primary" value="{{$employee->personal_email}}" name="personal_email">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Address<span class="text-danger">*</span></label>
-                                                <textarea data-rule-required="true" data-msg-required="Address is required"  class="form-control border-primary" id="address" name="address">{{$employee->address}}</textarea>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Emergency Contact<span class="text-danger">*</span></label>
-                                                <input type="text" id="emergency_contact" data-rule-required="true"  data-msg-required="Emergency Contact is required" class="form-control border-primary" value="{{$employee->emergency_contact}}" name="emergency_contact">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Place Of Birth</label>
-                                                <select name="place_of_birth" id="place_of_birth" class="select2 form-control " style="width: 100%">
-                                                    @foreach($place_of_birth_cities as $place_of_birth_city)
-                                                        <option value="{{$place_of_birth_city->id}}">{{$place_of_birth_city->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
                                             <label>Date Of Birth</label>
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
@@ -158,34 +166,6 @@
                                                 <input type="text" name="date_of_birth" data-value="{{$employee->date_of_birth != null ? $employee->date_of_birth : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="date_of_birth" placeholder="Date of Birth">
                                             </div>
                                         </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>CNIC<span class="text-danger">*</span></label>
-                                                <input type="text" id="cnic" data-rule-required="true"  data-msg-required="CNIC is required" class="form-control border-primary" value="{{$employee->cnic}}" name="cnic">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label>CNIC Issue Date</label>
-                                            <div class="form-group input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                        <span class="la la-calendar-o small-calender-icon"></span>
-                                                    </span>
-                                                </div>
-                                                <input type="text" name="cnic_issue_date" data-value="{{$employee->cnic_issue_date != null ? date('Y/m/d',strtotime($employee->cnic_issue_date)) : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_issue_date" placeholder="CNIC Issue Date">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label>CNIC Expiry Date</label>
-                                            <div class="form-group input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                        <span class="la la-calendar-o small-calender-icon"></span>
-                                                    </span>
-                                                </div>
-                                                <input type="text" name="cnic_expiry_date" data-value="{{$employee->cnic_expiry_date != null ? date('Y/m/d',strtotime($employee->cnic_expiry_date)) : ''}}"  class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_expiry_date" placeholder="CNIC Expiry Date">
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -193,20 +173,20 @@
                                         <h4 class="form-section">Official Info</h4>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>City<span class="text-danger">*</span></label>
-                                                <select name="city" id="city" class="select2 form-control " data-rule-required="true"  data-msg-required="City is required" style="width: 100%">
-                                                    @foreach($cities as $city)
-                                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                                <label>Zone<span class="text-danger">*</span></label>
+                                                <select name="zone" id="zone" data-rule-required="true"  data-msg-required="Zone is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($zones as $zone)
+                                                        <option value="{{$zone->id}}">{{$zone->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Zone<span class="text-danger">*</span></label>
-                                                <select name="zone" id="zone" data-rule-required="true"  data-msg-required="Zone is required" class="select2 form-control " style="width: 100%">
-                                                    @foreach($zones as $zone)
-                                                        <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                                <label>City<span class="text-danger">*</span></label>
+                                                <select name="city" id="city" class="select2 form-control " data-rule-required="true"  data-msg-required="City is required" style="width: 100%">
+                                                    @foreach($cities as $city)
+                                                        <option value="{{$city->id}}">{{$city->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -253,13 +233,14 @@
                                                 <input type="text" id="official_number" class="form-control border-primary" value="{{$employee->official_phone_number}}" name="official_number" >
                                             </div>
                                         </div>
-
+                                        @if($employee->employee_type_id == 1)
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Official & Outlook ID</label>
                                                 <input type="email" id="official_email" class="form-control border-primary" value="{{$employee->official_email}}" name="official_email" >
                                             </div>
                                         </div>
+                                        @endif
 
                                         <div class="col-md-12">
                                             <div class="form-group">
@@ -788,6 +769,95 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="form-group">
+                                                    <label>Scanned CNIC</label>
+                                                    @if(isset($attachments) && $attachments->cnic != null)
+                                                        @php
+                                                            $cnics = explode(',', $attachments->cnic);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-12">
+                                                <div class="form-group">
                                                     <label>CV/Resume</label>
                                                     @if(isset($attachments) && $attachments->cv != null)
                                                         @php
@@ -873,95 +943,6 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>Scanned CNIC</label>
-                                                    @if(isset($attachments) && $attachments->cnic != null)
-                                                        @php
-                                                            $cnics = explode(',', $attachments->cnic);
-                                                        @endphp
-                                                    @endif
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <div class="row">
-                                                                <div class="col-md-8">
-                                                                    <input type="file" name="cnic_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    @if(isset($cnics))
-                                                                        @foreach($cnics as $cnic)
-                                                                            @php
-                                                                                $pos = strpos($cnic, "cnic_1_");
-                                                                            @endphp
-                                                                            @if($pos !== false)
-                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
-                                                                            @endif
-                                                                        @endforeach
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="row">
-                                                                <div class="col-md-8">
-                                                                    <input type="file" name="cnic_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    @if(isset($cnics))
-                                                                        @foreach($cnics as $cnic)
-                                                                            @php
-                                                                                $pos = strpos($cnic, "cnic_2_");
-                                                                            @endphp
-                                                                            @if($pos !== false)
-                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
-                                                                            @endif
-                                                                        @endforeach
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="row">
-                                                                <div class="col-md-8">
-                                                                    <input type="file" name="cnic_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    @if(isset($cnics))
-                                                                        @foreach($cnics as $cnic)
-                                                                            @php
-                                                                                    $pos = strpos($cnic, "cnic_3_");
-                                                                            @endphp
-                                                                            @if($pos !== false)
-                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
-                                                                            @endif
-                                                                        @endforeach
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="row">
-                                                                <div class="col-md-8">
-                                                                    <input type="file" name="cnic_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    @if(isset($cnics))
-                                                                        @foreach($cnics as $cnic)
-                                                                            @php
-                                                                                $pos = strpos($cnic, "cnic_4_");
-                                                                            @endphp
-                                                                            @if($pos !== false)
-                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
-                                                                            @endif
-                                                                        @endforeach
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    </div>
                                             </div>
 
                                             <div class="col-md-12">
@@ -2101,6 +2082,12 @@
             });
             $("#religion").val("{{$employee->religion_id ?? ''}}").trigger('change');
 
+            $("#gender").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Gender",
+                width:'100%',
+            });
+            $("#gender").val("{{$employee->employee_gender_id ?? ''}}").trigger('change');
+
             $("#domicile").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Domicile",
                 width:'100%',
@@ -2135,7 +2122,7 @@
                 placeholder: "Select Staff Category",
                 width:'100%',
             });
-            $("#designation").val("{{$employee->staff_category_id ?? ''}}").trigger('change');
+            $("#staff_category").val("{{$employee->staff_category_id ?? ''}}").trigger('change');
 
             $("#city").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select City",
