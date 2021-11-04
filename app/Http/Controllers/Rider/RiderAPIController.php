@@ -4441,7 +4441,7 @@ class RiderAPIController extends Controller
         $banks = BanksList::select('id', 'name')->where('status', 1)->get();
         $rider_type = RiderType::select('id', 'name')->get();
         $staff_categories = StaffCategory::select('id', 'name')->get();
-        $shifts = EmployeeShift::where('name', '!=', 'Default')->select('id', 'name', 'start_time', 'end_time')->get();
+        $shifts = EmployeeShift::select('id', 'name', 'start_time', 'end_time')->get();
         $shift_data = array();
         foreach($shifts as $shift){
             $datum = array();
