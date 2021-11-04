@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\MasterCargo\Bag;
@@ -123,6 +124,11 @@ class ShipmentsJourneyController extends Controller
       if($verification == 1){
           if($shipper_status_id != 1){
               ShipmentStatusWebhookController::webhook_subscription($shipment_id, $shipper_status_id);
+          }
+
+          if($shipper_status_id == 20)
+          {
+              FinalChargesWebhookController::webhook_subscription($shipment_id);
           }
       }
         if (in_array($shipper_status_id, [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11, 14, 16, 30, 36, 37, 20, 12]) && $verification == 1) {

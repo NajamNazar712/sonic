@@ -784,6 +784,12 @@ class AdminNotificationsController extends Controller
                 $details['fields'] = ["rider", "otp"];
             }else if($id == 10){
                 $details['fields'] = ["time", "name"];
+            }else if($id == 11){
+                $details['fields'] = ["from", "to", "status"];
+            }else if($id == 12){
+                $details['fields'] = ["employee_name","trax_id","from", "to"];
+            }else if($id == 13){
+                $details['fields'] = ["employee_name","trax_id","from", "to"];
             }
             return $details;
         }else{
