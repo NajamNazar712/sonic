@@ -4441,12 +4441,13 @@ class RiderAPIController extends Controller
         $banks = BanksList::select('id', 'name')->where('status', 1)->get();
         $rider_type = RiderType::select('id', 'name')->get();
         $staff_categories = StaffCategory::select('id', 'name')->get();
-        $shifts = EmployeeShift::select('id', 'name', 'start_time', 'end_time')->get();
+        $shifts = EmployeeShift::where('name' ,'!=', 'Default')->select('id', 'name', 'start_time', 'end_time')->get();
         $shift_data = array();
         foreach($shifts as $shift){
             $datum = array();
             $datum['id'] = $shift->id;
             $datum['name'] = $shift->name. '( '.$shift->start_time.' - '. $shift->end_time.' )';
+            $shift_data[] = $datum;
         }
         return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts', $shift_data]);
     }
