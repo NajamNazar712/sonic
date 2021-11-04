@@ -55,7 +55,7 @@ class AdminCargoManifestController extends Controller
     public function manifest_mapping_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),396);
-        $cities = City::select(['id', 'name'])->where('business_category_id', 1)->where('hub', 1)->get();
+        $cities = City::select(['id', 'name'])->where('hub', 1)->get();
         $vehicles = Fleet::where('status', 1)->select(['id', 'reg_number'])->get();
         return view('admin.cargo.manifest.mapping')->with(['cities' => $cities, 'vehicles' => $vehicles]);
     }
