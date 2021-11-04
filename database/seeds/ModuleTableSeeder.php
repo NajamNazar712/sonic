@@ -27,7 +27,8 @@ class ModuleTableSeeder extends Seeder
             array('id' => 11, 'name' => 'User Management'),
             array('id' => 12, 'name' => 'Network Management'),
             array('id' => 13, 'name' => 'Notification'),
-            array('id' => 14, 'name' => 'Settings')
+            array('id' => 14, 'name' => 'Settings'),
+            array('id' => 15, 'name' => 'Support')
         ));
     }
 }
