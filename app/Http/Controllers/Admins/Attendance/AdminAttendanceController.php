@@ -325,14 +325,17 @@ class AdminAttendanceController extends Controller
             ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
             ->select('employee_attendances.employee_id','a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation','ed.name as designation_name', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type');
 
+
         if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
             if(session('department_id') != 6){
                 $attendances->where('employee_attendances.employee_type', 1)
                     ->where('ad.id', session('department_id'));
             }
             else{
-                $attendances->where('employee_attendances.employee_type', 2)
-                    ->orWhere('ad.id', session('department_id'));
+                $attendances->where(function($query){
+                    $query->where('employee_attendances.employee_type', 2)
+                        ->orWhere('ad.id', session('department_id'));
+                });
             }
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
         }
@@ -420,10 +423,13 @@ class AdminAttendanceController extends Controller
         }
         if ($search_department = $request->get('search_department')) {
             if($search_department != 6) {
-                $datatable->where('ad.id', $search_department)->where('employee_type',1);
+                $datatable->where('department_id', $search_department)->where('employee_type',1);
             }
             else{
-                $datatable->where('employee_type',2);
+                $datatable->where(function($query) use($search_department){
+                    $query->where('employee_type',2)
+                        ->orWhere('ad.id', $search_department);
+                });
             }
         }
 
