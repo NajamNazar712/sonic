@@ -1985,11 +1985,11 @@ class APIController extends Controller
 
             $gst = $origin_city->zone->gst;
             $total_charges_without_gst = array_sum($information['charges']);
-            $gst = $gst * $total_charges_without_gst;
-            $net_payable = $request->amount-($total_charges_without_gst + $gst);
-            $information['charges']['total_charges'] = number_format($total_charges_without_gst, 2);
-            $information['charges']['gst'] = number_format($gst, 2);
-            $information['charges']['net_payable'] = number_format($net_payable, 2);
+            $gst = ROUND(($gst * $total_charges_without_gst), 2, PHP_ROUND_HALF_DOWN);
+            $net_payable = ROUND(($request->amount-($total_charges_without_gst + $gst)), 2, PHP_ROUND_HALF_DOWN);
+            $information['charges']['total_charges'] = $total_charges_without_gst;
+            $information['charges']['gst'] = $gst;
+            $information['charges']['net_payable'] = $net_payable;
 
             return response()->json(['status' => 0, 'message' => 'Charges Calculated', 'information' => $information]);
         }
