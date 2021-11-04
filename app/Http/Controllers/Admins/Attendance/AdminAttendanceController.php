@@ -114,8 +114,10 @@ class AdminAttendanceController extends Controller
                     ->where('ad.id', session('department_id'));
             }
             else{
-                $attendances->where('employee_attendances.employee_type', 2)
-                    ->orWhere('ad.id', session('department_id'));
+                $attendances->where(function($query){
+                    $query->where('employee_attendances.employee_type', 2)
+                        ->orWhere('ad.id', session('department_id'));
+                });
             }
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
         }
@@ -247,7 +249,10 @@ class AdminAttendanceController extends Controller
                 $datatable->where('department_id', $search_department)->where('employee_type',1);
             }
             else{
-                $datatable->where('employee_type',2);
+                $datatable->where(function($query) use($search_department){
+                    $query->where('employee_type',2)
+                        ->orWhere('ad.id', $search_department);
+                });
             }
         }
 
