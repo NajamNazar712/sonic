@@ -72,8 +72,8 @@
                                         @if($employee->employee_type_id == 1)
                                             <div class="col-md-12">
                                                 <div class="form-group">
-                                                    <label>Personal Email</label>
-                                                    <input type="email" id="personal_email" class="form-control border-primary" value="{{$employee->personal_email}}" name="personal_email">
+                                                    <label>Personal Email<span class="text-danger">*</span></label>
+                                                    <input type="email" id="personal_email" data-rule-required="true" data-msg-required="Email is required" class="form-control border-primary" value="{{$employee->personal_email}}" name="personal_email">
                                                 </div>
                                             </div>
                                         @endif
@@ -107,8 +107,8 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Religion</label>
-                                                <select name="religion" id="religion" class="select2 form-control " style="width: 100%">
+                                                <label>Religion<span class="text-danger">*</span></label>
+                                                <select name="religion" id="religion" data-rule-required="true" data-msg-required="Religion is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($religions as $religion)
                                                         <option value="{{$religion->id}}">{{$religion->name}}</option>
                                                     @endforeach
@@ -117,8 +117,8 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Nationality</label>
-                                                <select name="nationality" id="nationality" class="select2 form-control " style="width: 100%">
+                                                <label>Nationality<span class="text-danger">*</span></label>
+                                                <select name="nationality" id="nationality" data-rule-required="true" data-msg-required="Nationality is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($nationalities as $nationality)
                                                         <option value="{{$nationality->id}}">{{$nationality->name}}</option>
                                                     @endforeach
@@ -127,8 +127,8 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Marital Status</label>
-                                                <select name="marital_status" id="marital_status" class="select2 form-control " style="width: 100%">
+                                                <label>Marital Status<span class="text-danger">*</span></label>
+                                                <select name="marital_status" id="marital_status" data-rule-required="true" data-msg-required="Marital Status is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($maritial_statuses as $maritial_status)
                                                         <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
                                                     @endforeach
@@ -156,14 +156,14 @@
                                             </div>
                                         </div>
                                         <div class="col-md-12">
-                                            <label>Date Of Birth</label>
+                                            <label>Date Of Birth<span class="text-danger">*</span></label>
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="date_of_birth" data-value="{{$employee->date_of_birth != null ? $employee->date_of_birth : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="date_of_birth" placeholder="Date of Birth">
+                                                <input type="text" name="date_of_birth" data-rule-required="true" data-msg-required="Date of Birth is required" data-value="{{$employee->date_of_birth != null ? $employee->date_of_birth : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="date_of_birth" placeholder="Date of Birth">
                                             </div>
                                         </div>
                                     </div>
