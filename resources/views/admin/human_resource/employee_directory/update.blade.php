@@ -247,7 +247,7 @@
                                                 <label>Working Shift<span class="text-danger">*</span></label>
                                                 <select name="shift_id" id="shift_list" data-rule-required="true"  data-msg-required="Shift is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($shifts as $shift)
-                                                        <option value="{{$shift->id}}">{{$shift->name}}</option>
+                                                        <option value="{{$shift->id}}">{{$shift->name}} ({{$shift->start_time}} - {{$shift->end_time}})</option>
                                                     @endforeach
                                                 </select>
                                             </div>
