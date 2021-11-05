@@ -226,7 +226,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return''; }
                     },
-                    {data: 'code', name: 'employee_designations.name', class: 'align-middle code'},
+                    {data: 'code', name: 'employee_designations.code', class: 'align-middle code'},
                     {data: 'name', name: 'employee_designations.name', class: 'align-middle name'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {data: 'role', name: 'r.name', class: 'align-middle role'},

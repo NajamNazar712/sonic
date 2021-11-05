@@ -15,7 +15,7 @@ class Seeder4236ForEmployeeDesignation extends Seeder
     public function run()
     {
         $cities = City::select('id', 'name')->where('hub', 1)->get();
-        $designations = EmployeeDesignation::whereIn('department_id', [3,1,10,9,7,8,5])->get();
+        $designations = EmployeeDesignation::whereIn('department_id', [3,1,10,9,7,8,5,4])->where('id','!=',58)->get();
         foreach ($designations as $designation)
         {
             EmployeeDesignationHub::where('designation_id',$designation->id)->delete();
