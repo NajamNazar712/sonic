@@ -8111,7 +8111,7 @@ class NotificationsController extends Controller
                     if ($shipment_journey) {
                         $current_status = $shipment_journey->shipment_status_consignee->name;
                         if ($shipment_journey->status_reason_id) {
-                            $reason = '& ' . $shipment_journey->shipment_status_reason->name;
+                            $reason = ' ' . $shipment_journey->shipment_status_reason->name;
                         }
                     } else {
                         $current_status = $shipment->status_consignee->name;

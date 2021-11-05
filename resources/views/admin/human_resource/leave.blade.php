@@ -324,7 +324,6 @@
                             head.push('Status');
                             head.push('Leave Purpose');
                             head.push('Reject Reason');
-                            head.push('Status');
                             head.push('Leave From');
                             head.push('Leave To');
                             head.push('Days');
@@ -346,7 +345,6 @@
                                 row.push(values.status);
                                 row.push(values.applied_reason);
                                 row.push(values.reject_reason);
-                                row.push(values.status);
                                 row.push(values.from);
                                 row.push(values.to);
                                 row.push(values.days);
