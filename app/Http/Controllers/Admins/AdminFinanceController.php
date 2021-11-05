@@ -9594,6 +9594,7 @@ class AdminFinanceController extends Controller
                     $done_payment->delivered_shipments = $pending_payment->delivered_shipments;
                     $done_payment->adjusted_shipments = $pending_payment->adjusted_shipments;
                     $done_payment->company_bank_id = $company_bank;
+                    $done_payment->user_bank_info_id = $user_bank_id;
 
 
                     $settings = GlobalSettings::where('type', 'ibft_charges');
@@ -9668,6 +9669,7 @@ class AdminFinanceController extends Controller
                     $done_payment->delivered_shipments = 0;
                     $done_payment->adjusted_shipments = 0;
                     $done_payment->company_bank_id = $company_bank;
+                    $done_payment->user_bank_info_id = $user_bank_id;
                     $settings = GlobalSettings::where('type', 'ibft_charges');
 
                     if ($settings->exists()) {
