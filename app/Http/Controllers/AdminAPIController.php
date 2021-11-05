@@ -4065,7 +4065,7 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function admin_signup_v3(Request $request)
+    public function signup_required_details(Request $request)
     {
         if ($request->isMethod('post')) {
             $rules = [
@@ -4074,11 +4074,13 @@ class AdminAPIController extends Controller
                 'mother_name' => ['required'],
                 'employee_gender_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_genders,id'],
                 'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'shift_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
+                'staff_category_id' => ['required', 'integer', 'digits_between:1,10', 'exists:staff_categories,id'],
                 'cnic_no' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
                 'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'guardian_name' => ['required'],
                 'religion_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
-                'nationality_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
+                'nationality_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
                 'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
                 'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
                 'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
@@ -4086,28 +4088,15 @@ class AdminAPIController extends Controller
                 'address' => ['required'],
                 'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'designation_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_designations,id'],
-                'department_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:admin_departments,id'],
+                'department_id' => ['required', 'integer', 'digits_between:1,10', 'exists:admin_departments,id'],
                 'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
-                'official_email' => ['nullable', 'email'],
-                'official_phone_number' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
-                'sonic_id' => ['nullable'],
-                'place_of_birth' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
-                'date_of_birth' => ['nullable'],
+                'date_of_birth' => ['required'],
                 'pin' => ['require', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
-                //EducationalDetails
-                'education_details' => ['nullable'],
-
                 //BankInformation
-                'bank_details' => ['nullable'],
-
-                //EmploymentHistory
-                'employment_history' => ['nullable'],
-
-                //MedicalDetails
-                'medical_details' => ['nullable'],
+                'bank_details' => ['required']
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -4183,20 +4172,98 @@ class AdminAPIController extends Controller
                         $employee_request->personal_email = $request->personal_email;
                         $employee_request->address = $request->address;
                         $employee_request->emergency_contact = $request->emergency_contact;
-                        $employee_request->cnic_issue_date = $request->cnic_issue_date;
-                        $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
                         $employee_request->designation_id = $request->designation_id;
                         $employee_request->department_id = $request->department_id;
                         $employee_request->zone_id = $request->zone_id;
-                        $employee_request->official_email = $request->official_email;
-                        $employee_request->official_phone_number = $request->official_phone_number;
-                        $employee_request->sonic_id = $request->sonic_id;
-                        $employee_request->place_of_birth = $request->place_of_birth;
                         $employee_request->date_of_birth = $request->date_of_birth;
                         $employee_request->pin = $request->pin;
                         $employee_request->mother_name = $request->mother_name;
+                        $employee_request->shift_id = $request->shift_id;
+                        $employee_request->staff_category_id = $request->staff_category_id;
                         $employee_request->save();
 
+                        if ($request->has('bank_details')) {
+                            $bank_details = json_decode($request->bank_details, true);
+                            foreach ($bank_details as $bank_detail) {
+                                $employee_bank_info = new EmployeeBankInformation();
+                                $employee_bank_info->employee_id = $employee_request->id;
+                                $employee_bank_info->account_title = $bank_detail['account_tile'];
+                                $employee_bank_info->bank_id = $bank_detail['bank'];
+                                $employee_bank_info->branch_name = $bank_detail['branch'];
+                                $employee_bank_info->iban = $bank_detail['iban_no'];
+                                $employee_bank_info->save();
+                            }
+                        }
+
+                        if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
+                            $employee_id = $employee_request->id;
+                            $date = Carbon::now()->format('Y_m_d');
+                            $attachments = new EmployeeAttachment();
+                            $attachments->employee_id = $employee_id;
+                            $cnic_array = [];
+                            if ($request->hasFile('cnic_1')) {
+                                $file = $request->file('cnic_1');
+                                $filename = 'cnic_1_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_id . '';
+                                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                                $cnic_array[0] = $directory . '/' . $filename;
+                            }
+                            if ($request->hasFile('cnic_2')) {
+                                $file = $request->file('cnic_2');
+                                $filename = 'cnic_2_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_id . '';
+                                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                                $cnic_array[1] = $directory . '/' . $filename;
+                            }
+                            $attachments->cnic = implode(',', $cnic_array);
+                            $attachments->save();
+                        }
+
+                        $response['status'] = 0;
+                        $response['employee_id'] = $employee_request->id;
+                        $message = 'Request Has Been Submitted and Pending for Approval';
+                    } catch (Exception $ex) {
+                        $response['message'] = $ex;
+                    }
+                }
+            }
+        } else {
+            $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
+    }
+
+    public function signup_optional_details(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $rules = [
+                //Employees
+                'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+
+                //EducationalDetails
+                'education_details' => ['nullable'],
+
+                //EmploymentHistory
+                'employment_history' => ['nullable'],
+
+                //MedicalDetails
+                'medical_details' => ['nullable'],
+            ];
+            $response = ['status' => 1];
+            $message = 'Unknown';
+
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $message = 'Error(s) in Input';
+                $response['errors'] = $validate->errors();
+            } else {
+                $employee_request = Employee::find($request->employee_id);
+                if ($employee_request) {
+                    try {
                         if ($request->has('employment_history')) {
                             $employment_histories = json_decode($request->employment_history, true);
                             foreach ($employment_histories as $employment_history) {
@@ -4237,48 +4304,9 @@ class AdminAPIController extends Controller
                             }
                         }
 
-                        if ($request->has('bank_details')) {
-                            $bank_details = json_decode($request->bank_details, true);
-                            foreach ($bank_details as $bank_detail) {
-                                $employee_bank_info = new EmployeeBankInformation();
-                                $employee_bank_info->employee_id = $employee_request->id;
-                                $employee_bank_info->account_title = $bank_detail['account_tile'];
-                                $employee_bank_info->branch_code = $bank_detail['branch_code'];
-                                $employee_bank_info->account_no = $bank_detail['account_number'];
-                                $employee_bank_info->bank_id = $bank_detail['bank'];
-                                $employee_bank_info->branch_name = $bank_detail['branch'];
-                                $employee_bank_info->iban = $bank_detail['iban_no'];
-                                $employee_bank_info->save();
-                            }
-                        }
-
-                        if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
-                            $employee_id = $employee_request->id;
-                            $date = Carbon::now()->format('Y_m_d');
-                            $attachments = new EmployeeAttachment();
-                            $attachments->employee_id = $employee_id;
-                            $cnic_array = [];
-                            if ($request->hasFile('cnic_1')) {
-                                $file = $request->file('cnic_1');
-                                $filename = 'cnic_1_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $cnic_array[0] = $directory . '/' . $filename;
-                            }
-                            if ($request->hasFile('cnic_2')) {
-                                $file = $request->file('cnic_2');
-                                $filename = 'cnic_2_' . $date . '.' . $file->extension();
-                                $directory = 'employee_directory/employee_' . $employee_id . '';
-                                Storage::disk('public')->putFileAs($directory, $file, $filename);
-                                $cnic_array[1] = $directory . '/' . $filename;
-                            }
-                            $attachments->cnic = implode(',', $cnic_array);
-                            $attachments->save();
-                        }
-
                         $response['status'] = 0;
                         $response['employee_id'] = $employee_request->id;
-                        $message = 'Request Has Been Submitted and Pending for Approval';
+                        $message = 'Optional details Has Been Submitted and Pending for Approval';
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }
