@@ -9965,7 +9965,7 @@ class RiderAPIController extends Controller
                                 foreach ($bank_details as $bank_detail) {
                                     $employee_bank_info = new EmployeeBankInformation();
                                     $employee_bank_info->employee_id = $employee_request->id;
-                                    $employee_bank_info->account_no = $bank_detail['account_number'];
+                                    $employee_bank_info->account_title = $bank_detail['account_tile'];
                                     $employee_bank_info->bank_id = $bank_detail['bank'];
                                     $employee_bank_info->branch_name = $bank_detail['branch'];
                                     $employee_bank_info->iban = $bank_detail['iban_no'];
