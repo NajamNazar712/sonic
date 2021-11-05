@@ -7987,7 +7987,7 @@ class NotificationsController extends Controller
 
                         $to = array();
                         $bcc = array();
-                        /*$to[] = 'hassan@trax.pk';
+                        $to[] = 'hassan@trax.pk';
                         $to[] = 'mohsin.qamar@trax.pk';
                         $to[] = 'talha.motiwala@trax.pk';
                         $to[] = 'shafay.tariq@trax.pk';
@@ -7996,8 +7996,7 @@ class NotificationsController extends Controller
                         $to[] = 'zakee.rasheed@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
-                        $bcc[] = 'danish.zahid@trax.pk';*/
-                        $to[] = 'muhammad.waqas@trax.pk';
+                        $bcc[] = 'danish.zahid@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
