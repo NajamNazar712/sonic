@@ -352,7 +352,7 @@ class LeadManagementController extends Controller
         $leads['received'] = number_format($leads['received']);
         $leads['in_process'] = number_format($leads['in_process']);
         $leads['dead_leads'] = number_format($leads['dead_leads']);
-        $leads['accounts_activated'] = number_format($leads['accounts_activated']->count());
+        $leads['accounts_activated'] = number_format($leads['accounts_activated']);
 
         return response()->json(['status' => 1, 'leads' => $leads]);
     }
