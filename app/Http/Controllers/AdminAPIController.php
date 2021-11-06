@@ -4096,7 +4096,10 @@ class AdminAPIController extends Controller
                 'cnic_2' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
                 //BankInformation
-                'bank_details' => ['required']
+                'bank_id' => ['required', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
+                'account_title' => ['required'],
+                'branch_name' => ['required'],
+                'iban' => ['required'],
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -4182,18 +4185,14 @@ class AdminAPIController extends Controller
                         $employee_request->staff_category_id = $request->staff_category_id;
                         $employee_request->save();
 
-                        if ($request->has('bank_details')) {
-                            $bank_details = json_decode($request->bank_details, true);
-                            foreach ($bank_details as $bank_detail) {
-                                $employee_bank_info = new EmployeeBankInformation();
-                                $employee_bank_info->employee_id = $employee_request->id;
-                                $employee_bank_info->account_title = $bank_detail['account_tile'];
-                                $employee_bank_info->bank_id = $bank_detail['bank'];
-                                $employee_bank_info->branch_name = $bank_detail['branch'];
-                                $employee_bank_info->iban = $bank_detail['iban_no'];
-                                $employee_bank_info->save();
-                            }
-                        }
+                        $employee_bank_info = new EmployeeBankInformation();
+                        $employee_bank_info->employee_id = $employee_request->id;
+                        $employee_bank_info->account_title = $request->account_title;
+                        $employee_bank_info->bank_id = $request->bank_id;
+                        $employee_bank_info->branch_name = $request->branch_name;
+                        $employee_bank_info->iban = $request->iban;
+                        $employee_bank_info->save();
+
 
                         if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
                             $employee_id = $employee_request->id;
