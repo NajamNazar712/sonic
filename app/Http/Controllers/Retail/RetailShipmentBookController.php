@@ -794,7 +794,7 @@ class RetailShipmentBookController extends Controller
                             </tbody>
                             </table>
                             </div>
-                            <div>
+                            <div class="col m-1 row">
                               <h1 style="
                              overflow: hidden;
                              margin-top: -220px;
@@ -1090,7 +1090,7 @@ class RetailShipmentBookController extends Controller
                 ';
 
                     $table_end .= '
-                    <div>
+                    <div class="col m-1 row">
                               <h1 style="
                              overflow: hidden;
                              margin-top: -220px;
