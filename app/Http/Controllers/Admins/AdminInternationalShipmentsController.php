@@ -116,7 +116,7 @@ class AdminInternationalShipmentsController extends Controller
             })],
             'international_tracking_number' => ['required'],
             'actual_weight' => ['nullable', 'numeric', 'between:0.1,100000'],
-            'service_provider_id' => ['required', 'numeric', 'between:1,6', 'exists:international_shipment_service_providers,id']
+            'service_provider_id' => ['required', 'numeric', 'between:1,7', 'exists:international_shipment_service_providers,id']
         ];
 
 
