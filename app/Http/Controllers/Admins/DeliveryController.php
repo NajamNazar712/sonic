@@ -7437,7 +7437,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         else{
             $riders = Rider::where('status',1)->where('blacklist',0)->select('id','name')->get();
         }
-        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->where('status', 1)->where('business_category_id', 1)->select('id','name')->get();
         return view('admin.delivery.note.request')->with(['riders' => $riders,'hubs' => $hubs]);
     }
     public function request_list(Request $requests){
