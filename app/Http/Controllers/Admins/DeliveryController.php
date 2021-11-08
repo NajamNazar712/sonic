@@ -72,6 +72,7 @@ use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Admin\PettyCashStatement;
+use App\Jobs\ProcessAgentCallMonitoring;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -2125,7 +2126,12 @@ class DeliveryController extends Controller
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
                     }
-                    
+
+                    //auto agent assigning
+                    $data = array();
+                    $data['delivery_note_id'] = $delivery_note_id;
+                    $data['shipment'] = $shipment;
+                    dispatch(new ProcessAgentCallMonitoring($data));
                 }
             }
 
