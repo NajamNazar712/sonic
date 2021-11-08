@@ -10,6 +10,8 @@ class Permission
 {
     private $actions = [
         'admin' => [
+            'orders.index' => 621,
+            'orders.self_collection.index' => 622,
             'orders.shipper_recall' => 139,
 
             'activity_trail.index' => 471,
