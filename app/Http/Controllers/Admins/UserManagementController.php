@@ -472,8 +472,9 @@ class UserManagementController extends Controller
     }
 
     public function admin_otp_list(Request $request){
-        $admins = Admin::select('admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.last_login_attempt')
+        $admins = Admin::select('cities.name as city','admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.last_login_attempt')
             ->where('admins.status', 1)
+            ->join('cities', 'admins.default_hub_id', '=', 'cities.id')
             ->whereNotNull('admins.otp');
         if(!in_array(session('role_id'), [1, 58, 61, 56, 71])) {
             $admins = $admins->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->where('ar.department_id', session('department_id'));

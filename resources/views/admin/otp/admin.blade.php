@@ -18,6 +18,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Name</th>
+                        <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">OTP</th>
                         <th class="border-primary border-darken-1">Last Login Attempt</th>
                     </tr>
@@ -120,6 +121,7 @@
 
                         head.push('S.No');
                         head.push('Name');
+                        head.push('City');
                         head.push('OTP');
                         head.push('Last Login Attempt');
                         $.each(result.data, function(index, values) {
@@ -127,6 +129,7 @@
 
                             row.push(index + 1);
                             row.push(values.name);
+                            row.push(values.city);
                             row.push(values.otp);
                             row.push(values.last_login_attempt);
 
@@ -165,10 +168,11 @@
                 url: '{{ route('admin.admin_otp.list') }}',
             },
             rowId: 'shId',
-            order: [[3, 'desc']],
+            order: [[4, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'name', name: 'admins.name', class: 'align-middle name'},
+                {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'otp', name: 'admins.otp', class: 'align-middle otp'},
                 {data: 'last_login_attempt', name: 'admins.last_login_attempt', class: 'align-middle last_login_attempt'},
 
