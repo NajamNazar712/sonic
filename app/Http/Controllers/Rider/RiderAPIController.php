@@ -9860,10 +9860,10 @@ class RiderAPIController extends Controller
                 'address' => ['required'],
                 'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
-                'date_of_birth' => ['nullable'],
+                'date_of_birth' => ['required'],
                 'pin' => ['required', 'integer', 'digits:4'],
-                'cnic_1' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
-                'cnic_2' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
                 //BankInformation
                 'bank_id' => ['required', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
