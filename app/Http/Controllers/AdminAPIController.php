@@ -4238,7 +4238,7 @@ class AdminAPIController extends Controller
         if ($request->isMethod('post')) {
             $rules = [
                 //Employees
-                'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+                'employees_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
 
                 //EducationalDetails
                 'education_details' => ['nullable'],
@@ -4260,7 +4260,7 @@ class AdminAPIController extends Controller
                 $message = 'Error(s) in Input';
                 $response['errors'] = $validate->errors();
             } else {
-                $employee_request = Employee::find($request->employee_id);
+                $employee_request = Employee::find($request->employees_id);
                 if ($employee_request) {
                     try {
                         if ($request->has('employment_history')) {

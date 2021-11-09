@@ -9871,7 +9871,7 @@ class RiderAPIController extends Controller
                 'branch_name' => ['required'],
                 'iban' => ['required'],
             ];
-            $response = ['status' => 0];
+            $response = ['status' => 1];
             $message = 'Unknown';
 
             $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -10041,7 +10041,7 @@ class RiderAPIController extends Controller
                 $message = 'Error(s) in Input';
                 $response['errors'] = $validate->errors();
             } else {
-                $employee_request = Employee::find($request->employee_id);
+                $employee_request = Employee::find($request->employees_id);
                 if ($employee_request) {
                     try {
                         if ($request->has('employment_history')) {
