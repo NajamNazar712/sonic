@@ -15,7 +15,7 @@ class Seeder4236ForEmployeeDirectory extends Seeder
     public function run()
     {
         $employees = array(
-            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => 'designation' => '','department' => '','shift' => ''),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => 'designation' => '','department' => '','shift' => '','status' => ''),
         );
 
         foreach ($employees as $employee)
@@ -29,7 +29,12 @@ class Seeder4236ForEmployeeDirectory extends Seeder
             $emp->phone_number = $employee['phone'];
             $emp->employee_type_id = $employee['type'];
             $emp->request_status_id = 3;
-            $emp->status_id = 3;
+            if($employee['status'] == 1) {
+                $emp->status_id = 3;
+            }
+            else{
+                $emp->status_id = 2;
+            }
             $emp->designation_id = $employee['designation'];
             $emp->department_id = $employee['department'];
             $emp->shift_id = $employee['shift'];
