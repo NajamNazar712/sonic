@@ -9880,6 +9880,8 @@ class RiderAPIController extends Controller
 
             if ($validate->fails()) {
                 $message = 'Error(s) in Input';
+                $response['phone_number'] = $request->phone_number;
+                $response['cnic'] = $request->cnic_no;
                 $response['errors'] = $validate->errors();
             } else {
                 $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
