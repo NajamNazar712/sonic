@@ -143,7 +143,7 @@
                         <th class="border-primary border-darken-1">Employee Name</th>
                         <th class="border-primary border-darken-1">Employee Designation</th>
                         <th class="border-primary border-darken-1">SDN No.</th>
-                        <th class="border-primary border-darken-1">DNCC Count</th>
+                        <th class="border-primary border-darken-1">DNCC/PNCC Count</th>
                     </tr>
                     </thead>
                 </table>
@@ -387,7 +387,7 @@
                             head.push('Employee Name');
                             head.push('Employee Designation');
                             head.push('SDN No.');
-                            head.push('DNCC Count');
+                            head.push('DNCC/PNCC Count');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -590,6 +590,39 @@
                         });
                 }
             });
+
+            $('body').on('click','a.dncc_print',function(){
+                var id = parseInt($(this).attr('dnid'));
+                printDNCC(id);
+            });
+            function printDNCC(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.sdn.dncc.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
 
             function printSDN(id) {
                 $.ajax({
