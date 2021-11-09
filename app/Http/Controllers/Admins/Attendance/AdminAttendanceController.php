@@ -587,11 +587,12 @@ class AdminAttendanceController extends Controller
 
         $datatable = Datatables::of($admin_attendance_action)
             ->editColumn('latitude', function ($action) {
-                $api = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng=' . $action->latitude . ',' . $action->longitude . '&key=AIzaSyAIg5c-H5DaYBwF_D0HuWliQZQ6XzKj8Nk';
-                $data = json_decode(file_get_contents($api));
-                $data_array = get_object_vars($data);
-                $result = $data_array['results'][0]->formatted_address;
-                return $result;
+                if ($action->latitude && $action->longitude) {
+                    $action = '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href="https://www.google.com/maps/search/?api=1&query=' . $action->latitude . ',' . $action->longitude . '" target="_blank"><i class="la la-map-marker"></i> View</a></div>';
+                } else {
+                    $action = '-';
+                }
+                return $action;
             })
             ->editColumn('attendance_date', function ($data) {
                 return Carbon::parse($data->attendance_date)->format("Y-m-d");

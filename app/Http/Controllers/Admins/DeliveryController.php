@@ -72,6 +72,7 @@ use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Admin\PettyCashStatement;
+use App\Jobs\ProcessAgentCallMonitoring;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -2125,7 +2126,12 @@ class DeliveryController extends Controller
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
                     }
-                    
+
+                    //auto agent assigning
+                    $data = array();
+                    $data['delivery_note_id'] = $delivery_note_id;
+                    $data['shipment'] = $shipment;
+                    dispatch(new ProcessAgentCallMonitoring($data));
                 }
             }
 
@@ -7437,10 +7443,12 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         else{
             $riders = Rider::where('status',1)->where('blacklist',0)->select('id','name')->get();
         }
-        return view('admin.delivery.note.request')->with(['riders' => $riders]);
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->where('status', 1)->where('business_category_id', 1)->select('id','name')->get();
+        return view('admin.delivery.note.request')->with(['riders' => $riders,'hubs' => $hubs]);
     }
-    public function request_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
+    public function request_list(Request $requests){
+        //dd($requests->search_hub);
+        if($requests->get('excel') && $requests->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),270);
         }
@@ -7448,7 +7456,10 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
             ->select(['delivery_note_requests.id as id','r.name as rider', 'delivery_note_requests.delivery_note_id as delivery_note','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by','delivery_note_requests.status as status']);
-
+            //dd($request);
+            if ($requests->search_hub) {
+                $request = $request->where('r.city_id', $requests->search_hub);
+            }
 
         $datatables = Datatables::of($request)
             ->editColumn('status', function ($result) {

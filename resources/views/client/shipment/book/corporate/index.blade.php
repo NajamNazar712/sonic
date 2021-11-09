@@ -174,7 +174,7 @@
                                         @else
                                             @if (Session::has('restrict_order_id'))
                                                 <div class="form-group">
-                                                    <input name="order_id" class="form-control order_id" placeholder="Order ID" data-rule-maxlength="100" data-rule-required="true" data-msg-required="Order ID is required" data-msg-maxlength="Order ID can be maximum 100 characters" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique">
+                                                    <input name="order_id" class="form-control order_id" placeholder="Order ID" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters" data-rule-remote="{{ route('cod.shipment.book.restrict_order_id') }}" data-msg-remote="Order ID must be unique">
                                                 </div>
                                             @else
                                                 <div class="form-group">
