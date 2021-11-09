@@ -4264,7 +4264,7 @@ class AdminAPIController extends Controller
                 if ($employee_request) {
                     try {
                         if ($request->has('employment_history')) {
-                            $employment_histories = $request->employment_history;
+                            $employment_histories = json_decode($request->employment_history, true);
                             foreach ($employment_histories as $employment_history) {
                                 $history = new EmployeeEmployementHistory();
                                 $history->employee_id = $employee_request->id;
@@ -4278,7 +4278,7 @@ class AdminAPIController extends Controller
                         }
 
                         if ($request->has('medical_details')) {
-                            $medical_details = $request->medical_details;
+                            $medical_details = json_decode($request->medical_details, true);
                             foreach ($medical_details as $medical_detail) {
                                 $medical_info = new EmployeeMedicalInformation();
                                 $medical_info->employee_id = $employee_request->id;
@@ -4291,7 +4291,7 @@ class AdminAPIController extends Controller
                         }
 
                         if ($request->has('education_details')) {
-                            $education_details = $request->education_details;
+                            $education_details = json_decode($request->education_details, true);
                             foreach ($education_details as $education_detail) {
                                 $employee_education = new EmployeeEducationalBackground();
                                 $employee_education->employee_id = $employee_request->id;
@@ -4315,6 +4315,7 @@ class AdminAPIController extends Controller
             $message = 'Post Method is Required';
         }
         $response['message'] = $message;
+        $response['education_details'] = $request->education_details;
         return response()->json($response);
     }
 }
