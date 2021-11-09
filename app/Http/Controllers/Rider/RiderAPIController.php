@@ -10008,6 +10008,8 @@ class RiderAPIController extends Controller
             $message = 'Post Method is Required';
         }
         $response['message'] = $message;
+        $response['phone_number'] = $request->phone_number;
+        $response['cnic'] = $request->cnic_no;
         return response()->json($response);
     }
 
