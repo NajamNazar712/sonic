@@ -398,30 +398,18 @@
                                         <h4 class="form-section">Bank Information</h4>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Account Title<span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control border-primary" id="account_title" value="{{$bank_info->account_title ?? ''}}" name="account_title" data-rule-required="true" data-msg-required="Account Title is required">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Branch Code<span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control border-primary" id="branch_code" value="{{$bank_info->branch_code ?? ''}}" name="branch_code" data-rule-required="true" data-msg-required="Branch Code is required">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Account Number<span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control border-primary" id="account_number" value="{{$bank_info->account_no ?? ''}}" name="account_number" data-rule-required="true" data-msg-required="Account Number is required">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
                                                 <label>Bank Name<span class="text-danger">*</span></label>
                                                 <select name="bank_name" id="bank_name" data-rule-required="true" data-msg-required="Bank Name is required" class="select2 form-control required" style="width: 100%">
                                                     @foreach($banks as $bank)
                                                         <option value="{{$bank->id}}">{{$bank->name}}</option>
                                                     @endforeach
                                                 </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Account Title<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control border-primary" id="account_title" value="{{$bank_info->account_title ?? ''}}" name="account_title" data-rule-required="true" data-msg-required="Account Title is required">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
