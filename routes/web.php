@@ -2404,6 +2404,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\AdminReportsController@manifest_short_received_shipments_list')->name('list');
             });
         });
+
+        Route::prefix('reverse_pickup')->name('reverse_pickup.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@reverse_pickup_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@reverse_pickup_list')->name('list');
+        });
     });
 
     //Reports end

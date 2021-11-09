@@ -9587,5 +9587,44 @@ class AdminReportsController extends Controller
 
         return $datatable->make(true);
     }
+
+    public function reverse_pickup_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),470);
+        return view('admin.reports.reverse_pickup');
+    }
+
+    public function reverse_pickup_list(Request $request){
+        $connection = 'reports';
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),471);
+        }
+        $shipments = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select(['shipments.tracking_number as tracking_number_link','shipments.order_id as order_id','shipments.tracking_number','u.name as shipper','u.address as address','u.phone as contact','oc.name as origin','dc.name as destination',DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),'sj.created_at as arrival_date','shipments.pickup_date as pickup_date','shipments.consignee_name as consignee_name','shipments.consignee_phone_number_1 as consignee_contact','shipments.consignee_address as consignee_address'])
+            ->where('shipments.booking_type_id', '=', 5);
+        
+            $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });            
+       
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('sj.created_at', [$from,$to]);
+        }
+        return $datatable->make(true);
+    }
 }
 
