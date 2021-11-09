@@ -9871,7 +9871,7 @@ class RiderAPIController extends Controller
                 'branch_name' => ['required'],
                 'iban' => ['required'],
             ];
-            $response = ['status' => 1];
+            $response = ['status' => 0];
             $message = 'Unknown';
 
             $validate = Validator::make($request->all(), $rules, $this->messages);
