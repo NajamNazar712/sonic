@@ -496,7 +496,7 @@
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-                initComplete: function() {c
+                initComplete: function() {
                     this.api().table().columns.adjust();
                 }
             });
