@@ -6220,6 +6220,9 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
 
+                    if($shipment->consignee_city_id == $request->consignee_city[$shipment_id]){
+                        continue;
+                    }
                     if ($shipment->shipper_status_id == 3) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
                         if ($cargo_consignment_shipment->exists()) {
