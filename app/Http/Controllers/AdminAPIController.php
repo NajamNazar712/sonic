@@ -4268,11 +4268,11 @@ class AdminAPIController extends Controller
                             foreach ($employment_histories as $employment_history) {
                                 $history = new EmployeeEmployementHistory();
                                 $history->employee_id = $employee_request->id;
-                                $history->name = $employment_history['organization_company_name'];
-                                $history->designation = $employment_history['position_designation'];
+                                $history->name = $employment_history['organization_name'];
+                                $history->designation = $employment_history['designation'];
                                 $history->from = $employment_history['from_date'];
                                 $history->to = $employment_history['to_date'];
-                                $history->reason = $employment_history['reason'];
+                                $history->reason = $employment_history['reason_for_leaving'];
                                 $history->save();
                             }
                         }
@@ -4297,7 +4297,7 @@ class AdminAPIController extends Controller
                                 $employee_education->employee_id = $employee_request->id;
                                 $employee_education->name = $education_detail['institute'];
                                 $employee_education->degree = $education_detail['degree'];
-                                $employee_education->grade = $education_detail['position_grade'];
+                                $employee_education->grade = $education_detail['position'];
                                 $employee_education->passing_year = $education_detail['graduation_year'];
                                 $employee_education->save();
                             }
