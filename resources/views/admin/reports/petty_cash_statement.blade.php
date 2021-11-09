@@ -559,7 +559,7 @@
 
                                 if (data.pickup_notes) {
                                     $.each(data.pickup_notes, function (index, value) {
-                                        notes += '<u><a href="javascript:void(0);" class="pncc_print" dnid="' + value + '">' + value + '</a></u><br>';
+                                        notes += '<span class="pncc_print" dnid="' + value + '">' + value + '</span><br>';
                                     });
                                 }
                                 $('#pncc_modal .modal-body').html('');
