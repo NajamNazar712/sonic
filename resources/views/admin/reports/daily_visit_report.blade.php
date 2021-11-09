@@ -62,6 +62,8 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Admin User</th>
+                        <th class="border-primary border-darken-1">Admin Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Visit Date/Time</th>
                         <th class="border-primary border-darken-1">Company Name</th>
                         <th class="border-primary border-darken-1">Customer Name</th>
@@ -70,8 +72,6 @@
                         <th class="border-primary border-darken-1">Email Address</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
                         <th class="border-primary border-darken-1">Meeting Feedback</th>
-                        <th class="border-primary border-darken-1">City</th>
-                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1">Photo of Location</th>
                         <th class="border-primary border-darken-1">Photo of Business Card</th>
@@ -214,6 +214,8 @@
                             head = [];
                             head.push('S. No.');
                             head.push('Admin User');
+                            head.push('Admin Hub');
+                            head.push('Zone');
                             head.push('Visit Date/Time');
                             head.push('Company Name');
                             head.push('Customer Name');
@@ -222,12 +224,12 @@
                             head.push('Email Address');
                             head.push('Lead Status');
                             head.push('Meeting Feedback');
-                            head.push('City');
-                            head.push('Zone');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.admin);
+                                row.push(values.city);
+                                row.push(values.zone);
                                 row.push(values.created_at);
                                 row.push(values.company_name);
                                 row.push(values.customer_name);
@@ -236,8 +238,6 @@
                                 row.push(values.email);
                                 row.push(values.lead_status);
                                 row.push(values.feedback);
-                                row.push(values.city);
-                                row.push(values.zone);
                                 body.push(row);
                             });
                         },
@@ -275,10 +275,12 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[2, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'admin' ,name: 'a.name', class: 'align-middle admin'},
+                    { data:'city' ,name: 'c.name', class: 'align-middle city'},
+                    { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data:'created_at' ,name: 'daily_visits.created_at', class: 'align-middle created_at'},
                     { data:'company_name' ,name: 'daily_visits.company_name', class: 'align-middle company_name'},
                     { data:'customer_name' ,name: 'daily_visits.customer_name', class: 'align-middle customer_name'},
@@ -287,8 +289,6 @@
                     { data:'email' ,name: 'daily_visits.email', class: 'align-middle email'},
                     { data:'lead_status' ,name: 'dvls.name', class: 'align-middle lead_status'},
                     { data:'feedback' ,name: 'daily_visits.feedback', class: 'align-middle feedback'},
-                    { data:'city' ,name: 'c.name', class: 'align-middle city'},
-                    { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data:'location' ,name: 'location', class: 'align-middle location', sortable: false, orderable: false, searchable: false},
                     { data:'l_photo' ,name: 'l_photo', class: 'align-middle l_photo', sortable: false, orderable: false, searchable: false},
                     { data:'b_c_photo' ,name: 'b_c_photo', class: 'align-middle b_c_photo', sortable: false, orderable: false, searchable: false},
