@@ -3994,10 +3994,10 @@ class AdminAPIController extends Controller
 
                     return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
                 } else {
-                    return response()->json(['status' => 1, 'message' => 'Invalid Password']);
+                    return response()->json(['status' => 1, 'message' => 'Invalid PIN!']);
                 }
             } else {
-                return response()->json(['status' => 1, 'message' => 'Wrong Email/Password!']);
+                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
             }
         }
     }
