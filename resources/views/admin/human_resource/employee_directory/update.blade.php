@@ -220,6 +220,40 @@
                                             </div>
                                         </div>
                                         @endif
+                                        @if($employee->employee_type_id == 2)
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Rider Type<span class="text-danger">*</span></label>
+                                                <select name="rider_type" id="rider_type" data-rule-required="true"  data-msg-required="Rider Type is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($rider_types as $rider_type)
+                                                        <option value="{{$rider_type->id}}">{{$rider_type->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Rider Main Category<span class="text-danger">*</span></label>
+                                                <select name="rider_main_category" id="rider_main_category" data-rule-required="true" data-msg-required="Main Category is Required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($main_categories as $main_category)
+                                                        <option value="{{$main_category->id}}">{{$main_category->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Rider Sub Category<span class="text-danger">*</span></label>
+                                                <select name="rider_sub_category" id="rider_sub_category" data-rule-required="true" data-msg-required="Sub Category is Required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($sub_categories as $sub_category)
+                                                        <option value="{{$sub_category->id}}">{{$sub_category->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        @endif
 
                                         <div class="col-md-12">
                                             <div class="form-group">
@@ -2136,6 +2170,24 @@
                 width:'100%',
             });
             $("#zone").val("{{$employee->zone_id ?? ''}}").trigger('change');
+
+            $("#rider_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rider Type",
+                width:'100%',
+            });
+            $("#rider_type").val("{{$rider_request->rider_type_id ?? ''}}").trigger('change');
+
+            $("#rider_main_category").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rider Main Category",
+                width:'100%',
+            });
+            $("#rider_main_category").val("{{$employee->rider_main_category ?? ''}}").trigger('change');
+
+            $("#rider_sub_category").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rider Sub Category",
+                width:'100%',
+            });
+            $("#rider_sub_category").val("{{$employee->rider_sub_category ?? ''}}").trigger('change');
 
             $("#department").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department",

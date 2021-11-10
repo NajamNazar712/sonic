@@ -953,7 +953,11 @@ class AdminHumanResourseController extends Controller
         $shifts = EmployeeShift::where('status', 1)->get();
         $staff_categories = StaffCategory::all();
         $genders = EmployeeGender::all();
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders'));
+        $rider_types = RiderType::all();
+        $main_categories = RiderMainCategory::all();
+        $sub_categories = RiderCategory::all();
+        $rider_request = $employee->rider_request;
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_request'));
     }
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
@@ -995,7 +999,15 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->shift_id = $request->shift_id;
         $employee->staff_category_id = $request->staff_category;
+        $employee->rider_sub_category = $request->rider_sub_category;
+        $employee->rider_main_category = $request->rider_main_category;
         $employee->update();
+
+        $rider_request = RiderRequest::find($employee->rider_request_id);
+        if($rider_request){
+            $rider_request->rider_type_id = $request->rider_type;
+            $rider_request->save();
+        }
 
         if($employee->employee_type_id == 1)
         {

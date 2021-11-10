@@ -9969,6 +9969,9 @@ class RiderAPIController extends Controller
                             $employee_request->date_of_birth = $request->date_of_birth;
                             $employee_request->mother_name = $request->mother_name;
                             $employee_request->pin = $request->pin;
+                            $employee_request->rider_main_category = $request->rider_main_category;
+                            $employee_request->rider_sub_category = $request->rider_sub_category;
+
                             $employee_request->save();
 
                             $employee_bank_info = new EmployeeBankInformation();
