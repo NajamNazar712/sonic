@@ -18,6 +18,7 @@ class CreateDwsWeightChargesHistoriesTable extends Migration
             $table->integer('user_id')->index();
             $table->integer('shipping_mode_id')->index();
             $table->tinyInteger('dws_weight_status')->default(1);
+            $table->integer('admin_id')->index();
             $table->timestamps();
         });
     }

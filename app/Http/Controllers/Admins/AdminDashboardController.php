@@ -143,6 +143,9 @@ use App\Http\Models\WeightCharge;
 use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\DiscountCharge;
+use App\Http\Models\DwsWeightCharges;
+use App\Http\Models\DwsWeightChargesHistory;
+use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\Rates\PendingWeightCharge;
 use App\Http\Models\Rates\PendingBookingTypeCharges;
 use App\Http\Models\Rates\PendingReturnCharge;
@@ -1907,6 +1910,31 @@ class AdminDashboardController extends Controller
 
 
     public function editRatesView($id){
+        $dws_weight = DwsWeightCharges::where('user_id',$id);
+
+        $on_dws_charges = null;
+        $ol_dws_charges = null;
+        $detain_dws_charges = null;
+        $sameday_dws_charges = null;
+
+        if($dws_weight->exists()){
+            $dws_weight = $dws_weight->get();
+            foreach ($dws_weight as $value) {
+                if($value->shipping_mode_id == 1){
+                    $on_dws_charges = $value->dws_weight_status;
+
+                }elseif($value->shipping_mode_id == 2){
+                    $on_dws_charges = $value->dws_weight_status;
+
+                }elseif($value->shipping_mode_id == 3){
+                    $on_dws_charges = $value->dws_weight_status;
+                    
+                }elseif($value->shipping_mode_id == 4){
+                    $on_dws_charges = $value->dws_weight_status;
+                    
+                }
+            }
+        }
         $user = User::find($id);
         $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
         $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
@@ -2089,14 +2117,14 @@ class AdminDashboardController extends Controller
             }
             if(session('department_id') == 7){
                 if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
-                    return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                    return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
                 else{
                     return view('admin.access_denied');
                 }
             }
             else{
-                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
             }
 
         }
@@ -2238,14 +2266,14 @@ class AdminDashboardController extends Controller
             $existing = 1;
             if(session('department_id') == 7){
                 if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
-                    return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                    return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
                 else{
                     return view('admin.access_denied');
                 }
             }
             else{
-                return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
             }
         }
         else {
@@ -3008,6 +3036,55 @@ class AdminDashboardController extends Controller
 
                 }
                 //dd($weightAlready);
+                if ($request->has('on_dws_weight')) {
+                    if($request->on_dws_weight == 0){
+                        
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }else{
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }
+        
+                }
             }
 
             //overland
@@ -3276,6 +3353,55 @@ class AdminDashboardController extends Controller
 
                 }
                 //dd($weightAlready);
+                if ($request->has('ol_dws_weight')) {
+                    if($request->ol_dws_weight == 0){
+                        
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }else{
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }
+        
+                }
             }
 
             //detain
@@ -3543,6 +3669,55 @@ class AdminDashboardController extends Controller
 
                 }
                 //dd($weightAlready);
+                if ($request->has('detain_dws_weight')) {
+                    if($request->detain_dws_weight == 0){
+                        
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }else{
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }
+        
+                }
             }
 
             //sameday
@@ -3811,6 +3986,55 @@ class AdminDashboardController extends Controller
 
                 }
                 //dd($weightAlready);
+                if ($request->has('sameday_dws_weight')) {
+                    if($request->sameday_dws_weight == 0){
+                        
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }else{
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }
+        
+                }
             }
             if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
                 $wms_user_info = WmsUserInformation::where('user_id', $id);
@@ -4596,6 +4820,55 @@ class AdminDashboardController extends Controller
 
                 }
                 //dd($weightAlready);
+                if ($request->has('on_dws_weight')) {
+                    if($request->on_dws_weight == 0){
+                        
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }else{
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }
+        
+                }
             }
             //Overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
@@ -4769,6 +5042,55 @@ class AdminDashboardController extends Controller
                         ]);
                     }
 
+                }
+                if ($request->has('ol_dws_weight')) {
+                    if($request->ol_dws_weight == 0){
+                        
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }else{
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' =>2,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }
+        
                 }
 
             }
@@ -4945,7 +5267,55 @@ class AdminDashboardController extends Controller
                     }
 
                 }
+                if ($request->has('detain_dws_weight')) {
+                    if($request->detain_dws_weight == 0){
+                        
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
 
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }else{
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' =>3,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }
+        
+                }
             }
             //Sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
@@ -5118,6 +5488,55 @@ class AdminDashboardController extends Controller
                         ]);
                     }
 
+                }
+                if ($request->has('sameday_dws_weight')) {
+                    if($request->sameday_dws_weight == 0){
+                        
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 0,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }else{
+                        DwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+                        
+                        DwsWeightChargesHistory::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' =>4,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'dws_weight_status' => 1,
+                            'admin_id' => Auth::id()
+                        ]);
+
+                    }
+        
                 }
             }
 
@@ -6942,6 +7361,55 @@ class AdminDashboardController extends Controller
 
             }
             //dd($weightAlready);
+            if ($request->has('on_dws_weight')) {
+                if($request->on_dws_weight == 0){
+                    
+                    DwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
+                    
+                    DwsWeightChargesHistory::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                }else{
+                    DwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+                    
+                    DwsWeightChargesHistory::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                }
+    
+            }
         }
         //Overland
         if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
@@ -7121,7 +7589,55 @@ class AdminDashboardController extends Controller
                 }
 
             }
+            if ($request->has('ol_dws_weight')) {
+                if($request->ol_dws_weight == 0){
+                    
+                    DwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
+                    
+                    DwsWeightChargesHistory::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
 
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                }else{
+                    DwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+                    
+                    DwsWeightChargesHistory::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                }
+    
+            }
         }
         //Detain
         if($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
@@ -7301,7 +7817,55 @@ class AdminDashboardController extends Controller
                 }
 
             }
+            if ($request->has('detain_dws_weight')) {
+                if($request->detain_dws_weight == 0){
+                    
+                    DwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
+                    
+                    DwsWeightChargesHistory::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
 
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                }else{
+                    DwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+                    
+                    DwsWeightChargesHistory::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                }
+    
+            }
         }
         //Sameday
         if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
@@ -7479,6 +8043,55 @@ class AdminDashboardController extends Controller
                     ]);
                 }
 
+            }
+            if ($request->has('sameday_dws_weight')) {
+                if($request->sameday_dws_weight == 0){
+                    
+                    DwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
+                    
+                    DwsWeightChargesHistory::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'dws_weight_status' => 0,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                }else{
+                    DwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+                    
+                    DwsWeightChargesHistory::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'dws_weight_status' => 1,
+                        'admin_id' => Auth::id()
+                    ]);
+
+                }
+    
             }
         }
 
