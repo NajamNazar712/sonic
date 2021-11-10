@@ -698,8 +698,12 @@
 
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Support</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="{{route('admin.orders.index')}}">Order Management</a></li>
-                    <li><a class="menu-item" href="{{route('admin.orders.self_collection.index')}}">Self Collection Shipments</a></li>
+                    @if(session('role_id') == 1 || in_array(621, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.orders.index')}}">Order Management</a></li>
+                    @endif
+                    @if (session('role_id') == 1 || in_array(622, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.orders.self_collection.index')}}">Self Collection Shipments</a></li>
+                    @endif
                     <li><a class="menu-item" href="{{ route('admin.quick_tracking.index') }}">Quick Tracking</a></li>
 
                     @if(session('role_id') == 1 || in_array(204, session('permissions')))
