@@ -9847,8 +9847,8 @@ class RiderAPIController extends Controller
         if ($request->isMethod('post')) {
             $rules = [
                 'rider_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
-                'rider_sub_category' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_categories,id'],
-                'rider_main_category' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_main_categories,id'],
+                'rider_sub_category' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_categories,id'],
+                'rider_main_category' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_main_categories,id'],
                 //Employees
                 'name' => ['required'],
                 'mother_name' => ['required'],
