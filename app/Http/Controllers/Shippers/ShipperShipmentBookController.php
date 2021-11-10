@@ -6383,7 +6383,7 @@ class ShipperShipmentBookController extends Controller
             }
             else{
                 if(Session::has('restrict_order_id')){
-                    $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+                    $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
                         $query->where('user_id', $user_id);
                     })];
                 }

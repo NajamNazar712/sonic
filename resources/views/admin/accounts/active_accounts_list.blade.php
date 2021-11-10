@@ -2139,6 +2139,7 @@
                         }
                     })
                         .done(function(data) {
+                            $('#restrict_order_id_checkbox').prop('checked',false);
                             if (data.status == 1) {
                                 $('#restrict_order_id_checkbox').click();
                             }
