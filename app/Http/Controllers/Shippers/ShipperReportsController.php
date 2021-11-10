@@ -38,7 +38,7 @@ class ShipperReportsController extends Controller
     }
     public function sales_list(Request $request)
     {
-        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982])) {
+        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110])) {
             $connection = 'reports';
         } else {
             $connection = 'mysql';
