@@ -4235,7 +4235,7 @@ class AdminAPIController extends Controller
 
     public function signup_optional_details(Request $request)
     {
-        return response()->json(['status' => 0,'education_details' => $request->education_details, 'employment_history' => $request->employment_history, 'medical_details' => $request->medical_details]);
+        //return response()->json(['status' => 0,'education_details' => $request->education_details, 'employment_history' => $request->employment_history, 'medical_details' => $request->medical_details]);
         if ($request->isMethod('post')) {
             $rules = [
                 //Employees

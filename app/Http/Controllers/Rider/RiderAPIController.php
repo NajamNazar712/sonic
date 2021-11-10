@@ -4445,7 +4445,7 @@ class RiderAPIController extends Controller
         $staff_categories = StaffCategory::select('id', 'name')->get();
         $shifts = EmployeeShift::where('name' ,'!=', 'Default')->select('id', 'name', 'start_time', 'end_time')->get();
         $category = RiderCategory::all();
-        $main_category = RiderMAinCategory::all();
+        $main_category = RiderMainCategory::all();
         $shift_data = array();
         foreach($shifts as $shift){
             $datum = array();
@@ -9847,6 +9847,8 @@ class RiderAPIController extends Controller
         if ($request->isMethod('post')) {
             $rules = [
                 'rider_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
+                'rider_sub_category' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_categories,id'],
+                'rider_main_category' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_main_categories,id'],
                 //Employees
                 'name' => ['required'],
                 'mother_name' => ['required'],
@@ -10049,7 +10051,7 @@ class RiderAPIController extends Controller
                 if ($employee_request) {
                     try {
                         if ($request->has('employment_history')) {
-                            $employment_histories = $request->employment_history;
+                            $employment_histories = json_decode($request->employment_history, true);
                             foreach ($employment_histories as $employment_history) {
                                 $history = new EmployeeEmployementHistory();
                                 $history->employee_id = $employee_request->id;
@@ -10063,7 +10065,7 @@ class RiderAPIController extends Controller
                         }
 
                         if ($request->has('medical_details')) {
-                            $medical_details = $request->medical_details;
+                            $medical_details = json_decode($request->medical_details, true);
                             foreach ($medical_details as $medical_detail) {
                                 $medical_info = new EmployeeMedicalInformation();
                                 $medical_info->employee_id = $employee_request->id;
@@ -10076,7 +10078,7 @@ class RiderAPIController extends Controller
                         }
 
                         if ($request->has('education_details')) {
-                            $education_details = $request->education_details;
+                            $education_details = json_decode($request->education_details, true);
                             foreach ($education_details as $education_detail) {
                                 $employee_education = new EmployeeEducationalBackground();
                                 $employee_education->employee_id = $employee_request->id;
