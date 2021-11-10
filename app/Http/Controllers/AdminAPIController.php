@@ -4023,7 +4023,7 @@ class AdminAPIController extends Controller
                     $admins->reset_pin_otp = $pin;
                     $admins->save();
                     NotificationsController::send(162, $admins->id, $request->phone_number);
-                    return response()->json(['status' => 0, 'message' => 'Pin has been sent to your phone number', 'otp' => $pin]);
+                    return response()->json(['status' => 0, 'message' => 'Otp has been sent to your phone number', 'otp' => $pin]);
                 }else{
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }

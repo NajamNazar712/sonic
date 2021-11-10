@@ -9646,11 +9646,11 @@ class RiderAPIController extends Controller
             if ($rider->exists()) {
                 $rider = $rider->first();
                 if($rider->status){
-                    $pin = rand(1000, 9999);
+                    $pin = rand(100000, 999999);
                     $rider->reset_pin_otp = $pin;
                     $rider->save();
                     NotificationsController::send(158, $rider->id);
-                    return response()->json(['status' => 0, 'message' => 'Pin has been sent to your registered number', 'otp' => $pin]);
+                    return response()->json(['status' => 0, 'message' => 'Otp has been sent to your registered number', 'otp' => $pin]);
                 }else{
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }
@@ -9664,7 +9664,7 @@ class RiderAPIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'otp' => ['required', 'integer', 'digits:4'],
+            'otp' => ['required', 'integer', 'digits:6'],
             'pin' => ['required', 'integer', 'digits:4'],
         ];
 
