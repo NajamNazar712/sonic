@@ -81,7 +81,7 @@
                                                         <td><input type="text" name="form[{{$no}}][replacement_item_description]" class="form-control text" value="{{$ro['replacement_item_description']}}" readonly="readonly"></td>
                                                         <td><input type="text" name="form[{{$no}}][replacement_item_quantity]" class="form-control number" value="{{$ro['replacement_item_quantity']}}" readonly="readonly"></td>
                                                     @endif
-                                                    @if($service_type_check_id == 3 || $service_type_check_id == null)
+                                                    @if($service_type_check_id == 3)
                                                         <input type="hidden" name="form[{{$no}}][item_product_type_id_1]" value="{{$ro['item_product_type_id_1']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_description_1]" value="{{$ro['item_description_1']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_quantity_1]" value="{{$ro['item_quantity_1']}}">
@@ -115,7 +115,7 @@
                                                     @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
                                                         <td><input type="text" name="form[{{$no}}][amount]" class="form-control text" value="{{$ro['amount']}}" readonly="readonly"></td>
                                                     @endif
-                                                    @if($service_type_check_id == 3 || $service_type_check_id == null)
+                                                    @if($service_type_check_id == 3)
                                                         <input type="hidden" name="form[{{$no}}][try_and_buy_charges]" value="{{$ro['try_and_buy_charges']}}">
                                                     @endif
                                                     <input type="hidden" name="form[{{$no}}][payment_mode_id]" value="{{$ro['payment_mode_id']}}">
@@ -151,7 +151,7 @@
                                                         <input type="hidden" name="form[{{$no}}][replacement_item_description]" value="{{$ro['replacement_item_description']}}">
                                                         <input type="hidden" name="form[{{$no}}][replacement_item_quantity]" value="{{$ro['replacement_item_quantity']}}">
                                                     @endif
-                                                    @if($service_type_check_id == 3 || $service_type_check_id == null)
+                                                    @if($service_type_check_id == 3)
                                                         <input type="hidden" name="form[{{$no}}][item_product_type_id_1]" value="{{$ro['item_product_type_id_1']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_description_1]" value="{{$ro['item_description_1']}}">
                                                         <input type="hidden" name="form[{{$no}}][item_quantity_1]" value="{{$ro['item_quantity_1']}}">
@@ -185,7 +185,7 @@
                                                     @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
                                                         <input type="hidden" name="form[{{$no}}][amount]" value="{{$ro['amount']}}">
                                                     @endif
-                                                    @if($service_type_check_id == 3 || $service_type_check_id == null)
+                                                    @if($service_type_check_id == 3)
                                                         <input type="hidden" name="form[{{$no}}][try_and_buy_charges]" value="{{$ro['try_and_buy_charges']}}">
                                                     @endif
                                                     <input type="hidden" name="form[{{$no}}][payment_mode_id]" value="{{$ro['payment_mode_id']}}">
