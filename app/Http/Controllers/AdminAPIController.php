@@ -4115,8 +4115,7 @@ class AdminAPIController extends Controller
                 $admin = Admin::where('phone_number', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
-                $employee = Employee::where('employee_type_id', 1)
-                    ->where('phone_number', $request->input('phone_number'))
+                $employee = Employee::where('phone_number', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
                 $user_request = AdminUserRequest::where('phone_number', $request->input('phone_number'))

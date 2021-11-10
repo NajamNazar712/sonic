@@ -9893,8 +9893,7 @@ class RiderAPIController extends Controller
                 $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
-                $employee = Employee::where('employee_type_id', 2)
-                    ->where('phone_number', $request->input('phone_number'))
+                $employee = Employee::where('phone_number', $request->input('phone_number'))
                     ->orWhere('cnic', $request->input('cnic_no'));
 
                 //Check RiderRequest Already Exist
