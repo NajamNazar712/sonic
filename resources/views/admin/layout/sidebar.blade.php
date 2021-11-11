@@ -1728,7 +1728,7 @@
                         @if (session('role_id') == 1 || in_array(568, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.fnf.index')}}">FNF</a></li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(596, session('permissions')))
+                        @if (Auth::user()->trax_id != NULL)
                             <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(613, session('permissions')))
