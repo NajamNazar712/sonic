@@ -9242,11 +9242,10 @@ class AdminFinanceController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),473);
         }
 
-        $invoices = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
-            ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
-//            ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id') 'ic.name as invoicing_cycle'
-            ->select('invoice_for_reimbursements.id', 'invoice_for_reimbursements.invoice_number', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges', 'invoice_for_reimbursements.total_gst', 'invoice_for_reimbursements.total_invoice_amount', 'invoice_for_reimbursements.created_at', 'invoice_for_reimbursements.invoicing_date')->where('invoice_for_reimbursements.to_show',1);
+        $invoices = InvoiceForReimbursement::leftjoin('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
+            ->leftjoin('cities as c', 'u.city_id', '=', 'c.id')
+            ->select('invoice_for_reimbursements.id', 'invoice_for_reimbursements.invoice_number', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges', 'invoice_for_reimbursements.total_gst', 'invoice_for_reimbursements.total_invoice_amount', 'invoice_for_reimbursements.created_at', 'invoice_for_reimbursements.invoicing_date')
+            ->where('invoice_for_reimbursements.to_show',1);
             if(session('department_id') == 7){
                 $invoices->whereIn('invoice_for_reimbursements.user_id', session('tagged_shippers'));
             }
