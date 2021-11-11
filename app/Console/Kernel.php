@@ -187,6 +187,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('month:averagerm')->dailyAt('07:30')->runInBackground();
         $schedule->command('month:averageindividual')->dailyAt('07:30')->runInBackground();
 
+
+        $schedule->command('reimbursement_invoice:generate')->monthlyOn(1, '00:30')->runInBackground();
+
         $settings = GlobalSettings::where('type', 'auto_invoice_generation_time');
 
         if ($settings->exists()) {

@@ -549,7 +549,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243,454,455,509], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243,454,455,509,625], session('permissions'))) !== 0)
 
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-money"></i>Financials</span></a>
                     <ul class="menu-content">
@@ -558,7 +558,7 @@
                             <li><a class="menu-item" href="{{ route('admin.finance.add_shipment_adjustment.index') }}">Add
                                     Adjustment</a></li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([59, 61, 232], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([59, 61, 232,625], session('permissions'))) !== 0)
                             <li class=" menu-item"><a href="#"><span class="menu-title">COD Payments</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(59, session('permissions')))
@@ -573,6 +573,9 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(232, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.finance.invoice_for_reimbursement.index') }}">Invoice for Reimbursement</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(625, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.finance.invoices.reimbursement.index') }}">Reimbursement Invoices</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(396, session('permissions')))
                                         <li><a class="menu-item"

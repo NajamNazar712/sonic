@@ -14,6 +14,10 @@ class DonePayment extends Model
 		return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
 	}
 
+    public function done_payment_calculation(){
+        return $this->hasOne('App\Http\Models\DonePaymentCalculation');
+    }
+
 	public function shipper_bank() {
 		return $this->belongsTo('App\Http\Models\Shipper\UserBankInfo', 'user_bank_info_id', 'id');
 	}

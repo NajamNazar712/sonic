@@ -1874,6 +1874,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('received', 'Admins\AdminFinanceController@received_invoices_index')->name('received_index');
             Route::get('received_list', 'Admins\AdminFinanceController@received_invoices_list')->name('received_list');
             //Route::get('download/{id}', 'Admins\AdminFinanceController@email_print_invoice')->name('download');
+
+            Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
+                Route::get('', 'Admins\AdminFinanceController@reimbursement_invoices_index')->name('index');
+                Route::get('list', 'Admins\AdminFinanceController@reimbursement_invoices_list')->name('list');
+            });
         });
 
         Route::prefix('invoice_for_reimbursement')->name('invoice_for_reimbursement.')->group(function () {

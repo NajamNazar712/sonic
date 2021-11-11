@@ -6265,6 +6265,122 @@ class AdminFinanceController extends Controller
         }
     }
 
+    static public function generate_reimbursement_invoice() {
+
+        $current_date = Carbon::now()->startOfDay();
+        $current_date_string = $current_date->toDateTimeString();
+        $billing_period_from_date = Carbon::now()->subMonth()->startOfMonth()->startOfDay()->toDateTimeString();
+        $billing_period_to_date = Carbon::now()->subMonth()->endOfMonth()->endOfDay()->toDateTimeString();
+
+        $users = User::where('account_type_id', 1)->get();
+
+        foreach ($users as $user) {
+            $user_id = $user->id;
+
+            $pending_payments = PendingPayment::where('user_id', $user_id)->whereBetween('created_at', [$billing_period_from_date, $billing_period_to_date]);
+
+            if ($pending_payments->exists()) {
+                $invoice_for_reimbursement = InvoiceForReimbursement::where('user_id', $user_id)->where('payment_type', 0)->where('from_date', $billing_period_from_date)->where('to_date', $billing_period_to_date);
+                if($invoice_for_reimbursement->exists())
+                {
+                    $invoice = $invoice_for_reimbursement->first();
+                    $invoice->to_show = 1;
+                    $invoice->invoicing_date = $billing_period_to_date;
+                    $invoice->created_at = $current_date_string;
+
+                    $invoice->update();
+
+                    $invoice_number = $invoice->invoice_number;
+                }
+                else {
+                    $invoice = new InvoiceForReimbursement();
+
+                    $invoice->user_id = $user_id;
+                    $invoice->invoicing_date = $billing_period_to_date;
+                    $invoice->from_date = $billing_period_from_date;
+                    $invoice->to_date = $billing_period_to_date;
+                    $invoice->payment_type = 0;
+                    $invoice->to_show = 1;
+
+                    $invoice->save();
+
+                    $invoice_number = $user_id . str_pad($invoice->id, 6, '0', STR_PAD_LEFT);
+
+                }
+
+                $total_charges = 0;
+                $total_gst = 0;
+                $total_invoice_amount = 0;
+
+                $pending_payments = $pending_payments->get();
+                foreach ($pending_payments as $pending_payment) {
+                    $calculation = $pending_payment->pending_payment_calculation;
+                    $total_charges = $total_charges + $calculation->charges;
+                    $total_gst = $total_gst + $calculation->gst;
+                    $total_invoice_amount = $total_invoice_amount + $calculation->charges + $calculation->gst;
+                }
+
+                $invoice->invoice_number = $invoice_number;
+                $invoice->total_charges = $total_charges;
+                $invoice->total_gst = $total_gst;
+                $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
+
+                $invoice->save();
+            }
+
+            $done_payments = DonePayment::where('user_id', $user_id)->whereBetween('created_at', [$billing_period_from_date, $billing_period_to_date]);
+
+            if ($done_payments->exists()) {
+                $invoice_for_reimbursement = InvoiceForReimbursement::where('user_id', $user_id)->where('payment_type', 1)->where('from_date', $billing_period_from_date)->where('to_date', $billing_period_to_date);
+                if($invoice_for_reimbursement->exists())
+                {
+                    $invoice = $invoice_for_reimbursement->first();
+                    $invoice->to_show = 1;
+                    $invoice->invoicing_date = $billing_period_to_date;
+                    $invoice->created_at = $current_date_string;
+
+                    $invoice->update();
+
+                    $invoice_number = $invoice->invoice_number;
+                }
+                else {
+                    $invoice = new InvoiceForReimbursement();
+
+                    $invoice->user_id = $user_id;
+                    $invoice->invoicing_date = $billing_period_to_date;
+                    $invoice->from_date = $billing_period_from_date;
+                    $invoice->to_date = $billing_period_to_date;
+                    $invoice->payment_type = 1;
+                    $invoice->to_show = 1;
+
+                    $invoice->save();
+
+                    $invoice_number = $user_id . str_pad($invoice->id, 6, '0', STR_PAD_LEFT);
+
+                }
+
+                $total_charges = 0;
+                $total_gst = 0;
+                $total_invoice_amount = 0;
+
+                $done_payments = $done_payments->get();
+                foreach ($done_payments as $done_payment) {
+                    $calculation = $done_payment->done_payment_calculation;
+                    $total_charges = $total_charges + $calculation->charges;
+                    $total_gst = $total_gst + $calculation->gst;
+                    $total_invoice_amount = $total_invoice_amount + $calculation->charges + $calculation->gst;
+                }
+
+                $invoice->invoice_number = $invoice_number;
+                $invoice->total_charges = $total_charges;
+                $invoice->total_gst = $total_gst;
+                $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
+
+                $invoice->save();
+            }
+        }
+    }
+
     static public function generate_invoice_print($id, $email = FALSE, $header = FALSE) {
         $invoice = Invoice::find($id);
 
@@ -7598,6 +7714,10 @@ class AdminFinanceController extends Controller
 
         return view('admin.finance.invoices')->with(['company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses]);
     }
+    public function reimbursement_invoices_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),472);
+        return view('admin.finance.reimbursement_invoices');
+    }
     public function received_invoices_index() {
         ActivityTrailController::createActivityTrailLog(Auth::id(),35);
         $company_banks = BanksList::where('affiliate', 1)->get();
@@ -7733,6 +7853,67 @@ class AdminFinanceController extends Controller
                 if ((session('role_id') == 1 || in_array(589, session('permissions')))) {
                     $dropdown .= $upload_deposit_slip_button;
                 }
+                $dropdown .= '
+                </div>
+              </div>
+            ';
+
+                return $dropdown;
+            });
+
+        return $datatables->make(true);
+    }
+
+    public function reimbursement_invoices_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),473);
+        }
+
+        $invoices = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
+//            ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id') 'ic.name as invoicing_cycle'
+            ->select('invoice_for_reimbursements.id', 'invoice_for_reimbursements.invoice_number', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges', 'invoice_for_reimbursements.total_gst', 'invoice_for_reimbursements.total_invoice_amount', 'invoice_for_reimbursements.created_at', 'invoice_for_reimbursements.invoicing_date')->where('invoice_for_reimbursements.to_show',1);
+            if(session('department_id') == 7){
+                $invoices->whereIn('invoice_for_reimbursements.user_id', session('tagged_shippers'));
+            }
+        $datatables = Datatables::of($invoices)
+            ->addColumn('invoice_number_button', function($invoice) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
+            })
+            ->editColumn('total_charges', function($invoice) {
+                return number_format($invoice->total_charges, 2);
+            })
+            ->editColumn('total_gst', function($invoice) {
+                return number_format($invoice->total_gst, 2);
+            })
+            ->editColumn('total_invoice_amount', function($invoice) {
+                return number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN));
+            })
+            ->editColumn('created_at', function($invoice) {
+                return Carbon::parse($invoice->created_at)->format('Y-m-d');
+            })
+            ->editColumn('invoicing_date', function($invoice) {
+                return Carbon::parse($invoice->invoicing_date)->format('Y-m-d') ?? "-";
+            })
+            ->addColumn('invoicing_cycle',function($invoice){
+                return "Monthly";
+            })
+            ->addColumn('action', function($invoice) {
+                $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
+                $origin_wise_print_button = '<button type="button" class="dropdown-item print_origin_wise"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Origin Wise Print</div></button>';
+                $gst_wise_print_button = '<button type="button" class="dropdown-item print_gst_wise"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">GST Wise Print</div></button>';
+
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= $export_to_excel_button;
+                $dropdown .= $origin_wise_print_button;
+                $dropdown .= $gst_wise_print_button;
                 $dropdown .= '
                 </div>
               </div>
