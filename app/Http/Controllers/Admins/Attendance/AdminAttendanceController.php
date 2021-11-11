@@ -31,6 +31,49 @@ class AdminAttendanceController extends Controller
         $this->middleware('Permission');
     }
 
+    private function distance($origin, $destination)
+    {
+        return $this->vincenty_distance($origin, $destination);
+    }
+
+    private function vincenty_distance($origin, $destination)
+    {
+        $earth_radius = 6371;
+
+        list($origin_latitude, $origin_longitude) = explode(',', $origin);
+        list($destination_latitude, $destination_longitude) = explode(',', $destination);
+
+        $origin_latitude = deg2rad($origin_latitude);
+        $origin_longitude = deg2rad($origin_longitude);
+        $destination_latitude = deg2rad($destination_latitude);
+        $destination_longitude = deg2rad($destination_longitude);
+
+        $longitude_delta = $destination_longitude - $origin_longitude;
+
+        $distance = round($earth_radius * (atan2(sqrt(pow(cos($destination_latitude) * sin($longitude_delta), 2) + pow(cos($origin_latitude) * sin($destination_latitude) - sin($origin_latitude) * cos($destination_latitude) * cos($longitude_delta), 2)), (sin($origin_latitude) * sin($destination_latitude) + cos($origin_latitude) * cos($destination_latitude) * cos($longitude_delta)))), 2);
+
+        return $distance;
+    }
+
+    private function calculate_location_status($latitude, $longitude){
+        $location_status = 1;
+        $reporting_locations = ReportingLocation::where('status', 1);
+        if($reporting_locations->exists()){
+            $reporting_locations = $reporting_locations->get();
+            foreach ($reporting_locations as $reporting_location){
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $latitude . ',' . $longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance <= $reporting_location->radius / 1000) {
+                    $location_status = 2;
+                    return $location_status;
+                }
+            }
+        }
+        return $location_status;
+    }
+
     public function admin_attendance_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),56);
 
@@ -443,30 +486,6 @@ class AdminAttendanceController extends Controller
         return $datatable->make(true);
     }
 
-    private function distance($origin, $destination)
-    {
-        return $this->vincenty_distance($origin, $destination);
-    }
-
-    private function vincenty_distance($origin, $destination)
-    {
-        $earth_radius = 6371;
-
-        list($origin_latitude, $origin_longitude) = explode(',', $origin);
-        list($destination_latitude, $destination_longitude) = explode(',', $destination);
-
-        $origin_latitude = deg2rad($origin_latitude);
-        $origin_longitude = deg2rad($origin_longitude);
-        $destination_latitude = deg2rad($destination_latitude);
-        $destination_longitude = deg2rad($destination_longitude);
-
-        $longitude_delta = $destination_longitude - $origin_longitude;
-
-        $distance = round($earth_radius * (atan2(sqrt(pow(cos($destination_latitude) * sin($longitude_delta), 2) + pow(cos($origin_latitude) * sin($destination_latitude) - sin($origin_latitude) * cos($destination_latitude) * cos($longitude_delta), 2)), (sin($origin_latitude) * sin($destination_latitude) + cos($origin_latitude) * cos($destination_latitude) * cos($longitude_delta)))), 2);
-
-        return $distance;
-    }
-
     public function mark_attendance_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 432);
@@ -510,22 +529,6 @@ class AdminAttendanceController extends Controller
         $admin = Admin::find($admin_id);
         if ($admin) {
             if (session('latitude') && session('longitude')) {
-                $location_status = 0;
-                $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                    ->join('admins as a', 'e.id', 'a.employee_id')
-                    ->where('a.id', $admin_id);
-                if ($reporting_location->exists()) {
-                    $reporting_location = $reporting_location->first();
-                    $reporting_location->radius;
-                    $destination = $reporting_location->lat . ',' . $reporting_location->long;
-                    $origin = session('latitude') . ',' . session('longitude');
-                    $distance = $this->distance($origin, $destination);
-                    if ($distance > $reporting_location->radius / 1000) {
-                        $location_status = 1;
-                    } else {
-                        $location_status = 2;
-                    }
-                }
                 $employee_attendance = EmployeeAttendance::where('employee_id', $admin_id)
                     ->where('employee_type', 1)
                     ->where('attendance_date', $attendance_date);
@@ -537,6 +540,7 @@ class AdminAttendanceController extends Controller
                     $attendance->employee_type = 1;
                     $attendance->attendance_date = $attendance_date;
                 }
+                $location_status = $this->calculate_location_status(session('latitude'), session('longitude'));
                 if ($request->clock_in == 1 && $request->clock_out == 0) {
                     if ($attendance->clock_out_datetime == NULL){
                         $attendance->clock_out_datetime = $attendance_mark;

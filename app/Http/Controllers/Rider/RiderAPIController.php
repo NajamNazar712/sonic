@@ -248,6 +248,25 @@ class RiderAPIController extends Controller
         return $distance;
     }
 
+    private function calculate_location_status($latitude, $longitude){
+        $location_status = 1;
+        $reporting_locations = ReportingLocation::where('status', 1);
+        if($reporting_locations->exists()){
+            $reporting_locations = $reporting_locations->get();
+            foreach ($reporting_locations as $reporting_location){
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $latitude . ',' . $longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance <= $reporting_location->radius / 1000) {
+                    $location_status = 2;
+                    return $location_status;
+                }
+            }
+        }
+        return $location_status;
+    }
+
     private function set_order($starting_location, $pickup_note_id, $pickup_note_requests)
     {
         $ordered = TRUE;
@@ -9487,22 +9506,6 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $location_status = 0;
-            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                ->join('riders as r', 'e.id', 'r.employee_id')
-                ->where('r.id', $rider_id);
-            if ($reporting_location->exists()) {
-                $reporting_location = $reporting_location->first();
-                $reporting_location->radius;
-                $destination = $reporting_location->lat . ',' . $reporting_location->long;
-                $origin = $request->latitude . ',' . $request->longitude;
-                $distance = $this->distance($origin, $destination);
-                if ($distance > $reporting_location->radius / 1000) {
-                    $location_status = 1;
-                } else {
-                    $location_status = 2;
-                }
-            }
             $attendance_datetime = Carbon::parse($request->attendance_date)->format('Y-m-d H:i:s');
             $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
             $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
@@ -9519,6 +9522,7 @@ class RiderAPIController extends Controller
                 $rider_attendance->employee_type = 2;
                 $rider_attendance->attendance_date = $attendance_date;
             }
+            $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
             if ($request->action == 1) {
                 $rider_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
                 $rider_attendance->clock_in_latitude = $request->latitude;
