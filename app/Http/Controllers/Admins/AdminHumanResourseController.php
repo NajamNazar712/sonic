@@ -235,7 +235,7 @@ class AdminHumanResourseController extends Controller
             ->join('employee_types as et','et.id','=','employees.employee_type_id')
             ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
             ->join('employee_statuses as es','es.id','=','employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address','employees.shift_id as shift_id','employees.guardian_name as father_name','ads.name as department_name'])
+            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address','employees.shift_id as shift_id','employees.guardian_name as father_name','ads.name as department_name','employees.first_inactive'])
             ->where(function ($q){
                 $q ->where('r.blacklist','=',0)
                     ->orWhere('r.blacklist','=',null);
@@ -345,7 +345,9 @@ class AdminHumanResourseController extends Controller
                             }
 
                             if(session('role_id') == 1 || in_array(620, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Staff</div></button>';
+                                if($result->first_inactive == 1) {
+                                    $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Staff</div></button>';
+                                }
                             }
                         }
                     }
@@ -387,7 +389,9 @@ class AdminHumanResourseController extends Controller
                             }
 
                             if(session('role_id') == 1 || in_array(620, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
+                                if($result->first_inactive == 1) {
+                                    $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
+                                }
                             }
                         }
                     }
@@ -611,6 +615,7 @@ class AdminHumanResourseController extends Controller
         $rider->save();
 
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
+        $employee->first_inactive = 1;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Rider is Activated!']);
 
@@ -664,6 +669,7 @@ class AdminHumanResourseController extends Controller
         $staff->save();
 
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
+        $employee->first_inactive = 1;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
 
