@@ -794,6 +794,17 @@ class RetailShipmentBookController extends Controller
                             </tbody>
                             </table>
                             </div>
+                            <div class="col m-1 row">
+                              <h1 style="
+                             overflow: hidden;
+                             margin-top: -220px;
+                             margin-left: 300px;
+                             opacity: 0.3;
+                             transform: rotate(350deg);
+                             font-size: 700%; 
+                             color: #636e72;"     
+                              >RETAIL</h1>
+                            </div>
                            ';
 
                            
@@ -1079,6 +1090,17 @@ class RetailShipmentBookController extends Controller
                 ';
 
                     $table_end .= '
+                    <div class="col m-1 row">
+                              <h1 style="
+                             overflow: hidden;
+                             margin-top: -220px;
+                             margin-left: 300px;
+                             opacity: 0.3;
+                             transform: rotate(350deg);
+                             font-size: 700%; 
+                             color: #636e72;"     
+                              >RETAIL</h1>
+                            </div>
                     <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Trax Copy</p></div><div class="col"><hr></div>
                   <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
                 ';
@@ -1240,7 +1262,6 @@ class RetailShipmentBookController extends Controller
               </body>
             </html>
         ';
-
         return $html;
     }
     public static function save_slip($shipment_id){
