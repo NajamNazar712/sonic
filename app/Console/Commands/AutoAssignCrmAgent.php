@@ -78,20 +78,43 @@ class AutoAssignCrmAgent extends Command
                 $value->save();
                 }
             }else{
-
-                $agent_log = CrmAgentLog::where('zone_id',$value->zone_id)
-                ->where('case_nature_id',$value->case_nature_id)
-                ->where('assinged_requests','<',90)
-                ->whereDate('assigned_date',Carbon::today()->toDateString())
-                ->orderBy('assinged_requests', 'asc')->get()->first();
-
-               if($agent_log){
-                $agent_log->assinged_requests = $agent_log->assinged_requests+1;
-                $agent_log->save();
-                
-                $value->agent_id = $agent_log->admin_id;
-                $value->save();
+                if($value->case_nature_type_id == 1){
+                    $agent_log = CrmAgentLog::where('case_nature_id',4)
+                    ->where('assinged_requests','<',90)
+                    ->whereDate('assigned_date',Carbon::today()->toDateString())
+                    ->orderBy('assinged_requests', 'asc')->get()->first();
+    
+                   if($agent_log){
+                    $agent_log->assinged_requests = $agent_log->assinged_requests+1;
+                    $agent_log->save();
+                    
+                    CrmRequestAgentHistory::create([
+                        'crm_request_id' => $value->id,
+                        'agent_id' => $agent_log->admin_id
+                    ]);
+                    $value->agent_id = $agent_log->admin_id;
+                    $value->save();
+                    }
+                }else{
+                    $agent_log = CrmAgentLog::where('zone_id',$value->zone_id)
+                    ->where('case_nature_id',$value->case_nature_id)
+                    ->where('assinged_requests','<',90)
+                    ->whereDate('assigned_date',Carbon::today()->toDateString())
+                    ->orderBy('assinged_requests', 'asc')->get()->first();
+    
+                   if($agent_log){
+                    $agent_log->assinged_requests = $agent_log->assinged_requests+1;
+                    $agent_log->save();
+                    CrmRequestAgentHistory::create([
+                        'crm_request_id' => $value->id,
+                        'agent_id' => $agent_log->admin_id
+                    ]);
+                    $value->agent_id = $agent_log->admin_id;
+                    $value->save();
+                    }
                 }
+
+               
 
             }
 
