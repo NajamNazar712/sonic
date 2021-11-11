@@ -4806,75 +4806,8 @@ class GlobalSettingsController extends Controller
     }
 
     public function crm_auto_assigning_index(){
-        //testing auto_assigning
-        // $crm_agents = CrmAgent::all();
-        // // // foreach ($crm_agents as $crm_agent) {
-        // // //     $crm_agent_log = new CrmAgentLog();
-        // // //     $crm_agent_log->admin_id = $crm_agent->admin_id;
-        // // //     $crm_agent_log->case_nature_id = $crm_agent->case_nature_id;
-        // // //     $crm_agent_log->zone_id = $crm_agent->zone_id;
-        // // //     $crm_agent_log->assigned_date = Carbon::today();
-        // // //     $crm_agent_log->assinged_requests = 0;
-        // // //     $crm_agent_log->save();
-
-        // // // }
-
-        // $crm_requests = CrmRequest::leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-        //                             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-        //                             ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
-        //                             ->select('crm_requests.id as id', 'crm_requests.case_nature_id as case_nature_id','z.id as zone_id')
-        //                             ->where('crm_requests.agent_id','=',Null)
-        //                             ->where('crm_requests.case_nature_id','<>',3)
-        //                             ->get();
-
-        //     dump($crm_requests->count());
-            
-        // foreach ($crm_requests as $value) {
-        //     //checking for claim of all zones
-        //     if($value->case_nature_id == 4){
-        //         $agent_log = CrmAgentLog::where('case_nature_id',$value->case_nature_id)
-        //         ->where('assinged_requests','<',90)
-        //         ->whereDate('assigned_date',Carbon::today()->toDateString())
-        //         ->orderBy('assinged_requests', 'asc')->get()->first();
-                
-        //        if($agent_log){
-        //         $agent_log->assinged_requests = $agent_log->assinged_requests+1;
-        //         $agent_log->save();
-        //         dump('crm_data');
-        //         dump($value);
-        //         $value->agent_id = $agent_log->admin_id;
-        //         $value->save();
-        //         dump('log_Data');
-        //         dump($value);
-        //        }
-        //     }else{
-        //         $agent_log = CrmAgentLog::where('zone_id',$value->zone_id)
-        //         ->where('case_nature_id',$value->case_nature_id)
-        //         ->where('assinged_requests','<',90)
-        //         ->whereDate('assigned_date',Carbon::today()->toDateString())
-        //         ->orderBy('assinged_requests', 'asc')->get()->first();
-                
-        //        if($agent_log){
-        //         $agent_log->assinged_requests = $agent_log->assinged_requests+1;
-        //         $agent_log->save();
-        //         dump('crm_data');
-        //         dump($value);
-        //         $value->agent_id = $agent_log->admin_id;
-        //         $value->save();
-        //         dump('log_Data');
-        //         dump($value);
-        //        }
-        //     }
-                
-                
-        //         // dump(Carbon::today()->toDateString());
-        // }
-
-        // dd($crm_agents);
-        //testing auto_assigning end
-        
         $agents = Admin::select('id', 'name')->whereIn('role_id',[37,28])->get();//37,28 role
-        $zones = Zone::where('status',1)->get();
+        $zones = Zone::where('status',1)->where('business_category_id',1)->get();
         $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
 
         return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents , 'zones' => $zones, 'case_natures' => $case_natures]);
@@ -4884,7 +4817,7 @@ class GlobalSettingsController extends Controller
         $roles = CrmAgent::join('admins as ad', 'ad.id', '=', 'crm_agents.admin_id')
                  ->join('zones as z','z.id','crm_agents.zone_id')   
                  ->join('crm_request_case_nature as cn','cn.id','crm_agents.case_nature_id')   
-        ->select('crm_agents.id', 'ad.name as agent_name', 'z.name as zone_name', 'cn.name as case_nature');
+        ->select('crm_agents.id', 'ad.name as agent_name', 'z.name as zone_name', 'cn.name as case_nature','crm_agents.status as status');
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
@@ -4892,14 +4825,25 @@ class GlobalSettingsController extends Controller
                 if($roles->id == 1 || $roles->id == 2){
                     return '-';
                 }else{
-                    return '<div class="btn-group">
+                    $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                     <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
-                    <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>
-                    </div>
+                    ';
+                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    if($roles->status == 1 ){
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }else{
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    
+                    $dropdown .='</div>
                   </div>
           ';
+
+          return $dropdown;
                 }
                
             }
@@ -4914,13 +4858,20 @@ class GlobalSettingsController extends Controller
                     return $roles->zone_name;
                 }
                
+        })->editColumn('status', function($roles) {
+            if($roles->status == 1){
+                return 'Enable';
+            }else{
+                return 'Disable';
+            }
+            
         });
 
     return $datatables->make(true);
     }
 
     public function crm_auto_assigning_submit(Request $request){
-        $crm_agent = CrmAgent::where('admin_id',$request->admin_id);
+        $crm_agent = CrmAgent::where('admin_id',$request->admin_id)->where('case_nature_id',$request->case_nature_id);
         if(!$crm_agent->exists()){
 
             CrmAgent::create($request->all());
@@ -4960,6 +4911,21 @@ class GlobalSettingsController extends Controller
         $crm_agent_data->save();
         return redirect()->back()->with('success', 'Agent Updated!');
 
+    }
+
+    public function crm_auto_assigning_enable_disable(Request $request){
+        $crm_agent = CrmAgent::find($request->id);
+        if($crm_agent->status == 1){
+            $crm_agent->status = 0;
+            $crm_agent->save();
+        return redirect()->back()->with('success', 'Agent Disabled!');
+
+        }else{
+            $crm_agent->status = 1;
+            $crm_agent->save();
+        return redirect()->back()->with('success', 'Agent Enabled!');
+
+        }
     }
 
 }

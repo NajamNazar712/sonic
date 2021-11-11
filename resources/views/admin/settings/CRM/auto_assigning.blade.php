@@ -24,6 +24,7 @@
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -211,6 +212,7 @@
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
                     {data: 'case_nature', name: 'cn.name', class: 'align-middle case_nature'},
+                    {data: 'status', name: 'crm_agents.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -225,7 +227,12 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var departments_select = '<select name="departments_select" id="departments_select" class="select2 form-control"></select>';
-
+                    
+                    var status = '<select name="status" id="status" class="select2 form-control">';
+                        status +='<option value="1">Enable</option>';
+                        status +='<option value="0">Disable</option>';
+                        status +='</select>';
+                   
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -238,6 +245,11 @@
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
+                        }else if ($(header).is('.status')) {
+                            $(status).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -248,6 +260,14 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+                    
+
+                    $('#status').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
 
                     this.api().table().columns.adjust();
@@ -318,9 +338,27 @@
 
                 
             });
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                                         $.ajax({
+                                            url:'{!! route("admin.settings.auto_assigning.enable_disable") !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'id': id,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        }).done(function (data) {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                            table.draw();
+                                        });
 
+                
+            });
 
-
+            
             $( "#crm_agent_assign" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CrmAgent;
 use App\Http\Models\CrmAgentLog;
 use Carbon\Carbon;
@@ -41,7 +42,7 @@ class AutoAssignCrmAgent extends Command
      */
     public function handle()
     {
-        $crm_agents = CrmAgent::all();
+        $crm_agents = CrmAgent::where('status',1)->get();
         foreach ($crm_agents as $crm_agent) {
             $crm_agent_log = new CrmAgentLog();
             $crm_agent_log->admin_id = $crm_agent->admin_id;
@@ -69,6 +70,10 @@ class AutoAssignCrmAgent extends Command
                 $agent_log->assinged_requests = $agent_log->assinged_requests+1;
                 $agent_log->save();
                 
+                CrmRequestAgentHistory::create([
+                    'crm_request_id' => $value->id,
+                    'agent_id' => $agent_log->admin_id
+                ]);
                 $value->agent_id = $agent_log->admin_id;
                 $value->save();
                 }

@@ -18,6 +18,7 @@ class CreateCrmAgentsTable extends Migration
             $table->integer('admin_id')->index();
             $table->integer('zone_id')->index()->nullable();
             $table->integer('case_nature_id')->index();
+            $table->integer('status')->default(1)->index();
             $table->timestamps();
         });
     }
