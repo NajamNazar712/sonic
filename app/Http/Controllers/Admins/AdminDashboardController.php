@@ -2283,6 +2283,9 @@ class AdminDashboardController extends Controller
 
     public function editRates(Request $request, $id){
         $user = User::find($id);
+        //updaing dws_Rate
+        DwsWeightCharges::where('user_id',$id)->delete();
+        PendingDwsWeightCharges::where('user_id',$id)->delete();
         if ($user['status']!=3) {
             $messages = [
                 'on_wa_range_up.*.required' => 'The overnight range up field is required.',

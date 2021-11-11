@@ -2394,6 +2394,9 @@ class AdminCorporateAccountsController extends Controller
         
         
         $user = User::find($id);
+//updaing dws_Rate
+        DwsWeightCharges::where('user_id',$id)->delete();
+        PendingDwsWeightCharges::where('user_id',$id)->delete();
         $new_rate_type_id = $user->new_rate_type_id;
 
         if ($user['status'] != 3) {
@@ -13592,6 +13595,9 @@ class AdminCorporateAccountsController extends Controller
     public function edit_rates_zone_wise_submit(Request $request, $id){
 
         $user = User::find($id);
+        //updaing dws_Rate
+        DwsWeightCharges::where('user_id',$id)->delete();
+        PendingDwsWeightCharges::where('user_id',$id)->delete();
         if ($user['status'] != 3) {
 
             $messages = [
@@ -24381,6 +24387,9 @@ class AdminCorporateAccountsController extends Controller
     public function edit_rates_default_submit(Request $request, $id){
 
         $user = User::find($id);
+        //updaing dws_Rate
+        DwsWeightCharges::where('user_id',$id)->delete();
+        PendingDwsWeightCharges::where('user_id',$id)->delete();
         if ($user['status']!=3) {
             
             $messages = [
