@@ -248,12 +248,13 @@ class RiderAPIController extends Controller
         return $distance;
     }
 
-    private function calculate_location_status($latitude, $longitude){
+    private function calculate_location_status($latitude, $longitude)
+    {
         $location_status = 1;
         $reporting_locations = ReportingLocation::where('status', 1);
-        if($reporting_locations->exists()){
+        if ($reporting_locations->exists()) {
             $reporting_locations = $reporting_locations->get();
-            foreach ($reporting_locations as $reporting_location){
+            foreach ($reporting_locations as $reporting_location) {
                 $reporting_location->radius;
                 $destination = $reporting_location->lat . ',' . $reporting_location->long;
                 $origin = $latitude . ',' . $longitude;
@@ -263,6 +264,8 @@ class RiderAPIController extends Controller
                     return $location_status;
                 }
             }
+        } else {
+            $location_status = 0;
         }
         return $location_status;
     }
