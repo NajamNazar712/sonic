@@ -8614,7 +8614,28 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.waqas@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
-                }            }
+                }
+                else if ($id == 163){
+                    $shipment = Shipment::find($reference_1_id);
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $reference_1_id)
+                        ->where('reference_1_id', $reference_2_id)
+                        ->order_by('id', 'DESC');
+                    if($shipment && $shipment_journey->exists()){
+                        $shipment_journey = $shipment_journey->first();
+                        if (strpos($body, '[tracking_no]') !== FALSE) {
+                            $body = str_replace('[tracking_no]', $shipment->tracking_number, $body);
+                        }
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $body = str_replace('[status]', $shipment_journey->shipment_status_shipper->name, $body);
+                        }
+                        if (strpos($body, '[reason]') !== FALSE) {
+                            $body = str_replace('[reason]', $shipment_journey->shipment_status_reason->name, $body);
+                        }
+                        $to = $shipment->consignee_phone_number_1;
+                        self::sms($body, $to, 1);
+                    }
+                }
+            }
         }
     }
     static public function custom($type, $subject, $body, $to) {
