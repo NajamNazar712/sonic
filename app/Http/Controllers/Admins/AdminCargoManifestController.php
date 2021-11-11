@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
@@ -2181,6 +2182,9 @@ class AdminCargoManifestController extends Controller
     public function receive_bag_details(Request $request)
     {
         $bag = CargoManifestBag::where('seal_number', $request->bag_number);
+        $arrive_at_destination = 0;
+        $misroute = 0;
+        $last_junction = "-";
 
         if ($bag->exists()) {
             $bag = $bag->whereIn('status_id',$this->bag_can_be_received_statuses);
@@ -2198,50 +2202,61 @@ class AdminCargoManifestController extends Controller
                     $cargo_bag = $cargo_bag->first();
 
                     $mapping = V2JunctionMapping::where('id',$bag->junction_mapping_id);
-
-                    if($mapping->exists())
-                    {
-                        $mapping = $mapping->first();
-                        $misroute = 1;
-                        $last_junction = "-";
-                        if($mapping->destination_id == Auth::user()->default_hub_id)
-                        {
-                            $misroute = 0;
-                            $last_junction = $mapping->junctions->sortByDesc('id')->first()->city->name ?? "-";
+                    $assigned_hubs = AdminHub::where('admin_id',Auth::id())->pluck('hub_id')->toArray();
+                    
+                    if($bag->type == 1){
+                        if(in_array($bag->destination_hub_id,$assigned_hubs)){
+                            $arrive_at_destination = 1;
                         }
-                        if($misroute == 1)
-                        {
-                            $previous_junction = "-";
-                            foreach ($mapping->junctions as $junction)
-                            {
-                                if($junction->junction_id == Auth::user()->default_hub_id)
-                                {
-                                    $misroute = 0;
-                                    $last_junction = $previous_junction;
-                                    break;
-                                }
+                        else if($arrive_at_destination == 0){
+                            if($mapping->exists()){
+                                $mapping = $mapping->first();
 
-                                $previous_junction = $junction->city->name;
+                                if($mapping->destination_id == $bag->destination_hub_id)
+                                {
+                                    $last_junction = $mapping->junctions->sortByDesc('id')->first()->city->name ?? "-";
+                                }
+                            }
+                            else{
+                                return ['status' => 1, 'error' => 'Bag Number is not associated with any mapping'];
                             }
                         }
-
-                        $details = array();
-
-                        $details['misroute'] = $misroute;
-                        $details['bag_id'] = $bag->id;
-                        $details['bag_number'] = $request->bag_number;
-                        $details['manifest_id'] = str_pad($cargo_bag->id, 6, '0', STR_PAD_LEFT);
-                        $details['origin'] = $cargo_bag->origin_hub->name;
-                        $details['destination'] = $cargo_bag->destination_hub->name;
-                        $details['last_junction'] = $last_junction;
-                        $details['actual_weight'] = $bag->actual_weight;
-                        $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
-
-                        return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
+                        else{
+                            $misroute = 1;
+                        }
                     }
                     else{
-                        return ['status' => 1, 'error' => 'Bag Number is not associated with any mapping'];
+                        //
                     }
+                   
+                    if($misroute == 1)
+                    {
+                        $previous_junction = "-";
+                        foreach ($mapping->junctions as $junction)
+                        {
+                            if(in_array($junction->junction_id,$assigned_hubs))
+                            {
+                                $misroute = 0;
+                                $last_junction = $previous_junction;
+                                break;
+                            }
+
+                            $previous_junction = $junction->city->name;
+                        }
+                    }
+
+                    $details['misroute'] = $misroute;
+                    $details['arrrive_at_destination'] = $arrive_at_destination;
+                    $details['bag_id'] = $bag->id;
+                    $details['bag_number'] = $request->bag_number;
+                    $details['manifest_id'] = str_pad($cargo_bag->id, 6, '0', STR_PAD_LEFT);
+                    $details['origin'] = $cargo_bag->origin_hub->name;
+                    $details['destination'] = $cargo_bag->destination_hub->name;
+                    $details['last_junction'] = $last_junction;
+                    $details['actual_weight'] = $bag->actual_weight;
+                    $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
+
+                    return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
 
                 } else {
                     return ['status' => 1, 'error' => 'Given Bag Number is not in any Cargo Manifest'];
