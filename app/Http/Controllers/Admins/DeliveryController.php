@@ -2130,7 +2130,7 @@ class DeliveryController extends Controller
                     //auto agent assigning
                     $data = array();
                     $data['delivery_note_id'] = $delivery_note_id;
-                    $data['shipment'] = $shipment;
+                    $data['shipment_id'] = $shipment;
                     dispatch(new ProcessAgentCallMonitoring($data));
                 }
             }
