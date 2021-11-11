@@ -155,6 +155,10 @@ class LoginController extends Controller
                     }
                 }
 
+                if($user->restrict_order_id == 1){
+                    session(['restrict_order_id' => true]);
+                }
+
                 $agreement_signed = $user->agreement_signed;
                 session(['agreement_signed' => $agreement_signed]);
 
@@ -205,12 +209,13 @@ class LoginController extends Controller
                 else {
                     session(['air_waybill_type' => 1]);
                 }
+
+                if($shipper->restrict_order_id == 1){
+                    session(['restrict_order_id' => true]);
+                }
             }
 
             $shipper_user_id = $user->user_id;
-        }
-        if($user->restrict_order_id == 1){
-            session(['restrict_order_id' => true]);
         }
         $shipment_pre_book = ShipmentPrebook::where('user_id', $shipper_user_id);
         if($shipment_pre_book->exists()){
