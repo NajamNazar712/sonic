@@ -175,7 +175,7 @@
 
                 if (id) {
                     $.ajax({
-						url: '{!! route('admin.finance.invoices.print') !!}',
+						url: '{!! route('admin.finance.invoices.reimbursement.print') !!}',
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -210,7 +210,7 @@
 
                 if (id) {
                     $.ajax({
-                        url: '{!! route('admin.finance.invoices.print') !!}',
+                        url: '{!! route('admin.finance.invoices.reimbursement.print') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
@@ -243,11 +243,11 @@
 				var id = parseInt($(this).parents('tr').attr('id'));
 
 				if ($(this).hasClass('export_to_excel')) {
-					window.open('{!! route('admin.finance.invoices.export_to_excel') !!}?id=' + id, '_blank');
+					window.open('{!! route('admin.finance.invoices.reimbursement.export_to_excel') !!}?id=' + id, '_blank');
 				}
 				else if ($(this).hasClass('print_origin_wise')) {
 					$.ajax({
-						url: '{!! route('admin.finance.invoices.print_origin_wise') !!}',
+						url: '{!! route('admin.finance.invoices.reimbursement.print_origin_wise') !!}',
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -275,7 +275,7 @@
 				}
 				else if ($(this).hasClass('print_gst_wise')) {
 					$.ajax({
-						url: '{!! route('admin.finance.invoices.print_gst_wise') !!}',
+						url: '{!! route('admin.finance.invoices.reimbursement.print_gst_wise') !!}',
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',

@@ -416,6 +416,12 @@ class Permission
             'finance.outstanding_shipments.walk_in_list' => 167,
             'finance.outstanding_shipments.walk_in_resolved' => 168,
 
+            'finance.invoices.reimbursement.index' => 625,
+            'finance.invoices.reimbursement.list' => 625,
+            'finance.invoices.reimbursement.print' => 625,
+            'finance.invoices.reimbursement.export_to_excel' => 625,
+            'finance.invoices.reimbursement.print_gst_wise' => 625,
+            'finance.invoices.reimbursement.print_origin_wise' => 625,
 
             'finance.invoices.slip' => 589,
 

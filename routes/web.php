@@ -1878,6 +1878,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
                 Route::get('', 'Admins\AdminFinanceController@reimbursement_invoices_index')->name('index');
                 Route::get('list', 'Admins\AdminFinanceController@reimbursement_invoices_list')->name('list');
+                Route::post('print_origin_wise', 'Admins\AdminFinanceController@reimbursement_invoices_print_origin_wise')->name('print_origin_wise');
+                Route::post('print_gst_wise', 'Admins\AdminFinanceController@reimbursement_invoices_print_gst_wise')->name('print_gst_wise');
+                Route::get('export_to_excel', 'Admins\AdminFinanceController@reimbursement_invoices_export_to_excel')->name('export_to_excel');
+                Route::post('print', 'Admins\AdminFinanceController@reimbursement_invoices_print')->name('print');
+
             });
         });
 
