@@ -85,7 +85,7 @@
 									</div>
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<select name="designation_id" class="select2" id="designation_id">
+											<select name="designation_id" class="select2" id="designation_id" data-rule-required="true" data-msg-required="Designation is required">
 												@foreach($designations as $designation)
 													@if ($designation->id == $user->designation_id)
 														<option value="{{ $designation->id }}" selected="selected">{{ $designation->name }}</option>

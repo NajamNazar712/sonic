@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\HR\Employee;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
@@ -56,6 +57,14 @@ class AdminResetPasswordController extends Controller
                     $admin->password = bcrypt($request->pin);
                     $admin->reset_pin_otp = null;
                     $admin->save();
+
+                    $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
+                    if($employee->exists())
+                    {
+                        $employee = $employee->first();
+                        $employee->pin = $request->pin;
+                        $employee->update();
+                    }
                     event(new PasswordReset($admin));
                     NotificationsController::send(159, $admin->id);
                     return redirect()->route('admin.login')->with('success', 'Pin Reset Successfully');
@@ -67,6 +76,13 @@ class AdminResetPasswordController extends Controller
                 $admin->dummy_pin = $request->pin;
                 $admin->password = bcrypt($request->pin);
                 $admin->save();
+                $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
+                if($employee->exists())
+                {
+                    $employee = $employee->first();
+                    $employee->pin = $request->pin;
+                    $employee->update();
+                }
                 event(new PasswordReset($admin));
                 NotificationsController::send(159, $admin->id);
                 return redirect()->route('admin.login')->with('success','Pin Reset Successfully');
