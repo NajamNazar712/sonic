@@ -701,7 +701,9 @@
                     <li><a class="menu-item" href="{{route('admin.orders.index')}}">Order Management</a></li>
                     <li><a class="menu-item" href="{{route('admin.orders.self_collection.index')}}">Self Collection Shipments</a></li>
                     <li><a class="menu-item" href="{{ route('admin.quick_tracking.index') }}">Quick Tracking</a></li>
-
+                    @if (Auth::user()->trax_id != NULL)
+                        <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
+                    @endif
                     @if(session('role_id') == 1 || in_array(204, session('permissions')))
                         <li class=" nav-item"><a href="{{ route('admin.cx_quick_tracking.cx_index') }}"><span class="menu-title">CX Quick Tracking</span></a></li>
 
@@ -1728,9 +1730,7 @@
                         @if (session('role_id') == 1 || in_array(568, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.fnf.index')}}">FNF</a></li>
                         @endif
-                        @if (Auth::user()->trax_id != NULL)
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
-                        @endif
+
                         @if (session('role_id') == 1 || in_array(613, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.leave.index')}}">Employee Leaves</a></li>
                         @endif
