@@ -8619,7 +8619,7 @@ class NotificationsController extends Controller
                     $shipment = Shipment::find($reference_1_id);
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $reference_1_id)
                         ->where('reference_1_id', $reference_2_id)
-                        ->order_by('id', 'DESC');
+                        ->orderBy('id', 'DESC');
                     if($shipment && $shipment_journey->exists()){
                         $shipment_journey = $shipment_journey->first();
                         if (strpos($body, '[tracking_no]') !== FALSE) {
@@ -8632,7 +8632,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[reason]', $shipment_journey->shipment_status_reason->name, $body);
                         }
                         $to = $shipment->consignee_phone_number_1;
-                        self::sms($body, $to, 1);
+                        self::sms($body, $to);
                     }
                 }
             }
