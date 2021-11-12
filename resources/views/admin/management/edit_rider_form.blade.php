@@ -191,8 +191,8 @@
 <script type="text/javascript">
     $(document).ready(function () {
 
-        var elem = document.querySelector('.special_rider_checkbox');
-        var switchery = new Switchery(elem);
+        // var elem = document.querySelector('.special_rider_checkbox');
+        // var switchery = new Switchery(elem);
         @if($type == 1)
         var edit_ccd_elem = document.querySelector('.edit_ccd_rider_checkbox');
         var edit_ccd_switchery = new Switchery(edit_ccd_elem);
