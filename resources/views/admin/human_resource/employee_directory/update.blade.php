@@ -122,7 +122,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Personal Email</label>
-                                                <input type="email" id="personal_email" class="form-control border-primary" value="{{$employee->personal_email}}" name="personal_email">
+                                                <input type="text" id="personal_email" class="form-control border-primary email_mask" value="{{$employee->personal_email}}" name="personal_email">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -245,7 +245,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Official & Outlook ID</label>
-                                                <input type="email" id="official_email" class="form-control border-primary" value="{{$employee->official_email}}" name="official_email" >
+                                                <input type="text" id="official_email" class="form-control border-primary email_mask" value="{{$employee->official_email}}" name="official_email" >
                                             </div>
                                         </div>
 
@@ -748,7 +748,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Email</label>
-                                                <input type="email" class="form-control border-primary" id="references_email" value="{{$reference->email ?? ''}}" name="email">
+                                                <input type="text" class="form-control border-primary email_mask" id="references_email" value="{{$reference->email ?? ''}}" name="email">
                                             </div>
                                         </div>
                                     </div>
@@ -1994,6 +1994,11 @@
                 'rightAlign': false,
                 'mask': '9999',
                 'clearIncomplete': true,
+            });
+
+            $('.email_mask').inputmask({
+                'alias': 'email',
+                'clearIncomplete': true
             });
 
             $('#profile-form #cnic').inputmask({
