@@ -990,6 +990,8 @@
                 var city_id = table.row($(this).parents('tr')).data().city_id;
                 var shift_id = table.row($(this).parents('tr')).data().shift_id;
                 var check_bit = table.row($(this).parents('tr')).data().check_if_rider_present_bit;
+                var sub_category = table.row($(this).parents('tr')).data().rider_sub_category;
+                var main_category = table.row($(this).parents('tr')).data().rider_main_category;
                 $('#city_list').val(city_id).trigger('change');
                 $('#shift_list').val(shift_id).trigger('change');
                 if(check_bit != null)
@@ -1011,6 +1013,8 @@
                 $('#rider_pin').val(pin);
                 $('#address').val(address);
                 $('#rider_type_list').val(rider_type).trigger('change');
+                $('#main_category_list').val(main_category).trigger('change');
+                $('#category_list').val(sub_category).trigger('change');
                 $('#editRiderModal').modal('show');
 
             });
