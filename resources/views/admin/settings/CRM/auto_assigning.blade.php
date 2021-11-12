@@ -143,6 +143,12 @@
     <script>
         $(document).ready(function() {
 
+            $('#AssignAgentModal').on('hidden.bs.modal', function () {
+                // $("agent_id").select2('val', '')
+                $('#agent_id').val('').trigger('change.select2');
+                $('#zone_id').val('').trigger('change.select2');
+                $('#case_nature_id').val('').trigger('change.select2');
+            });
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Agent",
