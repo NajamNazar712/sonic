@@ -569,6 +569,8 @@ class Permission
             'reports.shipper_insurance.index' => 502,
             'reports.shipper_insurance.list' => 502,
             
+            'reports.reverse_pickup.index' => 624,
+            'reports.reverse_pickup.list' => 624,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
