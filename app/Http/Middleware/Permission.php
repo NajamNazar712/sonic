@@ -45,6 +45,8 @@ class Permission
             'accounts.sister_account.merged_account.mapping.info' => 242,
             'accounts.sister_account.merged_account.mapping.submit' => 242,
             'accounts.receiving_sheet.index' => 364,
+            'accounts.restrict_order_id.info' => 619,
+            'accounts.restrict_order_id.submit' => 619,
 
             'corporate.reimbursement_setting.index' => 598,
             'corporate.reimbursement_setting.store' => 598,
