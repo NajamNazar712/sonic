@@ -978,6 +978,9 @@ class AdminHumanResourseController extends Controller
             'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id),Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
             'official_number'=> 'bail|nullable|'.Rule::unique('employees', 'phone_number')->ignore($employee->id).'|'.Rule::unique('employees', 'official_phone_number')->ignore($employee->id).'',
             'cnic'=> [Rule::unique('employees', 'cnic')->ignore($employee->id)],
+            'email'=> 'bail|nullable|'.Rule::unique('employees', 'personal_email')->ignore($employee->id).'|'.Rule::unique('employees', 'official_email')->ignore($employee->id).'',
+            'personal_email'=> 'bail|nullable|'.Rule::unique('employees', 'personal_email')->ignore($employee->id).'|'.Rule::unique('employees', 'official_email')->ignore($employee->id).'',
+            'official_email'=> 'bail|nullable|'.Rule::unique('employees', 'personal_email')->ignore($employee->id).'|'.Rule::unique('employees', 'official_email')->ignore($employee->id).'',
         ]);
 
         $employee->request_status_id = 2;
