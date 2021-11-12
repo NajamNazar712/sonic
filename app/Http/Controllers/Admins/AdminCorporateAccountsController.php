@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controller\Admins\DwsWeightChargesController;
 use App\CorporateRateTypeHistory;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CorporateRateType;
@@ -152,8 +153,6 @@ use App\Http\Models\Rates\PendingCorporateMinChargeableWeight;
 use App\Http\Models\PendingCorporateDefaultDiscountCharge;
 use App\Http\Models\PendingCorporateDefaultInsuranceCharges;
 use App\Http\Models\PendingCorporateDefaultCashHandlingCharges;
-use App\Http\Models\DwsWeightCharges;
-use App\Http\Models\DwsWeightChargesHistory;
 use App\Http\Models\PendingDwsWeightCharges;
 
 class AdminCorporateAccountsController extends Controller
@@ -953,50 +952,9 @@ class AdminCorporateAccountsController extends Controller
             //dd($weightAlready);
             if ($request->has('on_dws_weight')) {
                 if($request->on_dws_weight == 0){
-                    
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
+                    DwsWeightChargesController::add($id, 1, 0 ,Auth::id());
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
+                    DwsWeightChargesController::add($id, 1, 1 ,Auth::id());
                 }
     
             }
@@ -1213,50 +1171,9 @@ class AdminCorporateAccountsController extends Controller
             }
             if ($request->has('ol_dws_weight')) {
                 if($request->ol_dws_weight == 0){
-                    
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
+                    DwsWeightChargesController::add($id, 2, 0 ,Auth::id());
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
+                    DwsWeightChargesController::add($id, 2, 1 ,Auth::id());
                 }
     
             }
@@ -1477,50 +1394,9 @@ class AdminCorporateAccountsController extends Controller
             }
             if ($request->has('detain_dws_weight')) {
                 if($request->detain_dws_weight == 0){
-                    
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
+                    DwsWeightChargesController::add($id, 3, 0 ,Auth::id());
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
+                    DwsWeightChargesController::add($id, 3, 1 ,Auth::id());
                 }
     
             }
@@ -1738,50 +1614,9 @@ class AdminCorporateAccountsController extends Controller
             }
             if ($request->has('sameday_dws_weight')) {
                 if($request->sameday_dws_weight == 0){
-                    
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
+                    DwsWeightChargesController::add($id, 4, 0 ,Auth::id());
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
+                    DwsWeightChargesController::add($id, 4, 1 ,Auth::id());
                 }
     
             }
@@ -1859,7 +1694,7 @@ class AdminCorporateAccountsController extends Controller
 
     public function edit_rates_index($id)
     {
-        $dws_weight = DwsWeightCharges::where('user_id',$id);
+        $dws_weight = PendingDwsWeightCharges::where('user_id',$id);
 
         $on_dws_charges = null;
         $ol_dws_charges = null;
@@ -2394,9 +2229,6 @@ class AdminCorporateAccountsController extends Controller
         
         
         $user = User::find($id);
-//updaing dws_Rate
-        DwsWeightCharges::where('user_id',$id)->delete();
-        PendingDwsWeightCharges::where('user_id',$id)->delete();
         $new_rate_type_id = $user->new_rate_type_id;
 
         if ($user['status'] != 3) {
@@ -3300,49 +3132,11 @@ class AdminCorporateAccountsController extends Controller
 
                 if ($request->has('on_dws_weight')) {
                     if($request->on_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
+                        DwsWeightChargesController::edit($id, 1, 0 ,Auth::id());
+                      
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 1 ,Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -3694,49 +3488,12 @@ class AdminCorporateAccountsController extends Controller
 
                 if ($request->has('ol_dws_weight')) {
                     if($request->ol_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 2, 0 ,Auth::id());
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 1 ,Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -4090,49 +3847,12 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('detain_dws_weight')) {
                     if($request->detain_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 3, 0 ,Auth::id());
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                       
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 1 ,Auth::id());
 
                     }
         
@@ -4487,49 +4207,13 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('sameday_dws_weight')) {
                     if($request->sameday_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 4, 0 ,Auth::id());
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
                         
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 1 ,Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -5415,49 +5099,12 @@ class AdminCorporateAccountsController extends Controller
 
                 if ($request->has('on_dws_weight')) {
                     if($request->on_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 1, 0 ,Auth::id());
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                       
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 1 ,Auth::id());
 
                     }
         
@@ -5682,49 +5329,13 @@ class AdminCorporateAccountsController extends Controller
 
                 if ($request->has('ol_dws_weight')) {
                     if($request->ol_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 2, 0 ,Auth::id());
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
                         
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 1 ,Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -5949,49 +5560,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('detain_dws_weight')) {
                     if($request->detain_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 0 ,Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 1 ,Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -6214,49 +5787,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('sameday_dws_weight')) {
                     if($request->sameday_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 4, 0 ,Auth::id());
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 1 ,Auth::id());
 
                     }
         
@@ -6329,7 +5864,7 @@ class AdminCorporateAccountsController extends Controller
 
             if ($request->approve == 1) {
                 $user = User::find($id);
-
+                DwsWeightChargesController::approve($id);
                 /*if($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($packagings as $packaging) {
                         $packaging_charges = new HistoryPackagingCharge();
@@ -8468,49 +8003,10 @@ class AdminCorporateAccountsController extends Controller
 
                 if ($request->has('on_dws_weight')) {
                     if($request->on_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 0 ,Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 1 ,Auth::id());
 
                     }
         
@@ -8732,49 +8228,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('ol_dws_weight')) {
                     if($request->ol_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 0 ,Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 1 ,Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -8998,49 +8456,10 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('detain_dws_weight')) {
                     if($request->detain_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 0 ,Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 1 ,Auth::id());
 
                     }
         
@@ -9263,49 +8682,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('sameday_dws_weight')) {
                     if($request->sameday_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 0 ,Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 1 ,Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -9376,6 +8757,7 @@ class AdminCorporateAccountsController extends Controller
             if ($request->approve == 1) {
                
                 $user = User::find($id);
+                DwsWeightChargesController::approve($id);
 
                 if($user->corporate_rate_type_id == 3 && $user->new_rate_type_id == 1){
 
@@ -12700,49 +12082,10 @@ class AdminCorporateAccountsController extends Controller
             //dd($weightAlready);
             if ($request->has('on_dws_weight')) {
                 if($request->on_dws_weight == 0){
-                    
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 1, 0, Auth::id());
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 1, 1, Auth::id());
 
                 }
     
@@ -12957,48 +12300,12 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('ol_dws_weight')) {
                 if($request->ol_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 2, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 2, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -13217,48 +12524,11 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('detain_dws_weight')) {
                 if($request->detain_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 3, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 3, 1, Auth::id());
 
                 }
     
@@ -13473,49 +12743,10 @@ class AdminCorporateAccountsController extends Controller
             }
             if ($request->has('sameday_dws_weight')) {
                 if($request->sameday_dws_weight == 0){
-                    
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 4, 0, Auth::id());
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 4, 1, Auth::id());
 
                 }
     
@@ -13595,9 +12826,7 @@ class AdminCorporateAccountsController extends Controller
     public function edit_rates_zone_wise_submit(Request $request, $id){
 
         $user = User::find($id);
-        //updaing dws_Rate
-        DwsWeightCharges::where('user_id',$id)->delete();
-        PendingDwsWeightCharges::where('user_id',$id)->delete();
+        
         if ($user['status'] != 3) {
 
             $messages = [
@@ -14436,49 +13665,10 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('on_dws_weight')) {
                     if($request->on_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 1, Auth::id());
 
                     }
         
@@ -14825,49 +14015,11 @@ class AdminCorporateAccountsController extends Controller
 
                 if ($request->has('ol_dws_weight')) {
                     if($request->ol_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -15216,49 +14368,11 @@ class AdminCorporateAccountsController extends Controller
 
                 if ($request->has('detain_dws_weight')) {
                     if($request->detain_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -15606,49 +14720,10 @@ class AdminCorporateAccountsController extends Controller
 
                 if ($request->has('sameday_dws_weight')) {
                     if($request->sameday_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 1, Auth::id());
 
                     }
         
@@ -16467,49 +15542,12 @@ class AdminCorporateAccountsController extends Controller
                 //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
                     if($request->on_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -16723,49 +15761,12 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('ol_dws_weight')) {
                     if($request->ol_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -16979,49 +15980,12 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('detain_dws_weight')) {
                     if($request->detain_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -17233,49 +16197,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('sameday_dws_weight')) {
                     if($request->sameday_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 1, Auth::id());
 
                     }
         
@@ -17349,7 +16275,7 @@ class AdminCorporateAccountsController extends Controller
 
             if ($request->approve == 1) {
                 $user = User::find($id);
-
+                DwsWeightChargesController::approve($id);
                 /*if($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($packagings as $packaging) {
                         $packaging_charges = new HistoryPackagingCharge();
@@ -19373,6 +18299,17 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 //dd($weightAlready);
+                if ($request->has('on_dws_weight')) {
+                    if($request->sameday_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
+
+
+                    }else{
+                        DwsWeightChargesController::edit($id, 1, 1, Auth::id());
+
+                    }
+        
+                }
             }
             //Overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
@@ -19578,6 +18515,17 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
 
+                }
+                if ($request->has('ol_dws_weight')) {
+                    if($request->sameday_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
+
+
+                    }else{
+                        DwsWeightChargesController::edit($id, 2, 1, Auth::id());
+
+                    }
+        
                 }
 
             }
@@ -19787,7 +18735,17 @@ class AdminCorporateAccountsController extends Controller
                     }
 
                 }
+                if ($request->has('detain_dws_weight')) {
+                    if($request->sameday_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
 
+
+                    }else{
+                        DwsWeightChargesController::edit($id, 3, 1, Auth::id());
+
+                    }
+        
+                }
             }
             //Sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
@@ -19993,6 +18951,18 @@ class AdminCorporateAccountsController extends Controller
                     }
 
                 }
+
+                if ($request->has('sameday_dws_weight')) {
+                    if($request->sameday_dws_weight == 0){
+                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
+
+
+                    }else{
+                        DwsWeightChargesController::edit($id, 4, 1, Auth::id());
+
+                    }
+        
+                }
             }
             WmsPendingUserInformation::where('user_id', $id)->delete();
             WmsPendingPerProductCharge::where('user_id', $id)->delete();
@@ -20060,6 +19030,8 @@ class AdminCorporateAccountsController extends Controller
             //dd($weightAlready);
 
             if ($request->approve == 1){
+                DwsWeightChargesController::approve($id);
+
                 if($user->corporate_rate_type_id == 3 && $user->new_rate_type_id == 2){
 
                     //history for old rate type
@@ -23009,49 +21981,12 @@ class AdminCorporateAccountsController extends Controller
             //dd($weightAlready);
             if ($request->has('on_dws_weight')) {
                 if($request->on_dws_weight == 0){
-                    
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 1, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
+                   
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 1, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -23236,49 +22171,12 @@ class AdminCorporateAccountsController extends Controller
             }
             if ($request->has('ol_dws_weight')) {
                 if($request->ol_dws_weight == 0){
-                    
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 2, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 2, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -23465,48 +22363,11 @@ class AdminCorporateAccountsController extends Controller
             if ($request->has('detain_dws_weight')) {
                 if($request->detain_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 3, 0, Auth::id());
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 3, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -23691,49 +22552,12 @@ class AdminCorporateAccountsController extends Controller
 
             if ($request->has('sameday_dws_weight')) {
                 if($request->sameday_dws_weight == 0){
-                    
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 4, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 4, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -23893,7 +22717,7 @@ class AdminCorporateAccountsController extends Controller
 
     public function edit_rates_default($id){
 
-        $dws_weight = DwsWeightCharges::where('user_id',$id);
+        $dws_weight = PendingDwsWeightCharges::where('user_id',$id);
 
         $on_dws_charges = null;
         $ol_dws_charges = null;
@@ -24387,9 +23211,7 @@ class AdminCorporateAccountsController extends Controller
     public function edit_rates_default_submit(Request $request, $id){
 
         $user = User::find($id);
-        //updaing dws_Rate
-        DwsWeightCharges::where('user_id',$id)->delete();
-        PendingDwsWeightCharges::where('user_id',$id)->delete();
+        
         if ($user['status']!=3) {
             
             $messages = [
@@ -25126,49 +23948,10 @@ class AdminCorporateAccountsController extends Controller
                 //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
                     if($request->on_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
 
                     }
         
@@ -25445,49 +24228,10 @@ class AdminCorporateAccountsController extends Controller
                 //dd($weightAlready);
                 if ($request->has('ol_dws_weight')) {
                     if($request->ol_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 1, Auth::id());
 
                     }
         
@@ -25763,48 +24507,12 @@ class AdminCorporateAccountsController extends Controller
                 if ($request->has('detain_dws_weight')) {
                     if($request->detain_dws_weight == 0){
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -26080,48 +24788,11 @@ class AdminCorporateAccountsController extends Controller
                 if ($request->has('sameday_dws_weight')) {
                     if($request->sameday_dws_weight == 0){
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -26942,48 +25613,11 @@ class AdminCorporateAccountsController extends Controller
                 if ($request->has('on_dws_weight')) {
                     if($request->on_dws_weight == 0){
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -27165,48 +25799,12 @@ class AdminCorporateAccountsController extends Controller
                 if ($request->has('ol_dws_weight')) {
                     if($request->ol_dws_weight == 0){
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -27388,49 +25986,12 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('detain_dws_weight')) {
                     if($request->detain_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -27609,48 +26170,12 @@ class AdminCorporateAccountsController extends Controller
                 if ($request->has('sameday_dws_weight')) {
                     if($request->sameday_dws_weight == 0){
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -27723,6 +26248,7 @@ class AdminCorporateAccountsController extends Controller
             if ($request->approve == 1) {
 
                 $user = User::find($id);
+                DwsWeightChargesController::approve($id);
                 if($rate_origin_hubs = CorporateDefaultRateOriginHub::where('user_id', $id)->get()) {
                     foreach ($rate_origin_hubs as $rate_origin_hub) {
                         $history_rate_origin_hub = new HistoryCorporateDefaultRateOriginHub();
@@ -29536,48 +28062,11 @@ class AdminCorporateAccountsController extends Controller
                 if ($request->has('on_dws_weight')) {
                     if($request->on_dws_weight == 0){
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 1,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 1, 1, Auth::id());
 
                     }
         
@@ -29758,48 +28247,12 @@ class AdminCorporateAccountsController extends Controller
                 if ($request->has('ol_dws_weight')) {
                     if($request->ol_dws_weight == 0){
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 2, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 2,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -29979,49 +28432,11 @@ class AdminCorporateAccountsController extends Controller
                 }
                 if ($request->has('detain_dws_weight')) {
                     if($request->detain_dws_weight == 0){
-                        
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 3,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 3, 1, Auth::id());
 
                     }
         
@@ -30200,48 +28615,11 @@ class AdminCorporateAccountsController extends Controller
                 if ($request->has('sameday_dws_weight')) {
                     if($request->sameday_dws_weight == 0){
                         
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
-
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 0,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
 
                     }else{
-                        DwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
-                        
-                        DwsWeightChargesHistory::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' =>4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
+                        DwsWeightChargesController::edit($id, 4, 1, Auth::id());
 
-                        PendingDwsWeightCharges::create([
-                            'user_id' => $id,
-                            'shipping_mode_id' => 4,
-                            'dws_weight_status' => 1,
-                            'admin_id' => Auth::id()
-                        ]);
 
                     }
         
@@ -30312,6 +28690,7 @@ class AdminCorporateAccountsController extends Controller
             //dd($weightAlready);
 
            if($request->approve== 1){
+            DwsWeightChargesController::approve($id);
 
                if($rate_origin_hubs = CorporateRateOriginHub::where('user_id', $id)->get()) {
                    foreach ($rate_origin_hubs as $rate_origin_hub) {
@@ -32100,49 +30479,12 @@ class AdminCorporateAccountsController extends Controller
               //dd($weightAlready);
               if ($request->has('on_dws_weight')) {
                 if($request->on_dws_weight == 0){
+                    DwsWeightChargesController::add($id, 1, 0, Auth::id());
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 1, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -32362,48 +30704,12 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('ol_dws_weight')) {
                 if($request->ol_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 2, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 2, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -32627,48 +30933,12 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('detain_dws_weight')) {
                 if($request->detain_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 3, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 3, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -32889,48 +31159,12 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('sameday_dws_weight')) {
                 if($request->sameday_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 4, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 4, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -33628,48 +31862,12 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('on_dws_weight')) {
                 if($request->on_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 1, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 1, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -33883,48 +32081,12 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('ol_dws_weight')) {
                 if($request->ol_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 2, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 2, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -34143,48 +32305,12 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('detain_dws_weight')) {
                 if($request->detain_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 3, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 3, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -34400,48 +32526,12 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('sameday_dws_weight')) {
                 if($request->sameday_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 4, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 4, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -35101,48 +33191,12 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('on_dws_weight')) {
                 if($request->on_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 1, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 1, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
@@ -35328,48 +33382,11 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('ol_dws_weight')) {
                 if($request->ol_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 2, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' =>2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 2, 1, Auth::id());
 
                 }
     
@@ -35554,48 +33571,11 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('detain_dws_weight')) {
                 if($request->detain_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 3, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' =>3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 3, 1, Auth::id());
 
                 }
     
@@ -35780,48 +33760,12 @@ class AdminCorporateAccountsController extends Controller
               if ($request->has('sameday_dws_weight')) {
                 if($request->sameday_dws_weight == 0){
                     
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 4, 0, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 0,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }else{
-                    DwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
-                    
-                    DwsWeightChargesHistory::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' =>4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
+                    DwsWeightChargesController::add($id, 4, 1, Auth::id());
 
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => Auth::id()
-                    ]);
 
                 }
     
