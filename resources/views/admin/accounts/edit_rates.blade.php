@@ -350,7 +350,7 @@
                                                    <div class="col-3 mt-1" >
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                DWS Weight :
+                                                                <label class="card-title">DWS Weight </label>
                                                                 <input type="checkbox" name="on_dws" id="on_dws" class="switchery on_dws" {{ (($on_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true">
                                                             </div>
                                                         </fieldset>
@@ -1169,7 +1169,7 @@
                                                    <div class="col-3 mt-1" >
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                DWS Weight :
+                                                                <label class="card-title">DWS Weight </label>
                                                                 <input type="checkbox" name="ol_dws" id="ol_dws" class="switchery ol_dws" {{ (($ol_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true">
                                                             </div>
                                                         </fieldset>
@@ -1990,7 +1990,7 @@
                                                    <div class="col-3 mt-1" >
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                DWS Weight :
+                                                                <label class="card-title">DWS Weight </label>
                                                                 <input type="checkbox" name="detain_dws" id="detain_dws" class="switchery detain_dws"  {{ (($detain_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true">
                                                             </div>
                                                         </fieldset>
@@ -2780,7 +2780,7 @@
                                                    <div class="col-3 mt-1" >
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                DWS Weight :
+                                                                <label class="card-title">DWS Weight </label>
                                                                 <input type="checkbox" name="sameday_dws" id="sameday_dws" class="switchery sameday_dws" {{ (($sameday_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true">
                                                             </div>
                                                         </fieldset>
@@ -4046,6 +4046,7 @@
             obj.id = obj.id || obj.text;
             return obj;
         });
+        
         $('#user_select').prepend('<option value="" selected></option>').select2({
             placeholder: "Select User",
             width:'100%'
@@ -4267,7 +4268,10 @@
             $('body').on('change', '#rate_remarks', function () {
                 $(this).val($(this).val().trim());
             });
-
+            $('#on_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
             $("#on_dws").on('change', function(){
                 if($("#on_dws").is(":checked")){
                     $('#on_dws_weight').attr('disabled', false);
