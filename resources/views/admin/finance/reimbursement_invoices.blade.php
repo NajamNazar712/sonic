@@ -25,6 +25,7 @@
 							<th class="border-primary border-darken-1">Generation Date</th>
 							<th class="border-primary border-darken-1">Invoicing Cycle</th>
 							<th class="border-primary border-darken-1">Invoicing Date</th>
+							<th class="border-primary border-darken-1">Invoicing Type</th>
 							<th class="border-primary border-darken-1"></th>
 						</tr>
 					</thead>
@@ -78,6 +79,7 @@
                             head.push('Generation Date');
                             head.push('Invoicing Cycle');
                             head.push('Invoicing Date');
+                            head.push('Invoicing Type');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -92,6 +94,7 @@
                                 row.push(values.created_at);
                                 row.push(values.invoicing_cycle);
                                 row.push(values.invoicing_date);
+                                row.push(values.payment_type);
 
                                 body.push(row);
                             });
@@ -136,6 +139,7 @@
 					{data:'created_at', name: 'invoice_for_reimbursements.created_at', class: 'align-middle text-center generation_date'},
 					{data:'invoicing_cycle', name: 'ic.name', class: 'align-middle text-center invoicing_cycle', orderable: false, searchable: false},
 					{data:'invoicing_date', name: 'invoice_for_reimbursements.invoicing_date', class: 'align-middle text-center invoicing_date'},
+					{data:'payment_type', name: 'invoice_for_reimbursements.payment_type', class: 'align-middle text-center payment_type'},
 					{data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -149,12 +153,19 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+					var payment_type_select = '<select name="payment_type_select" id="payment_type_select" class="select2 form-control"></select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
 						if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.invoicing_cycle')) {
 							$(td).appendTo($(search));
+						} else if ($(header).is('.payment_type'))
+						{
+							$(payment_type_select).appendTo($(search))
+									.on('change', function() {
+										column.search($(this).val(), false, false, true).draw();
+									}).wrap(td);
 						}
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
@@ -166,6 +177,23 @@
 							}
 						}
 					});
+
+					var payment_types = $.map([{'id':0,'name':'Make'},{'id':1,'name':'Done'}], function (obj) {
+						obj.id = obj.id;
+						obj.text = obj.name;
+
+						return obj;
+					});
+
+
+					$('#payment_type_select').prepend('<option value="" selected></option>').select2({
+						data: payment_types,
+						placeholder: 'Select Payment Type',
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
+
 					this.api().table().columns.adjust();
 				}
 			});

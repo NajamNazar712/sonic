@@ -9244,7 +9244,7 @@ class AdminFinanceController extends Controller
 
         $invoices = InvoiceForReimbursement::leftjoin('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
             ->leftjoin('cities as c', 'u.city_id', '=', 'c.id')
-            ->select('invoice_for_reimbursements.id', 'invoice_for_reimbursements.invoice_number', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges', 'invoice_for_reimbursements.total_gst', 'invoice_for_reimbursements.total_invoice_amount', 'invoice_for_reimbursements.created_at', 'invoice_for_reimbursements.invoicing_date')
+            ->select('invoice_for_reimbursements.id', 'invoice_for_reimbursements.invoice_number', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges', 'invoice_for_reimbursements.total_gst', 'invoice_for_reimbursements.total_invoice_amount', 'invoice_for_reimbursements.created_at', 'invoice_for_reimbursements.invoicing_date','invoice_for_reimbursements.payment_type')
             ->where('invoice_for_reimbursements.to_show',1);
             if(session('department_id') == 7){
                 $invoices->whereIn('invoice_for_reimbursements.user_id', session('tagged_shippers'));
@@ -9255,6 +9255,15 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('total_charges', function($invoice) {
                 return number_format($invoice->total_charges, 2);
+            })
+            ->editColumn('payment_type', function($invoice) {
+                if($invoice->payment_type == 1)
+                {
+                    return "Done";
+                }
+                else{
+                    return "Make";
+                }
             })
             ->editColumn('total_gst', function($invoice) {
                 return number_format($invoice->total_gst, 2);
