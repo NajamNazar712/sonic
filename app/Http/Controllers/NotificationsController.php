@@ -58,6 +58,8 @@ use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessDeliveryNoteOtpSms;
 use App\Jobs\ProcessOTPSMS;
+use App\Jobs\ProcessOTPSMSITS;
+use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -114,6 +116,30 @@ class NotificationsController extends Controller
       else{
           dispatch(new ProcessSMS($sms));
       }
+    }
+
+    static private function sms_otp($body, $to, $name, $otp, $type) {
+        if ($type == 1) {
+            $sms = new SMS();
+
+            $sms->to = str_replace('-', '', $to);
+            $sms->body = $body;
+            $sms->otp = 1;
+
+            $sms->save();
+
+            dispatch(new ProcessOTPSMSITS($sms, $name, $otp));
+        }
+        else if ($type == 2) {
+            $sms = new DeliveryNoteOtpSms();
+
+            $sms->to = str_replace('-', '', $to);
+            $sms->body = $body;
+
+            $sms->save();
+
+            dispatch(new ProcessDeliveryNoteOtpSmsITS($sms, $name, $otp));
+        }
     }
 
     static private function delivery_note_otp_sms($body, $to) {
@@ -7752,14 +7778,18 @@ class NotificationsController extends Controller
                 } else if ($id == 138) {
                     $admin = $reference_1_id;
                     $otp = $reference_2_id;
+                    $name = '';
                     if (strpos($body, '[name]') !== FALSE) {
                         $body = str_replace('[name]', $admin->name, $body);
+                        $name = $admin->name;
                     }
                     if (strpos($body, '[code]') !== FALSE) {
                         $body = str_replace('[code]', $otp, $body);
                     }
                     $to = $admin->phone_number;
-                    self::sms($body, $to, 1);
+                    // self::sms($body, $to, 1);
+
+                    self::sms_otp($body, $to, $name, $otp, 1);
                 } else if ($id == 139) {
 
                     $yesterday = Carbon::yesterday();
@@ -8052,15 +8082,18 @@ class NotificationsController extends Controller
                 } else if ($id == 144) {
                     $rider = $reference_1_id;
                     $otp = $reference_2_id;
-
+                    $name = '';
                     if (strpos($body, '[rider_name]') !== FALSE) {
                         $body = str_replace('[rider_name]', $rider->name, $body);
+                        $name = $rider->name;
                     }
                     if (strpos($body, '[otp]') !== FALSE) {
                         $body = str_replace('[otp]', $otp, $body);
                     }
                     $to = $rider->phone;
-                    self::delivery_note_otp_sms($body, $to);
+                    // self::delivery_note_otp_sms($body, $to);
+
+                    self::sms_otp($body, $to, $name, $otp, 2);
                 } else if ($id == 145) {
                     $shipment_id = $reference_1_id;
                     $delivery_note_id = $reference_2_id;
