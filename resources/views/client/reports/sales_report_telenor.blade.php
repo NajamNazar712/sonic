@@ -106,6 +106,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone No. 1</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Booking Date</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -338,6 +339,7 @@
                             head.push('Consignee Name');
                             head.push('Consignee Phone No. 1');
                             head.push('Status');
+                            head.push('Booking Date');
                             head.push('Arrival Date');
                             head.push('Origin');
                             head.push('Destination');
@@ -355,6 +357,7 @@
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone_number_1);
                                 row.push(values.current_status);
+                                row.push(values.booking_date);
                                 row.push(values.arrival_date);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -404,7 +407,7 @@
                         d.dr_search_date_to = $('input[name="dr_search_date_to_formatted"]').val();
                     }
                 },
-                order: [[6, 'desc']],
+                order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -412,6 +415,7 @@
                     { data:'consignee_name' ,name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data:'consignee_phone_number_1' ,name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
+                    { data:'booking_date' ,name: 'sjb.created_at', class: 'align-middle booking_date'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},

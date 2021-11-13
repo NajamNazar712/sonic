@@ -607,7 +607,7 @@ class APIController extends Controller
             })];
         } else {
             if($user_type['restrict_order_id'] == 1){
-                $rules['order_id'] = ['required', 'integer', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+                $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id);
                 })];
             }

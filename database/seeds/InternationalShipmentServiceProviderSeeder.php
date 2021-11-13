@@ -19,6 +19,7 @@ class InternationalShipmentServiceProviderSeeder extends Seeder
             array('id' => 4, 'name'=>'Aramex', 'code' => 'T004'),
             array('id' => 5, 'name'=>'SkyNet', 'code' => 'T005'),
             array('id' => 6, 'name'=>'Nice Express AE', 'code' => 'T006'),
+            array('id' => 7, 'name'=>'Others', 'code' => 'T007'),
 
         ));
     }

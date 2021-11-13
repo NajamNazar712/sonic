@@ -701,8 +701,12 @@
 
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Support</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="{{route('admin.orders.index')}}">Order Management</a></li>
-                    <li><a class="menu-item" href="{{route('admin.orders.self_collection.index')}}">Self Collection Shipments</a></li>
+                    @if(session('role_id') == 1 || in_array(621, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.orders.index')}}">Order Management</a></li>
+                    @endif
+                    @if (session('role_id') == 1 || in_array(622, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.orders.self_collection.index')}}">Self Collection Shipments</a></li>
+                    @endif
                     <li><a class="menu-item" href="{{ route('admin.quick_tracking.index') }}">Quick Tracking</a></li>
 
                     @if(session('role_id') == 1 || in_array(204, session('permissions')))
@@ -939,7 +943,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301,319, 327,328,337,356, 401, 437, 444,472,476,493,502,524, 532, 555], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301,319, 327,328,337,356, 401, 437, 444,472,476,493,502,524, 532, 555,624], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(113, session('permissions')))
@@ -1151,6 +1155,9 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(524, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.operation_service_level.index') }}">Operation Service Level</a></li>
+                        @endif
+                         @if (session('role_id') == 1 || in_array(624, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.reverse_pickup.index') }}">Reverse Pickup</a></li>
                         @endif
                     </ul>
                 </li>

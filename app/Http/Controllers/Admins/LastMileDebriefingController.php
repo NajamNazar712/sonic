@@ -54,8 +54,10 @@ class LastMileDebriefingController extends Controller
             $time = 0;
         }
 
-        $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time)->subDays(1);
+        $next_time = Carbon::today()->endOfDay()->addHours($time);
+          
+        $prev_time = Carbon::today()->addHours($time);
+
 
         $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
 
@@ -82,7 +84,8 @@ class LastMileDebriefingController extends Controller
             ->where('admins.role_id', 18)
             ->where('admins.status',1)
             ->where('ea.clock_out_datetime','=',null)
-            ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))->get();
+            ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))
+            ->select('admins.id', 'admins.name')->get();
            
             return response()->json(['status' => 1, 'agents' => $agents]);
         }
@@ -108,18 +111,18 @@ class LastMileDebriefingController extends Controller
                         $agent_call_monitor = new AgentCallMonitoring;
                         $agent_call_monitor->agent_id = $request->agent_id;
                         $agent_call_monitor->shipment_id = $delivery_note_shipment->shipment_id;
-                        $agent_call_monitor->delivery_note_id = $delivery_note_shipment->delivery_note_id;
+                        $agent_call_monitor->delivery_note_id = $delivery_note_details->id;
                     }
                     $agent_call_monitor->save();
                 }
-                return redirect()->back()->with('success', 'Agent Assign successfully.');
+                return response()->json(['status' => 0, 'success' => 'Agent Assign successfully.']);
             }
             else{
-                return redirect()->back()->with('error', 'Undelivered shipments not found!');
+                return response()->json(['status' => 1, 'error' => 'Undelivered shipments not found!']);
             }
         }
         else{
-            return redirect()->back()->with('error', 'Delivery note already verified!');
+            return response()->json(['status' => 1, 'error' => 'Delivery note already verified!']);
         }
     }
 
@@ -138,8 +141,10 @@ class LastMileDebriefingController extends Controller
             $time = 0;
         }
 
-        $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time)->subDays(1);
+        // $next_time = Carbon::today()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time);
+          
+        $prev_time = Carbon::today()->addHours($time);
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -228,7 +233,7 @@ class LastMileDebriefingController extends Controller
                 $call_ratio = 0;
                 if($call_overall_count > 0){
                     $call_ratio = ($call_completed_count / $call_overall_count) * 100;
-                    $call_ratio = $call_ratio . '%';
+                    $call_ratio = round($call_ratio, 2) . '%';
                 }
 
                 return $call_ratio;
@@ -239,7 +244,7 @@ class LastMileDebriefingController extends Controller
                 $total_shipments = $deliveries->shipments_count;
                 if($total_shipments > 0){
                     $verify_shipments_ratio = ($verify_shipments_count / $total_shipments) * 100;
-                    $verify_shipments_ratio = $verify_shipments_ratio . '%';
+                    $verify_shipments_ratio = round($verify_shipments_ratio, 2) . '%';
                 }
 
                 return $verify_shipments_ratio;
@@ -290,8 +295,10 @@ class LastMileDebriefingController extends Controller
         else {
             $time = 0;
         }
-        $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time)->subDays(1);
+        $next_time = Carbon::today()->endOfDay()->addHours($time);
+          
+        // $next_time = Carbon::today()->addHours($time);
+        $prev_time = Carbon::today()->addHours($time);
         $data = AgentCallMonitoring::join('admins as agent','agent.id','=','agent_call_monitorings.agent_id')
             ->leftjoin('cities as hub','hub.id','=','agent.default_hub_id')
             ->select(['agent.id as agent_id','agent.name as agent_name','hub.name as hub'])
@@ -380,8 +387,10 @@ class LastMileDebriefingController extends Controller
         //     $time->addDays(1);
         // }
 
-        $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time)->subDays(1);
+        $next_time = Carbon::today()->endOfDay()->addHours($time);
+          
+        // $next_time = Carbon::today()->addHours($time);
+        $prev_time = Carbon::today()->addHours($time);
 
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
             ->where('completed',0)->where('skip',0)->where('created_at','>=',$prev_time)
@@ -677,7 +686,7 @@ class LastMileDebriefingController extends Controller
         $shipment_ids = $request->shipment_ids;
         $updated_shipments = FALSE;
         if(count($shipment_ids) > 0){
-            foreach ($shipment_ids as $shipment_id => $status){
+            foreach ($shipment_ids as $shipment_id){
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('reference_1_id', $delivery_note_id)->latest()->first();
 
 
@@ -717,13 +726,13 @@ class LastMileDebriefingController extends Controller
 
             }
             if($updated_shipments){
-                return redirect()->back()->with('success', 'SMS send successfully!');
+                return response()->json(['status' => 0, 'success' => 'SMS send successfully!']);
             }
             else{
-                return redirect()->back()->with('error', 'SMS could not send!');
+                return response()->json(['status' => 1, 'error' => 'SMS could not send!']);
             }
         }
-        return redirect()->back()->with('error', 'Something went wrong, try again!');
+        return response()->json(['status' => 1, 'error' => 'Something went wrong, try again!']);
 
     }
 }
