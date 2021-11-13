@@ -64,7 +64,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.finance.invoices.list') }}',
+                        url: '{{ route('admin.finance.invoices.reimbursement.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -111,7 +111,7 @@
                 buttons: [
 					{
 						extend: 'excel',
-						title: 'Pending Invoices',
+						title: 'Reimbursement Invoices',
 						className: 'btn btn-primary',
 						text: '<i class="la la-file-excel-o"></i> Excel',
 					},
