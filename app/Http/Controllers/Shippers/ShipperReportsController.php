@@ -765,8 +765,8 @@ class ShipperReportsController extends Controller
         })
         ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
 
-        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id')
-        ->whereNotIn('shipments.shipper_status_id',[1,17]);
+        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id')
+        ->whereIn('shipments.shipper_status_id',[1,2,3,4,5,8,9,12,14,20,21,22,23,24,48,31,17]);
 
         $shipment = $shipment->where(function ($query) {
             $query->where('shipments.user_id', 7306)
@@ -836,7 +836,21 @@ class ShipperReportsController extends Controller
             }else{
                 return $shipment->shipper_name;
             }
+        })
+        ->editColumn('current_status', function ($shipment) {
+            if($shipment->status_id == 2 ||$shipment->status_id == 3 ||$shipment->status_id == 4 ||$shipment->current_status == 5 ||$shipment->status_id == 8 ||$shipment->status_id == 9 ||$shipment->status_id == 12 ){
+                return 'In Process';
+            }elseif($shipment->status_id == 14){
+                return 'Delivered';
+            }elseif($shipment->status_id == 20 ||$shipment->status_id == 21 ||$shipment->status_id == 22 ||$shipment->status_id == 23 ||$shipment->status_id == 24 ||$shipment->status_id == 48){
+                return 'Return In Process';
+            }elseif($shipment->status_id == 31){
+                return 'Returned';
+            }else{
+                return $shipment->current_status;
+            }
         });
+
 
         // if($tracking = $request->get('search_tracking')){
         //     $datatable->where('shipments.tracking_number', '=', $tracking);
