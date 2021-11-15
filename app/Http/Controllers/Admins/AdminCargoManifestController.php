@@ -2201,79 +2201,61 @@ class AdminCargoManifestController extends Controller
                     ->where('cargo_manifests.status_id',1)
                     ->where('mb.cargo_manifest_bag_id',$bag->id);
 
-                if ($bag->exists()) {
-                    $bag = $bag->whereIn('status_id',$this->bag_can_be_received_statuses);
-                    if ($bag->exists()) {
-                        $bag = $bag->latest()->first();
+                if ($cargo_bag->exists()) {
+                    $cargo_bag = $cargo_bag->first();
 
-                        $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
-                            $join->on('mb.cargo_manifest_id','cargo_manifests.id');
-                        })
-                            ->select(['cargo_manifests.*','mb.cargo_manifest_bag_id'])
-                            ->where('cargo_manifests.status_id',1)
-                            ->where('mb.cargo_manifest_bag_id',$bag->id);
+                    $mapping = V2JunctionMapping::where('id',$bag->junction_mapping_id);
 
-                        if ($cargo_bag->exists()) {
-                            $cargo_bag = $cargo_bag->first();
-
-                            $mapping = V2JunctionMapping::where('id',$bag->junction_mapping_id);
-
-                            if($mapping->exists())
+                        if($mapping->exists())
+                        {
+                            $mapping = $mapping->first();
+                            $misroute = 1;
+                            $last_junction = "-";
+                            if(in_array($mapping->destination_id,session('hubs')))
                             {
-                                $mapping = $mapping->first();
-                                $misroute = 1;
-                                $last_junction = "-";
-                                if(in_array($mapping->destination_id,session('hubs')))
+                                $misroute = 0;
+                                $last_junction = $mapping->junctions->sortByDesc('id')->first()->city->name ?? "-";
+                            }
+                            if($misroute == 1)
+                            {
+                                $previous_junction = "-";
+                                foreach ($mapping->junctions as $junction)
                                 {
-                                    $misroute = 0;
-                                    $last_junction = $mapping->junctions->sortByDesc('id')->first()->city->name ?? "-";
-                                }
-                                if($misroute == 1)
-                                {
-                                    $previous_junction = "-";
-                                    foreach ($mapping->junctions as $junction)
+                                    if(in_array($junction->junction_id,session('hubs')))
                                     {
-                                        if(in_array($junction->junction_id,session('hubs')))
-                                        {
-                                            $misroute = 0;
-                                            $last_junction = $previous_junction;
-                                            break;
-                                        }
-
-                                        $previous_junction = $junction->city->name;
+                                        $misroute = 0;
+                                        $last_junction = $previous_junction;
+                                        break;
                                     }
+
+                                    $previous_junction = $junction->city->name;
                                 }
-
-                                $details = array();
-
-                                $details['misroute'] = $misroute;
-                                $details['bag_id'] = $bag->id;
-                                $details['bag_number'] = $request->bag_number;
-                                $details['manifest_id'] = str_pad($cargo_bag->id, 6, '0', STR_PAD_LEFT);
-                                $details['origin'] = $cargo_bag->origin_hub->name;
-                                $details['destination'] = $cargo_bag->destination_hub->name;
-                                $details['last_junction'] = $last_junction;
-                                $details['actual_weight'] = $bag->actual_weight;
-                                $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
-
-                                return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
-                            }
-                            else{
-                                return ['status' => 1, 'error' => 'Bag Number is not associated with any mapping'];
                             }
 
-                        } else {
-                            return ['status' => 1, 'error' => 'Given Bag Number is not in any Cargo Manifest'];
+                            $details = array();
+
+                            $details['misroute'] = $misroute;
+                            $details['bag_id'] = $bag->id;
+                            $details['bag_number'] = $request->bag_number;
+                            $details['manifest_id'] = str_pad($cargo_bag->id, 6, '0', STR_PAD_LEFT);
+                            $details['origin'] = $cargo_bag->origin_hub->name;
+                            $details['destination'] = $cargo_bag->destination_hub->name;
+                            $details['last_junction'] = $last_junction;
+                            $details['actual_weight'] = $bag->actual_weight;
+                            $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
+
+                            return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                         }
-                    }
+                        else{
+                            return ['status' => 1, 'error' => 'Bag Number is not associated with any mapping'];
+                        }
+
+                        }
                     else {
-                        return ['status' => 1, 'error' => 'Given Bag Number is already received or created'];
+                                return ['status' => 1, 'error' => 'Given Bag Number is not in any Cargo Manifest'];
+                            }
                     }
-                }
-                else {
-                    return ['status' => 1, 'error' => 'No Bag with given Bag Number is present'];
-                }
-            }
+
             else {
                 return ['status' => 1, 'error' => 'Given Bag Number is already received or created'];
             }
@@ -2281,6 +2263,7 @@ class AdminCargoManifestController extends Controller
         else {
             return ['status' => 1, 'error' => 'No Bag with given Bag Number is present'];
         }
+
     }
 
     public function receive_bag_store(Request $request)
