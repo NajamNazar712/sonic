@@ -9444,6 +9444,8 @@ class RiderAPIController extends Controller
             if ($shift->exists()) {
                 $shift = $shift->first();
                 $shift_exists = 1;
+            }else{
+                return response()->json(['status' => 0, 'data' => $data]);
             }
 
             foreach ($dates as $date) {
