@@ -139,6 +139,11 @@
                         <th class="border-primary border-darken-1">Statement Created By</th>
                         <th class="border-primary border-darken-1">Statement Checked At</th>
                         <th class="border-primary border-darken-1">Statement Checked By</th>
+                        <th class="border-primary border-darken-1">Employee Id</th>
+                        <th class="border-primary border-darken-1">Employee Name</th>
+                        <th class="border-primary border-darken-1">Employee Designation</th>
+                        <th class="border-primary border-darken-1">SDN No.</th>
+                        <th class="border-primary border-darken-1">DNCC/PNCC Count</th>
                     </tr>
                     </thead>
                 </table>
@@ -147,6 +152,44 @@
         </div>
     </div>
 
+
+    <div class="modal fade" id="pncc_modal" data-backdrop="static" role="dialog" aria-labelledby="pncc_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="pncc_modal_title">No. Of PNCC(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="dncc_modal" data-backdrop="static" role="dialog" aria-labelledby="dncc_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="dncc_modal_title">No. Of DNCC(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -340,6 +383,11 @@
                             head.push('Statement Created By');
                             head.push('Statement Checked At');
                             head.push('Statement Checked By');
+                            head.push('Employee Id');
+                            head.push('Employee Name');
+                            head.push('Employee Designation');
+                            head.push('SDN No.');
+                            head.push('DNCC/PNCC Count');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -366,6 +414,11 @@
                                 row.push(values.created_by);
                                 row.push(values.checked_at);
                                 row.push(values.checked_by);
+                                row.push(values.employee_id);
+                                row.push(values.employee_name);
+                                row.push(values.employee_designation);
+                                row.push(values.sdn_id_padded);
+                                row.push(values.dncc_count);
 
                                 body.push(row);
                             });
@@ -432,7 +485,12 @@
                     {data: 'created_at', name: 'pcs.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'checked_at', name: 'pcs.checked_at', class: 'align-middle checked_at'},
-                    {data: 'checked_by', name: 'chb.name', class: 'align-middle checked_by'}
+                    {data: 'checked_by', name: 'chb.name', class: 'align-middle checked_by'},
+                    {data: 'employee_id', name: 'employee.trax_id', class: 'align-middle employee_id'},
+                    {data: 'employee_name', name: 'petty_cash_statement_details.employee_name', class: 'align-middle employee_name'},
+                    {data: 'employee_designation', name: 'petty_cash_statement_details.employee_designation', class: 'align-middle employee_designation'},
+                    {data: 'sdn_id_link', name: 'sdn.id', class: 'align-middle text-center sdn_id_link'},
+                    {data: 'dncc_link', name: 'sdn.dncc_count', class: 'align-middle text-center dncc_link'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -481,6 +539,125 @@
                         }
                     });
             }
+
+
+
+            $('#datatable tbody').on('click','tr td.dncc_link button',function () {
+                var id = parseInt($(this).attr('data-sdn_id'));
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('admin.delivery.sdn.dn') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'sdn_id': id,
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                var notes = '<div>PNCC Number(s) :</div>';
+
+                                if (data.pickup_notes) {
+                                    $.each(data.pickup_notes, function (index, value) {
+                                        notes += '<span class="pncc_print" dnid="' + value + '">' + value + '</span><br>';
+                                    });
+                                }
+                                $('#pncc_modal .modal-body').html('');
+                                $('#pncc_modal').modal('show');
+                                $('#pncc_modal .modal-body').html(notes);
+                            } else if (data.status == 2) {
+                                var notes = '<div>DNCC Number(s) :</div>';
+
+                                if (data.delivery_notes) {
+                                    $.each(data.delivery_notes, function (index, value) {
+                                        notes += '<u><a href="javascript:void(0);" class="dncc_print" dnid="' + value + '">' + value + '</a></u><br>';
+                                    });
+                                }
+                                $('#dncc_modal .modal-body').html('');
+                                $('#dncc_modal').modal('show');
+                                $('#dncc_modal .modal-body').html(notes);
+                            } else if (data.status == 0) {
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } else {
+                                toastr.error('Something went wrong!', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                }
+            });
+
+            $('body').on('click','a.dncc_print',function(){
+                var id = parseInt($(this).attr('dnid'));
+                printDNCC(id);
+            });
+            function printDNCC(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.sdn.dncc.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
+            function printSDN(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.sdn.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
+            $('body').on('click','.printSDN',function () {
+                var sdn = parseInt($(this).attr('data-sdn_id'));
+                // console.log(sdn);
+                printSDN(sdn);
+            });
         });
     </script>
 @endsection

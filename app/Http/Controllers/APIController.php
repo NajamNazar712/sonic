@@ -606,7 +606,14 @@ class APIController extends Controller
                 $query->where('user_id', $user_id);
             })];
         } else {
-            $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
+            if($user_type['restrict_order_id'] == 1){
+                $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+                    $query->where('user_id', $user_id);
+                })];
+            }
+            else{
+                $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
+            }
         }
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -680,7 +687,7 @@ class APIController extends Controller
 
                 $consignee_city = City::find($request->input('consignee_city_id'));
 
-                if (($request->input('consignee_city_id') == 1244 && $user_id != 5982)) {
+                if (($request->input('consignee_city_id') == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110)) {
                     return response()->json(['status' => 1, 'message' => 'User is not allowed to book from ' . $request->input('consignee_city_id')]);
                 }
 

@@ -156,6 +156,7 @@
                         <th class="border-primary border-darken-1">Remark</th>
                         <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
+                        <th class="border-primary border-darken-1">Invoice No.</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
@@ -435,6 +436,7 @@
                             head.push('Remark');
                             head.push('Total Attempt');
                             head.push('Payment Status');
+                            head.push('Invoice No.');
                             head.push('Payment ID');
                             head.push('Service Type');
                             head.push('Arrival Date');
@@ -486,6 +488,7 @@
                                 row.push(values.remark);
                                 row.push(values.total_attempt);
                                 row.push(values.payment_status);
+                                row.push(values.invoice_number);
                                 row.push(values.payment_id);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
@@ -575,7 +578,7 @@
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                     }
                 },
-                order: [[13, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
@@ -588,6 +591,7 @@
                     { data: 'remark' ,name:'remark', class: 'align-middle remark'},
                     { data:'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
+                    { data:'invoice_number' ,name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
