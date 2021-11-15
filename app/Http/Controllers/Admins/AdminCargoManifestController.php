@@ -1335,7 +1335,7 @@ class AdminCargoManifestController extends Controller
                         $details['shipments'] = $bag->shipments;
                         $details['origin'] = $origin->name;
                         $details['destination'] = $destination->name;
-                     /*   $details['bag_weight'] = $bag->shipments_weight;*/
+                        $details['bag_weight'] = $bag->shipments_weight;
 
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                 }
