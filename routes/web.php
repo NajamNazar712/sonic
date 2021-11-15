@@ -420,6 +420,16 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@subscription_submit')->name('store');
         });
 
+        Route::prefix('initial_charges_subscription')->name('initial_charges_subscription.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@initial_charges_subscription_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@initial_charges_subscription_submit')->name('store');
+        });
+
+        Route::prefix('final_charges_subscription')->name('final_charges_subscription.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@final_charges_subscription_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@final_charges_subscription_submit')->name('store');
+        });
+
         Route::prefix('payment_subscription')->name('payment_subscription.')->group(function () {
             Route::get('', 'Shippers\ShipperGlobalSettingsController@payment_subscription_index')->name('index');
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@payment_subscription_submit')->name('store');
@@ -3359,6 +3369,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminHumanResourseController@department_list')->name('list');
             Route::post('add', 'Admins\AdminHumanResourseController@department_add')->name('add');
             Route::post('edit', 'Admins\AdminHumanResourseController@department_edit')->name('edit');
+        });
+
+        Route::prefix('leave')->name('leave.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@leave_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@leave_list')->name('list');
+            Route::post('edit', 'Admins\AdminHumanResourseController@leave_edit')->name('edit');
+            Route::post('approve', 'Admins\AdminHumanResourseController@leave_approve')->name('approve');
+            Route::post('reject', 'Admins\AdminHumanResourseController@leave_reject')->name('reject');
         });
 
         Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {

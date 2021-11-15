@@ -2658,7 +2658,7 @@ class AdminFinanceController extends Controller
         }
         else{
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
-            if($retail_shipment->shipping_mode == 3 && $adjustment_type == 2){
+            if($retail_shipment->shipping_mode == 3 && in_array($adjustment_type, [2, 6, 7, 8, 9, 10, 11, 15, 16])){
                 $pending_payment = RetailPendingPayment::where('user_id', $retail_shipment->shipper_account_no);
 
                 if ($pending_payment->exists()) {
@@ -2680,7 +2680,10 @@ class AdminFinanceController extends Controller
                     $pending_payment->save();
                 }
 
-                $payable = 0 - $payable;
+                if ($adjustment_type == 2) {
+                    $payable = 0 - $payable;
+                }
+
                 $pending_payment_shipment = new RetailPendingPaymentShipment();
 
                 $pending_payment_shipment->retail_pending_payment_id = $pending_payment->id;
@@ -11258,6 +11261,7 @@ class AdminFinanceController extends Controller
                     $done_payment->delivered_shipments = $pending_payment->delivered_shipments;
                     $done_payment->adjusted_shipments = $pending_payment->adjusted_shipments;
                     $done_payment->company_bank_id = $company_bank;
+                    $done_payment->user_bank_info_id = $user_bank_id;
 
 
                     $settings = GlobalSettings::where('type', 'ibft_charges');
@@ -11332,6 +11336,7 @@ class AdminFinanceController extends Controller
                     $done_payment->delivered_shipments = 0;
                     $done_payment->adjusted_shipments = 0;
                     $done_payment->company_bank_id = $company_bank;
+                    $done_payment->user_bank_info_id = $user_bank_id;
                     $settings = GlobalSettings::where('type', 'ibft_charges');
 
                     if ($settings->exists()) {

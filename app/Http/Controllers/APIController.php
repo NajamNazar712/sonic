@@ -687,7 +687,7 @@ class APIController extends Controller
 
                 $consignee_city = City::find($request->input('consignee_city_id'));
 
-                if (($request->input('consignee_city_id') == 1244 && $user_id != 5982)) {
+                if (($request->input('consignee_city_id') == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110)) {
                     return response()->json(['status' => 1, 'message' => 'User is not allowed to book from ' . $request->input('consignee_city_id')]);
                 }
 
@@ -1420,6 +1420,9 @@ class APIController extends Controller
 
             if ($shipment->packaging_material_request) {
                 $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
+                if ($shipment->packaging_charges) {
+                    $charges['packing_charges'] = $shipment->packaging_charges;
+                }
             } else if (in_array($current_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
                 if ($shipment->weight_charges) {
                     $charges['weight_charges'] = $shipment->weight_charges;
@@ -1452,6 +1455,14 @@ class APIController extends Controller
                 if ($shipment->nsa_osa_charges) {
                     $charges['nsa_osa_charges'] = $shipment->nsa_osa_charges;
                 }
+
+                if ($shipment->cash_handling_charges) {
+                    $charges['cash_handling_charges'] = $shipment->cash_handling_charges;
+                }
+
+                if ($shipment->packaging_charges) {
+                    $charges['packing_charges'] = $shipment->packaging_charges;
+                }
             } else if (in_array($current_status_id, [20, 21, 22, 23, 24, 25, 44])) {
                 if ($shipment->weight_charges) {
                     $charges['weight_charges'] = $shipment->weight_charges;
@@ -1472,6 +1483,10 @@ class APIController extends Controller
                 if ($shipment->intercept_charges) {
                     $charges['intercept_charges'] = $shipment->intercept_charges;
                 }
+
+                if ($shipment->packaging_charges) {
+                    $charges['packing_charges'] = $shipment->packaging_charges;
+                }
             } else {
                 if ($shipment->weight_charges) {
                     $charges['weight_charges'] = $shipment->weight_charges;
@@ -1484,8 +1499,26 @@ class APIController extends Controller
                 if ($shipment->fuel_surcharge) {
                     $charges['fuel_surcharge'] = $shipment->fuel_surcharge;
                 }
-            }
 
+                if ($shipment->cash_handling_charges) {
+                    $charges['cash_handling_charges'] = $shipment->cash_handling_charges;
+                }
+
+                if ($shipment->packaging_charges) {
+                    $charges['packing_charges'] = $shipment->packaging_charges;
+                }
+            }
+            $total_charges_without_gst = array_sum($charges);
+            $gst = $shipment->pickup_address->city->zone->gst;
+            $gst = $gst * $total_charges_without_gst;
+            $total_charges = $shipment->amount-($gst + $total_charges_without_gst);
+            if($current_status_id == 1){
+                $charges['net_payable'] = 0.0;
+            }else{
+                $charges['net_payable'] = number_format($total_charges, 2);
+            }
+            $charges['total_charges'] = number_format($total_charges_without_gst, 2);
+            $charges['gst'] = number_format($gst, 2);
             if (!empty($charges)) {
                 return response()->json(['status' => 0, 'message' => 'Charges of Shipment #' . $tracking_number, 'charges' => $charges]);
             } else {
@@ -1957,6 +1990,14 @@ class APIController extends Controller
                 $information['charges']['fuel_surcharge'] = 0;
             }
 
+            $gst = $origin_city->zone->gst;
+            $total_charges_without_gst = array_sum($information['charges']);
+            $gst = ROUND(($gst * $total_charges_without_gst), 2, PHP_ROUND_HALF_DOWN);
+            $net_payable = ROUND(($request->amount-($total_charges_without_gst + $gst)), 2, PHP_ROUND_HALF_DOWN);
+            $information['charges']['total_charges'] = $total_charges_without_gst;
+            $information['charges']['gst'] = $gst;
+            $information['charges']['net_payable'] = $net_payable;
+
             return response()->json(['status' => 0, 'message' => 'Charges Calculated', 'information' => $information]);
         }
     }
@@ -2183,10 +2224,10 @@ class APIController extends Controller
                             $shipment->consignee_status_id = 20;
                             $shipment->save();
                             $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, null);
                             ShipmentChargesController::return ($shipment->id);
 
                             AdminFinanceController::add_payment($shipment->id, 1);
+                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, 'Marked by shipper - API', $user_id, null);
                             return response()->json(['status' => 0, 'message' => "Shipment successfully marked as Shipment - Return Confirm"]);
                         } else {
                             return response()->json(['status' => 1, 'message' => "Shipment is not ready for Return Confirm"]);
@@ -3945,12 +3986,12 @@ class APIController extends Controller
                         if (!$shipment->packaging_material_request) {
                             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                             $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, $remark, $user_id, null);
+                            ShipmentChargesController::return ($shipment->id);
                             //                NotificationsController::send(15, 0, $request->shipment_id);
                             //                NotificationsController::send(16, 0, $request->shipment_id);
 
-                            ShipmentChargesController::return ($shipment->id);
                             AdminFinanceController::add_payment($shipment->id, 1);
+                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, $remark, $user_id, null);
                         } else {
                             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
                             $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();

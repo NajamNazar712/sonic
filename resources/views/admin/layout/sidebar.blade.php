@@ -708,7 +708,9 @@
                         <li><a class="menu-item" href="{{route('admin.orders.self_collection.index')}}">Self Collection Shipments</a></li>
                     @endif
                     <li><a class="menu-item" href="{{ route('admin.quick_tracking.index') }}">Quick Tracking</a></li>
-
+                    @if (Auth::user()->trax_id != NULL)
+                        <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
+                    @endif
                     @if(session('role_id') == 1 || in_array(204, session('permissions')))
                         <li class=" nav-item"><a href="{{ route('admin.cx_quick_tracking.cx_index') }}"><span class="menu-title">CX Quick Tracking</span></a></li>
 
@@ -1696,7 +1698,7 @@
                     </ul>
                 </li>
             @endif
-            @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human Resource</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs')}}">Download Docs</a></li>
@@ -1738,8 +1740,9 @@
                         @if (session('role_id') == 1 || in_array(568, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.fnf.index')}}">FNF</a></li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(596, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
+
+                        @if (session('role_id') == 1 || in_array(613, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.leave.index')}}">Employee Leaves</a></li>
                         @endif
                    
 

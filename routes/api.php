@@ -213,6 +213,13 @@ Route::name('api.')->group(function () {
 
             Route::post('payslip', 'Rider\RiderAPIController@rider_payslip')->name('payslip');
             Route::post('fake_status', 'Rider\RiderAPIController@fake_status_count')->name('fake_status');
+
+            Route::prefix('leave')->name('leave.')->group(function () {
+                Route::post('index', 'Rider\RiderAPIController@leave_index')->name('index');
+                Route::post('apply', 'Rider\RiderAPIController@leave_apply')->name('apply');
+                Route::get('list', 'Rider\RiderAPIController@employee_leave_list')->name('list');
+                Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
+            });
 		});
 
 	});
@@ -267,6 +274,19 @@ Route::name('api.')->group(function () {
 
             Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');
             Route::post('location_v2', 'AdminAPIController@attendance_notification')->name('location_v2');
+            Route::post('payslip', 'AdminAPIController@admin_payslip')->name('payslip');
+
+            Route::prefix('leave')->name('leave.')->group(function () {
+                Route::post('index', 'AdminAPIController@leave_index')->name('index');
+                Route::post('apply', 'AdminAPIController@leave_apply')->name('apply');
+                Route::get('list', 'AdminAPIController@employee_leave_list')->name('list');
+                Route::get('approver_list', 'AdminAPIController@approver_leave_list')->name('approver_list');
+                Route::post('approve', 'AdminAPIController@leave_approve')->name('approve');
+                Route::post('reject', 'AdminAPIController@leave_reject')->name('reject');
+                Route::post('detail', 'AdminAPIController@leave_detail')->name('detail');
+                Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
+                Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
+            });
 
         });
 
