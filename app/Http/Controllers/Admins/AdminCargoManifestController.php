@@ -2705,8 +2705,22 @@ class AdminCargoManifestController extends Controller
                         $details['id'] = $shipment->id;
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['bag_number'] = $bag->seal_number;
-                        $details['origin'] = $shipment->pickup_address->city->name;
-                        $details['destination'] = $shipment->consignee_city->name;
+
+                        if($shipment->shipper_status_id == 21)
+                        {
+                            $details['origin'] = $shipment->consignee_city->name;
+                            if($shipment->return_address_id != NULL){
+                                $details['destination'] =  $shipment->return_address->city->name;;
+                            }
+                            else{
+                                $details['destination'] =  $shipment->pickup_address->city->name;
+                            }
+                        }
+                        else{
+                            $details['origin'] = $shipment->pickup_address->city->name;
+                            $details['destination'] = $shipment->consignee_city->name;
+                        }
+
                         $details['hub'] = $shipment->consignee_city->hub_city->name;
                         $details['consignee'] = $shipment->consignee_name;
                         $details['shipping_mode'] = $shipment->shipping_mode->mode;
