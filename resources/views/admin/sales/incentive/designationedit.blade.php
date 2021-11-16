@@ -23,7 +23,7 @@
     $(document).ready(function () {
         $('#edit_designation_form #designation').select2({
             width: '100%',
-            placeholder: 'Select Designation*',
+            placeholder: 'Select Role*',
             allowClear:false,
             dropdownParent:$('#edit_designation_form')
         });

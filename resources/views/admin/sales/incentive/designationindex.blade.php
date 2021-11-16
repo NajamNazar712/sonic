@@ -103,7 +103,7 @@
         $(document).ready(function () {
             $('#add_designation_form #designation').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select designation*',
+                placeholder: 'Select Role*',
                 allowClear:false,
                 dropdownParent:$('#add_designation_form')
             });
