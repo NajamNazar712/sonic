@@ -52,6 +52,7 @@
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Manifest Id</th>
                                     <th class="border-primary border-darken-1">Shipment(s)</th>
+                                    <th class="border-primary border-darken-1">Lost Shipment(s)</th>
                                     <th class="border-primary border-darken-1">Junction(s)</th>
                                    <th class="border-primary border-darken-1">Short Received Shipment(s)</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -85,6 +86,19 @@
         </div>
     </div>
     <div class="modal fade" id="shipments" role="dialog" aria-labelledby="shipments_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="lost_shipments" role="dialog" aria-labelledby="lost_shipments" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -140,6 +154,7 @@
                             head.push('Destination');
                             head.push('Manifest Id');
                             head.push('Shipment(s)');
+                            head.push('Lost Shipment(s)');
                             head.push('Short Received Shipment(s)');
                             head.push('Shipping Mode');
                             head.push('Transport Mode');
@@ -160,6 +175,7 @@
                                 row.push(values.destination);
                                 row.push(values.manifest);
                                 row.push(values.shipments_count);
+                                row.push(values.lost_shipments);
                                 row.push(values.short_received);
                                 row.push(values.shipping_mode);
                                 row.push(values.transport_mode);
@@ -214,12 +230,11 @@
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'manifest_id', name: 'cm.id', class: 'align-middle manifest_id'},
                     {data: 'shipments', name: 'cargo_manifest_bags.shipments', class: 'align-middle text-center shipments'},
+                    {data: 'lost_shipments', name: 'cargo_manifest_bags.lost_shipments', class: 'align-middle text-center lost_shipments'},
                     {data: 'junctions', name: 'junctions', class: 'align-middle text-center junctions',orderable: false},
                     {data: 'short_received_shipments', name: 'short_received_shipments', class: 'align-middle text-center short_received_shipments'},
                     {data: 'shipping_mode', name: 'sm.id', class: 'align-middle shipping_mode'},
-
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
-                   /* {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},*/
                     {data: 'shipments_weight', name: 'cargo_manifest_bags.shipments_weight', class: 'align-middle shipments_weight'},
                     {data: 'actual_weight', name: 'cargo_manifest_bags.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'transitted_at', name: 'cargo_manifest_bags.created_at', class: 'align-middle transit_at'},
@@ -479,6 +494,41 @@
                             $('#short_received_shipments .modal-body').html(tracking_numbers);
 
                             $('#short_received_shipments').modal('show');
+                        }
+                    });
+            });
+
+            $('#datatable tbody').on('click', 'tr td.lost_shipments button', function() {
+                var seal_number = table.row($(this).parents('tr')).data().seal_number;
+
+                $('#lost_shipments .modal-body').html('');
+
+                $.ajax({
+                    url: '{!! route('admin.cargo_manifest.bags.history.lost_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'seal_number': seal_number
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var head = '';
+                            var tracking_numbers = '';
+
+                            head = '<h4 class="modal-title" id="shipments_title">Lost Shipment(s)</h4>' +
+                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                '<span aria-hidden="true">×</span>\n' +
+                                '</button>';
+
+                            $.each(data, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                            });
+
+                            $('#lost_shipments .modal-header').html(head);
+                            $('#lost_shipments .modal-body').html(tracking_numbers);
+
+                            $('#lost_shipments').modal('show');
                         }
                     });
             });

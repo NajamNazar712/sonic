@@ -1627,6 +1627,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('history')->name('history.')->group(function () {
                 Route::get('', 'Admins\AdminCargoManifestController@history_index')->name('index');
                 Route::get('list', 'Admins\AdminCargoManifestController@history_list')->name('list');
+                Route::post('lost_shipments', 'Admins\AdminCargoManifestController@history_lost_shipments')->name('lost_shipments');
             });
 
         });

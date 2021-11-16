@@ -26,6 +26,7 @@ use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Models\ManifestBagLostShipment;
 use App\Http\Models\MisroutedHistory;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Shipment;
@@ -1200,7 +1201,7 @@ class AdminCargoManifestController extends Controller
             ->join('admins as a', 'cargo_manifest_bags.created_by', '=', 'a.id')
             ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
-            ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'tm.name as transport_mode','cargo_manifest_bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_manifest_bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`cargo_manifest_bag_id` = `cargo_manifest_bags`.`id`) AS `chargeable_weight`'), 'cargo_manifest_bags.actual_weight', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type','cargo_manifest_bags.seal_number', 'bs.name as status','cm.id as manifest_id','cargo_manifest_bags.junction_mapping_id as junction_mapping_id','cargo_manifest_bags.created_at as transitted_at','cm.id as manifest','sm.mode as shipping_mode','cargo_manifest_bags.short_received_shipments as short_received_shipments','cargo_manifest_bags.short_received_shipments as short_received');
+            ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'tm.name as transport_mode','cargo_manifest_bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_manifest_bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`cargo_manifest_bag_id` = `cargo_manifest_bags`.`id`) AS `chargeable_weight`'), 'cargo_manifest_bags.actual_weight', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type','cargo_manifest_bags.seal_number', 'bs.name as status','cm.id as manifest_id','cargo_manifest_bags.junction_mapping_id as junction_mapping_id','cargo_manifest_bags.created_at as transitted_at','cm.id as manifest','sm.mode as shipping_mode','cargo_manifest_bags.short_received_shipments as short_received_shipments','cargo_manifest_bags.short_received_shipments as short_received','cargo_manifest_bags.lost_shipments as lost_shipments');
 
 
         if (session('role_id') != 1) {
@@ -1212,6 +1213,14 @@ class AdminCargoManifestController extends Controller
         $datatables = Datatables::of($bags)
             ->addColumn('shipments_count', function ($bag) {
                 return $bag->shipments;
+            })
+            ->editColumn('lost_shipments', function ($bag) {
+                if($bag->lost_shipments > 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' .$bag->lost_shipments . '</button>';
+                }
+                else{
+                    return 0;
+                }
             })
             ->editColumn('manifest_id',function ($bag){
                 if($bag->manifest_id){
@@ -2116,7 +2125,7 @@ class AdminCargoManifestController extends Controller
               $cargo_manifest_shipment_ids[] = $shipments->shipment_id;
           }
 
-          $trackings = Shipment::whereIn('id',$cargo_manifest_shipment_ids)->where('shipper_status_id','!=',18)->select('tracking_number')->get();
+          $trackings = Shipment::whereIn('id',$cargo_manifest_shipment_ids)->select('tracking_number')->get();
           foreach ($trackings as $number){
               $tracking_numbers[]  = $number->tracking_number;
           }
@@ -2133,7 +2142,7 @@ class AdminCargoManifestController extends Controller
             $cargo_manifest_shipment_ids[] = $shipments->shipment_id;
         }
 
-        $trackings = Shipment::whereIn('id',$cargo_manifest_shipment_ids)->where('shipper_status_id','!=',18)->select('tracking_number')->get();
+        $trackings = Shipment::whereIn('id',$cargo_manifest_shipment_ids)->select('tracking_number')->get();
         foreach ($trackings as $number){
             $tracking_numbers[]  = $number->tracking_number;
         }
@@ -2960,6 +2969,23 @@ class AdminCargoManifestController extends Controller
     public function cargo_manifest_in_transit_print(Request $request) {
         $html = self::print($request->cargo_manifest_ids,2);
         return $html;
+    }
+
+    public function history_lost_shipments(Request $request){
+     $bag = CargoManifestBag::where('seal_number',$request->seal_number)->first();
+     $tracking_numbers = array();
+     if($bag){
+         $shipment_ids = ManifestBagLostShipment::where('bag_id',$bag->id);
+         if($shipment_ids->exists()){
+             $shipment_ids = $shipment_ids->pluck('shipment_id')->toArray();
+
+             foreach ($shipment_ids as $shipment_id){
+                 $shipment = Shipment::find($shipment_id);
+                 $tracking_numbers[] = $shipment->tracking_number;
+             }
+         }
+         return $tracking_numbers;
+     }
     }
 
 }
