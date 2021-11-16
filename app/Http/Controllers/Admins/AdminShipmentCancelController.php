@@ -48,7 +48,7 @@ class AdminShipmentCancelController extends Controller
     }
 
     static public function cancel() {
-        $active_users = User::where('status', 3)->whereNotIn('id', [3324, 7762, 5982])->get();
+        $active_users = User::where('status', 3)->whereNotIn('id', [3324, 7762, 5982, 10104, 14110])->get();
         if(count($active_users)){
             foreach ($active_users as $user){
                 if($user->auto_shipment_cancellation_days == null){

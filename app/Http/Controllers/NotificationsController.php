@@ -7996,7 +7996,7 @@ class NotificationsController extends Controller
                         $to[] = 'zakee.rasheed@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
-                        $bcc[] = 'danish.zahidw@trax.pk';
+                        $bcc[] = 'danish.zahid@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -8111,7 +8111,7 @@ class NotificationsController extends Controller
                     if ($shipment_journey) {
                         $current_status = $shipment_journey->shipment_status_consignee->name;
                         if ($shipment_journey->status_reason_id) {
-                            $reason = '& ' . $shipment_journey->shipment_status_reason->name;
+                            $reason = ' ' . $shipment_journey->shipment_status_reason->name;
                         }
                     } else {
                         $current_status = $shipment->status_consignee->name;

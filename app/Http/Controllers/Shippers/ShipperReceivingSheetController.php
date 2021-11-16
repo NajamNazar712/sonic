@@ -60,7 +60,9 @@ class ShipperReceivingSheetController extends Controller
                 }
 
                 if (ReceivingSheetShipment::where('shipment_id', $shipment_id)->exists()) {
-                    return ['status' => 1, 'error' => $shipment->tracking_number . ' is already in a Receiving Sheet'];
+                    unset($shipment_ids[$key]);
+
+                    // return ['status' => 1, 'error' => $shipment->tracking_number . ' is already in a Receiving Sheet'];
                 }
 
                 if ($pickup_address_id == 0) {
@@ -225,6 +227,10 @@ class ShipperReceivingSheetController extends Controller
 
     public function add(Request $request) {
         $shipment = Shipment::find($request->input('shipment_id'));
+
+        if ($shipment->shipper_status_id != 1) {
+            return ['status' => 1, 'error' => $shipment->tracking_number . ' can no longer be added to a Receiving Sheet'];
+        }
 
         if ($shipment->user_id == session('user_id')) {
             $receiving_sheet = ReceivingSheet::find($request->input('receiving_sheet_id'));

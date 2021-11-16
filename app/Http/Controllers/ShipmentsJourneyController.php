@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -47,12 +48,15 @@ class ShipmentsJourneyController extends Controller
         }
       }
       else if (in_array($shipper_status_id, [3, 21, 26, 32])) {
-          $bag = Bag::find($shipment_journey->reference_1_id);
+          //$bag = Bag::find($shipment_journey->reference_1_id);
+          $bag = CargoManifestBag::find($shipment_journey->reference_1_id);
+
           if($bag){
               $cargo_consignment = $bag;
           }
           else{
-              $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
+              $cargo_consignment = Bag::find($shipment_journey->reference_1_id);
+
           }
 
         if ($cargo_consignment) {
@@ -60,12 +64,12 @@ class ShipmentsJourneyController extends Controller
         }
       }
       else if (in_array($shipper_status_id, [4, 22, 27, 33])) {
-          $bag = Bag::find($shipment_journey->reference_1_id);
+          $bag = CargoManifestBag::find($shipment_journey->reference_1_id);
           if($bag){
               $cargo_consignment = $bag;
           }
           else{
-              $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
+              $cargo_consignment = Bag::find($shipment_journey->reference_1_id);
           }
 
         if ($cargo_consignment) {

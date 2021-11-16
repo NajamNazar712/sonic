@@ -2413,7 +2413,7 @@ class AdminHumanResourseController extends Controller
         }
         $payslips = EmployeePayslip::select('id', 'payroll_month', 'trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban', 'total_salary');
         if (!in_array(596, session('permissions'))) {
-            $payslips->whereRaw('false');
+            $payslips->where('trax_id',Auth::user()->trax_id)->where('trax_id','!=',null);
         }
 
         $datatable = Datatables::of($payslips)

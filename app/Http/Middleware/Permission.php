@@ -1100,8 +1100,6 @@ class Permission
             'settings.international_automation_user.index' => 582,
 
             'settings.ccd_booking.index' => 558,
-
-            'human_resource.payslip.index' => 596,
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
