@@ -1083,7 +1083,7 @@ class AdminCargoManifestController extends Controller
                 unset($shipment_ids[$key]);
             }
         }
-
+       
         $bag_numbers = '';
         if (!empty($shipment_ids)) {
             foreach ($shipment_ids as $shipment_id) {
@@ -1094,9 +1094,19 @@ class AdminCargoManifestController extends Controller
                 }
                 else{
                     $bag_type = 2;
-                    $destination = $shipment->pickup_address->city->hub_id;
+                    if($shipment->shipper_status_id == 20){
+                        if($shipment->return_address_id != null){
+                            $destination = $shipment->return_address->city->hub_city;
+                        }
+                        else{
+                            $destination = $shipment->pickup_address->city->hub_city;
+                        }
+                    }
+                    else{
+                        $destination = $shipment->pickup_address->city->hub_id;
+                    }
                 }
-
+               
                 $bag = new CargoManifestBag();
                 $bag->seal_number = $shipment->tracking_number;
                 $bag->origin_hub_id = Auth::user()->default_hub_id;
