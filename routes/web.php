@@ -2496,6 +2496,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('rider_ticker')->name('rider_ticker.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@rider_ticker_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@rider_ticker_store')->name('store');
+            Route::post('admin_store', 'Admins\GlobalSettingsController@admin_ticker_store')->name('admin_store');
+            Route::post('retail_store', 'Admins\GlobalSettingsController@retail_ticker_store')->name('retail_store');
         });
 
         Route::prefix('walk_in')->name('walk_in.')->group(function () {
