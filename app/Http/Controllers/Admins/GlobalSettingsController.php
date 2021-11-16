@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\Http\Models\Admin\AdminAppSlider;
+use App\Http\Models\Admin\RetailAppSlider;
 use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
 use App\Http\Controllers\Admins\ActivityTrailController;
@@ -3715,7 +3717,9 @@ class GlobalSettingsController extends Controller
     public function rider_ticker_index()
     {
         $rider_ticker = RiderTickerImage::orderBy('id', 'ASC')->get();
-        return view('admin.settings.rider_ticker')->with(['id' => 1, 'rider_ticker' => $rider_ticker]);
+        $admin_ticker = AdminAppSlider::orderBy('id', 'ASC')->get();
+        $retail_ticker = RetailAppSlider::orderBy('id', 'ASC')->get();
+        return view('admin.settings.rider_ticker')->with(['id' => 1, 'rider_ticker' => $rider_ticker, 'admin_ticker' => $admin_ticker, 'retail_ticker' => $retail_ticker]);
     }
 
     public function rider_ticker_store(Request $request)

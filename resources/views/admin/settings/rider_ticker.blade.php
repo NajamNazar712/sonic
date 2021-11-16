@@ -7,12 +7,148 @@
 @section('title','App Slider')
 
 @section('content')
-    <h1 class="mb-1">
-        App Slider
-    </h1>
+    {{--Rider Slider Images--}}
+    <h1 class="mb-1">App Slider</h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
+            <div class="card-header"><h2 class="mb-1">Rider Slider</h2></div>
+            <div class="card-body">
+                @include('admin.inc.messages')
+                <form id="documents_form" class="form form-horizontal" action="{{route('admin.settings.rider_ticker.store')}}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <div class="form-body">
+                        <div class="row justify-content-center">
+                            <div class="col-4">
+                                <table class="table table-sm table-bordered text-center" id="Image_table">
+                                    <tbody>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 1</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_1"  id="upload_image_1"></td>
+                                        @if(isset($rider_ticker[0]))
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_1" id="rider_request_id" value="{{$rider_ticker[0]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[0]->picture_path))}}">View</button></a></td>
+                                        @endif
+
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 2</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_2"  id="upload_image_2"></td>
+                                        @if(isset($rider_ticker[1]))
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_2" id="rider_request_id" value="{{$rider_ticker[1]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[1]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 3</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_3"  id="upload_image_3"></td>
+                                        @if(isset($rider_ticker[2]))
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_3" id="rider_request_id" value="{{$rider_ticker[2]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[2]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 4</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_4"  id="upload_image_4"></td>
+                                        @if(isset($rider_ticker[3]))
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_4" id="rider_request_id" value="{{$rider_ticker[3]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[3]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 5</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_5"  id="upload_image_5"></td>
+                                        @if(isset($rider_ticker[4]))
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_5" id="rider_request_id" value="{{$rider_ticker[4]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[4]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mt-4">
+                            <div class="mr-1">
+                                <button type="submit" class="btn btn-outline-primary mr-1 upload">Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {{--Admin Slider Images--}}
+    <div class="card">
+        <div class="card-content" aria-expanded="true">
+            <div class="card-header"><h2 class="mb-1">Staff Slider</h2></div>
+            <div class="card-body">
+                @include('admin.inc.messages')
+                <form id="documents_form" class="form form-horizontal" action="{{route('admin.settings.rider_ticker.store')}}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <div class="form-body">
+                        <div class="row justify-content-center">
+                            <div class="col-4">
+                                <table class="table table-sm table-bordered text-center" id="Image_table">
+                                    <tbody>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 1</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_1"  id="upload_image_1"></td>
+                                        @if(isset($rider_ticker[0]))
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_1" id="rider_request_id" value="{{$rider_ticker[0]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[0]->picture_path))}}">View</button></a></td>
+                                        @endif
+
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 2</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_2"  id="upload_image_2"></td>
+                                        @if(isset($rider_ticker[1]))
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_2" id="rider_request_id" value="{{$rider_ticker[1]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[1]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 3</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_3"  id="upload_image_3"></td>
+                                        @if(isset($rider_ticker[2]))
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_3" id="rider_request_id" value="{{$rider_ticker[2]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[2]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 4</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_4"  id="upload_image_4"></td>
+                                        @if(isset($rider_ticker[3]))
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_4" id="rider_request_id" value="{{$rider_ticker[3]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[3]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 5</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_5"  id="upload_image_5"></td>
+                                        @if(isset($rider_ticker[4]))
+                                            <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_5" id="rider_request_id" value="{{$rider_ticker[4]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[4]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mt-4">
+                            <div class="mr-1">
+                                <button type="submit" class="btn btn-outline-primary mr-1 upload">Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {{--Retail Slider Images--}}
+    <div class="card">
+        <div class="card-content" aria-expanded="true">
+            <div class="card-header"><h2 class="mb-1">Retail Slider</h2></div>
             <div class="card-body">
                 @include('admin.inc.messages')
                 <form id="documents_form" class="form form-horizontal" action="{{route('admin.settings.rider_ticker.store')}}" method="post" enctype="multipart/form-data">
