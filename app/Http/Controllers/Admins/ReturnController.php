@@ -434,7 +434,6 @@ class ReturnController extends Controller
                     $parcel->consignee_status_id = 20;
                     $parcel->save();
 
-                    ShipmentsJourneyController::add($shipment, 20, 20, $return_reason, $remarks, NULL, Auth::id());
 
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
@@ -459,7 +458,8 @@ class ReturnController extends Controller
                             AdminFinanceController::done_payment($shipment, 1);
                         }
                     }
-                   $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
+                    ShipmentsJourneyController::add($shipment, 20, 20, $return_reason, $remarks, NULL, Auth::id());
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
                    if($return_assign_shipment->exists()){
 
                        $return_assign_shipment = $return_assign_shipment ->latest()->first();
@@ -579,7 +579,6 @@ class ReturnController extends Controller
 
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
 
-                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $return_reason, $remark, NULL, Auth::id());
 
 
                 NotificationsController::send(15, 0, $request->shipment_id);
@@ -603,8 +602,9 @@ class ReturnController extends Controller
                         AdminFinanceController::done_payment($request->shipment_id, 1);
                     }
                 }
-               $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
-               if($return_assign_shipment->exists()){
+                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $return_reason, $remark, NULL, Auth::id());
+                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+                if($return_assign_shipment->exists()){
                    $return_assign_shipment = $return_assign_shipment ->latest()->first();
                    $return_assign_shipment->status = 0;
                    $return_assign_shipment->save();
@@ -1034,7 +1034,6 @@ class ReturnController extends Controller
                             continue;
                         }
                         $shipment_details->shipper_status_id = 20; //Confirmation Pending
-                        ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
 
@@ -1057,6 +1056,7 @@ class ReturnController extends Controller
                             }
                         }
 
+                        ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
                     }
                     else if($status == 1){
                         $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();

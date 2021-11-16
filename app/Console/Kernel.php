@@ -102,7 +102,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ReturnSheetReceive',
         'App\Console\Commands\RiderDeactivateAutomatically',
         'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
-        'App\Console\Commands\SaleIncentiveReport',
+		'App\Console\Commands\SaleIncentiveReport',
+        'App\Console\Commands\AutoAssignCrmAgent',
     ];
 
     /**
@@ -189,6 +190,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('month:averagerm')->dailyAt('07:30')->runInBackground();
         $schedule->command('month:averageindividual')->dailyAt('07:30')->runInBackground();
 
+
+        $schedule->command('reimbursement_invoice:generate')->monthlyOn(1, '00:30')->runInBackground();
+
         $settings = GlobalSettings::where('type', 'auto_invoice_generation_time');
 
         if ($settings->exists()) {
@@ -254,7 +258,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
         $schedule->command('report:donepayment')->dailyAt('17:30')->runInBackground();
-        $schedule->command('report:retaildonepayment')->dailyAt('16:00')->runInBackground();
+        $schedule->command('report:retaildonepayment')->dailyAt('17:30')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'completed_aging_report_time');
 
@@ -351,10 +355,13 @@ class Kernel extends ConsoleKernel
             $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
         }
 
-//        $incentive_date = SalesIncentiveDate::first();
-//        if($incentive_date){
-//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
-//        }
+		//$incentive_date = SalesIncentiveDate::first();
+		//        if($incentive_date){
+		//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
+		//        }
+        $schedule->command('crm:autoassign')->dailyAt('05:00')->runInBackground();
+
+
     }
     /**
      * Register the commands for the application.

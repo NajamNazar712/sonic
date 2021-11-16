@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\CRM;
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
+use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\CRM\CrmRequestTaggingHistory;
+use App\Http\Models\SaleTierTag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -133,6 +137,68 @@ class CRMController extends Controller
                 $crm_request_status_history->status_id = 2;
 
                 $crm_request_status_history->save();
+
+                if($crm_request->shipper_id){
+                    $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
+                    if($sales_tier_tag->exists()){
+                        $sales_tier_tag = $sales_tier_tag->first();
+                        $tagged_id = $sales_tier_tag->kam;
+                        $kam_admin = Admin::find($tagged_id);
+                        if($launched_by == 0){
+                            $agent_id = Auth::id();
+                        }else{
+                            $default_agent_setting = GlobalSettings::where('type', 'crm_default_agent');
+                            if($default_agent_setting->exists()){
+                                $default_agent_setting = $default_agent_setting->first();
+                                $agent_id = $default_agent_setting->setting_value;
+                            }
+                            else{
+                                $agent_id = 306;
+                            }
+                        }
+                        if($kam_admin){
+                            if($kam_admin->status){
+                                if($tagged_id){
+                                    $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->first();
+                                    if(!empty($tagged_crm_request)){
+                                        if($tagged_crm_request['tagged_id'] != $tagged_id) {
+                                            CrmRequestTagging::where('crm_request_id', $crm_request->id)->update([
+                                                'crm_request_tagging_type_id' => 2,
+                                                'tagged_id' => $tagged_id
+                                            ]);
+
+                                            CrmRequestTaggingHistory::create([
+                                                'crm_request_id' => $crm_request->id,
+                                                'crm_request_tagging_type_id' => 2,
+                                                'tagged_id' => $tagged_id,
+                                                'agent_id' => $agent_id,
+                                                'hub_id' => NULL
+                                            ]);
+                                            NotificationsController::send(31,$crm_request->id);
+                                        }
+                                    }
+                                    else{
+                                        CrmRequestTagging::create([
+                                            'crm_request_id' => $crm_request->id,
+                                            'crm_request_tagging_type_id' => 2,
+                                            'tagged_id' => $tagged_id,
+                                            'hub_id' => NULL
+                                        ]);
+
+                                        CrmRequestTaggingHistory::create([
+                                            'crm_request_id' => $crm_request->id,
+                                            'crm_request_tagging_type_id' => 2,
+                                            'tagged_id' => $tagged_id,
+                                            'agent_id' => $agent_id,
+                                            'hub_id' => NULL
+                                        ]);
+                                        NotificationsController::send(31,$crm_request->id);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 

@@ -57,9 +57,12 @@ use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmTatHolidays;
+use App\Http\Models\CrmAgent;
+use App\Http\Models\CrmAgentLog;
 use App\Http\Models\DeliveryCallVerificationRatio;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Holiday;
@@ -93,6 +96,7 @@ use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Admin\SalesDesignationJourney;
 use App\Http\Models\Admin\SalesDesignation;
+use App\Http\Models\Zone;
 use Carbon\Carbon;
 use http\Env\Response;
 use Illuminate\Http\Request;
@@ -4539,9 +4543,9 @@ class GlobalSettingsController extends Controller
             $time = $settings->text;
         }
         else {
-            $time = '00:00';
+            $time = 0;
         }
-
+       
         return view('admin.settings.debriefing_time_setting_index')->with(['time' => $time]);
 
     }
@@ -4803,7 +4807,146 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-    public function sales_incentive()
+
+    public function crm_auto_assigning_index(){
+        $agents = Admin::select('id', 'name')->whereIn('role_id',[37,28])->get();//37,28 role
+        $zones = Zone::where('status',1)->where('business_category_id',1)->get();
+        $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
+
+        return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents , 'zones' => $zones, 'case_natures' => $case_natures]);
+    }
+
+    public function crm_auto_assigning_list(){
+        $roles = CrmAgent::join('admins as ad', 'ad.id', '=', 'crm_agents.admin_id')
+                 ->join('zones as z','z.id','crm_agents.zone_id')   
+                 ->join('crm_request_case_nature as cn','cn.id','crm_agents.case_nature_id')   
+        ->select('crm_agents.id', 'ad.name as agent_name', 'z.name as zone_name', 'cn.name as case_nature','crm_agents.status as status');
+        
+    $datatables = Datatables::of($roles)
+        ->addColumn('action', function($roles) {
+            if (session('role_id') == 1 || in_array(618, session('permissions'))) {
+                if($roles->id == 1 || $roles->id == 2){
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    
+                    if($roles->status == 1 ){
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }else{
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    $dropdown .='</div>
+                    </div>
+                        ';
+  
+                    return $dropdown;
+                }else{
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    ';
+                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    if($roles->status == 1 ){
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }else{
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+          return $dropdown;
+                }
+               
+            }
+            else {
+                return '';
+            }
+        })
+        ->editColumn('zone_name', function($roles) {
+                if($roles->id == 1 || $roles->id == 2){
+                    return '-';
+                }else{
+                    return $roles->zone_name;
+                }
+               
+        })->editColumn('status', function($roles) {
+            if($roles->status == 1){
+                return 'Enable';
+            }else{
+                return 'Disable';
+            }
+            
+        });
+
+    return $datatables->make(true);
+    }
+
+    public function crm_auto_assigning_submit(Request $request){
+        $crm_agent = CrmAgent::where('admin_id',$request->admin_id)->where('case_nature_id',$request->case_nature_id);
+        if(!$crm_agent->exists()){
+
+            CrmAgent::create($request->all());
+            return redirect()->back()->with('success', 'Agent Added!');
+        }else{
+            return redirect()->back()->with('error', 'Agent Already Exists!');
+
+        }
+
+
+    }
+
+    public function crm_auto_assigning_data(Request $request){
+        $crm_agent_data = CrmAgent::find($request->id);
+
+        $agent_id = $crm_agent_data->admin_id;
+        $zone_id = $crm_agent_data->zone_id;
+        $case_nature_id = $crm_agent_data->case_nature_id;
+        $crm_agent_id = $crm_agent_data->id;
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'zone_id' => $zone_id ,'case_nature_id'=> $case_nature_id,'crm_agent_id'=> $crm_agent_id]);
+
+    }
+
+    public function crm_auto_assigning_delete(Request $request){
+        CrmAgent::find($request->id)->delete();
+        return response()->json(['status' => 1, 'success' => 'Assigned Agent Deleted']);
+
+    }
+
+
+    public function crm_auto_assigning_update(Request $request){
+        $crm_agent_data = CrmAgent::find($request->crm_agent_id);
+
+        $crm_agent_data->admin_id = $request->admin_id;
+        $crm_agent_data->zone_id = $request->zone_id;
+        $crm_agent_data->case_nature_id = $request->case_nature_id;
+        $crm_agent_data->save();
+        return redirect()->back()->with('success', 'Agent Updated!');
+
+    }
+
+    public function crm_auto_assigning_enable_disable(Request $request){
+        $crm_agent = CrmAgent::find($request->id);
+        if($crm_agent->status == 1){
+            $crm_agent->status = 0;
+            $crm_agent->save();
+        return redirect()->back()->with('success', 'Agent Disabled!');
+
+        }else{
+            $crm_agent->status = 1;
+            $crm_agent->save();
+        return redirect()->back()->with('success', 'Agent Enabled!');
+
+        }
+    }
+public function sales_incentive()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),460);
         $incentives = SalesDesignation::where('status', 1)->get();
@@ -4857,4 +5000,5 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'Incentive Not Added Successfully!');
         }
     }
+
 }

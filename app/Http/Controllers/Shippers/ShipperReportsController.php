@@ -38,7 +38,7 @@ class ShipperReportsController extends Controller
     }
     public function sales_list(Request $request)
     {
-        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982])) {
+        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110])) {
             $connection = 'reports';
         } else {
             $connection = 'mysql';
@@ -593,6 +593,11 @@ class ShipperReportsController extends Controller
                     ->where('sj.id', '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1)'));
             })
+            ->leftJoin('shipments_journey as sjb', function ($join) use ($connection) {
+                $join->on('sjb.shipment_id', '=', 'shipments.id')
+                    ->where('sjb.id', '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 1 and shipments_journey.verification = 1)'));
+            })
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id', '=',
@@ -605,8 +610,8 @@ class ShipperReportsController extends Controller
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
-            ->select('shipments.tracking_number', 'shipments.order_id as order_id', 'ss.name as current_status', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.actual_weight', 'dr.created_at as delivered_or_returned', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'ssr.name as return_reason', 'dr.shipper_status_id')
-            ->whereNotIn('shipments.shipper_status_id', [1, 17]);
+            ->select('shipments.tracking_number', 'shipments.order_id as order_id', 'ss.name as current_status', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.actual_weight', 'dr.created_at as delivered_or_returned', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'ssr.name as return_reason', 'dr.shipper_status_id', 'sjb.created_at as booking_date')
+            ->whereNotIn('shipments.shipper_status_id', [17]);
 
         if (session('user_type') == 2) {
             if (session('restriction') == 1) {

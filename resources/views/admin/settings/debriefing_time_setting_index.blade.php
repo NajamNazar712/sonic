@@ -25,7 +25,7 @@
                                         <div class="form-group">
 
                                             <div class="input-group">
-                                                <input type="time" name="debriefing_time" class="form-control bg-primary border-primary white rounded-right debriefing_time" placeholder="Debriefing Time*" data-rule-required="true" data-msg-required="Debriefing Time is required" value="{{$time}}" >
+                                                <input type="number" name="debriefing_time" class="form-control bg-primary border-primary white rounded-right debriefing_time" min="1"  max="23" placeholder="Debriefing Time*" data-rule-required="true" data-msg-required="Debriefing Time is required" value="{{$time}}" >
                                             </div>
                                         </div>
                                         <button type="submit" class="btn btn-primary">Update</button>

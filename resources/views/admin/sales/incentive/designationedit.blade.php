@@ -23,7 +23,7 @@
     $(document).ready(function () {
         $('#edit_designation_form #designation').select2({
             width: '100%',
-            placeholder: 'Select Designation*',
+            placeholder: 'Select Role*',
             allowClear:false,
             dropdownParent:$('#edit_designation_form')
         });
@@ -31,7 +31,7 @@
         $('#edit_designation_form').validate({
             ignore: ":not(:visible),:disabled",
             errorClass: 'danger',
-            successClass: 'success',
+            successClass: 'success',S
             errorPlacement: function(error, element) {
                 error.addClass('w-100').appendTo(element.parents('.form-group'));
             },
