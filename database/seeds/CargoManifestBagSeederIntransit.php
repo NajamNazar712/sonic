@@ -12,7 +12,7 @@ class CargoManifestBagSeederIntransit extends Seeder
      */
     public function run()
     {
-        $bags = CargoManifestBag::where('status_id', 7)->get();
+        $bags = CargoManifestBag::where('status_id', '!=', 7)->get();
         if($bags){
             foreach ($bags as $bag){
                 $bag_shipments = $bag->shipment;
