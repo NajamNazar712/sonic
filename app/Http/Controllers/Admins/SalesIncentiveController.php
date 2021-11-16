@@ -62,20 +62,27 @@ class SalesIncentiveController extends Controller
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-users align-middle"></i> <span class="align-middle">View</span></button>';
             })
             ->addColumn('action', function ($data) {
+                if (session('role_id') == 1 || in_array(626, session('permissions')) || in_array(628, session('permissions'))){
                 $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
                      if ($data->status == 0) {
+                        if (session('role_id') == 1 || in_array(628, session('permissions')))
                         $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    
                     } else {
+                        if (session('role_id') == 1 || in_array(628, session('permissions')))
                         $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                     }
+                    if (session('role_id') == 1 || in_array(626, session('permissions')))
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $data->id . ' rel="editterritory" data-toggle="modal" data-target="#editterritory"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     $dropdown .= '
                     </div>
                   </div>
           ';
                     return $dropdown;
+                }
+                else{ return ''; }
             
         });
           
@@ -257,20 +264,27 @@ class SalesIncentiveController extends Controller
                 }
             })
             ->addColumn('action', function ($data) {
+                if (session('role_id') == 1 || in_array(627, session('permissions')) || in_array(629, session('permissions'))){
                 $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
                      if ($data->status == 0) {
+                        if (session('role_id') == 1 || in_array(629, session('permissions')))
                         $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                     } else {
+                        if (session('role_id') == 1 || in_array(629, session('permissions')))
                         $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                     }
+                    if (session('role_id') == 1 || in_array(627, session('permissions')))
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $data->id . ' rel="editdesignation" data-toggle="modal" data-target="#editdesignation"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     $dropdown .= '
                     </div>
                   </div>
           ';
                     return $dropdown;
+                }
+                else
+                { return '';}
             
         });
           
