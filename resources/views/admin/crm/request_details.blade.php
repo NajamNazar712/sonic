@@ -2130,7 +2130,9 @@
                                 index++;
                                 var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                                 var remove = '';
+                                @if (session('role_id') == 1 || in_array(623, session('permissions')))
                                 remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+                                @endif
                                 image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
                             });
                             $('#crm_image_view_table tbody').append(image_html);

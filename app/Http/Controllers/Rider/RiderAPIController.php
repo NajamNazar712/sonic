@@ -248,6 +248,28 @@ class RiderAPIController extends Controller
         return $distance;
     }
 
+    private function calculate_location_status($latitude, $longitude)
+    {
+        $location_status = 1;
+        $reporting_locations = ReportingLocation::where('status', 1);
+        if ($reporting_locations->exists()) {
+            $reporting_locations = $reporting_locations->get();
+            foreach ($reporting_locations as $reporting_location) {
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $latitude . ',' . $longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance <= $reporting_location->radius / 1000) {
+                    $location_status = 2;
+                    return $location_status;
+                }
+            }
+        } else {
+            $location_status = 0;
+        }
+        return $location_status;
+    }
+
     private function set_order($starting_location, $pickup_note_id, $pickup_note_requests)
     {
         $ordered = TRUE;
@@ -3586,6 +3608,7 @@ class RiderAPIController extends Controller
                                 }
 
                                 ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
+                                NotificationsController::send(163, $shipment->id, $request->delivery_note_id);
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
                                 $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
                                 if (!$rider_delivery_note_status->exists()) {
@@ -9486,22 +9509,6 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $location_status = 0;
-            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                ->join('riders as r', 'e.id', 'r.employee_id')
-                ->where('r.id', $rider_id);
-            if ($reporting_location->exists()) {
-                $reporting_location = $reporting_location->first();
-                $reporting_location->radius;
-                $destination = $reporting_location->lat . ',' . $reporting_location->long;
-                $origin = $request->latitude . ',' . $request->longitude;
-                $distance = $this->distance($origin, $destination);
-                if ($distance > $reporting_location->radius / 1000) {
-                    $location_status = 1;
-                } else {
-                    $location_status = 2;
-                }
-            }
             $attendance_datetime = Carbon::parse($request->attendance_date)->format('Y-m-d H:i:s');
             $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
             $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
@@ -9518,6 +9525,7 @@ class RiderAPIController extends Controller
                 $rider_attendance->employee_type = 2;
                 $rider_attendance->attendance_date = $attendance_date;
             }
+            $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
             if ($request->action == 1) {
                 $rider_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
                 $rider_attendance->clock_in_latitude = $request->latitude;
@@ -9981,6 +9989,80 @@ class RiderAPIController extends Controller
             }
             return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
 
+        }
+    }
+
+    public function month_attendance_history_v2(Request $request)
+    {
+        $rules = [
+            'first_day' => ['required'],
+            'last_day' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
+        } else {
+            $rider_id = $request->rider_id;
+            $dates = $this->generateDateRange($request->first_day, $request->last_day);
+            $data = array();
+            $shift = EmployeeShift::join('riders as r', 'employee_shifts.id', '=', 'r.shift_id')
+                ->where('r.id', $rider_id)
+                ->select('employee_shifts.start_time as start_time', 'employee_shifts.extension_minutes as grace_time');
+            $shift_exists = 0;
+            if ($shift->exists()) {
+                $shift = $shift->first();
+                $shift_exists = 1;
+            }else{
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+
+            foreach ($dates as $date) {
+                $datum = array();
+                $datum["date"] = Carbon::parse($date)->format("d");
+                $datum["month"] = Carbon::parse($date)->format("m");
+                $datum["year"] = Carbon::parse($date)->format("Y");
+                $attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                    ->where('employee_type', 2)
+                    ->whereDate('attendance_date', $date);
+                if ($attendance->exists()) {
+                    $attendance = $attendance->first();
+                    if ($shift_exists == 1) {
+                        if ($attendance->clock_in_datetime) {
+                            $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
+                            $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
+                            if ($attendance_date == $clock_in_date) {
+                                $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
+                                $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                                if ($time_diff > $shift->grace_time) {
+                                    $datum["status"] = 2;//Late
+                                } else {
+                                    $datum["status"] = 1;//Present
+                                }
+                            } else {
+                                $datum["status"] = 2;//Late
+                            }
+                        } else {
+                            $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
+                            $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                            if ($time_diff > $shift->grace_time) {
+                                $datum["status"] = 2;//Late
+                            } else {
+                                $datum["status"] = 1;//Present
+                            }
+                        }
+                    } else {
+                        $datum["status"] = 1;
+                    }
+                } else {
+                    $datum["status"] = 3;//Absent
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
         }
     }
 
