@@ -623,12 +623,14 @@ class LastMileDebriefingController extends Controller
                     $data->completed = 1;
                     $data->save();
 
+                    $check_pending_verification_shipment = AgentCallMonitoring::where('delivery_note_id', '=', $delivery_note_id)->where('completed',0)->exists();
                     $check_pending_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '=', $delivery_note_id)->where(function($query) {
                         $query->where('status','>', 1)
                         ->orWhere('status', 0);
                     })->exists();
-                    
-                    if(!$check_pending_delivery_note){
+                
+                    if(!$check_pending_delivery_note && !$check_pending_verification_shipment){
+                        $delivery_note = DeliveryNote::find($delivery_note_id);
                         $delivery_note->status=1;
                         $delivery_note->save();
                         return redirect()->back()->with('success', 'Shipment verified and Delivery Note Closed successfully!');
