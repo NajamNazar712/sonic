@@ -1101,7 +1101,9 @@ class AdminCargoManifestController extends Controller
                         }
                         else{
                             $destination = $shipment->pickup_address->city->hub_city;
+
                         }
+                        $destination = $destination->hub_id;
                     }
                     else{
                         $destination = $shipment->pickup_address->city->hub_city;
@@ -1111,7 +1113,7 @@ class AdminCargoManifestController extends Controller
                 $bag = new CargoManifestBag();
                 $bag->seal_number = $shipment->tracking_number;
                 $bag->origin_hub_id = Auth::user()->default_hub_id;
-                $bag->destination_hub_id = $destination->hub_id;
+                $bag->destination_hub_id = $destination;
                 $bag->shipments = 1;
                 $bag->quantity = count($shipment->items);
                 $bag->shipments_weight = $shipment->actual_weight;
