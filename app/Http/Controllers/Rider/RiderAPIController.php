@@ -9444,8 +9444,6 @@ class RiderAPIController extends Controller
             if ($shift->exists()) {
                 $shift = $shift->first();
                 $shift_exists = 1;
-            }else{
-                return response()->json(['status' => 0, 'data' => $data]);
             }
 
             foreach ($dates as $date) {
@@ -9991,6 +9989,80 @@ class RiderAPIController extends Controller
             }
             return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
 
+        }
+    }
+
+    public function month_attendance_history_v2(Request $request)
+    {
+        $rules = [
+            'first_day' => ['required'],
+            'last_day' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
+        } else {
+            $rider_id = $request->rider_id;
+            $dates = $this->generateDateRange($request->first_day, $request->last_day);
+            $data = array();
+            $shift = EmployeeShift::join('riders as r', 'employee_shifts.id', '=', 'r.shift_id')
+                ->where('r.id', $rider_id)
+                ->select('employee_shifts.start_time as start_time', 'employee_shifts.extension_minutes as grace_time');
+            $shift_exists = 0;
+            if ($shift->exists()) {
+                $shift = $shift->first();
+                $shift_exists = 1;
+            }else{
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+
+            foreach ($dates as $date) {
+                $datum = array();
+                $datum["date"] = Carbon::parse($date)->format("d");
+                $datum["month"] = Carbon::parse($date)->format("m");
+                $datum["year"] = Carbon::parse($date)->format("Y");
+                $attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                    ->where('employee_type', 2)
+                    ->whereDate('attendance_date', $date);
+                if ($attendance->exists()) {
+                    $attendance = $attendance->first();
+                    if ($shift_exists == 1) {
+                        if ($attendance->clock_in_datetime) {
+                            $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
+                            $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
+                            if ($attendance_date == $clock_in_date) {
+                                $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
+                                $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                                if ($time_diff > $shift->grace_time) {
+                                    $datum["status"] = 2;//Late
+                                } else {
+                                    $datum["status"] = 1;//Present
+                                }
+                            } else {
+                                $datum["status"] = 2;//Late
+                            }
+                        } else {
+                            $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
+                            $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                            if ($time_diff > $shift->grace_time) {
+                                $datum["status"] = 2;//Late
+                            } else {
+                                $datum["status"] = 1;//Present
+                            }
+                        }
+                    } else {
+                        $datum["status"] = 1;
+                    }
+                } else {
+                    $datum["status"] = 3;//Absent
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
         }
     }
 
