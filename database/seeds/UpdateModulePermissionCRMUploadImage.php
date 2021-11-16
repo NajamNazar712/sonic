@@ -12,7 +12,7 @@ class UpdateModulePermissionCRMUploadImage extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 623, 'name' => 'Crm Upload Image', 'module_id' => 14),
+            array('id' => 623, 'name' => 'Crm Delete Image', 'module_id' => 18),
         ));
     }
 }
