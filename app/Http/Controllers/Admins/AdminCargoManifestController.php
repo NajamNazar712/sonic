@@ -2711,11 +2711,11 @@ class AdminCargoManifestController extends Controller
                             $details['origin'] = $shipment->consignee_city->name;
                             if($shipment->return_address_id != NULL){
                                 $details['destination'] =  $shipment->return_address->city->name;
-                                $details['hub'] =  $shipment->return_address->hub_city->name;
+                                $details['hub'] =  $shipment->return_address->city->hub_city->name;
                             }
                             else{
                                 $details['destination'] =  $shipment->pickup_address->city->name;
-                                $details['hub'] =  $shipment->pickup_address->hub_city->name;
+                                $details['hub'] =  $shipment->pickup_address->city->hub_city->name;
                             }
                         }
                         else{
