@@ -1105,11 +1105,12 @@ class AdminCargoManifestController extends Controller
 
                         }
                         $destination = $destination->hub_id;
+                        $origin = $shipment->consignee_city->hub_city;
                     }
                     else{
                         $destination = $shipment->pickup_address->city->hub_city;
+                        $origin =  Auth::user()->default_hub_id;
                     }
-                    $origin = $destination;
                 }
                
                 $bag = new CargoManifestBag();
