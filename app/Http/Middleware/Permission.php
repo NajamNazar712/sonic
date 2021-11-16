@@ -1103,6 +1103,11 @@ class Permission
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
+            'sales.territory.territoryindex' =>610,
+            'sales.designation.designationindex' =>611,
+            'settings.sales.incentive.index' =>612,
+            'reports.sales_incentive.index' =>613,
+            'reports.sales_incentive.consolidated' =>614,
 
         ],
 

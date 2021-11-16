@@ -1662,11 +1662,11 @@
                         <li class=" nav-item"><a href="#"><span class="menu-title">Sales</span></a>
                             <ul class="menu-content">
                                 @if (session('role_id') == 1 || in_array(610, session('permissions')))
-                                    <li class=" nav-item"><a href="{{route('admin.sales.territory.territoryindex')}}"><span class="menu-title">Territory</span></a> </li>
+                                    <li class=" nav-item"><a href="{{route('admin.sales.territory.territoryindex')}}"><span class="menu-title">Sales Territory</span></a> </li>
                                 @endif
 
                                 @if (session('role_id') == 1 || in_array(611, session('permissions'))) 
-                                    <li class=" nav-item"><a href="{{route('admin.sales.designation.designationindex')}}"><span class="menu-title">Designations</span></a> </li>
+                                    <li class=" nav-item"><a href="{{route('admin.sales.designation.designationindex')}}"><span class="menu-title">Sales Designations</span></a> </li>
                                 @endif
 
                                 @if (session('role_id') == 1 || in_array(612, session('permissions')))
