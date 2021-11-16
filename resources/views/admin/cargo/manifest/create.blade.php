@@ -266,7 +266,7 @@
                 'allowMinus': false,
                 'allowPlus': false
             });*/
-
+            manifest_bag_weight = [];
             $('#add_bag_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -313,6 +313,7 @@
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         bag_ids.push(data.details.id);
+                                        manifest_bag_weight.push(data.details.bag_weight);
                                         scan_sound(1);
 
                                         $('#add_bag_form button.add').prop('disabled', false);
@@ -343,9 +344,8 @@
             $('#master_cargo_consignment_confirm').bind('click', function() {
 
                 let total_weight = 0;
-               /* table.columns('.bag_weight').data().eq(0).each(function (v){
-                        total_weight += parseFloat(v);
-                });*/
+
+                $.each(manifest_bag_weight,function(){total_weight+=parseFloat(this) || 0; });
 
                 $("#cargo_details #total_weight").val(total_weight);
 

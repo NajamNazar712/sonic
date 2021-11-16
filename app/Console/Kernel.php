@@ -102,7 +102,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ReturnSheetReceive',
         'App\Console\Commands\RiderDeactivateAutomatically',
         'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
-        'App\Console\Commands\SaleIncentiveReport',
+		'App\Console\Commands\SaleIncentiveReport',
+        'App\Console\Commands\AutoAssignCrmAgent',
     ];
 
     /**
@@ -354,10 +355,13 @@ class Kernel extends ConsoleKernel
             $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
         }
 
-//        $incentive_date = SalesIncentiveDate::first();
-//        if($incentive_date){
-//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
-//        }
+		//$incentive_date = SalesIncentiveDate::first();
+		//        if($incentive_date){
+		//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
+		//        }
+        $schedule->command('crm:autoassign')->dailyAt('05:00')->runInBackground();
+
+
     }
     /**
      * Register the commands for the application.
