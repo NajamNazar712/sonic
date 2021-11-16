@@ -9620,6 +9620,10 @@ class AdminReportsController extends Controller
         if ($admins_id = $request->get('search_admin')) {
             $datatable->where('shipments_journey.admin_id', $admins_id);
         }
+        if ($search_last_rider = $request->get('search_last_rider')) {
+            $datatable->where('shipments_journey.rider_id', $search_last_rider);
+        }
+        
         
         
         
