@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
@@ -15,6 +16,8 @@ use App\Http\Models\Admin\PettyCashStatementAmountLog;
 use App\Http\Models\Admin\PettyCashStatementDetail;
 use App\Http\Models\Admin\PettyCashStatementDetailDraft;
 use App\Http\Models\Admin\PettyCashStatementDraft;
+use App\Http\Models\Admin\RetailPickupNote;
+use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\City;
 use App\Http\Models\Shipper\User;
@@ -95,6 +98,50 @@ class AdminPettyCashController extends Controller
         if($cities->exists())
         {
             $data = $cities->select(['id','name'])->get();
+            return response()->json(['status'=>1,'data'=>$data]);
+        }
+        else{
+            return response()->json(['status'=>0]);
+        }
+    }
+
+    public function make_petty_cash_statement_get_dncc(Request $request)
+    {
+        $sdn_id = $request->sdn_id;
+        $sdn =  StationDepositNote::where('id',$sdn_id);
+        if($sdn->exists())
+        {
+            $sdn = $sdn->first();
+            if($sdn->sdn_type == 1)
+            {
+                foreach ($sdn->delivery_notes_list as $key => $dncc)
+                {
+                    $data[$key]['id'] = $dncc->delivery_note_id;
+                    $data[$key]['text'] = str_pad($dncc->delivery_note_id, 4, '0', STR_PAD_LEFT);
+                    $delivery_note = DeliveryNote::find($dncc->delivery_note_id);
+                    if($delivery_note) {
+                        $data[$key]['count'] = $delivery_note->delivered_shipments;
+                    }
+                    else{
+                        $data[$key]['count'] = 0;
+                    }
+                }
+            }
+            else{
+                foreach ($sdn->pickup_notes_list as $key => $pncc)
+                {
+                    $data[$key]['id'] = $pncc->retail_pickup_note_id;
+                    $data[$key]['text'] = str_pad($pncc->retail_pickup_note_id, 4, '0', STR_PAD_LEFT);
+                    $pickup_note = RetailPickupNote::find($pncc->retail_pickup_note_id);
+                    if($pickup_note)
+                    {
+                        $data[$key]['count'] = $pickup_note->shipments;
+                    }
+                    else{
+                        $data[$key]['count'] = 0;
+                    }
+                }
+            }
             return response()->json(['status'=>1,'data'=>$data]);
         }
         else{
