@@ -497,17 +497,17 @@
                                                                 <select name="on_dws_weight" id="on_dws_weight" class="form-control" {{ (($on_dws_charges != null) ? '' : 'disabled') }} >
                                                                     @if ($on_dws_charges != null)
                                                                         @if ($on_dws_charges == 1)
-                                                                        <option value="1" selected>Hight</option>
+                                                                        <option value="1" selected>High</option>
                                                                         <option value="0">Low</option>
                                                                         @elseif ($on_dws_charges == 0)
-                                                                        <option value="1" >Hight</option>
+                                                                        <option value="1" >High</option>
                                                                         <option value="0" selected>Low</option>
                                                                         @else
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                         @endif
                                                                     @else
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                     @endif
                                                                     
@@ -1391,17 +1391,17 @@
                                                                     @if ($ol_dws_charges != null)
                                                                    
                                                                         @if ($ol_dws_charges == 1)
-                                                                        <option value="1" selected>Hight</option>
+                                                                        <option value="1" selected>High</option>
                                                                         <option value="0">Low</option>
                                                                         @elseif ($ol_dws_charges == 0)
-                                                                        <option value="1" >Hight</option>
+                                                                        <option value="1" >High</option>
                                                                         <option value="0" selected>Low</option>
                                                                         @else
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                         @endif
                                                                     @else
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                     @endif
                                                                 </select>
@@ -2305,17 +2305,17 @@
                                                                     @if ($detain_dws_charges != null)
                                                                     
                                                                         @if ($detain_dws_charges == 1)
-                                                                        <option value="1" selected>Hight</option>
+                                                                        <option value="1" selected>High</option>
                                                                         <option value="0">Low</option>
                                                                         @elseif ($detain_dws_charges == 0)
-                                                                        <option value="1" >Hight</option>
+                                                                        <option value="1" >High</option>
                                                                         <option value="0" selected>Low</option>
                                                                         @else
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                         @endif
                                                                     @else
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                     @endif
                                                                 </select>
@@ -3191,17 +3191,17 @@
                                                                     @if ($sameday_dws_charges != null)
                                                                     
                                                                         @if ($sameday_dws_charges == 1)
-                                                                        <option value="1" selected>Hight</option>
+                                                                        <option value="1" selected>High</option>
                                                                         <option value="0">Low</option>
                                                                         @elseif ($sameday_dws_charges == 0)
-                                                                        <option value="1" >Hight</option>
+                                                                        <option value="1" >High</option>
                                                                         <option value="0" selected>Low</option>
                                                                         @else
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                         @endif
                                                                     @else
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                      @endif
                                                                 </select>

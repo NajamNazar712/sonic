@@ -266,7 +266,7 @@
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <select name="on_dws_weight" id="on_dws_weight" class="form-control" disabled>
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                 </select>
                                                             </div>
@@ -753,7 +753,7 @@
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <select name="ol_dws_weight" id="ol_dws_weight" class="form-control" disabled>
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                 </select>
                                                             </div>
@@ -1240,7 +1240,7 @@
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <select name="detain_dws_weight" id="detain_dws_weight" class="form-control" disabled>
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                 </select>
                                                             </div>
@@ -1704,7 +1704,7 @@
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <select name="sameday_dws_weight" id="sameday_dws_weight" class="form-control" disabled>
-                                                                        <option value="1">Hight</option>
+                                                                        <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                 </select>
                                                             </div>
