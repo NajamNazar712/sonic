@@ -11,6 +11,7 @@
         "buzz/laravel-google-captcha": "^2.3",
         "doctrine/dbal": "^2.7",
         "fideloper/proxy": "^4.0",
+        "fruitcake/laravel-cors": "^2.0",
         "fx3costa/laravelchartjs": "^2.5",
         "guzzlehttp/guzzle": "^6.3",
         "h4cc/wkhtmltoimage-amd64": "^0.12.4",

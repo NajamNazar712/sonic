@@ -37,6 +37,8 @@ use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\FnfSectionEmployee;
+use App\Http\Models\HR\EmployeeLeave;
+use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
@@ -58,6 +60,8 @@ use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessDeliveryNoteOtpSms;
 use App\Jobs\ProcessOTPSMS;
+use App\Jobs\ProcessOTPSMSITS;
+use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -114,6 +118,30 @@ class NotificationsController extends Controller
       else{
           dispatch(new ProcessSMS($sms));
       }
+    }
+
+    static private function sms_otp($body, $to, $name, $otp, $type) {
+        if ($type == 1) {
+            $sms = new SMS();
+
+            $sms->to = str_replace('-', '', $to);
+            $sms->body = $body;
+            $sms->otp = 1;
+
+            $sms->save();
+
+            dispatch(new ProcessOTPSMSITS($sms, $name, $otp));
+        }
+        else if ($type == 2) {
+            $sms = new DeliveryNoteOtpSms();
+
+            $sms->to = str_replace('-', '', $to);
+            $sms->body = $body;
+
+            $sms->save();
+
+            dispatch(new ProcessDeliveryNoteOtpSmsITS($sms, $name, $otp));
+        }
     }
 
     static private function delivery_note_otp_sms($body, $to) {
@@ -7752,14 +7780,18 @@ class NotificationsController extends Controller
                 } else if ($id == 138) {
                     $admin = $reference_1_id;
                     $otp = $reference_2_id;
+                    $name = '';
                     if (strpos($body, '[name]') !== FALSE) {
                         $body = str_replace('[name]', $admin->name, $body);
+                        $name = $admin->name;
                     }
                     if (strpos($body, '[code]') !== FALSE) {
                         $body = str_replace('[code]', $otp, $body);
                     }
                     $to = $admin->phone_number;
-                    self::sms($body, $to, 1);
+                    // self::sms($body, $to, 1);
+
+                    self::sms_otp($body, $to, $name, $otp, 1);
                 } else if ($id == 139) {
 
                     $yesterday = Carbon::yesterday();
@@ -7964,7 +7996,7 @@ class NotificationsController extends Controller
                         $to[] = 'zakee.rasheed@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
-                        $bcc[] = 'danish.zahidw@trax.pk';
+                        $bcc[] = 'danish.zahid@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -8052,15 +8084,18 @@ class NotificationsController extends Controller
                 } else if ($id == 144) {
                     $rider = $reference_1_id;
                     $otp = $reference_2_id;
-
+                    $name = '';
                     if (strpos($body, '[rider_name]') !== FALSE) {
                         $body = str_replace('[rider_name]', $rider->name, $body);
+                        $name = $rider->name;
                     }
                     if (strpos($body, '[otp]') !== FALSE) {
                         $body = str_replace('[otp]', $otp, $body);
                     }
                     $to = $rider->phone;
-                    self::delivery_note_otp_sms($body, $to);
+                    // self::delivery_note_otp_sms($body, $to);
+
+                    self::sms_otp($body, $to, $name, $otp, 2);
                 } else if ($id == 145) {
                     $shipment_id = $reference_1_id;
                     $delivery_note_id = $reference_2_id;
@@ -8076,7 +8111,7 @@ class NotificationsController extends Controller
                     if ($shipment_journey) {
                         $current_status = $shipment_journey->shipment_status_consignee->name;
                         if ($shipment_journey->status_reason_id) {
-                            $reason = '& ' . $shipment_journey->shipment_status_reason->name;
+                            $reason = ' ' . $shipment_journey->shipment_status_reason->name;
                         }
                     } else {
                         $current_status = $shipment->status_consignee->name;
@@ -8726,6 +8761,90 @@ class NotificationsController extends Controller
                     }
                     if (strpos($body, '[otp]') !== FALSE) {
                         $body = str_replace('[otp]', $reference1_id, $body);
+                    }
+                }else if ($id == 11) {
+                    if($employee_type == 1){
+                        $user = Admin::find($employee_id);
+                    }else{
+                        $user = Rider::find($employee_id);
+                    }
+                    $leave = EmployeeLeave::find($reference1_id);
+                    if($user && $leave){
+                        if($leave->status == 1){
+                            $status = "Submitted";
+                        }else{
+                            $leave_status = LeaveStatus::find($leave->status);
+                            $status = $leave_status->name;
+                        }
+                        if (strpos($body, '[from]') !== FALSE) {
+                            $body = str_replace('[from]', $leave->from, $body);
+                        }
+                        if($leave->to){
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->to, $body);
+                            }
+                        }else{
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->from, $body);
+                            }
+                        }
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $body = str_replace('[status]', $status, $body);
+                        }
+                    }
+                }else if ($id == 12) {
+                    $leave = EmployeeLeave::find($reference1_id);
+                    if($leave){
+                        if($leave->employee_type_id == 1){
+                            $user = Admin::find($leave->employee_id);
+                        }else{
+                            $user = Rider::find($leave->employee_id);
+                        }
+                        if (strpos($body, '[employee_name]') !== FALSE) {
+                            $body = str_replace('[employee_name]', $user->name, $body);
+                        }
+                        if (strpos($body, '[trax_id]') !== FALSE) {
+                            $body = str_replace('[trax_id]', $user->trax_id, $body);
+                        }
+                        if (strpos($body, '[from]') !== FALSE) {
+                            $body = str_replace('[from]', $leave->from, $body);
+                        }
+                        if($leave->to){
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->to, $body);
+                            }
+                        }else{
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->from, $body);
+                            }
+                        }
+                    }
+                }else if ($id == 13) {
+                    $leave = EmployeeLeave::find($reference1_id);
+                    if($leave){
+                        if($leave->employee_type_id == 1){
+                            $user = Admin::find($leave->employee_id);
+                        }else{
+                            $user = Rider::find($leave->employee_id);
+                        }
+                        if (strpos($body, '[employee_name]') !== FALSE) {
+                            $body = str_replace('[employee_name]', $user->name, $body);
+                        }
+                        if (strpos($body, '[trax_id]') !== FALSE) {
+                            $body = str_replace('[trax_id]', $user->trax_id, $body);
+                        }
+                        if (strpos($body, '[from]') !== FALSE) {
+                            $body = str_replace('[from]', $leave->from, $body);
+                        }
+                        if($leave->to){
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->to, $body);
+                            }
+                        }else{
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->from, $body);
+                            }
+                        }
                     }
                 }
                 $employee_device_token = EmployeeDeviceToken::where('employee_id', $employee_id)

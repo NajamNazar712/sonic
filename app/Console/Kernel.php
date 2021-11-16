@@ -188,6 +188,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('month:averagerm')->dailyAt('07:30')->runInBackground();
         $schedule->command('month:averageindividual')->dailyAt('07:30')->runInBackground();
 
+
+        $schedule->command('reimbursement_invoice:generate')->monthlyOn(1, '00:30')->runInBackground();
+
         $settings = GlobalSettings::where('type', 'auto_invoice_generation_time');
 
         if ($settings->exists()) {
@@ -253,7 +256,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
         $schedule->command('report:donepayment')->dailyAt('17:30')->runInBackground();
-        $schedule->command('report:retaildonepayment')->dailyAt('16:00')->runInBackground();
+        $schedule->command('report:retaildonepayment')->dailyAt('17:30')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'completed_aging_report_time');
 

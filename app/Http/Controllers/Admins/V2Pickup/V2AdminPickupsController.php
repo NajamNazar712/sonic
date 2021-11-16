@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\FtlRequestAdditionalCost;
@@ -842,6 +843,9 @@ class V2AdminPickupsController extends Controller
                 $piece_request_remarks = null;
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
+                    //region Taha
+                    $pickup_request=V2PickupRequest::where('id', $pickup_request_shipment->pickup_request_id)->first();
+                    //endregion
 
                     if ($shipment->shipper_status_id == 62) {
                         $shipment_pieces_request = ShipmentPiecesRequest::where('shipment_id', $shipment->id)->where('status', 1);
@@ -859,12 +863,17 @@ class V2AdminPickupsController extends Controller
 
                     if ($pickup_request_shipment) {
                         $reference_1_id = $pickup_request_shipment->pickup_request_id;
+                        $rider_id=$pickup_request->current_rider_id;
 
                         if (!in_array($pickup_request_shipment->pickup_request_id, $pickup_request_ids)) {
                             $pickup_request_ids[] = $pickup_request_shipment->pickup_request_id;
                         }
                     } else {
                         $reference_1_id = null;
+                    }
+                    if($pickup_request->current_rider_id==null)
+                    { 
+                        $rider_id=$pickup_rider_id;
                     }
 
                     $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
@@ -946,7 +955,8 @@ class V2AdminPickupsController extends Controller
 
                     $shipment->save();
                     $reference_2_id = null;
-                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, Auth::id(), $reference_1_id, $reference_2_id);
+                    
+                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, Auth::id(), $reference_1_id, $reference_2_id,1,null,$rider_id);
 
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if ($self_collection_shipment->exists()) {
@@ -1026,6 +1036,10 @@ class V2AdminPickupsController extends Controller
                             } else {
                                 ShipmentChargesController::international_fuel_surcharge($shipment_id);
                             }
+                        }
+
+                        if($shipment->walk_in_status == 0) {
+                            InitialChargesWebhookController::webhook_subscription($shipment_id);
                         }
                     }
 
@@ -1627,8 +1641,13 @@ class V2AdminPickupsController extends Controller
                     }
 
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
+                     //region Taha
+                     $pickup_request=V2PickupRequest::where('id', $pickup_request_shipment->pickup_request_id)->first();
+                     //endregion
+                     
                     if ($pickup_request_shipment) {
                         $reference_1_id = $pickup_request_shipment->pickup_request_id;
+                        $rider_id=$pickup_request->current_rider_id;
 
                         if (!in_array($pickup_request_shipment->pickup_request_id, $pickup_request_ids)) {
                             $pickup_request_ids[] = $pickup_request_shipment->pickup_request_id;
@@ -1636,7 +1655,10 @@ class V2AdminPickupsController extends Controller
                     } else {
                         $reference_1_id = null;
                     }
-
+                    if($pickup_request->current_rider_id==null)
+                    { 
+                        $rider_id=$pickup_rider_id;
+                    }
                     if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
                         $receiving_sheet_shipment->status = 1;
                         $receiving_sheet_shipment->save();
@@ -1676,7 +1698,7 @@ class V2AdminPickupsController extends Controller
 
                     $shipment->save();
                     $reference_2_id = null;
-                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, Auth::id(), $reference_1_id, $reference_2_id);
+                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, Auth::id(), $reference_1_id, $reference_2_id,1,null,$rider_id);
 
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if ($self_collection_shipment->exists()) {
@@ -1756,7 +1778,13 @@ class V2AdminPickupsController extends Controller
                                 ShipmentChargesController::international_fuel_surcharge($shipment_id);
                             }
                         }
+
+                        if($shipment->walk_in_status == 0) {
+                            InitialChargesWebhookController::webhook_subscription($shipment_id);
+                        }
                     }
+
+
 
                     if ($shipment->shipment_type != 2 && $shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);

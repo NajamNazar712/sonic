@@ -60,10 +60,9 @@
                                     <th class="border-primary border-darken-1">Junctions</th>
                                      <th class="border-primary border-darken-1">Vehicle</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    {{--<th class="border-primary border-darken-1">Aging</th>
-                                    <th class="border-primary border-darken-1">Created At</th>
-                                    <th class="border-primary border-darken-1">Updated By</th>
-                                    <th class="border-primary border-darken-1">Transited At</th>    --}}
+                                    <th class="border-primary border-darken-1">Status Updated At</th>
+                                    <th class="border-primary border-darken-1">Status Updated By</th>
+                                    <th class="border-primary border-darken-1">Status Hub</th>
                                     <th class="border-primary border-darken-1">Manifest Created At</th>
                                     <th class="border-primary border-darken-1">Transited Date</th>
                                     <th class="border-primary border-darken-1">Transited By</th>
@@ -226,6 +225,9 @@
                             head.push('Shipping Mode');
                             head.push('Manifest Id');
                             head.push('Status');
+                            head.push('Status Updated At');
+                            head.push('Status Updated By');
+                            head.push('Status Hub');
                             head.push('Manifest Created At');
                             head.push('Transited By');
                             head.push('Seal Updated By');
@@ -245,6 +247,9 @@
                                 row.push(values.shipping_mode);
                                 row.push(values.manifest);
                                 row.push(values.status);
+                                row.push(values.status_updated_at);
+                                row.push(values.status_updated_by);
+                                row.push(values.status_location);
                                 row.push(values.manifest_created_at);
                                 row.push(values.transitted_by);
                                 row.push(values.updated_by);
@@ -291,7 +296,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[13, 'desc']],
+                order: [[16, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'seal_number', name: 'seal_number', class: 'align-middle seal_number'},
@@ -307,6 +312,9 @@
                     {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles', searchable: false, orderable: false},
                     /*{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'},*/
                     {data: 'status', name: 'bs.id', class: 'align-middle status'},
+                    {data: 'status_updated_at', name: 'cmbj.created_at', class: 'align-middle status_updated_at'},
+                    {data: 'status_updated_by', name: 'status_editor.name', class: 'align-middle status_updated_by'},
+                    {data: 'status_location', name: 'sedh.name', class: 'align-middle status_location'},
                     {data: 'manifest_created_at', name: 'cm.created_at', class: 'align-middle manifest_created_at'},
                     {data: 'transitted_date', name: 'cargo_manifest_bags.created_at', class: 'align-middle transitted_date'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
