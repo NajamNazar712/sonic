@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminAppSlider;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
@@ -4473,6 +4474,17 @@ class AdminAPIController extends Controller
                 $data[] = $datum;
             }
             return response()->json(['status' => 0, 'data' => $data]);
+        }
+    }
+
+    public function admin_ticker_images(Request $request)
+    {
+        $admin_ticker_images = AdminAppSlider::orderBy('id', 'ASC');
+        if ($admin_ticker_images->exists()) {
+            $admin_ticker_images = $admin_ticker_images->get();
+            return response()->json(['status' => 0, 'images' => $admin_ticker_images]);
+        } else {
+            return response()->json(['status' => 1, 'message' => 'No Images Found']);
         }
     }
 

@@ -228,7 +228,7 @@ Route::name('api.')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function() {
         Route::post('login', 'AdminAPIController@login')->name('login');
         Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
-        Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
+        Route::get('slider', 'AdminAPIController@admin_ticker_images')->name('slider');
         Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
@@ -296,7 +296,7 @@ Route::name('api.')->group(function () {
 
     Route::prefix('retail_user')->name('retail_user.')->group(function() {
         Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
-        Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
+        Route::get('slider', 'Retail\RetailAPIController@retail_ticker_images')->name('slider');
 
         Route::middleware('RetailUserAPIToken')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function () {
