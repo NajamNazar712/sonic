@@ -1960,6 +1960,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('titles', 'Admins\AdminPettyCashController@make_petty_cash_statement_titles')->name('titles');
             Route::post('submit', 'Admins\AdminPettyCashController@make_petty_cash_statement_submit')->name('submit');
         });
+        Route::post('view/sdn_logs','Admins\AdminPettyCashController@sdn_log')->name('sdn_logs');
         Route::prefix('statements')->name('statements.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@petty_cash_statements_index')->name('index');
             Route::get('list', 'Admins\AdminPettyCashController@petty_cash_statements_list')->name('list');
