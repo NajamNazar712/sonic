@@ -18,10 +18,10 @@ class UpdateSalesModulePermissionForSalesIncentive extends Seeder
             array('id' => 613, 'name' => 'Sales Incentive Report - View', 'module_id' => 9),
             array('id' => 614, 'name' => 'Consolidated Sales Incentive Report- View', 'module_id' => 9),
 
-            array('id' => 626, 'name' => 'Sales Territory - Add/Edit', 'module_id' => 23),
-            array('id' => 627, 'name' => 'Sales Designation - Add/Edit', 'module_id' => 23),
-            array('id' => 628, 'name' => 'Sales Territory - Enable/Disable', 'module_id' => 23),
-            array('id' => 629, 'name' => 'Sales Designation - Enable/Disable', 'module_id' => 23),
+            array('id' => 626, 'name' => 'Sales Territory - Add/Edit', 'module_id' => 14),
+            array('id' => 627, 'name' => 'Sales Designation - Add/Edit', 'module_id' => 14),
+            array('id' => 628, 'name' => 'Sales Territory - Enable/Disable', 'module_id' => 14),
+            array('id' => 629, 'name' => 'Sales Designation - Enable/Disable', 'module_id' => 14),
 
         ));
     }
