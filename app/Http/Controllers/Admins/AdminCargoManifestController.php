@@ -1088,7 +1088,6 @@ class AdminCargoManifestController extends Controller
         if (!empty($shipment_ids)) {
             foreach ($shipment_ids as $shipment_id) {
                 $shipment = Shipment::find($shipment_id);
-                //dd($shipment->shipper_status_id);
                 if(in_array($shipment->shipper_status_id, [2, 49, 55])){
                     $bag_type = 1;
                     $destination = $shipment->consignee_city->hub_id;
@@ -1105,14 +1104,14 @@ class AdminCargoManifestController extends Controller
 
                         }
                         $destination = $destination->hub_id;
-                        $origin = $shipment->consignee_city->hub_city;
+                        $origin = $shipment->consignee_city->hub_city->hub_id;
                     }
                     else{
                         $destination = $shipment->pickup_address->city->hub_city;
                         $origin =  Auth::user()->default_hub_id;
                     }
                 }
-               
+
                 $bag = new CargoManifestBag();
                 $bag->seal_number = $shipment->tracking_number;
                 $bag->origin_hub_id = $origin;
