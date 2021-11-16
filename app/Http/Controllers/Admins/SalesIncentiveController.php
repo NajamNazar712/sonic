@@ -62,6 +62,7 @@ class SalesIncentiveController extends Controller
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-users align-middle"></i> <span class="align-middle">View</span></button>';
             })
             ->addColumn('action', function ($data) {
+                if (session('role_id') == 1 || in_array(626, session('permissions')) || in_array(628, session('permissions'))){
                 $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
@@ -80,6 +81,8 @@ class SalesIncentiveController extends Controller
                   </div>
           ';
                     return $dropdown;
+                }
+                else{ return ''; }
             
         });
           
@@ -261,6 +264,7 @@ class SalesIncentiveController extends Controller
                 }
             })
             ->addColumn('action', function ($data) {
+                if (session('role_id') == 1 || in_array(627, session('permissions')) || in_array(629, session('permissions'))){
                 $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
@@ -278,6 +282,9 @@ class SalesIncentiveController extends Controller
                   </div>
           ';
                     return $dropdown;
+                }
+                else
+                { return '';}
             
         });
           
