@@ -737,13 +737,13 @@ class LastMileDebriefingController extends Controller
 
             }
             if($updated_shipments){
-
+                $check_pending_verification_shipment = AgentCallMonitoring::where('delivery_note_id', '=', $delivery_note_id)->where('completed',0)->exists();
                 $check_pending_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '=', $delivery_note_id)->where(function($query) {
                     $query->where('status','>', 1)
                     ->orWhere('status', 0);
                 })->exists();
                 
-                if(!$check_pending_delivery_note){
+                if(!$check_pending_delivery_note && !$check_pending_verification_shipment){
                     $delivery_note = DeliveryNote::find($delivery_note_id);
                     $delivery_note->status=1;
                     $delivery_note->save();
