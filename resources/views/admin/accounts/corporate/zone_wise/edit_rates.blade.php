@@ -4460,6 +4460,18 @@
                 placeholder: "Select Weight Type",
                 width:'100%'
             });
+            $('#ol_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
+            $('#detain_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
+            $('#sameday_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
             //hub to hub end
             $("#on_dws").on('change', function(){
                 if($("#on_dws").is(":checked")){

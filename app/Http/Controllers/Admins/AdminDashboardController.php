@@ -4045,6 +4045,7 @@ class AdminDashboardController extends Controller
                 }
             }
             if($request->authorize == 1){
+                DwsWeightChargesController::approve($id);
                 User::where('id',$id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
             }
@@ -7810,12 +7811,18 @@ class AdminDashboardController extends Controller
             if($insurance_charge->exists()){
                 $insurance_charges_diff = 1;
             }
-            
+            $on_dws_weight_diff = 0;
+            if ($request->has('on_dws_weight')) {
+                if($request->on_dws_weight == 0){
+                    $on_dws_weight_diff = 1;
+                }
+            }
 
 
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $on_dws_weight_diff == 1)
             {
                 $overnight_changes = 1;
+                
             }
 //            dd($weight_range_up_diff,$weight_range_down_diff,$kg_range_diff,$local_diff,$national_charges_0_diff,$national_charges_1_diff, $national_charges_2_diff,$national_charges_3_diff,$booking_type_charges_diff,$cash_handling_charges_change,$return_charges_diff,$fuel_surcharge_diff,$weight_addition_diff,$insurance_charges_diff,$overnight_changes);
         }
@@ -7934,8 +7941,13 @@ class AdminDashboardController extends Controller
             if($insurance_charge->exists()){
                 $insurance_charges_diff = 1;
             }
-
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
+            $ol_dws_weight_diff = 0;
+            if ($request->has('ol_dws_weight')) {
+                if($request->ol_dws_weight == 0){
+                    $ol_dws_weight_diff = 1;
+                }
+            }
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $ol_dws_weight_diff == 1)
             {
                 $overland_changes = 1;
             }
@@ -8054,8 +8066,13 @@ class AdminDashboardController extends Controller
             if($insurance_charge->exists()){
                 $insurance_charges_diff = 1;
             }
-
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
+            $detain_dws_weight_diff = 0;
+            if ($request->has('detain_dws_weight')) {
+                if($request->detain_dws_weight == 0){
+                    $detain_dws_weight_diff = 1;
+                }
+            }
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $detain_dws_weight_diff == 1)
             {
                 $detain_changes = 1;
             }
@@ -8175,8 +8192,13 @@ class AdminDashboardController extends Controller
             if($insurance_charge->exists()){
                 $insurance_charges_diff = 1;
             }
-
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
+            $sameday_dws_weight_diff = 0;
+            if ($request->has('sameday_dws_weight')) {
+                if($request->sameday_dws_weight == 0){
+                    $sameday_dws_weight_diff = 1;
+                }
+            }
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $sameday_dws_weight_diff == 1)
             {
                 $sameday_changes = 1;
             }
@@ -8185,7 +8207,7 @@ class AdminDashboardController extends Controller
         //dd($overnight_changes,$overland_changes,$detain_changes,$sameday_changes,$warehouse_charges);
 
         if($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0){
-
+            DwsWeightChargesController::approve($id);
             User::where('id',$id)->update(['rate_status'=>0,'status' => 2,'rates_authorized_by'=> 32,'rates_approved_at'=>Carbon::now()]);
         }
         

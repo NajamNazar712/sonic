@@ -205,14 +205,14 @@
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <label class="card-title">DWS Weight </label>
-                                                                <input type="checkbox" name="on_dws" id="on_dws" class="switchery on_dws" data-size="xs" data-switchery="true">
+                                                                <input type="checkbox" name="on_dws" id="on_dws" class="switchery on_dws" data-size="xs" data-switchery="true" checked>
                                                             </div>
                                                         </fieldset>
                                                     </div> 
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <select name="on_dws_weight" id="on_dws_weight" class="form-control" disabled>
+                                                                <select name="on_dws_weight" id="on_dws_weight" class="form-control">
                                                                         <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                 </select>
@@ -692,14 +692,14 @@
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <label class="card-title">DWS Weight </label>
-                                                                <input type="checkbox" name="ol_dws" id="ol_dws" class="switchery ol_dws" data-size="xs" data-switchery="true">
+                                                                <input type="checkbox" name="ol_dws" id="ol_dws" class="switchery ol_dws" data-size="xs" data-switchery="true" checked>
                                                             </div>
                                                         </fieldset>
                                                     </div> 
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <select name="ol_dws_weight" id="ol_dws_weight" class="form-control" disabled>
+                                                                <select name="ol_dws_weight" id="ol_dws_weight" class="form-control">
                                                                         <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                 </select>
@@ -1179,14 +1179,14 @@
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <label class="card-title">DWS Weight </label>
-                                                                <input type="checkbox" name="detain_dws" id="detain_dws" class="switchery detain_dws" data-size="xs" data-switchery="true">
+                                                                <input type="checkbox" name="detain_dws" id="detain_dws" class="switchery detain_dws" data-size="xs" data-switchery="true" checked>
                                                             </div>
                                                         </fieldset>
                                                     </div> 
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <select name="detain_dws_weight" id="detain_dws_weight" class="form-control" disabled>
+                                                                <select name="detain_dws_weight" id="detain_dws_weight" class="form-control">
                                                                         <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                 </select>
@@ -1643,14 +1643,14 @@
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <label class="card-title">DWS Weight </label>
-                                                                <input type="checkbox" name="sameday_dws" id="sameday_dws" class="switchery sameday_dws" data-size="xs" data-switchery="true">
+                                                                <input type="checkbox" name="sameday_dws" id="sameday_dws" class="switchery sameday_dws" data-size="xs" data-switchery="true" checked>
                                                             </div>
                                                         </fieldset>
                                                     </div> 
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <select name="sameday_dws_weight" id="sameday_dws_weight" class="form-control" disabled>
+                                                                <select name="sameday_dws_weight" id="sameday_dws_weight" class="form-control">
                                                                         <option value="1">High</option>
                                                                         <option value="0">Low</option>
                                                                 </select>
@@ -2438,6 +2438,18 @@
                 $(this).val($(this).val().trim());
             });
             $('#on_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
+            $('#ol_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
+            $('#detain_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
+            $('#sameday_dws_weight').select2({
                 placeholder: "Select Weight Type",
                 width:'100%'
             });

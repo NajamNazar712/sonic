@@ -4388,6 +4388,7 @@ class AdminCorporateAccountsController extends Controller
             }
             User::where('id', $id)->update(['rate_status' => 1 ,'rates_updated_by' => Auth::id()]);
             if ($request->authorize == 1) {
+                DwsWeightChargesController::approve($id);
                 User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
@@ -14898,6 +14899,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
             if ($request->authorize == 1) {
+                DwsWeightChargesController::approve($id);
                 User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
@@ -24964,6 +24966,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
             if($request->authorize == 1){
+                DwsWeightChargesController::approve($id);
                 User::where('id',$id)->update(['rate_status'=>0,'status'=>2, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
             }
