@@ -1110,6 +1110,7 @@ class AdminCargoManifestController extends Controller
                 $bag->transport_mode_id = 2;
                 $bag->status_id = 1;
                 $bag->open_bag = 1;
+                $bag->completed = 0;
                 $bag->save();
 
                 CargoManifestBagJourneyController::add($bag->id,$bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
