@@ -194,6 +194,7 @@ Route::name('api.')->group(function () {
             Route::prefix('attendance')->name('attendance.')->group(function() {
                 Route::get('shift', 'Rider\RiderAPIController@rider_shift')->name('shift');
                 Route::post('month_history', 'Rider\RiderAPIController@month_attendance_history')->name('month_history');
+                Route::post('month_history_v2', 'Rider\RiderAPIController@month_attendance_history_v2')->name('month_history_v2');
                 Route::post('detail', 'Rider\RiderAPIController@attendance_details')->name('detail');
                 Route::post('mark', 'Rider\RiderAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'Rider\RiderAPIController@attendance_history')->name('history');
@@ -213,6 +214,13 @@ Route::name('api.')->group(function () {
 
             Route::post('payslip', 'Rider\RiderAPIController@rider_payslip')->name('payslip');
             Route::post('fake_status', 'Rider\RiderAPIController@fake_status_count')->name('fake_status');
+
+            Route::prefix('leave')->name('leave.')->group(function () {
+                Route::post('index', 'Rider\RiderAPIController@leave_index')->name('index');
+                Route::post('apply', 'Rider\RiderAPIController@leave_apply')->name('apply');
+                Route::get('list', 'Rider\RiderAPIController@employee_leave_list')->name('list');
+                Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
+            });
 		});
 
 	});
@@ -241,6 +249,7 @@ Route::name('api.')->group(function () {
             Route::prefix('attendance')->name('attendance.')->group(function() {
                 Route::get('shift', 'AdminAPIController@employee_shift')->name('shift');
                 Route::post('month_history', 'AdminAPIController@month_attendance_history')->name('month_history');
+                Route::post('month_history_v2', 'AdminAPIController@month_attendance_history_v2')->name('month_history_v2');
                 Route::post('detail', 'AdminAPIController@attendance_details')->name('detail');
                 Route::post('mark', 'AdminAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'AdminAPIController@attendance_history')->name('history');
@@ -267,6 +276,19 @@ Route::name('api.')->group(function () {
 
             Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');
             Route::post('location_v2', 'AdminAPIController@attendance_notification')->name('location_v2');
+            Route::post('payslip', 'AdminAPIController@admin_payslip')->name('payslip');
+
+            Route::prefix('leave')->name('leave.')->group(function () {
+                Route::post('index', 'AdminAPIController@leave_index')->name('index');
+                Route::post('apply', 'AdminAPIController@leave_apply')->name('apply');
+                Route::get('list', 'AdminAPIController@employee_leave_list')->name('list');
+                Route::get('approver_list', 'AdminAPIController@approver_leave_list')->name('approver_list');
+                Route::post('approve', 'AdminAPIController@leave_approve')->name('approve');
+                Route::post('reject', 'AdminAPIController@leave_reject')->name('reject');
+                Route::post('detail', 'AdminAPIController@leave_detail')->name('detail');
+                Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
+                Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
+            });
 
         });
 

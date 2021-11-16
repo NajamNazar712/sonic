@@ -105,11 +105,11 @@ class LeadManagementController extends Controller
         }
 
 
-        $leads['total'] = number_format($leads['total']->count());
-        $leads['received'] = number_format($leads['received']->count());
-        $leads['in_process'] = number_format($leads['in_process']->count());
-        $leads['dead_leads'] = number_format($leads['dead_leads']->count());
-        $leads['accounts_activated'] = number_format($leads['accounts_activated']->count());
+        $leads['total'] = $leads['total']->count();
+        $leads['received'] = $leads['received']->count();
+        $leads['in_process'] = $leads['in_process']->count();
+        $leads['dead_leads'] = $leads['dead_leads']->count();
+        $leads['accounts_activated'] = $leads['accounts_activated']->count();
 
         $leads['received_percentage'] = 0;
         $leads['in_process_percentage'] = 0;
@@ -121,6 +121,12 @@ class LeadManagementController extends Controller
             $leads['dead_leads_percentage'] = round(($leads['dead_leads'] / $leads['total']) * 100, 2);
             $leads['accounts_activated_percentage'] = round(($leads['accounts_activated'] / $leads['total']) * 100,2);
         }
+
+        $leads['total'] = number_format($leads['total']);
+        $leads['received'] = number_format($leads['received']);
+        $leads['in_process'] = number_format($leads['in_process']);
+        $leads['dead_leads'] = number_format($leads['dead_leads']);
+        $leads['accounts_activated'] = number_format($leads['accounts_activated']);
 
         $cities = City::select('id','name')->get();
 
@@ -149,7 +155,7 @@ class LeadManagementController extends Controller
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(session('role_id') != 4 && session('role_id') != 44 && session('role_id') != 60){
                 $leads = $leads->where('leads.sale_person_id', Auth::id());
             }
         }
@@ -317,11 +323,11 @@ class LeadManagementController extends Controller
         }
 
 
-        $leads['total'] = number_format($leads['total']->count());
-        $leads['received'] = number_format($leads['received']->count());
-        $leads['in_process'] = number_format($leads['in_process']->count());
-        $leads['dead_leads'] = number_format($leads['dead_leads']->count());
-        $leads['accounts_activated'] = number_format($leads['accounts_activated']->count());
+        $leads['total'] = $leads['total']->count();
+        $leads['received'] = $leads['received']->count();
+        $leads['in_process'] = $leads['in_process']->count();
+        $leads['dead_leads'] = $leads['dead_leads']->count();
+        $leads['accounts_activated'] = $leads['accounts_activated']->count();
 
         $leads['received_percentage'] = 0;
         $leads['in_process_percentage'] = 0;
@@ -341,6 +347,12 @@ class LeadManagementController extends Controller
                 $leads['accounts_activated_percentage'] = round(($leads['accounts_activated'] / $leads['total']) * 100,2);
             }
         }
+
+        $leads['total'] = number_format($leads['total']);
+        $leads['received'] = number_format($leads['received']);
+        $leads['in_process'] = number_format($leads['in_process']);
+        $leads['dead_leads'] = number_format($leads['dead_leads']);
+        $leads['accounts_activated'] = number_format($leads['accounts_activated']);
 
         return response()->json(['status' => 1, 'leads' => $leads]);
     }

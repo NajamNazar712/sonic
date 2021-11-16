@@ -9,6 +9,7 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
+use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
@@ -3034,7 +3035,6 @@ class DeliveryController extends Controller
                                                 if ($parcel->shipper_status_id != 12) {
                                                     ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                 }
-                                                ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                                                 if ($verification == 1) {
                                                     NotificationsController::send(15, 0, $shipment);
@@ -3054,6 +3054,8 @@ class DeliveryController extends Controller
                                                         AdminFinanceController::done_payment($shipment, 1);
                                                     }
                                                 }
+                                                ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+
 
                                             } else {
                                                 if ($parcel->packaging_material_charges != null) {
@@ -3128,7 +3130,7 @@ class DeliveryController extends Controller
                                                         AdminFinanceController::done_payment($shipment, 0);
                                                     }
 
-
+                                                    FinalChargesWebhookController::webhook_subscription($shipment);
                                                 }
                                             }
                                         }
@@ -3193,6 +3195,8 @@ class DeliveryController extends Controller
                                                         AdminFinanceController::done_payment($shipment, 0);
                                                     }
                                                 }
+
+                                                    FinalChargesWebhookController::webhook_subscription($shipment);
 //                                                ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                             }
                                             else{
@@ -3222,6 +3226,11 @@ class DeliveryController extends Controller
                                         }
                                     } else {
                                         AdminFinanceController::done_payment($shipment, 0);
+                                    }
+
+                                    if($shipper_status_details->shipper_status_id == 14 || $shipper_status_details->shipper_status_id == 30 || $shipper_status_details->shipper_status_id == 36 || $shipper_status_details->shipper_status_id == 37)
+                                    {
+                                        FinalChargesWebhookController::webhook_subscription($shipment);
                                     }
 
                                     if(!in_array($shipper_status_details->shipper_status_id, $delivered_status_array)){
@@ -6217,6 +6226,9 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
 
+                    if($shipment->consignee_city_id == $request->consignee_city[$shipment_id]){
+                        continue;
+                    }
                     if ($shipment->shipper_status_id == 3) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
                         if ($cargo_consignment_shipment->exists()) {

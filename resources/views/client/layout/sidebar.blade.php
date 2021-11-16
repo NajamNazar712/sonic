@@ -117,8 +117,7 @@
             
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Reports</span></a>
                     <ul class="menu-content">
-                        {{-- @if (session('user_id') == 3324) --}}
-                        @if (session('user_id') == 1091)
+                        @if (session('user_id') == 3324)
                             <li><a class="menu-item" href="{{ route('cod.reports.sales.telenor.index') }}">Overall Sales - Telenor</a></li>
                         @endif
 
@@ -169,6 +168,12 @@
                         @endif
                         @if(session('user_type') == 1)
                             <li><a class="menu-item" href="{{route('cod.settings.payment_subscription.index')}}">Payment Status Subscription</a></li>
+                        @endif
+                        @if(session('user_type') == 1)
+                            <li><a class="menu-item" href="{{route('cod.settings.initial_charges_subscription.index')}}">Initial Charges Subscription</a></li>
+                        @endif
+                        @if(session('user_type') == 1)
+                            <li><a class="menu-item" href="{{route('cod.settings.final_charges_subscription.index')}}">Final Charges Subscription</a></li>
                         @endif
                     </ul>
 

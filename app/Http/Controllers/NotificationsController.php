@@ -37,6 +37,8 @@ use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\FnfSectionEmployee;
+use App\Http\Models\HR\EmployeeLeave;
+use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
@@ -2475,7 +2477,7 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk', 'uzair.anees@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk', 'uzair.anees@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.saleem@trax.pk', 'mursaleen.rafiq@trax.pk'];
 
                     $bcc = ['muhammad.waqas@trax.pk', 'anum.khan@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
@@ -4000,7 +4002,7 @@ class NotificationsController extends Controller
 //                    $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk'];
 //                    $to = array_merge($to, $extra_admins);
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'mursaleen.rafiq@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = ['muhammad.waqas@trax.pk'];
@@ -7994,7 +7996,7 @@ class NotificationsController extends Controller
                         $to[] = 'zakee.rasheed@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
-                        $bcc[] = 'danish.zahidw@trax.pk';
+                        $bcc[] = 'danish.zahid@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -8109,7 +8111,7 @@ class NotificationsController extends Controller
                     if ($shipment_journey) {
                         $current_status = $shipment_journey->shipment_status_consignee->name;
                         if ($shipment_journey->status_reason_id) {
-                            $reason = '& ' . $shipment_journey->shipment_status_reason->name;
+                            $reason = ' ' . $shipment_journey->shipment_status_reason->name;
                         }
                     } else {
                         $current_status = $shipment->status_consignee->name;
@@ -8612,7 +8614,28 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.waqas@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
-                }            }
+                }
+                else if ($id == 163){
+                    $shipment = Shipment::find($reference_1_id);
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $reference_1_id)
+                        ->where('reference_1_id', $reference_2_id)
+                        ->orderBy('id', 'DESC');
+                    if($shipment && $shipment_journey->exists()){
+                        $shipment_journey = $shipment_journey->first();
+                        if (strpos($body, '[tracking_no]') !== FALSE) {
+                            $body = str_replace('[tracking_no]', $shipment->tracking_number, $body);
+                        }
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $body = str_replace('[status]', $shipment_journey->shipment_status_shipper->name, $body);
+                        }
+                        if (strpos($body, '[reason]') !== FALSE) {
+                            $body = str_replace('[reason]', $shipment_journey->shipment_status_reason->name, $body);
+                        }
+                        $to = $shipment->consignee_phone_number_1;
+                        self::sms($body, $to);
+                    }
+                }
+            }
         }
     }
     static public function custom($type, $subject, $body, $to) {
@@ -8759,6 +8782,90 @@ class NotificationsController extends Controller
                     }
                     if (strpos($body, '[otp]') !== FALSE) {
                         $body = str_replace('[otp]', $reference1_id, $body);
+                    }
+                }else if ($id == 11) {
+                    if($employee_type == 1){
+                        $user = Admin::find($employee_id);
+                    }else{
+                        $user = Rider::find($employee_id);
+                    }
+                    $leave = EmployeeLeave::find($reference1_id);
+                    if($user && $leave){
+                        if($leave->status == 1){
+                            $status = "Submitted";
+                        }else{
+                            $leave_status = LeaveStatus::find($leave->status);
+                            $status = $leave_status->name;
+                        }
+                        if (strpos($body, '[from]') !== FALSE) {
+                            $body = str_replace('[from]', $leave->from, $body);
+                        }
+                        if($leave->to){
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->to, $body);
+                            }
+                        }else{
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->from, $body);
+                            }
+                        }
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $body = str_replace('[status]', $status, $body);
+                        }
+                    }
+                }else if ($id == 12) {
+                    $leave = EmployeeLeave::find($reference1_id);
+                    if($leave){
+                        if($leave->employee_type_id == 1){
+                            $user = Admin::find($leave->employee_id);
+                        }else{
+                            $user = Rider::find($leave->employee_id);
+                        }
+                        if (strpos($body, '[employee_name]') !== FALSE) {
+                            $body = str_replace('[employee_name]', $user->name, $body);
+                        }
+                        if (strpos($body, '[trax_id]') !== FALSE) {
+                            $body = str_replace('[trax_id]', $user->trax_id, $body);
+                        }
+                        if (strpos($body, '[from]') !== FALSE) {
+                            $body = str_replace('[from]', $leave->from, $body);
+                        }
+                        if($leave->to){
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->to, $body);
+                            }
+                        }else{
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->from, $body);
+                            }
+                        }
+                    }
+                }else if ($id == 13) {
+                    $leave = EmployeeLeave::find($reference1_id);
+                    if($leave){
+                        if($leave->employee_type_id == 1){
+                            $user = Admin::find($leave->employee_id);
+                        }else{
+                            $user = Rider::find($leave->employee_id);
+                        }
+                        if (strpos($body, '[employee_name]') !== FALSE) {
+                            $body = str_replace('[employee_name]', $user->name, $body);
+                        }
+                        if (strpos($body, '[trax_id]') !== FALSE) {
+                            $body = str_replace('[trax_id]', $user->trax_id, $body);
+                        }
+                        if (strpos($body, '[from]') !== FALSE) {
+                            $body = str_replace('[from]', $leave->from, $body);
+                        }
+                        if($leave->to){
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->to, $body);
+                            }
+                        }else{
+                            if (strpos($body, '[to]') !== FALSE) {
+                                $body = str_replace('[to]', $leave->from, $body);
+                            }
+                        }
                     }
                 }
                 $employee_device_token = EmployeeDeviceToken::where('employee_id', $employee_id)

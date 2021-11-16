@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
-use App\Http\Controllers\Rider\RiderAPIController;
 use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
@@ -17,8 +16,6 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\MasterCargo\Bag;
-use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -42,21 +39,22 @@ use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
+use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMedicalInformation;
+use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
+use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use PharIo\Manifest\Manifest;
 use Password;
 
 class AdminAPIController extends Controller
@@ -109,7 +107,7 @@ class AdminAPIController extends Controller
         return $distance;
     }
 
-    private function generateDateRange($start_date, $end_date)
+    public static function generateDateRange($start_date, $end_date)
     {
         $start_date = Carbon::parse($start_date);
         $end_date = Carbon::parse($end_date);
@@ -119,6 +117,28 @@ class AdminAPIController extends Controller
         }
 
         return $dates;
+    }
+
+    private function calculate_location_status($latitude, $longitude)
+    {
+        $location_status = 1;
+        $reporting_locations = ReportingLocation::where('status', 1);
+        if ($reporting_locations->exists()) {
+            $reporting_locations = $reporting_locations->get();
+            foreach ($reporting_locations as $reporting_location) {
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $latitude . ',' . $longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance <= $reporting_location->radius / 1000) {
+                    $location_status = 2;
+                    return $location_status;
+                }
+            }
+        } else {
+            $location_status = 0;
+        }
+        return $location_status;
     }
 
     public function verify(Request $request)
@@ -3444,24 +3464,6 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-
-            $location_status = 0;
-            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                ->join('admins as a', 'e.id', 'a.employee_id')
-                ->where('a.id', $admin_id);
-            if($reporting_location->exists()){
-                $reporting_location = $reporting_location->first();
-                $reporting_location->radius;
-                $destination = $reporting_location->lat . ',' . $reporting_location->long;
-                $origin = $request->latitude . ',' . $request->longitude;
-                $distance = $this->distance($origin, $destination);
-                if ($distance > $reporting_location->radius / 1000) {
-                    $location_status = 1;
-                } else {
-                    $location_status = 2;
-                }
-            }
-
             $attendance_datetime = Carbon::parse($request->attendance_date)->format('Y-m-d H:i:s');
             $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
             $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
@@ -3478,6 +3480,7 @@ class AdminAPIController extends Controller
                 $admin_attendance->employee_type = 1;
                 $admin_attendance->attendance_date = $attendance_date;
             }
+            $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
             if ($request->action == 1) {
                 $admin_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
                 $admin_attendance->clock_in_latitude = $request->latitude;
@@ -3910,6 +3913,567 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'attendance_details' => $admin_attendance_action]);
         }
         return response()->json(['status' => 0, 'attendance_details' => []]);
+    }
+
+    public function admin_payslip(Request $request)
+    {
+        $rules = [
+            'date' => ['required']
+        ];
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admins = Admin::find($admin_id);
+            if ($admins) {
+                $payslip = EmployeePayslip::where('trax_id', $admins->trax_id)
+                    ->whereMonth('payroll_month', Carbon::parse($request->date)->format("m"))
+                    ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
+                if ($payslip->exists()) {
+                    $payslip = $payslip->get();
+                    $month = Carbon::parse($request->date)->format("F-Y");
+                    return response()->json(['status' => 0, 'payroll_month' => $month, 'data' => $payslip]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Payslip not found"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "User not found"]);
+            }
+        }
+    }
+
+    public function leave_index(Request $request)
+    {
+        if ($request->has('leave_id')) {
+            $leave = EmployeeLeave::find($request->leave_id);
+            if ($leave) {
+                if ($leave->employee_type_id == 1) {
+                    $admin = Admin::find($leave->employee_id);
+                    if ($admin) {
+                        if(!$admin->role->department->department_head_id){
+                            return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+                        }
+                        $data = array();
+                        $data['trax_id'] = $admin->trax_id;
+                        $data['name'] = $admin->name;
+                        $data['designation'] = $admin->designation;
+                        $data['department'] = $admin->role->department->name;
+                        $data['approver_email'] = $admin->role->department->department_head->email;
+                        $data['approver_name'] = $admin->role->department->department_head->name;
+                        $role_id = $admin->role_id;
+                        if ($role_id == 81) {
+                            $data['user_type'] = 2;
+                        } elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
+                            $data['user_type'] = 1;
+                        } else {
+                            $data['user_type'] = 0;
+                        }
+                        return response()->json(['status' => 0, 'data' => $data]);
+                    }
+                    return response()->json(['status' => 1, 'message' => "User not found"]);
+                } elseif ($leave->employee_type_id == 2) {
+                    $rider = Rider::find($leave->employee_id);
+                    $department = AdminDepartment::find(6);
+                    if ($department) {
+                        if ($rider) {
+                            if(!$department->department_head_id){
+                                return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+                            }
+                            $data = array();
+                            $data['trax_id'] = $rider->trax_id;
+                            $data['name'] = $rider->name;
+                            $data['designation'] = "Rider";
+                            $data['department'] = "Operations";
+                            $data['approver_email'] = $department->department_head->email;
+                            $data['approver_name'] = $department->department_head->name;
+                            $data['user_type'] = 0;
+                            return response()->json(['status' => 0, 'data' => $data]);
+                        }
+                        return response()->json(['status' => 1, 'message' => "Rider not found"]);
+                    }
+                    return response()->json(['status' => 1, 'message' => "Department Not Found"]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Failed"]);
+                }
+            }
+        } else {
+            $admin_id = $request->admin_id;
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                if(!$admin->role->department->department_head_id){
+                    return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
+                }
+                $data = array();
+                $data['trax_id'] = $admin->trax_id;
+                $data['name'] = $admin->name;
+                $data['designation'] = $admin->designation;
+                $data['department'] = $admin->role->department->name;
+                $data['approver_email'] = $admin->role->department->department_head->email;
+                $data['approver_name'] = $admin->role->department->department_head->name;
+                $role_id = $admin->role_id;
+                if ($role_id == 81) {
+                    $data['user_type'] = 2;
+                } elseif (in_array($role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 63])) {
+                    $data['user_type'] = 1;
+                } else {
+                    $data['user_type'] = 0;
+                }
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "User not found"]);
+        }
+    }
+
+    public function leave_apply(Request $request)
+    {
+        $rules = [
+            'from' => ['required'],
+            'to' => ['nullable'],
+            'reason' => ['required', 'max:500'],
+            'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                if ($request->has('leave_id')) {
+                    $leave_request = EmployeeLeave::where('id', $request->leave_id);
+                    if ($leave_request->exists()) {
+                        $leave_request = $leave_request->first();
+                        $leave_request->from = $request->from;
+                        $leave_request->to = $request->to;
+                        $leave_request->applied_reason = $request->reason;
+
+                        if ($leave_request->status == 2) {
+                            $leave_request->updated_by = $admin_id;
+                        }
+                        $leave_request->save();
+                        $message = "Leave Request edited successfully";
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
+                    }
+                } else {
+                    $leave = EmployeeLeave::where('employee_id', $admin_id)->where('employee_type_id', 1)->whereIn('status', [1, 2]);
+                    if ($leave->exists()) {
+                        return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                    }
+                    $leave_request = new EmployeeLeave();
+                    $leave_request->employee_id = $admin_id;
+                    $leave_request->employee_type_id = 1;
+                    if (in_array($admin->role_id, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70])) {
+                        $reporter_id = 8;
+                    } else {
+                        $reporter_id = $admin->role->department->department_head_id;
+                    }
+                    $leave_request->reporter_id = $reporter_id;
+                    $leave_request->from = $request->from;
+                    $leave_request->to = $request->to;
+                    $leave_request->applied_reason = $request->reason;
+                    $leave_request->save();
+                    $message = "Leave Request submitted successfully";
+                    NotificationsController::app_notification(11, $admin_id, 1, $leave_request->id);
+                    NotificationsController::app_notification(12, $leave_request->reporter_id, 1, $leave_request->id);
+                }
+                return response()->json(['status' => 0, 'apply_message' => $message]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'User Not Found']);
+            }
+        }
+
+    }
+
+    public function employee_leave_list(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+            ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as rejected_reason', 'employee_leaves.status as status_id', 'ls.name as status')
+            ->where('employee_id', $admin_id)
+            ->where('employee_type_id', 1);
+        if ($employee_leaves->exists()) {
+            $employee_leaves = $employee_leaves->get();
+            $data = array();
+            foreach ($employee_leaves as $employee_leave) {
+                $datum = array();
+                $datum['id'] = $employee_leave->id;
+                $datum['from'] = $employee_leave->from;
+                $datum['to'] = $employee_leave->to;
+                $datum['applied_reason'] = $employee_leave->applied_reason;
+                $datum['rejected_reason'] = $employee_leave->rejected_reason;
+                $datum['status_id'] = $employee_leave->status_id;
+                $datum['status'] = $employee_leave->status;
+                if($employee_leave->to){
+                    $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
+                    $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                }else{
+                    $datum['days_count'] = 1;
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'response' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+    }
+
+    public function approver_leave_list(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if ($admin) {
+            $admin_role = $admin->role_id;
+            if ($admin_role == 63) {
+                $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason')
+                    ->where('employee_leaves.status', 2);
+            } elseif (in_array($admin_role, [1, 2, 3, 4, 5, 6, 35, 52, 58, 70, 81])) {
+                $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason')
+                    ->where('employee_leaves.reporter_id', $admin_id);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Invalid Role"]);
+            }
+            if ($employee_leaves->exists()) {
+                $employee_leaves = $employee_leaves->get();
+                $data = array();
+                foreach ($employee_leaves as $employee_leave) {
+                    $datum = array();
+                    $datum['id'] = $employee_leave->id;
+                    $datum['from'] = $employee_leave->from;
+                    $datum['to'] = $employee_leave->to;
+                    $datum['applied_reason'] = $employee_leave->applied_reason;
+                    $datum['rejected_reason'] = $employee_leave->rejected_reason;
+                    $datum['status_id'] = $employee_leave->status_id;
+                    $datum['status'] = $employee_leave->status;
+                    if ($admin_role == 63){
+                        $datum['role'] = 0;
+                    }else{
+                        $datum['role'] = 1;
+                    }
+                    if($employee_leave->to){
+                        $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
+                        $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
+                        $datum['days_count'] = $start_date->diffInDays($end_date) + 1;
+                    }else{
+                        $datum['days_count'] = 1;
+                    }
+                    if ($employee_leave->type_id == 1) {
+                        $admin = Admin::find($employee_leave->employee_id);
+                        if ($admin) {
+                            $datum['name'] = $admin->name;
+                            $datum['trax_id'] = $admin->trax_id;
+                            $datum['designation'] = $admin->designation;
+                            $data[] = $datum;
+                        }
+                    } elseif ($employee_leave->type_id == 2) {
+                        $rider = Rider::find($employee_leave->employee_id);
+                        if ($rider) {
+                            $datum['name'] = $rider->name;
+                            $datum['trax_id'] = $rider->trax_id;
+                            $datum['designation'] = "Rider";
+                            $data[] = $datum;
+                        }
+                    }
+                }
+                return response()->json(['status' => 0, 'approver_response' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Pending Leave For Approval!"]);
+        }
+    }
+
+    public function leave_approve(Request $request)
+    {
+        $rules = [
+            'leave_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+                if ($employee_leaves->exists()) {
+                    $employee_leaves = $employee_leaves->first();
+                    if ($employee_leaves->status == 2) {
+                        $employee_leaves->status = 4;
+                        $employee_leaves->updated_by = $admin_id;
+                        if($employee_leaves->employee_id == 1){
+                            $user = Admin::find($employee_leaves->employee_id);
+                        }else{
+                            $user = Rider::find($employee_leaves->employee_id);
+                        }
+                        if(!$user){
+                            return response()->json(['status' => 1, 'message' => "Invalid Employee ID"]);
+                        }
+                        $shift = EmployeeShift::find($user->shift_id);
+                        if($employee_leaves->to) {
+                            $dates = $this->generateDateRange($employee_leaves->from, $employee_leaves->to);
+                        }else {
+                            $dates[] = $employee_leaves->from;
+                        }
+                            foreach ($dates as $date){
+                                $date = Carbon::parse($date)->format("Y-m-d");
+                                $mark_attendance = EmployeeAttendance::where('employee_id', $employee_leaves->employee_id)
+                                    ->where('employee_type', $employee_leaves->employee_type_id)
+                                    ->whereDate('attendance_date', $date);
+                                if ($mark_attendance->exists()){
+                                    $mark_attendance = $mark_attendance->first();
+                                }else{
+                                    $mark_attendance = new EmployeeAttendance();
+                                }
+                                $mark_attendance->attendance_date = $date;
+                                $mark_attendance->employee_id = $employee_leaves->employee_id;
+                                $mark_attendance->employee_type = $employee_leaves->employee_type_id;
+                                $mark_attendance->clock_in_latitude = "24.85758065592256";
+                                $mark_attendance->clock_in_longitude = "67.12476908400743";
+                                $mark_attendance->clock_out_latitude = "24.85758065592256";
+                                $mark_attendance->clock_out_longitude = "67.12476908400743";
+                                if($shift){
+                                    $mark_attendance->clock_in_datetime = $date.' '.$shift->start_time;
+                                    $mark_attendance->clock_out_datetime = $date.' '.$shift->end_time;
+                                }else{
+                                    $mark_attendance->clock_in_datetime = $date.' 09:00:00';
+                                    $mark_attendance->clock_out_datetime = $date.' 18:00:00';
+                                }
+                                $mark_attendance->leave_status = 1;
+                                $mark_attendance->save();
+
+                                $attendance_action = new EmployeeAttendanceActionLog();
+                                $attendance_action->employee_id = $mark_attendance->employee_id;
+                                $attendance_action->employee_type = $mark_attendance->employee_type;
+                                $attendance_action->action_id = 1;
+                                $attendance_action->action_date = $mark_attendance->clock_in_datetime;
+                                $attendance_action->attendance_date = $date;
+                                $attendance_action->latitude = $mark_attendance->clock_in_latitude;
+                                $attendance_action->longitude = $mark_attendance->clock_in_longitude;
+                                $attendance_action->save();
+
+                                $attendance_action = new EmployeeAttendanceActionLog();
+                                $attendance_action->employee_id = $mark_attendance->employee_id;
+                                $attendance_action->employee_type = $mark_attendance->employee_type;
+                                $attendance_action->action_id = 2;
+                                $attendance_action->action_date = $mark_attendance->clock_out_datetime;
+                                $attendance_action->attendance_date = $date;
+                                $attendance_action->latitude = $mark_attendance->clock_out_latitude;
+                                $attendance_action->longitude = $mark_attendance->clock_out_longitude;
+                                $attendance_action->save();
+                            }
+
+                    } elseif ($employee_leaves->status == 1) {
+                        $employee_leaves->status = 2;
+                        $employee_leaves->updated_by = $admin_id;
+                        $hr_admins = Admin::where('role_id', 63);
+                        if($hr_admins->exists()){
+                            $hr_admins = $hr_admins->get();
+                            foreach ($hr_admins as $hr_admin){
+                                NotificationsController::app_notification(13, $hr_admin->id, 1, $employee_leaves->id);
+                            }
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => "Invalid Role"]);
+                    }
+                    $employee_leaves->save();
+                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    return response()->json(['status' => 0, 'message' => "Leave request has been approved!"]);
+                }
+                return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+            }
+        }
+    }
+
+    public function leave_reject(Request $request)
+    {
+        $rules = [
+            'leave_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+            'rejection_reason' => ['required', 'max:500'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                $admin_role = $admin->role_id;
+                $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+                if ($employee_leaves->exists()) {
+                    $employee_leaves = $employee_leaves->first();
+                    if ($employee_leaves->status == 2) {
+                        $employee_leaves->status = 5;
+                    } elseif ($employee_leaves->status == 1) {
+                        $employee_leaves->status = 3;
+                    } else {
+                        return response()->json(['status' => 1, 'message' => "Invalid Role"]);
+                    }
+                    $employee_leaves->rejected_reason = $request->rejection_reason;
+                    $employee_leaves->updated_by = $admin_id;
+                    $employee_leaves->save();
+                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    return response()->json(['status' => 0, 'message' => "Leave request has been rejected!"]);
+                }
+                return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+            }
+        }
+    }
+
+    public function view_calender(Request $request)
+    {
+        $rules = [
+            'leave_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+            if ($employee_leaves->exists()) {
+                $employee_leaves = $employee_leaves->first();
+                if ($employee_leaves->to) {
+                    $dates = self::generateDateRange($employee_leaves->from, $employee_leaves->to);
+                    $data = array();
+                    foreach ($dates as $date) {
+                        $datum = array();
+                        $datum['date'] = $date;
+                        $datum['status'] = $employee_leaves->status;
+                        $data[] = $datum;
+                    }
+                } else {
+                    $datum = array();
+                    $datum['date'] = $employee_leaves->from;
+                    $datum['status'] = $employee_leaves->status;
+                    $data[] = $datum;
+                }
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
+
+        }
+    }
+
+    public function hr_leave_edit(Request $request)
+    {
+
+        $rules = [
+            'leave_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
+            'from' => ['required'],
+            'to' => ['nullable'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $leave = EmployeeLeave::where('id', $request->leave_id);
+            if ($leave->exists()) {
+                $leave = $leave->first();
+                $leave->from = $request->from;
+                $leave->to = $request->to;
+                $leave->updated_by = $admin_id;
+                $leave->save();
+                return response()->json(['status' => 0, 'message' => 'Leave Request Edited Successfully']);
+            }
+            return response()->json(['status' => 1, 'message' => 'Invalid Leave Id']);
+        }
+    }
+
+    public function month_attendance_history_v2(Request $request)
+    {
+        $rules = [
+            'first_day' => ['required'],
+            'last_day' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
+        } else {
+            $admin_id = $request->admin_id;
+            $dates = $this->generateDateRange($request->first_day, $request->last_day);
+            $data = array();
+            $shift = EmployeeShift::join('admins as a', 'employee_shifts.id', '=', 'a.shift_id')
+                ->where('a.id', $admin_id)
+                ->select('employee_shifts.start_time as start_time', 'employee_shifts.extension_minutes as grace_time');
+            $shift_exists = 0;
+            if ($shift->exists()) {
+                $shift = $shift->first();
+                $shift_exists = 1;
+            }else{
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            foreach ($dates as $date) {
+                $datum = array();
+                $datum["date"] = Carbon::parse($date)->format("d");
+                $datum["month"] = Carbon::parse($date)->format("m");
+                $datum["year"] = Carbon::parse($date)->format("Y");
+                $attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                    ->where('employee_type', 1)
+                    ->whereDate('attendance_date', $date);
+                if ($attendance->exists()) {
+                    $attendance = $attendance->first();
+                    if ($shift_exists == 1) {
+                        if ($attendance->clock_in_datetime) {
+                            $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
+                            $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
+                            if($attendance_date == $clock_in_date){
+                                $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
+                                $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                                if ($time_diff > $shift->grace_time) {
+                                    $datum["status"] = 2;//Late
+                                } else {
+                                    $datum["status"] = 1;//Present
+                                }
+                            }
+                            else{
+                                $datum["status"] = 2;//Late
+                            }
+                        } else {
+                            $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
+                            $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                            if ($time_diff > $shift->grace_time) {
+                                $datum["status"] = 2;//Late
+                            } else {
+                                $datum["status"] = 1;//Present
+                            }
+                        }
+                    } else {
+                        $datum["status"] = 1;
+                    }
+                } else {
+                    $datum["status"] = 3;//Absent
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
     }
 
 }

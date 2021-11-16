@@ -58,7 +58,6 @@ class LastMileDebriefingController extends Controller
           
         $prev_time = Carbon::today()->addHours($time);
 
-
         $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
 
 
@@ -415,12 +414,12 @@ class LastMileDebriefingController extends Controller
         $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->where('status', 1)->get();
         $shipment = Shipment::find($data->shipment_id);
         $delivery_note = DeliveryNote::find($data->delivery_note_id);
-        $total_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',Carbon::today())
-        ->where('created_at','<=',$time)->count();
-        $completed_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',Carbon::today())
-        ->where('created_at','<=',$time)->where('completed',1)->count();
-        $pending_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',Carbon::today())
-        ->where('created_at','<=',$time)->where('completed',0)->count();
+        $total_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',$prev_time)
+        ->where('created_at','<=',$next_time)->count();
+        $completed_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',$prev_time)
+        ->where('created_at','<=',$next_time)->where('completed',1)->count();
+        $pending_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',$prev_time)
+        ->where('created_at','<=',$next_time)->where('completed',0)->count();
 
         $reattempt_count = ShipmentsJourney::where('shipment_id', $data->shipment_id)
                 ->where('shipper_status_id','=',5)

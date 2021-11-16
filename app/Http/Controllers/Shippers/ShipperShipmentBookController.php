@@ -367,7 +367,7 @@ class ShipperShipmentBookController extends Controller
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        if(session('user_id') == 5982 || session('user_id') == 3324){
+        if(in_array(session('user_id'), [5982, 3324, 10104, 14110])) {
             $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         }
         else{
@@ -2306,7 +2306,7 @@ class ShipperShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        if(session('user_id') == 5982 || session('user_id') == 3324){
+        if(in_array(session('user_id'), [5982, 3324, 10104, 14110])) {
             $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         }
         else{
@@ -2814,7 +2814,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
 
-                        if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324) {
+                        if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
                         }
 
@@ -2931,7 +2931,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
 
-                        if ($pickup_consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324) {
+                        if ($pickup_consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $pickup_consignee_city->name . ' is not allowed for this shipper';
                         }
 
@@ -3022,7 +3022,7 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
                     else {
-                    if($user_id == 5982 || $user_id == 3324){
+                    if(in_array($user_id, [5982, 3324, 10104, 14110])) {
                         $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                     }
                     else{
@@ -3191,7 +3191,7 @@ class ShipperShipmentBookController extends Controller
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        if(session('user_id') == 5982 || session('user_id') == 3324){
+        if(in_array(session('user_id'), [5982, 3324, 10104, 14110])) {
             $consignee_cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         }
         else{
@@ -4131,7 +4131,7 @@ class ShipperShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-        if(session('user_id') == 5982 || session('user_id') == 3324){
+        if(in_array(session('user_id'), [5982, 3324, 10104, 14110])) {
             $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         }
         else{
@@ -4190,7 +4190,7 @@ class ShipperShipmentBookController extends Controller
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-//        if(session('user_id') == 5982 || session('user_id') == 3324){
+//        if(in_array(session('user_id'), [5982, 3324, 10104, 14110])) {
 //            $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
 //        }
 //        else{
@@ -4796,7 +4796,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
 
-                        if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324) {
+                        if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
                         }
 
@@ -4915,7 +4915,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
 
-                        if ($pickup_consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324) {
+                        if ($pickup_consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $pickup_consignee_city->name . ' is not allowed for this shipper';
                         }
 
@@ -5006,7 +5006,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else {
-                if($user_id == 5982 || $user_id == 3324){
+                if(in_array($user_id, [5982, 3324, 10104, 14110])) {
                     $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                 }
                 else{
@@ -5562,7 +5562,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
 
-                        if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324) {
+                        if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
                         }
 
@@ -5680,7 +5680,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
 
-                        if ($pickup_consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324) {
+                        if ($pickup_consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $pickup_consignee_city->name . ' is not allowed for this shipper';
                         }
 
@@ -5759,7 +5759,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else {
-                if($user_id == 5982 || $user_id == 3324){
+                if(in_array($user_id, [5982, 3324, 10104, 14110])) {
                     $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                 }
                 else{

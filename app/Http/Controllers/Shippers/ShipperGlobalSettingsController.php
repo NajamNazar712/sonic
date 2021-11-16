@@ -7,6 +7,8 @@ use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Webhook\FinalChargesSubscription;
+use App\Http\Models\Webhook\InitialChargesSubscription;
 use App\Http\Models\Webhook\PaymentStatusSubscription;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use Illuminate\Http\Request;
@@ -211,6 +213,130 @@ class ShipperGlobalSettingsController extends Controller
         }
         else {
             $sub_user = ShipmentStatusSubscription::where('user_id', $user_id)->first();
+            if($sub_user){
+                $sub_user->status = 0;
+                $sub_user->save();
+            }
+            return redirect()->back()->with('success', 'Setting Updated Successfully!');
+
+        }
+    }
+
+    public function initial_charges_subscription_index(){
+        $user_type = session('user_type');
+        if($user_type == 1){
+            $user_id = session('user_id');
+
+            $user_subscription = InitialChargesSubscription::where('user_id', $user_id)->first();
+
+            return view('client.settings.initial_charges_subscription')->with(['user_subscription' => $user_subscription]);
+        }
+        else{
+            return redirect()->back()->with('error', 'Access Denied!');
+        }
+
+    }
+    public function initial_charges_subscription_submit(Request $request){
+        $user_id = session('user_id');
+        $subscription_status = FALSE;
+
+        if($request->has('subscription_status')){
+            $subscription_status = TRUE;
+        }
+
+        if($subscription_status){
+            $subscription_url = $request->subscription_url;
+
+            if($subscription_url){
+
+                $url = filter_var($subscription_url, FILTER_SANITIZE_URL);
+
+
+                if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+                    return redirect()->back()->with('error', 'Not a valid url!');
+                }
+
+                $sub_user = InitialChargesSubscription::where('user_id', $user_id);
+                if($sub_user->exists()){
+                    $sub_user = $sub_user->first();
+                    $sub_user->url = $url;
+                    $sub_user->status = 1;
+                }
+                else{
+                    $sub_user = new InitialChargesSubscription();
+                    $sub_user->user_id = $user_id;
+                    $sub_user->url = $url;
+                    $sub_user->status = 1;
+                }
+                $sub_user->save();
+                return redirect()->back()->with('success', 'Setting Updated Successfully!');
+            }
+            return redirect()->back()->with('error', 'Not a valid url!');
+        }
+        else {
+            $sub_user = InitialChargesSubscription::where('user_id', $user_id)->first();
+            if($sub_user){
+                $sub_user->status = 0;
+                $sub_user->save();
+            }
+            return redirect()->back()->with('success', 'Setting Updated Successfully!');
+
+        }
+    }
+
+    public function final_charges_subscription_index(){
+        $user_type = session('user_type');
+        if($user_type == 1){
+            $user_id = session('user_id');
+
+            $user_subscription = FinalChargesSubscription::where('user_id', $user_id)->first();
+
+            return view('client.settings.final_charges_subscription')->with(['user_subscription' => $user_subscription]);
+        }
+        else{
+            return redirect()->back()->with('error', 'Access Denied!');
+        }
+
+    }
+    public function final_charges_subscription_submit(Request $request){
+        $user_id = session('user_id');
+        $subscription_status = FALSE;
+
+        if($request->has('subscription_status')){
+            $subscription_status = TRUE;
+        }
+
+        if($subscription_status){
+            $subscription_url = $request->subscription_url;
+
+            if($subscription_url){
+
+                $url = filter_var($subscription_url, FILTER_SANITIZE_URL);
+
+
+                if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+                    return redirect()->back()->with('error', 'Not a valid url!');
+                }
+
+                $sub_user = FinalChargesSubscription::where('user_id', $user_id);
+                if($sub_user->exists()){
+                    $sub_user = $sub_user->first();
+                    $sub_user->url = $url;
+                    $sub_user->status = 1;
+                }
+                else{
+                    $sub_user = new FinalChargesSubscription();
+                    $sub_user->user_id = $user_id;
+                    $sub_user->url = $url;
+                    $sub_user->status = 1;
+                }
+                $sub_user->save();
+                return redirect()->back()->with('success', 'Setting Updated Successfully!');
+            }
+            return redirect()->back()->with('error', 'Not a valid url!');
+        }
+        else {
+            $sub_user = FinalChargesSubscription::where('user_id', $user_id)->first();
             if($sub_user){
                 $sub_user->status = 0;
                 $sub_user->save();

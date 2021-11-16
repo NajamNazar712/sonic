@@ -45,6 +45,8 @@ class Permission
             'accounts.sister_account.merged_account.mapping.info' => 242,
             'accounts.sister_account.merged_account.mapping.submit' => 242,
             'accounts.receiving_sheet.index' => 364,
+            'accounts.restrict_order_id.info' => 619,
+            'accounts.restrict_order_id.submit' => 619,
 
             'corporate.reimbursement_setting.index' => 598,
             'corporate.reimbursement_setting.store' => 598,
@@ -418,6 +420,12 @@ class Permission
             'finance.outstanding_shipments.walk_in_list' => 167,
             'finance.outstanding_shipments.walk_in_resolved' => 168,
 
+            'finance.invoices.reimbursement.index' => 625,
+            'finance.invoices.reimbursement.list' => 625,
+            'finance.invoices.reimbursement.print' => 625,
+            'finance.invoices.reimbursement.export_to_excel' => 625,
+            'finance.invoices.reimbursement.print_gst_wise' => 625,
+            'finance.invoices.reimbursement.print_origin_wise' => 625,
 
             'finance.invoices.slip' => 589,
 
@@ -569,6 +577,8 @@ class Permission
             'reports.shipper_insurance.index' => 502,
             'reports.shipper_insurance.list' => 502,
             
+            'reports.reverse_pickup.index' => 624,
+            'reports.reverse_pickup.list' => 624,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -826,7 +836,7 @@ class Permission
             'settings.escalation.tagging.edit.store' => 350,
 
             'settings.default_agent.index' => 351,
-
+            
             'settings.holidays.index' => 358,
             'settings.holidays.list' => 358,
             'settings.holidays.add' => 358,
@@ -1020,6 +1030,8 @@ class Permission
             'human_resource.designation.list' => 481,
             'human_resource.department.index' => 484,
             'human_resource.department.list' => 484,
+            'human_resource.leave.index' => 613,
+            'human_resource.leave.list' => 613,
 
             'human_resource.rider_incentive.index' => 492,
             'human_resource.rider_incentive.list' => 492,
@@ -1100,11 +1112,13 @@ class Permission
             'settings.international_automation_user.index' => 582,
 
             'settings.ccd_booking.index' => 558,
-
-            'human_resource.payslip.index' => 596,
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
+
+            'settings.auto_assigning.index' => 616,
+            'settings.auto_assigning.list' => 616,
+
 
         ],
 

@@ -31,6 +31,52 @@ class AdminAttendanceController extends Controller
         $this->middleware('Permission');
     }
 
+    private function distance($origin, $destination)
+    {
+        return $this->vincenty_distance($origin, $destination);
+    }
+
+    private function vincenty_distance($origin, $destination)
+    {
+        $earth_radius = 6371;
+
+        list($origin_latitude, $origin_longitude) = explode(',', $origin);
+        list($destination_latitude, $destination_longitude) = explode(',', $destination);
+
+        $origin_latitude = deg2rad($origin_latitude);
+        $origin_longitude = deg2rad($origin_longitude);
+        $destination_latitude = deg2rad($destination_latitude);
+        $destination_longitude = deg2rad($destination_longitude);
+
+        $longitude_delta = $destination_longitude - $origin_longitude;
+
+        $distance = round($earth_radius * (atan2(sqrt(pow(cos($destination_latitude) * sin($longitude_delta), 2) + pow(cos($origin_latitude) * sin($destination_latitude) - sin($origin_latitude) * cos($destination_latitude) * cos($longitude_delta), 2)), (sin($origin_latitude) * sin($destination_latitude) + cos($origin_latitude) * cos($destination_latitude) * cos($longitude_delta)))), 2);
+
+        return $distance;
+    }
+
+    private function calculate_location_status($latitude, $longitude)
+    {
+        $location_status = 1;
+        $reporting_locations = ReportingLocation::where('status', 1);
+        if ($reporting_locations->exists()) {
+            $reporting_locations = $reporting_locations->get();
+            foreach ($reporting_locations as $reporting_location) {
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $latitude . ',' . $longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance <= $reporting_location->radius / 1000) {
+                    $location_status = 2;
+                    return $location_status;
+                }
+            }
+        } else {
+            $location_status = 0;
+        }
+        return $location_status;
+    }
+
     public function admin_attendance_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),56);
 
@@ -109,9 +155,15 @@ class AdminAttendanceController extends Controller
             ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as admin_shift', 'res.name as rider_shift');
 
         if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
-            $attendances->where('ad.id', session('department_id'));
             if(session('department_id') != 6){
-                $attendances->where('employee_attendances.employee_type', 1);
+                $attendances->where('employee_attendances.employee_type', 1)
+                    ->where('ad.id', session('department_id'));
+            }
+            else{
+                $attendances->where(function($query){
+                    $query->where('employee_attendances.employee_type', 2)
+                        ->orWhere('ad.id', session('department_id'));
+                });
             }
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
         }
@@ -243,7 +295,10 @@ class AdminAttendanceController extends Controller
                 $datatable->where('department_id', $search_department)->where('employee_type',1);
             }
             else{
-                $datatable->where('employee_type',2);
+                $datatable->where(function($query) use($search_department){
+                    $query->where('employee_type',2)
+                        ->orWhere('ad.id', $search_department);
+                });
             }
         }
 
@@ -316,10 +371,17 @@ class AdminAttendanceController extends Controller
             ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
             ->select('employee_attendances.employee_id','a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation','ed.name as designation_name', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type');
 
+
         if(session('role_id') != 1 && session('role_id') != 63 && session('role_id') != 70){
-            $attendances->where('ad.id', session('department_id'));
             if(session('department_id') != 6){
-                $attendances->where('employee_attendances.employee_type', 1);
+                $attendances->where('employee_attendances.employee_type', 1)
+                    ->where('ad.id', session('department_id'));
+            }
+            else{
+                $attendances->where(function($query){
+                    $query->where('employee_attendances.employee_type', 2)
+                        ->orWhere('ad.id', session('department_id'));
+                });
             }
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
         }
@@ -407,10 +469,13 @@ class AdminAttendanceController extends Controller
         }
         if ($search_department = $request->get('search_department')) {
             if($search_department != 6) {
-                $datatable->where('ad.id', $search_department)->where('employee_type',1);
+                $datatable->where('department_id', $search_department)->where('employee_type',1);
             }
             else{
-                $datatable->where('employee_type',2);
+                $datatable->where(function($query) use($search_department){
+                    $query->where('employee_type',2)
+                        ->orWhere('ad.id', $search_department);
+                });
             }
         }
 
@@ -422,30 +487,6 @@ class AdminAttendanceController extends Controller
         }
 
         return $datatable->make(true);
-    }
-
-    private function distance($origin, $destination)
-    {
-        return $this->vincenty_distance($origin, $destination);
-    }
-
-    private function vincenty_distance($origin, $destination)
-    {
-        $earth_radius = 6371;
-
-        list($origin_latitude, $origin_longitude) = explode(',', $origin);
-        list($destination_latitude, $destination_longitude) = explode(',', $destination);
-
-        $origin_latitude = deg2rad($origin_latitude);
-        $origin_longitude = deg2rad($origin_longitude);
-        $destination_latitude = deg2rad($destination_latitude);
-        $destination_longitude = deg2rad($destination_longitude);
-
-        $longitude_delta = $destination_longitude - $origin_longitude;
-
-        $distance = round($earth_radius * (atan2(sqrt(pow(cos($destination_latitude) * sin($longitude_delta), 2) + pow(cos($origin_latitude) * sin($destination_latitude) - sin($origin_latitude) * cos($destination_latitude) * cos($longitude_delta), 2)), (sin($origin_latitude) * sin($destination_latitude) + cos($origin_latitude) * cos($destination_latitude) * cos($longitude_delta)))), 2);
-
-        return $distance;
     }
 
     public function mark_attendance_index()
@@ -491,22 +532,6 @@ class AdminAttendanceController extends Controller
         $admin = Admin::find($admin_id);
         if ($admin) {
             if (session('latitude') && session('longitude')) {
-                $location_status = 0;
-                $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                    ->join('admins as a', 'e.id', 'a.employee_id')
-                    ->where('a.id', $admin_id);
-                if ($reporting_location->exists()) {
-                    $reporting_location = $reporting_location->first();
-                    $reporting_location->radius;
-                    $destination = $reporting_location->lat . ',' . $reporting_location->long;
-                    $origin = session('latitude') . ',' . session('longitude');
-                    $distance = $this->distance($origin, $destination);
-                    if ($distance > $reporting_location->radius / 1000) {
-                        $location_status = 1;
-                    } else {
-                        $location_status = 2;
-                    }
-                }
                 $employee_attendance = EmployeeAttendance::where('employee_id', $admin_id)
                     ->where('employee_type', 1)
                     ->where('attendance_date', $attendance_date);
@@ -518,6 +543,7 @@ class AdminAttendanceController extends Controller
                     $attendance->employee_type = 1;
                     $attendance->attendance_date = $attendance_date;
                 }
+                $location_status = $this->calculate_location_status(session('latitude'), session('longitude'));
                 if ($request->clock_in == 1 && $request->clock_out == 0) {
                     if ($attendance->clock_out_datetime == NULL){
                         $attendance->clock_out_datetime = $attendance_mark;

@@ -62,14 +62,14 @@ class AdminMonthClosingController extends Controller
                             $month_closing->delete();
                             if (!$parcel->packaging_material_request) {
                                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                                ShipmentsJourneyController::add($shipment, 20, 20, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
-    
+
                                 NotificationsController::send(15, 0, $shipment);
                                 NotificationsController::send(16, 0, $shipment);
-    
+
                                 ShipmentChargesController::return($shipment);
-    
+
                                 AdminFinanceController::add_payment($shipment, 1);
+                                ShipmentsJourneyController::add($shipment, 20, 20, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
                             }
                             else {
                                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
