@@ -155,7 +155,7 @@ class LeadManagementController extends Controller
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(session('role_id') != 4 && session('role_id') != 44 && session('role_id') != 60){
                 $leads = $leads->where('leads.sale_person_id', Auth::id());
             }
         }
