@@ -101,6 +101,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ReturnSheetReceive',
         'App\Console\Commands\RiderDeactivateAutomatically',
         'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
+        'App\Console\Commands\AutoAssignCrmAgent',
     ];
 
     /**
@@ -351,6 +352,10 @@ class Kernel extends ConsoleKernel
             $hourly = '0 */'. $hour .' * * *';
             $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
         }
+
+
+        $schedule->command('crm:autoassign')->dailyAt('05:00')->runInBackground();
+
 
     }
     /**
