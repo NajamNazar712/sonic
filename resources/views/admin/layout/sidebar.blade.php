@@ -1469,6 +1469,10 @@
                                     @if (session('role_id') == 1 || in_array(616, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.settings.auto_assigning.index') }}">Auto Assigning</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(639, session('permissions')))
+                                         <li><a class="menu-item" href="{{ route('admin.settings.auto_tagging.index') }}">Auto Tagging</a></li>
+                                    @endif
                                     
 
                                     @if (session('role_id') == 1 || session('role_id') == 6 || count(array_intersect([347, 348, 349, 350], session('permissions'))) !== 0)

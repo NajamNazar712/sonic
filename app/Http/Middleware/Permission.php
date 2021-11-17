@@ -1124,7 +1124,8 @@ class Permission
             'settings.auto_assigning.index' => 616,
             'settings.auto_assigning.list' => 616,
 
-
+            'settings.auto_tagging.index' => 639,
+            'settings.auto_tagging.list' => 639,
         ],
 
         'shipper' => [

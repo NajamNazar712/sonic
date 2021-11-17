@@ -2783,6 +2783,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
         });
 
+        Route::prefix('auto_tagging')->name('auto_tagging.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@crm_auto_tagging_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@crm_auto_tagging_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@crm_auto_tagging_submit')->name('submit');
+            Route::post('data', 'Admins\GlobalSettingsController@crm_auto_tagging_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@crm_auto_tagging_update')->name('update');
+            Route::post('delete', 'Admins\GlobalSettingsController@crm_auto_tagging_delete')->name('delete');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@crm_auto_tagging_enable_disable')->name('enable_disable');
+            
+        });
+
         Route::prefix('blacklist')->name('blacklist.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@blacklist_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@blacklist_list')->name('list');

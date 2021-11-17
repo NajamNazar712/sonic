@@ -1,0 +1,96 @@
+<?php
+
+use Illuminate\Database\Seeder;
+
+class ListAutoCrmTagUser extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::table('crm_auto_tag_users')->insert(array(
+            array('id' => 1, 'city_id' => 336, 'admin_id' => 495),
+            array('id' => 2, 'city_id' => 144, 'admin_id' => 495),
+            array('id' => 3, 'city_id' => 188, 'admin_id' => 495),
+            array('id' => 4, 'city_id' => 129, 'admin_id' => 495),
+            array('id' => 5, 'city_id' => 402, 'admin_id' => 495),
+            array('id' => 6, 'city_id' => 275, 'admin_id' => 495),
+            array('id' => 7, 'city_id' => 321, 'admin_id' => 495),
+            array('id' => 8, 'city_id' => 137, 'admin_id' => 495),
+            array('id' => 9, 'city_id' => 298, 'admin_id' => 495),
+            array('id' => 10, 'city_id' => 241, 'admin_id' => 889),
+            array('id' => 11, 'city_id' => 204, 'admin_id' => 893),
+            array('id' => 12, 'city_id' => 223, 'admin_id' => 263),
+            array('id' => 13, 'city_id' => 311, 'admin_id' => 263),
+            array('id' => 14, 'city_id' => 383, 'admin_id' => 1000),
+            array('id' => 15, 'city_id' => 315, 'admin_id' => 584),
+            array('id' => 16, 'city_id' => 384, 'admin_id' => 355),
+            array('id' => 17, 'city_id' => 385, 'admin_id' => 355),
+            array('id' => 18, 'city_id' => 381, 'admin_id' => 355),
+            array('id' => 19, 'city_id' => 302, 'admin_id' => 347),
+            array('id' => 20, 'city_id' => 214, 'admin_id' => 347),
+            array('id' => 21, 'city_id' => 317, 'admin_id' => 347),
+            array('id' => 22, 'city_id' => 185, 'admin_id' => 347),
+            array('id' => 23, 'city_id' => 135, 'admin_id' => 707),
+            array('id' => 24, 'city_id' => 116, 'admin_id' => 823),
+            array('id' => 25, 'city_id' => 227, 'admin_id' => 594),
+            array('id' => 26, 'city_id' => 254, 'admin_id' => 594),
+            array('id' => 27, 'city_id' => 314, 'admin_id' => 594),
+            array('id' => 28, 'city_id' => 109, 'admin_id' => 594),
+            array('id' => 29, 'city_id' => 293, 'admin_id' => 891),
+            array('id' => 30, 'city_id' => 134, 'admin_id' => 890),
+            array('id' => 31, 'city_id' => 284, 'admin_id' => 503),
+            array('id' => 32, 'city_id' => 110, 'admin_id' => 892),
+            array('id' => 33, 'city_id' => 199, 'admin_id' => 838),
+            array('id' => 34, 'city_id' => 107, 'admin_id' => 838),
+            array('id' => 35, 'city_id' => 165, 'admin_id' => 256),
+            array('id' => 36, 'city_id' => 101, 'admin_id' => 256),
+            array('id' => 37, 'city_id' => 264, 'admin_id' => 809),
+            array('id' => 38, 'city_id' => 271, 'admin_id' => 808),
+            array('id' => 39, 'city_id' => 288, 'admin_id' => 342),
+            array('id' => 40, 'city_id' => 174, 'admin_id' => 342),
+            array('id' => 41, 'city_id' => 158, 'admin_id' => 789),
+            array('id' => 42, 'city_id' => 465, 'admin_id' => 240),
+            array('id' => 43, 'city_id' => 445, 'admin_id' => 240),
+            array('id' => 44, 'city_id' => 122, 'admin_id' => 240),
+            array('id' => 45, 'city_id' => 255, 'admin_id' => 240),
+            array('id' => 46, 'city_id' => 418, 'admin_id' => 240),
+            array('id' => 47, 'city_id' => 436, 'admin_id' => 240),
+            array('id' => 48, 'city_id' => 221, 'admin_id' => 240),
+            array('id' => 49, 'city_id' => 186, 'admin_id' => 817),
+            array('id' => 50, 'city_id' => 244, 'admin_id' => 817),
+            array('id' => 51, 'city_id' => 414, 'admin_id' => 817),
+            array('id' => 52, 'city_id' => 138, 'admin_id' => 817),
+            array('id' => 53, 'city_id' => 210, 'admin_id' => 817),
+            array('id' => 54, 'city_id' => 139, 'admin_id' => 817),
+            array('id' => 55, 'city_id' => 438, 'admin_id' => 817),
+            array('id' => 56, 'city_id' => 159, 'admin_id' => 275),
+            array('id' => 57, 'city_id' => 332, 'admin_id' => 230),
+            array('id' => 58, 'city_id' => 202, 'admin_id' => 765),
+            array('id' => 59, 'city_id' => 226, 'admin_id' => 127),
+            array('id' => 60, 'city_id' => 250, 'admin_id' => 127),
+            array('id' => 61, 'city_id' => 318, 'admin_id' => 127),
+            array('id' => 62, 'city_id' => 131, 'admin_id' => 127),
+            array('id' => 63, 'city_id' => 316, 'admin_id' => 127),
+            array('id' => 64, 'city_id' => 305, 'admin_id' => 127),
+            array('id' => 65, 'city_id' => 172, 'admin_id' => 239),
+            array('id' => 66, 'city_id' => 243, 'admin_id' => 239),
+            array('id' => 67, 'city_id' => 257, 'admin_id' => 239),
+            array('id' => 68, 'city_id' => 470, 'admin_id' => 239),
+            array('id' => 69, 'city_id' => 322, 'admin_id' => 239),
+            array('id' => 70, 'city_id' => 162, 'admin_id' => 239),
+            array('id' => 71, 'city_id' => 247, 'admin_id' => 239),
+            array('id' => 72, 'city_id' => 361, 'admin_id' => 239),
+            array('id' => 73, 'city_id' => 246, 'admin_id' => 239),
+            array('id' => 74, 'city_id' => 283, 'admin_id' => 460),
+            array('id' => 75, 'city_id' => 276, 'admin_id' => 460),
+            array('id' => 76, 'city_id' => 123, 'admin_id' => 460),
+            array('id' => 77, 'city_id' => 124, 'admin_id' => 495),
+            array('id' => 78, 'city_id' => 340, 'admin_id' => 230),
+
+        ));
+    }
+}
