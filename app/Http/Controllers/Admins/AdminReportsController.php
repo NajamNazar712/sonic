@@ -9602,12 +9602,12 @@ class AdminReportsController extends Controller
             })
             ->editColumn('rider_status_marked_by', function($shipments) {
                 if($shipments->status_id == 5){
-                     $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id',$shipments->shipment_id)->get()->latest();
+                     $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id',$shipments->shipment_id)->latest()->first();
                      return $delivery_note_shipment->delivery_note->rider->name;
                 }elseif($shipments->status_id == 2){
                     return $shipments->rider_status_marked_by;
                 }elseif($shipments->status_id == 23){
-                    $return_note_shipment = ReturnNoteShipment::where('shipment_id',$shipments->shipment_id)->get()->latest();
+                    $return_note_shipment = ReturnNoteShipment::where('shipment_id',$shipments->shipment_id)->latest()->first();
                     $return_note = ReturnNote::find($return_note_shipment->return_note_id);
                     return $return_note->rider->name;
                 }else{
