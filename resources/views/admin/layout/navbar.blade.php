@@ -58,6 +58,7 @@
                             <i class="ft-chevron-down"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#" id="adminprofileshow"><span class="menu-title adminprofile"><i class="ft-user"></i> Profile</span></a>
                             <a class="dropdown-item" href="http://bit.ly/sonic_manuals" target="_blank"><i class="ft-help-circle"></i> HELP</a>
                             <a class="dropdown-item" href="{{ route('admin.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
                             <a class="dropdown-item" href="{{ route('admin.update.profile.password') }}"><span class="menu-title"><i class="ft-edit"></i>Change Password</span></a>
@@ -74,3 +75,19 @@
         </div>
     </div>
 </nav>
+@section('js')
+    <script type="text/javascript">
+        $('body').on('click','.adminprofile',function(){
+                var full_name = {{ Session::get('id') }};
+                var department_designation = "Information Technology (Software Engineer)";
+                var employee_id = "04230";
+                var email = "taha.habib@trax.pk";
+                var contact = "+92332-3255435";
+                $('#adminprofile').modal('show');
+                $('#full_name').html(full_name);
+                $('#department_designation').html(department_designation);
+                $('#employee_id').html(employee_id);
+                $('#email').html(email);
+                $('#contact').html(contact);
+            });
+    </script>

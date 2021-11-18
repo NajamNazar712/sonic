@@ -594,7 +594,41 @@
         </div>
     </div>
 </div>
-
+<div class="modal fade text-left" id="adminprofile" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="adminprofile"
+         aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="admin_profile_heading">User Profile<span></span></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body admin_profile text-center" id="admin_profile_body">
+                <table class="table table-sm table-bordered border">
+                    <thead>
+                       <tr>
+                        <th><strong>Full Name</strong></th>
+                        <th><strong>Department (Designation)</strong></th>
+                        <th><strong>Employee ID</strong></th>
+                        <th><strong>Email</strong></th>
+                        <th><strong>Contact</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id = "full_name"></td>
+                            <td id = "department_designation"></td>
+                            <td id = "employee_id"></td>
+                            <td id = "email"></td>
+                            <td id = "contact"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
