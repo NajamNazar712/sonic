@@ -3935,8 +3935,8 @@ class AdminAPIController extends Controller
                 ->whereMonth('payroll_month', Carbon::parse($request->date)->format("m"))
                 ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
             if ($payslip) {
-                $payslip_obj = $payslip->get();
                 $payslip = $payslip->first();
+                $payslip_obj = $payslip->get();
                 $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
                 $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
                 $personal_contact = $admins->phone_number;
