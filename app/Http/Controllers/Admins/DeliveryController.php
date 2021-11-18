@@ -2302,6 +2302,11 @@ class DeliveryController extends Controller
                 }
 
 				}
+
+                $data = array();
+                $data['delivery_note_id'] = $delivery_note_id;
+                $data['shipment_id'] = $shipment;
+                dispatch(new ProcessAgentCallMonitoring($data));
             }
             $delivery_note_data = DeliveryNote::find($delivery_note_id);
             $delivery_note_data->last_updated_at = Carbon::now();
