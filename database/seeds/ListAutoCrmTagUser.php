@@ -90,6 +90,13 @@ class ListAutoCrmTagUser extends Seeder
             array('id' => 76, 'city_id' => 123, 'admin_id' => 460),
             array('id' => 77, 'city_id' => 124, 'admin_id' => 495),
             array('id' => 78, 'city_id' => 340, 'admin_id' => 230),
+            array('id' => 79, 'city_id' => 540, 'admin_id' => 889),
+            array('id' => 80, 'city_id' => 505, 'admin_id' => 893),
+            array('id' => 81, 'city_id' => 506, 'admin_id' => 893),
+            array('id' => 82, 'city_id' => 127, 'admin_id' => 355),
+            array('id' => 83, 'city_id' => 467, 'admin_id' => 817),
+            array('id' => 84, 'city_id' => 912, 'admin_id' => 126),
+
 
         ));
     }

@@ -5004,7 +5004,7 @@ public function sales_incentive()
 
 
     public function crm_auto_tagging_index(){
-        $agents = Admin::select('id', 'name')->whereIn('role_id',[37,28])->get();//37,28 role
+        $agents = Admin::select('id', 'name')->get();//37,28 role
         $cities = city::where('status',1)->get();
         return view('admin.settings.CRM.auto_tagging')->with(['agents' => $agents , 'cities' => $cities]);
     }
