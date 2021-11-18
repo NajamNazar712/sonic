@@ -129,6 +129,13 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="row justify-content-center">
+                            <div class="col-6 form-group d-none" id="cn_input">
+                                <label for="end_point_id">Add CN</label>
+                                <select class="form-control" name="cn_id" id="cn_id" data-rule-required="true" data-msg-required="CN is required">
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button id="AssignAgentBtn" type="submit" class="btn btn-info">Add</button>
@@ -250,11 +257,17 @@
 				width: '100%',
 			});
 
+            $('#cn_id').prepend('<option value="" selected="selected"></option>').select2({
+				placeholder: 'Select CN *',
+				width: '100%',
+			});
+
             $('#hub_id').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Select Hub *'
 			}).bind('select2:select', function() {
-
+                // 'delivery_note_id': $('#delivery_note_id_input').val(),
+                var delivery_id = $('#delivery_note_id_input').val()
                 $.ajax({
                         url: '{!! route('admin.debriefing.supervisor.agents') !!}',
                         method: 'POST',
@@ -264,7 +277,7 @@
                         }
                     })
                         .done(function (data) {
-
+                            console.log(data.cns);
                             if(data.status){
                                 $('#assign_agent_id').empty().append('<option selected="selected" placeholder="Select Hub *" value="">text</option>');
                                 $('#agend_input').removeClass('d-none');
@@ -272,8 +285,14 @@
 
                                     $('#assign_agent_id').append('<option value="'+agent.id+'" >'+agent.name+'</option>')
                                 });
+
+                               $('#cn_input').removeClass('d-none');
+                               
+                             
                             }else{
                                 $('#agend_input').addClass('d-none');
+                                $('#cn_input').addClass('d-none');
+                                
 
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
@@ -747,6 +766,8 @@
             $('#AssignAgentModal').on('hide.bs.modal', function (){
                $('#assign_agent_form #hub_id').val('').trigger('change');
                 $('#agend_input').addClass('d-none');
+                $('#cn_input').addClass('d-none');
+
             });
 
             $('body').on('click','.printdeliverynote',function () {
