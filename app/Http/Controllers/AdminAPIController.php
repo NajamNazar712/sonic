@@ -44,6 +44,7 @@ use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\InternationalShipment;
+use App\Http\Models\PayslipPdf;
 use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
@@ -3917,7 +3918,7 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'attendance_details' => []]);
     }
 
-    public function admin_payslip(Request $request)
+    /*public function admin_payslip(Request $request)
     {
         $rules = [
             'date' => ['required']
@@ -3945,7 +3946,7 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => "User not found"]);
             }
         }
-    }
+    }*/
 
     public function leave_index(Request $request)
     {
@@ -4489,7 +4490,7 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function payslip_download(Request $request)
+    public function admin_payslip(Request $request)
     {
         $rules = [
             'date' => ['required']
@@ -4505,80 +4506,68 @@ class AdminAPIController extends Controller
             $payslip = EmployeePayslip::where('trax_id', $admins->trax_id)
                 ->whereMonth('payroll_month', Carbon::parse($request->date)->format("m"))
                 ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
-        }
 
-        $payslip = EmployeePayslip::find($request->payslip_id);
-
-        if (!$payslip) {
-            return response()->json(['status' => 0, 'error' => 'Payslip not found!']);
-        }
-        $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
-        $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
-        $personal_contact = '';
-
-        if (Admin::where('trax_id', $payslip->trax_id)->exists()) {
-            $user = Admin::where('trax_id', $payslip->trax_id)->first();
-            $personal_contact = $user->phone_number;
-        } else {
-            $rider = Rider::where('trax_id', $payslip->trax_id);
-            if ($rider->exists()) {
-                $rider = $rider->first();
-                $personal_contact = $rider->phone;
-            }
-        }
-
-        $basic_salary = ($payslip->basic_salary != NULL) ? number_format($payslip->basic_salary) : '-';
-        $house_rent = ($payslip->house_rent != NULL) ? number_format($payslip->house_rent) : '-';
-        $medical = ($payslip->medical != NULL) ? number_format($payslip->medical) : '-';
-        $gross_salary = ($payslip->gross_salary != NULL) ? number_format($payslip->gross_salary) : '-';
-        $payroll_days = ($payslip->payroll_days != NULL) ? $payslip->payroll_days : '-';
-        $present_days = ($payslip->present_days != NULL) ? $payslip->present_days : '-';
-        $absent_days = ($payslip->absent_days != NULL) ? $payslip->absent_days : '-';
-        $pay_cut_days = ($payslip->pay_cut_days != NULL) ? $payslip->pay_cut_days : '-';
-        $extra_paid_days = ($payslip->extra_paid_days != NULL) ? $payslip->extra_paid_days : '-';
-        $fuel_days = ($payslip->fuel_days != NULL) ? $payslip->fuel_days : '-';
+            if ($payslip) {
+                $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
+                $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
+                $personal_contact = $admins->phone_number;
+                $payslip_pdf = PayslipPdf::find($payslip->id);
+                if ($payslip_pdf) {
+                    $file_url = $payslip_pdf->file_path;
+                }
+                else {
+                    $basic_salary = ($payslip->basic_salary != NULL) ? number_format($payslip->basic_salary) : '-';
+                    $house_rent = ($payslip->house_rent != NULL) ? number_format($payslip->house_rent) : '-';
+                    $medical = ($payslip->medical != NULL) ? number_format($payslip->medical) : '-';
+                    $gross_salary = ($payslip->gross_salary != NULL) ? number_format($payslip->gross_salary) : '-';
+                    $payroll_days = ($payslip->payroll_days != NULL) ? $payslip->payroll_days : '-';
+                    $present_days = ($payslip->present_days != NULL) ? $payslip->present_days : '-';
+                    $absent_days = ($payslip->absent_days != NULL) ? $payslip->absent_days : '-';
+                    $pay_cut_days = ($payslip->pay_cut_days != NULL) ? $payslip->pay_cut_days : '-';
+                    $extra_paid_days = ($payslip->extra_paid_days != NULL) ? $payslip->extra_paid_days : '-';
+                    $fuel_days = ($payslip->fuel_days != NULL) ? $payslip->fuel_days : '-';
 
 
-        $mobile_allowance = ($payslip->mobile_allowance != NULL) ? number_format($payslip->mobile_allowance) : '-';
-        $vehicle_allowance = ($payslip->vehicle_allowance != NULL) ? number_format($payslip->vehicle_allowance) : '-';
-        $fuel_allowance = ($payslip->fuel_allowance != NULL) ? number_format($payslip->fuel_allowance) : '-';
-        $conveyance_allowance = ($payslip->conveyance_allowance != NULL) ? number_format($payslip->conveyance_allowance) : '-';
-        $vehicle_maintenance = ($payslip->vehicle_maintenance != NULL) ? number_format($payslip->vehicle_maintenance) : '-';
-        $fixed_incentive = ($payslip->fixed_incentive != NULL) ? number_format($payslip->fixed_incentive) : '-';
-        $holiday_allowance = ($payslip->holiday_allowance != NULL) ? number_format($payslip->holiday_allowance) : '-';
-        $overtime = ($payslip->overtime != NULL) ? number_format($payslip->overtime) : '-';
-        $bonus = ($payslip->bonus != NULL) ? number_format($payslip->bonus) : '-';
-        $arrears = ($payslip->arrears != NULL) ? number_format($payslip->arrears) : '-';
-        $pickup_incentive = ($payslip->pickup_incentive != NULL) ? number_format($payslip->pickup_incentive) : '-';
-        $delivery_incentive = ($payslip->delivery_incentive != NULL) ? number_format($payslip->delivery_incentive) : '-';
-        $operations_incentive = ($payslip->operation_incentive != NULL) ? number_format($payslip->operation_incentive) : '-';
-        $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? number_format($payslip->extra_duty_allowance) : '-';
-        $others_addition = ($payslip->others_addition != NULL) ? number_format($payslip->others_addition) : '-';
+                    $mobile_allowance = ($payslip->mobile_allowance != NULL) ? number_format($payslip->mobile_allowance) : '-';
+                    $vehicle_allowance = ($payslip->vehicle_allowance != NULL) ? number_format($payslip->vehicle_allowance) : '-';
+                    $fuel_allowance = ($payslip->fuel_allowance != NULL) ? number_format($payslip->fuel_allowance) : '-';
+                    $conveyance_allowance = ($payslip->conveyance_allowance != NULL) ? number_format($payslip->conveyance_allowance) : '-';
+                    $vehicle_maintenance = ($payslip->vehicle_maintenance != NULL) ? number_format($payslip->vehicle_maintenance) : '-';
+                    $fixed_incentive = ($payslip->fixed_incentive != NULL) ? number_format($payslip->fixed_incentive) : '-';
+                    $holiday_allowance = ($payslip->holiday_allowance != NULL) ? number_format($payslip->holiday_allowance) : '-';
+                    $overtime = ($payslip->overtime != NULL) ? number_format($payslip->overtime) : '-';
+                    $bonus = ($payslip->bonus != NULL) ? number_format($payslip->bonus) : '-';
+                    $arrears = ($payslip->arrears != NULL) ? number_format($payslip->arrears) : '-';
+                    $pickup_incentive = ($payslip->pickup_incentive != NULL) ? number_format($payslip->pickup_incentive) : '-';
+                    $delivery_incentive = ($payslip->delivery_incentive != NULL) ? number_format($payslip->delivery_incentive) : '-';
+                    $operations_incentive = ($payslip->operation_incentive != NULL) ? number_format($payslip->operation_incentive) : '-';
+                    $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? number_format($payslip->extra_duty_allowance) : '-';
+                    $others_addition = ($payslip->others_addition != NULL) ? number_format($payslip->others_addition) : '-';
 
-        $total_addition = ($payslip->total_salary != NULL) ? number_format($payslip->total_salary) : '-';
+                    $total_addition = ($payslip->total_salary != NULL) ? number_format($payslip->total_salary) : '-';
 
-        $paycut = ($payslip->paycut != NULL) ? number_format($payslip->paycut) : '-';
-        $absent = ($payslip->absent != NULL) ? number_format($payslip->absent) : '-';
-        $late_deduction = ($payslip->late_deduction != NULL) ? number_format($payslip->late_deduction) : '-';
-        $income_tax = ($payslip->income_tax != NULL) ? number_format($payslip->income_tax) : '-';
-        $eobi = ($payslip->eobi != NULL) ? number_format($payslip->eobi) : '-';
-        $advance_salary = ($payslip->advance_salary != NULL) ? number_format($payslip->advance_salary) : '-';
-        $month_closing = ($payslip->month_closing != NULL) ? number_format($payslip->month_closing) : '-';
-        $loan = ($payslip->loan != NULL) ? number_format($payslip->loan) : '-';
-        $fuel_card = ($payslip->fuel_card != NULL) ? number_format($payslip->fuel_card) : '-';
-        $open_parcel = ($payslip->open_parcel != NULL) ? number_format($payslip->open_parcel) : '-';
-        $phone_call = ($payslip->phone_call != NULL) ? number_format($payslip->phone_call) : '-';
-        $recovery = ($payslip->recovery != NULL) ? number_format($payslip->recovery) : '-';
-        $auction_sale = ($payslip->auction_sale != NULL) ? number_format($payslip->auction_sale) : '-';
-        $penalty = ($payslip->penalty != NULL) ? number_format($payslip->penalty) : '-';
-        $medical_insurance = ($payslip->medical_insurance != NULL) ? number_format($payslip->medical_insurance) : '-';
-        $van_deduction = ($payslip->van_deduction != NULL) ? number_format($payslip->van_deduction) : '-';
-        $others_deduction = ($payslip->others_deduction != NULL) ? number_format($payslip->others_deduction) : '-';
+                    $paycut = ($payslip->paycut != NULL) ? number_format($payslip->paycut) : '-';
+                    $absent = ($payslip->absent != NULL) ? number_format($payslip->absent) : '-';
+                    $late_deduction = ($payslip->late_deduction != NULL) ? number_format($payslip->late_deduction) : '-';
+                    $income_tax = ($payslip->income_tax != NULL) ? number_format($payslip->income_tax) : '-';
+                    $eobi = ($payslip->eobi != NULL) ? number_format($payslip->eobi) : '-';
+                    $advance_salary = ($payslip->advance_salary != NULL) ? number_format($payslip->advance_salary) : '-';
+                    $month_closing = ($payslip->month_closing != NULL) ? number_format($payslip->month_closing) : '-';
+                    $loan = ($payslip->loan != NULL) ? number_format($payslip->loan) : '-';
+                    $fuel_card = ($payslip->fuel_card != NULL) ? number_format($payslip->fuel_card) : '-';
+                    $open_parcel = ($payslip->open_parcel != NULL) ? number_format($payslip->open_parcel) : '-';
+                    $phone_call = ($payslip->phone_call != NULL) ? number_format($payslip->phone_call) : '-';
+                    $recovery = ($payslip->recovery != NULL) ? number_format($payslip->recovery) : '-';
+                    $auction_sale = ($payslip->auction_sale != NULL) ? number_format($payslip->auction_sale) : '-';
+                    $penalty = ($payslip->penalty != NULL) ? number_format($payslip->penalty) : '-';
+                    $medical_insurance = ($payslip->medical_insurance != NULL) ? number_format($payslip->medical_insurance) : '-';
+                    $van_deduction = ($payslip->van_deduction != NULL) ? number_format($payslip->van_deduction) : '-';
+                    $others_deduction = ($payslip->others_deduction != NULL) ? number_format($payslip->others_deduction) : '-';
 
-        $total_deduction = ($payslip->total_deduction != NULL) ? number_format($payslip->total_deduction) : '-';
-        $net_salary = ($payslip->net_salary != NULL) ? number_format($payslip->net_salary) : '-';
+                    $total_deduction = ($payslip->total_deduction != NULL) ? number_format($payslip->total_deduction) : '-';
+                    $net_salary = ($payslip->net_salary != NULL) ? number_format($payslip->net_salary) : '-';
 
-        $html = '<!doctype html>
+                    $html = '<!doctype html>
                 <html lang="en">
                   <head>
                     <meta charset="utf-8">
@@ -4635,7 +4624,7 @@ class AdminAPIController extends Controller
                      }
                     </style>';
 
-        $html .= '</head>
+                    $html .= '</head>
                   <body>
                    
                       <div class="table-responsive">
@@ -4659,7 +4648,7 @@ class AdminAPIController extends Controller
                              </tbody>
                          </table>';
 
-        $html .= '<table class="table border table-sm">
+                    $html .= '<table class="table border table-sm">
                     
                     <tbody>
                         <tr class="text-center">
@@ -4857,19 +4846,29 @@ class AdminAPIController extends Controller
                          </table>';
 
 
-        $html .= ' 
+                    $html .= ' 
                       </div>
                       </body>
                       </html>';
 
-        $pdf = SnappyPDF::loadHTML($html);
+                    $pdf = SnappyPDF::loadHTML($html);
 
-        $filename = 'payslip_' . $payslip->id . '.pdf';
+                    $filename = 'payslip_' . $payslip->id . '.pdf';
+                    $path = 'payslip_pdf/' . $filename;
+                    $result = $pdf->download($filename);
+                    Storage::disk('public')->put($path, $result);
+                    $payslip_pdf = new PayslipPdf();
+                    $payslip_pdf->payslip_id = $payslip->id;
+                    $payslip_pdf->file_path = $path;
+                    $payslip_pdf->save();
+                    $file_url = $payslip_pdf->file_path;
+                }
+                return response()->json(['status' => 0, 'payroll_month' => $payroll_month, 'data' => $payslip, 'file_url' => $file_url]);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Payslip not found"]);
+            }
 
-        $result = $pdf->download($filename);
-        $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
-        return array('status' => 1, 'image' => $pdf_file);
-
+        }
     }
 
 }
