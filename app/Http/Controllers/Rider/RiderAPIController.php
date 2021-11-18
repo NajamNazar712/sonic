@@ -9595,7 +9595,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'attendance_details' => []]);
         }
     }
-    
+
     public function rider_payslip(Request $request)
     {
         $rules = [
@@ -9617,8 +9617,9 @@ class RiderAPIController extends Controller
                 $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
                 $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
                 $personal_contact = $riders->phone;
-                $payslip_pdf = PayslipPdf::find($payslip->id);
-                if ($payslip_pdf) {
+                $payslip_pdf = PayslipPdf::where('payslip_id',$payslip->id);
+                if ($payslip_pdf->exists()) {
+                    $payslip_pdf = $payslip_pdf->first();
                     $file_url = $payslip_pdf->file_path;
                 }
                 else {
