@@ -961,6 +961,7 @@
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
+                            table.button('.un_tag').disable();
                         });
                 }
                 else {
@@ -1011,6 +1012,7 @@
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
+                            table.button('.un_tag').disable();
                         });
                 } else {
                     var error = "Add Internal Comment First!";
