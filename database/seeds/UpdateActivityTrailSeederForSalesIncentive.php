@@ -25,11 +25,11 @@ class UpdateActivityTrailSeederForSalesIncentive extends Seeder
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Sales > Territory', 'url'=>'admin.sales.territory.territoryindex', 'permission_id' => 610),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Sales > Designation', 'url'=>'admin.sales.designation.designationindex', 'permission_id' => 611),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Sales > Incentive Settings', 'url'=>'admin.settings.sales.incentive.index', 'permission_id' => 612),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Sales Incentive', 'url'=>'admin.reports.sales_incentive.index', 'permission_id' => 613),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Consolidated Sales Incentive', 'url'=>'admin.reports.sales_incentive.consolidated', 'permission_id' => 614)
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Sales > Sales Territory', 'url'=>'admin.sales.territory.territoryindex', 'permission_id' => 630),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Sales > Sales Designation ', 'url'=>'admin.sales.designation.designationindex', 'permission_id' => 631),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Sales > Incentive Settings', 'url'=>'admin.settings.sales.incentive.index', 'permission_id' => 632),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Sales Incentive', 'url'=>'admin.reports.sales_incentive.index', 'permission_id' => 633),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Consolidated Sales Incentive', 'url'=>'admin.reports.sales_incentive.consolidated', 'permission_id' => 634)
         ));
     }
 }

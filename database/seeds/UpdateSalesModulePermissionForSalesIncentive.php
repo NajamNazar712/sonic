@@ -12,16 +12,16 @@ class UpdateSalesModulePermissionForSalesIncentive extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 610, 'name' => 'Sales Territory - View', 'module_id' => 14),
-            array('id' => 611, 'name' => 'Sales Designation - View', 'module_id' => 14),
-            array('id' => 612, 'name' => 'Sales Incentive - View', 'module_id' => 14),
-            array('id' => 613, 'name' => 'Sales Incentive Report - View', 'module_id' => 9),
-            array('id' => 614, 'name' => 'Consolidated Sales Incentive Report- View', 'module_id' => 9),
+            array('id' => 630, 'name' => 'Sales Territory - View', 'module_id' => 14),
+            array('id' => 631, 'name' => 'Sales Designation - View', 'module_id' => 14),
+            array('id' => 632, 'name' => 'Sales Incentive - View', 'module_id' => 14),
+            array('id' => 633, 'name' => 'Sales Incentive Report - View', 'module_id' => 9),
+            array('id' => 634, 'name' => 'Consolidated Sales Incentive Report- View', 'module_id' => 9),
 
-            array('id' => 626, 'name' => 'Sales Territory - Add/Edit', 'module_id' => 14),
-            array('id' => 627, 'name' => 'Sales Designation - Add/Edit', 'module_id' => 14),
-            array('id' => 628, 'name' => 'Sales Territory - Enable/Disable', 'module_id' => 14),
-            array('id' => 629, 'name' => 'Sales Designation - Enable/Disable', 'module_id' => 14),
+            array('id' => 635, 'name' => 'Sales Territory - Add/Edit', 'module_id' => 14),
+            array('id' => 636, 'name' => 'Sales Designation - Add/Edit', 'module_id' => 14),
+            array('id' => 637, 'name' => 'Sales Territory - Enable/Disable', 'module_id' => 14),
+            array('id' => 638, 'name' => 'Sales Designation - Enable/Disable', 'module_id' => 14),
 
         ));
     }
