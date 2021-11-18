@@ -9595,38 +9595,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'attendance_details' => []]);
         }
     }
-
-    public function rider_payslip1(Request $request)
-    {
-        $rules = [
-            'date' => ['required']
-        ];
-        $rider_id = $request->rider_id;
-        $validate = Validator::make($request->all(), $rules, $this->messages);
-
-        $validate->setAttributeNames($this->names);
-
-        if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
-            $riders = Rider::find($rider_id);
-            if ($riders) {
-                $payslip = EmployeePayslip::where('trax_id', $riders->trax_id)
-                    ->whereMonth('payroll_month', Carbon::parse($request->date)->format("m"))
-                    ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
-                if ($payslip->exists()) {
-                    $payslip = $payslip->get();
-                    $month = Carbon::parse($request->date)->format("F-Y");
-                    return response()->json(['status' => 0, 'payroll_month' => $month, 'data' => $payslip]);
-                } else {
-                    return response()->json(['status' => 1, 'message' => "Payslip not found"]);
-                }
-            } else {
-                return response()->json(['status' => 1, 'message' => "Rider not found"]);
-            }
-        }
-    }
-
+    
     public function rider_payslip(Request $request)
     {
         $rules = [
@@ -9643,8 +9612,8 @@ class RiderAPIController extends Controller
                 ->whereMonth('payroll_month', Carbon::parse($request->date)->format("m"))
                 ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
             if ($payslip) {
-                $payslip = $payslip->first();
                 $payslip_obj = $payslip->get();
+                $payslip = $payslip->first();
                 $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
                 $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
                 $personal_contact = $riders->phone;
