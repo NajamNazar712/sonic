@@ -347,13 +347,47 @@ class AdminPettyCashController extends Controller
         $head = PettyCashAccountHead::select('id', 'name')->get();
 
         $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
+        $hub_array = array();
+        $city_array = array();
+        $dncc_array = "";
+        foreach ($zones as $zone) {
+            if($zone->id == $petty->zone_id) {
+                $hub_array[$zone->id] = $zone->zone_cities->where('hub', 1);
+                foreach ($zone->zone_cities->where('hub', 1) as $hub) {
+                    if($hub->id == $petty->hub_id) {
+                        $city_array[$hub->id] = $hub->hub_cities;
+                    }
+                }
+            }
+        }
+
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
+        $operation_managers = Admin::where('role_id',10)->where('status',1)->select(['id','trax_id','name'])->get();
         if (session('role_id') == 1) {
             $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
         } else {
             $sdns = StationDepositNote::where('status','!=', 2)->whereIn('hub_id', session('hubs'))->select('id')->get();
         }
-        return view('admin.petty_cash.edit')->with(['heads' => $head, 'petty_statement' => $petty,'zones'=>$zones,'sdns'=>$sdns,'employees'=>$employees]);
+
+        foreach ($sdns as $sdn)
+        {
+            if($sdn->id == $petty->sdn_id)
+            {
+                $response = $this::make_petty_cash_statement_get_dncc_static($sdn->id);
+                if($response['status'] == 1)
+                {
+                    foreach ($response['data'] as $data)
+                    {
+                        $id = $data['id'];
+                        $count = $data['count'];
+                        $text = $data['text'];
+                        $dncc_array .= "<option value='" . $id . "' data-count='" . $count . "'>" . $text . "</option>";
+                    }
+                }
+            }
+        }
+
+        return view('admin.petty_cash.edit')->with(['heads' => $head, 'petty_statement' => $petty,'zones'=>$zones,'sdns'=>$sdns,'employees'=>$employees,'operation_managers'=>$operation_managers,'hub_array'=>$hub_array]);
     }
 
     public function edit_petty_cash_statement_list(Request $request, $id)
@@ -364,7 +398,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('zones as z', 'z.id', '=', 'petty_cash_statement_details.zone_id')
             ->leftjoin('admins as a', 'a.id', '=', 'petty_cash_statement_details.employee_id')
             ->join('petty_cash_statements as pcs', 'pcs.id', '=', 'petty_cash_statement_details.petty_cash_statement_id')
-            ->select('petty_cash_statement_details.id as statement_detail_id', 'h.name as hub','c.name as city','z.name as zone','a.trax_id as employee_id', 'petty_cash_statement_details.hub_id', 'petty_cash_statement_details.account_head_id', 'petty_cash_statement_details.account_title_id', 'petty_cash_statement_details.date', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.status as petty_status', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document', 'petty_cash_statement_details.reference_document_2 as reference_document_2', 'petty_cash_statement_details.created_at','petty_cash_statement_details.employee_name as employee_name_data','petty_cash_statement_details.employee_designation as employee_designation_data','petty_cash_statement_details.hub_id','petty_cash_statement_details.zone_id','petty_cash_statement_details.city_id','op.name as op_name','op.trax_id as op_trax_id','op.id as op_id')
+            ->select('petty_cash_statement_details.id as statement_detail_id', 'h.name as hub','c.name as city','z.name as zone','petty_cash_statement_details.employee_id', 'pcs.hub_id', 'pcs.sdn_id','petty_cash_statement_details.account_head_id', 'petty_cash_statement_details.account_title_id', 'petty_cash_statement_details.date', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.status as petty_status', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document', 'petty_cash_statement_details.reference_document_2 as reference_document_2', 'petty_cash_statement_details.created_at','petty_cash_statement_details.employee_name as employee_name_data','petty_cash_statement_details.employee_designation as employee_designation_data','petty_cash_statement_details.zone_id','petty_cash_statement_details.city_id','op.name as op_name','op.trax_id as op_trax_id','op.id as op_id','petty_cash_statement_details.dncc_id','petty_cash_statement_details.delivered_shipments')
             ->where('petty_cash_statement_details.petty_cash_statement_id', $id);
         return Datatables::of($petty_details)
             ->setRowAttr([
@@ -407,39 +441,6 @@ class AdminPettyCashController extends Controller
                 return $select;
 
             })
-            ->addColumn('zone_name', function ($petty_details) {
-                $zone_id = $petty_details->zone_id;
-                $zones = Zone::where('business_category_id',1)->where('status',1)->select('id','name')->get();
-                $drops = '';
-                $selected = '';
-                foreach ($zones as $zone) {
-                    if ($zone->id == $zone_id) {
-                        $selected = 'selected';
-                    } else {
-                        $selected = '';
-                    }
-                    $drops .= '<option value="' . $zone->id . '" ' . $selected . '>' . $zone->name . '</option>';
-                }
-                $select = '<select class="form-control form-control-sm select2 zone_select" disabled name="zone[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Zone is required">' . $drops . '</select>';
-                return $select;
-            })
-            ->addColumn('hub_name', function ($petty_details) {
-                $zone_id = $petty_details->zone_id;
-                $hub_id = $petty_details->hub_id;
-                $petty_hubs = City::where('hub',1)->where('status',1)->where('zone_id',$zone_id)->select('id','name')->get();
-                $drops = '';
-                $selected = '';
-                foreach ($petty_hubs as $petty_hub) {
-                    if ($petty_hub->id == $hub_id) {
-                        $selected = 'selected';
-                    } else {
-                        $selected = '';
-                    }
-                    $drops .= '<option value="' . $petty_hub->id . '" ' . $selected . '>' . $petty_hub->name . '</option>';
-                }
-                $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Hub is required">' . $drops . '</select>';
-                return $select;
-            })
             ->addColumn('city_name', function ($petty_details) {
                 $hub_id = $petty_details->hub_id;
                 $city_id = $petty_details->city_id;
@@ -453,21 +454,6 @@ class AdminPettyCashController extends Controller
                         $selected = '';
                     }
                     $drops .= '<option value="' . $city->id . '" ' . $selected . '>' . $city->name . '</option>';
-                }
-                $select = '<select class="form-control form-control-sm select2 city_select" disabled name="city[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="City is required">' . $drops . '</select>';
-                return $select;
-            })
-            ->addColumn('operation_manager_name', function ($petty_details) {
-                $ops = Admin::where('role_id',10)->where('status',1)->select('id','trax_id','name')->get();
-                $drops = '';
-                $selected = '';
-                foreach ($ops as $op) {
-                    if ($op->id == $petty_details->op_id) {
-                        $selected = 'selected';
-                    } else {
-                        $selected = '';
-                    }
-                    $drops .= '<option value="' . $op->id . '" ' . $selected . '>' . $op->name . ' ( '.$op->trax_id.' )</option>';
                 }
                 $select = '<select class="form-control form-control-sm select2 city_select" disabled name="city[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="City is required">' . $drops . '</select>';
                 return $select;
@@ -496,8 +482,34 @@ class AdminPettyCashController extends Controller
                 $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_designation_data . '" name="employee_designations[' . $petty_details->statement_detail_id . ']" >';
                 return $input;
             })
-            ->editColumn('date', function ($petty_details) {
-                return Carbon::parse($petty_details->date)->toDateString();
+            ->addColumn('dncc', function ($petty_details) {
+                $sdn_id = $petty_details->sdn_id;
+                $dncc_id = $petty_details->dncc_id;
+                $drops = '';
+                $selected = '';
+                $response = $this::make_petty_cash_statement_get_dncc_static($sdn_id);
+                $drops .= "<option value='' data-count='' selected></option>";
+                if($response['status'] == 1)
+                {
+                    foreach ($response['data'] as $data)
+                    {
+                        $id = $data['id'];
+                        $count = $data['count'];
+                        $text = $data['text'];
+                        if ($id == $dncc_id) {
+                            $selected = 'selected';
+                        } else {
+                            $selected = '';
+                        }
+                        $drops .= "<option value='" . $id . "' data-count='" . $count . "' ".$selected.">" . $text . "</option>";
+                    }
+                }
+                $select = '<select class="form-control form-control-sm select2 dncc_select" disabled name="dncc[' . $petty_details->statement_detail_id . ']">' . $drops . '</select>';
+                return $select;
+            })
+            ->editColumn('delivered_shipments',function ($petty_details){
+                $input = '<input class="form-control form-control-sm" placeholder="Delivered Shipments" readonly value="' . $petty_details->delivered_shipments . '" name="delivered_shipment_count[' . $petty_details->statement_detail_id . ']" >';
+                return $input;
             })
             ->editColumn('expense_details', function ($petty_details) {
                 $expense = '<textarea class="form-control form-control-sm" disabled name="expense[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Expense Detail is required">' . $petty_details->expense_details . '</textarea>';
@@ -519,11 +531,11 @@ class AdminPettyCashController extends Controller
                 return $amount;
             })
             ->editColumn('reference_no', function ($petty_details) {
-                $reference = '<input class="form-control form-control-sm" disabled value="' . $petty_details->reference_no . '" name="reference[' . $petty_details->statement_detail_id . ']" >';
+                $reference = '<input class="form-control form-control-sm" disabled placeholder="Enter Reference No." value="' . $petty_details->reference_no . '" name="reference[' . $petty_details->statement_detail_id . ']" >';
                 return $reference;
             })
             ->editColumn('remarks', function ($petty_details) {
-                $remarks = '<textarea class="form-control form-control-sm" disabled name="remarks[' . $petty_details->statement_detail_id . ']">' . $petty_details->remarks . '</textarea>';
+                $remarks = '<textarea class="form-control form-control-sm" placeholder="Enter Remarks" disabled name="remarks[' . $petty_details->statement_detail_id . ']">' . $petty_details->remarks . '</textarea>';
                 return $remarks;
             })
             ->editColumn('reference_document', function ($petty_details) {
@@ -937,16 +949,12 @@ class AdminPettyCashController extends Controller
                 return redirect()->route('admin.petty_cash.approved.view',$statement_id);
             }
             foreach ($selected_ids as $selected_id) {
-//                $hubId = "hub.$selected_id";
                 $total_amount += $request->amount[$selected_id];
                 $petty_detail = PettyCashStatementDetail::where('petty_cash_statement_id', $petty_cash->id)->where('id', $selected_id)->first();
 
                 if (session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) {
                     $petty_detail->account_head_id = $request->head[$selected_id];
                     $petty_detail->account_title_id = $request->title[$selected_id];
-//                    $petty_detail->hub_id = $request->hub[$selected_id];
-//                    $petty_detail->hub_id = ($request->has($hubId) ? $request->hub[$selected_id] : null);
-
                 }
 
                 $petty_detail->expense_details = $request->expense[$selected_id];
@@ -954,6 +962,8 @@ class AdminPettyCashController extends Controller
                 $petty_detail->remarks = $request->remarks[$selected_id];
                 if ($petty_cash->status == 0) {
                     $petty_detail->station_amount = $request->amount[$selected_id];
+                    $petty_detail->dncc_id = $request->dncc[$selected_id] ?? null;
+                    $petty_detail->delivered_shipments = $request->delivered_shipment_count[$selected_id] ?? null;
                 } else if ($petty_cash->status == 1) {
                     $petty_detail->operation_amount = $request->amount[$selected_id];
                 } else {
@@ -991,7 +1001,7 @@ class AdminPettyCashController extends Controller
                     $petty_detail->save();
                 }
             }
-            if($request->has('select_statement_sdn') && $request->select_statement_sdn != $petty_cash->sdn_id)
+            if($petty_cash->status == 0 && $request->has('select_statement_sdn') && $request->select_statement_sdn != $petty_cash->sdn_id)
             {
                 $sdn_log = new PettyCashSdnLog();
                 $sdn_log->petty_cash_statement_id = $petty_cash->id;
