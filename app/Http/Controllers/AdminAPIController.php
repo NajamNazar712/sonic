@@ -4506,8 +4506,8 @@ class AdminAPIController extends Controller
             $payslip = EmployeePayslip::where('trax_id', $admins->trax_id)
                 ->whereMonth('payroll_month', Carbon::parse($request->date)->format("m"))
                 ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
-
             if ($payslip) {
+                $payslip = $payslip->first();
                 $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
                 $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
                 $personal_contact = $admins->phone_number;
@@ -4863,7 +4863,8 @@ class AdminAPIController extends Controller
                     $payslip_pdf->save();
                     $file_url = $payslip_pdf->file_path;
                 }
-                return response()->json(['status' => 0, 'payroll_month' => $payroll_month, 'data' => $payslip, 'file_url' => $file_url]);
+                $payslip_obj = $payslip->get();
+                return response()->json(['status' => 0, 'payroll_month' => $payroll_month, 'data' => $payslip_obj, 'file_url' => $file_url]);
             } else {
                 return response()->json(['status' => 1, 'message' => "Payslip not found"]);
             }
