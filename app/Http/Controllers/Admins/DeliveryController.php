@@ -2238,7 +2238,8 @@ class DeliveryController extends Controller
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
 
-                    }else if($request->status_drop[$shipment] == 56){
+                    }
+                    else if($request->status_drop[$shipment] == 56){
                         if($shipment_status->booking_type_id == 2 ){
                             if($shipment_status->shipper_status_id != $request->status_drop[$shipment]){
                                 ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
@@ -2296,17 +2297,17 @@ class DeliveryController extends Controller
                         }else{
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
-
-
                     }
+                    $data = array();
+                    $data['delivery_note_id'] = $delivery_note_id;
+                    $data['shipment_id'] = $shipment;
+                    dispatch(new ProcessAgentCallMonitoring($data));
+
                 }
 
 				}
 
-                $data = array();
-                $data['delivery_note_id'] = $delivery_note_id;
-                $data['shipment_id'] = $shipment;
-                dispatch(new ProcessAgentCallMonitoring($data));
+
             }
             $delivery_note_data = DeliveryNote::find($delivery_note_id);
             $delivery_note_data->last_updated_at = Carbon::now();
