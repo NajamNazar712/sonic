@@ -9611,7 +9611,7 @@ class RiderAPIController extends Controller
             $payslip = EmployeePayslip::where('trax_id', $riders->trax_id)
                 ->whereMonth('payroll_month', Carbon::parse($request->date)->format("m"))
                 ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
-            if ($payslip) {
+            if ($payslip->exists()) {
                 $payslip_obj = $payslip->get();
                 $payslip = $payslip->first();
                 $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
