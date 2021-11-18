@@ -44,24 +44,30 @@
 
                     <div class="row">
                         <div class="col">
+                            <fieldset class="form-group">
                                 <select name="select_statement_zone" id="select_statement_zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
                                     @foreach($zones as $zone)
                                         <option value="{{$zone->id}}">{{$zone->name}}</option>
                                     @endforeach
                                 </select>
+                            </fieldset>
                         </div>
 
                         <div class="col">
+                            <fieldset class="form-group">
                             <select name="select_statement_hub" id="select_statement_hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required">
                             </select>
+                            </fieldset>
                         </div>
 
                         <div class="col">
+                            <fieldset class="form-group">
                             <select name="select_statement_station_manager" id="select_statement_station_manager" class="form-control select2" data-rule-required="true" data-msg-required="Station Manager is required">
                                 @foreach($operation_managers as $manager)
                                     <option value="{{$manager->id}}">{{$manager->name}} @if($manager->trax_id != '')({{$manager->trax_id}}) @endif</option>
                                 @endforeach
                             </select>
+                            </fieldset>
                         </div>
                     </div>
                     <div class="row text-center">
@@ -227,17 +233,9 @@
                     });
             @endif
 
-            
-            // $('.reference_no').inputmask({
-            //     'alias': 'integer',
-            //     'allowMinus': false,
-            //     'allowPlus': false,
-            //     'rightAlign': false,
-            // });
             $('#select_statement_sdn').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select SDN No.',
                 width:'100%',
-                allowClear:true
             }).bind('change',function(){
                 var sdn = $(this).val();
                 $.ajax({
@@ -258,7 +256,6 @@
                         $('.dncc_select').each(function(elm){
                             $(this).empty().trigger('change');
                             $(this).html(dncc_data);
-                            $(this).prepend('<option value="" selected="selected"></option>').select2({placeholder:"Select Delivery Note"});
                             $(this).val('').trigger('change');
                         });
                     }
@@ -309,8 +306,6 @@
                             obj.text = obj.name;
                             return obj;
                         });
-
-                        console.table(cities_data);
 
                         $('.city_select').each(function(elm){
                             $(this).empty().trigger('change');
@@ -498,7 +493,9 @@
                     allowClear:true,
                 }).bind('change',function (){
                     let count = $(this).find(':selected').attr('data-count');
-                    $('input[name="delivered_shipment_count['+rows_count+']"]').val(count);
+                    let index = $(this).attr('name');
+                    index = index.substring(5, index.length-1);
+                    $('input[name="delivered_shipment_count['+index+']"]').val(count);
                 });
 
                 $('select[name="city['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({

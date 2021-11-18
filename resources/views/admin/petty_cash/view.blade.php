@@ -11,6 +11,14 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                     <div class="row">
+                        @if($petty_statement->zone_id != null)
+                            <div class="col-6">
+                                <fieldset class="form-group">
+                                    <label class="font-medium-3">Statement Zone :</label>
+                                    <span class="font-medium-4 font-weight-light">{!! $petty_statement->zone_name!!}</span>
+                                </fieldset>
+                            </div>
+                        @endif
                         @if($petty_statement->hub_id != null)
                         <div class="col-6">
                             <fieldset class="form-group">
@@ -19,14 +27,14 @@
                             </fieldset>
                         </div>
                         @endif
-                            @if($petty_statement->sdn_id != null)
-                                <div class="col-6">
-                                    <fieldset class="form-group">
-                                        <label class="font-medium-3">Statement SDN :</label>
-                                        <span class="font-medium-4 font-weight-light">{!! str_pad($petty_statement->sdn_id, 6, '0', STR_PAD_LEFT)!!}</span>
-                                    </fieldset>
-                                </div>
-                            @endif
+                        @if($petty_statement->sdn_id != null)
+                            <div class="col-6">
+                                <fieldset class="form-group">
+                                    <label class="font-medium-3">Statement SDN :</label>
+                                    <span class="font-medium-4 font-weight-light">{!! str_pad($petty_statement->sdn_id, 6, '0', STR_PAD_LEFT)!!}</span>
+                                </fieldset>
+                            </div>
+                        @endif
                         <div class="col">
                             <fieldset class="form-group">
                                 <label class="font-medium-3">Statement Reference Number :</label>
@@ -50,6 +58,24 @@
                         </div>
                             @endif
 
+                            @if($petty_statement->date != null)
+                                <div class="col-6 ">
+                                    <fieldset class="form-group">
+                                        <label class="font-medium-3">Statement Date :</label>
+                                        <span class="font-medium-4 font-weight-light">{!! date("Y-m-d",strtotime($petty_statement->date))!!}</span>
+                                    </fieldset>
+                                </div>
+                            @endif
+
+                            @if($petty_statement->station_manager_id != null)
+                                <div class="col-6 ">
+                                    <fieldset class="form-group">
+                                        <label class="font-medium-3">Station Manager Name :</label>
+                                        <span class="font-medium-4 font-weight-light">{!! $petty_statement->station_manager_name!!}</span>
+                                    </fieldset>
+                                </div>
+                            @endif
+
                         <div class="col-12">
                             <fieldset class="form-group">
                             <label class="font-medium-3">Total Amount :</label>
@@ -64,15 +90,13 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Account Head</th>
                             <th class="border-primary border-darken-1">Account Title</th>
-                            <th class="border-primary border-darken-1">Zone</th>
-                            <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">City / Location</th>
-                            <th class="border-primary border-darken-1">Operation Manager</th>
-                            <th class="border-primary border-darken-1">Date</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
                             <th class="border-primary border-darken-1"> Employee Id </th>
-                            <th class="border-primary border-darken-1"> Name </th>
+                            <th class="border-primary border-darken-1">Name </th>
                             <th class="border-primary border-darken-1"> Designation </th>
+                            <th class="border-primary border-darken-1"> Delivery Note </th>
+                            <th class="border-primary border-darken-1"> Delivered Shipments</th>
                             <th class="border-primary border-darken-1"> Amount </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
                             <th class="border-primary border-darken-1">Remarks</th>
@@ -155,15 +179,13 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data:'account_head' ,name: 'account_head', class: 'align-middle account_head'},
                     {data:'account_title' ,name: 'account_title', class: 'align-middle account_title'},
-                    {data:'zone_name' ,name: 'z.name', class: 'align-middle zone_name'},
-                    {data:'hub_name' ,name: 'h.name', class: 'align-middle hub_name'},
                     {data:'city_name' ,name: 'c.name', class: 'align-middle city_name'},
-                    {data:'operation_manager_name' ,name: 'op.name', class: 'align-middle operation_manager_name'},
-                    {data:'date' ,name: 'date', class: 'align-middle date'},
                     {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense'},
                     {data:'employee_trax_id' ,name: 'a.trax_id', class: 'align-middle employee_trax_id custom-col-width'},
                     {data:'employee_name' ,name: 'petty_cash_statement_details.employee_name', class: 'align-middle employee_name custom-col-width'},
                     {data:'employee_designation' ,name: 'petty_cash_statement_details.employee_designation', class: 'align-middle employee_designation custom-col-width'},
+                    {data:'dncc' ,name: 'petty_cash_statement_details.dncc_id', class: 'align-middle dncc custom-col-width'},
+                    {data:'delivered_shipments' ,name: 'petty_cash_statement_details.delivered_shipments', class: 'align-middle delivered_shipments custom-col-width'},
                     {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount custom-col-width'},
                     {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no'},
                     {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
