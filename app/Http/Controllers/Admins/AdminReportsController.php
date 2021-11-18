@@ -9600,14 +9600,14 @@ class AdminReportsController extends Controller
                     $query->where('ss.id','=',$keyword);
                   
             })
-            ->editColumn('rider_status_marked_by', function($query, $keyword) {
-                if($query->status_id == 5){
-                     $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id',$query->shipment_id)->get()->first();
+            ->editColumn('rider_status_marked_by', function($shipments) {
+                if($shipments->status_id == 5){
+                     $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id',$shipments->shipment_id)->get()->first();
                      return $delivery_note_shipment->delivery_note->rider->name;
-                }elseif($query->status_id == 2){
-                    return $query->rider_status_marked_by;
-                }elseif($query->status_id == 23){
-                    $return_note_shipment = ReturnNoteShipment::where('shipment_id',$query->shipment_id)->get()->first();
+                }elseif($shipments->status_id == 2){
+                    return $shipments->rider_status_marked_by;
+                }elseif($shipments->status_id == 23){
+                    $return_note_shipment = ReturnNoteShipment::where('shipment_id',$shipments->shipment_id)->get()->first();
                     $return_note = ReturnNote::find($return_note_shipment->return_note_id);
                     return $return_note->rider->name;
                 }else{
