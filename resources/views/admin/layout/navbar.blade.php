@@ -78,16 +78,26 @@
 @section('js')
     <script type="text/javascript">
         $('body').on('click','.adminprofile',function(){
-                var full_name = {{ Session::get('id') }};
-                var department_designation = "Information Technology (Software Engineer)";
-                var employee_id = "04230";
-                var email = "taha.habib@trax.pk";
-                var contact = "+92332-3255435";
-                $('#adminprofile').modal('show');
-                $('#full_name').html(full_name);
-                $('#department_designation').html(department_designation);
-                $('#employee_id').html(employee_id);
-                $('#email').html(email);
-                $('#contact').html(contact);
+            var full_name , department_designation , employee_id , email , contact ;
+            $.ajax({
+                    url:'{!! route('admin.dashboard.admin_profile') !!}',
+                    type:'GET'
+                }).done(function (data) {
+                    debugger;
+                    if(data.userid){
+                        full_name = data.;
+                        department_designation = data.department_designation;
+                        employee_id = data.employee_id;
+                        email = data.email;
+                        contact = data.contact;
+
+                        $('#adminprofile').modal('show');
+                        $('#full_name').html(full_name);
+                        $('#department_designation').html(department_designation);
+                        $('#employee_id').html(employee_id);
+                        $('#email').html(email);
+                        $('#contact').html(contact);
+                    }
+                });
             });
     </script>

@@ -11243,6 +11243,15 @@ class AdminDashboardController extends Controller
             return redirect()->back()->with('success', 'Order ID restriction removed successfully!');
         }
     }
+    public function admin_profile(Request $request){
+        $user =Admin::where('id', Auth::id())->first();
+        $designation = Admin::join('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
+        ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
+        ->where('admins.id', Auth::id())->first();
+        $dept_designation= $user->role->name.' ('. $designation->name .')';
+        //SELECT a.trax_id,a.name,a.email,a.phone_number,r.name,d.name FROM admins a, admin_roles r,admin_departments d WHERE a.role_id=r.id AND r.department_id=d.id
+        return response()->json(['full_name' => $user->name,'department_designation' => $dept_designation,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
+   }
 
 }
 
