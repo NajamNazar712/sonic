@@ -147,7 +147,7 @@ class CRMController extends Controller
                     $crm_city_id = $crm_request->shipment->consignee_city_id;
                 }
 
-                $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id);
+                $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
                 if($crm_auto_tag_user->exists()){
 
                     $crm_auto_tag_user = $crm_auto_tag_user->get()->first();
