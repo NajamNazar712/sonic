@@ -84,8 +84,8 @@
                     type:'GET'
                 }).done(function (data) {
                     debugger;
-                    if(data.userid){
-                        full_name = data.;
+                    if(data){
+                        full_name = data.full_name;
                         department_designation = data.department_designation;
                         employee_id = data.employee_id;
                         email = data.email;
