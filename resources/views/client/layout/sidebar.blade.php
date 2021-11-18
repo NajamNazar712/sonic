@@ -131,13 +131,13 @@
                             <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>
                         @endif
                         @if (session('permissions') != null)
-                            @if (Auth::id() == 1901)
+                            @if (Auth::id() == 1091)
                                 <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
                             @elseif (in_array(15, session('permissions')))
                                 <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
                             @endif
                         @else
-                            @if (Auth::id() == 1901)
+                            @if (Auth::id() == 1091)
                                 <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
                             @endif
                         @endif
