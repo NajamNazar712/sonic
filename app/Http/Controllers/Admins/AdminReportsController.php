@@ -25,6 +25,8 @@ use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Shipper\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -9575,7 +9577,7 @@ class AdminReportsController extends Controller
             ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftjoin('users as u', 'shipments_journey.user_id', '=', 'u.id')
             ->leftjoin('riders as r', 'shipments_journey.rider_id', '=', 'r.id')
-            ->select(['sh.tracking_number','sh.tracking_number as tracking_number_link','r.id','r.name as rider_status_marked_by','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id', 'shipments_journey.admin_id', 'shipments_journey.rider_id']);
+            ->select(['sh.id as shipment_id','sh.tracking_number','sh.tracking_number as tracking_number_link','r.id','r.name as rider_status_marked_by','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id', 'shipments_journey.admin_id', 'shipments_journey.rider_id']);
             
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -9597,7 +9599,22 @@ class AdminReportsController extends Controller
             })->filterColumn('ss.id', function($query, $keyword) {
                     $query->where('ss.id','=',$keyword);
                   
-            });
+            })
+            ->editColumn('rider_status_marked_by', function($query, $keyword) {
+                if($query->status_id == 5){
+                     $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id',$query->shipment_id)->get()->first();
+                     return $delivery_note_shipment->delivery_note->rider->name;
+                }elseif($query->status_id == 2){
+                    return $query->rider_status_marked_by;
+                }elseif($query->status_id == 23){
+                    $return_note_shipment = ReturnNoteShipment::where('shipment_id',$query->shipment_id)->get()->first();
+                    $return_note = ReturnNote::find($return_note_shipment->return_note_id);
+                    return $return_note->rider->name;
+                }else{
+                    return '';
+                }
+              
+        });
             
        
         if ($request->get('search_from') && $request->get('search_to')) {
