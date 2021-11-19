@@ -89,7 +89,7 @@
                             <th class="border-primary border-darken-1"> Employee Id </th>
                             <th class="border-primary border-darken-1"> Name </th>
                             <th class="border-primary border-darken-1"> Designation </th>
-                            <th class="border-primary border-darken-1"> Delivery Note </th>
+                            <th class="border-primary border-darken-1"> DNCC/PNCC </th>
                             <th class="border-primary border-darken-1"> Delivered Shipments </th>
                             <th class="border-primary border-darken-1"> Amount </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
@@ -442,7 +442,7 @@
                     });
 
                     $(".dncc_select").select2({
-                        placeholder: "Select Delivery Note",
+                        placeholder: "Select DNCC/PNCC",
                         width:'100%',
                         allowClear:true,
                     }).bind('change', function() {

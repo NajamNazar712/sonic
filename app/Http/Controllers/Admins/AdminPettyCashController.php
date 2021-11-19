@@ -353,11 +353,6 @@ class AdminPettyCashController extends Controller
         foreach ($zones as $zone) {
             if($zone->id == $petty->zone_id) {
                 $hub_array[$zone->id] = $zone->zone_cities->where('hub', 1);
-                foreach ($zone->zone_cities->where('hub', 1) as $hub) {
-                    if($hub->id == $petty->hub_id) {
-                        $city_array[$hub->id] = $hub->hub_cities;
-                    }
-                }
             }
         }
 
@@ -367,24 +362,6 @@ class AdminPettyCashController extends Controller
             $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
         } else {
             $sdns = StationDepositNote::where('status','!=', 2)->whereIn('hub_id', session('hubs'))->select('id')->get();
-        }
-
-        foreach ($sdns as $sdn)
-        {
-            if($sdn->id == $petty->sdn_id)
-            {
-                $response = $this::make_petty_cash_statement_get_dncc_static($sdn->id);
-                if($response['status'] == 1)
-                {
-                    foreach ($response['data'] as $data)
-                    {
-                        $id = $data['id'];
-                        $count = $data['count'];
-                        $text = $data['text'];
-                        $dncc_array .= "<option value='" . $id . "' data-count='" . $count . "'>" . $text . "</option>";
-                    }
-                }
-            }
         }
 
         return view('admin.petty_cash.edit')->with(['heads' => $head, 'petty_statement' => $petty,'zones'=>$zones,'sdns'=>$sdns,'employees'=>$employees,'operation_managers'=>$operation_managers,'hub_array'=>$hub_array]);
@@ -1758,9 +1735,9 @@ class AdminPettyCashController extends Controller
             foreach ($zones as $zone) {
                 if($zone->id == $draft->zone_id) {
                     $hub_array[$zone->id] = $zone->zone_cities->where('hub', 1);
-                    foreach ($zone->zone_cities->where('hub', 1) as $hub) {
+                    foreach ($zone->zone_cities as $hub) {
                         if($hub->id == $draft->hub_id) {
-                            $city_array[$hub->id] = $hub->hub_cities;
+                            $city_array[$hub->id] = $hub->hub_cities_including_self;
                         }
                     }
                 }

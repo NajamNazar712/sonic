@@ -88,7 +88,7 @@
                             <th class="border-primary border-darken-1">Employee Id </th>
                             <th class="border-primary border-darken-1">Name </th>
                             <th class="border-primary border-darken-1">Designation </th>
-                            <th class="border-primary border-darken-1">Delivery Note </th>
+                            <th class="border-primary border-darken-1">DNCC/PNCC </th>
                             <th class="border-primary border-darken-1">Delivered Shipment Count </th>
                             <th class="border-primary border-darken-1">Amount </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
@@ -474,7 +474,7 @@
 
                 $('select[name="dncc['+rows_count+']"]').html(dncc_data);
                 $('select[name="dncc['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    placeholder:'Select Delivery Note',
+                    placeholder:'Select DNCC/PNCC',
                     dropdownCssClass: 'form-control-sm p-0',
                     allowClear:true,
                 }).bind('change',function (){
@@ -959,7 +959,7 @@
 
                 $('select[name="dncc['+rows_count+']"]').html(dncc_data);
                 $('select[name="dncc['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    placeholder:'Select Delivery Note',
+                    placeholder:'Select DNCC/PNCC',
                     dropdownCssClass: 'form-control-sm p-0',
                     allowClear:true,
                 }).bind('change',function (){
