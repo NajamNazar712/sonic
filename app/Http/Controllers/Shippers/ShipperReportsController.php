@@ -628,6 +628,13 @@ class ShipperReportsController extends Controller
         });
 
         $datatable = Datatables::of($sales)
+            ->editColumn('arrival_date', function ($sales) {
+                if($sales->arrival_date == $sales->booking_date){
+                    return '-';
+                }else{
+                    return $sales->arrival_date;
+                }
+            })
             ->addColumn('delivery_within_15_days', function ($sales) {
                 if ($sales->shipper_status_id != 25) {
                     $delivered_date = Carbon::parse($sales->delivered_or_returned)->startOfDay();
