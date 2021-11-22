@@ -62,14 +62,14 @@ class AdminMonthClosingController extends Controller
                             $month_closing->delete();
                             if (!$parcel->packaging_material_request) {
                                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                                ShipmentsJourneyController::add($shipment, 20, 20, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
-    
+
                                 NotificationsController::send(15, 0, $shipment);
                                 NotificationsController::send(16, 0, $shipment);
-    
+
                                 ShipmentChargesController::return($shipment);
-    
+
                                 AdminFinanceController::add_payment($shipment, 1);
+                                ShipmentsJourneyController::add($shipment, 20, 20, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
                             }
                             else {
                                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
@@ -396,7 +396,7 @@ class AdminMonthClosingController extends Controller
         $shipment_ids = $request->shipment_ids;
         $date = Carbon::now();
         if(count($shipment_ids) > 0){
-            $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 51, 53, 3, 21, 26, 32);
+            $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 51, 53);
             $intransit_status_array = array(3, 21, 26, 32);
             $return_revert_statuses = array(20, 21, 22, 23, 24, 44, 47, 48);
             $return_note_statuses = array(23, 24, 28, 29, 34, 35, 44, 45,46, 47, 48, 60);

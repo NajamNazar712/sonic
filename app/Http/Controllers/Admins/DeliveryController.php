@@ -9,6 +9,7 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
+use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
@@ -72,6 +73,7 @@ use App\Http\Models\WarehouseStock;
 use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Admin\PettyCashStatement;
+use App\Jobs\ProcessAgentCallMonitoring;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -2125,7 +2127,12 @@ class DeliveryController extends Controller
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
                     }
-                    
+
+                    //auto agent assigning
+                    $data = array();
+                    $data['delivery_note_id'] = $delivery_note_id;
+                    $data['shipment_id'] = $shipment;
+                    dispatch(new ProcessAgentCallMonitoring($data));
                 }
             }
 
@@ -2231,7 +2238,8 @@ class DeliveryController extends Controller
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
 
-                    }else if($request->status_drop[$shipment] == 56){
+                    }
+                    else if($request->status_drop[$shipment] == 56){
                         if($shipment_status->booking_type_id == 2 ){
                             if($shipment_status->shipper_status_id != $request->status_drop[$shipment]){
                                 ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
@@ -2289,12 +2297,17 @@ class DeliveryController extends Controller
                         }else{
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
-
-
                     }
+                    $data = array();
+                    $data['delivery_note_id'] = $delivery_note_id;
+                    $data['shipment_id'] = $shipment;
+                    dispatch(new ProcessAgentCallMonitoring($data));
+
                 }
 
 				}
+
+
             }
             $delivery_note_data = DeliveryNote::find($delivery_note_id);
             $delivery_note_data->last_updated_at = Carbon::now();
@@ -3028,7 +3041,6 @@ class DeliveryController extends Controller
                                                 if ($parcel->shipper_status_id != 12) {
                                                     ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                 }
-                                                ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                                                 if ($verification == 1) {
                                                     NotificationsController::send(15, 0, $shipment);
@@ -3048,6 +3060,8 @@ class DeliveryController extends Controller
                                                         AdminFinanceController::done_payment($shipment, 1);
                                                     }
                                                 }
+                                                ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+
 
                                             } else {
                                                 if ($parcel->packaging_material_charges != null) {
@@ -3122,7 +3136,7 @@ class DeliveryController extends Controller
                                                         AdminFinanceController::done_payment($shipment, 0);
                                                     }
 
-
+                                                    FinalChargesWebhookController::webhook_subscription($shipment);
                                                 }
                                             }
                                         }
@@ -3187,6 +3201,8 @@ class DeliveryController extends Controller
                                                         AdminFinanceController::done_payment($shipment, 0);
                                                     }
                                                 }
+
+                                                    FinalChargesWebhookController::webhook_subscription($shipment);
 //                                                ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                             }
                                             else{
@@ -3216,6 +3232,11 @@ class DeliveryController extends Controller
                                         }
                                     } else {
                                         AdminFinanceController::done_payment($shipment, 0);
+                                    }
+
+                                    if($shipper_status_details->shipper_status_id == 14 || $shipper_status_details->shipper_status_id == 30 || $shipper_status_details->shipper_status_id == 36 || $shipper_status_details->shipper_status_id == 37)
+                                    {
+                                        FinalChargesWebhookController::webhook_subscription($shipment);
                                     }
 
                                     if(!in_array($shipper_status_details->shipper_status_id, $delivered_status_array)){
@@ -6211,6 +6232,9 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
 
+                    if($shipment->consignee_city_id == $request->consignee_city[$shipment_id]){
+                        continue;
+                    }
                     if ($shipment->shipper_status_id == 3) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
                         if ($cargo_consignment_shipment->exists()) {
@@ -7085,6 +7109,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                             $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
                                 ->whereDate('attendance_date', $attendance_date)
                                 ->where('employee_type', 2);
+                                
                             if (!$rider_attendance->exists()) {
                                 $rider_attendance = new EmployeeAttendance();
                                 $rider_attendance->employee_id = $rider_id;
@@ -7436,18 +7461,22 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         else{
             $riders = Rider::where('status',1)->where('blacklist',0)->select('id','name')->get();
         }
-        return view('admin.delivery.note.request')->with(['riders' => $riders]);
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->where('status', 1)->where('business_category_id', 1)->select('id','name')->get();
+        return view('admin.delivery.note.request')->with(['riders' => $riders,'hubs' => $hubs]);
     }
-    public function request_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
+    public function request_list(Request $requests){
+        if($requests->get('excel') && $requests->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),270);
         }
         $request = DeliveryNoteRequests::join('riders as r', 'r.id', '=', 'delivery_note_requests.rider_id')
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
+            ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
             ->select(['delivery_note_requests.id as id','r.name as rider', 'delivery_note_requests.delivery_note_id as delivery_note','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by','delivery_note_requests.status as status']);
-
+            if ($requests->search_hub) {
+                $request = $request->where('c.hub_id', $requests->search_hub);
+            }
 
         $datatables = Datatables::of($request)
             ->editColumn('status', function ($result) {

@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\AdminAPIController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeShift;
-use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -25,6 +27,7 @@ use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeGender;
+use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
@@ -35,7 +38,9 @@ use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\HR\EmployeeType;
 use App\Http\Models\HR\StaffCategory;
+use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\ReportingLocation;
+use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderCategory;
@@ -43,20 +48,16 @@ use App\Http\Models\Route;
 use App\Http\Models\RouteType;
 use App\Http\Models\Zone;
 use App\RiderMainCategory;
+use Auth;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Rider;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
-use Auth;
 
 class AdminHumanResourseController extends Controller
 {
@@ -68,23 +69,25 @@ class AdminHumanResourseController extends Controller
     }
 
     public function download_docs()
-    {    ActivityTrailController::createActivityTrailLog(Auth::id(),387);
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 387);
         return view('admin.human_resource.download_docs');
     }
+
     public function allusers()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),54);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 54);
         // $riders = Rider::where('status', 1)->get();
         //         $admins = Admin::where('status', 1)->get();
         $roles = ['Admin', 'Rider'];
         $roles = collect($roles);
         return view('admin.human_resource.allusers')->with(['roles' => $roles]);
     }
+
     public function all_user_ajax(Request $request)
     {
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),114);
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 114);
         }
         $assigned_hubs = session('hubs');
         if (session('role_id') != 1) {
@@ -156,7 +159,7 @@ class AdminHumanResourseController extends Controller
                     ->make(true);
             }
         } else {
-           
+
             $riders = Rider::where('status', 1)->where('rider_type_id', 1)->get();
 
             $admins = Admin::where('status', 1)->get();
@@ -205,8 +208,9 @@ class AdminHumanResourseController extends Controller
         }
     }
 
-    public function employee_directory_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),57);
+    public function employee_directory_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 57);
         $rider_type = RiderType::all();
         $route = Route::all();
         $operation_rider_category = OperationRidersCategory::all();
@@ -222,26 +226,26 @@ class AdminHumanResourseController extends Controller
         return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories,'employee_shifts'=>$employee_shifts, 'staff_categories' =>$staff_categories]);
     }
 
-    public function employee_directory_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),117);
+    public function employee_directory_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 117);
         }
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
-            ->join('employee_genders as eg','eg.id','=','employees.employee_gender_id')
-            ->leftjoin('admin_departments as ads','ads.id','=','employees.department_id')
-            ->leftjoin('admins as staff','staff.trax_id','=','employees.trax_id')
-            ->leftjoin('riders as r','r.trax_id','=','employees.trax_id')
-            ->leftjoin('rider_requests as rr','rr.id','=','employees.rider_request_id')
-            ->leftjoin('rider_types as rr_rt','rr_rt.id','=','rr.rider_type_id')
-            ->leftjoin('rider_types as r_rt','r_rt.id','=','r.rider_type_id')
-            ->join('employee_types as et','et.id','=','employees.employee_type_id')
-            ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
-            ->join('employee_statuses as es','es.id','=','employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address','employees.shift_id as shift_id','employees.guardian_name as father_name','ads.name as department_name','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category'])
-            ->where(function ($q){
-                $q ->where('r.blacklist','=',0)
-                    ->orWhere('r.blacklist','=',null);
+            ->join('employee_genders as eg', 'eg.id', '=', 'employees.employee_gender_id')
+            ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
+            ->leftjoin('admins as staff', 'staff.trax_id', '=', 'employees.trax_id')
+            ->leftjoin('riders as r', 'r.trax_id', '=', 'employees.trax_id')
+            ->leftjoin('rider_requests as rr', 'rr.id', '=', 'employees.rider_request_id')
+            ->leftjoin('rider_types as rr_rt', 'rr_rt.id', '=', 'rr.rider_type_id')
+            ->leftjoin('rider_types as r_rt', 'r_rt.id', '=', 'r.rider_type_id')
+            ->join('employee_types as et', 'et.id', '=', 'employees.employee_type_id')
+            ->join('employee_request_statuses as ers', 'ers.id', '=', 'employees.request_status_id')
+            ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
+            ->select(['r.name as check_if_rider_present_bit', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category'])
+            ->where(function ($q) {
+                $q->where('r.blacklist', '=', 0)
+                    ->orWhere('r.blacklist', '=', null);
             });
 
         if (session('role_id') != 1) {
@@ -256,25 +260,20 @@ class AdminHumanResourseController extends Controller
                 return $query->where('users.id', '=', $keyword);
             })
             ->filterColumn('et.name', function ($query, $keyword) {
-                if($keyword == 1)
-                {
-                    return $query->where('employees.employee_type_id','=',1);
-                }
-                elseif ($keyword == 2)
-                {
-                    return $query->where('et.name','=','Rider')
-                        ->where(function ($q){
-                           $q->where([['employees.status_id','!=',2],['r_rt.id',1]])
-                            ->orwhere([['employees.status_id','=',2],['rr_rt.id',1]]);
+                if ($keyword == 1) {
+                    return $query->where('employees.employee_type_id', '=', 1);
+                } elseif ($keyword == 2) {
+                    return $query->where('et.name', '=', 'Rider')
+                        ->where(function ($q) {
+                            $q->where([['employees.status_id', '!=', 2], ['r_rt.id', 1]])
+                                ->orwhere([['employees.status_id', '=', 2], ['rr_rt.id', 1]]);
                         });
 
-                }
-                elseif ($keyword == 3)
-                {
-                    return $query->where('et.name','=','Rider')
-                        ->where(function ($q){
-                            $q->where([['employees.status_id','!=',2],['r_rt.id',2]])
-                                ->orwhere([['employees.status_id','=',2],['rr_rt.id',2]]);
+                } elseif ($keyword == 3) {
+                    return $query->where('et.name', '=', 'Rider')
+                        ->where(function ($q) {
+                            $q->where([['employees.status_id', '!=', 2], ['r_rt.id', 2]])
+                                ->orwhere([['employees.status_id', '=', 2], ['rr_rt.id', 2]]);
                         });
                 }
 
@@ -283,24 +282,20 @@ class AdminHumanResourseController extends Controller
             ->addColumn('employee_hub',function($user){
                 return City::where('id',$user->city_id)->first()->hub_city->name ?? "";
             })
-            ->editColumn('employee_type',function ($user){
-                if($user->employee_type_id == 1)
-                {
+			->editColumn('employee_type', function ($user) {
+                if ($user->employee_type_id == 1) {
                     return $user->employee_type;
-                }
-                else{
+                } else {
 
                     $type = $user->employee_type;
                     if ($user->status_id != 2) {
-                        if(isset($user->active_rider_type))
-                        {
-                            $type .=' - ' . $user->active_rider_type;
+                        if (isset($user->active_rider_type)) {
+                            $type .= ' - ' . $user->active_rider_type;
                         }
                         return $type;
                     } else {
-                        if(isset($user->inactive_rider_type))
-                        {
-                            $type .=' - ' . $user->inactive_rider_type;
+                        if (isset($user->inactive_rider_type)) {
+                            $type .= ' - ' . $user->inactive_rider_type;
                         }
                         return $type;
                     }
@@ -310,12 +305,11 @@ class AdminHumanResourseController extends Controller
             ->editColumn('employee_name',function ($user){
                 return $user->employee_name;
             })
-            ->filterColumn('ads.name',function ($query,$keyword){
+            ->filterColumn('ads.name', function ($query, $keyword) {
 
                 if ($keyword != '') {
-                    $query->where('ads.name',$keyword);
-                }
-                else {
+                    $query->where('ads.name', $keyword);
+                } else {
                     $query->whereRaw('false');
                 }
             })
@@ -328,6 +322,7 @@ class AdminHumanResourseController extends Controller
             ';
 
                     if($result->request_status_id == 1 || $result->request_status_id == 2){
+                    if ($result->request_status_id == 1 || $result->request_status_id == 2) {
                         if (session('role_id') == 1 || in_array(469, session('permissions'))) {
 
                             $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
@@ -336,8 +331,7 @@ class AdminHumanResourseController extends Controller
 
                         }
                     }
-                    if($result->request_status_id == 3 && $result->employee_type_id == 1)
-                    {
+                    if ($result->request_status_id == 3 && $result->employee_type_id == 1) {
                         if ($result->status_id != 2 && (session('role_id') == 1 || in_array(591, session('permissions')))) {
                             $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
                         }
@@ -355,20 +349,16 @@ class AdminHumanResourseController extends Controller
                         }
                     }
 
-                    if($result->request_status_id == 3 && $result->employee_type_id == 2)
-                    {
+                    if ($result->request_status_id == 3 && $result->employee_type_id == 2) {
                         if (session('role_id') == 1 || in_array(98, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item update_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
                         }
 
-                        if($result->status_id != 2)
-                        {
+                        if ($result->status_id != 2) {
                             if (session('role_id') == 1 || in_array(381, session('permissions'))) {
-                                if($result->active_rider_type_id == 1)
-                                {
+                                if ($result->active_rider_type_id == 1) {
                                     $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Incentive</div></button>';
-                                }
-                                else{
+                                } else {
                                     $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Permanent</div></button>';
                                 }
 
@@ -385,8 +375,7 @@ class AdminHumanResourseController extends Controller
 
                         }
 
-                        if($result->status_id == 2 && $result->check_if_rider_present_bit != null)
-                        {
+                        if ($result->status_id == 2 && $result->check_if_rider_present_bit != null) {
                             if (session('role_id') == 1 || in_array(99, session('permissions'))) {
                                 $dropdown .= '<button type="button" class="dropdown-item activate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
                             }
@@ -409,8 +398,7 @@ class AdminHumanResourseController extends Controller
               </div>
             ';
                     return $dropdown;
-                }
-                else{
+                } else {
                     return '';
                 }
             })
@@ -429,8 +417,7 @@ class AdminHumanResourseController extends Controller
                 ->withErrors($validate);
         }
         $employee = Employee::find($request->employee_id);
-        if($employee)
-        {
+        if ($employee) {
             $employee->pin = $request->pin;
             $employee->update();
 
@@ -456,7 +443,7 @@ class AdminHumanResourseController extends Controller
 
             return back()->with(['success'=>'Employee Pin Updated Successfully']);
         }
-        return back()->with(['error'=>'Employee Not Found']);
+        return back()->with(['error' => 'Employee Not Found']);
     }
 
     public function rejoin_employee(Request $request)
@@ -508,7 +495,7 @@ class AdminHumanResourseController extends Controller
     public function employee_directory_make_rider_incentive(Request $request)
     {
         $employee_id = $request->employee_id;
-        if($employee_id){
+        if ($employee_id) {
             $employee = Employee::find($employee_id);
             if($employee){
                 $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
@@ -516,7 +503,7 @@ class AdminHumanResourseController extends Controller
                 {
                     $rider = $rider->first();
                     $rider_status = $rider->rider_type_id;
-                    if($rider_status == 1){
+                    if ($rider_status == 1) {
                         $rider->rider_type_id = 2;
                         $rider->updated_by = Auth::id();
                         $rider->save();
@@ -530,10 +517,11 @@ class AdminHumanResourseController extends Controller
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
     }
+
     public function employee_directory_make_rider_permanent(Request $request)
     {
         $employee_id = $request->employee_id;
-        if($employee_id){
+        if ($employee_id) {
             $employee = Employee::find($employee_id);
             if($employee){
                 $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
@@ -541,7 +529,7 @@ class AdminHumanResourseController extends Controller
                 {
                     $rider = $rider->first();
                     $rider_status = $rider->rider_type_id;
-                    if($rider_status == 2){
+                    if ($rider_status == 2) {
                         $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
                         if ($global_setting->exists()) {
@@ -571,15 +559,15 @@ class AdminHumanResourseController extends Controller
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
     }
+
     public function employee_directory_make_rider_blacklist(Request $request)
     {
         $employee_id = $request->employee_id;
-        if(!$employee_id){
+        if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
         $employee = Employee::find($employee_id);
-        if(!$employee)
-        {
+        if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
         $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
@@ -596,15 +584,15 @@ class AdminHumanResourseController extends Controller
         return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
 
     }
+
     public function employee_directory_make_rider_activate(Request $request)
     {
         $employee_id = $request->employee_id;
-        if(!$employee_id){
+        if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
         $employee = Employee::find($employee_id);
-        if(!$employee)
-        {
+        if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
         $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
@@ -623,15 +611,15 @@ class AdminHumanResourseController extends Controller
         return response()->json(['status' => 0, 'success' => 'Rider is Activated!']);
 
     }
+
     public function employee_directory_make_rider_deactivate(Request $request)
     {
         $employee_id = $request->employee_id;
-        if(!$employee_id){
+        if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
         $employee = Employee::find($employee_id);
-        if(!$employee)
-        {
+        if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
         $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
@@ -653,12 +641,11 @@ class AdminHumanResourseController extends Controller
     public function employee_directory_make_staff_activate(Request $request)
     {
         $employee_id = $request->employee_id;
-        if(!$employee_id){
+        if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
         $employee = Employee::find($employee_id);
-        if(!$employee)
-        {
+        if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
         $staff = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
@@ -677,15 +664,15 @@ class AdminHumanResourseController extends Controller
         return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
 
     }
+
     public function employee_directory_make_staff_deactivate(Request $request)
     {
         $employee_id = $request->employee_id;
-        if(!$employee_id){
+        if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
         $employee = Employee::find($employee_id);
-        if(!$employee)
-        {
+        if (!$employee) {
             return response()->json(['status' => 1, 'error' => 'Staff not found!']);
         }
         $staff = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
@@ -706,14 +693,14 @@ class AdminHumanResourseController extends Controller
     public function employee_directory_make_rider_update(Request $request)
     {
         $validations = [
-            'city_id'=>'required|numeric',
-            'rider_name'=>'required|max:255',
-            'phone'=>'required|max:255',
-            'cnic'=>'required|max:255',
-            'address'=>'required|max:255',
-            'route_id'=>'required',
-            'rider_category'=>'required|numeric',
-            'rider_main_category'=>'required|numeric',
+            'city_id' => 'required|numeric',
+            'rider_name' => 'required|max:255',
+            'phone' => 'required|max:255',
+            'cnic' => 'required|max:255',
+            'address' => 'required|max:255',
+            'route_id' => 'required',
+            'rider_category' => 'required|numeric',
+            'rider_main_category' => 'required|numeric',
             'pin' => 'required|integer|digits:4',
             'rider_type' => "required|numeric",
             'category' => "required|numeric"
@@ -724,10 +711,9 @@ class AdminHumanResourseController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
-        $employee = Employee::where('id',$request->employee_id);
-        if($employee->doesntExist())
-        {
-            return redirect()->back()->with('error','Rider Not Found');
+        $employee = Employee::where('id', $request->employee_id);
+        if ($employee->doesntExist()) {
+            return redirect()->back()->with('error', 'Rider Not Found');
         }
 
         $employee = $employee->first();
@@ -740,7 +726,7 @@ class AdminHumanResourseController extends Controller
             $rider->phone = $request->phone;
             $rider->cnic = $request->cnic;
             $rider->address = $request->address;
-            $rider->status =1;
+            $rider->status = 1;
             $rider->pin = bcrypt($request->pin);
             $rider->dummy_pin = $request->pin;
             $rider->created_by = Auth::id();
@@ -756,7 +742,7 @@ class AdminHumanResourseController extends Controller
         else{
             $rider = $rider->first();
         }
-        if($request->route_id == 'other'){
+        if ($request->route_id == 'other') {
             $route = new Route();
             $route->city_id = $request->city_id;
             $route->code = $request->route_code;
@@ -767,7 +753,7 @@ class AdminHumanResourseController extends Controller
             $route->status = 1;
             $route->save();
             $route_id = $route->id;
-        }else{
+        } else {
             Rider::where('route_id', $request->route_id)->where('id', '<>', $rider->id)->update(['route_id' => NULL]);
             $route_id = $request->route_id;
         }
@@ -778,10 +764,10 @@ class AdminHumanResourseController extends Controller
         $rider->rider_main_category_id = $request->rider_main_category;
         $rider->update();
 
-        if($rider){
+        if ($rider) {
             NotificationsController::send(61, $rider->id, $request->pin);
             $rider_request = RiderRequest::find($employee->rider_request_id);
-            if($rider_request){
+            if ($rider_request) {
                 $rider_request->status = 1;
                 $rider_request->save();
             }
@@ -794,33 +780,28 @@ class AdminHumanResourseController extends Controller
 
     public static function GetStatusOfEmployee($employee_id)
     {
-        $employee_fields = ['guardian_name','phone_number','address','city_id','department_id','zone_id','pin','official_phone_number'];
-        $employee_attachments_fields = ['cheque','photo'];
+        $employee_fields = ['guardian_name', 'phone_number', 'address', 'city_id', 'department_id', 'zone_id', 'pin', 'official_phone_number'];
+        $employee_attachments_fields = ['cheque', 'photo'];
         $employee = Employee::find($employee_id);
-        foreach ($employee_fields as $field)
-        {
-            if($employee[$field] == null)
-            {
+        foreach ($employee_fields as $field) {
+            if ($employee[$field] == null) {
                 return 3;
             }
         }
 
-        $bankInfo = EmployeeBankInformation::where('employee_id',$employee_id);
-        if($bankInfo->doesntExist())
-        {
+        $bankInfo = EmployeeBankInformation::where('employee_id', $employee_id);
+        if ($bankInfo->doesntExist()) {
             return 3;
         }
 
-        $attachments = EmployeeAttachment::where('employee_id',$employee_id);
-        if($attachments->doesntExist())
-        {
+        $attachments = EmployeeAttachment::where('employee_id', $employee_id);
+        if ($attachments->doesntExist()) {
             return 3;
         }
 
         $attachments = $attachments->first();
         foreach ($employee_attachments_fields as $employee_attachments_field) {
-            if($attachments[$employee_attachments_field] == null)
-            {
+            if ($attachments[$employee_attachments_field] == null) {
                 return 3;
             }
         }
@@ -828,12 +809,13 @@ class AdminHumanResourseController extends Controller
         return 1;
     }
 
-    public function employee_directory_approve(Request $request){
-        if(is_array($request->employee_ids)){
+    public function employee_directory_approve(Request $request)
+    {
+        if (is_array($request->employee_ids)) {
             foreach ($request->employee_ids as $employee_id) {
                 $employee = Employee::find($employee_id);
-                if(in_array($employee->request_status_id, [1, 2])) {
-                    if($employee->trax_id == null) {
+                if (in_array($employee->request_status_id, [1, 2])) {
+                    if ($employee->trax_id == null) {
                         if($employee->employee_type_id == 1){
                             if($employee->staff_category_id == 1){
                                 $global_setting = GlobalSettings::where('type', 'latest_employee_id');
@@ -864,13 +846,11 @@ class AdminHumanResourseController extends Controller
                     $employee->request_status_id = 3;
                     $employee->save();
 
-                    if($employee->employee_type_id == 1)
-                    {
+                    if ($employee->employee_type_id == 1) {
 
                         $admin = Admin::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
 
-                        if($admin->doesntExist())
-                        {
+                        if ($admin->doesntExist()) {
                             $admin = new Admin();
 
                             $admin->name = $employee->name;
@@ -885,12 +865,9 @@ class AdminHumanResourseController extends Controller
                             $admin->designation_id = $employee->designation_id;
                             $admin->shift_id = $employee->shift_id;
 
-
-                            if($employee->status_id == 2)
-                            {
+                            if ($employee->status_id == 2) {
                                 $admin->status = 0;
-                            }
-                            else{
+                            } else {
                                 $admin->status = 1;
                             }
 
@@ -914,16 +891,17 @@ class AdminHumanResourseController extends Controller
             }
 
             return response()->json(['status' => 0, 'success' => 'Employee(s) Approved Successfully!']);
-        }
-        else{
+        } else {
             return response()->json(['status' => 1, 'success' => 'Invalid Selection!']);
         }
     }
-    public function employee_directory_reject(Request $request){
-        if(is_array($request->employee_ids)) {
+
+    public function employee_directory_reject(Request $request)
+    {
+        if (is_array($request->employee_ids)) {
             foreach ($request->employee_ids as $employee_id) {
                 $employee = Employee::find($employee_id);
-                if(in_array($employee->request_status_id, [1, 2])){
+                if (in_array($employee->request_status_id, [1, 2])) {
                     $employee->request_status_id = 4;
                     $employee->save();
 
@@ -933,8 +911,7 @@ class AdminHumanResourseController extends Controller
                 }
             }
             return response()->json(['status' => 0, 'success' => 'Employee(s) Rejected Successfully!']);
-        }
-        else{
+        } else {
             return response()->json(['status' => 1, 'success' => 'Invalid Selection!']);
         }
 
@@ -948,11 +925,11 @@ class AdminHumanResourseController extends Controller
         $maritial_statuses = EmployeeMaritalStatus::all();
         $blood_groups = EmployeeBloodGroup::all();
         $designations = EmployeeDesignation::where('status', 1)->get();
-        $cities = City::where('status',1)->where('business_category_id',1)->get();
+        $cities = City::where('status', 1)->where('business_category_id', 1)->get();
         $zones = Zone::where('status', 1)->get();
         $departments = AdminDepartment::all();
         $relationships = EmployeeRelationship::all();
-        $banks = BanksList::where('status',1)->get();
+        $banks = BanksList::where('status', 1)->get();
         $medical_infos = $employee->medical_infos;
         $bank_info = $employee->bank_info;
         $reference = $employee->reference;
@@ -970,7 +947,7 @@ class AdminHumanResourseController extends Controller
         return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_request'));
     }
 
-    public function employee_directory_profile_update (Employee $employee, Request $request)
+    public function employee_directory_profile_update(Employee $employee, Request $request)
     {
 
 //        return $request;
@@ -1078,17 +1055,15 @@ class AdminHumanResourseController extends Controller
             }
         }
 
-        return back()->with(['success'=>'Employee Profile Updated Successfully']);
+        return back()->with(['success' => 'Employee Profile Updated Successfully']);
     }
 
     public function employee_directory_medical_update(Employee $employee, Request $request)
     {
-        if($employee->medical_infos->count() > 0)
-        {
+        if ($employee->medical_infos->count() > 0) {
             $employee->medical_infos()->delete();
         }
-        foreach ($request->name as $key => $value)
-        {
+        foreach ($request->name as $key => $value) {
             $medical_info = new EmployeeMedicalInformation();
             $medical_info->employee_id = $employee->id;
             $medical_info->name = $request->name[$key];
@@ -1099,24 +1074,21 @@ class AdminHumanResourseController extends Controller
 
             echo $request->formatted_dob[$key];
         }
-        if(count($request->name) > 0)
-        {
+        if (count($request->name) > 0) {
             $employee->request_status_id = 2;
-            $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+            $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
             $employee->update();
         }
 
-        return back()->with(['success'=>'Employee Medical Information Updated Successfully']);
+        return back()->with(['success' => 'Employee Medical Information Updated Successfully']);
     }
 
     public function employee_directory_education_update(Employee $employee, Request $request)
     {
-        if($employee->education_infos->count() > 0)
-        {
+        if ($employee->education_infos->count() > 0) {
             $employee->education_infos()->delete();
         }
-        foreach ($request->name as $key => $value)
-        {
+        foreach ($request->name as $key => $value) {
             $education = new EmployeeEducationalBackground();
             $education->employee_id = $employee->id;
             $education->name = $request->name[$key];
@@ -1126,23 +1098,20 @@ class AdminHumanResourseController extends Controller
             $education->save();
         }
 
-        if(count($request->name) > 0)
-        {
+        if (count($request->name) > 0) {
             $employee->request_status_id = 2;
-            $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+            $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
             $employee->update();
         }
-        return back()->with(['success'=>'Employee Educational Information Updated Successfully']);
+        return back()->with(['success' => 'Employee Educational Information Updated Successfully']);
     }
 
     public function employee_directory_employment_update(Employee $employee, Request $request)
     {
-        if($employee->employment_history->count() > 0)
-        {
+        if ($employee->employment_history->count() > 0) {
             $employee->employment_history()->delete();
         }
-        foreach ($request->name as $key => $value)
-        {
+        foreach ($request->name as $key => $value) {
             $employment = new EmployeeEmployementHistory();
             $employment->employee_id = $employee->id;
             $employment->name = $request->name[$key];
@@ -1153,22 +1122,19 @@ class AdminHumanResourseController extends Controller
             $employment->save();
         }
 
-        if(count($request->name) > 0)
-        {
+        if (count($request->name) > 0) {
             $employee->request_status_id = 2;
-            $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+            $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
             $employee->update();
         }
-        return back()->with(['success'=>'Employee Employment History Updated Successfully']);
+        return back()->with(['success' => 'Employee Employment History Updated Successfully']);
     }
 
     public function employee_directory_bank_update(Employee $employee, Request $request)
     {
-        if($employee->bank_info()->exists())
-        {
+        if ($employee->bank_info()->exists()) {
             $bank_info = $employee->bank_info->first();
-        }
-        else{
+        } else {
             $bank_info = new EmployeeBankInformation();
         }
 
@@ -1182,20 +1148,18 @@ class AdminHumanResourseController extends Controller
         $bank_info->save();
 
         $employee->request_status_id = 2;
-        $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+        $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
 
 
-        return back()->with(['success'=>'Employee Bank Information Updated Successfully']);
+        return back()->with(['success' => 'Employee Bank Information Updated Successfully']);
     }
 
     public function employee_directory_reference_update(Employee $employee, Request $request)
     {
-        if($employee->reference()->exists())
-        {
+        if ($employee->reference()->exists()) {
             $reference = $employee->reference->first();
-        }
-        else{
+        } else {
             $reference = new EmployeeReference();
         }
 
@@ -1209,68 +1173,68 @@ class AdminHumanResourseController extends Controller
         $reference->save();
 
         $employee->request_status_id = 2;
-        $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+        $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
 
-        return back()->with(['success'=>'Employee Reference Updated Successfully']);
+        return back()->with(['success' => 'Employee Reference Updated Successfully']);
     }
 
     public function employee_directory_attachments_update(Employee $employee, Request $request)
     {
         $request->validate([
-            'cv_1'=>'mimes:pdf,png,jpeg,jpg',
-            'cv_2'=>'mimes:pdf,png,jpeg,jpg',
-            'cv_3'=>'mimes:pdf,png,jpeg,jpg',
-            'cv_4'=>'mimes:pdf,png,jpeg,jpg',
-            'academic_1'=>'mimes:pdf,png,jpeg,jpg',
-            'academic_2'=>'mimes:pdf,png,jpeg,jpg',
-            'academic_3'=>'mimes:pdf,png,jpeg,jpg',
-            'academic_4'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_1'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_1'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_2'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_3'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_4'=>'mimes:pdf,png,jpeg,jpg',
-            'photo_1'=>'mimes:pdf,png,jpeg,jpg',
-            'photo_2'=>'mimes:pdf,png,jpeg,jpg',
-            'photo_3'=>'mimes:pdf,png,jpeg,jpg',
-            'photo_4'=>'mimes:pdf,png,jpeg,jpg',
-            'experience_certificate_1'=>'mimes:pdf,png,jpeg,jpg',
-            'experience_certificate_2'=>'mimes:pdf,png,jpeg,jpg',
-            'experience_certificate_3'=>'mimes:pdf,png,jpeg,jpg',
-            'experience_certificate_4'=>'mimes:pdf,png,jpeg,jpg',
-            'last_pay_slip_1'=>'mimes:pdf,png,jpeg,jpg',
-            'last_pay_slip_2'=>'mimes:pdf,png,jpeg,jpg',
-            'last_pay_slip_3'=>'mimes:pdf,png,jpeg,jpg',
-            'last_pay_slip_4'=>'mimes:pdf,png,jpeg,jpg',
-            'nikkah_nama_1'=>'mimes:pdf,png,jpeg,jpg',
-            'nikkah_nama_2'=>'mimes:pdf,png,jpeg,jpg',
-            'nikkah_nama_3'=>'mimes:pdf,png,jpeg,jpg',
-            'nikkah_nama_4'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_spouse_1'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_spouse_2'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_spouse_3'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_spouse_4'=>'mimes:pdf,png,jpeg,jpg',
-            'child_b_form_1'=>'mimes:pdf,png,jpeg,jpg',
-            'child_b_form_2'=>'mimes:pdf,png,jpeg,jpg',
-            'child_b_form_3'=>'mimes:pdf,png,jpeg,jpg',
-            'child_b_form_4'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_nominee_1'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_nominee_2'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_nominee_3'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_nominee_4'=>'mimes:pdf,png,jpeg,jpg',
-            'utility_bill_1'=>'mimes:pdf,png,jpeg,jpg',
-            'utility_bill_2'=>'mimes:pdf,png,jpeg,jpg',
-            'utility_bill_3'=>'mimes:pdf,png,jpeg,jpg',
-            'utility_bill_4'=>'mimes:pdf,png,jpeg,jpg',
-            'affidavit_1'=>'mimes:pdf,png,jpeg,jpg',
-            'affidavit_2'=>'mimes:pdf,png,jpeg,jpg',
-            'affidavit_3'=>'mimes:pdf,png,jpeg,jpg',
-            'affidavit_4'=>'mimes:pdf,png,jpeg,jpg',
-            'cheque_1'=>'mimes:pdf,png,jpeg,jpg',
-            'cheque_2'=>'mimes:pdf,png,jpeg,jpg',
-            'cheque_3'=>'mimes:pdf,png,jpeg,jpg',
-            'cheque_4'=>'mimes:pdf,png,jpeg,jpg',
+            'cv_1' => 'mimes:pdf,png,jpeg,jpg',
+            'cv_2' => 'mimes:pdf,png,jpeg,jpg',
+            'cv_3' => 'mimes:pdf,png,jpeg,jpg',
+            'cv_4' => 'mimes:pdf,png,jpeg,jpg',
+            'academic_1' => 'mimes:pdf,png,jpeg,jpg',
+            'academic_2' => 'mimes:pdf,png,jpeg,jpg',
+            'academic_3' => 'mimes:pdf,png,jpeg,jpg',
+            'academic_4' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_1' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_1' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_2' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_3' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_4' => 'mimes:pdf,png,jpeg,jpg',
+            'photo_1' => 'mimes:pdf,png,jpeg,jpg',
+            'photo_2' => 'mimes:pdf,png,jpeg,jpg',
+            'photo_3' => 'mimes:pdf,png,jpeg,jpg',
+            'photo_4' => 'mimes:pdf,png,jpeg,jpg',
+            'experience_certificate_1' => 'mimes:pdf,png,jpeg,jpg',
+            'experience_certificate_2' => 'mimes:pdf,png,jpeg,jpg',
+            'experience_certificate_3' => 'mimes:pdf,png,jpeg,jpg',
+            'experience_certificate_4' => 'mimes:pdf,png,jpeg,jpg',
+            'last_pay_slip_1' => 'mimes:pdf,png,jpeg,jpg',
+            'last_pay_slip_2' => 'mimes:pdf,png,jpeg,jpg',
+            'last_pay_slip_3' => 'mimes:pdf,png,jpeg,jpg',
+            'last_pay_slip_4' => 'mimes:pdf,png,jpeg,jpg',
+            'nikkah_nama_1' => 'mimes:pdf,png,jpeg,jpg',
+            'nikkah_nama_2' => 'mimes:pdf,png,jpeg,jpg',
+            'nikkah_nama_3' => 'mimes:pdf,png,jpeg,jpg',
+            'nikkah_nama_4' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_spouse_1' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_spouse_2' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_spouse_3' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_spouse_4' => 'mimes:pdf,png,jpeg,jpg',
+            'child_b_form_1' => 'mimes:pdf,png,jpeg,jpg',
+            'child_b_form_2' => 'mimes:pdf,png,jpeg,jpg',
+            'child_b_form_3' => 'mimes:pdf,png,jpeg,jpg',
+            'child_b_form_4' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_nominee_1' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_nominee_2' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_nominee_3' => 'mimes:pdf,png,jpeg,jpg',
+            'cnic_nominee_4' => 'mimes:pdf,png,jpeg,jpg',
+            'utility_bill_1' => 'mimes:pdf,png,jpeg,jpg',
+            'utility_bill_2' => 'mimes:pdf,png,jpeg,jpg',
+            'utility_bill_3' => 'mimes:pdf,png,jpeg,jpg',
+            'utility_bill_4' => 'mimes:pdf,png,jpeg,jpg',
+            'affidavit_1' => 'mimes:pdf,png,jpeg,jpg',
+            'affidavit_2' => 'mimes:pdf,png,jpeg,jpg',
+            'affidavit_3' => 'mimes:pdf,png,jpeg,jpg',
+            'affidavit_4' => 'mimes:pdf,png,jpeg,jpg',
+            'cheque_1' => 'mimes:pdf,png,jpeg,jpg',
+            'cheque_2' => 'mimes:pdf,png,jpeg,jpg',
+            'cheque_3' => 'mimes:pdf,png,jpeg,jpg',
+            'cheque_4' => 'mimes:pdf,png,jpeg,jpg',
         ],
             [
                 'cv_1.mimes' => 'CV must be a file of type: pdf,png,jpeg,jpg',
@@ -1327,128 +1291,111 @@ class AdminHumanResourseController extends Controller
                 'cheque_4.mimes' => 'Cheque must be a file of type: pdf,png,jpeg,jpg',
             ]);
 
-        if($employee->attachments()->exists())
-        {
+        if ($employee->attachments()->exists()) {
             $attachments = $employee->attachments;
-        }
-        else{
+        } else {
             $attachments = new EmployeeAttachment();
             $attachments->employee_id = $employee->id;
         }
 
         $date = Carbon::now()->format('Y_m_d');
 
-        if ($request->hasFile('cv_1') || $request->hasFile('cv_2') || $request->hasFile('cv_3') || $request->hasFile('cv_4'))       {
+        if ($request->hasFile('cv_1') || $request->hasFile('cv_2') || $request->hasFile('cv_3') || $request->hasFile('cv_4')) {
             $cv_array = [];
-            if($attachments->cv != NULL) {
+            if ($attachments->cv != NULL) {
                 $cvs = explode(',', $attachments->cv);
-                foreach ($cvs as $cv)
-                {
+                foreach ($cvs as $cv) {
                     $pos = strpos($cv, "cv_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cv_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cv_1')) {
                             Storage::disk('public')->delete($cv);
                         }
                         $cv_array[0] = $cv;
                     }
                     $pos = strpos($cv, "cv_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cv_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cv_2')) {
                             Storage::disk('public')->delete($cv);
                         }
                         $cv_array[1] = $cv;
                     }
                     $pos = strpos($cv, "cv_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cv_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cv_3')) {
                             Storage::disk('public')->delete($cv);
                         }
                         $cv_array[2] = $cv;
                     }
                     $pos = strpos($cv, "cv_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cv_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cv_4')) {
                             Storage::disk('public')->delete($cv);
                         }
                         $cv_array[3] = $cv;
                     }
                 }
             }
-            if($request->hasFile('cv_1'))
-            {
+            if ($request->hasFile('cv_1')) {
                 $file = $request->file('cv_1');
-                $filename = 'cv_1_'. $date . '.' . $file->extension();
+                $filename = 'cv_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cv_array[0] = $directory.'/'.$filename;
+                $cv_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cv_2'))
-            {
+            if ($request->hasFile('cv_2')) {
                 $file = $request->file('cv_2');
-                $filename = 'cv_2_'. $date . '.' . $file->extension();
+                $filename = 'cv_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cv_array[1] = $directory.'/'.$filename;
+                $cv_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cv_3'))
-            {
+            if ($request->hasFile('cv_3')) {
                 $file = $request->file('cv_3');
-                $filename = 'cv_3_'. $date . '.' . $file->extension();
+                $filename = 'cv_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cv_array[2] = $directory.'/'.$filename;
+                $cv_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cv_4'))
-            {
+            if ($request->hasFile('cv_4')) {
                 $file = $request->file('cv_4');
-                $filename = 'cv_4_'. $date . '.' . $file->extension();
+                $filename = 'cv_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cv_array[3] = $directory.'/'.$filename;
+                $cv_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->cv = implode(',',$cv_array);
+            $attachments->cv = implode(',', $cv_array);
         }
 
-        if ($request->hasFile('cnic_1') || $request->hasFile('cnic_2')|| $request->hasFile('cnic_3') || $request->hasFile('cnic_4'))
-        {
+        if ($request->hasFile('cnic_1') || $request->hasFile('cnic_2') || $request->hasFile('cnic_3') || $request->hasFile('cnic_4')) {
             $cnic_array = [];
-            if($attachments->cnic != NULL) {
-                $cnics = explode(',',$attachments->cnic);
-                foreach ($cnics as $cnic)
-                {
+            if ($attachments->cnic != NULL) {
+                $cnics = explode(',', $attachments->cnic);
+                foreach ($cnics as $cnic) {
                     $pos = strpos($cnic, "cnic_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_1')) {
                             Storage::disk('public')->delete($cnic);
                         }
                         $cnic_array[0] = $cnic;
                     }
                     $pos = strpos($cnic, "cnic_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_2')) {
                             Storage::disk('public')->delete($cnic);
                         }
                         $cnic_array[1] = $cnic;
                     }
                     $pos = strpos($cnic, "cnic_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_3')) {
                             Storage::disk('public')->delete($cnic);
                         }
                         $cnic_array[2] = $cnic;
                     }
                     $pos = strpos($cnic, "cnic_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_4')) {
                             Storage::disk('public')->delete($cnic);
                         }
                         $cnic_array[3] = $cnic;
@@ -1456,900 +1403,799 @@ class AdminHumanResourseController extends Controller
                 }
             }
 
-            if($request->hasFile('cnic_1'))
-            {
+            if ($request->hasFile('cnic_1')) {
                 $file = $request->file('cnic_1');
-                $filename = 'cnic_1_'. $date . '.' . $file->extension();
+                $filename = 'cnic_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_array[0] = $directory.'/'.$filename;
+                $cnic_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cnic_2'))
-            {
+            if ($request->hasFile('cnic_2')) {
                 $file = $request->file('cnic_2');
-                $filename = 'cnic_2_'. $date . '.' . $file->extension();
+                $filename = 'cnic_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_array[1] = $directory.'/'.$filename;
+                $cnic_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cnic_3'))
-            {
+            if ($request->hasFile('cnic_3')) {
                 $file = $request->file('cnic_3');
-                $filename = 'cnic_3_'. $date . '.' . $file->extension();
+                $filename = 'cnic_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_array[2] = $directory.'/'.$filename;
+                $cnic_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cnic_4'))
-            {
+            if ($request->hasFile('cnic_4')) {
                 $file = $request->file('cnic_4');
-                $filename = 'cnic_4_'. $date . '.' . $file->extension();
+                $filename = 'cnic_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_array[3] = $directory.'/'.$filename;
+                $cnic_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->cnic = implode(',',$cnic_array);
+            $attachments->cnic = implode(',', $cnic_array);
 
         }
 
-        if ($request->hasFile('photo_1') || $request->hasFile('photo_2') || $request->hasFile('photo_3') || $request->hasFile('photo_4'))       {
+        if ($request->hasFile('photo_1') || $request->hasFile('photo_2') || $request->hasFile('photo_3') || $request->hasFile('photo_4')) {
             $photo_array = [];
-            if($attachments->photo != NULL) {
+            if ($attachments->photo != NULL) {
                 $photos = explode(',', $attachments->photo);
-                foreach ($photos as $photo)
-                {
+                foreach ($photos as $photo) {
                     $pos = strpos($photo, "photo_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('photo_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('photo_1')) {
                             Storage::disk('public')->delete($photo);
                         }
                         $photo_array[0] = $photo;
                     }
                     $pos = strpos($photo, "photo_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('photo_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('photo_2')) {
                             Storage::disk('public')->delete($photo);
                         }
                         $photo_array[1] = $photo;
                     }
                     $pos = strpos($photo, "photo_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('photo_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('photo_3')) {
                             Storage::disk('public')->delete($photo);
                         }
                         $photo_array[2] = $photo;
                     }
                     $pos = strpos($photo, "photo_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('photo_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('photo_4')) {
                             Storage::disk('public')->delete($photo);
                         }
                         $photo_array[3] = $photo;
                     }
                 }
             }
-            if($request->hasFile('photo_1'))
-            {
+            if ($request->hasFile('photo_1')) {
                 $file = $request->file('photo_1');
-                $filename = 'photo_1_'. $date . '.' . $file->extension();
+                $filename = 'photo_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $photo_array[0] = $directory.'/'.$filename;
+                $photo_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('photo_2'))
-            {
+            if ($request->hasFile('photo_2')) {
                 $file = $request->file('photo_2');
-                $filename = 'photo_2_'. $date . '.' . $file->extension();
+                $filename = 'photo_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $photo_array[1] = $directory.'/'.$filename;
+                $photo_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('photo_3'))
-            {
+            if ($request->hasFile('photo_3')) {
                 $file = $request->file('photo_3');
-                $filename = 'photo_3_'. $date . '.' . $file->extension();
+                $filename = 'photo_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $photo_array[2] = $directory.'/'.$filename;
+                $photo_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('photo_4'))
-            {
+            if ($request->hasFile('photo_4')) {
                 $file = $request->file('photo_4');
-                $filename = 'photo_4_'. $date . '.' . $file->extension();
+                $filename = 'photo_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $photo_array[3] = $directory.'/'.$filename;
+                $photo_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->photo = implode(',',$photo_array);
+            $attachments->photo = implode(',', $photo_array);
         }
 
 
-        if ($request->hasFile('academic_1') || $request->hasFile('academic_2') || $request->hasFile('academic_3') || $request->hasFile('academic_4'))       {
+        if ($request->hasFile('academic_1') || $request->hasFile('academic_2') || $request->hasFile('academic_3') || $request->hasFile('academic_4')) {
             $academic_array = [];
-            if($attachments->academic != NULL) {
+            if ($attachments->academic != NULL) {
                 $academics = explode(',', $attachments->academic);
-                foreach ($academics as $academic)
-                {
+                foreach ($academics as $academic) {
                     $pos = strpos($academic, "academic_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('academic_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('academic_1')) {
                             Storage::disk('public')->delete($academic);
                         }
                         $academic_array[0] = $academic;
                     }
                     $pos = strpos($academic, "academic_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('academic_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('academic_2')) {
                             Storage::disk('public')->delete($academic);
                         }
                         $academic_array[1] = $academic;
                     }
                     $pos = strpos($academic, "academic_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('academic_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('academic_3')) {
                             Storage::disk('public')->delete($academic);
                         }
                         $academic_array[2] = $academic;
                     }
                     $pos = strpos($academic, "academic_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('academic_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('academic_4')) {
                             Storage::disk('public')->delete($academic);
                         }
                         $academic_array[3] = $academic;
                     }
                 }
             }
-            if($request->hasFile('academic_1'))
-            {
+            if ($request->hasFile('academic_1')) {
                 $file = $request->file('academic_1');
-                $filename = 'academic_1_'. $date . '.' . $file->extension();
+                $filename = 'academic_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $academic_array[0] = $directory.'/'.$filename;
+                $academic_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('academic_2'))
-            {
+            if ($request->hasFile('academic_2')) {
                 $file = $request->file('academic_2');
-                $filename = 'academic_2_'. $date . '.' . $file->extension();
+                $filename = 'academic_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $academic_array[1] = $directory.'/'.$filename;
+                $academic_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('academic_3'))
-            {
+            if ($request->hasFile('academic_3')) {
                 $file = $request->file('academic_3');
-                $filename = 'academic_3_'. $date . '.' . $file->extension();
+                $filename = 'academic_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $academic_array[2] = $directory.'/'.$filename;
+                $academic_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('academic_4'))
-            {
+            if ($request->hasFile('academic_4')) {
                 $file = $request->file('academic_4');
-                $filename = 'academic_4_'. $date . '.' . $file->extension();
+                $filename = 'academic_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $academic_array[3] = $directory.'/'.$filename;
+                $academic_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->academic = implode(',',$academic_array);
+            $attachments->academic = implode(',', $academic_array);
         }
 
-        if ($request->hasFile('experience_certificate_1') || $request->hasFile('experience_certificate_2') || $request->hasFile('experience_certificate_3') || $request->hasFile('experience_certificate_4'))       {
+        if ($request->hasFile('experience_certificate_1') || $request->hasFile('experience_certificate_2') || $request->hasFile('experience_certificate_3') || $request->hasFile('experience_certificate_4')) {
             $experience_certificate_array = [];
-            if($attachments->experience != NULL) {
+            if ($attachments->experience != NULL) {
                 $experience_certificates = explode(',', $attachments->experience);
-                foreach ($experience_certificates as $experience_certificate)
-                {
+                foreach ($experience_certificates as $experience_certificate) {
                     $pos = strpos($experience_certificate, "experience_certificate_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('experience_certificate_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('experience_certificate_1')) {
                             Storage::disk('public')->delete($experience_certificate);
                         }
                         $experience_certificate_array[0] = $experience_certificate;
                     }
                     $pos = strpos($experience_certificate, "experience_certificate_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('experience_certificate_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('experience_certificate_2')) {
                             Storage::disk('public')->delete($experience_certificate);
                         }
                         $experience_certificate_array[1] = $experience_certificate;
                     }
                     $pos = strpos($experience_certificate, "experience_certificate_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('experience_certificate_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('experience_certificate_3')) {
                             Storage::disk('public')->delete($experience_certificate);
                         }
                         $experience_certificate_array[2] = $experience_certificate;
                     }
                     $pos = strpos($experience_certificate, "experience_certificate_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('experience_certificate_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('experience_certificate_4')) {
                             Storage::disk('public')->delete($experience_certificate);
                         }
                         $experience_certificate_array[3] = $experience_certificate;
                     }
                 }
             }
-            if($request->hasFile('experience_certificate_1'))
-            {
+            if ($request->hasFile('experience_certificate_1')) {
                 $file = $request->file('experience_certificate_1');
-                $filename = 'experience_certificate_1_'. $date . '.' . $file->extension();
+                $filename = 'experience_certificate_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $experience_certificate_array[0] = $directory.'/'.$filename;
+                $experience_certificate_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('experience_certificate_2'))
-            {
+            if ($request->hasFile('experience_certificate_2')) {
                 $file = $request->file('experience_certificate_2');
-                $filename = 'experience_certificate_2_'. $date . '.' . $file->extension();
+                $filename = 'experience_certificate_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $experience_certificate_array[1] = $directory.'/'.$filename;
+                $experience_certificate_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('experience_certificate_3'))
-            {
+            if ($request->hasFile('experience_certificate_3')) {
                 $file = $request->file('experience_certificate_3');
-                $filename = 'experience_certificate_3_'. $date . '.' . $file->extension();
+                $filename = 'experience_certificate_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $experience_certificate_array[2] = $directory.'/'.$filename;
+                $experience_certificate_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('experience_certificate_4'))
-            {
+            if ($request->hasFile('experience_certificate_4')) {
                 $file = $request->file('experience_certificate_4');
-                $filename = 'experience_certificate_4_'. $date . '.' . $file->extension();
+                $filename = 'experience_certificate_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $experience_certificate_array[3] = $directory.'/'.$filename;
+                $experience_certificate_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->experience = implode(',',$experience_certificate_array);
+            $attachments->experience = implode(',', $experience_certificate_array);
         }
 
-        if ($request->hasFile('last_pay_slip_1') || $request->hasFile('last_pay_slip_2') || $request->hasFile('last_pay_slip_3') || $request->hasFile('last_pay_slip_4'))       {
+        if ($request->hasFile('last_pay_slip_1') || $request->hasFile('last_pay_slip_2') || $request->hasFile('last_pay_slip_3') || $request->hasFile('last_pay_slip_4')) {
             $last_pay_slip_array = [];
-            if($attachments->last_pay_slip != NULL) {
+            if ($attachments->last_pay_slip != NULL) {
                 $last_pay_slips = explode(',', $attachments->last_pay_slip);
-                foreach ($last_pay_slips as $last_pay_slip)
-                {
+                foreach ($last_pay_slips as $last_pay_slip) {
                     $pos = strpos($last_pay_slip, "last_pay_slip_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('last_pay_slip_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('last_pay_slip_1')) {
                             Storage::disk('public')->delete($last_pay_slip);
                         }
                         $last_pay_slip_array[0] = $last_pay_slip;
                     }
                     $pos = strpos($last_pay_slip, "last_pay_slip_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('last_pay_slip_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('last_pay_slip_2')) {
                             Storage::disk('public')->delete($last_pay_slip);
                         }
                         $last_pay_slip_array[1] = $last_pay_slip;
                     }
                     $pos = strpos($last_pay_slip, "last_pay_slip_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('last_pay_slip_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('last_pay_slip_3')) {
                             Storage::disk('public')->delete($last_pay_slip);
                         }
                         $last_pay_slip_array[2] = $last_pay_slip;
                     }
                     $pos = strpos($last_pay_slip, "last_pay_slip_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('last_pay_slip_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('last_pay_slip_4')) {
                             Storage::disk('public')->delete($last_pay_slip);
                         }
                         $last_pay_slip_array[3] = $last_pay_slip;
                     }
                 }
             }
-            if($request->hasFile('last_pay_slip_1'))
-            {
+            if ($request->hasFile('last_pay_slip_1')) {
                 $file = $request->file('last_pay_slip_1');
-                $filename = 'last_pay_slip_1_'. $date . '.' . $file->extension();
+                $filename = 'last_pay_slip_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $last_pay_slip_array[0] = $directory.'/'.$filename;
+                $last_pay_slip_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('last_pay_slip_2'))
-            {
+            if ($request->hasFile('last_pay_slip_2')) {
                 $file = $request->file('last_pay_slip_2');
-                $filename = 'last_pay_slip_2_'. $date . '.' . $file->extension();
+                $filename = 'last_pay_slip_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $last_pay_slip_array[1] = $directory.'/'.$filename;
+                $last_pay_slip_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('last_pay_slip_3'))
-            {
+            if ($request->hasFile('last_pay_slip_3')) {
                 $file = $request->file('last_pay_slip_3');
-                $filename = 'last_pay_slip_3_'. $date . '.' . $file->extension();
+                $filename = 'last_pay_slip_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $last_pay_slip_array[2] = $directory.'/'.$filename;
+                $last_pay_slip_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('last_pay_slip_4'))
-            {
+            if ($request->hasFile('last_pay_slip_4')) {
                 $file = $request->file('last_pay_slip_4');
-                $filename = 'last_pay_slip_4_'. $date . '.' . $file->extension();
+                $filename = 'last_pay_slip_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $last_pay_slip_array[3] = $directory.'/'.$filename;
+                $last_pay_slip_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->last_pay_slip = implode(',',$last_pay_slip_array);
+            $attachments->last_pay_slip = implode(',', $last_pay_slip_array);
         }
 
-        if ($request->hasFile('nikkah_nama_1') || $request->hasFile('nikkah_nama_2') || $request->hasFile('nikkah_nama_3') || $request->hasFile('nikkah_nama_4'))       {
+        if ($request->hasFile('nikkah_nama_1') || $request->hasFile('nikkah_nama_2') || $request->hasFile('nikkah_nama_3') || $request->hasFile('nikkah_nama_4')) {
             $nikkah_nama_array = [];
-            if($attachments->nikkah_nama != NULL) {
+            if ($attachments->nikkah_nama != NULL) {
                 $nikkah_namas = explode(',', $attachments->nikkah_nama);
-                foreach ($nikkah_namas as $nikkah_nama)
-                {
+                foreach ($nikkah_namas as $nikkah_nama) {
                     $pos = strpos($nikkah_nama, "nikkah_nama_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('nikkah_nama_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('nikkah_nama_1')) {
                             Storage::disk('public')->delete($nikkah_nama);
                         }
                         $nikkah_nama_array[0] = $nikkah_nama;
                     }
                     $pos = strpos($nikkah_nama, "nikkah_nama_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('nikkah_nama_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('nikkah_nama_2')) {
                             Storage::disk('public')->delete($nikkah_nama);
                         }
                         $nikkah_nama_array[1] = $nikkah_nama;
                     }
                     $pos = strpos($nikkah_nama, "nikkah_nama_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('nikkah_nama_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('nikkah_nama_3')) {
                             Storage::disk('public')->delete($nikkah_nama);
                         }
                         $nikkah_nama_array[2] = $nikkah_nama;
                     }
                     $pos = strpos($nikkah_nama, "nikkah_nama_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('nikkah_nama_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('nikkah_nama_4')) {
                             Storage::disk('public')->delete($nikkah_nama);
                         }
                         $nikkah_nama_array[3] = $nikkah_nama;
                     }
                 }
             }
-            if($request->hasFile('nikkah_nama_1'))
-            {
+            if ($request->hasFile('nikkah_nama_1')) {
                 $file = $request->file('nikkah_nama_1');
-                $filename = 'nikkah_nama_1_'. $date . '.' . $file->extension();
+                $filename = 'nikkah_nama_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $nikkah_nama_array[0] = $directory.'/'.$filename;
+                $nikkah_nama_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('nikkah_nama_2'))
-            {
+            if ($request->hasFile('nikkah_nama_2')) {
                 $file = $request->file('nikkah_nama_2');
-                $filename = 'nikkah_nama_2_'. $date . '.' . $file->extension();
+                $filename = 'nikkah_nama_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $nikkah_nama_array[1] = $directory.'/'.$filename;
+                $nikkah_nama_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('nikkah_nama_3'))
-            {
+            if ($request->hasFile('nikkah_nama_3')) {
                 $file = $request->file('nikkah_nama_3');
-                $filename = 'nikkah_nama_3_'. $date . '.' . $file->extension();
+                $filename = 'nikkah_nama_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $nikkah_nama_array[2] = $directory.'/'.$filename;
+                $nikkah_nama_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('nikkah_nama_4'))
-            {
+            if ($request->hasFile('nikkah_nama_4')) {
                 $file = $request->file('nikkah_nama_4');
-                $filename = 'nikkah_nama_4_'. $date . '.' . $file->extension();
+                $filename = 'nikkah_nama_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $nikkah_nama_array[3] = $directory.'/'.$filename;
+                $nikkah_nama_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->nikkah_nama = implode(',',$nikkah_nama_array);
+            $attachments->nikkah_nama = implode(',', $nikkah_nama_array);
         }
 
-        if ($request->hasFile('cnic_spouse_1') || $request->hasFile('cnic_spouse_2') || $request->hasFile('cnic_spouse_3') || $request->hasFile('cnic_spouse_4'))       {
+        if ($request->hasFile('cnic_spouse_1') || $request->hasFile('cnic_spouse_2') || $request->hasFile('cnic_spouse_3') || $request->hasFile('cnic_spouse_4')) {
             $cnic_spouse_array = [];
-            if($attachments->cnic_spouse != NULL) {
+            if ($attachments->cnic_spouse != NULL) {
                 $cnic_spouses = explode(',', $attachments->cnic_spouse);
-                foreach ($cnic_spouses as $cnic_spouse)
-                {
+                foreach ($cnic_spouses as $cnic_spouse) {
                     $pos = strpos($cnic_spouse, "cnic_spouse_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_spouse_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_spouse_1')) {
                             Storage::disk('public')->delete($cnic_spouse);
                         }
                         $cnic_spouse_array[0] = $cnic_spouse;
                     }
                     $pos = strpos($cnic_spouse, "cnic_spouse_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_spouse_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_spouse_2')) {
                             Storage::disk('public')->delete($cnic_spouse);
                         }
                         $cnic_spouse_array[1] = $cnic_spouse;
                     }
                     $pos = strpos($cnic_spouse, "cnic_spouse_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_spouse_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_spouse_3')) {
                             Storage::disk('public')->delete($cnic_spouse);
                         }
                         $cnic_spouse_array[2] = $cnic_spouse;
                     }
                     $pos = strpos($cnic_spouse, "cnic_spouse_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_spouse_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_spouse_4')) {
                             Storage::disk('public')->delete($cnic_spouse);
                         }
                         $cnic_spouse_array[3] = $cnic_spouse;
                     }
                 }
             }
-            if($request->hasFile('cnic_spouse_1'))
-            {
+            if ($request->hasFile('cnic_spouse_1')) {
                 $file = $request->file('cnic_spouse_1');
-                $filename = 'cnic_spouse_1_'. $date . '.' . $file->extension();
+                $filename = 'cnic_spouse_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_spouse_array[0] = $directory.'/'.$filename;
+                $cnic_spouse_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cnic_spouse_2'))
-            {
+            if ($request->hasFile('cnic_spouse_2')) {
                 $file = $request->file('cnic_spouse_2');
-                $filename = 'cnic_spouse_2_'. $date . '.' . $file->extension();
+                $filename = 'cnic_spouse_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_spouse_array[1] = $directory.'/'.$filename;
+                $cnic_spouse_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cnic_spouse_3'))
-            {
+            if ($request->hasFile('cnic_spouse_3')) {
                 $file = $request->file('cnic_spouse_3');
-                $filename = 'cnic_spouse_3_'. $date . '.' . $file->extension();
+                $filename = 'cnic_spouse_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_spouse_array[2] = $directory.'/'.$filename;
+                $cnic_spouse_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cnic_spouse_4'))
-            {
+            if ($request->hasFile('cnic_spouse_4')) {
                 $file = $request->file('cnic_spouse_4');
-                $filename = 'cnic_spouse_4_'. $date . '.' . $file->extension();
+                $filename = 'cnic_spouse_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_spouse_array[3] = $directory.'/'.$filename;
+                $cnic_spouse_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->cnic_spouse = implode(',',$cnic_spouse_array);
+            $attachments->cnic_spouse = implode(',', $cnic_spouse_array);
         }
 
-        if ($request->hasFile('child_b_form_1') || $request->hasFile('child_b_form_2') || $request->hasFile('child_b_form_3') || $request->hasFile('child_b_form_4'))       {
+        if ($request->hasFile('child_b_form_1') || $request->hasFile('child_b_form_2') || $request->hasFile('child_b_form_3') || $request->hasFile('child_b_form_4')) {
             $child_b_form_array = [];
-            if($attachments->child_b_form != NULL) {
+            if ($attachments->child_b_form != NULL) {
                 $child_b_forms = explode(',', $attachments->child_b_form);
-                foreach ($child_b_forms as $child_b_form)
-                {
+                foreach ($child_b_forms as $child_b_form) {
                     $pos = strpos($child_b_form, "child_b_form_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('child_b_form_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('child_b_form_1')) {
                             Storage::disk('public')->delete($child_b_form);
                         }
                         $child_b_form_array[0] = $child_b_form;
                     }
                     $pos = strpos($child_b_form, "child_b_form_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('child_b_form_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('child_b_form_2')) {
                             Storage::disk('public')->delete($child_b_form);
                         }
                         $child_b_form_array[1] = $child_b_form;
                     }
                     $pos = strpos($child_b_form, "child_b_form_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('child_b_form_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('child_b_form_3')) {
                             Storage::disk('public')->delete($child_b_form);
                         }
                         $child_b_form_array[2] = $child_b_form;
                     }
                     $pos = strpos($child_b_form, "child_b_form_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('child_b_form_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('child_b_form_4')) {
                             Storage::disk('public')->delete($child_b_form);
                         }
                         $child_b_form_array[3] = $child_b_form;
                     }
                 }
             }
-            if($request->hasFile('child_b_form_1'))
-            {
+            if ($request->hasFile('child_b_form_1')) {
                 $file = $request->file('child_b_form_1');
-                $filename = 'child_b_form_1_'. $date . '.' . $file->extension();
+                $filename = 'child_b_form_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $child_b_form_array[0] = $directory.'/'.$filename;
+                $child_b_form_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('child_b_form_2'))
-            {
+            if ($request->hasFile('child_b_form_2')) {
                 $file = $request->file('child_b_form_2');
-                $filename = 'child_b_form_2_'. $date . '.' . $file->extension();
+                $filename = 'child_b_form_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $child_b_form_array[1] = $directory.'/'.$filename;
+                $child_b_form_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('child_b_form_3'))
-            {
+            if ($request->hasFile('child_b_form_3')) {
                 $file = $request->file('child_b_form_3');
-                $filename = 'child_b_form_3_'. $date . '.' . $file->extension();
+                $filename = 'child_b_form_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $child_b_form_array[2] = $directory.'/'.$filename;
+                $child_b_form_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('child_b_form_4'))
-            {
+            if ($request->hasFile('child_b_form_4')) {
                 $file = $request->file('child_b_form_4');
-                $filename = 'child_b_form_4_'. $date . '.' . $file->extension();
+                $filename = 'child_b_form_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $child_b_form_array[3] = $directory.'/'.$filename;
+                $child_b_form_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->child_b_form = implode(',',$child_b_form_array);
+            $attachments->child_b_form = implode(',', $child_b_form_array);
         }
 
-        if ($request->hasFile('cnic_nominee_1') || $request->hasFile('cnic_nominee_2') || $request->hasFile('cnic_nominee_3') || $request->hasFile('cnic_nominee_4'))       {
+        if ($request->hasFile('cnic_nominee_1') || $request->hasFile('cnic_nominee_2') || $request->hasFile('cnic_nominee_3') || $request->hasFile('cnic_nominee_4')) {
             $cnic_nominee_array = [];
-            if($attachments->cnic_nominee != NULL) {
+            if ($attachments->cnic_nominee != NULL) {
                 $cnic_nominees = explode(',', $attachments->cnic_nominee);
-                foreach ($cnic_nominees as $cnic_nominee)
-                {
+                foreach ($cnic_nominees as $cnic_nominee) {
                     $pos = strpos($cnic_nominee, "cnic_nominee_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_nominee_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_nominee_1')) {
                             Storage::disk('public')->delete($cnic_nominee);
                         }
                         $cnic_nominee_array[0] = $cnic_nominee;
                     }
                     $pos = strpos($cnic_nominee, "cnic_nominee_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_nominee_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_nominee_2')) {
                             Storage::disk('public')->delete($cnic_nominee);
                         }
                         $cnic_nominee_array[1] = $cnic_nominee;
                     }
                     $pos = strpos($cnic_nominee, "cnic_nominee_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_nominee_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_nominee_3')) {
                             Storage::disk('public')->delete($cnic_nominee);
                         }
                         $cnic_nominee_array[2] = $cnic_nominee;
                     }
                     $pos = strpos($cnic_nominee, "cnic_nominee_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cnic_nominee_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cnic_nominee_4')) {
                             Storage::disk('public')->delete($cnic_nominee);
                         }
                         $cnic_nominee_array[3] = $cnic_nominee;
                     }
                 }
             }
-            if($request->hasFile('cnic_nominee_1'))
-            {
+            if ($request->hasFile('cnic_nominee_1')) {
                 $file = $request->file('cnic_nominee_1');
-                $filename = 'cnic_nominee_1_'. $date . '.' . $file->extension();
+                $filename = 'cnic_nominee_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_nominee_array[0] = $directory.'/'.$filename;
+                $cnic_nominee_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cnic_nominee_2'))
-            {
+            if ($request->hasFile('cnic_nominee_2')) {
                 $file = $request->file('cnic_nominee_2');
-                $filename = 'cnic_nominee_2_'. $date . '.' . $file->extension();
+                $filename = 'cnic_nominee_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_nominee_array[1] = $directory.'/'.$filename;
+                $cnic_nominee_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cnic_nominee_3'))
-            {
+            if ($request->hasFile('cnic_nominee_3')) {
                 $file = $request->file('cnic_nominee_3');
-                $filename = 'cnic_nominee_3_'. $date . '.' . $file->extension();
+                $filename = 'cnic_nominee_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_nominee_array[2] = $directory.'/'.$filename;
+                $cnic_nominee_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cnic_nominee_4'))
-            {
+            if ($request->hasFile('cnic_nominee_4')) {
                 $file = $request->file('cnic_nominee_4');
-                $filename = 'cnic_nominee_4_'. $date . '.' . $file->extension();
+                $filename = 'cnic_nominee_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cnic_nominee_array[3] = $directory.'/'.$filename;
+                $cnic_nominee_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->cnic_nominee = implode(',',$cnic_nominee_array);
+            $attachments->cnic_nominee = implode(',', $cnic_nominee_array);
         }
 
-        if ($request->hasFile('utility_bill_1') || $request->hasFile('utility_bill_2') || $request->hasFile('utility_bill_3') || $request->hasFile('utility_bill_4'))       {
+        if ($request->hasFile('utility_bill_1') || $request->hasFile('utility_bill_2') || $request->hasFile('utility_bill_3') || $request->hasFile('utility_bill_4')) {
             $utility_bill_array = [];
-            if($attachments->utility_bill != NULL) {
+            if ($attachments->utility_bill != NULL) {
                 $utility_bills = explode(',', $attachments->utility_bill);
-                foreach ($utility_bills as $utility_bill)
-                {
+                foreach ($utility_bills as $utility_bill) {
                     $pos = strpos($utility_bill, "utility_bill_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('utility_bill_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('utility_bill_1')) {
                             Storage::disk('public')->delete($utility_bill);
                         }
                         $utility_bill_array[0] = $utility_bill;
                     }
                     $pos = strpos($utility_bill, "utility_bill_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('utility_bill_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('utility_bill_2')) {
                             Storage::disk('public')->delete($utility_bill);
                         }
                         $utility_bill_array[1] = $utility_bill;
                     }
                     $pos = strpos($utility_bill, "utility_bill_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('utility_bill_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('utility_bill_3')) {
                             Storage::disk('public')->delete($utility_bill);
                         }
                         $utility_bill_array[2] = $utility_bill;
                     }
                     $pos = strpos($utility_bill, "utility_bill_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('utility_bill_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('utility_bill_4')) {
                             Storage::disk('public')->delete($utility_bill);
                         }
                         $utility_bill_array[3] = $utility_bill;
                     }
                 }
             }
-            if($request->hasFile('utility_bill_1'))
-            {
+            if ($request->hasFile('utility_bill_1')) {
                 $file = $request->file('utility_bill_1');
-                $filename = 'utility_bill_1_'. $date . '.' . $file->extension();
+                $filename = 'utility_bill_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $utility_bill_array[0] = $directory.'/'.$filename;
+                $utility_bill_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('utility_bill_2'))
-            {
+            if ($request->hasFile('utility_bill_2')) {
                 $file = $request->file('utility_bill_2');
-                $filename = 'utility_bill_2_'. $date . '.' . $file->extension();
+                $filename = 'utility_bill_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $utility_bill_array[1] = $directory.'/'.$filename;
+                $utility_bill_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('utility_bill_3'))
-            {
+            if ($request->hasFile('utility_bill_3')) {
                 $file = $request->file('utility_bill_3');
-                $filename = 'utility_bill_3_'. $date . '.' . $file->extension();
+                $filename = 'utility_bill_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $utility_bill_array[2] = $directory.'/'.$filename;
+                $utility_bill_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('utility_bill_4'))
-            {
+            if ($request->hasFile('utility_bill_4')) {
                 $file = $request->file('utility_bill_4');
-                $filename = 'utility_bill_4_'. $date . '.' . $file->extension();
+                $filename = 'utility_bill_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $utility_bill_array[3] = $directory.'/'.$filename;
+                $utility_bill_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->utility_bill = implode(',',$utility_bill_array);
+            $attachments->utility_bill = implode(',', $utility_bill_array);
         }
 
-        if ($request->hasFile('affidavit_1') || $request->hasFile('affidavit_2') || $request->hasFile('affidavit_3') || $request->hasFile('affidavit_4'))       {
+        if ($request->hasFile('affidavit_1') || $request->hasFile('affidavit_2') || $request->hasFile('affidavit_3') || $request->hasFile('affidavit_4')) {
             $affidavit_array = [];
-            if($attachments->affidavit != NULL) {
+            if ($attachments->affidavit != NULL) {
                 $affidavits = explode(',', $attachments->affidavit);
-                foreach ($affidavits as $affidavit)
-                {
+                foreach ($affidavits as $affidavit) {
                     $pos = strpos($affidavit, "affidavit_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('affidavit_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('affidavit_1')) {
                             Storage::disk('public')->delete($affidavit);
                         }
                         $affidavit_array[0] = $affidavit;
                     }
                     $pos = strpos($affidavit, "affidavit_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('affidavit_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('affidavit_2')) {
                             Storage::disk('public')->delete($affidavit);
                         }
                         $affidavit_array[1] = $affidavit;
                     }
                     $pos = strpos($affidavit, "affidavit_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('affidavit_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('affidavit_3')) {
                             Storage::disk('public')->delete($affidavit);
                         }
                         $affidavit_array[2] = $affidavit;
                     }
                     $pos = strpos($affidavit, "affidavit_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('affidavit_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('affidavit_4')) {
                             Storage::disk('public')->delete($affidavit);
                         }
                         $affidavit_array[3] = $affidavit;
                     }
                 }
             }
-            if($request->hasFile('affidavit_1'))
-            {
+            if ($request->hasFile('affidavit_1')) {
                 $file = $request->file('affidavit_1');
-                $filename = 'affidavit_1_'. $date . '.' . $file->extension();
+                $filename = 'affidavit_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $affidavit_array[0] = $directory.'/'.$filename;
+                $affidavit_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('affidavit_2'))
-            {
+            if ($request->hasFile('affidavit_2')) {
                 $file = $request->file('affidavit_2');
-                $filename = 'affidavit_2_'. $date . '.' . $file->extension();
+                $filename = 'affidavit_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $affidavit_array[1] = $directory.'/'.$filename;
+                $affidavit_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('affidavit_3'))
-            {
+            if ($request->hasFile('affidavit_3')) {
                 $file = $request->file('affidavit_3');
-                $filename = 'affidavit_3_'. $date . '.' . $file->extension();
+                $filename = 'affidavit_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $affidavit_array[2] = $directory.'/'.$filename;
+                $affidavit_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('affidavit_4'))
-            {
+            if ($request->hasFile('affidavit_4')) {
                 $file = $request->file('affidavit_4');
-                $filename = 'affidavit_4_'. $date . '.' . $file->extension();
+                $filename = 'affidavit_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $affidavit_array[3] = $directory.'/'.$filename;
+                $affidavit_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->affidavit = implode(',',$affidavit_array);
+            $attachments->affidavit = implode(',', $affidavit_array);
         }
 
-        if ($request->hasFile('cheque_1') || $request->hasFile('cheque_2') || $request->hasFile('cheque_3') || $request->hasFile('cheque_4'))       {
+        if ($request->hasFile('cheque_1') || $request->hasFile('cheque_2') || $request->hasFile('cheque_3') || $request->hasFile('cheque_4')) {
             $cheque_array = [];
-            if($attachments->cheque != NULL) {
+            if ($attachments->cheque != NULL) {
                 $cheques = explode(',', $attachments->cheque);
-                foreach ($cheques as $cheque)
-                {
+                foreach ($cheques as $cheque) {
                     $pos = strpos($cheque, "cheque_1_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cheque_1')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cheque_1')) {
                             Storage::disk('public')->delete($cheque);
                         }
                         $cheque_array[0] = $cheque;
                     }
                     $pos = strpos($cheque, "cheque_2_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cheque_2')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cheque_2')) {
                             Storage::disk('public')->delete($cheque);
                         }
                         $cheque_array[1] = $cheque;
                     }
                     $pos = strpos($cheque, "cheque_3_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cheque_3')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cheque_3')) {
                             Storage::disk('public')->delete($cheque);
                         }
                         $cheque_array[2] = $cheque;
                     }
                     $pos = strpos($cheque, "cheque_4_");
-                    if($pos !== false)
-                    {
-                        if($request->hasFile('cheque_4')) {
+                    if ($pos !== false) {
+                        if ($request->hasFile('cheque_4')) {
                             Storage::disk('public')->delete($cheque);
                         }
                         $cheque_array[3] = $cheque;
                     }
                 }
             }
-            if($request->hasFile('cheque_1'))
-            {
+            if ($request->hasFile('cheque_1')) {
                 $file = $request->file('cheque_1');
-                $filename = 'cheque_1_'. $date . '.' . $file->extension();
+                $filename = 'cheque_1_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cheque_array[0] = $directory.'/'.$filename;
+                $cheque_array[0] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cheque_2'))
-            {
+            if ($request->hasFile('cheque_2')) {
                 $file = $request->file('cheque_2');
-                $filename = 'cheque_2_'. $date . '.' . $file->extension();
+                $filename = 'cheque_2_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cheque_array[1] = $directory.'/'.$filename;
+                $cheque_array[1] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cheque_3'))
-            {
+            if ($request->hasFile('cheque_3')) {
                 $file = $request->file('cheque_3');
-                $filename = 'cheque_3_'. $date . '.' . $file->extension();
+                $filename = 'cheque_3_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cheque_array[2] = $directory.'/'.$filename;
+                $cheque_array[2] = $directory . '/' . $filename;
             }
-            if($request->hasFile('cheque_4'))
-            {
+            if ($request->hasFile('cheque_4')) {
                 $file = $request->file('cheque_4');
-                $filename = 'cheque_4_'. $date . '.' . $file->extension();
+                $filename = 'cheque_4_' . $date . '.' . $file->extension();
                 $directory = 'employee_directory/employee_' . $employee->id . '';
                 Storage::disk('public')->putFileAs($directory, $file, $filename);
-                $cheque_array[3] = $directory.'/'.$filename;
+                $cheque_array[3] = $directory . '/' . $filename;
             }
 
-            $attachments->cheque = implode(',',$cheque_array);
+            $attachments->cheque = implode(',', $cheque_array);
         }
 
 
         $attachments->save();
 
         $employee->request_status_id = 2;
-        $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+        $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
 
 
-        return back()->with(['success'=>'Employee Attachments Updated Successfully']);
+        return back()->with(['success' => 'Employee Attachments Updated Successfully']);
     }
-    public function reporting_location_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),388);
+
+    public function reporting_location_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 388);
         $cities = City::where('status', 1)->where('business_category_id', 1)->get();
         return view('admin.human_resource.reporting_location')->with(['cities' => $cities]);
     }
 
-    public function reporting_location_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),389);
+    public function reporting_location_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 389);
         }
         $location = ReportingLocation::join('cities as c', 'reporting_locations.city_id', '=', 'c.id')
             ->select(['reporting_locations.id as id', 'reporting_locations.name as location_name', 'c.name as city', 'c.id as city_id', 'reporting_locations.lat', 'reporting_locations.long', 'reporting_locations.status', 'reporting_locations.address', 'reporting_locations.radius']);
@@ -2360,18 +2206,17 @@ class AdminHumanResourseController extends Controller
 
         return Datatables::of($location)
             ->addColumn('map', function ($data) {
-               return '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $data->lat . ',' . $data->long . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                return '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $data->lat . ',' . $data->long . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
             })
             ->editColumn('status', function ($data) {
-                if($data->status == 0){
+                if ($data->status == 0) {
                     return 'In-Active';
-                }
-                else{
+                } else {
                     return 'Active';
                 }
             })
             ->addColumn("action", function ($data) {
-                if(session('role_id') == 1 || in_array(479, session('permissions')) || in_array(480, session('permissions'))){
+                if (session('role_id') == 1 || in_array(479, session('permissions')) || in_array(480, session('permissions'))) {
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -2381,10 +2226,9 @@ class AdminHumanResourseController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
                     if (session('role_id') == 1 || in_array(480, session('permissions'))) {
-                        if($data->status == 0) {
+                        if ($data->status == 0) {
                             $dropdown .= '<button type="button" class="dropdown-item enable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                        }
-                        else{
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item disable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                         }
                     }
@@ -2393,29 +2237,29 @@ class AdminHumanResourseController extends Controller
               </div>
             ';
                     return $dropdown;
-                }
-                else{
+                } else {
                     return '';
                 }
             })
             ->make(true);
     }
 
-    public function reporting_location_status(Request $request){
+    public function reporting_location_status(Request $request)
+    {
         $id = $request->id;
         $location = ReportingLocation::find($id);
-        if($request->status == 0){
+        if ($request->status == 0) {
             $status = 'Disabled';
-        }
-        else{
+        } else {
             $status = 'Enabled';
         }
         $location->status = $request->status;
         $location->save();
-        return response()->json(['status' => 1, 'success' => 'Location '. $status .' successfully!']);
+        return response()->json(['status' => 1, 'success' => 'Location ' . $status . ' successfully!']);
     }
 
-    public function reporting_location_add(Request $request){
+    public function reporting_location_add(Request $request)
+    {
         $location = new ReportingLocation();
         $location->city_id = $request->city;
         $location->name = $request->name;
@@ -2427,7 +2271,8 @@ class AdminHumanResourseController extends Controller
         return redirect()->back()->with('success', 'Location Added Successfully!');
     }
 
-    public function reporting_location_edit(Request $request){
+    public function reporting_location_edit(Request $request)
+    {
         $location = ReportingLocation::find($request->location_id);
         $location->city_id = $request->city;
         $location->name = $request->name;
@@ -2438,28 +2283,29 @@ class AdminHumanResourseController extends Controller
         $location->save();
         return redirect()->back()->with('success', 'Location Updated Successfully!');
     }
-    public function designation_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),390);
+
+    public function designation_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 390);
         $departments = AdminDepartment::all();
         $hubs = City::select('id','name')->where('hub',1)->get();
         return view('admin.human_resource.designation',compact('departments','hubs'));
     }
 
-    public function designation_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),391);
+    public function designation_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 391);
         }
-        $designations = EmployeeDesignation::leftjoin('admin_departments as ad','ad.id','employee_designations.department_id')
-            ->leftjoin('admin_roles as r','r.id','employee_designations.role_id')
-            ->select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description','employee_designations.department_id','ad.name as department','r.name as role','r.id as role_id']);
+        $designations = EmployeeDesignation::leftjoin('admin_departments as ad', 'ad.id', 'employee_designations.department_id')
+            ->leftjoin('admin_roles as r', 'r.id', 'employee_designations.role_id')
+            ->select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description', 'employee_designations.department_id', 'ad.name as department', 'r.name as role', 'r.id as role_id']);
 
         return Datatables::of($designations)
             ->editColumn('status', function ($data) {
-                if($data->status == 0){
+                if ($data->status == 0) {
                     return 'In-Active';
-                }
-                else{
+                } else {
                     return 'Active';
                 }
             })
@@ -2467,7 +2313,7 @@ class AdminHumanResourseController extends Controller
                 return EmployeeDesignationHub::where('designation_id',$data->id)->get(['hub_id'])->toArray();
             })
             ->addColumn("action", function ($data) {
-                if(session('role_id') == 1 || in_array(482, session('permissions')) || in_array(483, session('permissions'))){
+                if (session('role_id') == 1 || in_array(482, session('permissions')) || in_array(483, session('permissions'))) {
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -2477,10 +2323,9 @@ class AdminHumanResourseController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                     }
                     if (session('role_id') == 1 || in_array(483, session('permissions'))) {
-                        if($data->status == 0) {
+                        if ($data->status == 0) {
                             $dropdown .= '<button type="button" class="dropdown-item enable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                        }
-                        else{
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item disable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                         }
                     }
@@ -2489,36 +2334,36 @@ class AdminHumanResourseController extends Controller
               </div>
             ';
                     return $dropdown;
-                }
-                else{
+                } else {
                     return '';
                 }
             })
             ->make(true);
     }
 
-    public function designation_status(Request $request){
+    public function designation_status(Request $request)
+    {
         $id = $request->id;
         $designation = EmployeeDesignation::find($id);
-        if($request->status == 0){
+        if ($request->status == 0) {
             $status = 'Disabled';
-        }
-        else{
+        } else {
             $status = 'Enabled';
         }
         $designation->status = $request->status;
         $designation->save();
-        return response()->json(['status' => 1, 'success' => 'Designation '. $status .' successfully!']);
+        return response()->json(['status' => 1, 'success' => 'Designation ' . $status . ' successfully!']);
     }
 
     public function designation_roles(Request $request)
     {
-        $roles = AdminRole::where('department_id',$request->department_id)->get();
+        $roles = AdminRole::where('department_id', $request->department_id)->get();
 
-        return response()->json(['status'=>1,'roles'=>$roles]);
+        return response()->json(['status' => 1, 'roles' => $roles]);
     }
 
-    public function designation_add(Request $request){
+    public function designation_add(Request $request)
+    {
         $designation = new EmployeeDesignation();
         $designation->name = $request->name;
         $designation->department_id = $request->department_id;
@@ -2539,7 +2384,8 @@ class AdminHumanResourseController extends Controller
         return redirect()->back()->with('success', 'Designation Added Successfully!');
     }
 
-    public function designation_edit(Request $request){
+    public function designation_edit(Request $request)
+    {
         $designation = EmployeeDesignation::find($request->designation_id);
         $designation->name = $request->name;
         $designation->department_id = $request->department_id;
@@ -2582,30 +2428,30 @@ class AdminHumanResourseController extends Controller
             {
                 return response()->json(['status'=>1,'designations'=>$designations->get()]);
             }
-            else{
-                return response()->json(['status'=>0,'error'=>'Designation Not Found']);
-            }
-        }
-        else{
-            return response()->json(['status'=>0,'error'=>'Department is Required']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Department is Required']);
         }
     }
-    public function department_index(){
 
-        ActivityTrailController::createActivityTrailLog(Auth::id(),392);
-        return view('admin.human_resource.department');
+    public function department_index()
+    {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 392);
+        $admin = Admin::select('id', 'name', 'trax_id')->where('status', 1)->get();
+        return view('admin.human_resource.department')->with(['admins' => $admin]);
     }
 
-    public function department_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),393);
+    public function department_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 393);
         }
-        $departments = AdminDepartment::select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description']);
+        $departments = AdminDepartment::leftjoin('admins as a', 'a.id', '=', 'admin_departments.department_head_id')
+            ->select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description', 'a.name as head', 'admin_departments.department_head_id as head_id']);
 
         return Datatables::of($departments)
             ->addColumn("action", function ($data) {
-                if(session('role_id') == 1 || in_array(485, session('permissions'))){
+                if (session('role_id') == 1 || in_array(485, session('permissions'))) {
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -2619,43 +2465,48 @@ class AdminHumanResourseController extends Controller
               </div>
             ';
                     return $dropdown;
-                }
-                else{
+                } else {
                     return '';
                 }
             })
             ->make(true);
     }
 
-    public function department_add(Request $request){
+    public function department_add(Request $request)
+    {
         $department = new AdminDepartment();
         $department->name = $request->name;
         $department->description = $request->description;
+        $department->department_head_id = $request->head_id;
         $department->save();
 
-        $department->code = 'Dep'. str_pad($department->id, 3, '0', STR_PAD_LEFT);
+        $department->code = 'Dep' . str_pad($department->id, 3, '0', STR_PAD_LEFT);
         $department->save();
         return redirect()->back()->with('success', 'Department Added Successfully!');
     }
 
-    public function department_edit(Request $request){
+    public function department_edit(Request $request)
+    {
         $department = AdminDepartment::find($request->department_id);
         $department->name = $request->name;
         $department->description = $request->description;
+        $department->department_head_id = $request->head_id;
         $department->save();
         return redirect()->back()->with('success', 'Department Updated Successfully!');
     }
 
-    public function rider_incentive_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),242);
-        $cities = DB::table('cities')->select('id','name')->get();
-        $hubs = DB::table('cities')->where('hub',1)->select('id','name')->get();
-        $zones = DB::table('zones')->where('status',1)->select('id','name')->get();
+    public function rider_incentive_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 242);
+        $cities = DB::table('cities')->select('id', 'name')->get();
+        $hubs = DB::table('cities')->where('hub', 1)->select('id', 'name')->get();
+        $zones = DB::table('zones')->where('status', 1)->select('id', 'name')->get();
 
         return view('admin.human_resource.rider_incentive')->with(['cities' => $cities, 'hubs' => $hubs, 'zones' => $zones]);
     }
 
-    public function rider_incentive_list(Request $request){
+    public function rider_incentive_list(Request $request)
+    {
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 243);
         }
@@ -2663,52 +2514,51 @@ class AdminHumanResourseController extends Controller
             ->join('cities', 'cities.id', '=', 'riders.city_id')
             ->join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
             ->join('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type','cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive', 'riders.trax_id as employee_id');
+            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type', 'cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive', 'riders.trax_id as employee_id');
 
         $datatable = Datatables::of($incentives);
 
-        if($city = $request->get('search_city')){
+        if ($city = $request->get('search_city')) {
             $datatable->where('cities.id', '=', $city);
         }
-        if($hub = $request->get('search_hub')){
+        if ($hub = $request->get('search_hub')) {
             $datatable->where('cities.hub_id', '=', $hub);
         }
 
-        if($zone = $request->get('search_zone')){
+        if ($zone = $request->get('search_zone')) {
             $datatable->where('cities.zone_id', '=', $zone);
         }
 
-        if($employee_id = $request->get('employee_id')){
+        if ($employee_id = $request->get('employee_id')) {
             $datatable->where('riders.trax_id', '=', $employee_id);
         }
 
-        if($employee_name = $request->get('employee_name')){
-            $datatable->where('riders.name', 'like', "%".$employee_name."%");
+        if ($employee_name = $request->get('employee_name')) {
+            $datatable->where('riders.name', 'like', "%" . $employee_name . "%");
         }
 
         if ($request->get('search_date_from') != null && $request->get('search_date_from') != null) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('riders_incentives.date', [$from,$to]);
+            $datatable->whereBetween('riders_incentives.date', [$from, $to]);
         }
 
 
         return $datatable->make(true);
 
 
-
     }
 
     public function employee_shift_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),433);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 433);
         return view('admin.human_resource.employee_shift');
     }
 
     public function employee_shift_list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),434);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 434);
         }
 
         $shifts = EmployeeShift::all();
@@ -2791,18 +2641,20 @@ class AdminHumanResourseController extends Controller
         return redirect()->back()->with('success', 'Shift Updated Successfully!');
     }
 
-    public function payslip_index(Request $request){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),436);
+    public function payslip_index(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 436);
         return view('admin.human_resource.payslip.index');
     }
 
-    public function payslip_list(Request $request){
+    public function payslip_list(Request $request)
+    {
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
-        $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban','total_salary');
-        if(!in_array(596, session('permissions'))){
-            $payslips->whereRaw('false');
+        $payslips = EmployeePayslip::select('id', 'payroll_month', 'trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban', 'total_salary');
+        if (!in_array(596, session('permissions'))) {
+            $payslips->where('trax_id',Auth::user()->trax_id)->where('trax_id','!=',null);
         }
 
         $datatable = Datatables::of($payslips)
@@ -2821,15 +2673,17 @@ class AdminHumanResourseController extends Controller
             $month = $request->get('search_payslip_month');
             $from = Carbon::parse($month)->startOfMonth()->toDateString();
             $to = Carbon::parse($month)->endOfMonth()->toDateString();
-            $datatable->whereBetween('employee_payslips.payroll_month', [$from,$to]);
+            $datatable->whereBetween('employee_payslips.payroll_month', [$from, $to]);
         }
         return $datatable->make(true);
 
     }
-    public function payslip_excel_upload(Request $request){
+
+    public function payslip_excel_upload(Request $request)
+    {
 
         $payroll_month = $request->payslip_month_formatted;
-        if(!$payroll_month){
+        if (!$payroll_month) {
             return redirect()->back()->with('error', 'Payslip month not selected!');
         }
 
@@ -2837,11 +2691,10 @@ class AdminHumanResourseController extends Controller
 
             if ($value) {
                 $result = false;
-                if(Admin::where('trax_id', $value)->exists()){
+                if (Admin::where('trax_id', $value)->exists()) {
                     $result = true;
-                }
-                else{
-                    if(Rider::where('trax_id', $value)->exists()){
+                } else {
+                    if (Rider::where('trax_id', $value)->exists()) {
                         $result = true;
                     }
                 }
@@ -2920,7 +2773,7 @@ class AdminHumanResourseController extends Controller
 
         ];
         $rules = [
-            'trax_id' => ['required', 'between:1,100','check_trax_id'],
+            'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
             'name' => ['required', 'between:1,100'],
             'designation' => ['required', 'between:1,100'],
             'department' => ['required', 'between:1,100'],
@@ -2929,8 +2782,8 @@ class AdminHumanResourseController extends Controller
             'joining_date' => ['required', 'date_format:Y-m-d'],
             'confirmation_date' => ['nullable', 'date_format:Y-m-d'],
             'cnic' => ['required', 'between:1,100'],
-            'employee_status' => ['nullable', 'string','between:1,100'],
-            'employee_type' => ['nullable','string','between:1,100'],
+            'employee_status' => ['nullable', 'string', 'between:1,100'],
+            'employee_type' => ['nullable', 'string', 'between:1,100'],
             'payroll_days' => ['nullable', 'integer'],
             'present_days' => ['nullable', 'integer'],
             'pay_cut_days' => ['nullable', 'integer'],
@@ -2976,7 +2829,7 @@ class AdminHumanResourseController extends Controller
             'medical_insurance' => ['nullable', 'integer'],
             'total_deduction' => ['nullable', 'integer'],
             'net_salary' => ['nullable', 'integer'],
-            'iban' => ['nullable','string'],
+            'iban' => ['nullable', 'string'],
 
         ];
 
@@ -2987,7 +2840,7 @@ class AdminHumanResourseController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Employee ID','Employee Name','Designation','Department', 'Hub', 'Zone', 'Date of Joining', 'CNIC', 'Employee Status', 'Payroll Days', 'Present Days', 'Pay Cut Days', 'Absent Days', 'Extra Paid Days', 'Fuel Days', 'Basic Salary', 'House Rent', 'Medical', 'Gross Salary', 'Mobile Allowance', 'Vehicle Allowance', 'Fuel Allowance', 'Conveyance Allowance', 'Vehicle Maintenance', 'Fixed Incentive', 'Sunday / Holiday Allowance', 'Overtime', 'Bonus', 'Arrears', 'Pickup Incentive', 'Delivery Incentive', 'Operations Incentive', 'Extra Duty Allowance', 'Others Addition', 'Total Salary', 'Pay Cut', 'Absent', 'Late Deduction', 'Income Tax', 'EOBI', 'Advance Salary', 'Month Closing', 'Loan', 'Fuel Card', 'Open Parcel', 'Phone Call', 'Recovery', 'Auction Sale', 'Penalty', 'Others Deduction', 'Van Deduction', 'Medical Insurance', 'Total Deduction', 'Net Salary', 'IBAN', 'Confirmation Date', 'Employee Type'];
+            $header = ['Employee ID', 'Employee Name', 'Designation', 'Department', 'Hub', 'Zone', 'Date of Joining', 'CNIC', 'Employee Status', 'Payroll Days', 'Present Days', 'Pay Cut Days', 'Absent Days', 'Extra Paid Days', 'Fuel Days', 'Basic Salary', 'House Rent', 'Medical', 'Gross Salary', 'Mobile Allowance', 'Vehicle Allowance', 'Fuel Allowance', 'Conveyance Allowance', 'Vehicle Maintenance', 'Fixed Incentive', 'Sunday / Holiday Allowance', 'Overtime', 'Bonus', 'Arrears', 'Pickup Incentive', 'Delivery Incentive', 'Operations Incentive', 'Extra Duty Allowance', 'Others Addition', 'Total Salary', 'Pay Cut', 'Absent', 'Late Deduction', 'Income Tax', 'EOBI', 'Advance Salary', 'Month Closing', 'Loan', 'Fuel Card', 'Open Parcel', 'Phone Call', 'Recovery', 'Auction Sale', 'Penalty', 'Others Deduction', 'Van Deduction', 'Medical Insurance', 'Total Deduction', 'Net Salary', 'IBAN', 'Confirmation Date', 'Employee Type'];
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
@@ -3127,38 +2980,39 @@ class AdminHumanResourseController extends Controller
 
     }
 
-    public function payslip_print(Request $request){
+    public function payslip_print(Request $request)
+    {
 
         $payslip = EmployeePayslip::find($request->payslip_id);
 
-        if(!$payslip){
+        if (!$payslip) {
             return response()->json(['status' => 0, 'error' => 'Payslip not found!']);
         }
         $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
         $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
         $personal_contact = '';
 
-        if(Admin::where('trax_id', $payslip->trax_id)->exists()){
+        if (Admin::where('trax_id', $payslip->trax_id)->exists()) {
             $user = Admin::where('trax_id', $payslip->trax_id)->first();
             $personal_contact = $user->phone_number;
-        }else{
+        } else {
             $rider = Rider::where('trax_id', $payslip->trax_id);
-            if($rider->exists()){
+            if ($rider->exists()) {
                 $rider = $rider->first();
                 $personal_contact = $rider->phone;
             }
         }
 
-        $basic_salary = ($payslip->basic_salary != NULL) ? number_format($payslip->basic_salary) :'-';
-        $house_rent = ($payslip->house_rent != NULL) ? number_format($payslip->house_rent) :'-';
-        $medical = ($payslip->medical != NULL) ? number_format($payslip->medical) :'-';
-        $gross_salary = ($payslip->gross_salary != NULL) ? number_format($payslip->gross_salary) :'-';
-        $payroll_days = ($payslip->payroll_days != NULL) ? $payslip->payroll_days:'-';
-        $present_days = ($payslip->present_days != NULL) ? $payslip->present_days:'-';
-        $absent_days = ($payslip->absent_days != NULL) ? $payslip->absent_days:'-';
-        $pay_cut_days = ($payslip->pay_cut_days != NULL) ? $payslip->pay_cut_days:'-';
-        $extra_paid_days = ($payslip->extra_paid_days != NULL) ? $payslip->extra_paid_days:'-';
-        $fuel_days = ($payslip->fuel_days != NULL) ? $payslip->fuel_days:'-';
+        $basic_salary = ($payslip->basic_salary != NULL) ? number_format($payslip->basic_salary) : '-';
+        $house_rent = ($payslip->house_rent != NULL) ? number_format($payslip->house_rent) : '-';
+        $medical = ($payslip->medical != NULL) ? number_format($payslip->medical) : '-';
+        $gross_salary = ($payslip->gross_salary != NULL) ? number_format($payslip->gross_salary) : '-';
+        $payroll_days = ($payslip->payroll_days != NULL) ? $payslip->payroll_days : '-';
+        $present_days = ($payslip->present_days != NULL) ? $payslip->present_days : '-';
+        $absent_days = ($payslip->absent_days != NULL) ? $payslip->absent_days : '-';
+        $pay_cut_days = ($payslip->pay_cut_days != NULL) ? $payslip->pay_cut_days : '-';
+        $extra_paid_days = ($payslip->extra_paid_days != NULL) ? $payslip->extra_paid_days : '-';
+        $fuel_days = ($payslip->fuel_days != NULL) ? $payslip->fuel_days : '-';
 
 
         $mobile_allowance = ($payslip->mobile_allowance != NULL) ? number_format($payslip->mobile_allowance) : '-';
@@ -3193,6 +3047,7 @@ class AdminHumanResourseController extends Controller
         $recovery = ($payslip->recovery != NULL) ? number_format($payslip->recovery) : '-';
         $auction_sale = ($payslip->auction_sale != NULL) ? number_format($payslip->auction_sale) : '-';
         $penalty = ($payslip->penalty != NULL) ? number_format($payslip->penalty) : '-';
+        $medical_insurance = ($payslip->medical_insurance != NULL) ? number_format($payslip->medical_insurance) : '-';
         $van_deduction = ($payslip->van_deduction != NULL) ? number_format($payslip->van_deduction) : '-';
         $others_deduction = ($payslip->others_deduction != NULL) ? number_format($payslip->others_deduction) : '-';
 
@@ -3270,11 +3125,11 @@ class AdminHumanResourseController extends Controller
                              </tr>
                              <tr>
                                 <td class="text-left align-middle">Head Office (Karachi): </td>
-                                <td class="text-right align-middle"><b>Payroll Month: </b><u>'. $payroll_month .'</u></td>
+                                <td class="text-right align-middle"><b>Payroll Month: </b><u>' . $payroll_month . '</u></td>
                              </tr>
                              <tr>
                                 <td class="text-left align-middle">Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi.</td>
-                                <td class="text-right align-middle"><b>Payroll Cut Off Date: </b> <u>'. $payroll_cut_off_date .'</u></td>
+                                <td class="text-right align-middle"><b>Payroll Cut Off Date: </b> <u>' . $payroll_cut_off_date . '</u></td>
                                 
                              </tr>
                              </tbody>
@@ -3288,70 +3143,70 @@ class AdminHumanResourseController extends Controller
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Employee ID</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->trax_id .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->trax_id . '</td>
                             <td colspan="2"  class="border twice-right">Date of Joining</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->joining_date .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->joining_date . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Employee Name</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->name .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->name . '</td>
                             <td colspan="2"  class="border twice-right">Date of Confirmation</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->confirmation_date .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->confirmation_date . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Designation</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->designation .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->designation . '</td>
                             <td colspan="2"  class="border twice-right">Employee Type</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->employee_type .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->employee_type . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Department</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->department .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->department . '</td>
                             <td colspan="2"  class="border twice-right">Employee Status</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->employee_status .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->employee_status . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Location</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->hub .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->hub . '</td>
                             <td colspan="2"  class="border twice-right">Personal Contact #</td>
-                            <td colspan="2"  class="border twice-right">'. $personal_contact .'</td>
+                            <td colspan="2"  class="border twice-right">' . $personal_contact . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">CNIC No.</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->cnic .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->cnic . '</td>
                             <td colspan="2"  class="border twice-right">Bank Account No.</td>
-                            <td colspan="2"  class="border twice-right">'. $payslip->iban .'</td>
+                            <td colspan="2"  class="border twice-right">' . $payslip->iban . '</td>
                         </tr>
                         <tr class="text-center">
                             <td class="color primary border twice" colspan="8"><b>Salary Breakup</b></td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Basic Salary</td>
-                            <td colspan="2"  class="border twice-right">'. $basic_salary .'</td>
+                            <td colspan="2"  class="border twice-right">' . $basic_salary . '</td>
                             <td colspan="1"  class="border twice-right">Payroll Days</td>
-                            <td colspan="1"  class="border twice-right">'. $payroll_days .'</td>
+                            <td colspan="1"  class="border twice-right">' . $payroll_days . '</td>
                             <td colspan="1"  class="border twice-right">Absent Days</td>
-                            <td colspan="1"  class="border twice-right">'. $absent_days .'</td>
+                            <td colspan="1"  class="border twice-right">' . $absent_days . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">House Rent</td>
-                            <td colspan="2"  class="border twice-right">'. $house_rent .'</td>
+                            <td colspan="2"  class="border twice-right">' . $house_rent . '</td>
                             <td colspan="1"  class="border twice-right">Present Days</td>
-                            <td colspan="1"  class="border twice-right">'. $present_days .'</td>
+                            <td colspan="1"  class="border twice-right">' . $present_days . '</td>
                             <td colspan="1"  class="border twice-right">Extra Paid Days</td>
-                            <td colspan="1"  class="border twice-right">'. $extra_paid_days .'</td>
+                            <td colspan="1"  class="border twice-right">' . $extra_paid_days . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Medical</td>
-                            <td colspan="2"  class="border twice-right">'. $medical .'</td>
+                            <td colspan="2"  class="border twice-right">' . $medical . '</td>
                             <td colspan="1"  class="border twice-right">Pay Cut Days</td>
-                            <td colspan="1"  class="border twice-right">'. $pay_cut_days .'</td>
+                            <td colspan="1"  class="border twice-right">' . $pay_cut_days . '</td>
                             <td colspan="1"  class="border twice-right">Fuel Days</td>
-                            <td colspan="1"  class="border twice-right">'. $fuel_days .'</td>
+                            <td colspan="1"  class="border twice-right">' . $fuel_days . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right"><b>Gross Salary</b></td>
-                            <td colspan="2"  class="border twice-right">'. $gross_salary .'</td>
+                            <td colspan="2"  class="border twice-right">' . $gross_salary . '</td>
                             <td colspan="4"  class="border twice-right"></td>
                         </tr>
                         <tr class="text-center">
@@ -3360,110 +3215,116 @@ class AdminHumanResourseController extends Controller
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Mobile Allowance</td>
-                            <td colspan="2"  class="border twice-right">'. $mobile_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">' . $mobile_allowance . '</td>
                             <td colspan="2"  class="border twice-right">Pay Cut</td>
-                            <td colspan="2"  class="border twice-right">'. $paycut .'</td>
+                            <td colspan="2"  class="border twice-right">' . $paycut . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Vehicle Allowance</td>
-                            <td colspan="2"  class="border twice-right">'. $vehicle_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">' . $vehicle_allowance . '</td>
                             <td colspan="2"  class="border twice-right">Absent</td>
-                            <td colspan="2"  class="border twice-right">'. $absent .'</td>
+                            <td colspan="2"  class="border twice-right">' . $absent . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Fuel Allowance</td>
-                            <td colspan="2"  class="border twice-right">'. $fuel_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">' . $fuel_allowance . '</td>
                             <td colspan="2"  class="border twice-right">Late Deduction</td>
-                            <td colspan="2"  class="border twice-right">'. $late_deduction .'</td>
+                            <td colspan="2"  class="border twice-right">' . $late_deduction . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Conveyance Allowance</td>
-                            <td colspan="2"  class="border twice-right">'. $conveyance_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">' . $conveyance_allowance . '</td>
                             <td colspan="2"  class="border twice-right">Income Tax</td>
-                            <td colspan="2"  class="border twice-right">'. $income_tax .'</td>
+                            <td colspan="2"  class="border twice-right">' . $income_tax . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Vehicle Maintenance</td>
-                            <td colspan="2"  class="border twice-right">'. $vehicle_maintenance .'</td>
+                            <td colspan="2"  class="border twice-right">' . $vehicle_maintenance . '</td>
                             <td colspan="2"  class="border twice-right">EOBI</td>
-                            <td colspan="2"  class="border twice-right">'. $eobi .'</td>
+                            <td colspan="2"  class="border twice-right">' . $eobi . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Fixed Incentive</td>
-                            <td colspan="2"  class="border twice-right">'. $fixed_incentive .'</td>
+                            <td colspan="2"  class="border twice-right">' . $fixed_incentive . '</td>
                             <td colspan="2"  class="border twice-right">Advance Salary</td>
-                            <td colspan="2"  class="border twice-right">'. $advance_salary .'</td>
+                            <td colspan="2"  class="border twice-right">' . $advance_salary . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Sunday / Holiday Allowance</td>
-                            <td colspan="2"  class="border twice-right">'. $holiday_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">' . $holiday_allowance . '</td>
                             <td colspan="2"  class="border twice-right">Month Closing</td>
-                            <td colspan="2"  class="border twice-right">'. $month_closing .'</td>
+                            <td colspan="2"  class="border twice-right">' . $month_closing . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Overtime</td>
-                            <td colspan="2"  class="border twice-right">'. $overtime .'</td>
+                            <td colspan="2"  class="border twice-right">' . $overtime . '</td>
                             <td colspan="2"  class="border twice-right">Loan</td>
-                            <td colspan="2"  class="border twice-right">'. $loan .'</td>
+                            <td colspan="2"  class="border twice-right">' . $loan . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Bonus</td>
-                            <td colspan="2"  class="border twice-right">'. $bonus .'</td>
+                            <td colspan="2"  class="border twice-right">' . $bonus . '</td>
                             <td colspan="2"  class="border twice-right">Fuel Card</td>
-                            <td colspan="2"  class="border twice-right">'. $fuel_card .'</td>
+                            <td colspan="2"  class="border twice-right">' . $fuel_card . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Arrears</td>
-                            <td colspan="2"  class="border twice-right">'. $arrears .'</td>
+                            <td colspan="2"  class="border twice-right">' . $arrears . '</td>
                             <td colspan="2"  class="border twice-right">Open Parcel</td>
-                            <td colspan="2"  class="border twice-right">'. $open_parcel .'</td>
+                            <td colspan="2"  class="border twice-right">' . $open_parcel . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Pickup Incentive</td>
-                            <td colspan="2"  class="border twice-right">'. $pickup_incentive .'</td>
+                            <td colspan="2"  class="border twice-right">' . $pickup_incentive . '</td>
                             <td colspan="2"  class="border twice-right">Phone Call</td>
-                            <td colspan="2"  class="border twice-right">'. $phone_call .'</td>
+                            <td colspan="2"  class="border twice-right">' . $phone_call . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Delivery Incentive</td>
-                            <td colspan="2"  class="border twice-right">'. $delivery_incentive .'</td>
+                            <td colspan="2"  class="border twice-right">' . $delivery_incentive . '</td>
                             <td colspan="2"  class="border twice-right">Recovery</td>
-                            <td colspan="2"  class="border twice-right">'. $recovery .'</td>
+                            <td colspan="2"  class="border twice-right">' . $recovery . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Operations Incentive</td>
-                            <td colspan="2"  class="border twice-right">'. $operations_incentive .'</td>
+                            <td colspan="2"  class="border twice-right">' . $operations_incentive . '</td>
                             <td colspan="2"  class="border twice-right">Auction Sale</td>
-                            <td colspan="2"  class="border twice-right">'. $auction_sale .'</td>
+                            <td colspan="2"  class="border twice-right">' . $auction_sale . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
-                            <td colspan="2"  class="border twice-right">'. $extra_duty_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">' . $extra_duty_allowance . '</td>
                             <td colspan="2"  class="border twice-right">Penalty</td>
-                            <td colspan="2"  class="border twice-right">'. $penalty .'</td>
+                            <td colspan="2"  class="border twice-right">' . $penalty . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Others Addition</td>
-                            <td colspan="2"  class="border twice-right">'. $others_addition .'</td>
+                            <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
+                            <td colspan="2"  class="border twice-right">Medical Insurance</td>
+                            <td colspan="2"  class="border twice-right">' . $medical_insurance . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right"></td>
+                            <td colspan="2"  class="border twice-right"></td>
                             <td colspan="2"  class="border twice-right">Van Deduction</td>
-                            <td colspan="2"  class="border twice-right">'. $van_deduction .'</td>
+                            <td colspan="2"  class="border twice-right">' . $van_deduction . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right"></td>
                             <td colspan="2"  class="border twice-right"></td>
                             <td colspan="2"  class="border twice-right">Others Deduction</td>
-                            <td colspan="2"  class="border twice-right">'. $others_deduction .'</td>
+                            <td colspan="2"  class="border twice-right">' . $others_deduction . '</td>
                         </tr>
                         
                         <tr class="text-center">
                             <td class="color primary border twice" colspan="2"><b>Total Addition</b></td>
-                            <td class="color primary border twice" colspan="2">'. $total_addition .'</td>
+                            <td class="color primary border twice" colspan="2">' . $total_addition . '</td>
                             <td class="color primary border twice" colspan="2"><b>Total Deduction</b></td>
-                            <td class="color primary border twice" colspan="2">'. $total_deduction .'</td>
+                            <td class="color primary border twice" colspan="2">' . $total_deduction . '</td>
                         </tr>
                         <tr class="text-left">
                             <td class="color primary border twice" colspan="6"><b>Net Salary</b></td>
-                            <td class="color primary border twice text-center" colspan="2">'. $net_salary .'</td>
+                            <td class="color primary border twice text-center" colspan="2">' . $net_salary . '</td>
                         </tr>
                         <tr class="text-left">
                             <td class="border twice" colspan="8" rowspan="5"><i>Note: This is a system generated document and does not require any signature.</i></td>
@@ -3472,7 +3333,7 @@ class AdminHumanResourseController extends Controller
                          </table>';
 
 
-        $html .=  ' 
+        $html .= ' 
                       </div>
                       </body>
                       </html>';
@@ -3485,5 +3346,289 @@ class AdminHumanResourseController extends Controller
         $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
         return array('status' => 1, 'image' => $pdf_file);
 
+    }
+
+    public function leave_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 465);
+        $users = Admin::where('status', 1)->select('id', 'name')->get();
+        $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
+        $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
+        $trax_ids = array_merge($trax_id, $rider_trax_id);
+        $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
+        $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
+        $cnic = array_merge($admin_cnic, $rider_cnic);
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        $leave_statuses = LeaveStatus::select('id', 'name')->get();
+        return view('admin.human_resource.leave')->with(['leave_statuses' => $leave_statuses, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
+    }
+
+    public function leave_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 466);
+        }
+        $employee_leaves = EmployeeLeave::leftjoin('admins as a', 'a.id', 'employee_leaves.employee_id')
+            ->leftjoin('admins as u', 'u.id', 'employee_leaves.updated_by')
+            ->join('leave_statuses as ls', 'ls.id', 'employee_leaves.status')
+            ->leftjoin('admin_roles as ar', 'ar.id', 'a.role_id')
+            ->leftjoin('admin_departments as ad', 'ad.id', 'ar.department_id')
+            ->leftjoin('riders as r', 'r.id', 'employee_leaves.employee_id')
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'ad.name as department', 'ad.id as department_id', 'employee_leaves.employee_type_id as employee_type', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'ls.name as status', 'ls.id as status_id', 'employee_leaves.employee_id as employee_id', 'employee_leaves.id as leave_id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.created_at as requested_date', 'employee_leaves.updated_at as updated_at', 'u.name as updated_by', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.rejected_reason as reject_reason');
+
+        /*if(session('role_id') != 1 && session('role_id') != 63){
+            $employee_leaves->where('ad.id', session('department_id'));
+            if(session('department_id') != 6){
+                $employee_leaves->where('employee_leaves.employee_type_id', 1);
+            }
+        }*/
+
+        $datatable = Datatables::of($employee_leaves)
+            ->editColumn('trax_id', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_trax_id;
+                } else {
+                    return $employee->trax_id;
+                }
+            })
+            ->editColumn('leave_id', function ($employee) {
+                    return $employee->leave_id;
+            })
+            ->editColumn('name', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_name;
+                } else {
+                    return $employee->admin_name;
+                }
+            })
+            ->editColumn('employee_type', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return "Rider";
+                } else {
+                    return "Staff";
+                }
+            })
+            ->editColumn('designation', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return "Rider";
+                } else {
+                    return $employee->designation;
+                }
+            })
+            ->editColumn('department', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return "Operations";
+                } else {
+                    return $employee->department;
+                }
+            })
+            ->editColumn('cnic', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_cnic;
+                } else {
+                    return $employee->admin_cnic;
+                }
+            })
+            ->editColumn('days', function ($employee) {
+                if($employee->to){
+                    $start_date = Carbon::createFromFormat('Y-m-d', $employee->from);
+                    $end_date = Carbon::createFromFormat('Y-m-d', $employee->to);
+                    return $start_date->diffInDays($end_date) + 1;
+                }else{
+                    return 1;
+                }
+            })
+            ->editColumn('requested', function ($employee) {
+                $date = Carbon::parse($employee->requested_date)->format("Y-m-d");
+                return $date;
+            })
+            ->editColumn('updated', function ($employee) {
+                $date = Carbon::parse($employee->updated_at)->format("Y-m-d");
+                return $date;
+            })
+            ->editColumn('leave_count', function ($employee) {
+                $leave_count = EmployeeAttendance::where('employee_type', $employee->employee_type)
+                    ->where('employee_id', $employee->employee_id)
+                    ->where('leave_status', 1)->count();
+                return $leave_count;
+            })
+            ->addColumn("action", function ($employee) {
+                if (in_array($employee->status_id, [1,2,3])) {
+                    if (session('role_id') == 1 || in_array(614, session('permissions')) || in_array(615, session('permissions'))) {
+                        $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                        if (session('role_id') == 1 || in_array(614, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                        }
+                        if (session('role_id') == 1 || in_array(615, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
+                        }
+
+                        $dropdown .= '
+                </div>
+              </div>
+            ';
+                        return $dropdown;
+                    } else {
+                        return '';
+                    }
+                } else {
+                    return '';
+                }
+
+            });
+        if ($search_admin = $request->get('search_admin')) {
+            $datatable->where('a.id', $search_admin)->where('employee_type_id',1);
+        }
+        if ($search_rider = $request->get('search_rider')) {
+            $datatable->where('r.id', $search_rider)->where('employee_type_id',2);
+        }
+        if ($search_trax_id = $request->get('search_trax_id')) {
+            $datatable->where(function($q) use ($search_trax_id){
+                $q->where([['a.trax_id', $search_trax_id],['employee_type_id',1]])
+                    ->orWhere([['r.trax_id', $search_trax_id],['employee_type_id',2]]);
+            });
+        }
+        if ($search_cnic = $request->get('search_cnic')) {
+            $datatable->where(function($q) use ($search_cnic){
+                $q->where([['a.cnic', $search_cnic],['employee_type_id',1]])
+                    ->orWhere([['r.cnic', $search_cnic],['employee_type_id',2]]);
+            });
+        }
+        return $datatable->make(true);
+    }
+
+    public function leave_approve(Request $request)
+    {
+        $admin_id = Auth::id();
+        $admin = Admin::find($admin_id);
+        if ($admin) {
+            $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+            if ($employee_leaves->exists()) {
+                $employee_leaves = $employee_leaves->first();
+                if (in_array($employee_leaves->status, [1,2,3])) {
+                    $employee_leaves->status = 4;
+                    $employee_leaves->updated_by = $admin_id;
+                    if ($employee_leaves->employee_id == 1) {
+                        $user = Admin::find($employee_leaves->employee_id);
+                    } else {
+                        $user = Rider::find($employee_leaves->employee_id);
+                    }
+                    if(!$user){
+                        return redirect()->back()->with('error', 'Invalid Employee ID');
+                    }
+                    $shift = EmployeeShift::find($user->shift_id);
+                    if ($employee_leaves->to) {
+                        $dates = AdminAPIController::generateDateRange($employee_leaves->from, $employee_leaves->to);
+                    } else {
+                        $dates[] = $employee_leaves->from;
+                    }
+                    foreach ($dates as $date) {
+                        $date = Carbon::parse($date)->format("Y-m-d");
+                        $mark_attendance = EmployeeAttendance::where('employee_id', $employee_leaves->employee_id)
+                            ->where('employee_type', $employee_leaves->employee_type_id)
+                            ->whereDate('attendance_date', $date);
+                        if ($mark_attendance->exists()) {
+                            $mark_attendance = $mark_attendance->first();
+                        } else {
+                            $mark_attendance = new EmployeeAttendance();
+                        }
+                        $mark_attendance->attendance_date = $date;
+                        $mark_attendance->employee_id = $employee_leaves->employee_id;
+                        $mark_attendance->employee_type = $employee_leaves->employee_type_id;
+                        $mark_attendance->clock_in_latitude = "24.85758065592256";
+                        $mark_attendance->clock_in_longitude = "67.12476908400743";
+                        $mark_attendance->clock_out_latitude = "24.85758065592256";
+                        $mark_attendance->clock_out_longitude = "67.12476908400743";
+                        if ($shift) {
+                            $mark_attendance->clock_in_datetime = $date . ' ' . $shift->start_time;
+                            $mark_attendance->clock_out_datetime = $date . ' ' . $shift->end_time;
+                        } else {
+                            $mark_attendance->clock_in_datetime = $date . ' 09:00:00';
+                            $mark_attendance->clock_out_datetime = $date . ' 18:00:00';
+                        }
+                        $mark_attendance->leave_status = 1;
+                        $mark_attendance->save();
+
+                        $attendance_action = new EmployeeAttendanceActionLog();
+                        $attendance_action->employee_id = $mark_attendance->employee_id;
+                        $attendance_action->employee_type = $mark_attendance->employee_type;
+                        $attendance_action->action_id = 1;
+                        $attendance_action->action_date = $mark_attendance->clock_in_datetime;
+                        $attendance_action->attendance_date = $date;
+                        $attendance_action->latitude = $mark_attendance->clock_in_latitude;
+                        $attendance_action->longitude = $mark_attendance->clock_in_longitude;
+                        $attendance_action->save();
+
+                        $attendance_action = new EmployeeAttendanceActionLog();
+                        $attendance_action->employee_id = $mark_attendance->employee_id;
+                        $attendance_action->employee_type = $mark_attendance->employee_type;
+                        $attendance_action->action_id = 2;
+                        $attendance_action->action_date = $mark_attendance->clock_out_datetime;
+                        $attendance_action->attendance_date = $date;
+                        $attendance_action->latitude = $mark_attendance->clock_out_latitude;
+                        $attendance_action->longitude = $mark_attendance->clock_out_longitude;
+                        $attendance_action->save();
+
+                        $employee_leaves->save();
+                    }
+                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    return redirect()->back()->with('success', 'Leave Approved Successfully');
+                } else {
+                    return redirect()->back()->with('error', 'Leave Already Approved');
+                }
+            }
+            return redirect()->back()->with('error', 'Invalid Leave ID');
+        }
+    }
+
+    public function leave_reject(Request $request)
+    {
+        $admin_id = Auth::id();
+        $admin = Admin::find($admin_id);
+        if ($admin) {
+            $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
+            if ($employee_leaves->exists()) {
+                $employee_leaves = $employee_leaves->first();
+                if (in_array($employee_leaves->status, [1,2,3])) {
+                    $employee_leaves->status = 5;
+                    $employee_leaves->rejected_reason = $request->reason;
+                    $employee_leaves->updated_by = $admin_id;
+                    $employee_leaves->save();
+                    NotificationsController::app_notification(11, $employee_leaves->employee_id, $employee_leaves->employee_type_id, $employee_leaves->id);
+                    return redirect()->back()->with('success', 'Leave Reject Successfully');
+                } else {
+                    return redirect()->back()->with('error', 'Leave Already Rejected');
+                }
+            }
+            return redirect()->back()->with('error', 'Invalid Leave ID');
+        }
+    }
+
+    public function leave_edit(Request $request)
+    {
+        $admin_id = Auth::id();
+        $admin = Admin::find($admin_id);
+        if ($admin) {
+                $leave_request = EmployeeLeave::where('id', $request->leave_id);
+                if ($leave_request->exists()) {
+                    $leave_request = $leave_request->first();
+                    if (in_array($leave_request->status, [1,2,3])) {
+                        $leave_request->from = Carbon::Parse($request->from)->format("Y-m-d");
+                        $leave_request->to = Carbon::Parse($request->to)->format("Y-m-d");
+                        $leave_request->applied_reason = $request->reason;
+                        $leave_request->updated_by = $admin_id;
+                        $leave_request->save();
+                        return redirect()->back()->with('success', 'Leave Edit Successfully');
+                    }
+                    return redirect()->back()->with('error', 'Leave Already Approved');
+                }
+                return redirect()->back()->with('error', 'Invalid Leave ID');
+            }
     }
 }

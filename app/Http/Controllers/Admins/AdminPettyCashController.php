@@ -9,6 +9,7 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashConsignee;
 use App\Http\Models\Admin\PettyCashConsigneeHub;
+use App\Http\Models\Admin\PettyCashSdnLog;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\PettyCashStatementAmountLog;
 use App\Http\Models\Admin\PettyCashStatementDetail;
@@ -291,7 +292,15 @@ class AdminPettyCashController extends Controller
     public function edit_petty_cash_statement_index(Request $request, $id)
     {
         $petty = PettyCashStatement::find($id);
+        if(!in_array($petty->status,[0, 1, 2, 7]))
+        {
+            return back()->with(['info'=>'Statement Already Approved']);
+        }
         $head = PettyCashAccountHead::select('id', 'name')->get();
+        if(!in_array($petty->status ,[0,1,2,7]))
+        {
+            return redirect()->route('admin.petty_cash.approved.view',$id);
+        }
         $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
         if (session('role_id') == 1) {
@@ -547,6 +556,28 @@ class AdminPettyCashController extends Controller
         return view('admin.petty_cash.reference_document')->with(['url' => $url]);
     }
 
+    public function sdn_log(Request $request)
+    {
+        $logs = PettyCashSdnLog::where('petty_cash_statement_id',$request->statement_id);
+        if($logs->exists())
+        {
+            $logs = $logs->get();
+            $data = array();
+            foreach ($logs as $key => $log)
+            {
+                $data[$key]['sdn'] = str_pad($log->previous_sdn_id, 6, '0', STR_PAD_LEFT);
+                $data[$key]['admin'] = $log->admin->name;
+                $data[$key]['timestamp'] = (string)$log->created_at;
+            }
+
+            return response()->json(['status'=>0,'logs'=>$data]);
+        }
+        else{
+            return response()->json(['status'=>1,'error'=>'No Logs Found']);
+        }
+
+    }
+
     public function petty_cash_statements_list(Request $request)
     {
         if($request->get('excel') && $request->get('excel') == true)
@@ -582,6 +613,14 @@ class AdminPettyCashController extends Controller
             ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('sdn_update_logs', function ($petty) {
+                $log = PettyCashSdnLog::where('petty_cash_statement_id',$petty->statement_id);
+                if($log->exists())
+                {
+                    return '<button class="btn btn-sm btn-outline-info align-middle sdn_logs font-medium-1"><i class="ft-align-justify align-middle"></i></button>';
+                }
+                return "-";
             })
             ->editColumn('total_amount', function ($shipment) {
                 return number_format($shipment->total_amount);
@@ -849,6 +888,10 @@ class AdminPettyCashController extends Controller
         $petty_cash = PettyCashStatement::find($statement_id);
         $total_amount = 0;
         if ($petty_cash) {
+            if(!in_array($petty_cash->status ,[0,1,2,7]))
+            {
+                return redirect()->route('admin.petty_cash.approved.view',$statement_id);
+            }
             foreach ($selected_ids as $selected_id) {
 //                $hubId = "hub.$selected_id";
                 $total_amount += $request->amount[$selected_id];
@@ -904,6 +947,17 @@ class AdminPettyCashController extends Controller
                     $petty_detail->save();
                 }
             }
+            if($request->has('select_statement_sdn') && $request->select_statement_sdn != $petty_cash->sdn_id)
+            {
+                $sdn_log = new PettyCashSdnLog();
+                $sdn_log->petty_cash_statement_id = $petty_cash->id;
+                $sdn_log->previous_sdn_id = $petty_cash->sdn_id;
+                $sdn_log->admin_id = Auth::id();
+                $sdn_log->save();
+
+                $petty_cash->sdn_id = $request->select_statement_sdn;
+
+            }
             $petty_cash->total_amount = $total_amount;
             $petty_cash->save();
             return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Updated!']);
@@ -953,6 +1007,14 @@ class AdminPettyCashController extends Controller
             ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('sdn_update_logs', function ($petty) {
+                $log = PettyCashSdnLog::where('petty_cash_statement_id',$petty->statement_id);
+                if($log->exists())
+                {
+                    return '<button class="btn btn-sm btn-outline-info align-middle sdn_logs font-medium-1"><i class="ft-align-justify align-middle"></i></button>';
+                }
+                return "-";
             })
             ->editColumn('total_amount', function ($shipment) {
                 return number_format($shipment->total_amount);

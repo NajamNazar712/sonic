@@ -82,7 +82,7 @@
                                                     <label class="custom-control-label" for="colorRadio7">Selected Shipper</label>
                                                 </div>
                                                 <div class="d-inline-block custom-control custom-radio mr-1">
-                                                    <input type="radio" class="custom-control-input bg-danger add_marco" value="marco" name="packaging_type" id="colorRadio4">
+                                                    <input type="radio" class="custom-control-input bg-warning add_marco" value="marco" name="packaging_type" id="colorRadio4">
                                                     <label class="custom-control-label" for="colorRadio4">Marco</label>
                                                 </div>
                                             </fieldset>
@@ -223,7 +223,7 @@
                                                     <label class="custom-control-label" for="colorRadio8">Selected Shipper</label>
                                                 </div>
                                                 <div class="d-inline-block custom-control custom-radio mr-1">
-                                                    <input type="radio" class="custom-control-input bg-danger edit_marco" value="marco" name="packaging_type_edit" id="colorRadio9">
+                                                    <input type="radio" class="custom-control-input bg-warning edit_marco" value="marco" name="packaging_type_edit" id="colorRadio9">
                                                     <label class="custom-control-label" for="colorRadio9">Marco</label>
                                                 </div>
                                             </fieldset>
@@ -695,10 +695,13 @@
                             $('input.edit_external').attr('checked', true);
                             $("#shippers_select_edit").html('');
 
-                        }else if(data.type.packaging_type === 4) {
-                            $('input.edit_only_shipper').attr('checked', true);
                         }else if(data.type.packaging_type === 5){
                             $('input.edit_marco').attr('checked', true);
+                            $("#shippers_select_edit").html('');
+
+                        }else if(data.type.packaging_type === 4) {
+                            $('input.edit_only_shipper').attr('checked', true);
+
                             $.ajax({
                         url: '{{route('admin.packaging.types.all_shippers_edit')}}',
                         success: function (result) {
