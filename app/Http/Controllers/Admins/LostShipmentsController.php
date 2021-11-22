@@ -275,6 +275,7 @@ class LostShipmentsController extends Controller
     public function add_lost_shipments(Request $request){
 
         $passing_status_array = array(1,14,17,18,25,31,38);
+        $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
         $remarks = $request->remarks;
         $lost_shipments_array = array();
@@ -294,14 +295,16 @@ class LostShipmentsController extends Controller
                         }
                     }
 
-                   $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_details->id);
-                    if($cargo_manifest_bag_shipments->exists()){
-                        $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
-                        $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                        if($bag){
-                            ManifestBagLostShipment::create(['bag_id' => $bag->id,'shipment_id' => $shipment_details->id]);
-                            $bag->lost_shipments++;
-                            $bag->save();
+                    if(in_array($shipment_details->shipper_status_id,$shipment_status_for_bags)){
+                        $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_details->id);
+                        if($cargo_manifest_bag_shipments->exists()){
+                            $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
+                            $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
+                            if($bag){
+                                ManifestBagLostShipment::create(['bag_id' => $bag->id,'shipment_id' => $shipment_details->id]);
+                                $bag->lost_shipments++;
+                                $bag->save();
+                            }
                         }
                     }
 
