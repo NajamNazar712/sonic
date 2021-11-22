@@ -9608,7 +9608,7 @@ class AdminReportsController extends Controller
                 }elseif($shipments->status_id == 2){
                     return $shipments->rider_status_marked_by;
                 }elseif($shipments->status_id == 23){
-                    $return_note_shipment = ReturnNoteShipment::where('shipment_id',$shipments->shipment_id)->latest()->first();
+                    $return_note_shipment = ReturnNoteShipment::where('shipment_id',$shipments->shipment_id)->get()->first();
                     $return_note = ReturnNote::find($return_note_shipment->return_note_id);
                     return $return_note->rider->name;
                 }else{
