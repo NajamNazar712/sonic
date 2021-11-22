@@ -989,8 +989,6 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Date Added</th>
                             <th class="border-primary border-darken-1">Image</th>
-                            <th class="border-primary border-darken-1"></th>
-
                         </tr>
                         </thead>
                         <tbody></tbody>
@@ -2129,9 +2127,8 @@
                             $.each(data.images, function (index, image) {
                                 index++;
                                 var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-                                var remove = '';
-                                remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
+                               
+                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td></tr>';
                             });
                             $('#crm_image_view_table tbody').append(image_html);
                             $('#image_upload_modal').modal('show');
