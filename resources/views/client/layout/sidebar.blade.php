@@ -117,7 +117,7 @@
             
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Reports</span></a>
                     <ul class="menu-content">
-                        @if (session('user_id') == 3324)
+                        @if (session('user_id') == 1091)
                             <li><a class="menu-item" href="{{ route('cod.reports.sales.telenor.index') }}">Overall Sales - Telenor</a></li>
                         @endif
 

@@ -576,7 +576,7 @@ class ShipperReportsController extends Controller
     {
         $shipping_modes = DB::connection('mysql')->table('shipping_modes')->select('id', 'mode')->get();
         $cities = DB::connection('mysql')->table('cities')->select('id', 'name')->get();
-        $statuses = DB::connection('mysql')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
+        $statuses = DB::connection('mysql')->table('shipment_status')->whereNotIn('id', [17])->get();
         return view('client.reports.sales_report_telenor')->with(['cities' => $cities, 'statuses' => $statuses, 'shipping_modes' => $shipping_modes]);
     }
     public function sales_telenor_list(Request $request)
@@ -591,7 +591,7 @@ class ShipperReportsController extends Controller
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1)'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (1,2) and shipments_journey.verification = 1)'));
             })
             ->leftJoin('shipments_journey as sjb', function ($join) use ($connection) {
                 $join->on('sjb.shipment_id', '=', 'shipments.id')
