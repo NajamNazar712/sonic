@@ -9639,7 +9639,22 @@ class AdminReportsController extends Controller
             $datatable->where('shipments_journey.admin_id', $admins_id);
         }
         if ($search_last_rider = $request->get('search_last_rider')) {
-            $datatable->where('shipments_journey.rider_id', $search_last_rider);
+            $rider = Rider::find($search_last_rider);
+            
+            // if($shipments->status_id == 5){
+            //     $delivery_note = DeliveryNote::find($shipments->ref_id);
+            //      return $delivery_note->rider->name;
+            // }elseif($shipments->status_id == 2){
+            //     return $shipments->rider_status_marked_by;
+            // }elseif($shipments->status_id == 23){
+            //     $return_note_shipment = ReturnNoteShipment::where('shipment_id',$shipments->shipment_id)->get()->first();
+            //     $return_note = ReturnNote::find($return_note_shipment->return_note_id);
+            //     return $return_note->rider->name;
+            // }
+
+            // $datatable->where('r.name', $rider->name);
+            dd($datatable);
+
         }
         
         

@@ -113,7 +113,7 @@
                         <th class="border-primary border-darken-1">Status Marked</th>
                         <th class="border-primary border-darken-1">Status Marking Date</th>
                         <th class="border-primary border-darken-1">Status Marked By</th>
-                        <th class="border-primary border-darken-1">Last Assigned Rider</th>
+                        <th class="border-primary border-darken-1">Assigned Rider</th>
                     </tr>
                     </thead>
                 </table>
@@ -247,7 +247,7 @@
             });
             $('#search_last_rider').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Last Assigned Rider",
+                placeholder:"Assigned Rider",
                 allowClear:true,
             });
             
@@ -320,7 +320,7 @@
                             head.push('Status Marked');
                             head.push('Status Marking Date');
                             head.push('Status Marked By');
-                            head.push('Last Assigned Rider');
+                            head.push('Assigned Rider');
                             
                             $.each(result.data, function(index, values) {
                                 row = [];
