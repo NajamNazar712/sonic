@@ -1326,7 +1326,7 @@ class AdminCargoManifestController extends Controller
             if (in_array($bag->status_id, [1, 3, 5])) {
                 $origin_id = Auth::user()->default_hub_id;
                 $destination_hub_id = $bag->destination_hub_id;
-                $mapping = V2JunctionMapping::where([['origin_id',$origin_id],['destination_id',$destination_hub_id],['status',1]]);
+                $mapping = V2JunctionMapping::where('origin_id',$origin_id)->where('destination_id',$destination_hub_id)->where('status',1);
 
                 $allowed = FALSE;
 
