@@ -9665,5 +9665,81 @@ class AdminReportsController extends Controller
         }
         return $datatable->make(true);
     }
-}
+
+
+    public function sales_incentive_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),461);
+        $filter_dates = DB::connection('reports')->table('sales_incentive_filter_dates')
+            ->select('id','date')
+            ->orderBy('id', 'desc')
+            ->get();
+        $admins = DB::connection('reports')->table('admins')->whereExists(function($query) {
+            $query->from('admin_roles')
+                ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
+                ->where('department_id', '=', 7);
+        })->select('id', 'name')->get();
+        $cities = City::where('business_category_id', 1)->where('hub', 1)->select('id', 'name')->get();
+        return view('admin.reports.sales_incentive')->with(['filter_dates' => $filter_dates, 'admins' => $admins, 'cities' => $cities]);
+    }
+    public function sales_incentive_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),467);
+        }
+        $incentive = DB::connection('reports')->table('sales_incentives')
+            ->join('sales_territories as st', 'st.id', '=', 'sales_incentives.territory_id')
+            ->join('cities as c', 'c.id', '=', 'st.cityid')
+            ->join('sales_designations as sd', 'sd.id', '=', 'sales_incentives.designation_id')
+            ->join('admins as a', 'a.id', '=', 'sales_incentives.admin_id')
+            ->join('sales_incentive_filter_dates as sifd', 'sifd.id', '=', 'sales_incentives.filter_date_id')
+            ->select(['sales_incentives.id', 'st.code as territory_code', 'sd.code as designation_code', 'a.name as admin', 'sales_incentives.shipper_count', 'sales_incentives.shipment_count', 'sales_incentives.revenue', 'sales_incentives.commission', 'c.name as origin_city'])
+        ->where('sifd.id', $request->filter_date);
+
+        $datatable = Datatables::of($incentive)
+        ->addColumn('sales_code', function($data){
+            return $data->designation_code . '-' . $data->territory_code;
+        });
+        if ($admin_id = $request->get('admin_id')) {
+            $datatable->where('a.id', $admin_id);
+        }
+        if ($city_id = $request->get('city_id')) {
+            $datatable->where('c.id', $city_id);
+        }
+        return $datatable->make(true);
+    }
+    public function consolidated_sales_incentive_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),462);
+        $filter_dates = DB::connection('reports')->table('sales_incentive_filter_dates')
+            ->select('id','date')
+            ->orderBy('id', 'desc')
+            ->get();
+        $admins = DB::connection('reports')->table('admins')->whereExists(function($query) {
+            $query->from('admin_roles')
+                ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
+                ->where('department_id', '=', 7);
+        })->select('id', 'name')->get();
+        return view('admin.reports.consolidated_sales_incentive')->with(['filter_dates' => $filter_dates, 'admins' => $admins]);
+    }
+    public function consolidated_sales_incentive_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),468);
+        }
+        $incentive = DB::connection('reports')->table('sales_consolidated_incentives')
+            ->join('admins as a', 'a.id', '=', 'sales_consolidated_incentives.admin_id')
+            ->join('sales_incentive_filter_dates as sifd', 'sifd.id', '=', 'sales_consolidated_incentives.filter_date_id')
+            ->select(['sales_consolidated_incentives.id', 'a.name as admin', 'a.trax_id as trax_id', 'sales_consolidated_incentives.shipper_count', 'sales_consolidated_incentives.shipment_count', 'sales_consolidated_incentives.revenue', 'sales_consolidated_incentives.commission'])
+            ->where('sifd.id', $request->filter_date);
+
+        $datatable = Datatables::of($incentive);
+
+        if ($admin_id = $request->get('admin_id')) {
+            $datatable->where('a.id', $admin_id);
+        }
+        return $datatable->make(true);
+    }}
 
