@@ -9577,6 +9577,8 @@ class AdminReportsController extends Controller
             ->join('users as su', 'sh.user_id', '=', 'su.id')
             ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftjoin('users as u', 'shipments_journey.user_id', '=', 'u.id')
+            ->leftjoin('delivery_notes as dn', 'shipments_journey.reference_1_id', '=', 'dn.id')
+            ->leftjoin('return_notes as rn', 'shipments_journey.reference_1_id', '=', 'rn.id')
             ->leftjoin('riders as r', 'shipments_journey.rider_id', '=', 'r.id')
             ->select(['shipments_journey.reference_1_id as ref_id','sh.id as shipment_id','sh.tracking_number','sh.tracking_number as tracking_number_link','r.id','r.name as rider_status_marked_by','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id', 'shipments_journey.admin_id', 'shipments_journey.rider_id']);
             
@@ -9639,7 +9641,7 @@ class AdminReportsController extends Controller
             $datatable->where('shipments_journey.admin_id', $admins_id);
         }
         if ($search_last_rider = $request->get('search_last_rider')) {
-            $rider = Rider::find($search_last_rider);
+            // $rider = Rider::find($search_last_rider);
             
             // if($shipments->status_id == 5){
             //     $delivery_note = DeliveryNote::find($shipments->ref_id);
@@ -9653,8 +9655,8 @@ class AdminReportsController extends Controller
             // }
 
             // $datatable->where('r.name', $rider->name);
-            dd($datatable);
-
+            $datatable->where('dn.rider_id', $search_last_rider)->orWhere('rn.rider_id',$search_last_rider)->orWhere('r.id',$search_last_rider);
+                
         }
         
         
