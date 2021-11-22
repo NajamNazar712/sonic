@@ -175,7 +175,7 @@
                                 row.push(values.destination);
                                 row.push(values.manifest);
                                 row.push(values.shipments_count);
-                                row.push(values.lost_shipments);
+                                row.push(values.ls);
                                 row.push(values.short_received);
                                 row.push(values.shipping_mode);
                                 row.push(values.transport_mode);
@@ -221,7 +221,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[10, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'seal_number', name: 'cargo_manifest_bags.seal_number', class: 'align-middle seal_number'},
