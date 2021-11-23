@@ -305,6 +305,43 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            <div class="col-md-6 text-center">
+                                                <div class="row">
+                                                   <div class="col-3 mt-1" >
+                                                        <fieldset>
+                                                            <div class="input-group form-group">
+                                                                <label class="card-title">DWS Weight </label>
+                                                                <input type="checkbox" name="on_dws" id="on_dws" class="switchery on_dws" data-size="xs" data-switchery="true" checked>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div> 
+                                                    <div class="col-4">
+                                                        <fieldset>
+                                                            <div class="input-group form-group">
+                                                                <select name="on_dws_weight" id="on_dws_weight" class="form-control">
+                                                                        <option value="1">High</option>
+                                                                        <option value="0">Low</option>
+                                                                </select>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div> 
+                                                </div>
+                                                
+                                            </div>
+                                            <div class="col-md-6 text-center">
+                                                <fieldset>
+                                                    <div class="input-group form-group">
+                                                        <h3>DWS Weight</h3>
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text" >Try &amp; Buy</span>
+                                                        </div>
+                                                        <input type="text" class="form-control percent" data-rule-required="true" data-msg-required="This field is required" value="{{$shippingType[1][0]->try_and_buy_charges}}" name="on_tnb_charges">
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text" >%</span>
+                                                        </div>
+                                                    </div>
+                                                </fieldset>
+                                            </div>
                                         </div>
                                         <hr>
                                         <div class="row">
@@ -831,6 +868,29 @@
                                                         </div>
                                                     </div>
                                                 </fieldset>
+                                            </div>
+                                            <div class="col-md-6 text-center">
+                                                <div class="row">
+                                                   <div class="col-3 mt-1" >
+                                                        <fieldset>
+                                                            <div class="input-group form-group">
+                                                                <label class="card-title">DWS Weight </label>
+                                                                <input type="checkbox" name="ol_dws" id="ol_dws" class="switchery ol_dws" data-size="xs" data-switchery="true" checked>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div> 
+                                                    <div class="col-4">
+                                                        <fieldset>
+                                                            <div class="input-group form-group">
+                                                                <select name="ol_dws_weight" id="ol_dws_weight" class="form-control">
+                                                                        <option value="1">High</option>
+                                                                        <option value="0">Low</option>
+                                                                </select>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div> 
+                                                </div>
+                                                
                                             </div>
                                         </div>
                                         <hr>
@@ -1361,6 +1421,29 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            <div class="col-md-6 text-center">
+                                                <div class="row">
+                                                   <div class="col-3 mt-1" >
+                                                        <fieldset>
+                                                            <div class="input-group form-group">
+                                                                <label class="card-title">DWS Weight </label>
+                                                                <input type="checkbox" name="detain_dws" id="detain_dws" class="switchery detain_dws" data-size="xs" data-switchery="true" checked>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div> 
+                                                    <div class="col-4">
+                                                        <fieldset>
+                                                            <div class="input-group form-group">
+                                                                <select name="detain_dws_weight" id="detain_dws_weight" class="form-control">
+                                                                        <option value="1">High</option>
+                                                                        <option value="0">Low</option>
+                                                                </select>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div> 
+                                                </div>
+                                                
+                                            </div>
                                         </div>
                                         <hr>
                                         <div class="row">
@@ -1869,6 +1952,29 @@
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            <div class="col-md-6 text-center">
+                                                <div class="row">
+                                                   <div class="col-3 mt-1" >
+                                                        <fieldset>
+                                                            <div class="input-group form-group">
+                                                                <label class="card-title">DWS Weight </label>
+                                                                <input type="checkbox" name="sameday_dws" id="sameday_dws" class="switchery sameday_dws" data-size="xs" data-switchery="true" checked>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div> 
+                                                    <div class="col-4">
+                                                        <fieldset>
+                                                            <div class="input-group form-group">
+                                                                <select name="sameday_dws_weight" id="sameday_dws_weight" class="form-control">
+                                                                        <option value="1">High</option>
+                                                                        <option value="0">Low</option>
+                                                                </select>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div> 
+                                                </div>
+                                                
+                                            </div>
                                         </div>
                                         <hr>
                                         <div class="row">
@@ -2373,6 +2479,55 @@
             $('body').on('change', '#rate_remarks', function () {
                 $(this).val($(this).val().trim());
             });
+
+            $('#on_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
+            $('#ol_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
+            $('#detain_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
+            $('#sameday_dws_weight').select2({
+                placeholder: "Select Weight Type",
+                width:'100%'
+            });
+            $("#on_dws").on('change', function(){
+                if($("#on_dws").is(":checked")){
+                    $('#on_dws_weight').attr('disabled', false);
+                }else{
+                    $('#on_dws_weight').attr('disabled', true);
+                }
+            });
+            $("#ol_dws").on('change', function(){
+                if($("#ol_dws").is(":checked")){
+                    $('#ol_dws_weight').attr('disabled', false);
+                }else{
+                    $('#ol_dws_weight').attr('disabled', true);
+                }
+            });
+
+            $("#detain_dws").on('change', function(){
+                if($("#detain_dws").is(":checked")){
+                    $('#detain_dws_weight').attr('disabled', false);
+                }else{
+                    $('#detain_dws_weight').attr('disabled', true);
+                }
+            });
+
+            $("#sameday_dws").on('change', function(){
+                if($("#sameday_dws").is(":checked")){
+                    $('#sameday_dws_weight').attr('disabled', false);
+                }else{
+                    $('#sameday_dws_weight').attr('disabled', true);
+                }
+            });
+
+            
             $("#on_default").on('change', function(){
                 if($("#ol_default").is(":checked")){
                     $("#ol_default").trigger('click');
