@@ -36,6 +36,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
@@ -4455,11 +4456,27 @@ class AdminAPIController extends Controller
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
                     //check weight from dws 
-                    if($dense_weight < $volume_weight){
-                        $actual_weight = $volume_weight; 
+                    $dws_charges = DwsWeightCharges::where('user_id',$shipment->user_id,'shipping_mode_id',$shipment->shipping_mode_id);
+                    if($dws_charges->exists()){
+                        $dws_charges = $dws_charges->get()->first();
+                        $dws_charges_status = $dws_charges->dws_weight_status;
+                        if($dws_charges_status == 1){
+                            if($dense_weight < $volume_weight){
+                                $actual_weight = $volume_weight; 
+                            }else{
+                                $actual_weight = $dense_weight; 
+                            }
+                        }else{
+                            if($dense_weight < $volume_weight){
+                                $actual_weight = $dense_weight; 
+                            }else{
+                                $actual_weight = $volume_weight; 
+                            }
+                        }
                     }else{
-                        $actual_weight = $dense_weight; 
+                        return response()->json(['status' => 1, 'message' => 'weight not found']);
                     }
+                    
                     //check weight from dws end
                     $shipment->actual_weight = $actual_weight;
                     $shipment->save();
