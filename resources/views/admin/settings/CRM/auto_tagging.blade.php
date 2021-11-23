@@ -167,7 +167,7 @@
                     @if (session('role_id') == 1 || in_array(640, session('permissions')))
                     
                     {
-                        text: '<i class="la la-plus"></i> ADD',
+                        text: '<i class="la la-plus"></i> Add',
                         className: 'btn btn-primary tag_agents',
                         enabled: true,
                         action: function (e, dt, node, config) {
