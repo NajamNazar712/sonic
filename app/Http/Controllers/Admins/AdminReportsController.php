@@ -9618,7 +9618,9 @@ class AdminReportsController extends Controller
                 }
               
         });
-            
+        if ($tracking_number = $request->get('tracking_number')) {
+            $datatable->whereIn('sh.tracking_number', explode(',', $tracking_number));
+        }
        
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
@@ -9628,9 +9630,7 @@ class AdminReportsController extends Controller
         if ($shipper_id = $request->get('search_shipper')) {
             $datatable->where('sh.user_id', $shipper_id);
         }
-        if ($tracking_number = $request->get('tracking_number')) {
-            $datatable->whereIn('sh.tracking_number', explode(',', $tracking_number));
-        }
+        
         if ($status_marked = $request->get('status_marked')) {
             $datatable->where('ss.id', $status_marked);
         }
@@ -9641,30 +9641,32 @@ class AdminReportsController extends Controller
             $datatable->where('shipments_journey.admin_id', $admins_id);
         }
         if ($search_last_rider = $request->get('search_last_rider')) {
-            // $rider = Rider::find($search_last_rider);
-            
-            // if($shipments->status_id == 5){
-            //     $delivery_note = DeliveryNote::find($shipments->ref_id);
-            //      return $delivery_note->rider->name;
-            // }elseif($shipments->status_id == 2){
-            //     return $shipments->rider_status_marked_by;
-            // }elseif($shipments->status_id == 23){
-            //     $return_note_shipment = ReturnNoteShipment::where('shipment_id',$shipments->shipment_id)->get()->first();
-            //     $return_note = ReturnNote::find($return_note_shipment->return_note_id);
-            //     return $return_note->rider->name;
-            // }
+            $datatable->where(function ($query) use ($search_last_rider) {
+                $query->where([
+                    ['dn.rider_id', '=', $search_last_rider],
+                    ['shipments_journey.shipper_status_id', '=', '5']
+                ])->orWhere([
+                    ['rn.rider_id', '=', $search_last_rider],
+                    ['shipments_journey.shipper_status_id', '=', '23']
+                ])->orWhere([
+                    ['r.id', '=', $search_last_rider],
+                    ['shipments_journey.shipper_status_id', '=', '2']
+                ]);
 
-            // $datatable->where('r.name', $rider->name);
-            $datatable->where([
-                ['dn.rider_id', '=', $search_last_rider],
-                ['shipments_journey.shipper_status_id', '=', '5']
-            ])->orWhere([
-                ['rn.rider_id', '=', $search_last_rider],
-                ['shipments_journey.shipper_status_id', '=', '23']
-            ])->orWhere([
-                ['r.id', '=', $search_last_rider],
-                ['shipments_journey.shipper_status_id', '=', '2']
-            ]);
+            });
+
+
+
+            // $datatable->where([
+            //     ['dn.rider_id', '=', $search_last_rider],
+            //     ['shipments_journey.shipper_status_id', '=', '5']
+            // ])->orWhere([
+            //     ['rn.rider_id', '=', $search_last_rider],
+            //     ['shipments_journey.shipper_status_id', '=', '23']
+            // ])->orWhere([
+            //     ['r.id', '=', $search_last_rider],
+            //     ['shipments_journey.shipper_status_id', '=', '2']
+            // ]);
                 
         }
         
