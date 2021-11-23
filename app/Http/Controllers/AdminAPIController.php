@@ -4454,12 +4454,13 @@ class AdminAPIController extends Controller
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
-                    
+                    //check weight from dws 
                     if($dense_weight < $volume_weight){
                         $actual_weight = $volume_weight; 
                     }else{
                         $actual_weight = $dense_weight; 
                     }
+                    //check weight from dws end
                     $shipment->actual_weight = $actual_weight;
                     $shipment->save();
 
