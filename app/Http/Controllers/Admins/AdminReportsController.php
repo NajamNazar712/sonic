@@ -9658,10 +9658,10 @@ class AdminReportsController extends Controller
             $datatable->where([
                 ['dn.rider_id', '=', $search_last_rider],
                 ['shipments_journey.shipper_status_id', '=', '5']
-            ])->orWhere([
+            ])->where([
                 ['rn.rider_id', '=', $search_last_rider],
                 ['shipments_journey.shipper_status_id', '=', '23']
-            ])->orWhere([
+            ])->where([
                 ['r.id', '=', $search_last_rider],
                 ['shipments_journey.shipper_status_id', '=', '2']
             ]);
