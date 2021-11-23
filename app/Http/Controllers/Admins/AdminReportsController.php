@@ -9655,7 +9655,16 @@ class AdminReportsController extends Controller
             // }
 
             // $datatable->where('r.name', $rider->name);
-            $datatable->where('dn.rider_id', $search_last_rider)->orWhere('rn.rider_id',$search_last_rider)->orWhere('r.id',$search_last_rider);
+            $datatable->where([
+                ['dn.rider_id', '=', $search_last_rider],
+                ['shipments_journey.shipper_status_id', '=', '5']
+            ])->orWhere([
+                ['rn.rider_id', '=', $search_last_rider],
+                ['shipments_journey.shipper_status_id', '=', '23']
+            ])->orWhere([
+                ['r.id', '=', $search_last_rider],
+                ['shipments_journey.shipper_status_id', '=', '2']
+            ]);
                 
         }
         
