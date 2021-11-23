@@ -9610,8 +9610,8 @@ class AdminReportsController extends Controller
                 }elseif($shipments->status_id == 2){
                     return $shipments->rider_status_marked_by;
                 }elseif($shipments->status_id == 23){
-                    $return_note_shipment = ReturnNoteShipment::where('shipment_id',$shipments->shipment_id)->get()->first();
-                    $return_note = ReturnNote::find($return_note_shipment->return_note_id);
+                    // $return_note_shipment = ReturnNoteShipment::where('shipment_id',$shipments->shipment_id)->get()->first();
+                    $return_note = ReturnNote::find($shipments->ref_id);
                     return $return_note->rider->name;
                 }else{
                     return '';
@@ -9658,10 +9658,10 @@ class AdminReportsController extends Controller
             $datatable->where([
                 ['dn.rider_id', '=', $search_last_rider],
                 ['shipments_journey.shipper_status_id', '=', '5']
-            ])->where([
+            ])->orWhere([
                 ['rn.rider_id', '=', $search_last_rider],
                 ['shipments_journey.shipper_status_id', '=', '23']
-            ])->where([
+            ])->orWhere([
                 ['r.id', '=', $search_last_rider],
                 ['shipments_journey.shipper_status_id', '=', '2']
             ]);
