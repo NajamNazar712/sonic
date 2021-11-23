@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Auto Tagging Agents')
+@section('title', 'Auto Tagging Users')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Auto Tagging Agents
+                    Auto Tagging Users
                 </h1>
 
                 <div class="card">
@@ -21,7 +21,7 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Agent</th>
+                                    <th class="border-primary border-darken-1">User</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
@@ -38,7 +38,7 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Tag Agent</h4>
+                    <h4 class="modal-title" id="">Tag User</h4>
                 </div>
                 <form method="post" id="crm_agent_assign" action="{{route('admin.settings.auto_tagging.submit')}}">
                     @csrf
@@ -75,7 +75,7 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Edit Agent</h4>
+                    <h4 class="modal-title" id="">Edit User</h4>
                 </div>
                 <form method="post" id="crm_agent_edit" action="{{route('admin.settings.auto_tagging.update')}}">
                     @csrf
@@ -137,13 +137,13 @@
             });
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
-                placeholder:"Select Agent",
+                placeholder:"Select User",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
             $('#city_id').prepend('<option selected></option>').select2({
                 width:'100%',
-                placeholder:"Select Zone",
+                placeholder:"Select City",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
