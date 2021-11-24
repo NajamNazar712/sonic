@@ -9959,8 +9959,7 @@ class RiderAPIController extends Controller
                       </html>';
 
                     $pdf = SnappyPDF::loadHTML($html);
-
-                    $filename = 'payslip_' . $payslip->id . '-' . $payroll_month . '.pdf';
+                    $filename = 'payslip_'. $payslip->id .  Carbon::now()->toDateTimeString() . '-' . $payroll_month . '.pdf';
                     $path = 'payslip_pdf/' . $filename;
                     $result = $pdf->download($filename);
                     Storage::disk('public')->put($path, $result);
