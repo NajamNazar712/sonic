@@ -18,6 +18,9 @@ use App\Http\Models\Notification;
 
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\City;
+use Illuminate\Support\Facades\Storage;
 
 use Auth;
 
@@ -33,7 +36,9 @@ class AdminNotificationsController extends Controller
         $notifications = NotificationType::all();
         $riders = Rider::where('status', 1)->get();
         $employees = Admin::where('status', 1)->get();
-      return view('admin.notifications.index')->with(['notifications'=>$notifications, 'riders' => $riders, 'employees' => $employees]);
+        $hubs = DB::connection('reports')->table('cities')->where('hub',1)->where('status', 1)->where('business_category_id', 1)->select('id','name')->get();
+        $cities = DB::connection('reports')->table('cities')->where('status', 1)->where('business_category_id', 1)->select('id','name')->get();
+      return view('admin.notifications.index')->with(['notifications'=>$notifications, 'riders' => $riders, 'employees' => $employees, 'hubs' => $hubs, 'cities' => $cities]);
     }
 
     public function list(Request $request) {
@@ -86,26 +91,68 @@ class AdminNotificationsController extends Controller
     }
 
     public function send_custom_email(Request $request) {
+        $attachments = array();
         if ($request->get('receiver') == 1) {
-            $emails = Admin::all()->pluck('email')->toArray();
-
+            if($request->get('search_hub') == 0) {
+                $emails = Admin::all()->pluck('email')->toArray();
+            }
+            else {
+                $emails = Admin::where('default_hub_id', '=', $request->get('search_hub'))->pluck('email')->toArray();
+            }
         }
         else {
-            if ($request->get('shipper_status') == 1) {
-                $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+            if($request->get('search_city') == 0)
+            {
+                if ($request->get('shipper_status') == 1) {
+                    $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+                }
+                else if ($request->get('shipper_status') == 2) {
+                    $emails = User::where('status', '=', 4)->where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+                }
+                else {
+                    $emails = User::where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+                }
             }
-            else if ($request->get('shipper_status') == 2){
-                $emails = User::where('status', '=', 4)->where('blacklist', '=', 0)->get()->pluck('email')->toArray();
-            }
-            else{
-                $emails = User::where('blacklist', '=', 0)->get()->pluck('email')->toArray();
+            else
+            {
+                if ($request->get('shipper_status') == 1) {
+                    $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
+                }
+                else if ($request->get('shipper_status') == 2) {
+                    $emails = User::where('status', '=', 4)->where('blacklist', '=', 0)->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
+                }
+                else {
+                    $emails = User::where('blacklist', '=', 0)->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
+                }
             }
         }
 
         if (!empty($emails)) {
             $subject = $request->get('subject');
             $body = $request->get('body');
-
+            $body_attachment_message= 'Please Find the Attachment from the following Link(s).'. PHP_EOL;
+            if($request->hasFile('attachment'))
+            {
+                $files = $request->file('attachment');
+                foreach ($files as $file) {
+                    $image = $file;
+                    $extension = $image->getClientOriginalExtension();
+                    $originalname = pathinfo( $image->getClientOriginalName(), PATHINFO_FILENAME);
+                    $random = rand(1000, 100000);
+                    $now = Carbon::now();
+                    $time = $now->year . '_' . $now->month;
+                    $generated_image_name =  $time . $random . Auth::id() . '.' . $extension;
+                    $image->move(public_path('storage/custom_email_attachments'), $generated_image_name);
+                    $fullpath = Storage::disk('public')->url('/storage/custom_email_attachments/'.$generated_image_name);
+                    array_push($attachments,$fullpath);
+                }
+                foreach ($attachments as $attachment)
+                {
+                    $body_attachment_message = $body_attachment_message . $attachment. PHP_EOL;
+                }
+                $body_attachment_message =  $body_attachment_message. PHP_EOL . 'NOTE: the attachments will be removed after 7 days(s)';
+                //dd($body_attachment_message);
+            }
             foreach ($emails as $to) {
                 NotificationsController::custom(1, $subject, $body, $to);
             }
