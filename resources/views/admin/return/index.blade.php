@@ -260,7 +260,7 @@
                     <form id="single_update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                         <input type="hidden" id="return_reason_shipment_id">
                         <div class="form-group">
-                            <input type="text" id="return_reason_shipment_remarks" class="form-control" placeholder="Remarks">
+                            <input type="text" id="return_reason_shipment_remarks" maxlength="100" class="form-control" placeholder="Remarks">
                         </div>
                         <div class="form-group">
                             @if($return_confirm_reasons)

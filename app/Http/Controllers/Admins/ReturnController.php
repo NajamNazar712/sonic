@@ -412,7 +412,7 @@ class ReturnController extends Controller
     }
 
     public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
-
+        //return ['status'=>0,'error'=>"Shipments is not from your assigned Hub"];Xyedth
         $shipment_ids = $request->shipment_ids;
         $return_reason = $request->return_reason_select;
         $remarks = $request->remark;
@@ -566,7 +566,7 @@ class ReturnController extends Controller
     }
 
     public function return_marked_single_status(Request $request){
-        
+        //return ['status'=>0,'error'=>"Shipments is not from your assigned Hub"];Xyedth
         $remark = $request->remark;
         if($request->action == 'confirm'){
             $return_reason = $request->single_return_reason_select;
