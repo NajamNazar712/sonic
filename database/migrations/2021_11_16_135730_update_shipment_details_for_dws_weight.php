@@ -14,8 +14,12 @@ class UpdateShipmentDetailsForDwsWeight extends Migration
     public function up()
     {
         Schema::table('shipment_details', function (Blueprint $table) {
-            $table->tinyInteger('dws_status')->nullable();
-            $table->string('dws_image')->nullable();
+            $table->tinyInteger('dws_status')->nullable()->index();
+            $table->string('dws_image')->nullable()->index();
+            $table->string('dense_weight')->nullable()->index();
+            $table->string('dimension_l')->nullable()->index();
+            $table->string('dimension_w')->nullable()->index();
+            $table->string('dimension_h')->nullable()->index();
         });
     }
 

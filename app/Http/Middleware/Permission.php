@@ -1119,6 +1119,8 @@ class Permission
             'settings.auto_assigning.index' => 616,
             'settings.auto_assigning.list' => 616,
 
+            'reports.dws_report.index' => 642,
+
 
         ],
 

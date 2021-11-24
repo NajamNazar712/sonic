@@ -951,8 +951,8 @@ class AdminCorporateAccountsController extends Controller
             }
             //dd($weightAlready);
             if ($request->has('on_dws_weight')) {
-                if($request->on_dws_weight == 0){
-                    DwsWeightChargesController::add($id, 1, 0 ,Auth::id());
+                if($request->on_dws_weight == 2){
+                    DwsWeightChargesController::add($id, 1, 2 ,Auth::id());
                 }else{
                     DwsWeightChargesController::add($id, 1, 1 ,Auth::id());
                 }
@@ -1170,8 +1170,8 @@ class AdminCorporateAccountsController extends Controller
 
             }
             if ($request->has('ol_dws_weight')) {
-                if($request->ol_dws_weight == 0){
-                    DwsWeightChargesController::add($id, 2, 0 ,Auth::id());
+                if($request->ol_dws_weight == 2){
+                    DwsWeightChargesController::add($id, 2, 2 ,Auth::id());
                 }else{
                     DwsWeightChargesController::add($id, 2, 1 ,Auth::id());
                 }
@@ -1393,8 +1393,8 @@ class AdminCorporateAccountsController extends Controller
 
             }
             if ($request->has('detain_dws_weight')) {
-                if($request->detain_dws_weight == 0){
-                    DwsWeightChargesController::add($id, 3, 0 ,Auth::id());
+                if($request->detain_dws_weight == 2){
+                    DwsWeightChargesController::add($id, 3, 2 ,Auth::id());
                 }else{
                     DwsWeightChargesController::add($id, 3, 1 ,Auth::id());
                 }
@@ -1613,8 +1613,8 @@ class AdminCorporateAccountsController extends Controller
 
             }
             if ($request->has('sameday_dws_weight')) {
-                if($request->sameday_dws_weight == 0){
-                    DwsWeightChargesController::add($id, 4, 0 ,Auth::id());
+                if($request->sameday_dws_weight == 2){
+                    DwsWeightChargesController::add($id, 4, 2 ,Auth::id());
                 }else{
                     DwsWeightChargesController::add($id, 4, 1 ,Auth::id());
                 }
@@ -3135,8 +3135,8 @@ class AdminCorporateAccountsController extends Controller
                 }
 
                 if ($request->has('on_dws_weight')) {
-                    if($request->on_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 1, 0 ,Auth::id());
+                    if($request->on_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 1, 2 ,Auth::id());
                       
                     }else{
                         DwsWeightChargesController::edit($id, 1, 1 ,Auth::id());
@@ -3491,8 +3491,8 @@ class AdminCorporateAccountsController extends Controller
                 }
 
                 if ($request->has('ol_dws_weight')) {
-                    if($request->ol_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 2, 0 ,Auth::id());
+                    if($request->ol_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 2, 2 ,Auth::id());
                         
 
                     }else{
@@ -3850,8 +3850,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('detain_dws_weight')) {
-                    if($request->detain_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 3, 0 ,Auth::id());
+                    if($request->detain_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 3, 2 ,Auth::id());
                         
                        
 
@@ -4210,8 +4210,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 4, 0 ,Auth::id());
+                    if($request->sameday_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 4, 2 ,Auth::id());
                         
                         
 
@@ -5103,8 +5103,8 @@ class AdminCorporateAccountsController extends Controller
                 //dd($weightAlready);
 
                 if ($request->has('on_dws_weight')) {
-                    if($request->on_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 1, 0 ,Auth::id());
+                    if($request->on_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 1, 2 ,Auth::id());
                         
                        
 
@@ -5333,8 +5333,8 @@ class AdminCorporateAccountsController extends Controller
                 }
 
                 if ($request->has('ol_dws_weight')) {
-                    if($request->ol_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 2, 0 ,Auth::id());
+                    if($request->ol_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 2, 2 ,Auth::id());
                         
                         
 
@@ -5564,8 +5564,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('detain_dws_weight')) {
-                    if($request->detain_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 3, 0 ,Auth::id());
+                    if($request->detain_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 3, 2 ,Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 3, 1 ,Auth::id());
@@ -5791,8 +5791,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 4, 0 ,Auth::id());
+                    if($request->sameday_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 4, 2 ,Auth::id());
                         
 
                     }else{
@@ -8007,8 +8007,8 @@ class AdminCorporateAccountsController extends Controller
                 //dd($weightAlready);
 
                 if ($request->has('on_dws_weight')) {
-                    if($request->on_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 1, 0 ,Auth::id());
+                    if($request->on_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 1, 2 ,Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 1, 1 ,Auth::id());
@@ -8232,8 +8232,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('ol_dws_weight')) {
-                    if($request->ol_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 2, 0 ,Auth::id());
+                    if($request->ol_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 2, 2 ,Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 2, 1 ,Auth::id());
@@ -8460,8 +8460,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('detain_dws_weight')) {
-                    if($request->detain_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 3, 0 ,Auth::id());
+                    if($request->detain_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 3, 2 ,Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 3, 1 ,Auth::id());
@@ -8686,8 +8686,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 4, 0 ,Auth::id());
+                    if($request->sameday_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 4, 2 ,Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 4, 1 ,Auth::id());
@@ -12086,8 +12086,8 @@ class AdminCorporateAccountsController extends Controller
             }
             //dd($weightAlready);
             if ($request->has('on_dws_weight')) {
-                if($request->on_dws_weight == 0){
-                    DwsWeightChargesController::add($id, 1, 0, Auth::id());
+                if($request->on_dws_weight == 2){
+                    DwsWeightChargesController::add($id, 1, 2, Auth::id());
 
                 }else{
                     DwsWeightChargesController::add($id, 1, 1, Auth::id());
@@ -12303,9 +12303,9 @@ class AdminCorporateAccountsController extends Controller
 
             }
             if ($request->has('ol_dws_weight')) {
-                if($request->ol_dws_weight == 0){
+                if($request->ol_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 2, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 2, 2, Auth::id());
 
 
                 }else{
@@ -12527,9 +12527,9 @@ class AdminCorporateAccountsController extends Controller
 
             }
             if ($request->has('detain_dws_weight')) {
-                if($request->detain_dws_weight == 0){
+                if($request->detain_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 3, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 3, 2, Auth::id());
 
 
                 }else{
@@ -12747,8 +12747,8 @@ class AdminCorporateAccountsController extends Controller
 
             }
             if ($request->has('sameday_dws_weight')) {
-                if($request->sameday_dws_weight == 0){
-                    DwsWeightChargesController::add($id, 4, 0, Auth::id());
+                if($request->sameday_dws_weight == 2){
+                    DwsWeightChargesController::add($id, 4, 2, Auth::id());
 
                 }else{
                     DwsWeightChargesController::add($id, 4, 1, Auth::id());
@@ -13669,8 +13669,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('on_dws_weight')) {
-                    if($request->on_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
+                    if($request->on_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 1, 2, Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 1, 1, Auth::id());
@@ -14019,8 +14019,8 @@ class AdminCorporateAccountsController extends Controller
                 }
 
                 if ($request->has('ol_dws_weight')) {
-                    if($request->ol_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
+                    if($request->ol_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 2, 2, Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 2, 1, Auth::id());
@@ -14372,8 +14372,8 @@ class AdminCorporateAccountsController extends Controller
                 }
 
                 if ($request->has('detain_dws_weight')) {
-                    if($request->detain_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
+                    if($request->detain_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 3, 2, Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 3, 1, Auth::id());
@@ -14724,8 +14724,8 @@ class AdminCorporateAccountsController extends Controller
                 }
 
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
+                    if($request->sameday_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 4, 2, Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 4, 1, Auth::id());
@@ -15547,8 +15547,8 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
-                    if($request->on_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
+                    if($request->on_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 1, 2, Auth::id());
                         
 
                     }else{
@@ -15766,8 +15766,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('ol_dws_weight')) {
-                    if($request->ol_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
+                    if($request->ol_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 2, 2, Auth::id());
 
 
                     }else{
@@ -15985,8 +15985,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('detain_dws_weight')) {
-                    if($request->detain_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
+                    if($request->detain_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 3, 2, Auth::id());
 
 
                     }else{
@@ -16202,8 +16202,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
+                    if($request->sameday_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 4, 2, Auth::id());
 
 
                     }else{
@@ -18306,8 +18306,8 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
+                    if($request->sameday_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 1, 2, Auth::id());
 
 
                     }else{
@@ -18523,8 +18523,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('ol_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
+                    if($request->sameday_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 2, 2, Auth::id());
 
 
                     }else{
@@ -18742,8 +18742,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('detain_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
+                    if($request->sameday_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 3, 2, Auth::id());
 
 
                     }else{
@@ -18959,8 +18959,8 @@ class AdminCorporateAccountsController extends Controller
                 }
 
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
+                    if($request->sameday_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 4, 2, Auth::id());
 
 
                     }else{
@@ -21986,8 +21986,8 @@ class AdminCorporateAccountsController extends Controller
             }
             //dd($weightAlready);
             if ($request->has('on_dws_weight')) {
-                if($request->on_dws_weight == 0){
-                    DwsWeightChargesController::add($id, 1, 0, Auth::id());
+                if($request->on_dws_weight == 2){
+                    DwsWeightChargesController::add($id, 1, 2, Auth::id());
 
                    
                 }else{
@@ -22176,8 +22176,8 @@ class AdminCorporateAccountsController extends Controller
 
             }
             if ($request->has('ol_dws_weight')) {
-                if($request->ol_dws_weight == 0){
-                    DwsWeightChargesController::add($id, 2, 0, Auth::id());
+                if($request->ol_dws_weight == 2){
+                    DwsWeightChargesController::add($id, 2, 2, Auth::id());
 
 
                 }else{
@@ -22367,9 +22367,9 @@ class AdminCorporateAccountsController extends Controller
 
             }
             if ($request->has('detain_dws_weight')) {
-                if($request->detain_dws_weight == 0){
+                if($request->detain_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 3, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 3, 2, Auth::id());
 
                 }else{
                     DwsWeightChargesController::add($id, 3, 1, Auth::id());
@@ -22557,8 +22557,8 @@ class AdminCorporateAccountsController extends Controller
             }
 
             if ($request->has('sameday_dws_weight')) {
-                if($request->sameday_dws_weight == 0){
-                    DwsWeightChargesController::add($id, 4, 0, Auth::id());
+                if($request->sameday_dws_weight == 2){
+                    DwsWeightChargesController::add($id, 4, 2, Auth::id());
 
 
                 }else{
@@ -23954,10 +23954,10 @@ class AdminCorporateAccountsController extends Controller
                 //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
                     if($request->on_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
+                        DwsWeightChargesController::edit($id, 1, 2, Auth::id());
 
                     }else{
-                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
+                        DwsWeightChargesController::edit($id, 1, 1, Auth::id());
 
                     }
         
@@ -24233,8 +24233,8 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('ol_dws_weight')) {
-                    if($request->ol_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
+                    if($request->ol_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 2, 2, Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 2, 1, Auth::id());
@@ -24511,9 +24511,9 @@ class AdminCorporateAccountsController extends Controller
                 //dd($weightAlready);
 
                 if ($request->has('detain_dws_weight')) {
-                    if($request->detain_dws_weight == 0){
+                    if($request->detain_dws_weight == 2){
                         
-                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
+                        DwsWeightChargesController::edit($id, 3, 2, Auth::id());
 
 
                     }else{
@@ -24792,9 +24792,9 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
+                    if($request->sameday_dws_weight == 2){
                         
-                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
+                        DwsWeightChargesController::edit($id, 4, 2, Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 4, 1, Auth::id());
@@ -25618,9 +25618,9 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
-                    if($request->on_dws_weight == 0){
+                    if($request->on_dws_weight == 2){
                         
-                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
+                        DwsWeightChargesController::edit($id, 1, 2, Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 1, 1, Auth::id());
@@ -25804,9 +25804,9 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('ol_dws_weight')) {
-                    if($request->ol_dws_weight == 0){
+                    if($request->ol_dws_weight == 2){
                         
-                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
+                        DwsWeightChargesController::edit($id, 2, 2, Auth::id());
 
 
                     }else{
@@ -25992,8 +25992,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('detain_dws_weight')) {
-                    if($request->detain_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
+                    if($request->detain_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 3, 2, Auth::id());
 
 
                     }else{
@@ -26175,9 +26175,9 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
+                    if($request->sameday_dws_weight == 2){
                         
-                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
+                        DwsWeightChargesController::edit($id, 4, 2, Auth::id());
 
 
                     }else{
@@ -28067,9 +28067,9 @@ class AdminCorporateAccountsController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
-                    if($request->on_dws_weight == 0){
+                    if($request->on_dws_weight == 2){
                         
-                        DwsWeightChargesController::edit($id, 1, 0, Auth::id());
+                        DwsWeightChargesController::edit($id, 1, 2, Auth::id());
 
 
                     }else{
@@ -28252,9 +28252,9 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('ol_dws_weight')) {
-                    if($request->ol_dws_weight == 0){
+                    if($request->ol_dws_weight == 2){
                         
-                        DwsWeightChargesController::edit($id, 2, 0, Auth::id());
+                        DwsWeightChargesController::edit($id, 2, 2, Auth::id());
 
 
                     }else{
@@ -28438,8 +28438,8 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('detain_dws_weight')) {
-                    if($request->detain_dws_weight == 0){
-                        DwsWeightChargesController::edit($id, 3, 0, Auth::id());
+                    if($request->detain_dws_weight == 2){
+                        DwsWeightChargesController::edit($id, 3, 2, Auth::id());
 
 
                     }else{
@@ -28620,9 +28620,9 @@ class AdminCorporateAccountsController extends Controller
 
                 }
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 0){
+                    if($request->sameday_dws_weight == 2){
                         
-                        DwsWeightChargesController::edit($id, 4, 0, Auth::id());
+                        DwsWeightChargesController::edit($id, 4, 2, Auth::id());
 
                     }else{
                         DwsWeightChargesController::edit($id, 4, 1, Auth::id());
@@ -30485,8 +30485,8 @@ class AdminCorporateAccountsController extends Controller
               }
               //dd($weightAlready);
               if ($request->has('on_dws_weight')) {
-                if($request->on_dws_weight == 0){
-                    DwsWeightChargesController::add($id, 1, 0, Auth::id());
+                if($request->on_dws_weight == 2){
+                    DwsWeightChargesController::add($id, 1, 2, Auth::id());
                     
 
                 }else{
@@ -30709,9 +30709,9 @@ class AdminCorporateAccountsController extends Controller
 
               }
               if ($request->has('ol_dws_weight')) {
-                if($request->ol_dws_weight == 0){
+                if($request->ol_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 2, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 2, 2, Auth::id());
 
 
                 }else{
@@ -30938,9 +30938,9 @@ class AdminCorporateAccountsController extends Controller
 
               }
               if ($request->has('detain_dws_weight')) {
-                if($request->detain_dws_weight == 0){
+                if($request->detain_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 3, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 3, 2, Auth::id());
 
 
                 }else{
@@ -31164,9 +31164,9 @@ class AdminCorporateAccountsController extends Controller
 
               }
               if ($request->has('sameday_dws_weight')) {
-                if($request->sameday_dws_weight == 0){
+                if($request->sameday_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 4, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 4, 2, Auth::id());
 
 
                 }else{
@@ -31867,9 +31867,9 @@ class AdminCorporateAccountsController extends Controller
               }
               //dd($weightAlready);
               if ($request->has('on_dws_weight')) {
-                if($request->on_dws_weight == 0){
+                if($request->on_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 1, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 1, 2, Auth::id());
 
 
                 }else{
@@ -32086,9 +32086,9 @@ class AdminCorporateAccountsController extends Controller
 
               }
               if ($request->has('ol_dws_weight')) {
-                if($request->ol_dws_weight == 0){
+                if($request->ol_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 2, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 2, 2, Auth::id());
 
 
                 }else{
@@ -32310,9 +32310,9 @@ class AdminCorporateAccountsController extends Controller
 
               }
               if ($request->has('detain_dws_weight')) {
-                if($request->detain_dws_weight == 0){
+                if($request->detain_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 3, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 3, 2, Auth::id());
 
 
                 }else{
@@ -32531,9 +32531,9 @@ class AdminCorporateAccountsController extends Controller
               }
 
               if ($request->has('sameday_dws_weight')) {
-                if($request->sameday_dws_weight == 0){
+                if($request->sameday_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 4, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 4, 2, Auth::id());
 
 
                 }else{
@@ -33196,9 +33196,9 @@ class AdminCorporateAccountsController extends Controller
               }
               //dd($weightAlready);
               if ($request->has('on_dws_weight')) {
-                if($request->on_dws_weight == 0){
+                if($request->on_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 1, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 1, 2, Auth::id());
 
 
                 }else{
@@ -33387,9 +33387,9 @@ class AdminCorporateAccountsController extends Controller
 
               }
               if ($request->has('ol_dws_weight')) {
-                if($request->ol_dws_weight == 0){
+                if($request->ol_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 2, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 2, 2, Auth::id());
 
 
                 }else{
@@ -33576,9 +33576,9 @@ class AdminCorporateAccountsController extends Controller
 
               }
               if ($request->has('detain_dws_weight')) {
-                if($request->detain_dws_weight == 0){
+                if($request->detain_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 3, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 3, 2, Auth::id());
 
 
                 }else{
@@ -33765,9 +33765,9 @@ class AdminCorporateAccountsController extends Controller
 
               }
               if ($request->has('sameday_dws_weight')) {
-                if($request->sameday_dws_weight == 0){
+                if($request->sameday_dws_weight == 2){
                     
-                    DwsWeightChargesController::add($id, 4, 0, Auth::id());
+                    DwsWeightChargesController::add($id, 4, 2, Auth::id());
 
 
                 }else{

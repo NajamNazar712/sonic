@@ -40,7 +40,7 @@ class DwsWeightChargesController extends Controller
             'admin_id' => $admin_id
         ]);
 
-        PendingDwsWeightCharges::create([
+        PendingDwsWeightCharges::create([ 
             'user_id' => $user_id,
             'shipping_mode_id' => $shipping_mode_id,
             'dws_weight_status' => $dws_weight_status,

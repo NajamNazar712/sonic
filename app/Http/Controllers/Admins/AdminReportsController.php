@@ -9741,5 +9741,37 @@ class AdminReportsController extends Controller
             $datatable->where('a.id', $admin_id);
         }
         return $datatable->make(true);
-    }}
+    }
+
+    public function dws_report_index(){
+        return view('admin.reports.dws_report');
+
+    }
+
+    public function dws_report_list(Request $request){
+
+        // if($request->get('excel') && $request->get('excel') == true)
+        // {
+        //     ActivityTrailController::createActivityTrailLog(Auth::id(),268);
+        // }
+        $shipments = DB::connection('reports')->table('shipments')->join('shipment_details as sd', 'shipments.id', '=', 'sd.shipment_id')
+            ->select(['shipments.tracking_number','shipments.tracking_number as tracking_number_link','sd.dense_weight as dense_weight','sd.dimension_l as length','sd.dimension_w as width','sd.dimension_h as height','shipments.created_at as date'])
+            ->where('sd.dws_status','<>',Null);
+            
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+        }
+        if ($tracking_number = $request->get('tracking_number')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_number));
+        }
+        return $datatable->make(true);
+    }
+}
 

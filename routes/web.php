@@ -2434,6 +2434,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@reverse_pickup_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@reverse_pickup_list')->name('list');
         });
+        Route::prefix('dws_report')->name('dws_report.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@dws_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@dws_report_list')->name('list');
+        });
+
+        
     });
 
     //Reports end
