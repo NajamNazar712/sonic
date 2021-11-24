@@ -413,10 +413,9 @@ class ReturnController extends Controller
 
     public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
 
-
         $shipment_ids = $request->shipment_ids;
         $return_reason = $request->return_reason_select;
-        // $remarks = $request->remark;
+        $remarks = $request->remark;
 
         if($request->action == 'confirm'){
 
@@ -567,7 +566,7 @@ class ReturnController extends Controller
     }
 
     public function return_marked_single_status(Request $request){
-
+        
         $remark = $request->remark;
         if($request->action == 'confirm'){
             $return_reason = $request->single_return_reason_select;

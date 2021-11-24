@@ -259,7 +259,9 @@
                 <div class="modal-body text-center">
                     <form id="single_update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                         <input type="hidden" id="return_reason_shipment_id">
-                        <input type="hidden" id="return_reason_shipment_remarks">
+                        <div class="form-group">
+                            <input type="text" id="return_reason_shipment_remarks" class="form-control" placeholder="Remarks">
+                        </div>
                         <div class="form-group">
                             @if($return_confirm_reasons)
                                 <select id="single_return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
@@ -1425,7 +1427,16 @@
                                     'return_reason_select': return_reason_select
                                 }
                             }).done(function (data) {
-                                UnblockPagePermanently();
+                                if(data.status == 1){
+                                    UnblockPagePermanently();
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                }else{
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                }
                                 table.rows().deselect();
                                 selected_rows = [];
                                 shipment_remarks = {};
@@ -1433,8 +1444,6 @@
                                 table.button('.assign').disable();
                                 table.button('.re-attempt').disable();
                                 table.button('.un-assign').disable();
-                                table.draw('false');
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 $('#ReturnConfirmReasonModal').modal('hide');
                                 $('#return_reason_select').val(null).trigger('change');
                                 $('button.update_return_confirm').attr('disabled', false);
