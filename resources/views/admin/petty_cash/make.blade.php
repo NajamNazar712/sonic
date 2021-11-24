@@ -81,6 +81,7 @@
                             <tr role="row" class="bg-primary white">
 
                                 <th class="border-primary border-darken-1">S. No.</th>
+<<<<<<< HEAD
                                 <th class="border-primary border-darken-1">Zone</th>
                                 <th class="border-primary border-darken-1">Hub</th>
                                 <th class="border-primary border-darken-1">City / Location</th>
@@ -88,11 +89,22 @@
                                 <th class="border-primary border-darken-1">Date</th>
                                 <th class="border-primary border-darken-1">Account Head</th>
                                 <th class="border-primary border-darken-1">Account Title</th>
+=======
+                                <th class="border-primary border-darken-1">Account Head</th>
+                                <th class="border-primary border-darken-1">Account Title</th>
+                                <th class="border-primary border-darken-1">City / Location</th>
+>>>>>>> sprint_82
                                 <th class="border-primary border-darken-1">Details of Expense</th>
                                 <th class="border-primary border-darken-1"> Amount </th>
                                 <th class="border-primary border-darken-1"> Employee Id </th>
                                 <th class="border-primary border-darken-1"> Name </th>
                                 <th class="border-primary border-darken-1"> Designation </th>
+<<<<<<< HEAD
+=======
+                                <th class="border-primary border-darken-1"> DNCC/PNCC </th>
+                                <th class="border-primary border-darken-1"> Delivered Shipment Count</th>
+                                <th class="border-primary border-darken-1"> Amount </th>
+>>>>>>> sprint_82
                                 <th class="border-primary border-darken-1">Reference No.</th>
                                 <th class="border-primary border-darken-1">Remarks</th>
                                 <th class="border-primary border-darken-1">Reference Documents</th>
@@ -359,6 +371,7 @@
                 autoWidth: true,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+<<<<<<< HEAD
                     {name: 'zone', class: 'align-middle zone custom-col-width form-group'},
                     {name: 'hub', class: 'align-middle hub custom-col-width form-group'},
                     {name: 'city', class: 'align-middle city custom-col-width form-group'},
@@ -366,11 +379,22 @@
                     {name: 'date', class: 'align-middle date date-col-width form-group'},
                     {name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
                     {name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
+=======
+                    {name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
+                    {name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
+                    {name: 'city', class: 'align-middle city custom-col-width form-group'},
+>>>>>>> sprint_82
                     {name: 'details_of_expense', class: 'align-middle details_of_expense doe-col-width form-group'},
                     {name: 'amount', class: 'align-middle expense_amount custom-col-width form-group'},
                     {name: 'employee_id', class: 'align-middle employee_id custom-col-width form-group'},
                     {name: 'name', class: 'align-middle name custom-col-width form-group'},
                     {name: 'designation', class: 'align-middle designation custom-col-width form-group'},
+<<<<<<< HEAD
+=======
+                    {name: 'dncc', class: 'align-middle dncc custom-col-width form-group'},
+                    {name: 'delivered_shipment_count', class: 'align-middle delivered_shipment_count custom-col-width form-group'},
+                    {name: 'amount', class: 'align-middle expense_amount custom-col-width form-group'},
+>>>>>>> sprint_82
                     {name: 'reference_no', class: 'align-middle reference_no custom-col-width form-group'},
                     {name: 'remarks', class: 'align-middle custom-col-width remarks'},
                     {name: 'image', class: 'align-middle image custom-col-width form-group'},
@@ -475,6 +499,7 @@
                     return obj;
                 });
 
+<<<<<<< HEAD
                 var operation_managers = $.map({!! $operation_managers !!}, function (obj) {
                     obj.id = obj.id;
                     obj.text = obj.name+" ("+obj.trax_id+") ";
@@ -482,6 +507,9 @@
                 });
 
                 table.row.add([0, zone_select,hub_select,city_select,operation_manager_select,date_input,heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
+=======
+                table.row.add([0, heads_select,titles_select,city_select,expense_detail_input,employee_select,employee_name_input,employee_designation_input,dncc_select,delivered_shipment_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
+>>>>>>> sprint_82
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
