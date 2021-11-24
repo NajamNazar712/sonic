@@ -141,15 +141,16 @@ class AdminNotificationsController extends Controller
                     $random = rand(1000, 100000);
                     $now = Carbon::now();
                     $time = $now->year . '_' . $now->month;
-                    $generated_image_name =  $time . $random . Auth::id() . '.' . $extension;
+                    $image_name =  $time . $random . Auth::id();
+                    $generated_image_name =  $image_name . '.' . $extension;
                     $image->move(public_path('storage/custom_email_attachments'), $generated_image_name);
-                    $fullpath = Storage::disk('public')->url('/storage/custom_email_attachments/'.$generated_image_name);
+                    $fullpath = Storage::disk('public')->url('/custom_email_attachments/'.$generated_image_name);
                     array_push($attachments,$fullpath);
                 }
                 foreach ($attachments as $key => $attachment)
                 {
                     $key = $key + 1;
-                    $link = '<a href="' . $attachment . '" target="_blank">Attachment '.$key.'</a>';
+                    $link = '<a href="' . $attachment . '" target="_blank"><u> Attachment '.$key.'</u></a>';
                     $body_attachment_message = $body_attachment_message . $link . PHP_EOL;
                 }
                 // $body_attachment_message =  $body_attachment_message. PHP_EOL . 'NOTE: the attachments will be removed after 7 days(s)';
