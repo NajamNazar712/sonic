@@ -130,7 +130,7 @@ class AdminNotificationsController extends Controller
         if (!empty($emails)) {
             $subject = $request->get('subject');
             $body = $request->get('body');
-            $body_attachment_message= 'Please Find the Attachment from the following Link(s).'. PHP_EOL;
+            $body_attachment_message= PHP_EOL . 'Please Find the Attachment from the following Link(s).'. PHP_EOL;
             if($request->hasFile('attachment'))
             {
                 $files = $request->file('attachment');
@@ -146,12 +146,14 @@ class AdminNotificationsController extends Controller
                     $fullpath = Storage::disk('public')->url('/storage/custom_email_attachments/'.$generated_image_name);
                     array_push($attachments,$fullpath);
                 }
-                foreach ($attachments as $attachment)
+                foreach ($attachments as $key => $attachment)
                 {
-                    $body_attachment_message = $body_attachment_message . $attachment. PHP_EOL;
+                    $key = $key + 1;
+                    $link = '<a href="' . $attachment . '" target="_blank">Attachment '.$key.'</a>';
+                    $body_attachment_message = $body_attachment_message . $link . PHP_EOL;
                 }
-                $body_attachment_message =  $body_attachment_message. PHP_EOL . 'NOTE: the attachments will be removed after 7 days(s)';
-                //dd($body_attachment_message);
+                // $body_attachment_message =  $body_attachment_message. PHP_EOL . 'NOTE: the attachments will be removed after 7 days(s)';
+                $body = $body . PHP_EOL . $body_attachment_message;
             }
             foreach ($emails as $to) {
                 NotificationsController::custom(1, $subject, $body, $to);
