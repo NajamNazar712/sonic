@@ -3070,6 +3070,8 @@ class AdminDashboardController extends Controller
                         DwsWeightChargesController::edit($id, 1, 1,Auth::id());
 
                     }
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
 
@@ -3348,6 +3350,8 @@ class AdminDashboardController extends Controller
                         DwsWeightChargesController::edit($id, 2, 1,Auth::id());
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
             }
 
@@ -3625,6 +3629,8 @@ class AdminDashboardController extends Controller
                         DwsWeightChargesController::edit($id, 3, 1,Auth::id());
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
             }
 
@@ -3901,6 +3907,8 @@ class AdminDashboardController extends Controller
                         DwsWeightChargesController::edit($id, 4, 1,Auth::id());
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
             if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
@@ -4696,6 +4704,8 @@ class AdminDashboardController extends Controller
                         DwsWeightChargesController::edit($id, 1, 1,Auth::id());
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
             //Overland
@@ -4878,6 +4888,8 @@ class AdminDashboardController extends Controller
                         DwsWeightChargesController::edit($id, 2, 1,Auth::id());
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
 
             }
@@ -5064,6 +5076,8 @@ class AdminDashboardController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
             }
             //Sameday
@@ -5245,6 +5259,8 @@ class AdminDashboardController extends Controller
                         DwsWeightChargesController::edit($id, 4, 1,Auth::id());
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
 

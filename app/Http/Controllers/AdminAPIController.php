@@ -4463,6 +4463,9 @@ class AdminAPIController extends Controller
                         if($dws_charges_status == 1){
                             if($dense_weight < $volume_weight){
                                 $actual_weight = $volume_weight; 
+                                $shipment->length = $request->dimension_l;
+                                $shipment->breadth = $request->dimension_w;
+                                $shipment->height = $request->dimension_h;
                             }else{
                                 $actual_weight = $dense_weight; 
                             }
@@ -4471,6 +4474,9 @@ class AdminAPIController extends Controller
                                 $actual_weight = $dense_weight; 
                             }else{
                                 $actual_weight = $volume_weight; 
+                                $shipment->length = $request->dimension_l;
+                                $shipment->breadth = $request->dimension_w;
+                                $shipment->height = $request->dimension_h;
                             }
                         }
                     }else{

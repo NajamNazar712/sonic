@@ -3144,6 +3144,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
 
@@ -3501,6 +3503,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
             }
 
@@ -3860,6 +3864,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
 
             }
@@ -4221,6 +4227,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
 
             }
@@ -5113,6 +5121,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
             //Overland
@@ -5344,6 +5354,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
 
             }
@@ -5573,6 +5585,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
 
             }
@@ -5800,6 +5814,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
             WmsPendingUserInformation::where('user_id', $id)->delete();
@@ -8015,6 +8031,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
             //Overland
@@ -8241,6 +8259,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
 
             }
@@ -8468,6 +8488,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
 
             }
@@ -8695,6 +8717,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
             WmsPendingUserInformation::where('user_id', $id)->delete();
@@ -13703,6 +13727,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
 
@@ -14054,6 +14080,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
             }
 
@@ -14407,7 +14435,9 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
-                }  
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
+                }
 
             }
 
@@ -14758,6 +14788,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
 
             }
@@ -15583,6 +15615,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
             //Overland
@@ -15802,6 +15836,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
             }
             //Detain
@@ -16021,6 +16057,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
             }
             //Sameday
@@ -16237,6 +16275,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
 
             }
@@ -18341,6 +18381,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
             //Overland
@@ -18558,6 +18600,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
 
             }
@@ -18777,6 +18821,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
             }
             //Sameday
@@ -18994,6 +19040,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
             WmsPendingUserInformation::where('user_id', $id)->delete();
@@ -23987,6 +24035,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
 
@@ -24267,6 +24317,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
 
             }
@@ -24548,6 +24600,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
             }
 
@@ -24828,6 +24882,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
             if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
@@ -25654,6 +25710,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
             //Overland
@@ -25841,6 +25899,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
 
             }
@@ -26028,6 +26088,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
             }
             //Sameday
@@ -26212,6 +26274,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
 
@@ -28103,6 +28167,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
             //Overland
@@ -28289,6 +28355,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
             }
             //Detain
@@ -28473,6 +28541,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
             }
             //Sameday
@@ -28656,6 +28726,8 @@ class AdminCorporateAccountsController extends Controller
 
                     }
         
+                }else{
+                    DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
 
