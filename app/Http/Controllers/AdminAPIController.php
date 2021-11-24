@@ -4416,16 +4416,16 @@ class AdminAPIController extends Controller
     public function dws_weight(Request $request){
         
         $rules = [
-            'CN' => ['required', 'integer'],
+            'tracking_number' => ['required', 'integer'],
             'weight' => ['required'],
             'dimension_l' => ['required'],
             'dimension_w' => ['required'],
             'dimension_h' => ['required'],
-            'imgename' => ['required','mimes:pdf,png,jpeg,jpg,docx,doc'],
-            'Machine' => ['required'],
+            'image_name' => ['required','mimes:pdf,png,jpeg,jpg,docx,doc'],
+            'machine' => ['required'],
             'date' => ['required'],
-            'Package_type' => ['required'],
-            'isUploaded' => ['required'],
+            'package_type' => ['required'],
+            'is_uploaded' => ['required'],
             
         ];
 

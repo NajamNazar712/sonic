@@ -257,7 +257,7 @@
                                                    <div class="col-3 mt-1" >
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <label class="card-title">DWS Weight </label>
+                                                                <label class="card-title mr-1">DWS Weight </label>
                                                                 <input type="checkbox" name="on_dws" id="on_dws" class="switchery on_dws" data-size="xs" data-switchery="true" checked>
                                                             </div>
                                                         </fieldset>
@@ -744,7 +744,7 @@
                                                    <div class="col-3 mt-1" >
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <label class="card-title">DWS Weight </label>
+                                                                <label class="card-title mr-1">DWS Weight </label>
                                                                 <input type="checkbox" name="ol_dws" id="ol_dws" class="switchery ol_dws" data-size="xs" data-switchery="true" checked>
                                                             </div>
                                                         </fieldset>
@@ -1231,7 +1231,7 @@
                                                    <div class="col-3 mt-1" >
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <label class="card-title">DWS Weight </label>
+                                                                <label class="card-title mr-1">DWS Weight </label>
                                                                 <input type="checkbox" name="detain_dws" id="detain_dws" class="switchery detain_dws" data-size="xs" data-switchery="true" checked>
                                                             </div>
                                                         </fieldset>
@@ -1695,7 +1695,7 @@
                                                    <div class="col-3 mt-1" >
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <label class="card-title">DWS Weight </label>
+                                                                <label class="card-title mr-1">DWS Weight </label>
                                                                 <input type="checkbox" name="sameday_dws" id="sameday_dws" class="switchery sameday_dws" data-size="xs" data-switchery="true" checked>
                                                             </div>
                                                         </fieldset>

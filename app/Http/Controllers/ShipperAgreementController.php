@@ -24,6 +24,7 @@ use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\CRFTermsConditions;
+use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\InternationalRatesCashHandlingCharges;
@@ -707,7 +708,21 @@ otherwise it will be rejected</li>
                     }
 
                     if($weight_charges){
-                        $weight_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges </strong></thead></table></div></div>';
+                        $weight_charges_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Weight Charges</strong></thead></table></div></div>';
+                        $dws_weight_charges = DwsWeightCharges::where('user_id',$id)->where('shipping_mode_id',$rate->shipping_mode_id);
+                        if($dws_weight_charges->exists()){
+                            $dws_weight_charges = $dws_weight_charges->get()->first();
+                            if($dws_weight_charges->dws_weight_status == 1){
+                                $dws_Weight_type = 'High';
+                            }else{
+                                $dws_Weight_type = 'Low';
+
+                            }
+                            $weight_charges_details .= '<div class="row mb-0"><div class="col-5"><table class="table table-sm table-bordered mb-0 mt-0">
+                                <tbody><tr><td class="color primary" ><strong>DWS Weight</strong></td><td>' . $dws_Weight_type . '</td></tr></tbody>
+                              </table></div></div>';
+                        }
+
                         if($shipper->account_type_id == 2 && $corporate_rate_type != 3 ){
                             if($corporate_rate_type != 3){
                                 $chargeable_weight = CorporateMinChargeableWeight::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->where('delivery_type_id', 1)->first();
