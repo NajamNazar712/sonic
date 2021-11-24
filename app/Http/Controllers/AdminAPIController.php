@@ -4456,7 +4456,7 @@ class AdminAPIController extends Controller
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
                     //check weight from dws 
-                    $dws_charges = DwsWeightCharges::where('user_id',$shipment->user_id,'shipping_mode_id',$shipment->shipping_mode_id);
+                    $dws_charges = DwsWeightCharges::where('user_id',$shipment->user_id)->where('shipping_mode_id',$shipment->shipping_mode_id);
                     if($dws_charges->exists()){
                         $dws_charges = $dws_charges->get()->first();
                         $dws_charges_status = $dws_charges->dws_weight_status;

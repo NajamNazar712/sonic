@@ -63,6 +63,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">CN</th>
+                        <th class="border-primary border-darken-1">Weight Type</th>
                         <th class="border-primary border-darken-1">Dense Weight</th>
                         <th class="border-primary border-darken-1">Length (Volumetric Weight)</th>
                         <th class="border-primary border-darken-1">Breadth (Volumetric Weight)</th>
@@ -243,6 +244,7 @@
                             
                             head.push('S.No');
                             head.push('CN');
+                            head.push('Weight Type');
                             head.push('Dense Weight');
                             head.push('Length (Volumetric Weight)');
                             head.push('Breadth (Volumetric Weight)');
@@ -254,6 +256,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.weight_type);
                                 row.push(values.dense_weight);
                                 row.push(values.length);
                                 row.push(values.width);
@@ -307,7 +310,8 @@
                 order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number_link', name: 'sh.tracking_number', class: 'align-middle tracking_number_link', searchable: false},
+                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link', searchable: false},
+                    {data: 'weight_type', name: 'weight_type', class: 'align-middle weight_type', searchable: false},
                     {data: 'dense_weight', name: 'dense_weight', class: 'align-middle dense_weight'},
                     {data: 'length', name: 'length', class: 'align-middle length'},
                     {data: 'width', name: 'width', class: 'align-middle width'},

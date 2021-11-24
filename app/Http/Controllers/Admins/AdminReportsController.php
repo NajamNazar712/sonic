@@ -9755,14 +9755,22 @@ class AdminReportsController extends Controller
         //     ActivityTrailController::createActivityTrailLog(Auth::id(),268);
         // }
         $shipments = DB::connection('reports')->table('shipments')->join('shipment_details as sd', 'shipments.id', '=', 'sd.shipment_id')
-            ->select(['shipments.tracking_number','shipments.tracking_number as tracking_number_link','sd.dense_weight as dense_weight','sd.dimension_l as length','sd.dimension_w as width','sd.dimension_h as height','shipments.created_at as date'])
+            ->select(['shipments.tracking_number','shipments.tracking_number as tracking_number_link','sd.dense_weight as dense_weight','sd.dimension_l as length','sd.dimension_w as width','sd.dimension_h as height','sd.dws_status as weight_type','shipments.created_at as date'])
             ->where('sd.dws_status','<>',Null);
             
         $datatable = Datatables::of($shipments)
-            ->editColumn('tracking_number_link', function ($shipments) {
-                $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
-            });
+        ->editColumn('tracking_number_link', function ($shipments) {
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        })->editColumn('weight_type', function ($shipments) {
+            if($shipments->weight_type == 1){
+                return "High";
+            }else{
+                return "Low";
+
+            }
+        });
+        
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
