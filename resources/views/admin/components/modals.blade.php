@@ -608,20 +608,22 @@
                 <table class="table table-sm table-bordered border">
                     <thead>
                        <tr>
-                        <th><strong>Full Name</strong></th>
-                        <th><strong>Department (Designation)</strong></th>
                         <th><strong>Employee ID</strong></th>
+                        <th><strong>Full Name</strong></th>
                         <th><strong>Email</strong></th>
                         <th><strong>Contact</strong></th>
+                        <th><strong>Department</strong></th>
+                        <th><strong>Designation</strong></th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td id = "full_name"></td>
-                            <td id = "department_designation"></td>
                             <td id = "employee_id"></td>
+                            <td id = "full_name"></td>
                             <td id = "email"></td>
                             <td id = "contact"></td>
+                            <td id = "department"></td>
+                            <td id = "designation"></td>
                         </tr>
                     </tbody>
                 </table>

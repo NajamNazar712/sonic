@@ -78,7 +78,7 @@
 @section('js')
     <script type="text/javascript">
         $('body').on('click','.adminprofile',function(){
-            var full_name , department_designation , employee_id , email , contact ;
+            var full_name , department , employee_id , email , contact , designation;
             $.ajax({
                     url:'{!! route('admin.dashboard.admin_profile') !!}',
                     type:'GET'
@@ -86,17 +86,19 @@
                     debugger;
                     if(data){
                         full_name = data.full_name;
-                        department_designation = data.department_designation;
+                        department = data.department;
                         employee_id = data.employee_id;
                         email = data.email;
                         contact = data.contact;
+                        designation = data.designation;
 
                         $('#adminprofile').modal('show');
                         $('#full_name').html(full_name);
-                        $('#department_designation').html(department_designation);
+                        $('#department').html(department);
                         $('#employee_id').html(employee_id);
                         $('#email').html(email);
                         $('#contact').html(contact);
+                        $('#designation').html(designation);
                     }
                 });
             });
