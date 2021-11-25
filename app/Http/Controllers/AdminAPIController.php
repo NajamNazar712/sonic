@@ -4436,7 +4436,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $shipment = Shipment::where('tracking_number',$request->CN);
+            $shipment = Shipment::where('tracking_number',$request->tracking_number);
             if($shipment->exists()){
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
@@ -4718,9 +4718,9 @@ class AdminAPIController extends Controller
                     }
                     // NotificationsController::send(4, $shipment_ids);
                     $date = Carbon::now()->format('Y_m_d');
-                    if ($request->hasFile('imgename')) {
-                        $file = $request->file('imgename');
-                        $filename = 'imgename' . $date . '.' . $file->extension();
+                    if ($request->hasFile('image_name')) {
+                        $file = $request->file('image_name');
+                        $filename = 'image_name' . $date . '.' . $file->extension();
                         $directory = 'dws_images';
                         Storage::disk('public')->putFileAs($directory, $file, $filename);
                         $link = $directory . '/' . $filename;
