@@ -971,6 +971,19 @@ class AdminCargoManifestController extends Controller
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
+            if($shipment->shipper_status_id == 20){
+                $lost_shipment = ManifestBagLostShipment::where('shipment_id',$shipment_id)->latest()->first();
+                if($lost_shipment){
+                    $bag = CargoManifestBag::find($lost_shipment->bag_id);
+                   if($bag->lost_shipments > 0){
+                       $bag->lost_shipments--;
+                       $bag->save();
+                       $lost_shipment->delete();
+                   }
+                }
+            }
+
+
             if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
                 $shipments++;
                 $shipments_weight += $shipment->actual_weight;
@@ -1002,6 +1015,7 @@ class AdminCargoManifestController extends Controller
             $id = $bag->id;
 
             foreach ($shipment_ids as $shipment_id) {
+
                 $bag_shipment = new CargoManifestBagShipments();
 
                 $bag_shipment->cargo_manifest_bag_id = $id;
