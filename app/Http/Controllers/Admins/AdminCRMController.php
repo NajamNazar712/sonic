@@ -2127,6 +2127,56 @@ class AdminCRMController extends Controller
                     if($crm_request->case_nature_id == 4){
                         NotificationsController::send(117, $crm_request->id, 6);
                     }
+                    if($crm_request->shipper_id){
+                        $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
+                        if($sales_tier_tag->exists()){
+                            $sales_tier_tag = $sales_tier_tag->first();
+                            $tagged_id = $sales_tier_tag->kam;
+                            $kam_admin = Admin::find($tagged_id);
+                            if($kam_admin){
+                                if($kam_admin->status){
+                                    if($tagged_id){
+                                        $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',4)->first();
+                                        if(!empty($tagged_crm_request)){
+                                            if($tagged_crm_request['tagged_id'] != $tagged_id) {
+                                                CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',4)->update([
+                                                    'crm_request_tagging_type_id' => 4,
+                                                    'tagged_id' => $tagged_id
+                                                ]);
+
+                                                CrmRequestTaggingHistory::create([
+                                                    'crm_request_id' => $crm_request->id,
+                                                    'crm_request_tagging_type_id' => 4,
+                                                    'tagged_id' => $tagged_id,
+                                                    'agent_id' => Auth::id(),
+                                                    'hub_id' => NULL
+                                                ]);
+                                                NotificationsController::send(31,$crm_request->id);
+                                            }
+                                        }
+                                        else{
+                                            CrmRequestTagging::create([
+                                                'crm_request_id' => $crm_request->id,
+                                                'crm_request_tagging_type_id' => 4,
+                                                'tagged_id' => $tagged_id,
+                                                'hub_id' => NULL
+                                            ]);
+
+                                            CrmRequestTaggingHistory::create([
+                                                'crm_request_id' => $crm_request->id,
+                                                'crm_request_tagging_type_id' => 4,
+                                                'tagged_id' => $tagged_id,
+                                                'agent_id' => Auth::id(),
+                                                'hub_id' => NULL
+                                            ]);
+                                            NotificationsController::send(31,$crm_request->id);
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
                         if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
                             $crm_city_id = $crm_request->shipment->pickup_address->city->id;
 
@@ -2138,17 +2188,17 @@ class AdminCRMController extends Controller
                         if($crm_auto_tag_user->exists()){
 
                             $crm_auto_tag_user = $crm_auto_tag_user->get()->first();
-                            $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->first();
+                            $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
                             if(!empty($tagged_crm_request)){
                                 if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
-                                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->update([
-                                        'crm_request_tagging_type_id' => 2,
+                                    CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->update([
+                                        'crm_request_tagging_type_id' => 5,
                                         'tagged_id' => $crm_auto_tag_user->admin_id
                                     ]);
 
                                     CrmRequestTaggingHistory::create([
                                         'crm_request_id' => $crm_request->id,
-                                        'crm_request_tagging_type_id' => 2,
+                                        'crm_request_tagging_type_id' => 5,
                                         'tagged_id' => $crm_auto_tag_user->admin_id,
                                         'agent_id' => Auth::id(),
                                         'hub_id' => NULL
@@ -2159,14 +2209,14 @@ class AdminCRMController extends Controller
                             else{
                                 CrmRequestTagging::create([
                                     'crm_request_id' => $crm_request->id,
-                                    'crm_request_tagging_type_id' => 2,
+                                    'crm_request_tagging_type_id' => 5,
                                     'tagged_id' => $crm_auto_tag_user->admin_id,
                                     'hub_id' => NULL
                                 ]);
 
                                 CrmRequestTaggingHistory::create([
                                     'crm_request_id' => $crm_request->id,
-                                    'crm_request_tagging_type_id' => 2,
+                                    'crm_request_tagging_type_id' => 5,
                                     'tagged_id' => $crm_auto_tag_user->admin_id,
                                     'agent_id' => Auth::id(),
                                     'hub_id' => NULL
@@ -2375,10 +2425,14 @@ class AdminCRMController extends Controller
         else if($request->crm_request_tagging_type_id == 2){
             $name = Admin::where('id', $request->tagged_id)->first();
         }
-        $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $request->crm_request_id)->first();
+        $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $request->crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
         if(!empty($tagged_crm_request)){
             if($tagged_crm_request['tagged_id'] != $request->tagged_id) {
-                CrmRequestTagging::where('crm_request_id', $request->crm_request_id)->update([
+
+                CrmRequestTagging::where('crm_request_id', $request->crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
+
+                CrmRequestTagging::create([
+                    'crm_request_id' => $request->crm_request_id,
                     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
                     'tagged_id' => $request->tagged_id,
                     'hub_id' => $tagged_hub
@@ -2454,14 +2508,23 @@ class AdminCRMController extends Controller
                 else if($request->crm_request_tagging_type_id == 2){
                     $name = Admin::where('id', $request->tagged_id)->first();
                 }
-                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request_id)->first();
+                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
                 if(!empty($tagged_crm_request)){
                     if($tagged_crm_request['tagged_id'] != $request->tagged_id) {
-                        CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
+                        
+                        CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
+
+                        CrmRequestTagging::create([
+                            'crm_request_id' => $crm_request_id,
                             'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
                             'tagged_id' => $request->tagged_id,
                             'hub_id' => $tagged_hub
                         ]);
+                        // CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
+                        //     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+                        //     'tagged_id' => $request->tagged_id,
+                        //     'hub_id' => $tagged_hub
+                        // ]);
 
                         CrmRequestTaggingHistory::create([
                             'crm_request_id' => $crm_request_id,
@@ -2501,11 +2564,16 @@ class AdminCRMController extends Controller
         if($request->multiple == 1){
             if(count($request->crm_request_ids) > 0){
                 foreach($request->crm_request_ids as $crm_request_id){
-                    $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->first();
+                    $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
                     if($check_previous){
-                        CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
+                        CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
+                       
+                        CrmRequestTagging::create([
+                            'crm_request_id' => $crm_request_id,
                             'crm_request_tagging_type_id' => 3,
                             'tagged_id' => null
+                        ]);
+                        CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
                         ]);
                         CrmRequestTaggingHistory::create([
                             'crm_request_id' => $crm_request_id,
@@ -2520,12 +2588,16 @@ class AdminCRMController extends Controller
         }
         else{
             $crm_request_id = $request->crm_request_id;
-            $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->first();
+            $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
             if($check_previous){
-                CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
-                    'crm_request_tagging_type_id' => 3,
-                    'tagged_id' => null
-                ]);
+                CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
+                        CrmRequestTagging::create([
+                            'crm_request_id' => $crm_request_id,
+                            'crm_request_tagging_type_id' => 3,
+                            'tagged_id' => null
+                        ]);
+
+               
                 CrmRequestTaggingHistory::create([
                     'crm_request_id' => $crm_request_id,
                     'crm_request_tagging_type_id' => 3,
@@ -2742,17 +2814,17 @@ class AdminCRMController extends Controller
                             if($crm_auto_tag_user->exists()){
     
                                 $crm_auto_tag_user = $crm_auto_tag_user->get()->first();
-                                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->first();
+                                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
                                 if(!empty($tagged_crm_request)){
                                     if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
-                                        CrmRequestTagging::where('crm_request_id', $crm_request->id)->update([
-                                            'crm_request_tagging_type_id' => 2,
+                                        CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->update([
+                                            'crm_request_tagging_type_id' => 5,
                                             'tagged_id' => $crm_auto_tag_user->admin_id
                                         ]);
     
                                         CrmRequestTaggingHistory::create([
                                             'crm_request_id' => $crm_request->id,
-                                            'crm_request_tagging_type_id' => 2,
+                                            'crm_request_tagging_type_id' => 5,
                                             'tagged_id' => $crm_auto_tag_user->admin_id,
                                             'agent_id' => Auth::id(),
                                             'hub_id' => NULL
@@ -2763,14 +2835,14 @@ class AdminCRMController extends Controller
                                 else{
                                     CrmRequestTagging::create([
                                         'crm_request_id' => $crm_request->id,
-                                        'crm_request_tagging_type_id' => 2,
+                                        'crm_request_tagging_type_id' => 5,
                                         'tagged_id' => $crm_auto_tag_user->admin_id,
                                         'hub_id' => NULL
                                     ]);
     
                                     CrmRequestTaggingHistory::create([
                                         'crm_request_id' => $crm_request->id,
-                                        'crm_request_tagging_type_id' => 2,
+                                        'crm_request_tagging_type_id' => 5,
                                         'tagged_id' => $crm_auto_tag_user->admin_id,
                                         'agent_id' => Auth::id(),
                                         'hub_id' => NULL

@@ -52,9 +52,11 @@
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
-                                    <th class="border-primary border-darken-1">Tagged To</th>
-                                  {{--  <th class="border-primary border-darken-1">Special Request</th>--}}
+                                    <th class="border-primary border-darken-1">Manual Tagged To</th>
                                     <th class="border-primary border-darken-1">Tagged At</th>
+                                    <th class="border-primary border-darken-1">Auto Tagged To KAE</th>
+                                    <th class="border-primary border-darken-1">Auto Tagged To Operation</th>
+                                  {{--  <th class="border-primary border-darken-1">Special Request</th>--}}
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned Date</th>
@@ -301,8 +303,11 @@
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Tagged (Admin/Department)');
-                            head.push('Tagged To');
+                            head.push('Manual Tagged To');
                             head.push('Tagged At');
+                            head.push('Auto Tagged To KAE');
+                            head.push('Auto Tagged To Operation');
+                            
                             head.push('Launched Date');
                             head.push('Complaint Re-Open Date');
                             head.push('Agent Assigned Date');
@@ -339,6 +344,9 @@
                                 row.push(values.tagged);
                                 row.push(values.tagged_to);
                                 row.push(values.tagged_date);
+                                row.push(values.tagged_to_kae);
+                                row.push(values.tagged_to_operation);
+                                
                                 row.push(values.created_at);
                                 row.push(values.reopen_date);
                                 row.push(values.agent_assigned_date);
@@ -697,6 +705,8 @@
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
                   /*  {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},*/
                     {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
+                    {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae', orderable: false, searchable: false},
+                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation', orderable: false, searchable: false},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
