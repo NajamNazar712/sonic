@@ -68,7 +68,7 @@
                         <th class="border-primary border-darken-1">Length (Volumetric Weight)</th>
                         <th class="border-primary border-darken-1">Breadth (Volumetric Weight)</th>
                         <th class="border-primary border-darken-1">Height (Volumetric Weight)</th>
-                        <th class="border-primary border-darken-1">Date</th>
+                        <th class="border-primary border-darken-1">Arrival Date</th>
                     </tr>
                     </thead>
                 </table>
@@ -307,7 +307,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[4, 'desc']],
+                order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link', searchable: false},

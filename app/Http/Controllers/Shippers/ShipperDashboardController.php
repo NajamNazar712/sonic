@@ -1125,13 +1125,13 @@ class ShipperDashboardController extends Controller
                     $on_dws_charges = $value->dws_weight_status;
 
                 }elseif($value->shipping_mode_id == 2){
-                    $on_dws_charges = $value->dws_weight_status;
+                    $ol_dws_charges = $value->dws_weight_status;
 
                 }elseif($value->shipping_mode_id == 3){
-                    $on_dws_charges = $value->dws_weight_status;
+                    $detain_dws_charges = $value->dws_weight_status;
                     
                 }elseif($value->shipping_mode_id == 4){
-                    $on_dws_charges = $value->dws_weight_status;
+                    $sameday_dws_charges = $value->dws_weight_status;
                     
                 }
             }
