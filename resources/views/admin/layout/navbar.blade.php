@@ -58,6 +58,7 @@
                             <i class="ft-chevron-down"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#" id="adminprofileshow"><span class="menu-title adminprofile"><i class="ft-user"></i> Profile</span></a>
                             <a class="dropdown-item" href="http://bit.ly/sonic_manuals" target="_blank"><i class="ft-help-circle"></i> HELP</a>
                             <a class="dropdown-item" href="{{ route('admin.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
                             <a class="dropdown-item" href="{{ route('admin.update.profile.password') }}"><span class="menu-title"><i class="ft-edit"></i>Change Password</span></a>
@@ -74,3 +75,31 @@
         </div>
     </div>
 </nav>
+@section('js')
+    <script type="text/javascript">
+        $('body').on('click','.adminprofile',function(){
+            var full_name , department , employee_id , email , contact , designation;
+            $.ajax({
+                    url:'{!! route('admin.dashboard.admin_profile') !!}',
+                    type:'GET'
+                }).done(function (data) {
+                    debugger;
+                    if(data){
+                        full_name = data.full_name;
+                        department = data.department;
+                        employee_id = data.employee_id;
+                        email = data.email;
+                        contact = data.contact;
+                        designation = data.designation;
+
+                        $('#adminprofile').modal('show');
+                        $('#full_name').html(full_name);
+                        $('#department').html(department);
+                        $('#employee_id').html(employee_id);
+                        $('#email').html(email);
+                        $('#contact').html(contact);
+                        $('#designation').html(designation);
+                    }
+                });
+            });
+    </script>

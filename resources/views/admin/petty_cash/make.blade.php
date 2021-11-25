@@ -55,18 +55,18 @@
 
                         <div class="col">
                             <fieldset class="form-group">
-                            <select name="select_statement_hub" id="select_statement_hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required">
-                            </select>
+                                <select name="select_statement_hub" id="select_statement_hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required">
+                                </select>
                             </fieldset>
                         </div>
 
                         <div class="col">
                             <fieldset class="form-group">
-                            <select name="select_statement_station_manager" id="select_statement_station_manager" class="form-control select2" data-rule-required="true" data-msg-required="Station Manager is required">
-                                @foreach($operation_managers as $manager)
-                                    <option value="{{$manager->id}}">{{$manager->name}} @if($manager->trax_id != '')({{$manager->trax_id}}) @endif</option>
-                                @endforeach
-                            </select>
+                                <select name="select_statement_station_manager" id="select_statement_station_manager" class="form-control select2" data-rule-required="true" data-msg-required="Station Manager is required">
+                                    @foreach($operation_managers as $manager)
+                                        <option value="{{$manager->id}}">{{$manager->name}} @if($manager->trax_id != '')({{$manager->trax_id}}) @endif</option>
+                                    @endforeach
+                                </select>
                             </fieldset>
                         </div>
                     </div>
@@ -100,37 +100,37 @@
                             </thead>
                         </table>
                     </div>
-                        <div class="row justify-content-center">
-                    <div class="col-2">
-                        <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" name="submit_button" value="create"><i class="la la-list"></i> Make Statement</button>
+                    <div class="row justify-content-center">
+                        <div class="col-2">
+                            <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" name="submit_button" value="create"><i class="la la-list"></i> Make Statement</button>
+                        </div>
+                        <div class="col-2">
+                            <button id="statement_draft" type="submit"  class="btn btn-success btn-block" name="submit_button" value="draft"><i class="la la-save"></i> Save Draft</button>
+                        </div>
                     </div>
-                    <div class="col-2">
-                        <button id="statement_draft" type="submit"  class="btn btn-success btn-block" name="submit_button" value="draft"><i class="la la-save"></i> Save Draft</button>
-                    </div>
-                </div>
                 </form>
             </div>
         </div>
     </div>
     {{--<section>--}}
-        {{--<div class="modal fade" id="upload_image_modal" data-backdrop="static" role="dialog" aria-labelledby="upload_image_modal" aria-hidden="true">--}}
-            {{--<div class="modal-dialog modal-sm" role="document">--}}
-                {{--<div class="modal-content">--}}
-                    {{--<div class="modal-header">--}}
-                        {{--<h4 class="modal-title" id="shipments_modal_title">Upload Image</h4>--}}
+    {{--<div class="modal fade" id="upload_image_modal" data-backdrop="static" role="dialog" aria-labelledby="upload_image_modal" aria-hidden="true">--}}
+    {{--<div class="modal-dialog modal-sm" role="document">--}}
+    {{--<div class="modal-content">--}}
+    {{--<div class="modal-header">--}}
+    {{--<h4 class="modal-title" id="shipments_modal_title">Upload Image</h4>--}}
 
-                        {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-                            {{--<span aria-hidden="true">×</span>--}}
-                        {{--</button>--}}
-                    {{--</div>--}}
-                    {{--<div class="modal-body text-center">--}}
-                    {{--</div>--}}
-                    {{--<div class="modal-footer">--}}
-                        {{--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--}}
-                    {{--</div>--}}
-                {{--</div>--}}
-            {{--</div>--}}
-        {{--</div>--}}
+    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+    {{--<span aria-hidden="true">×</span>--}}
+    {{--</button>--}}
+    {{--</div>--}}
+    {{--<div class="modal-body text-center">--}}
+    {{--</div>--}}
+    {{--<div class="modal-footer">--}}
+    {{--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--}}
+    {{--</div>--}}
+    {{--</div>--}}
+    {{--</div>--}}
+    {{--</div>--}}
     {{--</section>--}}
 
 
@@ -147,10 +147,10 @@
             min-width: 150px;
         }
         /*th.expense_amount, th.reference_no{*/
-            /*width: 60px;*/
+        /*width: 60px;*/
         /*}*/
         /*td.expense_amount input, td.reference_no input{*/
-            /*font-size: 12px;*/
+        /*font-size: 12px;*/
         /*}*/
 
         /*.custom-zone-col-width{*/
@@ -169,10 +169,10 @@
             width: 250px;
         }
         /*div.picker th, td {*/
-            /*padding: 0px;*/
+        /*padding: 0px;*/
         /*}*/
         /*.date .picker td {*/
-            /*border: transparent;*/
+        /*border: transparent;*/
         /*}*/
         .total_amount_span{
             font-size: 24px;
@@ -213,24 +213,24 @@
                     'ids[]': '{{ session('print') }}',
                 }
             })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
+                .done(function(data) {
+                    var tab = window.open('', '_blank');
 
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
+                    if(!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    }
+                    else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
             @endif
 
             $('#select_statement_sdn').prepend('<option value="" selected="selected"></option>').select2({
@@ -550,20 +550,20 @@
             var result = true;
             $.validator.addMethod("reference_no",
                 function(value, element) {
-                        $.ajax({
-                            type: "POST",
-                            async: true,
-                            url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
-                            data: {reference: value,'_token': '{!! csrf_token() !!}'},
-                            success: function (data) {
-                                if(data === 'true'){
-                                    result = false;
-                                }else{
-                                    result = true;
-                                }
+                    $.ajax({
+                        type: "POST",
+                        async: true,
+                        url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
+                        data: {reference: value,'_token': '{!! csrf_token() !!}'},
+                        success: function (data) {
+                            if(data === 'true'){
+                                result = false;
+                            }else{
+                                result = true;
                             }
-                        });
-                        return result;
+                        }
+                    });
+                    return result;
                 },
                 "Statement Reference Number already exists."
             );
