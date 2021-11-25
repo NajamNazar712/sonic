@@ -88,21 +88,20 @@
                         <tr role="row" class="bg-primary white">
 
                             <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">City / Location</th>
                             <th class="border-primary border-darken-1">Account Head</th>
                             <th class="border-primary border-darken-1">Account Title</th>
-                            <th class="border-primary border-darken-1">City / Location</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
+                            <th class="border-primary border-darken-1"> Amount </th>
                             <th class="border-primary border-darken-1"> Employee Id </th>
                             <th class="border-primary border-darken-1">Name </th>
                             <th class="border-primary border-darken-1"> Designation </th>
-                            <th class="border-primary border-darken-1"> DNCC/PNCC </th>
-                            <th class="border-primary border-darken-1"> Delivered Shipments</th>
-                            <th class="border-primary border-darken-1"> Amount </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Reference Document</th>
-                            <th class="border-primary border-darken-1">Status</th>
-
+                            <th class="border-primary border-darken-1"> DNCC/PNCC </th>
+                            <th class="border-primary border-darken-1"> Delivered Shipments</th>
+                            <th class="border-primary border-darken-1"> Status</th>
                         </tr>
                         </thead>
                     </table>
@@ -177,20 +176,20 @@
                 ordering: false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data:'city_name' ,name: 'c.name', class: 'align-middle city_name'},
                     {data:'account_head' ,name: 'account_head', class: 'align-middle account_head'},
                     {data:'account_title' ,name: 'account_title', class: 'align-middle account_title'},
-                    {data:'city_name' ,name: 'c.name', class: 'align-middle city_name'},
                     {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense'},
+                    {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount custom-col-width'},
                     {data:'employee_trax_id' ,name: 'a.trax_id', class: 'align-middle employee_trax_id custom-col-width'},
                     {data:'employee_name' ,name: 'petty_cash_statement_details.employee_name', class: 'align-middle employee_name custom-col-width'},
                     {data:'employee_designation' ,name: 'petty_cash_statement_details.employee_designation', class: 'align-middle employee_designation custom-col-width'},
-                    {data:'dncc' ,name: 'petty_cash_statement_details.dncc_id', class: 'align-middle dncc custom-col-width'},
-                    {data:'delivered_shipments' ,name: 'petty_cash_statement_details.delivered_shipments', class: 'align-middle delivered_shipments custom-col-width'},
-                    {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount custom-col-width'},
                     {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no'},
                     {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
                     {data:'reference_document' ,name: 'reference_document', class: 'align-middle reference_document'},
                     {data:'status' ,name: 'petty_cash_statement_details.status', class: 'align-middle status'},
+                    {data:'dncc' ,name: 'petty_cash_statement_details.dncc_id', class: 'align-middle dncc custom-col-width'},
+                    {data:'delivered_shipments' ,name: 'petty_cash_statement_details.delivered_shipments', class: 'align-middle delivered_shipments custom-col-width'},
                 ],
 
                 rowCallback: function(row, data, index) {
