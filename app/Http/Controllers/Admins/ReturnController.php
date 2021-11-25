@@ -56,6 +56,7 @@ use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use function foo\func;
+use App\Http\Models\Shipper\UserShippingInfo;
 
 class ReturnController extends Controller
 {
@@ -412,7 +413,6 @@ class ReturnController extends Controller
     }
 
     public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
-        //return ['status'=>0,'error'=>"Shipments is not from your assigned Hub"];Xyedth
         $shipment_ids = $request->shipment_ids;
         $return_reason = $request->return_reason_select;
         $remarks = $request->remark;
@@ -421,6 +421,11 @@ class ReturnController extends Controller
 
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
+                $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
+                if(!in_array($pickup_address->city_id, session('hubs')))
+                {
+                    return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
+                }
                 if($parcel->booking_type_id == 5){
                     continue;
                 }
@@ -508,6 +513,11 @@ class ReturnController extends Controller
         if($request->action == 'reattempt'){
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
+                $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
+                if(!in_array($pickup_address->city_id, session('hubs')))
+                {
+                    return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
+                }
                 if(!in_array($parcel->shipper_status_id, [13, 20])){
                     $remark_inp = "remark.$shipment";
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
@@ -566,11 +576,15 @@ class ReturnController extends Controller
     }
 
     public function return_marked_single_status(Request $request){
-        //return ['status'=>0,'error'=>"Shipments is not from your assigned Hub"];Xyedth
         $remark = $request->remark;
         if($request->action == 'confirm'){
             $return_reason = $request->single_return_reason_select;
             $parcel = Shipment::find($request->shipment_id);
+            $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
+            if(!in_array($pickup_address->city_id, session('hubs')))
+            {
+                return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
+            }
             if($parcel->booking_type_id == 5){
                 return ['status' => 0,'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
             }
@@ -622,6 +636,11 @@ class ReturnController extends Controller
 
         }elseif($request->action == 'reattempt'){
             $parcel = Shipment::find($request->shipment_id);
+            $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
+            if(!in_array($pickup_address->city_id, session('hubs')))
+            {
+                return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
+            }
             if(!in_array($parcel->shipper_status_id, [13, 20]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52)){
                 $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52])->latest('id')->first();
 

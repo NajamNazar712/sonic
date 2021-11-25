@@ -788,7 +788,16 @@
                                             table.button('.un-assign').disable();
                                             table.rows().deselect();
                                             table.draw('false');
+                                            
+                                            if(data.status == 1){
+                                            UnblockPagePermanently();
+                                            table.draw('false');
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }
+                                            else{
+                                                UnblockPagePermanently();
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            }
 
                                         });
                                     }
