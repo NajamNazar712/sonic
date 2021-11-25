@@ -152,10 +152,30 @@
                                             </tr>
                                             @if($crm_details['status_id'] == 2 || $crm_details['status_id'] == 3)
                                                 <tr>
-                                                    <th scope="row">Tagged To</th>
+                                                    <th scope="row">Tagged Manual</th>
                                                     <td class="name">
                                                         @if($tagged_name != null)
                                                             <h5 class="mb-0">{{$tagged_name}}</h5>
+                                                        @else
+                                                            <h5 class="mb-0">-</h5>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Tagged Kae</th>
+                                                    <td class="name">
+                                                        @if($tagged_kae_name != null)
+                                                            <h5 class="mb-0">{{$tagged_kae_name}}</h5>
+                                                        @else
+                                                            <h5 class="mb-0">-</h5>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th scope="row">Tagged Operation</th>
+                                                    <td class="name">
+                                                        @if($tagged_operation_name != null)
+                                                            <h5 class="mb-0">{{$tagged_operation_name}}</h5>
                                                         @else
                                                             <h5 class="mb-0">-</h5>
                                                         @endif

@@ -408,7 +408,7 @@ class AdminCRMController extends Controller
             $types = CrmRequestTaggingTypes::get();
             $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
             $hubs = City::where('hub', 1)->get();
-            $tagged = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->first();
+            $tagged = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->whereIn('crm_request_tagging_type_id', [1,2])->first();
             $tagged_name = '';
             $tag_check = '';
             $tag_permission = '';
@@ -422,6 +422,19 @@ class AdminCRMController extends Controller
                 else if($tagged['crm_request_tagging_type_id'] == 2){
                     $tagged_name = Admin::find($tagged['tagged_id'])->name;
                 }
+            }
+            
+            $tagged_kae = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->where('crm_request_tagging_type_id', 4)->get()->first();
+            if($tagged_kae){
+                $tagged_kae_name = Admin::find($tagged_kae->tagged_id)->name;
+            }else{
+                $tagged_kae_name = '';
+            }
+            $tagged_operation = CrmRequestTagging::where('crm_request_id', $crm_request['id'])->where('crm_request_tagging_type_id', 5)->get()->first();
+            if($tagged_operation){
+                $tagged_operation_name = Admin::find($tagged_operation->tagged_id)->name;
+            }else{
+                $tagged_operation_name = '';
             }
             $escalation_tagged = CrmRequestEscalationTagging::where('crm_request_id', $crm_request['id'])
                 ->where('role_id', session('role_id'))
@@ -521,7 +534,7 @@ class AdminCRMController extends Controller
                 $approvers[] = $admin_request->admin;
             }
             
-            return view('admin.crm.request_details')->with(['crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $approvers]);
+            return view('admin.crm.request_details')->with(['tagged_kae_name' => $tagged_kae_name, 'tagged_operation_name' => $tagged_operation_name, 'crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $approvers]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -1381,6 +1394,77 @@ class AdminCRMController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('tagged_to_manual', function($requests){
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->whereIn('crm_request_tagging_type_id', [1,2])->get()->first();
+                if($crm_tagging){
+                    if($crm_tagging->crm_request_tagging_type_id == 1){
+                        
+                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name;
+                        return $tagged_name;
+                    }elseif($crm_tagging->crm_request_tagging_type_id == 2){
+                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name;
+                        return $tagged_name;
+
+                    }else{
+                        return '-';
+                    }
+                }else{
+                    return '-';
+                }
+            })
+            ->filterColumn('tagged_to_manual',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 1)
+                            ->where('adp.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
+                            ->where('at.name', 'like', '%' . $keyword . '%');
+                    });
+                }
+            })
+            ->orderColumn('tagged_to_manual', DB::raw('IF (crt.crm_request_tagging_type_id = 1, adp.name, IF (crt.crm_request_tagging_type_id = 2, at.name, ""))') . ' $1')
+            
+            ->addColumn('tagged_to_kae', function($requests){
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',4)->get()->first();
+                if($crm_tagging){
+                    $admin = Admin::find($crm_tagging->tagged_id);
+                    return $admin->name;
+                }else{
+                    return '-';
+                }
+
+            })
+            ->filterColumn('tagged_to_kae',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 4)
+                            ->where('at.name', 'like', '%' . $keyword . '%');
+                    });
+                }
+            })
+            ->orderColumn('tagged_to_kae', DB::raw('IF (crt.crm_request_tagging_type_id = 4, at.name, "")') . ' $1')
+            
+            ->addColumn('tagged_to_operation', function($requests){
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->get()->first();
+                if($crm_tagging){
+                    $admin = Admin::find($crm_tagging->tagged_id);
+                    return $admin->name;
+                }else{
+                    return '-';
+                }
+            })
+            ->filterColumn('tagged_to_operation',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 5)
+                            ->where('at.name', 'like', '%' . $keyword . '%');
+                    });
+                }
+            })
+            ->orderColumn('tagged_to_operation', DB::raw('IF (crt.crm_request_tagging_type_id = 5, at.name, "")') . ' $1')
+            
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
                     $dropdown = '
@@ -1747,7 +1831,77 @@ class AdminCRMController extends Controller
                 else{
                     return '-';
                 }
+            })->addColumn('tagged_to_manual', function($requests){
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->whereIn('crm_request_tagging_type_id', [1,2])->get()->first();
+                if($crm_tagging){
+                    if($crm_tagging->crm_request_tagging_type_id == 1){
+                        
+                        $tagged_name = AdminDepartment::find($crm_tagging->tagged_id)->name;
+                        return $tagged_name;
+                    }elseif($crm_tagging->crm_request_tagging_type_id == 2){
+                        $tagged_name = Admin::find($crm_tagging->tagged_id)->name;
+                        return $tagged_name;
+
+                    }else{
+                        return '-';
+                    }
+                }else{
+                    return '-';
+                }
             })
+            ->filterColumn('tagged_to_manual',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 1)
+                            ->where('adp.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 2)
+                            ->where('at.name', 'like', '%' . $keyword . '%');
+                    });
+                }
+            })
+            ->orderColumn('tagged_to_manual', DB::raw('IF (crt.crm_request_tagging_type_id = 1, adp.name, IF (crt.crm_request_tagging_type_id = 2, at.name, ""))') . ' $1')
+            
+            ->addColumn('tagged_to_kae', function($requests){
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',4)->get()->first();
+                if($crm_tagging){
+                    $admin = Admin::find($crm_tagging->tagged_id);
+                    return $admin->name;
+                }else{
+                    return '-';
+                }
+
+            })
+            ->filterColumn('tagged_to_kae',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 4)
+                            ->where('at.name', 'like', '%' . $keyword . '%');
+                    });
+                }
+            })
+            ->orderColumn('tagged_to_kae', DB::raw('IF (crt.crm_request_tagging_type_id = 4, at.name, "")') . ' $1')
+            
+            ->addColumn('tagged_to_operation', function($requests){
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->get()->first();
+                if($crm_tagging){
+                    $admin = Admin::find($crm_tagging->tagged_id);
+                    return $admin->name;
+                }else{
+                    return '-';
+                }
+            })
+            ->filterColumn('tagged_to_operation',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where(function($sub_query) use ($keyword) {
+                        $sub_query->where('crt.crm_request_tagging_type_id', '=', 5)
+                            ->where('at.name', 'like', '%' . $keyword . '%');
+                    });
+                }
+            })
+            ->orderColumn('tagged_to_operation', DB::raw('IF (crt.crm_request_tagging_type_id = 5, at.name, "")') . ' $1')
+            
             ->addColumn('action', function($requests) {
                 $route = route('admin.crm.request.details', ['id' => $requests->id]);
                     $dropdown = '

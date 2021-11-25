@@ -342,7 +342,7 @@
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.tagged);
-                                row.push(values.tagged_to);
+                                row.push(values.tagged_to_manual);
                                 row.push(values.tagged_date);
                                 row.push(values.tagged_to_kae);
                                 row.push(values.tagged_to_operation);
@@ -702,11 +702,11 @@
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
-                    {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
+                    {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'},
                   /*  {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},*/
                     {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
-                    {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae', orderable: false, searchable: false},
-                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation', orderable: false, searchable: false},
+                    {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae'},
+                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
