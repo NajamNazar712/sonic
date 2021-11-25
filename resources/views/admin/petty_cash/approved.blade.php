@@ -48,10 +48,11 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Statement No.</th>
+                        <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Origin Hub</th>
                         <th class="border-primary border-darken-1">Destination Hub</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
-                        <th class="border-primary border-darken-1">Date (From - To)</th>
+                        <th class="border-primary border-darken-1">Date</th>
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
@@ -63,11 +64,43 @@
                         <th class="border-primary border-darken-1">Finance Approved At</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Tracking Number</th>
+                        <th class="border-primary border-darken-1">SDN Update Log</th>
                         <th class="border-primary border-darken-1"></th>
 
                     </tr>
                     </thead>
                 </table>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade text-left" id="SDNLogModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SDNLogModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Petty Cash Statement SDN Log</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body  text-center">
+                    <table class="table table-bordered datatable" id="sdn_log_datatable" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">SDN ID</th>
+                            <th class="border-primary border-darken-1">User</th>
+                            <th class="border-primary border-darken-1">Updated At</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
 
             </div>
         </div>
@@ -144,6 +177,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('Statement No.');
+                            head.push('Hub');
                             head.push('Origin Hub');
                             head.push('Destination Hub');
                             head.push('Statement Reference No.');
@@ -167,6 +201,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.statement_id);
+                                row.push(values.hub_name);
                                 row.push(values.origin_hub_name);
                                 row.push(values.destination_hub_name);
                                 row.push(values.reference_no);
@@ -345,6 +380,7 @@
                     {data: 'statement_id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'statement_link', name: 'petty_cash_statements.id', class: 'align-middle statement_link'},
+                    {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
                     {data: 'origin_hub_name', name: 'o.name', class: 'align-middle origin_hub_name'},
                     {data: 'destination_hub_name', name: 'd.name', class: 'align-middle destination_hub_name'},
                     {data: 'reference_no', name: 'petty_cash_statements.reference_no', class: 'align-middle reference_no'},
@@ -360,6 +396,7 @@
                     {data: 'finance_approved_at', name: 'petty_cash_statements.finance_approved_at', class: 'align-middle finance_approved_at'},
                     {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
+                    {data: 'sdn_update_logs', name: '', class: 'text-center align-middle sdn_update_logs', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -391,7 +428,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') ||  $(header).is('.action') || $(header).is('.select') ) {
+                        if ($(header).is('.serial_number') ||  $(header).is('.action') || $(header).is('.select') || $(header).is('.sdn_update_logs') ) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -421,6 +458,58 @@
                 }
             });
 
+            var sdn_log_datatable = $('#sdn_log_datatable').DataTable({
+                dom: 'ltipr',
+                scrollX: false,
+                autoWidth : false,
+                paging:false,
+                columns: [
+                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {name: 'sdn_id', class: 'align-middle', orderable: false},
+                    {name: 'admin', class: 'align-middle', orderable: false},
+                    {name: 'timestamp', class: 'align-middle', orderable: false},
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = sdn_log_datatable.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+
+            $('body').on('click','.sdn_update_logs button.sdn_logs',function(){
+                var id = $(this).parents('tr').attr('id');
+                $.ajax({
+                    url: '{!! route('admin.petty_cash.sdn_logs') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'statement_id': id
+                    }
+                }).done(function(data){
+                    if(data.status == 0){
+                        var sdn_logs = data.logs;
+                        $.each(sdn_logs, function (index, value) {
+                            console.log(value);
+                            sdn_log_datatable.row.add([0, value.sdn, value.admin, value.timestamp]);
+                            sdn_log_datatable.draw(true);
+                        });
+
+                        $("#SDNLogModal").modal('show');
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            });
+
+            $('#SDNLogModal').on('hide.bs.modal', function (e) {
+                sdn_log_datatable.clear().draw();
+            });
+
+            
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
 
