@@ -1360,6 +1360,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('data', 'Admins\ReturnController@rcp_agent_data')->name('data');
 
         });
+        Route::prefix('revert')->name('revert.')->group(function () {
+            Route::get('', 'Admins\ReturnController@return_revert_index')->name('index');
+            Route::post('shipment_details', 'Admins\ReturnController@return_revert_shipment_details')->name('shipment_details');
+            Route::post('submit', 'Admins\ReturnController@return_revert_submit')->name('submit');
+        });
     });
     Route::prefix('debriefing')->name('debriefing.')->group(function (){
         Route::prefix('supervisor')->name('supervisor.')->group(function (){

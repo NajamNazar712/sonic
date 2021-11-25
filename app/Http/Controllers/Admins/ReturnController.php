@@ -56,7 +56,6 @@ use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use function foo\func;
-
 class ReturnController extends Controller
 {
     public function __construct()
@@ -4536,5 +4535,53 @@ class ReturnController extends Controller
 
         return response()->json(['status' => 1, 'stats' => $stats]);
 
+    }
+    public function return_revert_index(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),475);
+        $settings = GlobalSettings::where('type', 'global_rider_id')->first();
+
+        if ($settings) {
+            $global_rider_id = $settings->setting_value;
+        } else {
+            $global_rider_id = 0;
+        }
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        return view('admin.return.revert')->with(['riders' => $riders, 'global_rider_id' => $global_rider_id]);
+    }
+    public function return_revert_shipment_details(Request $request)
+    {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number)->where('shipper_status_id', 25)->first();
+        if($shipment)
+        {
+            $details = array();
+
+            $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->first();
+
+            $details['id'] = $shipment->id;
+            $details['tracking_number'] = $shipment->tracking_number;
+            $details['shipper'] = $shipment->user->name;
+            $details['return_note'] = $return_note_id->return_note_id;
+            
+            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+        } 
+        else {
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is on another status'];
+        }
+    }
+    public function return_revert_submit(Request $request)
+    {
+        $shipment_ids = explode(',', $request->shipment_ids);
+
+        foreach ($shipment_ids as $key => $shipment_id) {
+            $shipment = Shipment::find($shipment_id);
+            if($shipment)
+            {
+                $shipment->shipper_status_id = 47;
+                $shipment->save();
+                ShipmentsJourneyController::add($shipment_id, 47, 47, null, null, null, Auth::id());
+            }
+        }
+        return redirect()->back()->with(['success' => 'Shipments Reverted']);
     }
 }
