@@ -44,7 +44,7 @@
 
                                 <input type="hidden" name="shipment_ids" class="shipment_ids">
                                 <div class="form-group ml-1">
-                                    <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Confirm</button>
+                                    <button type="submit" name="confirm" class="btn btn-primary confirm" value="Confirm" disabled="disabled">Revert</button>
                                 </div>
                             </form>
                         </div>
