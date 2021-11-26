@@ -495,7 +495,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
     Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
-
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
@@ -505,6 +504,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
         Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
+        Route::get('admin_profile', 'Admins\AdminDashboardController@admin_profile')->name('admin_profile');
         //Search Sonic
 //        Route::get('search_sonic', 'Admins\AdminDashboardController@search_sonic')->name('search_sonic');
         
@@ -1956,11 +1956,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('destination', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_destination')->name('destination');
             Route::post('hubs', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_hubs')->name('hubs');
             Route::post('cities', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_cities')->name('cities');
+            Route::post('dncc', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_dncc')->name('dncc');
             Route::post('employee', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_employee')->name('employee');
             Route::post('reference', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_reference')->name('reference');
             Route::post('titles', 'Admins\AdminPettyCashController@make_petty_cash_statement_titles')->name('titles');
             Route::post('submit', 'Admins\AdminPettyCashController@make_petty_cash_statement_submit')->name('submit');
         });
+        Route::post('view/sdn_logs','Admins\AdminPettyCashController@sdn_log')->name('sdn_logs');
         Route::prefix('statements')->name('statements.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@petty_cash_statements_index')->name('index');
             Route::get('list', 'Admins\AdminPettyCashController@petty_cash_statements_list')->name('list');
