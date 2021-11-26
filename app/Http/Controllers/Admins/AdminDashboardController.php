@@ -329,7 +329,7 @@ class AdminDashboardController extends Controller
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
 
-        if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('department_id') == 7 && (session('role_id') != 4 && session('role_id') != 75)) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         }
         else {
@@ -8178,7 +8178,7 @@ class AdminDashboardController extends Controller
         }
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(session('role_id') != 4 && session('role_id') != 75 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -8540,7 +8540,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(session('role_id') != 4 && session('role_id') != 75 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -8873,7 +8873,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(session('role_id') != 4 && session('role_id') != 75 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -11194,7 +11194,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(session('role_id') != 4 && session('role_id') != 75){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }

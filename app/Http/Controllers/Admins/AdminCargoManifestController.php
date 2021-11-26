@@ -1008,6 +1008,7 @@ class AdminCargoManifestController extends Controller
             $bag->type = $request->input('bag_type');
             $bag->transport_mode_id = 2;
             $bag->status_id = 1;
+            $bag->completed = 0;
             $bag->save();
           
             CargoManifestBagJourneyController::add($bag->id,$bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
@@ -1097,7 +1098,7 @@ class AdminCargoManifestController extends Controller
                 unset($shipment_ids[$key]);
             }
         }
-
+       
         $bag_numbers = '';
         if (!empty($shipment_ids)) {
             foreach ($shipment_ids as $shipment_id) {
@@ -1105,15 +1106,30 @@ class AdminCargoManifestController extends Controller
                 if(in_array($shipment->shipper_status_id, [2, 49, 55])){
                     $bag_type = 1;
                     $destination = $shipment->consignee_city->hub_id;
+                    $origin = Auth::user()->default_hub_id;
                 }
                 else{
                     $bag_type = 2;
-                    $destination = $shipment->pickup_address->city->hub_id;
+                    if($shipment->shipper_status_id == 20){
+                        if($shipment->return_address_id != null){
+                            $destination = $shipment->return_address->city->hub_city;
+                        }
+                        else{
+                            $destination = $shipment->pickup_address->city->hub_city;
+
+                        }
+                        $destination = $destination->hub_id;
+                        $origin = $shipment->consignee_city->hub_city->hub_id;
+                    }
+                    else{
+                        $destination = $shipment->pickup_address->city->hub_city;
+                        $origin =  Auth::user()->default_hub_id;
+                    }
                 }
 
                 $bag = new CargoManifestBag();
                 $bag->seal_number = $shipment->tracking_number;
-                $bag->origin_hub_id = Auth::user()->default_hub_id;
+                $bag->origin_hub_id = $origin;
                 $bag->destination_hub_id = $destination;
                 $bag->shipments = 1;
                 $bag->quantity = count($shipment->items);
@@ -1124,6 +1140,7 @@ class AdminCargoManifestController extends Controller
                 $bag->transport_mode_id = 2;
                 $bag->status_id = 1;
                 $bag->open_bag = 1;
+                $bag->completed = 0;
                 $bag->save();
 
                 CargoManifestBagJourneyController::add($bag->id,$bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
@@ -1332,7 +1349,7 @@ class AdminCargoManifestController extends Controller
             if (in_array($bag->status_id, [1, 3, 5])) {
                 $origin_id = Auth::user()->default_hub_id;
                 $destination_hub_id = $bag->destination_hub_id;
-                $mapping = V2JunctionMapping::where([['origin_id',$origin_id],['destination_id',$destination_hub_id],['status',1]]);
+                $mapping = V2JunctionMapping::where('origin_id',$origin_id)->where('destination_id',$destination_hub_id)->where('status',1);
 
                 $allowed = FALSE;
 
@@ -1965,7 +1982,11 @@ class AdminCargoManifestController extends Controller
              ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
              ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
              ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id as status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'cargo_manifest_bags.quantity','tm.name as transport_mode','cargo_manifest_bags.shipments_weight', 'cargo_manifest_bags.actual_weight', 'cargo_manifest_bags.shipments as bag_shipments', 'a.name as transitted_by','oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type','cargo_manifest_bags.seal_number','bs.name as status','sm.mode as shipping_mode','cm.id as manifest_id','cargo_manifest_bags.seal_number','cm.created_at as manifest_created_at','cargo_manifest_bags.origin_hub_id as origin_hub_id','cargo_manifest_bags.destination_hub_id as destination_hub_id','cm.id as manifest','ah.name as updated_by','cargo_manifest_bags.created_at as transitted_date','cargo_manifest_bags.short_received_shipments as short_received_shipments','cargo_manifest_bags.short_received_shipments as short_shipments','cargo_manifest_bags.received_shipments','cmbj.created_at as status_updated_at','status_editor.name as status_updated_by','sedh.name as status_location')
-            ->where('cargo_manifest_bags.shipments','!=',DB::raw('(select(received_shipments) from cargo_manifest_bags as cmb where cmb.id =cargo_manifest_bags.id)'));
+             ->where(function ($query) {
+                 $query->where('cargo_manifest_bags.shipments','!=',DB::raw('(select(received_shipments) from cargo_manifest_bags as cmb where cmb.id =cargo_manifest_bags.id)'))
+                         ->orWhere('cargo_manifest_bags.completed', 0);
+                         });
+
 
 
         $datatables = Datatables::of($bags)
@@ -2707,9 +2728,25 @@ class AdminCargoManifestController extends Controller
                         $details['id'] = $shipment->id;
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['bag_number'] = $bag->seal_number;
-                        $details['origin'] = $shipment->pickup_address->city->name;
-                        $details['destination'] = $shipment->consignee_city->name;
-                        $details['hub'] = $shipment->consignee_city->hub_city->name;
+
+                        if($shipment->shipper_status_id == 21)
+                        {
+                            $details['origin'] = $shipment->consignee_city->name;
+                            if($shipment->return_address_id != NULL){
+                                $details['destination'] =  $shipment->return_address->city->name;
+                                $details['hub'] =  $shipment->return_address->city->hub_city->name;
+                            }
+                            else{
+                                $details['destination'] =  $shipment->pickup_address->city->name;
+                                $details['hub'] =  $shipment->pickup_address->city->hub_city->name;
+                            }
+                        }
+                        else{
+                            $details['origin'] = $shipment->pickup_address->city->name;
+                            $details['destination'] = $shipment->consignee_city->name;
+                            $details['hub'] = $shipment->consignee_city->hub_city->name;
+                        }
+
                         $details['consignee'] = $shipment->consignee_name;
                         $details['shipping_mode'] = $shipment->shipping_mode->mode;
                         $details['amount'] = number_format($shipment->amount);
@@ -2846,6 +2883,7 @@ class AdminCargoManifestController extends Controller
             else {
                 $bag->short_received_shipments = 0;
                 $status_id = 7;
+                $bag->completed = 1;
             }
             $bag->status_id = $status_id;
             $bag->received_at = Carbon::now();
