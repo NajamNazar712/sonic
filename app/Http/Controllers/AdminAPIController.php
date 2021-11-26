@@ -4480,7 +4480,19 @@ class AdminAPIController extends Controller
                             }
                         }
                     }else{
-                        return response()->json(['status' => 1, 'message' => 'weight not found']);
+                        if($shipment->business_category_id == 2){
+                            if($dense_weight < $volume_weight){
+                                $actual_weight = $volume_weight; 
+                                $shipment->length = $request->dimension_l;
+                                $shipment->breadth = $request->dimension_w;
+                                $shipment->height = $request->dimension_h;
+                            }else{
+                                $actual_weight = $dense_weight; 
+                            }
+                        }else{
+
+                            return response()->json(['status' => 1, 'message' => 'weight not found']);
+                        }
                     }
                     
                     //check weight from dws end
