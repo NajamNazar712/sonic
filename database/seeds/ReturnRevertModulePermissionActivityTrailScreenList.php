@@ -22,7 +22,7 @@ class ReturnRevertModulePermissionActivityTrailScreenList extends Seeder
        ));
 
         DB::table('module_permissions')->insert(array(
-            array('id' => 643, 'name' => 'Return Revert - View', 'module_id' => 8),
+            array('id' => 643, 'name' => 'Return Revert - View', 'module_id' => 7),
         ));
     }
 }

@@ -4556,7 +4556,7 @@ class ReturnController extends Controller
         {
             $details = array();
 
-            $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->first();
+            $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->orderBy('return_note_id', 'desc')->first();
 
             $details['id'] = $shipment->id;
             $details['tracking_number'] = $shipment->tracking_number;

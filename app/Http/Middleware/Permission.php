@@ -365,6 +365,7 @@ class Permission
             'return.cx_sales.list' => 266,
             'return.return_deliveries.index' => 566,
             'return.return_deliveries.list' => 566,
+            'return.revert.index' => 643,
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
