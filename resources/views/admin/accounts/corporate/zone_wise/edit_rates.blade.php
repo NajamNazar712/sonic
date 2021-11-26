@@ -1387,7 +1387,7 @@
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <select name="ol_dws_weight" id="ol_dws_weight" class="form-control" disabled>
+                                                                <select name="ol_dws_weight" id="ol_dws_weight" class="form-control"  {{ (($ol_dws_charges != null) ? '' : 'disabled') }} >
                                                                     @if ($ol_dws_charges != null)
                                                                    
                                                                         @if ($ol_dws_charges == 1)
@@ -2301,7 +2301,7 @@
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <select name="detain_dws_weight" id="detain_dws_weight" class="form-control" disabled>
+                                                                <select name="detain_dws_weight" id="detain_dws_weight" class="form-control"  {{ (($detain_dws_charges != null) ? '' : 'disabled') }} >
                                                                     @if ($detain_dws_charges != null)
                                                                     
                                                                         @if ($detain_dws_charges == 1)
@@ -3187,7 +3187,7 @@
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
-                                                                <select name="sameday_dws_weight" id="sameday_dws_weight" class="form-control" disabled>
+                                                                <select name="sameday_dws_weight" id="sameday_dws_weight" class="form-control"  {{ (($sameday_dws_charges != null) ? '' : 'disabled') }} >
                                                                     @if ($sameday_dws_charges != null)
                                                                     
                                                                         @if ($sameday_dws_charges == 1)

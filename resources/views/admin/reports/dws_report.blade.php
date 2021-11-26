@@ -237,7 +237,7 @@
                     params.excel = true;
                     
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.work_code_master.list') }}',
+                        url: '{{ route('admin.reports.dws_report.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -282,7 +282,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Work Code Master Report',
+                        title: 'DWS Report',
                         className: 'btn btn-primary excel',
                         enabled:false,
                         text: '<i class="la la-file-excel-o"></i> Excel',
