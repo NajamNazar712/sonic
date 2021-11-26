@@ -2140,7 +2140,7 @@
                             '_token': '{{ csrf_token() }}',
                             'shipment_id': $('#return_shipment_id').val(),
                             'single_return_reason_select': return_reason_select,
-                            'remarks': remarks,
+                            'remark': remarks,
                             'action': 'confirm'
                         }
                     })

@@ -223,7 +223,9 @@
                 </div>
                 <div class="modal-body text-center">
                     <form id="update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
-
+                        <div class="form-group">
+                            <input type="text" id="return_reason_shipment_remarks" maxlength="100" class="form-control" placeholder="Remarks">
+                        </div>
                         <div class="form-group">
                             @if($return_confirm_reasons)
                                 <select id="return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
@@ -1251,7 +1253,7 @@
                     atext = 'Select Yes to change shipment status to Return-Confirm!';
                     $('#ReturnConfirmReasonSingleModal').modal('show');
                     $('#return_reason_shipment_id').val(row_id);
-                    $('#return_reason_shipment_remarks').val(remark);
+                    //$('#return_reason_shipment_remarks').val(remark);
                 }else if(action === 'reattempt'){
                     atext = 'Select Yes to change shipment status to Re-Attempt!';
                 }
@@ -1391,6 +1393,7 @@
                 submitHandler: function(form) {
 
                     var return_reason_select = $('#return_reason_select').val();
+                    var remarks = $('#return_reason_shipment_remarks').val();
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to change shipment status to Return-Confirm!',
@@ -1420,8 +1423,8 @@
                                 var row = table.row(index);
                                 if ($(row.node()).hasClass('selected')) {
                                     var id = parseInt(row.id());
-                                    var remarks = $(row.node()).find('td.shipment_remarks textarea').val();
-                                    shipment_remarks[id] = remarks;
+                                    //var remarks = $(row.node()).find('td.shipment_remarks textarea').val();
+                                    //shipment_remarks[id] = remarks;
                                 }
                             });
 
@@ -1432,7 +1435,7 @@
                                     'shipment_ids':selected_rows,
                                     '_token':'{{ csrf_token() }}',
                                     'action': 'confirm',
-                                    'remark': shipment_remarks,
+                                    'remark': remarks,
                                     'return_reason_select': return_reason_select
                                 }
                             }).done(function (data) {
