@@ -106,7 +106,7 @@ class AdminLoginController extends Controller
                 }
             }
 //mark login end
-            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login]);
+            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login, 'id' => $id]);
 
             return redirect()->intended(route('admin.dashboard.index'));
         }

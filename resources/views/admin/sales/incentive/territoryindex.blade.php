@@ -242,7 +242,7 @@
                 scrollX: true, scrollY: '500px',
                 // autoWidth: false,
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(626, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(635, session('permissions')))
                     {
                         text: 'Add Territory',
                         className: 'btn btn-primary add',
