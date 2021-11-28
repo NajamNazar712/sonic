@@ -495,7 +495,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
     Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
-
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
@@ -505,6 +504,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
         Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
+        Route::get('admin_profile', 'Admins\AdminDashboardController@admin_profile')->name('admin_profile');
         //Search Sonic
 //        Route::get('search_sonic', 'Admins\AdminDashboardController@search_sonic')->name('search_sonic');
         
@@ -1632,6 +1632,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('history')->name('history.')->group(function () {
                 Route::get('', 'Admins\AdminCargoManifestController@history_index')->name('index');
                 Route::get('list', 'Admins\AdminCargoManifestController@history_list')->name('list');
+                Route::post('lost_shipments', 'Admins\AdminCargoManifestController@history_lost_shipments')->name('lost_shipments');
             });
 
         });
