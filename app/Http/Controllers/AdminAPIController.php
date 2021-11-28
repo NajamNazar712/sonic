@@ -4455,45 +4455,49 @@ class AdminAPIController extends Controller
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
-                    //check weight from dws 
-                    $dws_charges = DwsWeightCharges::where('user_id',$shipment->user_id)->where('shipping_mode_id',$shipment->shipping_mode_id);
-                    if($dws_charges->exists()){
-                        $dws_charges = $dws_charges->get()->first();
-                        $dws_charges_status = $dws_charges->dws_weight_status;
-                        if($dws_charges_status == 1){
-                            if($dense_weight < $volume_weight){
-                                $actual_weight = $volume_weight; 
-                                $shipment->length = $request->dimension_l;
-                                $shipment->breadth = $request->dimension_w;
-                                $shipment->height = $request->dimension_h;
-                            }else{
-                                $actual_weight = $dense_weight; 
-                            }
+                    
+                    if($shipment->business_category_id == 2){
+                        if($dense_weight < $volume_weight){
+                            $actual_weight = $volume_weight; 
+                            $shipment->length = $request->dimension_l;
+                            $shipment->breadth = $request->dimension_w;
+                            $shipment->height = $request->dimension_h;
                         }else{
-                            if($dense_weight < $volume_weight){
-                                $actual_weight = $dense_weight; 
-                            }else{
-                                $actual_weight = $volume_weight; 
-                                $shipment->length = $request->dimension_l;
-                                $shipment->breadth = $request->dimension_w;
-                                $shipment->height = $request->dimension_h;
-                            }
+                            $actual_weight = $dense_weight; 
                         }
                     }else{
-                        if($shipment->business_category_id == 2){
-                            if($dense_weight < $volume_weight){
-                                $actual_weight = $volume_weight; 
-                                $shipment->length = $request->dimension_l;
-                                $shipment->breadth = $request->dimension_w;
-                                $shipment->height = $request->dimension_h;
+                        $dws_charges = DwsWeightCharges::where('user_id',$shipment->user_id)->where('shipping_mode_id',$shipment->shipping_mode_id);
+                        if($dws_charges->exists()){
+                            $dws_charges = $dws_charges->get()->first();
+                            $dws_charges_status = $dws_charges->dws_weight_status;
+                            if($dws_charges_status == 1){
+                                if($dense_weight < $volume_weight){
+                                    $actual_weight = $volume_weight; 
+                                    $shipment->length = $request->dimension_l;
+                                    $shipment->breadth = $request->dimension_w;
+                                    $shipment->height = $request->dimension_h;
+                                }else{
+                                    $actual_weight = $dense_weight; 
+                                }
                             }else{
-                                $actual_weight = $dense_weight; 
+                                if($dense_weight < $volume_weight){
+                                    $actual_weight = $dense_weight; 
+                                }else{
+                                    $actual_weight = $volume_weight; 
+                                    $shipment->length = $request->dimension_l;
+                                    $shipment->breadth = $request->dimension_w;
+                                    $shipment->height = $request->dimension_h;
+                                }
                             }
                         }else{
-
-                            return response()->json(['status' => 1, 'message' => 'weight not found']);
+                            
+                            return response()->json(['status' => 1, 'message' => 'dws chareges not set']);
                         }
+
                     }
+
+                    //check weight from dws 
+                    
                     
                     //check weight from dws end
                     $shipment->actual_weight = $actual_weight;
