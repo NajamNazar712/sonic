@@ -224,9 +224,6 @@
                 <div class="modal-body text-center">
                     <form id="update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                         <div class="form-group">
-                            <input type="text" id="return_reason_shipment_remarks" maxlength="100" class="form-control" placeholder="Remarks">
-                        </div>
-                        <div class="form-group">
                             @if($return_confirm_reasons)
                                 <select id="return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
                                     @foreach($return_confirm_reasons as $reason)
@@ -234,6 +231,9 @@
                                     @endforeach
                                 </select>
                             @endif
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="return_reason_shipment_remarks" maxlength="100" class="form-control" placeholder="Remarks">
                         </div>
 
                         <div class="form-group ml-1">
@@ -262,9 +262,6 @@
                     <form id="single_update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                         <input type="hidden" id="return_reason_shipment_id">
                         <div class="form-group">
-                            <input type="text" id="return_reason_shipment_remarks" maxlength="100" class="form-control" placeholder="Remarks">
-                        </div>
-                        <div class="form-group">
                             @if($return_confirm_reasons)
                                 <select id="single_return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
                                     @foreach($return_confirm_reasons as $reason)
@@ -272,6 +269,9 @@
                                     @endforeach
                                 </select>
                             @endif
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="return_reason_shipment_remarks" maxlength="100" class="form-control" placeholder="Remarks">
                         </div>
 
                         <div class="form-group ml-1">

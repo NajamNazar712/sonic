@@ -349,9 +349,6 @@
                             </div>
                             <hr>
                             <div class="form-group">
-                                <input type="text" id="return_reason_shipment_remarks" class="form-control" maxlength="100" placeholder="Remarks">
-                            </div>
-                            <div class="form-group">
                                 @if($return_confirm_reasons)
                                     <select id="return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
                                         @foreach($return_confirm_reasons as $reason)
@@ -359,6 +356,9 @@
                                         @endforeach
                                     </select>
                                 @endif
+                            </div>
+                            <div class="form-group">
+                                <input type="text" id="return_reason_shipment_remarks" class="form-control" maxlength="100" placeholder="Remarks">
                             </div>
                             </div>
                             <div class="row justify-content-center">
