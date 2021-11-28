@@ -271,7 +271,7 @@
                             @endif
                         </div>
                         <div class="form-group">
-                            <input type="text" id="return_reason_shipment_remarks" maxlength="100" class="form-control" placeholder="Remarks">
+                            <input type="text" id="return_reason_shipment_remarks_single" maxlength="100" class="form-control" placeholder="Remarks">
                         </div>
 
                         <div class="form-group ml-1">
@@ -1098,6 +1098,14 @@
             $('#AssignAgentModal').on('hide.bs.modal', function (e) {
                 $('#assign_agent').val('').trigger('change');
             });
+            $('#ReturnConfirmReasonModal').on('hide.bs.modal', function (e) {
+                $('#return_reason_select').val('').trigger('change');
+                $('#return_reason_shipment_remarks').val('');
+            });
+            $('#ReturnConfirmReasonSingleModal').on('hide.bs.modal', function (e) {
+                $('#single_return_reason_select').val('').trigger('change');
+                $('#return_reason_shipment_remarks_single').val('');
+            });
 
             var hub_ids = [];
 
@@ -1468,7 +1476,7 @@
 
             $('#single_reason_update_btn').on('click', function(){
                 var shipment_id = $('#return_reason_shipment_id').val();
-                var remarks = $('#return_reason_shipment_remarks').val();
+                var remarks = $('#return_reason_shipment_remarks_single').val();
                 var single_return_reason_select = $('#single_return_reason_select').val();
                 if(single_return_reason_select === ''){
                     var error = 'Select a reason!';
