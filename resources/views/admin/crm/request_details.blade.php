@@ -162,7 +162,7 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <th scope="row">Tagged Kae</th>
+                                                    <th scope="row">Tagged KAE</th>
                                                     <td class="name">
                                                         @if($tagged_kae_name != null)
                                                             <h5 class="mb-0">{{$tagged_kae_name}}</h5>
