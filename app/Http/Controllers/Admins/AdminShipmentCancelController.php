@@ -68,9 +68,8 @@ class AdminShipmentCancelController extends Controller
                     foreach ($shipments->get() as $shipment) {
                         //cacel from warehouse
 
-                        if($shipment->warehouse == 1){
-                            $shipment->warehouse_order_status = 9;
-                        }
+                        if($shipment->warehouse != 1){
+                            // $shipment->warehouse_order_status = 9;
                         //cacel from warehouse end
 
                         $shipment->shipper_status_id = 17;
@@ -117,6 +116,7 @@ class AdminShipmentCancelController extends Controller
                         //cacel from warehouse end
                         
                         ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
+                    }
                     }
                 }
             }
