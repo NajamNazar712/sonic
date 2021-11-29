@@ -495,7 +495,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
     Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
-
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
@@ -505,6 +504,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
         Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
+        Route::get('admin_profile', 'Admins\AdminDashboardController@admin_profile')->name('admin_profile');
         //Search Sonic
 //        Route::get('search_sonic', 'Admins\AdminDashboardController@search_sonic')->name('search_sonic');
         
@@ -1360,6 +1360,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('data', 'Admins\ReturnController@rcp_agent_data')->name('data');
 
         });
+        Route::prefix('revert')->name('revert.')->group(function () {
+            Route::get('', 'Admins\ReturnController@return_revert_index')->name('index');
+            Route::post('shipment_details', 'Admins\ReturnController@return_revert_shipment_details')->name('shipment_details');
+            Route::post('submit', 'Admins\ReturnController@return_revert_submit')->name('submit');
+        });
     });
     Route::prefix('debriefing')->name('debriefing.')->group(function (){
         Route::prefix('supervisor')->name('supervisor.')->group(function (){
@@ -1627,6 +1632,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('history')->name('history.')->group(function () {
                 Route::get('', 'Admins\AdminCargoManifestController@history_index')->name('index');
                 Route::get('list', 'Admins\AdminCargoManifestController@history_list')->name('list');
+                Route::post('lost_shipments', 'Admins\AdminCargoManifestController@history_lost_shipments')->name('lost_shipments');
             });
 
         });
@@ -1955,11 +1961,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('destination', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_destination')->name('destination');
             Route::post('hubs', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_hubs')->name('hubs');
             Route::post('cities', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_cities')->name('cities');
+            Route::post('dncc', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_dncc')->name('dncc');
             Route::post('employee', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_employee')->name('employee');
             Route::post('reference', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_reference')->name('reference');
             Route::post('titles', 'Admins\AdminPettyCashController@make_petty_cash_statement_titles')->name('titles');
             Route::post('submit', 'Admins\AdminPettyCashController@make_petty_cash_statement_submit')->name('submit');
         });
+        Route::post('view/sdn_logs','Admins\AdminPettyCashController@sdn_log')->name('sdn_logs');
         Route::prefix('statements')->name('statements.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@petty_cash_statements_index')->name('index');
             Route::get('list', 'Admins\AdminPettyCashController@petty_cash_statements_list')->name('list');
@@ -2351,7 +2359,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@app_efficiency_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@app_efficiency_list')->name('app_efficiency_list');
         });
-
+        Route::prefix('sales_incentive')->name('sales_incentive.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@sales_incentive_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@sales_incentive_list')->name('list');
+            Route::get('consolidated', 'Admins\AdminReportsController@consolidated_sales_incentive_index')->name('consolidated');
+            Route::get('consolidated_list', 'Admins\AdminReportsController@consolidated_sales_incentive_list')->name('consolidated_list');
+        });
         Route::prefix('month_closing')->name('month_closing.')->group(function(){
             Route::prefix('individual')->name('individual.')->group(function (){
                 Route::get('', 'Admins\AdminMonthClosingReportsController@month_closing_individual_index')->name('index');
@@ -2450,6 +2463,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset')->name('password.reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
+
+    Route::prefix('sales')->name('sales.')->group(function () {
+        Route::prefix('territory')->name('territory.')->group(function () {
+            Route::get('', 'Admins\SalesIncentiveController@territoryindex')->name('territoryindex');
+            Route::get('list', 'Admins\SalesIncentiveController@territory_list')->name('list');
+            Route::post('users', 'Admins\SalesIncentiveController@territory_users')->name('users');
+            Route::post('add', 'Admins\SalesIncentiveController@territory_add')->name('add');
+            Route::get('edit/{id}', 'Admins\SalesIncentiveController@territory_edit')->name('edit');
+            Route::put('update/{id}', 'Admins\SalesIncentiveController@territory_update')->name('update');
+            Route::post('city_admins', 'Admins\SalesIncentiveController@territory_city_admins')->name('city_admins');
+            Route::post('status', 'Admins\SalesIncentiveController@territory_enable_disable')->name('status');
+        });
+        Route::prefix('designation')->name('designation.')->group(function () {
+            Route::get('', 'Admins\SalesIncentiveController@designationindex')->name('designationindex');
+            Route::get('list', 'Admins\SalesIncentiveController@designation_list')->name('list');
+            Route::post('add', 'Admins\SalesIncentiveController@designation_add')->name('add');
+            Route::get('edit/{id}', 'Admins\SalesIncentiveController@designation_edit')->name('edit');
+            Route::put('update/{id}', 'Admins\SalesIncentiveController@designation_update')->name('update');
+            Route::post('status', 'Admins\SalesIncentiveController@designation_enable_disable')->name('status');
+        });
+    });
 
     Route::prefix('settings')->name('settings.')->group(function () {
         Route::prefix('pickup')->name('pickup.')->group(function () {
@@ -2671,6 +2705,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
         });
         Route::prefix('sales')->name('sales.')->group(function () {
+            Route::prefix('incentive')->name('incentive.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@sales_incentive')->name('index');
+            Route::post('add', 'Admins\GlobalSettingsController@sales_incentive_add')->name('add');
+            });
             Route::prefix('targets')->name('targets.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@sales_person_targets')->name('index');
                 Route::post('', 'Admins\GlobalSettingsController@sales_person_targets_submit')->name('update');
@@ -2740,6 +2778,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('default_agent')->name('default_agent.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@crm_default_agent_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@crm_default_agent_store')->name('store');
+        });
+
+        Route::prefix('auto_assigning')->name('auto_assigning.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@crm_auto_assigning_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@crm_auto_assigning_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@crm_auto_assigning_submit')->name('submit');
+            Route::post('data', 'Admins\GlobalSettingsController@crm_auto_assigning_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@crm_auto_assigning_update')->name('update');
+            Route::post('delete', 'Admins\GlobalSettingsController@crm_auto_assigning_delete')->name('delete');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@crm_auto_assigning_enable_disable')->name('enable_disable');
+            
         });
 
         Route::prefix('blacklist')->name('blacklist.')->group(function () {

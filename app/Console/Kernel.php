@@ -3,6 +3,7 @@
 namespace App\Console;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\SalesIncentiveDate;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -101,6 +102,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ReturnSheetReceive',
         'App\Console\Commands\RiderDeactivateAutomatically',
         'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
+		'App\Console\Commands\SaleIncentiveReport',
+        'App\Console\Commands\AutoAssignCrmAgent',
     ];
 
     /**
@@ -351,6 +354,13 @@ class Kernel extends ConsoleKernel
             $hourly = '0 */'. $hour .' * * *';
             $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
         }
+
+		//$incentive_date = SalesIncentiveDate::first();
+		//        if($incentive_date){
+		//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
+		//        }
+        $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
+
 
     }
     /**

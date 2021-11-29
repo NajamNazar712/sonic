@@ -14,6 +14,7 @@ use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\CargoConsignment;
+use App\Http\Models\ManifestBagLostShipment;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Shipment;
@@ -221,7 +222,7 @@ class LostShipmentsController extends Controller
     }
     public function get_shipment_info(Request $request)
     {
-            $passing_status_array = array(1, 5, 14, 17, 25, 30, 31, 60);
+            $passing_status_array = array(1, 5, 11 , 14, 17, 25, 30, 31, 60);
             $tracking_number = $request->tracking_number;
             if ($tracking_number != '') {
                 $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $passing_status_array);
@@ -274,7 +275,7 @@ class LostShipmentsController extends Controller
     public function add_lost_shipments(Request $request){
 
         $passing_status_array = array(1,14,17,18,25,31,38);
-        //$intransit_status_array = array(3, 21, 26, 32);
+        $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
         $remarks = $request->remarks;
         $lost_shipments_array = array();
@@ -294,71 +295,19 @@ class LostShipmentsController extends Controller
                         }
                     }
 
-                  /*  $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_details->id);
-                    if($cargo_manifest_bag_shipments->exists()){
-                        $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
-                        $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                        if($bag){
-                            $shipments_count = 0;
-                          if(in_array($bag->status_id,[8,9])){
-                              $bag_total_shipments = $bag->short_received_shipments;
-                              if($bag_total_shipments > 0){
-                                  $shipments_count = $bag_total_shipments - 1;
-                                  $bag->short_received_shipments = $shipments_count;
-                              }
-                          }
-                          else{
-                              $bag_total_shipments = $bag->shipments;
-                              if($bag_total_shipments > 0){
-                                  $shipments_count = $bag_total_shipments - 1;
-                                  $bag->shipments = $shipments_count;
-                              }
-                          }
-
-                            $shipment_weight = $bag->shipments_weight;
-                            if($shipment_weight > 0){
-                                $bag->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-                                $bag->actual_weight = $bag->shipments_weight;
-                            }
-                            if ($shipments_count == 0) {
-                                $bag->status_id = 10;
-                                CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,10,Auth::id(),NULL,NULL);
-                            }
-                            else if($shipments_count > 0  && in_array($bag->status_id, [7,8,9,10])){
-                                $bag->status_id = 7;
-                                CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,7,Auth::id(),NULL,NULL);
-                            }
-                            else {
-                                $bag->status_id = 8;
-                                CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, 8, Auth::id(), NULL, NULL);
-                            }
-                            $bag->save();
-                        }
-
-                        $cargo_bag = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
-                        if($cargo_bag->exists()){
-                            $cargo_bag = $cargo_bag->first();
-                            $cargo = CargoManifest::find($cargo_bag->cargo_manifest_id);
-                            if($cargo){
-                                $total_bags = $cargo->bags;
-                                $cargo_total_shipments = $cargo->shipments;
-                                if($shipments_count == 0){
-                                    $cargo->bags = $total_bags - 1;
-                                }
-                                $cargo->shipments = $cargo_total_shipments - 1;
-                                $cargo_weight = $cargo->bags_weight;
-                                $cargo->actual_weight = $cargo_weight - $shipment_details->actual_weight;
-                                $cargo->bags_weight =  $cargo->actual_weight;
-                                $cargo->save();
+                    if(in_array($shipment_details->shipper_status_id,$shipment_status_for_bags)){
+                        $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_details->id);
+                        if($cargo_manifest_bag_shipments->exists()){
+                            $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
+                            $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
+                            if($bag){
+                                ManifestBagLostShipment::create(['bag_id' => $bag->id,'shipment_id' => $shipment_details->id]);
+                                $bag->lost_shipments++;
+                                $bag->save();
                             }
                         }
-                        $shipment_details->shipper_status_id = 18;
-                        $shipment_details->save();
-                        ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment],NULL,Auth::id());
-                        $lost_shipments_array[] = $shipment;
-
                     }
-                    */
+
                     $shipment_details->shipper_status_id = 18;
                     $shipment_details->save();
                     ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment],NULL,Auth::id());

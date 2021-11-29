@@ -357,6 +357,9 @@
                                     </select>
                                 @endif
                             </div>
+                            <div class="form-group">
+                                <input type="text" id="return_reason_shipment_remarks" class="form-control" maxlength="100" placeholder="Remarks">
+                            </div>
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-3">
@@ -2121,6 +2124,7 @@
             },
             submitHandler: function(form) {
                     var return_reason_select = $('#return_reason_select').val();
+                    var remarks = $('#return_reason_shipment_remarks').val();
                     swal({
                             title: 'Please Wait!',
                             text: ' ',
@@ -2136,6 +2140,7 @@
                             '_token': '{{ csrf_token() }}',
                             'shipment_id': $('#return_shipment_id').val(),
                             'single_return_reason_select': return_reason_select,
+                            'remark': remarks,
                             'action': 'confirm'
                         }
                     })
@@ -2155,6 +2160,7 @@
         });
         $('#ReturnConfirmReasonModal').on('hide.bs.modal', function (e) {
                 $('#return_reason_select').val('').trigger('change');
+                $('#return_reason_shipment_remarks').val('');
             });
         $( "#reattempt_request_form" ).validate({
             errorClass:"danger",

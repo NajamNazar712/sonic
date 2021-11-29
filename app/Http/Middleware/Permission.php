@@ -365,6 +365,7 @@ class Permission
             'return.cx_sales.list' => 266,
             'return.return_deliveries.index' => 566,
             'return.return_deliveries.list' => 566,
+            'return.revert.index' => 643,
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
@@ -836,7 +837,7 @@ class Permission
             'settings.escalation.tagging.edit.store' => 350,
 
             'settings.default_agent.index' => 351,
-
+            
             'settings.holidays.index' => 358,
             'settings.holidays.list' => 358,
             'settings.holidays.add' => 358,
@@ -1115,6 +1116,15 @@ class Permission
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
+            'sales.territory.territoryindex' =>630,
+            'sales.designation.designationindex' =>631,
+            'settings.sales.incentive.index' =>632,
+            'reports.sales_incentive.index' =>633,
+            'reports.sales_incentive.consolidated' =>634,
+
+            'settings.auto_assigning.index' => 616,
+            'settings.auto_assigning.list' => 616,
+
 
         ],
 
