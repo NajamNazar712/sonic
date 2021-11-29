@@ -46,6 +46,8 @@ use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use DB;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\ShipmentDetail;
+use Illuminate\Support\Facades\Storage;
 
 class AdminTrackingController extends Controller
 {
@@ -1432,6 +1434,16 @@ class AdminTrackingController extends Controller
                         }
 
                         $details['shipment_id'] = $shipment->id;
+                        $ship_details = ShipmentDetail::where('shipment_id',$shipment->id);
+                        if($ship_details->exists()){
+
+                            if($shipment->shipment_detail->dws_image != null){
+                                $details['dws_image'] = Storage::url($shipment->shipment_detail->dws_image);
+                            }else{
+                                $details['dws_image'] = $shipment->shipment_detail->dws_image;
+                            }
+                        }
+
 
                         $tracking['shipments'][] = $details;
                     }

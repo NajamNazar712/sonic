@@ -576,7 +576,7 @@ class ShipperReportsController extends Controller
     {
         $shipping_modes = DB::connection('mysql')->table('shipping_modes')->select('id', 'mode')->get();
         $cities = DB::connection('mysql')->table('cities')->select('id', 'name')->get();
-        $statuses = DB::connection('mysql')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
+        $statuses = DB::connection('mysql')->table('shipment_status')->whereNotIn('id', [17])->get();
         return view('client.reports.sales_report_telenor')->with(['cities' => $cities, 'statuses' => $statuses, 'shipping_modes' => $shipping_modes]);
     }
     public function sales_telenor_list(Request $request)
@@ -591,7 +591,7 @@ class ShipperReportsController extends Controller
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1)'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (1,2) and shipments_journey.verification = 1)'));
             })
             ->leftJoin('shipments_journey as sjb', function ($join) use ($connection) {
                 $join->on('sjb.shipment_id', '=', 'shipments.id')
@@ -628,6 +628,13 @@ class ShipperReportsController extends Controller
         });
 
         $datatable = Datatables::of($sales)
+            ->editColumn('arrival_date', function ($sales) {
+                if($sales->arrival_date == $sales->booking_date){
+                    return '-';
+                }else{
+                    return $sales->arrival_date;
+                }
+            })
             ->addColumn('delivery_within_15_days', function ($sales) {
                 if ($sales->shipper_status_id != 25) {
                     $delivered_date = Carbon::parse($sales->delivered_or_returned)->startOfDay();
@@ -765,8 +772,7 @@ class ShipperReportsController extends Controller
         })
         ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
 
-        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id')
-        ->whereNotIn('shipments.shipper_status_id',[1,17]);
+        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
 
         $shipment = $shipment->where(function ($query) {
             $query->where('shipments.user_id', 7306)
@@ -836,7 +842,21 @@ class ShipperReportsController extends Controller
             }else{
                 return $shipment->shipper_name;
             }
+        })
+        ->editColumn('current_status', function ($shipment) {
+            if($shipment->status_id == 2 ||$shipment->status_id == 3 ||$shipment->status_id == 4 ||$shipment->current_status == 5 ||$shipment->status_id == 8 ||$shipment->status_id == 9 ||$shipment->status_id == 12 ||$shipment->status_id == 6 ||$shipment->status_id == 7 ||$shipment->status_id == 10 || $shipment->status_id == 11 || $shipment->status_id == 13  || $shipment->status_id == 15 || $shipment->status_id == 49 || $shipment->status_id == 52 || $shipment->status_id == 54  || $shipment->status_id == 55 || $shipment->status_id == 61 || $shipment->status_id == 62 || $shipment->status_id == 63){
+                return 'In Process';
+            }elseif($shipment->status_id == 14){
+                return 'Delivered';
+            }elseif($shipment->status_id == 20 ||$shipment->status_id == 21 ||$shipment->status_id == 22 ||$shipment->status_id == 23 ||$shipment->status_id == 24 || $shipment->status_id == 48 || $shipment->status_id == 44 || $shipment->status_id == 47 || $shipment->status_id == 57 || $shipment->status_id == 60){
+                return 'Return In Process';
+            }elseif($shipment->status_id == 25){
+                return 'Returned';
+            }else{
+                return $shipment->current_status;
+            }
         });
+
 
         // if($tracking = $request->get('search_tracking')){
         //     $datatable->where('shipments.tracking_number', '=', $tracking);

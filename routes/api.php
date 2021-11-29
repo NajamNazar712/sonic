@@ -290,6 +290,9 @@ Route::name('api.')->group(function () {
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
             });
 
+
+            Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
+
         });
 
     });

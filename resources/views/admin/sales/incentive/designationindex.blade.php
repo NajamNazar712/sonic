@@ -155,7 +155,7 @@
                 scrollX: true, scrollY: '500px',
                 // autoWidth: false,
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(627, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(636, session('permissions')))
                     {
                         text: 'Add Designation',
                         className: 'btn btn-primary add',

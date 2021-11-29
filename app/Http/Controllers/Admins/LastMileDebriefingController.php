@@ -685,7 +685,7 @@ class LastMileDebriefingController extends Controller
 
                 return response()->json(['status' => 0, 'shipments_data' => $shipments_data]);
             }
-            return response()->json(['status' => 1, 'error' => 'No undelived shipments found!']);
+            return response()->json(['status' => 1, 'error' => 'No undelivered shipments found!']);
         }
         else{
             return response()->json(['status' => 1, 'error' => 'Something went wrong!!']);

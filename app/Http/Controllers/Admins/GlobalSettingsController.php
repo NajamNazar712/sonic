@@ -4810,6 +4810,8 @@ class GlobalSettingsController extends Controller
     }
 
     public function crm_auto_assigning_index(){
+        
+        ActivityTrailController::createActivityTrailLog(Auth::id(),469);
         $agents = Admin::select('id', 'name')->whereIn('role_id',[37,28])->get();//37,28 role
         $zones = Zone::where('status',1)->where('business_category_id',1)->get();
         $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
