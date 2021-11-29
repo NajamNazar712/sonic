@@ -331,7 +331,7 @@ class AdminDashboardController extends Controller
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
 
-        if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('department_id') == 7 && (session('role_id') != 4 && session('role_id') != 75)) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         }
         else {
@@ -8382,7 +8382,7 @@ class AdminDashboardController extends Controller
         }
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(session('role_id') != 4 && session('role_id') != 75 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -8744,7 +8744,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(session('role_id') != 4 && session('role_id') != 75 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -9077,7 +9077,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(session('role_id') != 4 && session('role_id') != 75 ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -11398,7 +11398,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(session('role_id') != 4 && session('role_id') != 75){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -11447,6 +11447,13 @@ class AdminDashboardController extends Controller
             return redirect()->back()->with('success', 'Order ID restriction removed successfully!');
         }
     }
+    public function admin_profile(Request $request){
+        $user =Admin::where('id', Auth::id())->first();
+        $department = Admin::join('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
+        ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
+        ->where('admins.id', Auth::id())->first();
+        return response()->json(['full_name' => $user->name,'department' => $department->name,'designation' => $user->designation,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
+   }
 
 }
 

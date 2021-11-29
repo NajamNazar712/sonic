@@ -56,6 +56,7 @@ use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use function foo\func;
+use App\Http\Models\Shipper\UserShippingInfo;
 
 class ReturnController extends Controller
 {
@@ -412,23 +413,26 @@ class ReturnController extends Controller
     }
 
     public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
-
-
         $shipment_ids = $request->shipment_ids;
         $return_reason = $request->return_reason_select;
-        // $remarks = $request->remark;
+        $remarks = $request->remark;
 
         if($request->action == 'confirm'){
 
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
+                $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
+                if(!in_array($pickup_address->city_id, session('hubs')))
+                {
+                    return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
+                }
                 if($parcel->booking_type_id == 5){
                     continue;
                 }
                 $remark_inp = "remark.$shipment";
                 if(!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55])){
 
-                    $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
+//                    $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
 //                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                     $parcel->shipper_status_id = 20;
                     $parcel->consignee_status_id = 20;
@@ -509,6 +513,11 @@ class ReturnController extends Controller
         if($request->action == 'reattempt'){
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
+                $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
+                if(!in_array($pickup_address->city_id, session('hubs')))
+                {
+                    return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
+                }
                 if(!in_array($parcel->shipper_status_id, [13, 20])){
                     $remark_inp = "remark.$shipment";
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
@@ -567,11 +576,15 @@ class ReturnController extends Controller
     }
 
     public function return_marked_single_status(Request $request){
-
         $remark = $request->remark;
         if($request->action == 'confirm'){
             $return_reason = $request->single_return_reason_select;
             $parcel = Shipment::find($request->shipment_id);
+            $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
+            if(!in_array($pickup_address->city_id, session('hubs')))
+            {
+                return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
+            }
             if($parcel->booking_type_id == 5){
                 return ['status' => 0,'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
             }
@@ -623,6 +636,11 @@ class ReturnController extends Controller
 
         }elseif($request->action == 'reattempt'){
             $parcel = Shipment::find($request->shipment_id);
+            $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
+            if(!in_array($pickup_address->city_id, session('hubs')))
+            {
+                return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
+            }
             if(!in_array($parcel->shipper_status_id, [13, 20]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52)){
                 $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52])->latest('id')->first();
 
@@ -4536,5 +4554,53 @@ class ReturnController extends Controller
 
         return response()->json(['status' => 1, 'stats' => $stats]);
 
+    }
+    public function return_revert_index(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),475);
+        $settings = GlobalSettings::where('type', 'global_rider_id')->first();
+
+        if ($settings) {
+            $global_rider_id = $settings->setting_value;
+        } else {
+            $global_rider_id = 0;
+        }
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        return view('admin.return.revert')->with(['riders' => $riders, 'global_rider_id' => $global_rider_id]);
+    }
+    public function return_revert_shipment_details(Request $request)
+    {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number)->where('shipper_status_id', 25)->first();
+        if($shipment)
+        {
+            $details = array();
+
+            $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->orderBy('return_note_id', 'desc')->first();
+
+            $details['id'] = $shipment->id;
+            $details['tracking_number'] = $shipment->tracking_number;
+            $details['shipper'] = $shipment->user->name;
+            $details['return_note'] = $return_note_id->return_note_id;
+            
+            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+        } 
+        else {
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is on another status'];
+        }
+    }
+    public function return_revert_submit(Request $request)
+    {
+        $shipment_ids = explode(',', $request->shipment_ids);
+
+        foreach ($shipment_ids as $key => $shipment_id) {
+            $shipment = Shipment::find($shipment_id);
+            if($shipment)
+            {
+                $shipment->shipper_status_id = 47;
+                $shipment->save();
+                ShipmentsJourneyController::add($shipment_id, 47, 47, null, null, null, Auth::id());
+            }
+        }
+        return redirect()->back()->with(['success' => 'Shipments Reverted']);
     }
 }
