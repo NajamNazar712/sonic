@@ -4745,7 +4745,11 @@ class AdminAPIController extends Controller
                         if($shipment_detail->exists()){
                             $shipment_detail = $shipment_detail->get()->first();
                             $shipment_detail->dws_image = $link;
-                            $shipment_detail->dws_status = $dws_charges_status;
+                            if($shipment->business_category_id == 2){
+                                $shipment_detail->dws_status = 1;
+                            }else{
+                                $shipment_detail->dws_status = $dws_charges_status;
+                            }
                             $shipment_detail->dense_weight = $dense_weight;
                             $shipment_detail->dimension_l = $request->dimension_l;
                             $shipment_detail->dimension_w = $request->dimension_w;
@@ -4755,7 +4759,11 @@ class AdminAPIController extends Controller
                             $shipment_detail = new ShipmentDetail;
                             $shipment_detail->shipment_id = $shipment_id;
                             $shipment_detail->dws_image = $link;
-                            $shipment_detail->dws_status = $dws_charges_status;
+                            if($shipment->business_category_id == 2){
+                                $shipment_detail->dws_status = 1;
+                            }else{
+                                $shipment_detail->dws_status = $dws_charges_status;
+                            }
                             $shipment_detail->dense_weight = $dense_weight;
                             $shipment_detail->dimension_l = $request->dimension_l;
                             $shipment_detail->dimension_w = $request->dimension_w;
