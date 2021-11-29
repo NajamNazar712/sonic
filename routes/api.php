@@ -194,6 +194,7 @@ Route::name('api.')->group(function () {
             Route::prefix('attendance')->name('attendance.')->group(function() {
                 Route::get('shift', 'Rider\RiderAPIController@rider_shift')->name('shift');
                 Route::post('month_history', 'Rider\RiderAPIController@month_attendance_history')->name('month_history');
+                Route::post('month_history_v2', 'Rider\RiderAPIController@month_attendance_history_v2')->name('month_history_v2');
                 Route::post('detail', 'Rider\RiderAPIController@attendance_details')->name('detail');
                 Route::post('mark', 'Rider\RiderAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'Rider\RiderAPIController@attendance_history')->name('history');
@@ -248,6 +249,7 @@ Route::name('api.')->group(function () {
             Route::prefix('attendance')->name('attendance.')->group(function() {
                 Route::get('shift', 'AdminAPIController@employee_shift')->name('shift');
                 Route::post('month_history', 'AdminAPIController@month_attendance_history')->name('month_history');
+                Route::post('month_history_v2', 'AdminAPIController@month_attendance_history_v2')->name('month_history_v2');
                 Route::post('detail', 'AdminAPIController@attendance_details')->name('detail');
                 Route::post('mark', 'AdminAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'AdminAPIController@attendance_history')->name('history');
@@ -287,6 +289,9 @@ Route::name('api.')->group(function () {
                 Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
             });
+
+
+            Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
 
         });
 

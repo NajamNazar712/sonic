@@ -477,14 +477,21 @@ class ShipperInternationalShipmentBookController extends Controller
             $check = NonServiceArea::pluck('name')->toArray();
             $blacklist_errors = array();
             $blacklist_found_categories = array();
-
+            
             if(Session::has('prefix')){
                 $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id);
                 })];
             }
             else{
-                $rules['order_id'] = ['nullable', 'between:0,100'];
+                if(Session::has('restrict_order_id')){
+                    $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
+                        $query->where('user_id', $user_id);
+                    })];
+                }
+                else{
+                    $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
+                }
             }
 
             if($account_type_id == 1){

@@ -546,7 +546,7 @@
 						@if (session('role_id') == 1 || in_array(597, session('permissions')))
 					{
 						text: 'Generate Report',
-						className: 'btn btn-primary paid',
+						className: 'btn btn-primary',
 						enabled: true,
 						action: function (e, dt, node, config) {
 							$.ajax({

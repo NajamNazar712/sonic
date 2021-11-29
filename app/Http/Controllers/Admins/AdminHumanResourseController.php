@@ -2806,6 +2806,7 @@ class AdminHumanResourseController extends Controller
         $recovery = ($payslip->recovery != NULL) ? number_format($payslip->recovery) : '-';
         $auction_sale = ($payslip->auction_sale != NULL) ? number_format($payslip->auction_sale) : '-';
         $penalty = ($payslip->penalty != NULL) ? number_format($payslip->penalty) : '-';
+        $medical_insurance = ($payslip->medical_insurance != NULL) ? number_format($payslip->medical_insurance) : '-';
         $van_deduction = ($payslip->van_deduction != NULL) ? number_format($payslip->van_deduction) : '-';
         $others_deduction = ($payslip->others_deduction != NULL) ? number_format($payslip->others_deduction) : '-';
 
@@ -3058,6 +3059,12 @@ class AdminHumanResourseController extends Controller
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Others Addition</td>
                             <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
+                            <td colspan="2"  class="border twice-right">Medical Insurance</td>
+                            <td colspan="2"  class="border twice-right">' . $medical_insurance . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right"></td>
+                            <td colspan="2"  class="border twice-right"></td>
                             <td colspan="2"  class="border twice-right">Van Deduction</td>
                             <td colspan="2"  class="border twice-right">' . $van_deduction . '</td>
                         </tr>

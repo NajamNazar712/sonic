@@ -2238,7 +2238,8 @@ class DeliveryController extends Controller
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
 
-                    }else if($request->status_drop[$shipment] == 56){
+                    }
+                    else if($request->status_drop[$shipment] == 56){
                         if($shipment_status->booking_type_id == 2 ){
                             if($shipment_status->shipper_status_id != $request->status_drop[$shipment]){
                                 ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
@@ -2296,12 +2297,17 @@ class DeliveryController extends Controller
                         }else{
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
-
-
                     }
+                    $data = array();
+                    $data['delivery_note_id'] = $delivery_note_id;
+                    $data['shipment_id'] = $shipment;
+                    dispatch(new ProcessAgentCallMonitoring($data));
+
                 }
 
 				}
+
+
             }
             $delivery_note_data = DeliveryNote::find($delivery_note_id);
             $delivery_note_data->last_updated_at = Carbon::now();
@@ -7459,7 +7465,6 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         return view('admin.delivery.note.request')->with(['riders' => $riders,'hubs' => $hubs]);
     }
     public function request_list(Request $requests){
-        //dd($requests->search_hub);
         if($requests->get('excel') && $requests->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),270);
@@ -7467,10 +7472,10 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         $request = DeliveryNoteRequests::join('riders as r', 'r.id', '=', 'delivery_note_requests.rider_id')
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
+            ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
             ->select(['delivery_note_requests.id as id','r.name as rider', 'delivery_note_requests.delivery_note_id as delivery_note','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by','delivery_note_requests.status as status']);
-            //dd($request);
             if ($requests->search_hub) {
-                $request = $request->where('r.city_id', $requests->search_hub);
+                $request = $request->where('c.hub_id', $requests->search_hub);
             }
 
         $datatables = Datatables::of($request)
