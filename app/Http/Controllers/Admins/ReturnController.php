@@ -4581,6 +4581,8 @@ class ReturnController extends Controller
             $details['tracking_number'] = $shipment->tracking_number;
             $details['shipper'] = $shipment->user->name;
             $details['return_note'] = $return_note_id->return_note_id;
+
+            ShipmentScanningJourneyController::add($shipment->id, 29, 1, Auth::id(), null,null);
             
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
         } 

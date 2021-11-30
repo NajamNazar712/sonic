@@ -32,7 +32,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\BookingType;
 use App\Http\Models\Product;
 use App\Http\Models\ShipmentPaymentStatus;
-
+use App\Http\Models\WMS\WmsProductBarcode;
 use Auth;
 use DB;
 
@@ -66,6 +66,12 @@ class AdminShipmentCancelController extends Controller
 
                 if ($shipments->exists()) {
                     foreach ($shipments->get() as $shipment) {
+                        //cacel from warehouse
+
+                        if($shipment->warehouse != 1){
+                            // $shipment->warehouse_order_status = 9;
+                        //cacel from warehouse end
+
                         $shipment->shipper_status_id = 17;
                         $shipment->consignee_status_id = 17;
                         $shipment->save();
@@ -92,8 +98,25 @@ class AdminShipmentCancelController extends Controller
                                 }
                             }
                         }
+                        //cacel from warehouse
+                        if($shipment->warehouse == 1){
+                            $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->where('courier_id', 1)->get();
+                            if($shipment_products){
+                                foreach ($shipment_products as $shipment_product){
+                                    $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
+                                    if($current_stock_addition){
+                                        $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
+                                        $current_stock_addition->save();
+                                    }
+                                }
+                            }
+
+                            WmsProductBarcode::where('shipment_id', $shipment->id)->where('courier_id', 1)->update(['shipment_id' => null, 'courier_id' => null, 'picklist_id' => null]);
+                        }
+                        //cacel from warehouse end
                         
                         ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
+                    }
                     }
                 }
             }

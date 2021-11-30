@@ -9800,16 +9800,18 @@ class AdminReportsController extends Controller
     }
 
     public function dws_report_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),476);
+
         return view('admin.reports.dws_report');
 
     }
 
     public function dws_report_list(Request $request){
 
-        // if($request->get('excel') && $request->get('excel') == true)
-        // {
-        //     ActivityTrailController::createActivityTrailLog(Auth::id(),268);
-        // }
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),477);
+        }
         $shipments = DB::connection('reports')->table('shipments')->join('shipment_details as sd', 'shipments.id', '=', 'sd.shipment_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')

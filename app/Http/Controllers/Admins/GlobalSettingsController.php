@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Admins;
 
 
 use App\Http\Models\Admin\SalesIncentiveDate;
-use App\Http\Models\FleetDriver;
+use App\Http\Models\Admin\AdminAppSlider;
+use App\Http\Models\Admin\RetailAppSlider;use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
@@ -3723,7 +3724,9 @@ class GlobalSettingsController extends Controller
     public function rider_ticker_index()
     {
         $rider_ticker = RiderTickerImage::orderBy('id', 'ASC')->get();
-        return view('admin.settings.rider_ticker')->with(['id' => 1, 'rider_ticker' => $rider_ticker]);
+        $admin_ticker = AdminAppSlider::orderBy('id', 'ASC')->get();
+        $retail_ticker = RetailAppSlider::orderBy('id', 'ASC')->get();
+        return view('admin.settings.rider_ticker')->with(['id' => 1, 'rider_ticker' => $rider_ticker, 'admin_ticker' => $admin_ticker, 'retail_ticker' => $retail_ticker]);
     }
 
     public function rider_ticker_store(Request $request)
@@ -5111,4 +5114,197 @@ public function sales_incentive()
         }
     }
 
+    public function admin_ticker_store(Request $request)
+    {
+        $request->validate([
+            'upload_image_6' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_7' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_8' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_9' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_10' => 'nullable|image|mimes:jpeg,png|max:2048',
+        ]);
+
+        if (!$request->hasFile('upload_image_6') && !$request->hasFile('upload_image_7') && !$request->hasFile('upload_image_8') && !$request->hasFile('upload_image_9') && !$request->hasFile('upload_image_10')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image_6')) {
+            if ($request->has('admin_ticker_id_1')) {
+                $ticker_id = $request->get('admin_ticker_id_1');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_6));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_7')) {
+            if ($request->has('admin_ticker_id_2')) {
+                $ticker_id = $request->get('admin_ticker_id_2');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_7));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_8')) {
+            if ($request->has('admin_ticker_id_3')) {
+                $ticker_id = $request->get('admin_ticker_id_3');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_8));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_9')) {
+            if ($request->has('admin_ticker_id_4')) {
+                $ticker_id = $request->get('admin_ticker_id_4');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_9));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_10')) {
+            if ($request->has('admin_ticker_id_5')) {
+                $ticker_id = $request->get('admin_ticker_id_5');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_10));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        return redirect()->back()->with(['success' => 'Images Uploaded!']);
+    }
+
+    public function retail_ticker_store(Request $request)
+    {
+        $request->validate([
+            'upload_image_11' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_12' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_13' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_14' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_15' => 'nullable|image|mimes:jpeg,png|max:2048',
+        ]);
+
+        if (!$request->hasFile('upload_image_11') && !$request->hasFile('upload_image_12') && !$request->hasFile('upload_image_13') && !$request->hasFile('upload_image_14') && !$request->hasFile('upload_image_15')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image_11')) {
+            if ($request->has('retail_ticker_id_1')) {
+                $ticker_id = $request->get('retail_ticker_id_1');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_11));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_12')) {
+            if ($request->has('retail_ticker_id_2')) {
+                $ticker_id = $request->get('retail_ticker_id_2');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_12));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_13')) {
+            if ($request->has('retail_ticker_id_3')) {
+                $ticker_id = $request->get('retail_ticker_id_3');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_13));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_14')) {
+            if ($request->has('retail_ticker_id_4')) {
+                $ticker_id = $request->get('retail_ticker_id_4');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_14));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_15')) {
+            if ($request->has('retail_ticker_id_5')) {
+                $ticker_id = $request->get('retail_ticker_id_5');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_15));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        return redirect()->back()->with(['success' => 'Images Uploaded!']);
+    }
 }
