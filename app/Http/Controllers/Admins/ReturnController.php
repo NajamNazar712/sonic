@@ -4581,6 +4581,8 @@ class ReturnController extends Controller
             $details['tracking_number'] = $shipment->tracking_number;
             $details['shipper'] = $shipment->user->name;
             $details['return_note'] = $return_note_id->return_note_id;
+
+            ShipmentScanningJourneyController::add($shipment->id, 29, 1, Auth::id(), null,null);
             
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
         } 
@@ -4599,7 +4601,6 @@ class ReturnController extends Controller
                 $shipment->shipper_status_id = 47;
                 $shipment->save();
                 ShipmentsJourneyController::add($shipment_id, 47, 47, null, null, null, Auth::id());
-                ShipmentScanningJourneyController::add($shipment->id, 29, 1, Auth::id(), null,null);
             }
         }
         return redirect()->back()->with(['success' => 'Shipments Reverted']);
