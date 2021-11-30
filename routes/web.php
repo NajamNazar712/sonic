@@ -2992,6 +2992,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@debriefing_time_setting_update')->name('update');
         });
 
+        Route::prefix('omni')->name('omni.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@omni_user_setting_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@omni_user_setting_update')->name('update');
+        });
+
         Route::prefix('shipment_status_eta')->name('shipment_status_eta.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shipment_status_eta_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@shipment_status_eta_list')->name('list');

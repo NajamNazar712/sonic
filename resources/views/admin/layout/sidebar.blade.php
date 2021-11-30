@@ -1398,6 +1398,9 @@
                                     @if (session('role_id') == 1 || in_array(526, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.debriefing_time_setting.index')}}">Debriefing Time Setting</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(644, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.omni.index')}}">Omni User Setting</a></li>
+                                    @endif
 
                                     
                                 </ul>

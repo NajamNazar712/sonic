@@ -98,6 +98,7 @@ use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Admin\SalesDesignationJourney;
 use App\Http\Models\Admin\SalesDesignation;
 use App\Http\Models\Zone;
+use App\OmniUsers;
 use Carbon\Carbon;
 use http\Env\Response;
 use Illuminate\Http\Request;
@@ -5111,4 +5112,40 @@ public function sales_incentive()
         }
     }
 
+
+    public function omni_user_setting_index(){
+       $omni_users = OmniUsers::where('status',1)->pluck('user_id')->toArray();
+       $shippers = array();
+       if(count($omni_users) > 0){
+           foreach ($omni_users as $user_id){
+               $user = User::find($user_id);
+               $shippers[] = $user->id;
+           }
+       }
+        $users = User::where('status',3)->where('blacklist', 0)->select('id','name')->get();
+        return view('admin.settings.omni_user')->with(['shippers' => $shippers,'users' => $users]);
+    }
+    public function omni_user_setting_update(Request $request){
+       $omni_users = OmniUsers::where('status',1)->pluck('user_id')->toArray();
+       if($request->shippers){
+           if(count($omni_users) > 0){
+              foreach($request->shippers as $shipper){
+                 $user = OmniUsers::where('user_id',$shipper);
+                 if($user->exists()){
+                     $user->update(['status' => 0]);
+                 }
+                  OmniUsers::create(['user_id' =>$shipper,'status'=>1]);
+              }
+           }
+           else{
+               foreach ($request->shippers as $shipper_id){
+                   OmniUsers::create(['user_id' =>$shipper_id,'status'=>1]);
+               }
+           }
+           return redirect()->back()->with(['success'=>'Setting Updated!']);
+       }
+       else{
+           return redirect()->back()->with(['error'=>'No Shipper Selected!']);
+       }
+    }
 }
