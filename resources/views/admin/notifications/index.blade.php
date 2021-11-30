@@ -35,7 +35,7 @@
 								<div class="modal fade" id="send_custom_email" role="dialog" aria-labelledby="send_custom_email_title" aria-hidden="true">
 									<div class="modal-dialog modal-lg" role="document">
 										<div class="modal-content">
-											<form class="form-horizontal" method="POST" action="{{ route('admin.notifications.send_custom_email') }}" novalidate="novalidate">
+											<form  class="form-horizontal" method="POST" action="{{ route('admin.notifications.send_custom_email') }}" enctype="multipart/form-data" novalidate="novalidate">
 												{{ csrf_field() }}
 
 												<div class="modal-header">
@@ -62,6 +62,26 @@
 															<option value="3">All</option>
 														</select>
 													</div>
+													
+													<div class="form-group d-none" id="hub_div">
+														<select name="search_hub" class="select2 search_hub" data-rule-required="true" data-msg-required="Hub is required">
+															<option value="" selected="selected"></option>
+															<option value="0">All</option>
+															@foreach($hubs as $hub)
+																<option value="{{$hub->id}}">{{$hub->name}}</option>
+															@endforeach
+														</select>
+													</div>
+
+													<div class="form-group d-none" id="city_div">
+														<select name="search_city" class="select2 search_city" data-rule-required="true" data-msg-required="City is required">
+															<option value="" selected="selected"></option>
+															<option value="0">All</option>
+															@foreach($cities as $city)
+																<option value="{{$city->id}}">{{$city->name}}</option>
+															@endforeach
+														</select>
+													</div>
 
 													<div class="form-group">
 														<label>Subject</label>
@@ -71,6 +91,10 @@
 													<div class="form-group">
 														<label>Body</label>
 														<textarea type="text" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required"></textarea>
+													</div>
+													<div class="form-group">
+														<label>Upload File(s)</label>
+														<input type="file" name="attachment[]"  class="form-control attachment" multiple >
 													</div>
 												</div>
 												<div class="modal-footer">
@@ -209,19 +233,33 @@
 					width: '100%',
 					placeholder: 'Status*'
 				});
+				$('#send_custom_email .search_hub').select2({
+					width: '100%',
+					placeholder: 'Hub*'
+				});
+				$('#send_custom_email .search_city').select2({
+					width: '100%',
+					placeholder: 'City*'
+				});
 
 				$('#send_custom_email .receiver').select2({
 					width: '100%',
 					placeholder: 'Receiver*'
 				}).bind('change', function() {
+					$('.search_hub').val('').trigger('change');
+					$('.search_city').val('').trigger('change');
 					if ($(this).hasClass('danger')) {
 						$(this).valid();
 					}
 					if(this.value == 2){
 						$('#shipper_div').removeClass('d-none');
+						$('#city_div').removeClass('d-none');
+						$('#hub_div').addClass('d-none');
 					}
 					else{
 						$('#shipper_div').addClass('d-none');
+						$('#city_div').addClass('d-none');
+						$('#hub_div').removeClass('d-none');
 					}
 				});
 
@@ -384,6 +422,20 @@
 					},
 					errorPlacement: function(error, element) {
 						error.addClass('w-100').appendTo(element.parent('.form-group'));
+					},
+					submitHandler: function(form) {
+						$(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+						swal({
+							title: 'Please Wait!',
+							text: 'Your Email are being send!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+
+						form.submit();
 					}
 				});
 			@endif
@@ -551,8 +603,11 @@
 				$('.shipper_status').val('').trigger('change');
 				$('#shipper_div').addClass('d-none');
 				$('.receiver').val('').trigger('change');
+				$('.search_hub').val('').trigger('change');
+				$('.search_city').val('').trigger('change');
 				$('.subject').val('').trigger('change');
 				$('.body').val('').trigger('change');
+				$('.attachment').val('').trigger('change');
 
 			});
 
@@ -560,10 +615,13 @@
 				$('.notification_receiver').val('').trigger('change');
 				$('.riders').val('').trigger('change');
 				$('.employees').val('').trigger('change');
+				$('.search_hub').val('').trigger('change');
+				$('.search_city').val('').trigger('change');
 				$('#riders_div').addClass('d-none');
 				$('#employees_div').addClass('d-none');
 				$('.notification_title').val('');
 				$('.notification_body').val('');
+				$('.attachment').val('').trigger('change');
 			});
 
 		});

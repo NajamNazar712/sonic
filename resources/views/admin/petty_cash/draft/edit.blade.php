@@ -25,9 +25,49 @@
                                 </select>
                             </fieldset>
                         </div>
+                        <div class="col ">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                </div>
+
+                                <input type="text" name="select_statement_date" data-value="{{$petty_statement_draft->date}}" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_statement_date" placeholder="Select Date" data-rule-required="true" data-msg-required="Date is required">
+                            </div>
+                        </div>
                         <div class="col">
                             <fieldset class="form-group">
                                 <input type="text" class="form-control reference_no" disabled name="reference_no" id="reference_no" placeholder="Statement Reference No." data-rule-required="true" data-msg-required="Statement Reference No. is required" value="{{$petty_statement_draft->reference_no}}">
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col">
+                            <fieldset class="form-group">
+                                <select name="select_statement_zone" id="select_statement_zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                                    @foreach($zones as $zone)
+                                        <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+
+                        <div class="col">
+                            <fieldset class="form-group">
+                                <select name="select_statement_hub" id="select_statement_hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required">
+                                </select>
+                            </fieldset>
+                        </div>
+
+                        <div class="col">
+                            <fieldset class="form-group">
+                                <select name="select_statement_station_manager" id="select_statement_station_manager" class="form-control select2" data-rule-required="true" data-msg-required="Station Manager is required">
+                                    @foreach($operation_managers as $manager)
+                                        <option value="{{$manager->id}}">{{$manager->name}} @if($manager->trax_id != '')({{$manager->trax_id}}) @endif</option>
+                                    @endforeach
+                                </select>
                             </fieldset>
                         </div>
                     </div>
@@ -41,20 +81,18 @@
                         <tr role="row" class="bg-primary white">
 
                             <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">City / Location</th>
                             <th class="border-primary border-darken-1">Account Head</th>
                             <th class="border-primary border-darken-1">Account Title</th>
-                            <th class="border-primary border-darken-1">Zone</th>
-                            <th class="border-primary border-darken-1">Hub</th>
-                            <th class="border-primary border-darken-1">City / Location</th>
-                            <th class="border-primary border-darken-1">Operation Manager</th>
-                            <th class="border-primary border-darken-1">Date</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
-                            <th class="border-primary border-darken-1"> Employee Id </th>
-                            <th class="border-primary border-darken-1"> Name </th>
-                            <th class="border-primary border-darken-1"> Designation </th>
-                            <th class="border-primary border-darken-1"> Amount </th>
+                            <th class="border-primary border-darken-1">Amount </th>
+                            <th class="border-primary border-darken-1">Employee Id </th>
+                            <th class="border-primary border-darken-1">Name </th>
+                            <th class="border-primary border-darken-1">Designation </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
                             <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">DNCC/PNCC </th>
+                            <th class="border-primary border-darken-1">Delivered Shipment Count </th>
                             <th class="border-primary border-darken-1">Reference Documents</th>
                             <th class="border-primary border-darken-1"></th>
 
@@ -131,29 +169,144 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            // $('.reference_no').inputmask({
-            //     'alias': 'integer',
-            //     'allowMinus': false,
-            //     'allowPlus': false,
-            //     'rightAlign': false,
-            // });
+            let first = false;
+            let cities_data = $.map({!! $city_array[$petty_statement_draft->hub_id] !!}, function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
 
-            let default_zone_id = '';
-            let default_hub_id = '';
-            let default_operation_manager_id = '';
-            let default_zone_value = '';
-            let default_hub_value = '';
-            let default_operation_manager_value = '';
-            let cities_data = ""
+            let dncc_data = "{!! $dncc_array !!}";
 
             $('#select_statement_sdn').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select SDN No.',
                 width:'100%',
-                allowClear:true
+            }).bind('change',function(){
+                var sdn = $(this).val();
+                if(first) {
+                    $.ajax({
+                        url: '{!! route('admin.petty_cash.make.dncc') !!}',
+                        type: 'POST',
+                        data: {
+                            'sdn_id': sdn,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status) {
+                            dncc_data = "";
+                            $.each(data.data, function (i, v) {
+                                dncc_data += "<option value='" + v.id + "' data-count='" + v.count + "'>" + v.text + "</option>";
+                            });
+
+                            $(".delivered_shipment_input").val('');
+                            $('.dncc_select').each(function (elm) {
+                                $(this).empty().trigger('change');
+                                $(this).html(dncc_data);
+                                $(this).val('').trigger('change');
+                            });
+                        }
+                    });
+                }
             });
 
             $('#select_statement_sdn').val('{!! $petty_statement_draft->sdn_id!!}').trigger('change');
 
+            $('#select_statement_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Zone',
+                width:'100%',
+            }).bind('change',function(){
+                var zone = $(this).val();
+                if(first) {
+                    $.ajax({
+                        url: '{!! route('admin.petty_cash.make.hubs') !!}',
+                        type: 'POST',
+                        data: {
+                            'zone': zone,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status) {
+                            var hub = $('#select_statement_hub');
+                            hub.empty().trigger('change');
+                            $.each(data.data, function (key, value) {
+                                var newOption = new Option(value.name, value.id, false, false);
+                                hub.append(newOption);
+                            });
+                            hub.val('').trigger('change');
+                        }
+                    });
+                }
+            });
+
+            $('#select_statement_zone').val('{!! $petty_statement_draft->zone_id!!}').trigger('change');
+
+            var hub_array = @json($hub_array);
+            var hub_data = $.map(hub_array[{!! $petty_statement_draft->zone_id!!}], function (obj) {
+                obj.id = obj.id;
+                obj.text = obj.name;
+                return obj;
+            });
+
+
+            $('#select_statement_hub').prepend('<option value="" selected="selected"></option>').select2({
+                data: hub_data,
+                placeholder:'Select Hub',
+                width:'100%',
+            }).bind('change',function(){
+                var hub = $(this).val();
+                if(first) {
+                    $.ajax({
+                        url: '{!! route('admin.petty_cash.make.cities') !!}',
+                        type: 'POST',
+                        data: {
+                            'hub': hub,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status) {
+                            cities_data = $.map(data.data, function (obj) {
+                                obj.id = obj.id;
+                                obj.text = obj.name;
+                                return obj;
+                            });
+
+                            $('.city_select').each(function (elm) {
+                                $(this).empty().trigger('change');
+                                $(this).prepend('<option value="" selected="selected"></option>').select2({
+                                    data: cities_data,
+                                    placeholder: "Select a City"
+                                });
+                                $(this).val('').trigger('change');
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('#select_statement_hub').val('{!! $petty_statement_draft->hub_id!!}').trigger('change');
+
+            $('#select_statement_station_manager').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Station Manager',
+                width:'100%',
+            });
+
+            $('#select_statement_station_manager').val('{!! $petty_statement_draft->station_manager_id!!}').trigger('change');
+
+            var min_date_limit = '{{ Carbon\Carbon::now()->subDays(3)->toDateString() }}';
+            var all_max_date = new Date();
+
+            $('#select_statement_date').pickadate({
+                firstDay: 1,
+                today: '',
+                min: new Date(min_date_limit),
+                max: all_max_date,
+                clear: '',
+                close: '',
+                weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
+                showMonthsShort: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+            });
 
             var selected_rows = [];
             var rows_count = 0;
@@ -173,20 +326,18 @@
                 autoWidth: true,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {name: 'city', class: 'align-middle city custom-col-width form-group'},
                     {name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
                     {name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
-                    {name: 'zone', class: 'align-middle zone custom-col-width form-group'},
-                    {name: 'hub', class: 'align-middle hub custom-col-width form-group'},
-                    {name: 'city', class: 'align-middle city custom-col-width form-group'},
-                    {name: 'operation_manager_id', class: 'align-middle operation_manager_id custom-col-width form-group'},
-                    {name: 'date', class: 'align-middle date date-col-width form-group'},
                     {name: 'details_of_expense', class: 'align-middle details_of_expense doe-col-width form-group'},
+                    {name: 'amount', class: 'align-middle expense_amount custom-col-width form-group'},
                     {name: 'employee_id', class: 'align-middle employee_id custom-col-width form-group'},
                     {name: 'name', class: 'align-middle name custom-col-width form-group'},
                     {name: 'designation', class: 'align-middle designation custom-col-width form-group'},
-                    {name: 'amount', class: 'align-middle expense_amount custom-col-width form-group'},
                     {name: 'reference_no', class: 'align-middle reference_no custom-col-width form-group'},
                     {name: 'remarks', class: 'align-middle custom-col-width remarks'},
+                    {name: 'dncc', class: 'align-middle dncc custom-col-width form-group'},
+                    {name: 'delivered_shipment_count', class: 'align-middle delivered_shipment_count custom-col-width form-group'},
                     {name: 'image', class: 'align-middle image custom-col-width form-group'},
                     {name: 'action', class: 'align-middle action'},
                 ],
@@ -207,7 +358,7 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('td.form-group'));
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
 
@@ -254,22 +405,20 @@
                 "Statement Reference Number already exists."
             );
 
-            var max_date = '{{ Carbon\Carbon::now()->toDateString() }}';
+
             rows_count = 0;
-            var min_date_limit = '{{ Carbon\Carbon::now()->subDays(3)->toDateString() }}';
             function add_row() {
 
                 rows_count++;
                 selected_rows.push(rows_count);
                 var heads_select = '<select class="form-control select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
-                var zone_select = '<input type="hidden" class="zone_input_id" name="zone['+rows_count+']" value="'+default_zone_id+'"><input type="text" readonly placeholder="Select Zone" class="form-control zone_input_value" value="'+default_zone_value+'">';
-                var hub_select = '<input type="hidden" class="hub_input_id" name="hub['+rows_count+']" value="'+default_hub_id+'"><input type="text" readonly placeholder="Select Hub" class="form-control hub_input_value" value="'+default_hub_value+'">';
-                var operation_manager_select = '<input type="hidden" class="operation_manager_input_id" name="operation_manager['+rows_count+']" value="'+default_operation_manager_id+'"><input type="text" readonly class="form-control operation_manager_input_value" placeholder="Select Operation Manager" value="'+default_operation_manager_value+'">';
                 var city_select = '<select class="form-control form-control-sm select2 city_select" name="city['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
-                var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required"></div>';
-
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" maxlength="300" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
+
+                var dncc_select = '<select class="form-control form-control-sm select2 dncc_select" name="dncc['+rows_count+']"></select>';
+                var delivered_shipment_input = '<input class="form-control form-control-sm delivered_shipment_input" readonly name="delivered_shipment_count['+rows_count+']" placeholder="Total Delivered Shipments">';
+
                 var employee_select = '<select class="form-control form-control-sm select2 employee_select" name="employee['+rows_count+']"></select>';
                 var employee_name_input = '<input class="form-control form-control-sm employee_name" readonly name="employee_name['+rows_count+']" placeholder="Employee Name">';
                 var employee_designation_input = '<input class="form-control form-control-sm employee_designation" readonly name="employee_designation['+rows_count+']" placeholder="Employee Designation">';
@@ -291,20 +440,12 @@
                     return obj;
                 });
 
-                var zones = $.map({!! $zones !!}, function (obj) {
-                    obj.id = obj.id;
-                    obj.text = obj.name;
-                    return obj;
-                });
-
                 var employees = $.map({!! $employees !!}, function (obj) {
                     obj.id = obj.id;
                     obj.text = obj.trax_id;
                     return obj;
                 });
-                // var trow = '<tr><td>'+rows_count+'</td><td>'+heads_select+'</td><td>'+titles_select+'</td><td>'+hub_select+'</td><td>'+date_input+'</td><td>'+expense_detail_input+'</td><td>'+amount_input+'</td><td>'+reference_input+'</td><td>'+remarks_input+'</td><td>'+upload_image+'</td><td>'+remove+'</td></tr>';
-                // $('#datatable tbody').append(trow);
-                table.row.add([0, heads_select,titles_select,zone_select,hub_select,city_select,operation_manager_select,date_input,expense_detail_input,employee_select,employee_name_input,employee_designation_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
+                table.row.add([0, city_select,heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
@@ -330,26 +471,24 @@
                     placeholder:'Select a City',
                     dropdownCssClass: 'form-control-sm p-0'
                 });
+
+                $('select[name="dncc['+rows_count+']"]').html(dncc_data);
+                $('select[name="dncc['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    placeholder:'Select DNCC/PNCC',
+                    dropdownCssClass: 'form-control-sm p-0',
+                    allowClear:true,
+                }).bind('change',function (){
+                    let count = $(this).find(':selected').attr('data-count');
+                    let index = $(this).attr('name');
+                    index = index.substring(5, index.length-1);
+                    $('input[name="delivered_shipment_count['+index+']"]').val(count);
+                });
+
                 $('.reference_row').inputmask({
                     'alias': 'integer',
                     'allowMinus': false,
                     'allowPlus': false,
                     'rightAlign': false,
-                });
-                $('#expense_date_' + rows_count).pickadate({
-                    firstDay: 1,
-                    today: '',
-                    clear: '',
-                    close: '',
-                    min: new Date(min_date_limit),
-                    max: new Date(max_date),
-                    weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
-                    showMonthsShort: true,
-                    formatSubmit: 'yyyy-mm-dd 00:00:00',
-                    hiddenSuffix: '_formatted',
-                    onOpen: function() {
-                        $('#expense_date_' + rows_count+'_root').css('top', '45px');
-                    },
                 });
 
                 $('.amount').inputmask({
@@ -373,11 +512,6 @@
                 var selected_head = $(this).find(':selected');
                 var head = parseInt(selected_head.val());
                 var title = selected_head.closest('td').next('td').find('.title_select');
-                // if(head == 1){
-                //     selected_head.closest('td').next('td').next('td').find('.hub_select').prop("disabled",false);
-                // }else{
-                //     selected_head.closest('td').next('td').next('td').find('.hub_select').prop("disabled",true);
-                // }
                 $.ajax({
                     url:'{!! route('admin.petty_cash.make.titles') !!}',
                     type:'POST',
@@ -395,75 +529,6 @@
                         title.val('').trigger('change');
                     }
                 });
-            });
-
-            $('body').on('select2:select','.zone .zone_select',function () {
-                var rowid = parseInt($(this).parents('tr').attr('id'));
-                var selected_zone = $(this).find(':selected');
-                var zone = parseInt(selected_zone.val());
-                default_zone_id = zone;
-                default_zone_value = selected_zone.text();
-                $(".zone_input_id").val(default_zone_id);
-                $(".zone_input_value").val(default_zone_value);
-                var hub = selected_zone.closest('td').next('td').find('.hub_select');
-                $.ajax({
-                    url:'{!! route('admin.petty_cash.make.hubs') !!}',
-                    type:'POST',
-                    data: {
-                        'zone':zone,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status){
-                        hub.empty().trigger('change');
-                        $.each(data.data,function (key,value) {
-                            var newOption = new Option(value.name, value.id, false, false);
-                            hub.append(newOption).trigger('change');
-                        });
-                        hub.val('').trigger('change');
-                    }
-                });
-            });
-
-            $('body').on('select2:select','.hub .hub_select',function () {
-                var rowid = parseInt($(this).parents('tr').attr('id'));
-                var selected_hub = $(this).find(':selected');
-                var hub = parseInt(selected_hub.val());
-                default_hub_id = hub;
-                default_hub_value = selected_hub.text();
-                $(".hub_input_id").val(default_hub_id);
-                $(".hub_input_value").val(default_hub_value);
-                var city = selected_hub.closest('td').next('td').find('.city_select');
-                $.ajax({
-                    url:'{!! route('admin.petty_cash.make.cities') !!}',
-                    type:'POST',
-                    data: {
-                        'hub':hub,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status){
-                        cities_data = $.map(data.data, function (obj) {
-                            obj.id = obj.id;
-                            obj.text = obj.name;
-                            return obj;
-                        });
-                        $('.city_select').each(function(elm){
-                            $(this).empty().trigger('change');
-                            $(this).prepend('<option value="" selected="selected"></option>').select2({data:cities_data,placeholder:"Select a City"});
-                            $(this).val('').trigger('change');
-                        });
-                    }
-                });
-            });
-
-            $('body').on('select2:select','.operation_manager_id .operation_manager_select',function () {
-                var selected_manager = $(this).find(':selected');
-                var manager = parseInt(selected_manager.val());
-                default_operation_manager_id = manager;
-                default_operation_manager_value = selected_manager.text();
-                $(".operation_manager_input_id").val(default_operation_manager_id);
-                $(".operation_manager_input_value").val(default_operation_manager_value);
             });
 
             $('body').on('change','.employee_id .employee_select',function () {
@@ -507,6 +572,7 @@
                 calculate_amount();
 
             });
+
             function calculate_amount() {
                 var total_amount = 0;
                 table.rows().nodes().each(function(index) {
@@ -520,6 +586,7 @@
                 });
                 $('#statements_total_amount').text(total_amount);
             }
+
             $('body').on('click','.action button.approve', function () {
                 var current = $(this);
                 var id = parseInt($(this).parents('tr').attr('id'));
@@ -690,6 +757,7 @@
                 });
                 $('#statements_total_amount').text(total_amount);
             });
+
             $('#statement_approve').on('click', function (e) {
                 e.preventDefault();
                 var current = $(this);
@@ -771,17 +839,15 @@
 
             function load_data() {
 
-                @foreach($petty_statement_draft->petty_cash_statement_draft_details as $data)
+                @foreach($petty_statement_draft->petty_cash_statement_draft_details as $key => $data)
                         var head = '{{$data->account_head_id}}';
                         var title = '{{$data->account_title_id}}';
-                        var zone = '{{$data->zone_id}}';
-                        var hub = '{{$data->hub_id}}';
                         var city = '{{$data->city_id}}';
-                        var operation_manager = '{{$data->operation_manager_id}}';
-                        var date = '{{$data->date}}';
                         var employee_id = '{{$data->employee_id}}';
                         var employee_name = '{{$data->employee_name}}';
                         var employee_designation = '{{$data->employee_designation}}';
+                        var dncc = '{{$data->dncc_id}}';
+                        var delivered_shipments = '{{$data->delivered_shipments}}';
                         var expense = '{{str_replace(array("\n", "\r"), '',$data->expense_details)}}';
                         var amount = '{{$data->amount}}';
                         var reference_no = '{{$data->reference_no}}';
@@ -789,19 +855,21 @@
                         var reference_document = $.trim('{{$data->reference_document}}');
                         var reference_document_2 = $.trim('{{$data->reference_document_2}}');
 
-                    load_row(head, title, zone,hub,city,operation_manager, date, expense,employee_id,employee_name,employee_designation, amount, reference_no, remarks, reference_document,reference_document_2);
+                    load_row(head, title,city, expense,employee_id,employee_name,employee_designation,dncc,delivered_shipments, amount, reference_no, remarks, reference_document,reference_document_2);
                 @endforeach
             }
             load_data();
 
-            function load_row(head, title,zone, hub,city,operation_manager, date, expense,employee_id,employee_name,employee_designation, amount, reference, remarks, reference_document,reference_document_2) {
+            function load_row(head, title,city, expense,employee_id,employee_name,employee_designation,dncc,delivered_shipments, amount, reference, remarks, reference_document,reference_document_2) {
                 var image_url = '{{asset('/storage/petty_cash_statement_details_draft')}}';
                 rows_count++;
                 selected_rows.push(rows_count);
                 var heads_select = '<select class="form-control select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
                 var city_select = '<select class="form-control form-control-sm select2 city_select" name="city['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
-                var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required" data-value="'+ date +'"></div>';
+
+                var dncc_select = '<select class="form-control form-control-sm select2 dncc_select" name="dncc['+rows_count+']"></select>';
+                var delivered_shipment_input = '<input class="form-control form-control-sm delivered_shipment_input" readonly name="delivered_shipment_count['+rows_count+']" placeholder="Total Delivered Shipments">';
 
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" maxlength="300" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">'+ expense +'</textarea>';
                 var employee_select = '<select class="form-control form-control-sm select2 employee_select" name="employee['+rows_count+']"></select>';
@@ -832,14 +900,8 @@
 
                 if(rows_count == 1){
                     var remove = '';
-                    var zone_select = '<select class="form-control form-control-sm select2 zone_select" name="zone['+rows_count+']" data-rule-required="true" data-msg-required="Zone is required"></select>';
-                    var hub_select = '<select class="form-control form-control-sm select2 hub_select"  name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
-                    var operation_manager_select = '<select class="form-control form-control-sm select2 operation_manager_select" name="operation_manager['+rows_count+']" data-rule-required="true" data-msg-required="Operation Manager is required"></select>';
                 }else{
                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-                    var zone_select = '<input type="hidden" class="zone_input_id" name="zone['+rows_count+']" value="'+default_zone_id+'"><input type="text" readonly placeholder="Select Zone" class="form-control zone_input_value" value="'+default_zone_value+'">';
-                    var hub_select = '<input type="hidden" class="hub_input_id" name="hub['+rows_count+']" value="'+default_hub_id+'"><input type="text" readonly placeholder="Select Hub" class="form-control hub_input_value" value="'+default_hub_value+'">';
-                    var operation_manager_select = '<input type="hidden" class="operation_manager_input_id" name="operation_manager['+rows_count+']" value="'+default_operation_manager_id+'"><input type="text" readonly class="form-control operation_manager_input_value" placeholder="Select Operation Manager" value="'+default_operation_manager_value+'">';
                 }
 
                 var heads = $.map({!! $heads !!}, function (obj) {
@@ -855,40 +917,12 @@
                     return obj;
                 });
 
-                var zones = $.map({!! $zones !!}, function (obj) {
-                    obj.id = obj.id;
-                    obj.text = obj.name;
-                    return obj;
-                });
-
-                var hub_array = @json($hub_array);
-                var zone_hub = $.map(hub_array[zone], function (obj) {
-                    obj.id = obj.id;
-                    obj.text = obj.name;
-                    return obj;
-                });
-
-                var city_array = @json($city_array);
-                var hub_city = $.map(city_array[hub], function (obj) {
-                    obj.id = obj.id;
-                    obj.text = obj.name;
-                    return obj;
-                });
-
-                var operation_managers = $.map({!! $operation_managers !!}, function (obj) {
-                    obj.id = obj.id;
-                    obj.text = obj.name+" ("+obj.trax_id+") ";
-                    return obj;
-                });
-
                 var employees = $.map({!! $employees !!}, function (obj) {
                     obj.id = obj.id;
                     obj.text = obj.trax_id;
                     return obj;
                 });
-                // var trow = '<tr><td>'+rows_count+'</td><td>'+heads_select+'</td><td>'+titles_select+'</td><td>'+hub_select+'</td><td>'+date_input+'</td><td>'+expense_detail_input+'</td><td>'+amount_input+'</td><td>'+reference_input+'</td><td>'+remarks_input+'</td><td>'+upload_image+'</td><td>'+remove+'</td></tr>';
-                // $('#datatable tbody').append(trow);
-                table.row.add([0, heads_select,titles_select,zone_select,hub_select,city_select,operation_manager_select,date_input,expense_detail_input,employee_select,employee_name_input,employee_designation_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
+                table.row.add([0, city_select,heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
@@ -904,92 +938,43 @@
                     dropdownCssClass: 'form-control-sm p-0'
                 });
                 $('select[name="title['+rows_count+']"]').val(title).trigger('change');
-                if(rows_count == 1) {
-                    $('select[name="zone[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
-                        data: zones,
-                        placeholder: 'Select Zone',
-                        dropdownCssClass: 'form-control-sm p-0'
 
-                    });
-                    $('select[name="zone[' + rows_count + ']"]').val(zone).trigger('change');
+                $('select[name="employee[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data: employees,
+                    placeholder: 'Select Employee Id',
+                    dropdownCssClass: 'form-control-sm p-0',
+                    allowClear:true,
 
-                    default_zone_id = zone;
-                    $.each(zones,function (i,v){
-                       if(v.id == zone)
-                       {
-                           default_zone_value = v.text;
-                       }
-                    });
+                });
 
-                    $('select[name="hub[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
-                        data: zone_hub,
-                        placeholder: 'Select Hub',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    $('select[name="hub[' + rows_count + ']"]').val(hub).trigger('change');
+                $('select[name="employee[' + rows_count + ']"]').val(employee_id).trigger('change');
 
+                $('select[name="city[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data: cities_data,
+                    placeholder: 'Select a City',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
 
-                    default_hub_id = hub;
-                    $.each(zone_hub,function (i,v){
-                        if(v.id == hub)
-                        {
-                            default_hub_value = v.text;
-                        }
-                    });
+                $('select[name="city[' + rows_count + ']"]').val(city).trigger('change');
 
-                    $('select[name="operation_manager['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                        data: operation_managers,
-                        placeholder:'Select Operation Manager',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-
-                    $('select[name="operation_manager[' + rows_count + ']"]').val(operation_manager).trigger('change');
-
-                    default_operation_manager_id = operation_manager;
-                    $.each(operation_managers,function (i,v){
-                        if(v.id == operation_manager)
-                        {
-                            default_operation_manager_value = v.text;
-                        }
-                    });
-
-                    cities_data = hub_city;
-                }
-                    $('select[name="employee[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
-                        data: employees,
-                        placeholder: 'Select Employee Id',
-                        dropdownCssClass: 'form-control-sm p-0',
-                        allowClear:true,
-
-                    });
-                    $('select[name="employee[' + rows_count + ']"]').val(employee_id).trigger('change');
-                    $('select[name="city[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
-                        data: hub_city,
-                        placeholder: 'Select a City',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    $('select[name="city[' + rows_count + ']"]').val(city).trigger('change');
+                $('select[name="dncc['+rows_count+']"]').html(dncc_data);
+                $('select[name="dncc['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    placeholder:'Select DNCC/PNCC',
+                    dropdownCssClass: 'form-control-sm p-0',
+                    allowClear:true,
+                }).bind('change',function (){
+                    let count = $(this).find(':selected').attr('data-count');
+                    let index = $(this).attr('name');
+                    index = index.substring(5, index.length-1);
+                    $('input[name="delivered_shipment_count['+index+']"]').val(count);
+                });
+                $('select[name="dncc[' + rows_count + ']"]').val(dncc).trigger('change');
 
                 $('.reference_row').inputmask({
                     'alias': 'integer',
                     'allowMinus': false,
                     'allowPlus': false,
                     'rightAlign': false,
-                });
-                $('#expense_date_' + rows_count).pickadate({
-                    firstDay: 1,
-                    today: '',
-                    clear: '',
-                    close: '',
-                    min: new Date(min_date_limit),
-                    max: new Date(max_date),
-                    weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
-                    showMonthsShort: true,
-                    formatSubmit: 'yyyy-mm-dd 00:00:00',
-                    hiddenSuffix: '_formatted',
-                    onOpen: function() {
-                        $('#expense_date_' + rows_count+'_root').css('top', '-262px');
-                    },
                 });
 
                 $('.amount').inputmask({
@@ -1004,6 +989,8 @@
 
             }
 
+
+            first = true;
         });
     </script>
 @endsection
