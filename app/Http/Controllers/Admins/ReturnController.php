@@ -4599,6 +4599,7 @@ class ReturnController extends Controller
                 $shipment->shipper_status_id = 47;
                 $shipment->save();
                 ShipmentsJourneyController::add($shipment_id, 47, 47, null, null, null, Auth::id());
+                ShipmentScanningJourneyController::add($shipment->id, 29, 1, Auth::id(), null,null);
             }
         }
         return redirect()->back()->with(['success' => 'Shipments Reverted']);
