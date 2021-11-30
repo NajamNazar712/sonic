@@ -110,7 +110,7 @@ class LastMileDebriefingController extends Controller
                         }
                     }
                     else{
-                        $agent_call_monitor = new AgentCallMonitoring;
+                        $agent_call_monitor = new AgentCallMonitoring();
                         $agent_call_monitor->agent_id = $request->agent_id;
                         $agent_call_monitor->shipment_id = $value;
                         $agent_call_monitor->delivery_note_id = $delivery_note_details->id;
