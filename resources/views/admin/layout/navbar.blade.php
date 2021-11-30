@@ -83,7 +83,7 @@
                     url:'{!! route('admin.dashboard.admin_profile') !!}',
                     type:'GET'
                 }).done(function (data) {
-                    debugger;
+
                     if(data){
                         full_name = data.full_name;
                         department = data.department;
