@@ -438,13 +438,17 @@ class Permission
 
             'petty_cash.make.index' => 145,
             'petty_cash.statements.index' => 146,
-            'petty_cash.approved.index' => 147,
+            'petty_cash.statements.list' => 146,
+            'petty_cash.statements.edit' => 147,
+
+            'petty_cash.approved.index' => 645,
+
             'petty_cash.approved.view' => 461,
             'petty_cash.approved.view.list' => 461,
 
-//            'petty_cash.statements.approve' => 173,
-//            'petty_cash.statements.approve' => 190,
-//            'petty_cash.statements.approve' => 191,
+            'petty_cash.draft.index' => 238,
+            'petty_cash.draft.list' => 238,
+            'petty_cash.draft.view' => 239,
 
             'petty_cash.rejected.index' => 243,
             'petty_cash.rejected.list' => 243,
