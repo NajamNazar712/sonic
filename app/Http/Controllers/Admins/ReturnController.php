@@ -421,11 +421,6 @@ class ReturnController extends Controller
 
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
-                $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
-                if(!in_array($pickup_address->city_id, session('hubs')))
-                {
-                    return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
-                }
                 if($parcel->booking_type_id == 5){
                     continue;
                 }
@@ -513,11 +508,6 @@ class ReturnController extends Controller
         if($request->action == 'reattempt'){
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
-                $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
-                if(!in_array($pickup_address->city_id, session('hubs')))
-                {
-                    return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
-                }
                 if(!in_array($parcel->shipper_status_id, [13, 20])){
                     $remark_inp = "remark.$shipment";
                     $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
@@ -580,8 +570,8 @@ class ReturnController extends Controller
         if($request->action == 'confirm'){
             $return_reason = $request->single_return_reason_select;
             $parcel = Shipment::find($request->shipment_id);
-            $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
-            if(!in_array($pickup_address->city_id, session('hubs')))
+            $pickup_address_city = $parcel->pickup_address->city_id;
+            if(!in_array($pickup_address_city, session('hubs')))
             {
                 return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
             }
@@ -634,10 +624,10 @@ class ReturnController extends Controller
             return ['status'=>0,'error'=>"Shipment is in different status, Cannot mark it as Return - Confirm!"];
 
 
-        }elseif($request->action == 'reattempt'){
+        }else if($request->action == 'reattempt'){
             $parcel = Shipment::find($request->shipment_id);
-            $pickup_address = UserShippingInfo::find($parcel->pickup_address_id);
-            if(!in_array($pickup_address->city_id, session('hubs')))
+            $pickup_address_city = $parcel->pickup_address->city_id;
+            if(!in_array($pickup_address_city, session('hubs')))
             {
                 return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
             }
