@@ -5148,8 +5148,8 @@ return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'error
             
 
         }
-
-public function month_attendance_history_v2(Request $request)
+    }
+    public function month_attendance_history_v2(Request $request)
     {
         $rules = [
             'first_day' => ['required'],
@@ -5160,7 +5160,7 @@ $validate = Validator::make($request->all(), $rules, $this->messages);
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {         
-$message = 'Error(s) in Input';
+            $message = 'Error(s) in Input';
             return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
         } else {
             $admin_id = $request->admin_id;
