@@ -98,9 +98,9 @@
                             <th class="border-primary border-darken-1"> Designation </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
                             <th class="border-primary border-darken-1">Remarks</th>
-                            <th class="border-primary border-darken-1">Reference Document</th>
                             <th class="border-primary border-darken-1"> DNCC/PNCC </th>
                             <th class="border-primary border-darken-1"> Delivered Shipments</th>
+                            <th class="border-primary border-darken-1">Reference Document</th>
                             <th class="border-primary border-darken-1"> Status</th>
                         </tr>
                         </thead>
@@ -186,10 +186,10 @@
                     {data:'employee_designation' ,name: 'petty_cash_statement_details.employee_designation', class: 'align-middle employee_designation custom-col-width'},
                     {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no'},
                     {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
-                    {data:'reference_document' ,name: 'reference_document', class: 'align-middle reference_document'},
-                    {data:'status' ,name: 'petty_cash_statement_details.status', class: 'align-middle status'},
                     {data:'dncc' ,name: 'petty_cash_statement_details.dncc_id', class: 'align-middle dncc custom-col-width'},
                     {data:'delivered_shipments' ,name: 'petty_cash_statement_details.delivered_shipments', class: 'align-middle delivered_shipments custom-col-width'},
+                    {data:'reference_document' ,name: 'reference_document', class: 'align-middle reference_document'},
+                    {data:'status' ,name: 'petty_cash_statement_details.status', class: 'align-middle status'},
                 ],
 
                 rowCallback: function(row, data, index) {
