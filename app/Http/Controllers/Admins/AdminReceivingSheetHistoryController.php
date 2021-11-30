@@ -171,7 +171,6 @@ class AdminReceivingSheetHistoryController extends Controller
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
                             <td class="color primary"><strong>Product Type</strong></td>
                             <td class="color primary"><strong>Booking Date</strong></td>
-                            <td class="color primary"><strong>Description</strong></td>
                             <td class="color primary"><strong>Quantity</strong></td>
                             <td class="color primary"><strong>Destination</strong></td>
                             <td class="color primary"><strong>Estimated Weight</strong></td>
@@ -231,7 +230,6 @@ class AdminReceivingSheetHistoryController extends Controller
                     $shipment_details .= '
                             <td>' . $item->product->product_name . '</td>
                             <td>' . $item->created_at . '</td>
-                            <td>' . $item->description . '</td>
                             <td>' . $item->quantity . '</td>
                     ';
 
@@ -245,7 +243,6 @@ class AdminReceivingSheetHistoryController extends Controller
                     $shipment_details .= '
                             <td>' . $item->product->product_name . '</td>
                             <td>' . $item->created_at . '</td>
-                            <td>' . $item->description . '</td>
                             <td>' . $item->quantity . '</td>
                     ';
 
@@ -267,7 +264,6 @@ class AdminReceivingSheetHistoryController extends Controller
                         $shipment_details .= '
                             <td>' . $item->product->product_name . '</td>
                             <td>' . $item->created_at . '</td>
-                            <td>' . $item->description . '</td>
                             <td>' . $item->quantity . '</td>
                         ';
 
@@ -291,7 +287,6 @@ class AdminReceivingSheetHistoryController extends Controller
                     $shipment_details .= '
                             <td>' . $item->product->product_name . '</td>
                             <td>' . $item->created_at . '</td>
-                            <td>' . $item->description . '</td>
                             <td>' . $item->quantity . '</td>
                     ';
 

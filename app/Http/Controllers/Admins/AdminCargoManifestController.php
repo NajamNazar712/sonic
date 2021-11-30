@@ -1112,13 +1112,12 @@ class AdminCargoManifestController extends Controller
                     $bag_type = 2;
                     if($shipment->shipper_status_id == 20){
                         if($shipment->return_address_id != null){
-                            $destination = $shipment->return_address->city->hub_city;
+                            $destination = $shipment->return_address->city->hub_city->id;
                         }
                         else{
-                            $destination = $shipment->pickup_address->city->hub_city;
-
+                            $destination = $shipment->pickup_address->city->hub_city->id;
                         }
-                        $destination = $destination->hub_id;
+                       
                         $origin = $shipment->consignee_city->hub_city->hub_id;
                     }
                     else{

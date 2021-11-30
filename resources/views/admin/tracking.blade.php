@@ -1480,7 +1480,6 @@
             $('#tracking').on('click','.intercept', function () {
                 id = $(this).attr('id');
                 status_id = $(this).attr('data-tracking');
-                debugger;
                 if(id != ''){
                     var redirect = '{!! route('admin.intercept.index', ':id') !!}';
                     if(status_id==12 ||status_id==52)
