@@ -445,7 +445,7 @@
                     obj.text = obj.trax_id;
                     return obj;
                 });
-                table.row.add([0, city_select,heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,upload_image,dncc_select,delivered_shipment_input,remove]).node().id = rows_count;
+                table.row.add([0, city_select,heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
@@ -922,7 +922,7 @@
                     obj.text = obj.trax_id;
                     return obj;
                 });
-                table.row.add([0, heads_select,titles_select,city_select,expense_detail_input,employee_select,employee_name_input,employee_designation_input,dncc_select,delivered_shipment_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
+                table.row.add([0, city_select,heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
