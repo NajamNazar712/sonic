@@ -91,9 +91,9 @@
                                 <th class="border-primary border-darken-1"> Designation </th>
                                 <th class="border-primary border-darken-1">Reference No.</th>
                                 <th class="border-primary border-darken-1">Remarks</th>
-                                <th class="border-primary border-darken-1">Reference Documents</th>
                                 <th class="border-primary border-darken-1"> DNCC/PNCC </th>
                                 <th class="border-primary border-darken-1"> Delivered Shipment Count</th>
+                                <th class="border-primary border-darken-1">Reference Documents</th>
                                 <th class="border-primary border-darken-1"></th>
 
                             </tr>
@@ -367,9 +367,9 @@
                     {name: 'designation', class: 'align-middle designation custom-col-width form-group'},
                     {name: 'reference_no', class: 'align-middle reference_no custom-col-width form-group'},
                     {name: 'remarks', class: 'align-middle custom-col-width remarks'},
-                    {name: 'image', class: 'align-middle image custom-col-width form-group'},
                     {name: 'dncc', class: 'align-middle dncc custom-col-width form-group'},
                     {name: 'delivered_shipment_count', class: 'align-middle delivered_shipment_count custom-col-width form-group'},
+                    {name: 'image', class: 'align-middle image custom-col-width form-group'},
                     {name: 'action', class: 'align-middle action'},
                 ],
 
@@ -471,7 +471,7 @@
                     return obj;
                 });
 
-                table.row.add([0, city_select, heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,upload_image,dncc_select,delivered_shipment_input,remove]).node().id = rows_count;
+                table.row.add([0, city_select, heads_select,titles_select,expense_detail_input,amount_input,employee_select,employee_name_input,employee_designation_input,reference_input,remarks_input,dncc_select,delivered_shipment_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
