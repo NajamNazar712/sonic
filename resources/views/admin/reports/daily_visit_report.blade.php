@@ -62,6 +62,8 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Admin User</th>
+                        <th class="border-primary border-darken-1">Admin Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Visit Date/Time</th>
                         <th class="border-primary border-darken-1">Company Name</th>
                         <th class="border-primary border-darken-1">Customer Name</th>
@@ -212,6 +214,8 @@
                             head = [];
                             head.push('S. No.');
                             head.push('Admin User');
+                            head.push('Admin Hub');
+                            head.push('Zone');
                             head.push('Visit Date/Time');
                             head.push('Company Name');
                             head.push('Customer Name');
@@ -224,6 +228,8 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.admin);
+                                row.push(values.city);
+                                row.push(values.zone);
                                 row.push(values.created_at);
                                 row.push(values.company_name);
                                 row.push(values.customer_name);
@@ -269,10 +275,12 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[2, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'admin' ,name: 'a.name', class: 'align-middle admin'},
+                    { data:'city' ,name: 'c.name', class: 'align-middle city'},
+                    { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data:'created_at' ,name: 'daily_visits.created_at', class: 'align-middle created_at'},
                     { data:'company_name' ,name: 'daily_visits.company_name', class: 'align-middle company_name'},
                     { data:'customer_name' ,name: 'daily_visits.customer_name', class: 'align-middle customer_name'},

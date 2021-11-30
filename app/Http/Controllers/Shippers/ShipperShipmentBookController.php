@@ -108,6 +108,9 @@ class ShipperShipmentBookController extends Controller
             return false;
         }
     }
+    private function restrict_unique_order_id($order_id) {
+        return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
+    }
 
     private function set_service_type($service_type_id) {
         $service_type = BookingType::find($service_type_id);
@@ -909,6 +912,14 @@ class ShipperShipmentBookController extends Controller
     public function order_id(Request $request) {
         if ($request->filled('order_id')) {
             return json_encode($this->unique_order_id($request->input('order_id')));
+        }
+        else {
+            return 'false';
+        }
+    }
+    public function restrict_order_id(Request $request) {
+        if ($request->filled('order_id')) {
+            return json_encode($this->restrict_unique_order_id($request->input('order_id')));
         }
         else {
             return 'false';
@@ -2677,7 +2688,14 @@ class ShipperShipmentBookController extends Controller
                 })];
             }
             else{
-                $rules['order_id'] = ['nullable', 'between:0,100'];
+                if(Session::has('restrict_order_id')){
+                    $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })];
+                }
+                else{
+                    $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
+                }
             }
 
             foreach ($rows as $key => $row) {
@@ -4621,7 +4639,14 @@ class ShipperShipmentBookController extends Controller
                 })];
             }
             else{
-                $rules['order_id'] = ['nullable', 'between:0,100'];
+                if(Session::has('restrict_order_id')){
+                    $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })];
+                }
+                else{
+                    $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
+                }
             }
 
             foreach ($rows as $key => $row) {
@@ -5381,7 +5406,14 @@ class ShipperShipmentBookController extends Controller
                 })];
             }
             else{
-                $rules['order_id'] = ['nullable', 'between:0,100'];
+                if(Session::has('restrict_order_id')){
+                    $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })];
+                }
+                else{
+                    $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
+                }
             }
 
             foreach ($rows as $key => $row) {
@@ -6350,7 +6382,14 @@ class ShipperShipmentBookController extends Controller
                 })];
             }
             else{
-                $rules['order_id'] = ['nullable', 'between:0,100'];
+                if(Session::has('restrict_order_id')){
+                    $rules['order_id'] = ['nullable', 'between:0,100', Rule::unique('shipments', 'order_id')->where(function($query) use($user_id) {
+                        $query->where('user_id', $user_id);
+                    })];
+                }
+                else{
+                    $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
+                }
             }
 
             foreach ($rows as $key => $row) {

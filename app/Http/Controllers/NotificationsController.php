@@ -2477,7 +2477,7 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk', 'uzair.anees@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk', 'uzair.anees@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.saleem@trax.pk', 'mursaleen.rafiq@trax.pk'];
 
                     $bcc = ['muhammad.waqas@trax.pk', 'anum.khan@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
@@ -4002,7 +4002,7 @@ class NotificationsController extends Controller
 //                    $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk'];
 //                    $to = array_merge($to, $extra_admins);
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'mursaleen.rafiq@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = ['muhammad.waqas@trax.pk'];
@@ -8334,7 +8334,9 @@ class NotificationsController extends Controller
                     $kam = SaleTierTag::where('user_id', $shipper_id);
                     if ($kam->exists()) {
                         $kam = $kam->first();
-                        $to[] = Admin::find($kam->kam)->email;
+                        if($kam){
+                            $to[] = Admin::find($kam->kam)->email;
+                        }
                     }
                     if(count($to) > 0){
                         self::email($subject, $body, $to);

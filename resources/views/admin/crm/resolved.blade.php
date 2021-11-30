@@ -52,8 +52,10 @@
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
-                                    <th class="border-primary border-darken-1">Tagged To</th>
-                                    <th class="border-primary border-darken-1">Tagged At</th>
+                                    <th class="border-primary border-darken-1">Manual Tagged To</th>
+                                    {{-- <th class="border-primary border-darken-1">Tagged At</th> --}}
+                                    <th class="border-primary border-darken-1">Auto Tagged To KAE</th>
+                                    <th class="border-primary border-darken-1">Auto Tagged To Operation</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Resolved By</th>
@@ -273,8 +275,10 @@
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Tagged (Admin/Department)');
-                            head.push('Tagged To');
-                            head.push('Tagged At');
+                            head.push('Manual Tagged To');
+                            // head.push('Tagged At');
+                            head.push('Auto Tagged To KAE');
+                            head.push('Auto Tagged To Operation');
                             head.push('Launched Date');
                             head.push('Complaint Re-Open Date');
                             head.push('Resolved By');
@@ -307,8 +311,10 @@
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.crm_request_tagging_type_id);
-                                row.push(values.tagged_to);
-                                row.push(values.tagged_date);
+                                row.push(values.tagged_to_manual);
+                                // row.push(values.tagged_date);
+                                row.push(values.tagged_to_kae);
+                                row.push(values.tagged_to_operation);
                                 row.push(values.created_at);
                                 row.push(values.reopen_date);
                                 row.push(values.resolved_by);
@@ -356,7 +362,8 @@
                         }
                     },
                     @endif
-                    {
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(309, session('permissions')))
+                        {
                         text: 'Tag',
                         className: 'btn btn-primary tag',
                         enabled: false,
@@ -366,6 +373,84 @@
                             }
                         }
                     },
+                    {
+                        text: 'Un Tag',
+                        className: 'btn btn-primary un_tag',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            swal({
+                                text: 'Are you sure, you want to un tag these Request(s)?',
+                                icon: 'info',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function(confirm) {
+                                if (confirm) {
+                                    $.ajax({
+                                        url: '{!! route('admin.crm.in_process.un_tag') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            'crm_request_ids[]': selected_rows,
+                                            'multiple': 1,
+                                            '_token': '{{ csrf_token() }}'
+                                        }
+                                    })
+                                        .done(function (data) {
+                                            if (data.status == 0) {
+                                                toastr.success(data.success, 'Success!', {
+                                                    positionClass: 'toast-bottom-center',
+                                                    containerId: 'toast-bottom-center'
+                                                });
+                                            } else {
+                                                toastr.error(data.error, 'Error!', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center'
+                                                });
+                                            }
+                                            table.rows().nodes().each(function(index) {
+                                                var row = table.row(index);
+
+                                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                                    row.deselect();
+
+                                                    id = parseInt(row.id());
+
+                                                    var index = $.inArray(id, selected_rows);
+
+                                                    if (index !== -1) {
+                                                        selected_rows.splice(index, 1);
+                                                    }
+                                                }
+                                            });
+                                            if (selected_rows.length == 0) {
+                                                table.button('.assign').disable();
+                                                table.button('.un_tag').disable();
+                                                table.button('.close_requests').disable();
+                                                table.button('.tag').disable();
+                                                table.button('.bulk_external_comment').enable();
+                                                table.button('.bulk_internal_comment').enable();
+                                            }
+                                            table.draw('false');
+                                        });
+                                    }
+                            });
+                        }
+                    },
+                    @endif
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))
                     {
                         text: 'Assign Agent',
@@ -540,6 +625,7 @@
                                     table.button('.bulk_internal_comment').enable();
                                     table.button('.bulk_external_comment').enable();
                                     table.button('.tag').enable();
+                                    table.button('.un_tag').enable();
                                 }
                             });
                         }
@@ -570,6 +656,7 @@
                                         table.button('.bulk_internal_comment').disable();
                                         table.button('.bulk_external_comment').disable();
                                         table.button('.tag').disable();
+                                        table.button('.un_tag').disable();
                                     }
                                 }
                             });
@@ -603,7 +690,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[23, 'desc']],
+                order: [[24, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -623,8 +710,15 @@
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'crm_request_tagging_type_id', name: 'crth.crm_request_tagging_type_id', class: 'align-middle tagged'},
-                    {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
-                    {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
+                    // {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
+                    {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'},
+                  /*  {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},*/
+                    // {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
+                    {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae', orderable: false, searchable: false,},
+                    // {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
+                    // {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
+                    // {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'},
+                    {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation', orderable: false, searchable: false,},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'resolved_by', name: 'ra.name', class: 'align-middle resolved_by'},
@@ -880,6 +974,7 @@
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
+                            table.button('.un_tag').disable();
                         });
                 }
                 else {
@@ -930,6 +1025,7 @@
                             table.button('.bulk_external_comment').disable();
                             table.button('.bulk_internal_comment').disable();
                             table.button('.tag').disable();
+                            table.button('.un_tag').disable();
                         });
                 } else {
                     var error = "Add Internal Comment First!";
@@ -964,6 +1060,7 @@
                     table.button('.bulk_internal_comment').enable();
                     table.button('.bulk_external_comment').enable();
                     table.button('.tag').enable();
+                    table.button('.un_tag').enable();
                 }
                 else {
                     table.button('.assign').disable();
@@ -971,6 +1068,8 @@
                     table.button('.bulk_internal_comment').disable();
                     table.button('.bulk_external_comment').disable();
                     table.button('.tag').disable();
+                    table.button('.un_tag').disable();
+
                 }
             });
 

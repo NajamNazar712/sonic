@@ -150,6 +150,7 @@
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
+                        <th class="border-primary border-darken-1">Invoice No.</th>
                         <th class="border-primary border-darken-1">Payment Number</th>
                         <th class="border-primary border-darken-1">SDN Number</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -157,6 +158,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Return City</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Class</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -399,6 +401,7 @@
                             head.push('Order ID');
                             head.push('Status');
                             head.push('Payment Status');
+                            head.push('Invoice No.');
                             head.push('Payment Number');
                             head.push('SDN Number');
                             head.push('Service Type');
@@ -406,6 +409,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Return City');
                             head.push('Zone');
                             head.push('Class');
                             head.push('Shipping Mode');
@@ -439,6 +443,7 @@
                                 row.push(values.order_id);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
+                                row.push(values.invoice_number);
                                 row.push(values.payment_id);
                                 row.push(values.sdn_id);
                                 row.push(values.service_type);
@@ -446,6 +451,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.return_city);
                                 row.push(values.zone);
                                 row.push(values.class);
                                 row.push(values.shipping_mode);
@@ -520,7 +526,7 @@
                         d.search_business_category = $('#search_business_category').val();
                     }
                 },
-                order: [[11, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
@@ -530,6 +536,7 @@
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
+                    { data:'invoice_number' ,name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
                     { data:'payment_id' ,name: 'dps.done_payment_id', class: 'align-middle payment_status'},
                     { data:'sdn_id' ,name: 'dnsdn.station_deposit_note_id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
@@ -537,6 +544,7 @@
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
+                    { data:'return_city', name: 'return_city', class: 'align-middle return_city'},
                     { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},

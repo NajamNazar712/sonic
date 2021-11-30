@@ -110,18 +110,18 @@ class LastMileDebriefingController extends Controller
                         $agent_call_monitor = new AgentCallMonitoring;
                         $agent_call_monitor->agent_id = $request->agent_id;
                         $agent_call_monitor->shipment_id = $delivery_note_shipment->shipment_id;
-                        $agent_call_monitor->delivery_note_id = $delivery_note_shipment->delivery_note_id;
+                        $agent_call_monitor->delivery_note_id = $delivery_note_details->id;
                     }
                     $agent_call_monitor->save();
                 }
-                return redirect()->back()->with('success', 'Agent Assign successfully.');
+                return response()->json(['status' => 0, 'success' => 'Agent Assign successfully.']);
             }
             else{
-                return redirect()->back()->with('error', 'Undelivered shipments not found!');
+                return response()->json(['status' => 1, 'error' => 'Undelivered shipments not found!']);
             }
         }
         else{
-            return redirect()->back()->with('error', 'Delivery note already verified!');
+            return response()->json(['status' => 1, 'error' => 'Delivery note already verified!']);
         }
     }
 
@@ -232,7 +232,7 @@ class LastMileDebriefingController extends Controller
                 $call_ratio = 0;
                 if($call_overall_count > 0){
                     $call_ratio = ($call_completed_count / $call_overall_count) * 100;
-                    $call_ratio = $call_ratio . '%';
+                    $call_ratio = round($call_ratio, 2) . '%';
                 }
 
                 return $call_ratio;
@@ -243,7 +243,7 @@ class LastMileDebriefingController extends Controller
                 $total_shipments = $deliveries->shipments_count;
                 if($total_shipments > 0){
                     $verify_shipments_ratio = ($verify_shipments_count / $total_shipments) * 100;
-                    $verify_shipments_ratio = $verify_shipments_ratio . '%';
+                    $verify_shipments_ratio = round($verify_shipments_ratio, 2) . '%';
                 }
 
                 return $verify_shipments_ratio;
@@ -381,10 +381,14 @@ class LastMileDebriefingController extends Controller
         else {
             $time = 0;
         }
-        
+        // $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+        // if(Carbon::now() > $time){
+        //     $time->addDays(1);
+        // }
 
         $next_time = Carbon::today()->endOfDay()->addHours($time);
           
+        // $next_time = Carbon::today()->addHours($time);
         $prev_time = Carbon::today()->addHours($time);
 
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
@@ -618,6 +622,19 @@ class LastMileDebriefingController extends Controller
                     $data->completed = 1;
                     $data->save();
 
+                    $check_pending_verification_shipment = AgentCallMonitoring::where('delivery_note_id', '=', $delivery_note_id)->where('completed',0)->exists();
+                    $check_pending_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '=', $delivery_note_id)->where(function($query) {
+                        $query->where('status','>', 1)
+                        ->orWhere('status', 0);
+                    })->exists();
+                
+                    if(!$check_pending_delivery_note && !$check_pending_verification_shipment){
+                        $delivery_note = DeliveryNote::find($delivery_note_id);
+                        $delivery_note->status=1;
+                        $delivery_note->save();
+                        return redirect()->back()->with('success', 'Shipment verified and Delivery Note Closed successfully!');
+                    }
+
                     return redirect()->back()->with('success', 'Shipment verified successfully!');
 
                 }
@@ -668,7 +685,7 @@ class LastMileDebriefingController extends Controller
 
                 return response()->json(['status' => 0, 'shipments_data' => $shipments_data]);
             }
-            return response()->json(['status' => 1, 'error' => 'No undelived shipments found!']);
+            return response()->json(['status' => 1, 'error' => 'No undelivered shipments found!']);
         }
         else{
             return response()->json(['status' => 1, 'error' => 'Something went wrong!!']);
@@ -681,7 +698,7 @@ class LastMileDebriefingController extends Controller
         $shipment_ids = $request->shipment_ids;
         $updated_shipments = FALSE;
         if(count($shipment_ids) > 0){
-            foreach ($shipment_ids as $shipment_id => $status){
+            foreach ($shipment_ids as $shipment_id){
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('reference_1_id', $delivery_note_id)->latest()->first();
 
 
@@ -721,13 +738,26 @@ class LastMileDebriefingController extends Controller
 
             }
             if($updated_shipments){
-                return redirect()->back()->with('success', 'SMS send successfully!');
+                $check_pending_verification_shipment = AgentCallMonitoring::where('delivery_note_id', '=', $delivery_note_id)->where('completed',0)->exists();
+                $check_pending_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '=', $delivery_note_id)->where(function($query) {
+                    $query->where('status','>', 1)
+                    ->orWhere('status', 0);
+                })->exists();
+                
+                if(!$check_pending_delivery_note && !$check_pending_verification_shipment){
+                    $delivery_note = DeliveryNote::find($delivery_note_id);
+                    $delivery_note->status=1;
+                    $delivery_note->save();
+                    return response()->json(['status' => 0, 'success' => 'SMS send successfully and Delivery Note Closed!']);
+                }
+                else
+                return response()->json(['status' => 0, 'success' => 'SMS send successfully!']);
             }
             else{
-                return redirect()->back()->with('error', 'SMS could not send!');
+                return response()->json(['status' => 1, 'error' => 'SMS could not send!']);
             }
         }
-        return redirect()->back()->with('error', 'Something went wrong, try again!');
+        return response()->json(['status' => 1, 'error' => 'Something went wrong, try again!']);
 
     }
 }

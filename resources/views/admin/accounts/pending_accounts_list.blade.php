@@ -333,6 +333,35 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="RestrictOrderIDModal" data-backdrop="static" role="dialog" aria-labelledby="RestrictOrderIDModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Restrict Order ID</h4>
+                </div>
+                <form id="restrict_order_id_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.restrict_order_id.submit') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="col text-center">
+                            <label class="font-medium-2 font-weight-bold block">Restrict Order ID for Booking</label>
+                            <div class="form-group">
+                                <input type="hidden" name="user_id" id="restrict_user_id">
+                                <label for="restrict_order_id_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                <input type="checkbox" name="restrict_order_id_checkbox" id="restrict_order_id_checkbox" class="switchery restrict_order_id_checkbox" data-size="sm" data-switchery="true">
+                                <label for="restrict_order_id_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="restrict_order_id_submit">Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -517,7 +546,7 @@
         var selected_rows = [];
         var table = $('#datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
-            scrollX: true, scrollY: '600px',
+            scrollX: true, scrollY: '800px',
             buttons: [
                 @if (session('role_id') == 1 || in_array(609, session('permissions')))
                     {
@@ -1544,6 +1573,54 @@
 
                 form.submit();
 
+            }
+        });
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            var id = $(this).parents('tr').attr('id');
+            if($(this).hasClass('restrict_order_id')){
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.accounts.restrict_order_id.info') !!}',
+                        method: 'POST',
+                        data: {
+                            'user_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            $('#restrict_order_id_checkbox').prop('checked',false);
+                            if (data.status == 1) {
+                                $('#restrict_order_id_checkbox').click();
+                            }
+                            $('#restrict_user_id').val(id);
+                            $('#RestrictOrderIDModal').modal('show');
+
+
+                        });
+                }
+            }
+        });
+
+        $('#restrict_order_id_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Order ID is being restricted!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
+                form.submit();
             }
         });
 

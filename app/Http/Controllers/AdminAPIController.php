@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
+use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminAppSlider;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
@@ -25,6 +28,7 @@ use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\Admin\Retail\RetailTraxBox;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\AppNotification;
@@ -32,6 +36,8 @@ use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
@@ -46,10 +52,20 @@ use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PayslipPdf;
 use App\Http\Models\Product;
+use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentDetail;
+use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
+use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Models\Zone;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
@@ -4758,18 +4774,393 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function month_attendance_history_v2(Request $request)
+   
+
+    
+        
+public function dws_weight(Request $request){
+        
+    $rules = [
+        'tracking_number' => ['required', 'integer'],
+        'weight' => ['required'],
+        'dimension_l' => ['required'],
+        'dimension_w' => ['required'],
+        'dimension_h' => ['required'],
+        'image_name' => ['required','mimes:pdf,png,jpeg,jpg,docx,doc'],
+        'machine' => ['required'],
+        'date' => ['required'],
+        'package_type' => ['required'],
+        'is_uploaded' => ['required'],
+        
+    ];
+$validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {            
+return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment = Shipment::where('tracking_number',$request->tracking_number);
+            if($shipment->exists()){
+                $settings = GlobalSettings::where('type', 'global_rider_id')->first();
+
+                if ($settings) {
+                    $global_rider_id = $settings->setting_value;
+                }
+                $pickup_rider_id = $global_rider_id;
+
+                $shipment = $shipment->get()->first();
+                $shipment_id = $shipment->id;
+                // arrive function
+                // if ($shipment->actual_weight == null) {
+                //     return response()->json(['status' => 1, 'message' => 'weight not found']);
+                // }
+
+                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                    $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
+                    $dense_weight = $request->weight;
+                    
+                    if($shipment->business_category_id == 2){
+                        if($dense_weight < $volume_weight){
+                            $actual_weight = $volume_weight; 
+                            $shipment->length = $request->dimension_l;
+                            $shipment->breadth = $request->dimension_w;
+                            $shipment->height = $request->dimension_h;
+                        }else{
+                            $actual_weight = $dense_weight; 
+                        }
+                    }else{
+                        $dws_charges = DwsWeightCharges::where('user_id',$shipment->user_id)->where('shipping_mode_id',$shipment->shipping_mode_id);
+                        if($dws_charges->exists()){
+                            $dws_charges = $dws_charges->get()->first();
+                            $dws_charges_status = $dws_charges->dws_weight_status;
+                            if($dws_charges_status == 1){
+                                if($dense_weight < $volume_weight){
+                                    $actual_weight = $volume_weight; 
+                                    $shipment->length = $request->dimension_l;
+                                    $shipment->breadth = $request->dimension_w;
+                                    $shipment->height = $request->dimension_h;
+                                }else{
+                                    $actual_weight = $dense_weight; 
+                                }
+                            }else{
+                                if($dense_weight < $volume_weight){
+                                    $actual_weight = $dense_weight; 
+                                }else{
+                                    $actual_weight = $volume_weight; 
+                                    $shipment->length = $request->dimension_l;
+                                    $shipment->breadth = $request->dimension_w;
+                                    $shipment->height = $request->dimension_h;
+                                }
+                            }
+                        }else{
+                            
+                            return response()->json(['status' => 1, 'message' => 'dws chareges not set']);
+                        }
+
+                    }
+
+                    //check weight from dws 
+                    
+                    
+                    //check weight from dws end
+                    $shipment->actual_weight = $actual_weight;
+                    $shipment->save();
+
+                    $piece_request_remarks = null;
+                    if ($shipment->shipper_status_id == 62) {
+                        $shipment_pieces_request = ShipmentPiecesRequest::where('shipment_id', $shipment->id)->where('status', 1);
+                        if ($shipment_pieces_request->exists()) {
+                            $shipment_pieces_request = $shipment_pieces_request->first();
+                            $shipment_pieces_request->status = 2;
+                            $shipment_pieces_request->request_status_id = 4;
+                            $shipment_pieces_request->last_updated_by_admin = $request->admin_id;
+                            $shipment_pieces_request->last_updated_at = Carbon::now();
+                            $shipment_pieces_request->department_id = session('department_id');
+                            $shipment_pieces_request->save();
+                            $piece_request_remarks = 'Resolved through Arrival';
+                        }
+                    }
+
+                    $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
+                     //region Taha
+                     $pickup_request=V2PickupRequest::where('id', $pickup_request_shipment->pickup_request_id)->first();
+                     //endregion
+                     
+                    if ($pickup_request_shipment) {
+                        $reference_1_id = $pickup_request_shipment->pickup_request_id;
+                        $rider_id=$pickup_request->current_rider_id;
+
+                        // if (!in_array($pickup_request_shipment->pickup_request_id, $pickup_request_ids)) {
+                            // $pickup_request_ids[] = $pickup_request_shipment->pickup_request_id;
+                            $pickup_request_id = $pickup_request_shipment->pickup_request_id;
+                        // }
+                    } else {
+                        $reference_1_id = null;
+                    }
+                    if($pickup_request->current_rider_id==null)
+                    { 
+                        $rider_id=$pickup_rider_id;
+                    }
+                    if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
+                        $receiving_sheet_shipment->status = 1;
+                        $receiving_sheet_shipment->save();
+
+                        $receiving_sheet_id = $receiving_sheet_shipment->receiving_sheet_id;
+
+                        $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
+
+                        $receiving_sheet->received = $receiving_sheet->received + 1;
+
+                        $receiving_sheet->save();
+
+                        if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+                            $receiving_sheet_received = new ReceivingSheetReceived();
+
+                            $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
+                            $receiving_sheet_received->user_id = $shipment->user_id;
+                            $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+                            $receiving_sheet_received->shipment_id = $shipment_id;
+
+                            $receiving_sheet_received->save();
+                        }
+                    } else {
+                        if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+                            $receiving_sheet_received = new ReceivingSheetReceived();
+
+                            $receiving_sheet_received->user_id = $shipment->user_id;
+                            $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+                            $receiving_sheet_received->shipment_id = $shipment_id;
+
+                            $receiving_sheet_received->save();
+                        }
+                    }
+
+                    $shipment->shipper_status_id = 2;
+                    $shipment->consignee_status_id = 2;
+
+                    $shipment->save();
+                    $reference_2_id = null;
+                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, $request->admin_id, $reference_1_id, $reference_2_id,1,null,$rider_id);
+
+                    $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
+                    if ($self_collection_shipment->exists()) {
+                        if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
+                            $shipment->shipper_status_id = 15;
+                            $shipment->consignee_status_id = 15;
+
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment_id, 15, 15, null, $piece_request_remarks, null, $request->admin_id);
+                            NotificationsController::send(126, $shipment_id);
+                        }
+                    }
+                    $shipment->refresh();
+                    if ($shipment->walk_in_delivery_type_id == 2 && $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
+                        $shipment->shipper_status_id = 15;
+                        $shipment->consignee_status_id = 15;
+                        $shipment->save();
+                        ShipmentsJourneyController::add($shipment_id, 15, 15, null, $piece_request_remarks, null, $request->admin_id);
+                        NotificationsController::send(126, $shipment_id);
+                    }
+                    if ($shipment->booking_type_id == 4) {
+                        $print_shipment_ids[] = $shipment_id;
+                    }
+                    //Consolidated Shipments
+                    $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
+                    if ($consolidated_shipment) {
+//                $user_shipping_info = UserShippingInfo::find($shipment->pickup_address_id);
+                        if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
+                            $check_all_consolidation_shipments = true;
+
+                            $shipment->shipper_status_id = 58;
+                            $shipment->consignee_status_id = 58;
+                            $shipment->save();
+
+                            ShipmentsJourneyController::add($shipment_id, 58, 58, null, $piece_request_remarks, null, $request->admin_id);
+
+                            $consolidation_id = $consolidated_shipment->consolidation_id;
+                            $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
+
+                            foreach ($remaining_consolidated_shipments as $remaining_consolidated_shipment) {
+                                $check_remaining_consolidated_shipment = Shipment::find($remaining_consolidated_shipment->shipment_id);
+                                if ($check_remaining_consolidated_shipment->shipper_status_id != 58) {
+                                    $check_all_consolidation_shipments = false;
+                                }
+                            }
+
+                            if ($check_all_consolidation_shipments == true) {
+                                foreach ($remaining_consolidated_shipments as $update_remaining_consolidated_shipment) {
+                                    $update_all_consolidated_shipment = Shipment::find($update_remaining_consolidated_shipment->shipment_id);
+
+                                    $update_all_consolidated_shipment->shipper_status_id = 59;
+                                    $update_all_consolidated_shipment->consignee_status_id = 59;
+
+                                    $update_all_consolidated_shipment->save();
+
+                                    ShipmentsJourneyController::add($update_remaining_consolidated_shipment->shipment_id, 59, 59, null, $piece_request_remarks, null, $request->admin_id);
+                                }
+                            }
+                        }
+                    }
+                    //Consolidated Shipments
+
+                    $booking_sms = BookingSmsForShippers::where('user_id', $shipment->user_id)->where('status', 1);
+                    if ($booking_sms->exists()) {
+                        NotificationsController::send(3, $shipment_id);
+                    }
+                    if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
+                        if ($shipment->booking_type_id == 4) {
+                            ShipmentChargesController::walkin_weight($shipment_id);
+                        } else {
+                            ShipmentChargesController::weight($shipment_id);
+                            if ($shipment->business_category_id == 1) {
+                                ShipmentChargesController::cash_handling($shipment_id);
+                                ShipmentChargesController::insurance($shipment_id);
+                                ShipmentChargesController::fuel_surcharge($shipment_id);
+                            } else {
+                                ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                            }
+                        }
+
+                        if($shipment->walk_in_status == 0) {
+                            InitialChargesWebhookController::webhook_subscription($shipment_id);
+                        }
+                    }
+
+                    if ($shipment->shipment_type != 2 && $shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
+                        $shipment = Shipment::find($shipment_id);
+
+                        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
+
+                        $gst = Zone::find($shipment->pickup_address->city->zone_id)->gst;
+
+                        $gst = ROUND(($charges * $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                        $shipment->amount = $shipment->amount + $charges + $gst;
+
+                        $shipment->save();
+
+                        $print_shipment_ids[] = $shipment_id;
+                    }
+                    if (($shipment->charges_mode_id == 2 || $shipment->charges_mode_id == 1) && $shipment->booking_type_id == 4) {
+                        // $shipment_ids = array($shipment->id);
+                        // NotificationsController::send(85, $shipment_ids, $request->admin_id);
+                    }
+
+                    $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('pickup_request_id', $pickup_request_id);
+
+                    if ($pickup_request_shipment->exists()) {
+                        $pickup_request_shipment = $pickup_request_shipment->first();
+                        $pickup_request_id = $pickup_request_shipment->pickup_request_id;
+                        $pickup_request_shipment->status = 1;
+                        $pickup_request_shipment->save();
+                        $pickup_request_received_shipment = new V2PickupReceivedShipment();
+                        $pickup_request_received_shipment->pickup_request_id = $pickup_request_id;
+                        $pickup_request_received_shipment->shipment_id = $shipment->id;
+                        $pickup_note_id = NULL;
+                        $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->latest()->first();
+                        if($pickup_note_request){
+                            $pickup_note_id = $pickup_note_request->pickup_note_id;
+                        }
+                        $pickup_request_received_shipment->pickup_note_id = $pickup_note_id;
+                        $pickup_request_received_shipment->save();
+                        $pickup_request = $pickup_request_shipment->pickup_request;
+                        ShipmentsPickupJourneyController::add($shipment_id, 2, $request->admin_id, $pickup_request->id);
+
+                        $pickup_request->received = $pickup_request->received + 1;
+                        $pickup_request->status_id = 2;
+                        $pickup_request->save();
+
+                    }
+                    $pickup_request = V2PickupRequest::find($pickup_request_id);
+                    if ($pickup_request->received >= 1) {
+                            $pickup_note_request = $pickup_request->pickup_note_request;
+                            if ($pickup_note_request) {
+                                $pickup_note_id = $pickup_note_request->pickup_note_id;
+                                $pickup_note_request->status = 1;
+                                $pickup_note_request->save();
+                                $pickup_note = V2PickupNote::find($pickup_note_id);
+                                
+                            }
+
+                            $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
+                            if ($retail_pickup_note->exists()) {
+                                $retail_pickup_note = $retail_pickup_note->first();
+                                $retail_pickup_note->status = 3;
+                                $retail_pickup_note->save();
+                            }
+                        
+
+                    }
+                    $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
+                    if ($pickup_note_requests_count == 0) {
+                        V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
+                    }
+                    // NotificationsController::send(4, $shipment_ids);
+                    $date = Carbon::now()->format('Y_m_d');
+                    if ($request->hasFile('image_name')) {
+                        $file = $request->file('image_name');
+                        $filename = 'image_name' . $date . '.' . $file->extension();
+                        $directory = 'dws_images';
+                        Storage::disk('public')->putFileAs($directory, $file, $filename);
+                        $link = $directory . '/' . $filename;
+                        
+                        $shipment_detail = ShipmentDetail::where('shipment_id',$shipment_id);
+                        if($shipment_detail->exists()){
+                            $shipment_detail = $shipment_detail->get()->first();
+                            $shipment_detail->dws_image = $link;
+                            if($shipment->business_category_id == 2){
+                                $shipment_detail->dws_status = 1;
+                            }else{
+                                $shipment_detail->dws_status = $dws_charges_status;
+                            }
+                            $shipment_detail->dense_weight = $dense_weight;
+                            $shipment_detail->dimension_l = $request->dimension_l;
+                            $shipment_detail->dimension_w = $request->dimension_w;
+                            $shipment_detail->dimension_h = $request->dimension_h;
+                            $shipment_detail->save();
+                        }else{
+                            $shipment_detail = new ShipmentDetail;
+                            $shipment_detail->shipment_id = $shipment_id;
+                            $shipment_detail->dws_image = $link;
+                            if($shipment->business_category_id == 2){
+                                $shipment_detail->dws_status = 1;
+                            }else{
+                                $shipment_detail->dws_status = $dws_charges_status;
+                            }
+                            $shipment_detail->dense_weight = $dense_weight;
+                            $shipment_detail->dimension_l = $request->dimension_l;
+                            $shipment_detail->dimension_w = $request->dimension_w;
+                            $shipment_detail->dimension_h = $request->dimension_h;
+                            $shipment_detail->save();
+                        }
+                    }
+                }else{
+                return response()->json(['status' => 1, 'message' => 'out of status']);
+
+                }
+                
+                // arrive function end
+                
+            }else{
+                return response()->json(['status' => 1, 'message' => 'shipment not found']);
+            }
+            
+
+        }
+
+public function month_attendance_history_v2(Request $request)
     {
         $rules = [
             'first_day' => ['required'],
             'last_day' => ['required'],
         ];
-        $validate = Validator::make($request->all(), $rules, $this->messages);
+$validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
 
-        if ($validate->fails()) {
-            $message = 'Error(s) in Input';
+        if ($validate->fails()) {         
+$message = 'Error(s) in Input';
             return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
         } else {
             $admin_id = $request->admin_id;

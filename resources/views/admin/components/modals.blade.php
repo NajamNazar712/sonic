@@ -498,7 +498,45 @@
         </div>
     </div>
 </div>
+{{-- edit territory --}}
+<div class="modal fade" id="editterritory" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editterritory"
+     aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="add_remarks_title">Edit Territory</h4>
 
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body text-center" id="editterritoryDiv">
+
+            </div>
+                
+        </div>
+    </div>
+</div>
+
+{{-- edit designation --}}
+<div class="modal fade" id="editdesignation" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editdesignation"
+     aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="add_remarks_title">Edit Designation</h4>
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body text-center" id="editdesignationDiv">
+
+            </div>
+                
+        </div>
+    </div>
+</div>
 
 {{-- edit retail user --}}
 <div class="modal fade" id="editRetailUser" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editRetailUser"
@@ -556,7 +594,43 @@
         </div>
     </div>
 </div>
-
+<div class="modal fade text-left" id="adminprofile" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="adminprofile"
+         aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="admin_profile_heading">User Profile<span></span></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body admin_profile text-center" id="admin_profile_body">
+                <table class="table table-sm table-bordered border">
+                    <thead>
+                       <tr>
+                        <th><strong>Employee ID</strong></th>
+                        <th><strong>Full Name</strong></th>
+                        <th><strong>Email</strong></th>
+                        <th><strong>Contact</strong></th>
+                        <th><strong>Department</strong></th>
+                        <th><strong>Designation</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id = "employee_id"></td>
+                            <td id = "full_name"></td>
+                            <td id = "email"></td>
+                            <td id = "contact"></td>
+                            <td id = "department"></td>
+                            <td id = "designation"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
