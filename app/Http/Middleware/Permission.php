@@ -365,6 +365,7 @@ class Permission
             'return.cx_sales.list' => 266,
             'return.return_deliveries.index' => 566,
             'return.return_deliveries.list' => 566,
+            'return.revert.index' => 643,
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
@@ -1115,14 +1116,18 @@ class Permission
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
-            'sales.territory.territoryindex' =>610,
-            'sales.designation.designationindex' =>611,
-            'settings.sales.incentive.index' =>612,
-            'reports.sales_incentive.index' =>613,
-            'reports.sales_incentive.consolidated' =>614,
+            'sales.territory.territoryindex' =>630,
+            'sales.designation.designationindex' =>631,
+            'settings.sales.incentive.index' =>632,
+            'reports.sales_incentive.index' =>633,
+            'reports.sales_incentive.consolidated' =>634,
 
             'settings.auto_assigning.index' => 616,
             'settings.auto_assigning.list' => 616,
+
+            'settings.auto_tagging.index' => 639,
+            'settings.auto_tagging.list' => 639,
+            'reports.dws_report.index' => 642,
 
 
         ],

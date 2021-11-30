@@ -359,7 +359,7 @@ class Kernel extends ConsoleKernel
 		//        if($incentive_date){
 		//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
 		//        }
-        $schedule->command('crm:autoassign')->dailyAt('05:00')->runInBackground();
+        $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
 
 
     }

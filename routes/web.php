@@ -495,7 +495,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
     Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
-
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
@@ -505,6 +504,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('incoming_weight_range_list','Admins\AdminDashboardController@incoming_weight_range_list')->name('incoming_weight_range_list');
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
         Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
+        Route::get('admin_profile', 'Admins\AdminDashboardController@admin_profile')->name('admin_profile');
         //Search Sonic
 //        Route::get('search_sonic', 'Admins\AdminDashboardController@search_sonic')->name('search_sonic');
         
@@ -1360,6 +1360,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('data', 'Admins\ReturnController@rcp_agent_data')->name('data');
 
         });
+        Route::prefix('revert')->name('revert.')->group(function () {
+            Route::get('', 'Admins\ReturnController@return_revert_index')->name('index');
+            Route::post('shipment_details', 'Admins\ReturnController@return_revert_shipment_details')->name('shipment_details');
+            Route::post('submit', 'Admins\ReturnController@return_revert_submit')->name('submit');
+        });
     });
     Route::prefix('debriefing')->name('debriefing.')->group(function (){
         Route::prefix('supervisor')->name('supervisor.')->group(function (){
@@ -1627,6 +1632,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('history')->name('history.')->group(function () {
                 Route::get('', 'Admins\AdminCargoManifestController@history_index')->name('index');
                 Route::get('list', 'Admins\AdminCargoManifestController@history_list')->name('list');
+                Route::post('lost_shipments', 'Admins\AdminCargoManifestController@history_lost_shipments')->name('lost_shipments');
             });
 
         });
@@ -1955,11 +1961,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('destination', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_destination')->name('destination');
             Route::post('hubs', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_hubs')->name('hubs');
             Route::post('cities', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_cities')->name('cities');
+            Route::post('dncc', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_dncc')->name('dncc');
             Route::post('employee', 'Admins\AdminPettyCashController@make_petty_cash_statement_get_employee')->name('employee');
             Route::post('reference', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_reference')->name('reference');
             Route::post('titles', 'Admins\AdminPettyCashController@make_petty_cash_statement_titles')->name('titles');
             Route::post('submit', 'Admins\AdminPettyCashController@make_petty_cash_statement_submit')->name('submit');
         });
+        Route::post('view/sdn_logs','Admins\AdminPettyCashController@sdn_log')->name('sdn_logs');
         Route::prefix('statements')->name('statements.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@petty_cash_statements_index')->name('index');
             Route::get('list', 'Admins\AdminPettyCashController@petty_cash_statements_list')->name('list');
@@ -2434,6 +2442,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@reverse_pickup_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@reverse_pickup_list')->name('list');
         });
+        Route::prefix('dws_report')->name('dws_report.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@dws_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@dws_report_list')->name('list');
+        });
+
+        
     });
 
     //Reports end
@@ -2540,6 +2554,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('rider_ticker')->name('rider_ticker.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@rider_ticker_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@rider_ticker_store')->name('store');
+            Route::post('admin_store', 'Admins\GlobalSettingsController@admin_ticker_store')->name('admin_store');
+            Route::post('retail_store', 'Admins\GlobalSettingsController@retail_ticker_store')->name('retail_store');
         });
 
         Route::prefix('walk_in')->name('walk_in.')->group(function () {
@@ -2780,6 +2796,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@crm_auto_assigning_update')->name('update');
             Route::post('delete', 'Admins\GlobalSettingsController@crm_auto_assigning_delete')->name('delete');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@crm_auto_assigning_enable_disable')->name('enable_disable');
+            
+        });
+
+        Route::prefix('auto_tagging')->name('auto_tagging.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@crm_auto_tagging_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@crm_auto_tagging_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@crm_auto_tagging_submit')->name('submit');
+            Route::post('data', 'Admins\GlobalSettingsController@crm_auto_tagging_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@crm_auto_tagging_update')->name('update');
+            Route::post('delete', 'Admins\GlobalSettingsController@crm_auto_tagging_delete')->name('delete');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@crm_auto_tagging_enable_disable')->name('enable_disable');
             
         });
 

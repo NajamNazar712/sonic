@@ -67,4 +67,8 @@ class User extends Authenticatable
     public function return(){
         return $this->hasMany('App\Http\Models\Shipper\UserReturnInfo');
     }
+
+    public function dws_charges(){
+        return $this->hasMany('App\Http\Models\DwsWeightCharges');
+    }
 }

@@ -357,6 +357,9 @@
                                     </select>
                                 @endif
                             </div>
+                            <div class="form-group">
+                                <input type="text" id="return_reason_shipment_remarks" class="form-control" maxlength="100" placeholder="Remarks">
+                            </div>
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-3">
@@ -661,6 +664,7 @@
                         if (data.shipments != undefined) {
                             
                             $.each(data.shipments, function (index, details) {
+                                
                                 var id = details.shipment_id;
                                 var shipment_type = details.shipment_type;
                                 var shipment = '';
@@ -688,6 +692,10 @@
                                 @if (session('role_id') == 1 || in_array(245, session('permissions')))
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' + id + ' data-tracking=' + details.tracking_history[0].status_id + '>Intercept</button>';
                                 @endif
+                                console.log(details.dws_image);
+                                if(details.dws_image != null){
+                                    shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.dws_image + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> DWS File</a>';
+                                }
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
 
@@ -2121,6 +2129,7 @@
             },
             submitHandler: function(form) {
                     var return_reason_select = $('#return_reason_select').val();
+                    var remarks = $('#return_reason_shipment_remarks').val();
                     swal({
                             title: 'Please Wait!',
                             text: ' ',
@@ -2136,6 +2145,7 @@
                             '_token': '{{ csrf_token() }}',
                             'shipment_id': $('#return_shipment_id').val(),
                             'single_return_reason_select': return_reason_select,
+                            'remark': remarks,
                             'action': 'confirm'
                         }
                     })
@@ -2155,6 +2165,7 @@
         });
         $('#ReturnConfirmReasonModal').on('hide.bs.modal', function (e) {
                 $('#return_reason_select').val('').trigger('change');
+                $('#return_reason_shipment_remarks').val('');
             });
         $( "#reattempt_request_form" ).validate({
             errorClass:"danger",

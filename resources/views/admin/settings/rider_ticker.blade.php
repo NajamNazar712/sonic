@@ -7,14 +7,14 @@
 @section('title','App Slider')
 
 @section('content')
-    <h1 class="mb-1">
-        App Slider
-    </h1>
+    {{--Rider Slider Images--}}
+    <h1 class="mb-1">App Slider</h1>
+    @include('admin.inc.messages')
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
+            <div class="card-header"><h2 class="mb-1">Rider Slider</h2></div>
             <div class="card-body">
-                @include('admin.inc.messages')
                 <form id="documents_form" class="form form-horizontal" action="{{route('admin.settings.rider_ticker.store')}}" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="form-body">
@@ -61,6 +61,140 @@
                                         @if(isset($rider_ticker[4]))
                                             <input type="hidden" class="form-control form-control-sm" name="rider_ticker_id_5" id="rider_request_id" value="{{$rider_ticker[4]->id}}">
                                             <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($rider_ticker[4]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mt-4">
+                            <div class="mr-1">
+                                <button type="submit" class="btn btn-outline-primary mr-1 upload">Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {{--Admin Slider Images--}}
+    <div class="card">
+        <div class="card-content" aria-expanded="true">
+            <div class="card-header"><h2 class="mb-1">Staff Slider</h2></div>
+            <div class="card-body">
+                <form id="admin_slider_form" class="form form-horizontal" action="{{route('admin.settings.rider_ticker.admin_store')}}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <div class="form-body">
+                        <div class="row justify-content-center">
+                            <div class="col-4">
+                                <table class="table table-sm table-bordered text-center" id="Image_table">
+                                    <tbody>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 1</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_6"  id="upload_image_6"></td>
+                                        @if(isset($admin_ticker[0]))
+                                            <input type="hidden" class="form-control form-control-sm" name="admin_ticker_id_1" id="admin_request_id" value="{{$admin_ticker[0]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($admin_ticker[0]->picture_path))}}">View</button></a></td>
+                                        @endif
+
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 2</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_7"  id="upload_image_7"></td>
+                                        @if(isset($admin_ticker[1]))
+                                            <input type="hidden" class="form-control form-control-sm" name="admin_ticker_id_2" id="admin_request_id" value="{{$admin_ticker[1]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($admin_ticker[1]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 3</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_8"  id="upload_image_8"></td>
+                                        @if(isset($admin_ticker[2]))
+                                            <input type="hidden" class="form-control form-control-sm" name="admin_ticker_id_3" id="admin_request_id" value="{{$admin_ticker[2]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($admin_ticker[2]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 4</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_9"  id="upload_image_9"></td>
+                                        @if(isset($admin_ticker[3]))
+                                            <input type="hidden" class="form-control form-control-sm" name="admin_ticker_id_4" id="admin_request_id" value="{{$admin_ticker[3]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($admin_ticker[3]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 5</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_10"  id="upload_image_10"></td>
+                                        @if(isset($admin_ticker[4]))
+                                            <input type="hidden" class="form-control form-control-sm" name="admin_ticker_id_5" id="admin_request_id" value="{{$admin_ticker[4]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($admin_ticker[4]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center mt-4">
+                            <div class="mr-1">
+                                <button type="submit" class="btn btn-outline-primary mr-1 upload">Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {{--Retail Slider Images--}}
+    <div class="card">
+        <div class="card-content" aria-expanded="true">
+            <div class="card-header"><h2 class="mb-1">Retail Slider</h2></div>
+            <div class="card-body">
+                <form id="retail_slider_form" class="form form-horizontal" action="{{route('admin.settings.rider_ticker.retail_store')}}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <div class="form-body">
+                        <div class="row justify-content-center">
+                            <div class="col-4">
+                                <table class="table table-sm table-bordered text-center" id="Image_table">
+                                    <tbody>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 1</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_11"  id="upload_image_11"></td>
+                                        @if(isset($retail_ticker[0]))
+                                            <input type="hidden" class="form-control form-control-sm" name="retail_ticker_id_1" id="retail_request_id" value="{{$retail_ticker[0]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($retail_ticker[0]->picture_path))}}">View</button></a></td>
+                                        @endif
+
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 2</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_12"  id="upload_image_12"></td>
+                                        @if(isset($retail_ticker[1]))
+                                            <input type="hidden" class="form-control form-control-sm" name="retail_ticker_id_2" id="retail_request_id" value="{{$retail_ticker[1]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($retail_ticker[1]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 3</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_13"  id="upload_image_13"></td>
+                                        @if(isset($retail_ticker[2]))
+                                            <input type="hidden" class="form-control form-control-sm" name="retail_ticker_id_3" id="retail_request_id" value="{{$retail_ticker[2]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($retail_ticker[2]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 4</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_14"  id="upload_image_14"></td>
+                                        @if(isset($retail_ticker[3]))
+                                            <input type="hidden" class="form-control form-control-sm" name="retail_ticker_id_4" id="retail_request_id" value="{{$retail_ticker[3]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($retail_ticker[3]->picture_path))}}">View</button></a></td>
+                                        @endif
+                                    </tr>
+                                    <tr style="height: 50px">
+                                        <td class="align-middle"><h6><b>Image # 5</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_15"  id="upload_image_15"></td>
+                                        @if(isset($retail_ticker[4]))
+                                            <input type="hidden" class="form-control form-control-sm" name="retail_ticker_id_5" id="retail_request_id" value="{{$retail_ticker[4]->id}}">
+                                            <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($retail_ticker[4]->picture_path))}}">View</button></a></td>
                                         @endif
                                     </tr>
                                     </tbody>
@@ -146,6 +280,106 @@
                     var image_3 = $('#upload_image_3').val();
                     var image_4 = $('#upload_image_4').val();
                     var image_5 = $('#upload_image_5').val();
+
+                    if((image_1 !== "" && image_1 != null) || (image_2 !== "" && image_2 != null) || (image_3 !== "" && image_3 != null) || (image_4 !== "" && image_4 != null) || (image_5 !== "" && image_5 != null)){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to upload Image(s)',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                form.submit();
+                            }
+                        });
+                    }
+                    else{
+                        var error = 'No file Selected';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+            });
+
+            $( "#admin_slider_form" ).validate({
+                errorClass:"danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var image_1 = $('#upload_image_6').val();
+                    var image_2 = $('#upload_image_7').val();
+                    var image_3 = $('#upload_image_8').val();
+                    var image_4 = $('#upload_image_9').val();
+                    var image_5 = $('#upload_image_10').val();
+
+                    if((image_1 !== "" && image_1 != null) || (image_2 !== "" && image_2 != null) || (image_3 !== "" && image_3 != null) || (image_4 !== "" && image_4 != null) || (image_5 !== "" && image_5 != null)){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to upload Image(s)',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                form.submit();
+                            }
+                        });
+                    }
+                    else{
+                        var error = 'No file Selected';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+            });
+
+            $( "#retail_slider_form" ).validate({
+                errorClass:"danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var image_1 = $('#upload_image_11').val();
+                    var image_2 = $('#upload_image_12').val();
+                    var image_3 = $('#upload_image_13').val();
+                    var image_4 = $('#upload_image_14').val();
+                    var image_5 = $('#upload_image_15').val();
 
                     if((image_1 !== "" && image_1 != null) || (image_2 !== "" && image_2 != null) || (image_3 !== "" && image_3 != null) || (image_4 !== "" && image_4 != null) || (image_5 !== "" && image_5 != null)){
                         swal({

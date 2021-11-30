@@ -16,6 +16,7 @@ use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\Admin\Retail\RetailTraxBox;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\RetailAppSlider;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
@@ -330,5 +331,16 @@ class RetailAPIController extends Controller
 
         return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
 
+    }
+
+    public function retail_ticker_images(Request $request)
+    {
+        $retail_ticker_images = RetailAppSlider::orderBy('id', 'ASC');
+        if ($retail_ticker_images->exists()) {
+            $retail_ticker_images = $retail_ticker_images->get();
+            return response()->json(['status' => 0, 'images' => $retail_ticker_images]);
+        } else {
+            return response()->json(['status' => 1, 'message' => 'No Images Found']);
+        }
     }
 }
