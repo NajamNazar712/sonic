@@ -570,11 +570,11 @@ class ReturnController extends Controller
         if($request->action == 'confirm'){
             $return_reason = $request->single_return_reason_select;
             $parcel = Shipment::find($request->shipment_id);
-            $pickup_address_city = $parcel->pickup_address->city_id;
-            if(!in_array($pickup_address_city, session('hubs')))
-            {
-                return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
-            }
+            // $pickup_address_city = $parcel->pickup_address->city_id;
+            // if(!in_array($pickup_address_city, session('hubs')))
+            // {
+            //     return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
+            // }
             if($parcel->booking_type_id == 5){
                 return ['status' => 0,'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
             }
@@ -626,11 +626,11 @@ class ReturnController extends Controller
 
         }else if($request->action == 'reattempt'){
             $parcel = Shipment::find($request->shipment_id);
-            $pickup_address_city = $parcel->pickup_address->city_id;
-            if(!in_array($pickup_address_city, session('hubs')))
-            {
-                return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
-            }
+            // $pickup_address_city = $parcel->pickup_address->city_id;
+            // if(!in_array($pickup_address_city, session('hubs')))
+            // {
+            //     return ['status' => 0,'error' => "Shipments is not from your assigned Hub"];
+            // }
             if(!in_array($parcel->shipper_status_id, [13, 20]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52)){
                 $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52])->latest('id')->first();
 
