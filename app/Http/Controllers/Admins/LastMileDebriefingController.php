@@ -120,7 +120,7 @@ class LastMileDebriefingController extends Controller
                 return response()->json(['status' => 0, 'success' => 'Agent Assign successfully.']);
             }
             else{
-                return response()->json(['status' => 1, 'error' => 'Undelivered shipments not found!']);
+                return response()->json(['status' => 1, 'error' => 'Please Select At Least One Shipment!']);
             }
         }
         else{
