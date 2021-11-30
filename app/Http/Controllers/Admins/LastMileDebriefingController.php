@@ -76,7 +76,8 @@ class LastMileDebriefingController extends Controller
         $admin_ids = AdminHub::where('hub_id',$request->hub_id)->pluck('admin_id')->toArray();
         $delivery_note_id = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
         ->join('shipments as s','s.id','=','dns.shipment_id')
-        ->where('delivery_note_id',$request->delivery_id)
+        ->where('delivery_notes.id',$request->delivery_id)
+        ->where('dns.status',1)
         ->select('s.id as shipment_id','s.tracking_number as tracking_number')
         ->get();
         if(count($admin_ids) > 0){
