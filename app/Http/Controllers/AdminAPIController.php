@@ -4774,34 +4774,31 @@ class AdminAPIController extends Controller
         }
     }
 
-   
+    public function dws_weight(Request $request)
+    {
 
-    
-        
-public function dws_weight(Request $request){
-        
-    $rules = [
-        'tracking_number' => ['required', 'integer'],
-        'weight' => ['required'],
-        'dimension_l' => ['required'],
-        'dimension_w' => ['required'],
-        'dimension_h' => ['required'],
-        'image_name' => ['required','mimes:pdf,png,jpeg,jpg,docx,doc'],
-        'machine' => ['required'],
-        'date' => ['required'],
-        'package_type' => ['required'],
-        'is_uploaded' => ['required'],
-        
-    ];
-$validate = Validator::make($request->all(), $rules, $this->messages);
+        $rules = [
+            'tracking_number' => ['required', 'integer'],
+            'weight' => ['required'],
+            'dimension_l' => ['required'],
+            'dimension_w' => ['required'],
+            'dimension_h' => ['required'],
+            'image_name' => ['required', 'mimes:pdf,png,jpeg,jpg,docx,doc'],
+            'machine' => ['required'],
+            'date' => ['required'],
+            'package_type' => ['required'],
+            'is_uploaded' => ['required'],
+
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
 
-        if ($validate->fails()) {            
-return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $shipment = Shipment::where('tracking_number',$request->tracking_number);
-            if($shipment->exists()){
+            $shipment = Shipment::where('tracking_number', $request->tracking_number);
+            if ($shipment->exists()) {
                 $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
                 if ($settings) {
@@ -4819,50 +4816,50 @@ return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'error
                 if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
-                    
-                    if($shipment->business_category_id == 2){
-                        if($dense_weight < $volume_weight){
-                            $actual_weight = $volume_weight; 
+
+                    if ($shipment->business_category_id == 2) {
+                        if ($dense_weight < $volume_weight) {
+                            $actual_weight = $volume_weight;
                             $shipment->length = $request->dimension_l;
                             $shipment->breadth = $request->dimension_w;
                             $shipment->height = $request->dimension_h;
-                        }else{
-                            $actual_weight = $dense_weight; 
+                        } else {
+                            $actual_weight = $dense_weight;
                         }
-                    }else{
-                        $dws_charges = DwsWeightCharges::where('user_id',$shipment->user_id)->where('shipping_mode_id',$shipment->shipping_mode_id);
-                        if($dws_charges->exists()){
+                    } else {
+                        $dws_charges = DwsWeightCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+                        if ($dws_charges->exists()) {
                             $dws_charges = $dws_charges->get()->first();
                             $dws_charges_status = $dws_charges->dws_weight_status;
-                            if($dws_charges_status == 1){
-                                if($dense_weight < $volume_weight){
-                                    $actual_weight = $volume_weight; 
+                            if ($dws_charges_status == 1) {
+                                if ($dense_weight < $volume_weight) {
+                                    $actual_weight = $volume_weight;
                                     $shipment->length = $request->dimension_l;
                                     $shipment->breadth = $request->dimension_w;
                                     $shipment->height = $request->dimension_h;
-                                }else{
-                                    $actual_weight = $dense_weight; 
+                                } else {
+                                    $actual_weight = $dense_weight;
                                 }
-                            }else{
-                                if($dense_weight < $volume_weight){
-                                    $actual_weight = $dense_weight; 
-                                }else{
-                                    $actual_weight = $volume_weight; 
+                            } else {
+                                if ($dense_weight < $volume_weight) {
+                                    $actual_weight = $dense_weight;
+                                } else {
+                                    $actual_weight = $volume_weight;
                                     $shipment->length = $request->dimension_l;
                                     $shipment->breadth = $request->dimension_w;
                                     $shipment->height = $request->dimension_h;
                                 }
                             }
-                        }else{
-                            
+                        } else {
+
                             return response()->json(['status' => 1, 'message' => 'dws chareges not set']);
                         }
 
                     }
 
                     //check weight from dws 
-                    
-                    
+
+
                     //check weight from dws end
                     $shipment->actual_weight = $actual_weight;
                     $shipment->save();
@@ -4883,24 +4880,23 @@ return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'error
                     }
 
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
-                     //region Taha
-                     $pickup_request=V2PickupRequest::where('id', $pickup_request_shipment->pickup_request_id)->first();
-                     //endregion
-                     
+                    //region Taha
+                    $pickup_request = V2PickupRequest::where('id', $pickup_request_shipment->pickup_request_id)->first();
+                    //endregion
+
                     if ($pickup_request_shipment) {
                         $reference_1_id = $pickup_request_shipment->pickup_request_id;
-                        $rider_id=$pickup_request->current_rider_id;
+                        $rider_id = $pickup_request->current_rider_id;
 
                         // if (!in_array($pickup_request_shipment->pickup_request_id, $pickup_request_ids)) {
-                            // $pickup_request_ids[] = $pickup_request_shipment->pickup_request_id;
-                            $pickup_request_id = $pickup_request_shipment->pickup_request_id;
+                        // $pickup_request_ids[] = $pickup_request_shipment->pickup_request_id;
+                        $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                         // }
                     } else {
                         $reference_1_id = null;
                     }
-                    if($pickup_request->current_rider_id==null)
-                    { 
-                        $rider_id=$pickup_rider_id;
+                    if ($pickup_request->current_rider_id == null) {
+                        $rider_id = $pickup_rider_id;
                     }
                     if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
                         $receiving_sheet_shipment->status = 1;
@@ -4941,7 +4937,7 @@ return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'error
 
                     $shipment->save();
                     $reference_2_id = null;
-                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, $request->admin_id, $reference_1_id, $reference_2_id,1,null,$rider_id);
+                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, $request->admin_id, $reference_1_id, $reference_2_id, 1, null, $rider_id);
 
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if ($self_collection_shipment->exists()) {
@@ -5022,7 +5018,7 @@ return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'error
                             }
                         }
 
-                        if($shipment->walk_in_status == 0) {
+                        if ($shipment->walk_in_status == 0) {
                             InitialChargesWebhookController::webhook_subscription($shipment_id);
                         }
                     }
@@ -5059,7 +5055,7 @@ return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'error
                         $pickup_request_received_shipment->shipment_id = $shipment->id;
                         $pickup_note_id = NULL;
                         $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->latest()->first();
-                        if($pickup_note_request){
+                        if ($pickup_note_request) {
                             $pickup_note_id = $pickup_note_request->pickup_note_id;
                         }
                         $pickup_request_received_shipment->pickup_note_id = $pickup_note_id;
@@ -5074,22 +5070,22 @@ return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'error
                     }
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
                     if ($pickup_request->received >= 1) {
-                            $pickup_note_request = $pickup_request->pickup_note_request;
-                            if ($pickup_note_request) {
-                                $pickup_note_id = $pickup_note_request->pickup_note_id;
-                                $pickup_note_request->status = 1;
-                                $pickup_note_request->save();
-                                $pickup_note = V2PickupNote::find($pickup_note_id);
-                                
-                            }
+                        $pickup_note_request = $pickup_request->pickup_note_request;
+                        if ($pickup_note_request) {
+                            $pickup_note_id = $pickup_note_request->pickup_note_id;
+                            $pickup_note_request->status = 1;
+                            $pickup_note_request->save();
+                            $pickup_note = V2PickupNote::find($pickup_note_id);
 
-                            $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
-                            if ($retail_pickup_note->exists()) {
-                                $retail_pickup_note = $retail_pickup_note->first();
-                                $retail_pickup_note->status = 3;
-                                $retail_pickup_note->save();
-                            }
-                        
+                        }
+
+                        $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
+                        if ($retail_pickup_note->exists()) {
+                            $retail_pickup_note = $retail_pickup_note->first();
+                            $retail_pickup_note->status = 3;
+                            $retail_pickup_note->save();
+                        }
+
 
                     }
                     $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
@@ -5104,14 +5100,14 @@ return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'error
                         $directory = 'dws_images';
                         Storage::disk('public')->putFileAs($directory, $file, $filename);
                         $link = $directory . '/' . $filename;
-                        
-                        $shipment_detail = ShipmentDetail::where('shipment_id',$shipment_id);
-                        if($shipment_detail->exists()){
+
+                        $shipment_detail = ShipmentDetail::where('shipment_id', $shipment_id);
+                        if ($shipment_detail->exists()) {
                             $shipment_detail = $shipment_detail->get()->first();
                             $shipment_detail->dws_image = $link;
-                            if($shipment->business_category_id == 2){
+                            if ($shipment->business_category_id == 2) {
                                 $shipment_detail->dws_status = 1;
-                            }else{
+                            } else {
                                 $shipment_detail->dws_status = $dws_charges_status;
                             }
                             $shipment_detail->dense_weight = $dense_weight;
@@ -5119,13 +5115,13 @@ return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'error
                             $shipment_detail->dimension_w = $request->dimension_w;
                             $shipment_detail->dimension_h = $request->dimension_h;
                             $shipment_detail->save();
-                        }else{
+                        } else {
                             $shipment_detail = new ShipmentDetail;
                             $shipment_detail->shipment_id = $shipment_id;
                             $shipment_detail->dws_image = $link;
-                            if($shipment->business_category_id == 2){
+                            if ($shipment->business_category_id == 2) {
                                 $shipment_detail->dws_status = 1;
-                            }else{
+                            } else {
                                 $shipment_detail->dws_status = $dws_charges_status;
                             }
                             $shipment_detail->dense_weight = $dense_weight;
@@ -5135,31 +5131,32 @@ return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'error
                             $shipment_detail->save();
                         }
                     }
-                }else{
-                return response()->json(['status' => 1, 'message' => 'out of status']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'out of status']);
 
                 }
-                
+
                 // arrive function end
-                
-            }else{
+
+            } else {
                 return response()->json(['status' => 1, 'message' => 'shipment not found']);
             }
-            
+
 
         }
     }
+
     public function month_attendance_history_v2(Request $request)
     {
         $rules = [
             'first_day' => ['required'],
             'last_day' => ['required'],
         ];
-$validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
 
-        if ($validate->fails()) {         
+        if ($validate->fails()) {
             $message = 'Error(s) in Input';
             return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
         } else {
@@ -5173,7 +5170,7 @@ $validate = Validator::make($request->all(), $rules, $this->messages);
             if ($shift->exists()) {
                 $shift = $shift->first();
                 $shift_exists = 1;
-            }else{
+            } else {
                 return response()->json(['status' => 0, 'data' => $data]);
             }
             foreach ($dates as $date) {
@@ -5190,7 +5187,7 @@ $validate = Validator::make($request->all(), $rules, $this->messages);
                         if ($attendance->clock_in_datetime) {
                             $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
                             $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
-                            if($attendance_date == $clock_in_date){
+                            if ($attendance_date == $clock_in_date) {
                                 $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
                                 $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
                                 if ($time_diff > $shift->grace_time) {
@@ -5198,8 +5195,7 @@ $validate = Validator::make($request->all(), $rules, $this->messages);
                                 } else {
                                     $datum["status"] = 1;//Present
                                 }
-                            }
-                            else{
+                            } else {
                                 $datum["status"] = 2;//Late
                             }
                         } else {
