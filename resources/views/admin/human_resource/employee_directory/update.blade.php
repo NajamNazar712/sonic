@@ -2198,7 +2198,7 @@
                 placeholder: "Select Department",
                 width:'100%',
             });
-
+            @if($employee->employee_type_id == 1)
             $("#department").on('change',function(){
                 id = $(this).val();
                 $.ajax({
@@ -2228,7 +2228,7 @@
             });
 
             $("#department").val("{{$employee->department_id ?? ''}}").trigger('change');
-
+            @endif
 
             var family_member_index = 0;
             $(".marital_status_family_member").prepend('<option value="" selected></option>').select2({
