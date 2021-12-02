@@ -155,15 +155,15 @@ class CRMController extends Controller
                     if(!empty($tagged_crm_request)){
                         if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
                             CrmRequestTagging::where('crm_request_id', $crm_request->id)->update([
-                                'crm_request_tagging_type_id' => 2,
+                                'crm_request_tagging_type_id' => 5,
                                 'tagged_id' => $crm_auto_tag_user->admin_id
                             ]);
 
                             CrmRequestTaggingHistory::create([
                                 'crm_request_id' => $crm_request->id,
-                                'crm_request_tagging_type_id' => 2,
+                                'crm_request_tagging_type_id' => 5,
                                 'tagged_id' => $crm_auto_tag_user->admin_id,
-                                'agent_id' => Auth::id(),
+                                'agent_id' => 306,
                                 'hub_id' => NULL
                             ]);
                             NotificationsController::send(31,$crm_request->id);
@@ -172,16 +172,16 @@ class CRMController extends Controller
                     else{
                         CrmRequestTagging::create([
                             'crm_request_id' => $crm_request->id,
-                            'crm_request_tagging_type_id' => 2,
+                            'crm_request_tagging_type_id' => 5,
                             'tagged_id' => $crm_auto_tag_user->admin_id,
                             'hub_id' => NULL
                         ]);
 
                         CrmRequestTaggingHistory::create([
                             'crm_request_id' => $crm_request->id,
-                            'crm_request_tagging_type_id' => 2,
+                            'crm_request_tagging_type_id' => 5,
                             'tagged_id' => $crm_auto_tag_user->admin_id,
-                            'agent_id' => Auth::id(),
+                            'agent_id' => 306,
                             'hub_id' => NULL
                         ]);
                         NotificationsController::send(31,$crm_request->id);
