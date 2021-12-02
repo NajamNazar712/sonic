@@ -10472,7 +10472,7 @@ class RiderAPIController extends Controller
         return response()->json($response);
     }
 
- public function leave_index(Request $request){
+    public function leave_index(Request $request){
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
         $department = AdminDepartment::find(6);
