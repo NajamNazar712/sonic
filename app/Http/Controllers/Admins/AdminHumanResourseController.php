@@ -321,7 +321,7 @@ class AdminHumanResourseController extends Controller
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                    if ($result->request_status_id == 1 || $result->request_status_id == 2) {
+
                         if ($result->request_status_id == 1 || $result->request_status_id == 2) {
                             if (session('role_id') == 1 || in_array(469, session('permissions'))) {
 
@@ -358,7 +358,8 @@ class AdminHumanResourseController extends Controller
                                 if (session('role_id') == 1 || in_array(381, session('permissions'))) {
                                     if ($result->active_rider_type_id == 1) {
                                         $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Incentive</div></button>';
-                                    } else {
+                                    }
+                                    else {
                                         $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Permanent</div></button>';
                                     }
 
@@ -398,9 +399,9 @@ class AdminHumanResourseController extends Controller
               </div>
             ';
                         return $dropdown;
-                    } else {
-                        return '';
-                    }
+                }
+                else {
+                    return '';
                 }
             })
             ->make(true);
