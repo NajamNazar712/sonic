@@ -16,7 +16,6 @@ class CreateOmniUsersTable extends Migration
         Schema::create('omni_users', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->index();
-            $table->smallInteger('status')->index();
             $table->timestamps();
         });
     }

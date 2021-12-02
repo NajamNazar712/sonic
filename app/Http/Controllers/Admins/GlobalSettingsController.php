@@ -5114,7 +5114,7 @@ public function sales_incentive()
 
 
     public function omni_user_setting_index(){
-       $omni_users = OmniUsers::where('status',1)->pluck('user_id')->toArray();
+       $omni_users = OmniUsers::pluck('user_id')->toArray();
        $shippers = array();
        if(count($omni_users) > 0){
            foreach ($omni_users as $user_id){
@@ -5126,21 +5126,13 @@ public function sales_incentive()
         return view('admin.settings.omni_user')->with(['shippers' => $shippers,'users' => $users]);
     }
     public function omni_user_setting_update(Request $request){
-       $omni_users = OmniUsers::where('status',1)->pluck('user_id')->toArray();
+       $omni_users = OmniUsers::pluck('user_id')->toArray();
        if($request->shippers){
            if(count($omni_users) > 0){
-              foreach($request->shippers as $shipper){
-                 $user = OmniUsers::where('user_id',$shipper);
-                 if($user->exists()){
-                     $user->update(['status' => 0]);
-                 }
-                  OmniUsers::create(['user_id' =>$shipper,'status'=>1]);
-              }
+               DB::table('omni_users')->delete();
            }
-           else{
-               foreach ($request->shippers as $shipper_id){
-                   OmniUsers::create(['user_id' =>$shipper_id,'status'=>1]);
-               }
+           foreach ($request->shippers as $shipper_id){
+               OmniUsers::create(['user_id' =>$shipper_id]);
            }
            return redirect()->back()->with(['success'=>'Setting Updated!']);
        }
