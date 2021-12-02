@@ -68,7 +68,15 @@
                         </fieldset>
                     </div>
 
-                    <div class="col-4 "></div>
+                    <div class="col-4 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_last_rider" id="search_last_rider" class="form-control" required data-rule-required="true" data-msg-required="This field is required">
+                                @foreach($riders as $rider)
+                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     
                     <div class="col-4 ">
                         <div class="form-group input-group">
@@ -105,6 +113,7 @@
                         <th class="border-primary border-darken-1">Status Marked</th>
                         <th class="border-primary border-darken-1">Status Marking Date</th>
                         <th class="border-primary border-darken-1">Status Marked By</th>
+                        <th class="border-primary border-darken-1">Assigned Rider</th>
                     </tr>
                     </thead>
                 </table>
@@ -236,6 +245,12 @@
                 placeholder:"Select Status",
                 allowClear:true,
             });
+            $('#search_last_rider').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Assigned Rider",
+                allowClear:true,
+            });
+            
 
 
 
@@ -305,6 +320,8 @@
                             head.push('Status Marked');
                             head.push('Status Marking Date');
                             head.push('Status Marked By');
+                            head.push('Assigned Rider');
+                            
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -315,6 +332,7 @@
                                 row.push(values.status_marked);
                                 row.push(values.status_marking_date);
                                 row.push(values.status_marked_by);
+                                row.push(values.rider_status_marked_by);
 
                                 body.push(row);
                             });
@@ -360,6 +378,8 @@
                         d.status_marked = $('#status_marked').val();
                         d.search_rider = $('#search_rider').val();
                         d.search_admin = $('#search_admin').val();
+                        d.search_last_rider = $('#search_last_rider').val();
+                        
                         
                     }
                 },
@@ -372,7 +392,8 @@
                     {data: 'status_marked', name: 'ss.id', class: 'align-middle status_marked'},
                     {data: 'status_marking_date', name: 'shipments_journey.created_at', class: 'align-middle status_marking_date'},
                     {data: 'status_marked_by', name: 'ad.name', class: 'align-middle status_marked_by'},
-
+                    {data: 'rider_status_marked_by', name: 'r.name', class: 'align-middle rider_status_marked_by'},
+                    
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

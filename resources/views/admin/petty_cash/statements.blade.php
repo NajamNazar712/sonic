@@ -79,10 +79,11 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Statement No.</th>
+                        <th class="border-primary border-darken-1">Hub Name</th>
                         <th class="border-primary border-darken-1">Origin Hub</th>
                         <th class="border-primary border-darken-1">Destination Hub</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
-                        <th class="border-primary border-darken-1">Date (From - To)</th>
+                        <th class="border-primary border-darken-1">Date</th>
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
@@ -228,10 +229,11 @@
 
                             head.push('S.No');
                             head.push('Statement No.');
+                            head.push('Hub Name');
                             head.push('Origin Hub');
                             head.push('Destination Hub');
                             head.push('Statement Reference No.');
-                            head.push('Date (From - To)');
+                            head.push('Date');
                             head.push('Total Amount');
                             head.push('Created By');
                             head.push('Created At');
@@ -251,6 +253,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.statement_id);
+                                row.push(values.hub_name);
                                 row.push(values.origin_hub_name);
                                 row.push(values.destination_hub_name);
                                 row.push(values.reference_no);
@@ -280,7 +283,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
-                @if (session('role_id') == 1 || in_array(190, session('permissions')))
+                @if (session('role_id') == 1 || (in_array(190, session('permissions')) && session('department_id') == 6))
                     {
                         className: 'btn btn-primary station',
                         text: 'Station Approved',
@@ -360,7 +363,7 @@
                     },
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(191, session('permissions')))
+                        @if (session('role_id') == 1 || (in_array(191, session('permissions')) &&  session('department_id') == 6))
                     {
                         className: 'btn btn-primary operation',
                         text: 'Operation Approved',
@@ -440,7 +443,7 @@
                         }
                     },
                         @endif
-                        @if (session('role_id') == 1 || in_array(173, session('permissions')))
+                        @if (session('role_id') == 1 || (in_array(173, session('permissions')) &&  session('department_id') == 4))
                     {
                         className: 'btn btn-primary finance',
                         text: 'Finance Approved',
@@ -692,15 +695,16 @@
                     }
                 },
                 rowId: 'statement_id',
-                order: [9, 'desc'],
+                order: [10, 'desc'],
                 columns: [
                     {data: 'statement_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'statement_link', name: 'petty_cash_statements.id', class: 'align-middle statement_link'},
+                    {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
                     {data: 'origin_hub_name', name: 'o.name', class: 'align-middle origin_hub_name'},
                     {data: 'destination_hub_name', name: 'd.name', class: 'align-middle destination_hub_name'},
                     {data: 'reference_no', name: 'petty_cash_statements.reference_no', class: 'align-middle reference_no'},
-                    {data: 'date', name: 'date', class: 'align-middle date', orderable:false},
+                    {data: 'date', name: 'date', class: 'align-middle date'},
                     {data: 'total_amount', name: 'petty_cash_statements.total_amount', class: 'align-middle total_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},

@@ -19,6 +19,10 @@ class City extends Model
     {
         return $this->hasMany(self::class,'hub_id','id')->where('id','!=',$this->id);
     }
+    public function hub_cities_including_self()
+    {
+        return $this->hasMany(self::class,'hub_id','id');
+    }
     public function routes(){
         return $this->hasMany('App\Http\Models\Route');
     }

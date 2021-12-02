@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Admins;
 
 
 use App\Http\Models\Admin\SalesIncentiveDate;
-use App\Http\Models\FleetDriver;
+use App\Http\Models\Admin\AdminAppSlider;
+use App\Http\Models\Admin\RetailAppSlider;use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
@@ -15,6 +16,7 @@ use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
 use App\Http\Models\Admin\CompletedAgingReport;
+use App\Http\Models\Admin\CrmAutoTagUser;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\Fuel\FuelFactorHistory;
@@ -3722,7 +3724,9 @@ class GlobalSettingsController extends Controller
     public function rider_ticker_index()
     {
         $rider_ticker = RiderTickerImage::orderBy('id', 'ASC')->get();
-        return view('admin.settings.rider_ticker')->with(['id' => 1, 'rider_ticker' => $rider_ticker]);
+        $admin_ticker = AdminAppSlider::orderBy('id', 'ASC')->get();
+        $retail_ticker = RetailAppSlider::orderBy('id', 'ASC')->get();
+        return view('admin.settings.rider_ticker')->with(['id' => 1, 'rider_ticker' => $rider_ticker, 'admin_ticker' => $admin_ticker, 'retail_ticker' => $retail_ticker]);
     }
 
     public function rider_ticker_store(Request $request)
@@ -5003,4 +5007,304 @@ public function sales_incentive()
         }
     }
 
+
+    public function crm_auto_tagging_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
+        $cities = city::where('status',1)->get();
+        return view('admin.settings.CRM.auto_tagging')->with(['agents' => $agents , 'cities' => $cities]);
+    }
+
+    public function crm_auto_tagging_list(){
+        $roles = CrmAutoTagUser::join('admins as ad', 'ad.id', '=', 'crm_auto_tag_users.admin_id')
+                 ->join('cities as c','c.id','crm_auto_tag_users.city_id')   
+        ->select('crm_auto_tag_users.id', 'ad.name as agent_name', 'c.name as city_name','crm_auto_tag_users.status');
+        
+    $datatables = Datatables::of($roles)
+        ->addColumn('action', function($roles) {
+            if (session('role_id') == 1 || in_array(640, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    ';
+                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    if($roles->status == 1 ){
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }else{
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+          return $dropdown;
+               
+            }
+            else {
+                return '';
+            }
+        })->editColumn('status', function($roles) {
+            if($roles->status == 1){
+                return 'Enable';
+            }else{
+                return 'Disable';
+            }
+            
+        });
+
+    return $datatables->make(true);
+    }
+
+    public function crm_auto_tagging_submit(Request $request){
+        $crm_agent = CrmAutoTagUser::where('city_id',$request->city_id);
+        if(!$crm_agent->exists()){
+            CrmAutoTagUser::create($request->all());
+            return redirect()->back()->with('success', 'Agent Added!');
+        }else{
+            return redirect()->back()->with('error', 'Location already exist, Please edit the Tagged user');
+
+        }
+
+
+    }
+
+    public function crm_auto_tagging_data(Request $request){
+        $crm_agent_data = CrmAutoTagUser::find($request->id);
+
+        $agent_id = $crm_agent_data->admin_id;
+        $city_id = $crm_agent_data->city_id;
+        $crm_agent_id = $crm_agent_data->id;
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'crm_agent_id'=> $crm_agent_id]);
+
+    }
+
+    public function crm_auto_tagging_delete(Request $request){
+        CrmAutoTagUser::find($request->id)->delete();
+        return response()->json(['status' => 1, 'success' => 'Tagged Agent Deleted']);
+
+    }
+
+
+    public function crm_auto_tagging_update(Request $request){
+        $crm_agent_data = CrmAutoTagUser::find($request->crm_agent_id);
+
+        $crm_agent_data->admin_id = $request->admin_id;
+        $crm_agent_data->city_id = $request->city_id;
+        $crm_agent_data->save();
+        return redirect()->back()->with('success', 'Agent Updated!');
+
+    }
+
+    public function crm_auto_tagging_enable_disable(Request $request){
+        $crm_agent = CrmAutoTagUser::find($request->id);
+        if($crm_agent->status == 1){
+            $crm_agent->status = 0;
+            $crm_agent->save();
+        return redirect()->back()->with('success', 'Agent Disabled!');
+
+        }else{
+            $crm_agent->status = 1;
+            $crm_agent->save();
+        return redirect()->back()->with('success', 'Agent Enabled!');
+
+        }
+    }
+
+    public function admin_ticker_store(Request $request)
+    {
+        $request->validate([
+            'upload_image_6' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_7' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_8' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_9' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_10' => 'nullable|image|mimes:jpeg,png|max:2048',
+        ]);
+
+        if (!$request->hasFile('upload_image_6') && !$request->hasFile('upload_image_7') && !$request->hasFile('upload_image_8') && !$request->hasFile('upload_image_9') && !$request->hasFile('upload_image_10')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image_6')) {
+            if ($request->has('admin_ticker_id_1')) {
+                $ticker_id = $request->get('admin_ticker_id_1');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_6));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_7')) {
+            if ($request->has('admin_ticker_id_2')) {
+                $ticker_id = $request->get('admin_ticker_id_2');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_7));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_8')) {
+            if ($request->has('admin_ticker_id_3')) {
+                $ticker_id = $request->get('admin_ticker_id_3');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_8));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_9')) {
+            if ($request->has('admin_ticker_id_4')) {
+                $ticker_id = $request->get('admin_ticker_id_4');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_9));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_10')) {
+            if ($request->has('admin_ticker_id_5')) {
+                $ticker_id = $request->get('admin_ticker_id_5');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_10));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        return redirect()->back()->with(['success' => 'Images Uploaded!']);
+    }
+
+    public function retail_ticker_store(Request $request)
+    {
+        $request->validate([
+            'upload_image_11' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_12' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_13' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_14' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_15' => 'nullable|image|mimes:jpeg,png|max:2048',
+        ]);
+
+        if (!$request->hasFile('upload_image_11') && !$request->hasFile('upload_image_12') && !$request->hasFile('upload_image_13') && !$request->hasFile('upload_image_14') && !$request->hasFile('upload_image_15')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image_11')) {
+            if ($request->has('retail_ticker_id_1')) {
+                $ticker_id = $request->get('retail_ticker_id_1');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_11));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_12')) {
+            if ($request->has('retail_ticker_id_2')) {
+                $ticker_id = $request->get('retail_ticker_id_2');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_12));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_13')) {
+            if ($request->has('retail_ticker_id_3')) {
+                $ticker_id = $request->get('retail_ticker_id_3');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_13));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_14')) {
+            if ($request->has('retail_ticker_id_4')) {
+                $ticker_id = $request->get('retail_ticker_id_4');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_14));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_15')) {
+            if ($request->has('retail_ticker_id_5')) {
+                $ticker_id = $request->get('retail_ticker_id_5');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_15));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        return redirect()->back()->with(['success' => 'Images Uploaded!']);
+    }
 }

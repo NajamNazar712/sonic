@@ -233,9 +233,9 @@ Route::name('api.')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function() {
         Route::post('login', 'AdminAPIController@login')->name('login');
         Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
-        Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
-        Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
+        Route::get('slider', 'AdminAPIController@admin_ticker_images')->name('slider');
+        Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');        Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
         Route::post('forget_pin', 'AdminAPIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'AdminAPIController@reset_pin')->name('reset_pin');
         Route::prefix('register_request')->name('register_request.')->group(function () {
@@ -302,13 +302,16 @@ Route::name('api.')->group(function () {
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
             });
 
+
+            Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
+
         });
 
     });
 
     Route::prefix('retail_user')->name('retail_user.')->group(function() {
         Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
-        Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
+        Route::get('slider', 'Retail\RetailAPIController@retail_ticker_images')->name('slider');
 
         Route::middleware('RetailUserAPIToken')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function () {

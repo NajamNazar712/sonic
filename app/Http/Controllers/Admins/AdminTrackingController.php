@@ -24,6 +24,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentsJourney;
@@ -46,6 +47,8 @@ use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use DB;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\ShipmentDetail;
+use Illuminate\Support\Facades\Storage;
 
 class AdminTrackingController extends Controller
 {
@@ -84,7 +87,6 @@ class AdminTrackingController extends Controller
                     }
                 }
                 ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null,null);
-
                 if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
                     $details = array();
 
@@ -766,6 +768,21 @@ class AdminTrackingController extends Controller
                     if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
                         $details = array();
 
+                        if($shipment->business_category_id == 2){
+                            $international_shipment = InternationalShipment::where('shipment_id', $shipment->id)->whereNotNull('international_tracking_number');
+                            if($international_shipment->exists()){
+                                $international_shipment = $international_shipment->first();
+                                $details['international_shipment'] = 1;
+                                $details['international_tracking_number'] = $international_shipment->international_tracking_number;
+                            }
+                            else{
+                                $details['international_shipment'] = 0;
+                            }
+                        }
+                        else{
+                            $details['international_shipment'] = 0;
+                        }
+
                         $details['tracking_number'] = $tracking_number;
                     if($shipment->pod_image()->exists()){
                         $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);
@@ -956,14 +973,17 @@ class AdminTrackingController extends Controller
                                     else if($cargo_bag_shipment->exists()){
                                         $bag_shipment = $cargo_bag_shipment->orderBy('id','desc')->skip($manifest_bag_seal_number)->take(1)->first();
                                         $manifest_bag_seal_number++;
-                                        $bag = CargoManifestBag::find($bag_shipment->cargo_manifest_bag_id);
-                                        $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
-                                        if($cargo_manifest->exists()){
+                                        $bag = CargoManifestBag::where('id',$bag_shipment->cargo_manifest_bag_id);
+                                        if($bag->exists()){
+                                            $bag= $bag->first();
+                                            $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
+                                            if($cargo_manifest->exists()){
 
-                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
-                                        }
-                                        else{
-                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                            }
+                                            else{
+                                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                            }
                                         }
 
                                     }
@@ -1432,6 +1452,16 @@ class AdminTrackingController extends Controller
                         }
 
                         $details['shipment_id'] = $shipment->id;
+                        $ship_details = ShipmentDetail::where('shipment_id',$shipment->id);
+                        if($ship_details->exists()){
+
+                            if($shipment->shipment_detail->dws_image != null){
+                                $details['dws_image'] = Storage::url($shipment->shipment_detail->dws_image);
+                            }else{
+                                $details['dws_image'] = $shipment->shipment_detail->dws_image;
+                            }
+                        }
+
 
                         $tracking['shipments'][] = $details;
                     }

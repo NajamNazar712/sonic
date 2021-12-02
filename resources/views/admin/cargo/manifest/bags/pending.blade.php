@@ -151,7 +151,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.master_cargo.bag.pending.list') }}',
+                    url: '{{ route('admin.cargo_manifest.bags.pending.list') }}',
                     data: function (d) {
                         d.shipment_type = $('#shipment_type_search_form #shipment_type').val();
                         d.search_shipping_mode = $('#shipment_type_search_form #search_shipping_mode').val();
