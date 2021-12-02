@@ -94,6 +94,8 @@ use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
+use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
+use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Admin\SalesDesignationJourney;
@@ -5306,5 +5308,77 @@ public function sales_incentive()
             $retail_ticker->save();
         }
         return redirect()->back()->with(['success' => 'Images Uploaded!']);
+    }
+
+    public function status_webhook_index(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 478);
+        return view('admin.settings.shipper.status_webhook_index');
+    }
+
+    public function status_webhook_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 479);
+        }
+        $shippers = ShipmentStatusSubscription::leftjoin('users as s', 's.id', '=', 'shipment_status_subscriptions.user_id')
+            ->select('s.id as account_id', 's.name as shipper_name', 'shipment_status_subscriptions.url as url','shipment_status_subscriptions.id as id')->where('shipment_status_subscriptions.status', 1);
+
+        $datatable = Datatables::of($shippers)
+            ->addColumn('action', function ($shipper) {
+                if (session('role_id') == 1 || in_array(646, session('permissions'))) {
+                    $route = route('admin.settings.shippers.status_webhook.edit',$shipper->account_id);
+                    $dropdown = '
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <a href="'.$route.'" class="dropdown-item">Update Status Mapping</a></div></div>';
+
+                    return $dropdown;
+                }
+                return '';
+            });
+        return $datatable->make(true);
+    }
+
+    public function status_webhook_edit($id, Request $request)
+    {
+        $webhook = ShipmentStatusSubscription::where('user_id',$id)->first();
+        if($webhook)
+        {
+            $statuses = ShipmentStatus::where('status',1)->get();
+            $shippers_statuses = ShipmentStatusesForShipperWebhook::where('user_id',$webhook->user_id)->get(['status_id','webhook_status']);
+
+
+            $shipper_statuses = array();
+            foreach ($shippers_statuses as $status)
+            {
+                $shipper_statuses[$status->status_id] = $status->webhook_status;
+            }
+
+            return view('admin.settings.shipper.status_webhook_edit',compact('statuses','shipper_statuses','webhook'));
+        }
+        return back()->with(['error'=>"Invalid Shipper ID"]);
+    }
+
+    public function status_webhook_update(Request $request)
+    {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 480);
+        ShipmentStatusesForShipperWebhook::where('user_id',$request->shipper_id)->delete();
+
+        foreach ($request->webhook_status as $key => $status)
+        {
+           if($status != null)
+           {
+               $shipper_status = new ShipmentStatusesForShipperWebhook();
+               $shipper_status->user_id = $request->shipper_id;
+               $shipper_status->status_id = $key;
+               $shipper_status->webhook_status = $status;
+               $shipper_status->save();
+           }
+        }
+
+        return redirect()->route('admin.settings.shippers.status_webhook.index')->with(['success'=>'Shipper Statuses Updated Successfully']);
     }
 }
