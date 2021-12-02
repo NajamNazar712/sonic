@@ -19,7 +19,7 @@ class SetDWSWeightHighForShippers extends Seeder
     {
         $shippers = User::where('status', 3)->pluck('id')->toArray();
 
-                $rates =  RateStatus::whereIn('user_id',$shipper);
+                $rates =  RateStatus::whereIn('user_id',$shippers);
                 if($rates->exists()){
                     foreach ($rates->get() as $value) {
                         PendingDwsWeightCharges::create([
@@ -37,7 +37,7 @@ class SetDWSWeightHighForShippers extends Seeder
                     }
                 }
                 
-                    $rates =  CorporateRateStatus::whereIn('user_id',$shipper);
+                    $rates =  CorporateRateStatus::whereIn('user_id',$shippers);
                     if($rates->exists()){
                         foreach ($rates->get() as $value) {
                             PendingDwsWeightCharges::create([
