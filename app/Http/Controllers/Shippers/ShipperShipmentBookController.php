@@ -39,6 +39,7 @@ use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\ZoneClassCity;
 use App\Jobs\ProcessShipmentBookingDistributionDB;
+use App\OmniUsers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -2338,8 +2339,15 @@ class ShipperShipmentBookController extends Controller
                 $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
             }
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
+        $omni_user = OmniUsers::where('user_id',session('user_id'));
+        if(!$omni_user->exists()){
+            $omni_user = 0;
+        }
+        else{
+            $omni_user = 1;
+        }
 
-       return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
+       return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes,'omni_user'=> $omni_user]);
     }
 
     public function excel_store(Request $request) {

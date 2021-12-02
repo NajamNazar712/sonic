@@ -673,7 +673,7 @@ class APIController extends Controller
                         $user_shipping_info_return = UserShippingInfo::find($request->input('return_address_id'));
 
                         if (!$user_shipping_info_return->status) {
-                            return response()->json(['status' => 1, 'message' => 'Return Address ID #' . $request->input('return_address_id') . ' is disabled']);
+                            return responsea()->json(['status' => 1, 'message' => 'Return Address ID #' . $request->input('return_address_id') . ' is disabled']);
                         }
 
                         if (!$user_shipping_info_return->city->status) {
