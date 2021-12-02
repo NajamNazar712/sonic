@@ -5230,4 +5230,20 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function admin_profile(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin_profile = Admin::join('admin_roles as ar','admins.role_id', '=', 'ar.id')
+            ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
+            ->join('cities as h', 'h.id', '=', 'admins.default_hub_id')
+            ->select('admins.trax_id as trax_id', 'admins.name as name', 'admins.email as email', 'admins.phone_number as phone', 'admins.cnic as cnic', 'h.name as hub', 'admins.designation as designation', 'ad.name as department_name')
+            ->where('admins.id', $admin_id);
+        if ($admin_profile->exists()) {
+        $admin_profile = $admin_profile->get();
+            return response()->json(['status' => 0, 'admin' => $admin_profile]);
+        } else {
+            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+    }
+
 }
