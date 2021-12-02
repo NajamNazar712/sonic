@@ -114,7 +114,7 @@
 											@if($omni_user == 1)
 												<div class="col">
 													<div class="form-group text-right">
-														<a href="{{ asset('file/Trax Omni Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Omni</a>
+														<a href="{{ asset('file/Trax Book Omni Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Omni</a>
 													</div>
 												</div>
 											@endif

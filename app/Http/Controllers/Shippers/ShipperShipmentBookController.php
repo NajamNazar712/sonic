@@ -2578,10 +2578,9 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => ['nullable', 'between:0,190'],
             'shipper_reference_number_4' => ['nullable', 'between:0,190'],
             'shipper_reference_number_5' => ['nullable', 'between:0,190'],
-            /*'return_address_id' => ['nullable'],*/
             'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
-            })->where('hidden', 0), 'origin_check'],
+            })->where('hidden', 0)],
 
         ];
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
@@ -4199,8 +4198,15 @@ class ShipperShipmentBookController extends Controller
                 $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
             }
         }
+        $omni_user = OmniUsers::where('user_id',session('user_id'));
+        if(!$omni_user->exists()){
+            $omni_user = 0;
+        }
+        else{
+            $omni_user = 1;
+        }
 
-       return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights,'distribution_products'=>$distribution_products]);
+       return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights,'distribution_products'=>$distribution_products,'omni_user' => $omni_user]);
     }
 
     public function corporate_excel_distribution_index() {
@@ -4313,6 +4319,7 @@ class ShipperShipmentBookController extends Controller
     public function corporate_excel_store(Request $request) {
 
         $user_id = session('user_id');
+        $omni = 0;
         $rate_type_id = session('rate_type_id');
 
         Validator::extend('phone_number', function($attribute, $value, $parameters) {
@@ -4424,7 +4431,8 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_4' => 'Shipper Reference Number 4',
             'shipper_reference_number_5' => 'Shipper Reference Number 5',
             'open_shipment' => 'Open Shipment',
-            
+            'return_address_id' => 'Return Address Id',
+
         ];
 
         $messages = [
@@ -4524,9 +4532,9 @@ class ShipperShipmentBookController extends Controller
             //     $query->whereNotIn('id', [3]);
             // })],
 
-            /*'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
+            'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
-            })->where('hidden', 0)],*/
+            })->where('hidden', 0)],
 
             'shipper_reference_number_1' => ['nullable', 'between:0,190'],
             'shipper_reference_number_2' => ['nullable', 'between:0,190'],
@@ -4603,6 +4611,12 @@ class ShipperShipmentBookController extends Controller
                 $column_count = 25;
                 $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'order_id', 9 => 'order_date', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'special_instructions', 16 => 'estimated_weight', 17 => 'shipping_mode_id', 18 => 'same_day_timing_id', 19 => 'shipper_reference_number_1', 20 => 'shipper_reference_number_2', 21 => 'shipper_reference_number_3', 22 => 'shipper_reference_number_4', 23 => 'shipper_reference_number_5', 24 => 'open_shipment'];
                 $service_type_check_id = 5;
+            }
+            elseif($excel_type == 6){  //for omni
+                $column_count = 32;
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'special_instructions', 18 => 'estimated_weight', 19 => 'shipping_mode_id', 20 => 'same_day_timing_id', 21 => 'amount', 22 => 'payment_mode_id', 23 => 'charges_mode_id', 24 => 'pieces_quantity', 25 => 'shipper_reference_number_1', 26 => 'shipper_reference_number_2', 27 => 'shipper_reference_number_3', 28 => 'shipper_reference_number_4', 29 => 'shipper_reference_number_5', 30 => 'open_shipment',31 => 'Return Address Id'];
+                $service_type_check_id = 1;
+                $omni = 1;
             }
             else{
                 return redirect()->back()->with('error', 'Invalid Template Selected');
@@ -4789,7 +4803,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address ID #' . $row['pickup_address_id'] . ' is disabled';
                         }
 
-                        if($row['service_type_id'] == 1 || $row['service_type_id'] == 2){
+                        if($row['service_type_id'] == 1 && $omni == 1){
                             if($row['return_address_id'] != NULL){
                                 $user_return_info = UserShippingInfo::find($row['return_address_id']);
 
@@ -5080,7 +5094,8 @@ class ShipperShipmentBookController extends Controller
                 foreach ($cities as $city){
                     $city_name[$city->name]=$city->name;
                 }
-                return view('client.shipment.book.corporate.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id]);
+               
+                return view('client.shipment.book.corporate.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'user_shipping_modes' => $user_shipping_modes, 'service_type_check_id' => $service_type_check_id,'omni' => $omni]);
             }
         }
 
