@@ -15,46 +15,69 @@ class SetDWSWeightHighForShippers extends Seeder
      */
     public function run()
     {
-        $shippers = User::whereIn('status', [3, 4])->get();
+        $shippers = User::where('status', 3)->get();
 
         foreach($shippers as $shipper){
-            for ($i=1; $i <5;  $i++) { 
-
-                $pending = PendingDwsWeightCharges::where('user_id',$shipper->id)->where('shipping_mode_id',$i);
-
-                $active = DwsWeightCharges::where('user_id',$shipper->id)->where('shipping_mode_id',$i);
-              
-                $history = DwsWeightChargesHistory::where('user_id',$shipper->id)->where('shipping_mode_id',$i);
-                
-
-                if(!$pending->exists()){
+            // for (1=1; 1 <5;  1++) { 
 
                     PendingDwsWeightCharges::create([
                         'user_id' => $shipper->id,
-                        'shipping_mode_id' => $i,
+                        'shipping_mode_id' => 1,
                         'dws_weight_status' => 1,
                         'admin_id' => 174
                     ]);
-                }
-                if(!$active->exists()){
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $shipper->id,
+                        'shipping_mode_id' => 2,
+                        'dws_weight_status' => 1,
+                        'admin_id' => 174
+                    ]);
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $shipper->id,
+                        'shipping_mode_id' => 3,
+                        'dws_weight_status' => 1,
+                        'admin_id' => 174
+                    ]);
+                    PendingDwsWeightCharges::create([
+                        'user_id' => $shipper->id,
+                        'shipping_mode_id' => 4,
+                        'dws_weight_status' => 1,
+                        'admin_id' => 174
+                    ]);
                 
                     DwsWeightCharges::create([
                         'user_id' => $shipper->id,
-                        'shipping_mode_id' => $i,
+                        'shipping_mode_id' => 1,
                         'dws_weight_status' => 1,
                         'admin_id' => 174
                     ]);
-                }
-                if(!$history->exists()){
-                
-                    DwsWeightChargesHistory::create([
+                    DwsWeightCharges::create([
                         'user_id' => $shipper->id,
-                        'shipping_mode_id' => $i,
+                        'shipping_mode_id' => 2,
                         'dws_weight_status' => 1,
                         'admin_id' => 174
                     ]);
-                }
-            }
+                    DwsWeightCharges::create([
+                        'user_id' => $shipper->id,
+                        'shipping_mode_id' => 3,
+                        'dws_weight_status' => 1,
+                        'admin_id' => 174
+                    ]);
+                    DwsWeightCharges::create([
+                        'user_id' => $shipper->id,
+                        'shipping_mode_id' => 4,
+                        'dws_weight_status' => 1,
+                        'admin_id' => 174
+                    ]);
+                
+                    // DwsWeightChargesHistory::create([
+                    //     'user_id' => $shipper->id,
+                    //     'shipping_mode_id' => 1,
+                    //     'dws_weight_status' => 1,
+                    //     'admin_id' => 174
+                    // ]);
+            // }
+            
         }
     }
 }
