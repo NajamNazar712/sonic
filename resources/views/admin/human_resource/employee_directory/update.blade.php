@@ -2143,13 +2143,11 @@
                 placeholder: "Select Designation",
                 width:'100%',
             });
-            $("#designation").val("{{$employee->designation_id ?? ''}}").trigger('change');
 
             $("#staff_category").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Staff Category",
                 width:'100%',
             });
-            $("#staff_category").val("{{$employee->staff_category_id ?? ''}}").trigger('change');
 
             $("#city").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select City",
@@ -2180,24 +2178,27 @@
                 placeholder: "Select Rider Type",
                 width:'100%',
             });
-            $("#rider_type").val("{{$rider_request->rider_type_id ?? ''}}").trigger('change');
 
             $("#rider_main_category").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Rider Main Category",
                 width:'100%',
             });
-            $("#rider_main_category").val("{{$employee->rider_main_category ?? ''}}").trigger('change');
 
             $("#rider_sub_category").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Rider Sub Category",
                 width:'100%',
             });
-            $("#rider_sub_category").val("{{$employee->rider_sub_category ?? ''}}").trigger('change');
 
             $("#department").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department",
                 width:'100%',
             });
+            @if($employee->employee_type_id == 2)
+            $("#rider_sub_category").val("{{$employee->rider_sub_category ?? ''}}").trigger('change');
+            $("#rider_main_category").val("{{$employee->rider_main_category ?? ''}}").trigger('change');
+            $("#rider_type").val("{{$rider_request->rider_type_id ?? ''}}").trigger('change');
+            @endif
+
             @if($employee->employee_type_id == 1)
             $("#department").on('change',function(){
                 id = $(this).val();
@@ -2228,6 +2229,8 @@
             });
 
             $("#department").val("{{$employee->department_id ?? ''}}").trigger('change');
+            $("#designation").val("{{$employee->designation_id ?? ''}}").trigger('change');
+            $("#staff_category").val("{{$employee->staff_category_id ?? ''}}").trigger('change');
             @endif
 
             var family_member_index = 0;
