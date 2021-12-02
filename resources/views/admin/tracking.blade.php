@@ -694,7 +694,7 @@
                                 @endif
                                 console.log(details.dws_image);
                                 if(details.dws_image != null){
-                                    shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.dws_image + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> DWS File</a>';
+                                    shipment += '<a class="btn btn-secondary d-sm-inline-block file mr-1" href="' + details.dws_image + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> DWS File</a>';
                                 }
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
