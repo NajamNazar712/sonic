@@ -5,6 +5,8 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\DwsWeightChargesHistory;
 use App\Http\Models\PendingDwsWeightCharges;
+use App\Http\Models\RateStatus;
+use App\Http\Models\CorporateRateStatus;
 
 class SetDWSWeightHighForShippers extends Seeder
 {
@@ -15,69 +17,44 @@ class SetDWSWeightHighForShippers extends Seeder
      */
     public function run()
     {
-        $shippers = User::where('status', 3)->get();
+        $shippers = User::where('status', 3)->pluck('id')->toArray();
 
-        foreach($shippers as $shipper){
-            // for (1=1; 1 <5;  1++) { 
-
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $shipper->id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => 174
-                    ]);
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $shipper->id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => 174
-                    ]);
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $shipper->id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => 174
-                    ]);
-                    PendingDwsWeightCharges::create([
-                        'user_id' => $shipper->id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => 174
-                    ]);
+                $rates =  RateStatus::whereIn('user_id',$shipper);
+                if($rates->exists()){
+                    foreach ($rates->get() as $value) {
+                        PendingDwsWeightCharges::create([
+                            'user_id' => $value->user_id,
+                            'shipping_mode_id' => $value->shipping_mode_id,
+                            'dws_weight_status' => 1,
+                            'admin_id' => 174
+                        ]);
+                        DwsWeightCharges::create([
+                            'user_id' => $value->user_id,
+                            'shipping_mode_id' => $value->shipping_mode_id,
+                            'dws_weight_status' => 1,
+                            'admin_id' => 174
+                        ]);
+                    }
+                }
                 
-                    DwsWeightCharges::create([
-                        'user_id' => $shipper->id,
-                        'shipping_mode_id' => 1,
-                        'dws_weight_status' => 1,
-                        'admin_id' => 174
-                    ]);
-                    DwsWeightCharges::create([
-                        'user_id' => $shipper->id,
-                        'shipping_mode_id' => 2,
-                        'dws_weight_status' => 1,
-                        'admin_id' => 174
-                    ]);
-                    DwsWeightCharges::create([
-                        'user_id' => $shipper->id,
-                        'shipping_mode_id' => 3,
-                        'dws_weight_status' => 1,
-                        'admin_id' => 174
-                    ]);
-                    DwsWeightCharges::create([
-                        'user_id' => $shipper->id,
-                        'shipping_mode_id' => 4,
-                        'dws_weight_status' => 1,
-                        'admin_id' => 174
-                    ]);
+                    $rates =  CorporateRateStatus::whereIn('user_id',$shipper);
+                    if($rates->exists()){
+                        foreach ($rates->get() as $value) {
+                            PendingDwsWeightCharges::create([
+                                'user_id' => $value->user_id,
+                                'shipping_mode_id' => $value->shipping_mode_id,
+                                'dws_weight_status' => 1,
+                                'admin_id' => 174
+                            ]);
+                            DwsWeightCharges::create([
+                                'user_id' => $value->user_id,
+                                'shipping_mode_id' => $value->shipping_mode_id,
+                                'dws_weight_status' => 1,
+                                'admin_id' => 174
+                            ]);
+                        }
+                    }
                 
-                    // DwsWeightChargesHistory::create([
-                    //     'user_id' => $shipper->id,
-                    //     'shipping_mode_id' => 1,
-                    //     'dws_weight_status' => 1,
-                    //     'admin_id' => 174
-                    // ]);
-            // }
-            
-        }
+               
     }
 }
