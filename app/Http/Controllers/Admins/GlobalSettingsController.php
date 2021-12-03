@@ -5112,32 +5112,46 @@ public function sales_incentive()
         }
     }
 
-
     public function omni_user_setting_index(){
-       $omni_users = OmniUsers::pluck('user_id')->toArray();
-       $shippers = array();
-       if(count($omni_users) > 0){
-           foreach ($omni_users as $user_id){
-               $user = User::find($user_id);
-               $shippers[] = $user->id;
-           }
-       }
+        $shippers = array();
+        $omni_accounts = array();
+        $settings = GlobalSettings::where('type', 'omni_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if($settings->text != NULL){
+                $omni_accounts = array_map('intval', explode(',', $settings->text));
+                foreach ($omni_accounts as $user_id){
+                    $user = User::find($user_id);
+                    $shippers[] = $user->id;
+                }
+            }
+        }
         $users = User::where('status',3)->where('blacklist', 0)->select('id','name')->get();
         return view('admin.settings.omni_user')->with(['shippers' => $shippers,'users' => $users]);
     }
     public function omni_user_setting_update(Request $request){
-       $omni_users = OmniUsers::pluck('user_id')->toArray();
-       if($request->shippers){
-           if(count($omni_users) > 0){
-               DB::table('omni_users')->delete();
-           }
-           foreach ($request->shippers as $shipper_id){
-               OmniUsers::create(['user_id' =>$shipper_id]);
-           }
-           return redirect()->back()->with(['success'=>'Setting Updated!']);
-       }
-       else{
-           return redirect()->back()->with(['error'=>'No Shipper Selected!']);
-       }
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'omni_users');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'omni_users';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
     }
 }

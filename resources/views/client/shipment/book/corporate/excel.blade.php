@@ -62,12 +62,14 @@
                                                             <label class="custom-control-label" for="excel_type_5">Reverse Pickup</label>
                                                         </div>
                                                     </fieldset>
-                                                    <fieldset>
-                                                        <div class="custom-control custom-radio col">
-                                                            <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_6" value="6">
-                                                            <label class="custom-control-label" for="excel_type_6">Omni</label>
-                                                        </div>
-                                                    </fieldset>
+                                                    @if($omni_user == 1)
+                                                        <fieldset>
+                                                            <div class="custom-control custom-radio col">
+                                                                <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_6" value="6">
+                                                                <label class="custom-control-label" for="excel_type_6">Omni</label>
+                                                            </div>
+                                                        </fieldset>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -107,11 +109,13 @@
                                                     <a href="{{ asset('file/Trax Book Corporate Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
                                                 </div>
                                             </div>
-                                            <div class="col">
-                                                <div class="form-group text-right">
-                                                    <a href="{{ asset('file/Trax Book Corporate Omni Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Omni</a>
+                                            @if($omni_user == 1)
+                                                <div class="col">
+                                                    <div class="form-group text-right">
+                                                        <a href="{{ asset('file/Trax Book Corporate Omni Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Omni</a>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

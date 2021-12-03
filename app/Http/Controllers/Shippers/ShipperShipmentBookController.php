@@ -39,7 +39,6 @@ use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\ZoneClassCity;
 use App\Jobs\ProcessShipmentBookingDistributionDB;
-use App\OmniUsers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -2339,12 +2338,17 @@ class ShipperShipmentBookController extends Controller
                 $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
             }
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
-        $omni_user = OmniUsers::where('user_id',session('user_id'));
-        if(!$omni_user->exists()){
-            $omni_user = 0;
-        }
-        else{
-            $omni_user = 1;
+
+        $omni_user = 0;
+        $settings = GlobalSettings::where('type', 'omni_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if($settings->text != NULL){
+                $omni_accounts = array_map('intval', explode(',', $settings->text));
+                if(in_array(session('user_id'),$omni_accounts)){
+                    $omni_user = 1;
+                }
+            }
         }
 
        return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes,'omni_user'=> $omni_user]);
@@ -4198,12 +4202,16 @@ class ShipperShipmentBookController extends Controller
                 $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
             }
         }
-        $omni_user = OmniUsers::where('user_id',session('user_id'));
-        if(!$omni_user->exists()){
-            $omni_user = 0;
-        }
-        else{
-            $omni_user = 1;
+        $omni_user = 0;
+        $settings = GlobalSettings::where('type', 'omni_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if($settings->text != NULL){
+                $omni_accounts = array_map('intval', explode(',', $settings->text));
+                if(in_array(session('user_id'),$omni_accounts)){
+                    $omni_user = 1;
+                }
+            }
         }
 
        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights,'distribution_products'=>$distribution_products,'omni_user' => $omni_user]);
@@ -4614,7 +4622,7 @@ class ShipperShipmentBookController extends Controller
             }
             elseif($excel_type == 6){  //for omni
                 $column_count = 32;
-                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'special_instructions', 18 => 'estimated_weight', 19 => 'shipping_mode_id', 20 => 'same_day_timing_id', 21 => 'amount', 22 => 'payment_mode_id', 23 => 'charges_mode_id', 24 => 'pieces_quantity', 25 => 'shipper_reference_number_1', 26 => 'shipper_reference_number_2', 27 => 'shipper_reference_number_3', 28 => 'shipper_reference_number_4', 29 => 'shipper_reference_number_5', 30 => 'open_shipment',31 => 'Return Address Id'];
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'special_instructions', 18 => 'estimated_weight', 19 => 'shipping_mode_id', 20 => 'same_day_timing_id', 21 => 'amount', 22 => 'payment_mode_id', 23 => 'charges_mode_id', 24 => 'pieces_quantity', 25 => 'shipper_reference_number_1', 26 => 'shipper_reference_number_2', 27 => 'shipper_reference_number_3', 28 => 'shipper_reference_number_4', 29 => 'shipper_reference_number_5', 30 => 'open_shipment',31 => 'return_address_id'];
                 $service_type_check_id = 1;
                 $omni = 1;
             }
@@ -4803,7 +4811,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address ID #' . $row['pickup_address_id'] . ' is disabled';
                         }
 
-                        if($row['service_type_id'] == 1 && $omni == 1){
+                        if($row['service_type_id'] == 1 || $row['service_type_id'] == 2  && $omni == 1){
                             if($row['return_address_id'] != NULL){
                                 $user_return_info = UserShippingInfo::find($row['return_address_id']);
 
