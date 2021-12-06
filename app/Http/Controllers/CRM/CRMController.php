@@ -146,47 +146,98 @@ class CRMController extends Controller
                 }else{
                     $crm_city_id = $crm_request->shipment->consignee_city_id;
                 }
+                
+                if($crm_request->shipper_id){
+                    $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
+                    if($sales_tier_tag->exists()){
+                        $sales_tier_tag = $sales_tier_tag->first();
+                        $tagged_id = $sales_tier_tag->kam;
+                        $kam_admin = Admin::find($tagged_id);
+                        if($kam_admin){
+                            if($kam_admin->status){
+                                if($tagged_id){
+                                    $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',4)->first();
+                                    if(!empty($tagged_crm_request)){
+                                        if($tagged_crm_request['tagged_id'] != $tagged_id) {
+                                            CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',4)->update([
+                                                'crm_request_tagging_type_id' => 4,
+                                                'tagged_id' => $tagged_id
+                                            ]);
 
-                $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
-                if($crm_auto_tag_user->exists()){
+                                            CrmRequestTaggingHistory::create([
+                                                'crm_request_id' => $crm_request->id,
+                                                'crm_request_tagging_type_id' => 4,
+                                                'tagged_id' => $tagged_id,
+                                                'agent_id' => 306,
+                                                'hub_id' => NULL
+                                            ]);
+                                            NotificationsController::send(31,$crm_request->id);
+                                        }
+                                    }
+                                    else{
+                                        CrmRequestTagging::create([
+                                            'crm_request_id' => $crm_request->id,
+                                            'crm_request_tagging_type_id' => 4,
+                                            'tagged_id' => $tagged_id,
+                                            'hub_id' => NULL
+                                        ]);
 
-                    $crm_auto_tag_user = $crm_auto_tag_user->get()->first();
-                    $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->first();
-                    if(!empty($tagged_crm_request)){
-                        if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
-                            CrmRequestTagging::where('crm_request_id', $crm_request->id)->update([
-                                'crm_request_tagging_type_id' => 5,
-                                'tagged_id' => $crm_auto_tag_user->admin_id
-                            ]);
-
-                            CrmRequestTaggingHistory::create([
-                                'crm_request_id' => $crm_request->id,
-                                'crm_request_tagging_type_id' => 5,
-                                'tagged_id' => $crm_auto_tag_user->admin_id,
-                                'agent_id' => 306,
-                                'hub_id' => NULL
-                            ]);
-                            NotificationsController::send(31,$crm_request->id);
+                                        CrmRequestTaggingHistory::create([
+                                            'crm_request_id' => $crm_request->id,
+                                            'crm_request_tagging_type_id' => 4,
+                                            'tagged_id' => $tagged_id,
+                                            'agent_id' => 306,
+                                            'hub_id' => NULL
+                                        ]);
+                                        NotificationsController::send(31,$crm_request->id);
+                                    }
+                                }
+                            }
                         }
-                    }
-                    else{
-                        CrmRequestTagging::create([
-                            'crm_request_id' => $crm_request->id,
-                            'crm_request_tagging_type_id' => 5,
-                            'tagged_id' => $crm_auto_tag_user->admin_id,
-                            'hub_id' => NULL
-                        ]);
 
-                        CrmRequestTaggingHistory::create([
-                            'crm_request_id' => $crm_request->id,
-                            'crm_request_tagging_type_id' => 5,
-                            'tagged_id' => $crm_auto_tag_user->admin_id,
-                            'agent_id' => 306,
-                            'hub_id' => NULL
-                        ]);
-                        NotificationsController::send(31,$crm_request->id);
                     }
                 }
+
+                $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
+                            if($crm_auto_tag_user->exists()){
+    
+                                $crm_auto_tag_user = $crm_auto_tag_user->get()->first();
+                                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
+                                if(!empty($tagged_crm_request)){
+                                    if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
+                                        CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->update([
+                                            'crm_request_tagging_type_id' => 5,
+                                            'tagged_id' => $crm_auto_tag_user->admin_id
+                                        ]);
+    
+                                        CrmRequestTaggingHistory::create([
+                                            'crm_request_id' => $crm_request->id,
+                                            'crm_request_tagging_type_id' => 5,
+                                            'tagged_id' => $crm_auto_tag_user->admin_id,
+                                            'agent_id' => 306,
+                                            'hub_id' => NULL
+                                        ]);
+                                        NotificationsController::send(31,$crm_request->id);
+                                    }
+                                }
+                                else{
+                                    CrmRequestTagging::create([
+                                        'crm_request_id' => $crm_request->id,
+                                        'crm_request_tagging_type_id' => 5,
+                                        'tagged_id' => $crm_auto_tag_user->admin_id,
+                                        'hub_id' => NULL
+                                    ]);
+    
+                                    CrmRequestTaggingHistory::create([
+                                        'crm_request_id' => $crm_request->id,
+                                        'crm_request_tagging_type_id' => 5,
+                                        'tagged_id' => $crm_auto_tag_user->admin_id,
+                                        'agent_id' => 306,
+                                        'hub_id' => NULL
+                                    ]);
+                                    NotificationsController::send(31,$crm_request->id);
+                                }
+                            }
             }
         }
 
