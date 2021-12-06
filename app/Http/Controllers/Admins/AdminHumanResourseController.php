@@ -824,7 +824,7 @@ class AdminHumanResourseController extends Controller
                                 $trax_id_prefix = 'Trax';
                             }elseif ($employee->staff_category_id == 2){
                                 $global_setting = GlobalSettings::where('type', 'latest_intern_id');
-                                $trax_id_prefix = 'TraxI';
+                                $trax_id_prefix = 'Trax-I-';
                             }else{
                                 return response()->json(['status' => 1, 'error' => 'Invalid Staff Category']);
                             }

@@ -19,7 +19,8 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Name</th>
                         <th class="border-primary border-darken-1">City</th>
-                        <th class="border-primary border-darken-1">OTP</th>
+                        <th class="border-primary border-darken-1">Login OTP</th>
+                        <th class="border-primary border-darken-1">Reset Pin OTP</th>
                         <th class="border-primary border-darken-1">Last Login Attempt</th>
                     </tr>
                     </thead>
@@ -122,7 +123,8 @@
                         head.push('S.No');
                         head.push('Name');
                         head.push('City');
-                        head.push('OTP');
+                        head.push('Login OTP');
+                        head.push('Reset Pin OTP');
                         head.push('Last Login Attempt');
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -131,6 +133,7 @@
                             row.push(values.name);
                             row.push(values.city);
                             row.push(values.otp);
+                            row.push(values.reset_pin_otp);
                             row.push(values.last_login_attempt);
 
                             body.push(row);
@@ -168,12 +171,13 @@
                 url: '{{ route('admin.admin_otp.list') }}',
             },
             rowId: 'shId',
-            order: [[4, 'desc']],
+            order: [[5, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'name', name: 'admins.name', class: 'align-middle name'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'otp', name: 'admins.otp', class: 'align-middle otp'},
+                {data: 'reset_pin_otp', name: 'admins.reset_pin_otp', class: 'align-middle reset_pin_otp'},
                 {data: 'last_login_attempt', name: 'admins.last_login_attempt', class: 'align-middle last_login_attempt'},
 
             ],

@@ -14,7 +14,7 @@ class UpdateGlobalSettingsForTraxInternId extends Seeder
         $timestamp = \Carbon\Carbon::now();
 
         DB::table('global_settings')->insert(array(
-            array('type' => 'latest_intern_id', 'setting_value' => 300, 'created_at' => $timestamp, 'updated_at' => $timestamp)
+            array('type' => 'latest_intern_id', 'setting_value' => 250, 'created_at' => $timestamp, 'updated_at' => $timestamp)
         ));
     }
 }

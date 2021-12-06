@@ -644,7 +644,7 @@ class UserManagementController extends Controller
     }
 
     public function admin_otp_list(Request $request){
-        $admins = Admin::select('cities.name as city','admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.last_login_attempt')
+        $admins = Admin::select('cities.name as city','admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.reset_pin_otp as reset_pin_otp', 'admins.last_login_attempt')
             ->where('admins.status', 1)
             ->join('cities', 'admins.default_hub_id', '=', 'cities.id')
             ->whereNotNull('admins.otp');
