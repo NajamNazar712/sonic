@@ -1207,7 +1207,7 @@
             function set_return_city(){
                 if ($('#return_address').val() == 0 || service_type != 1)
                 {
-                    console.log(11);
+
                     var return_city_id = $('#return_address').val();
                     $('#return_city_name').addClass('d-none');
 
