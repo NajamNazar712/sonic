@@ -1593,6 +1593,9 @@
                 shipment_piece_ids = [];
                 piece_table.clear().draw();
             });
+            $('#OtpModal').on('shown.bs.modal', function () {
+            $('#otp_input').focus();
+            }); 
         });
 
         function camera_scan_detected(tracking_number) {
