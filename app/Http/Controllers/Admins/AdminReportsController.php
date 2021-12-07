@@ -41,6 +41,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\Admin\NsaChargesLog;
 
 class AdminReportsController extends Controller
 {
@@ -9841,6 +9842,44 @@ class AdminReportsController extends Controller
         }
         if ($tracking_number = $request->get('tracking_number')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_number));
+        }
+        return $datatable->make(true);
+    }
+    public function osa_charges_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),481);
+        $filter_dates = DB::connection('reports')->table('sales_incentive_filter_dates')
+            ->select('id','date')
+            ->orderBy('id', 'desc')
+            ->get();
+        $admins = DB::connection('reports')->table('admins')->whereExists(function($query) {
+            $query->from('admin_roles')
+                ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
+                ->where('department_id', '=', 7);
+        })->select('id', 'name')->get();
+        $cities = City::where('business_category_id', 1)->where('hub', 1)->select('id', 'name')->get();
+        return view('admin.reports.osa_charges')->with(['filter_dates' => $filter_dates, 'admins' => $admins, 'cities' => $cities]);
+    }
+    public function osa_charges_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),482);
+        }
+        $shipments = Shipment::join('nsa_charges_logs as nc', 'shipments.id', '=', 'nc.shipment_id')
+        ->leftjoin('admins as a','a.id','=','nc.updated_by')
+        ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','a.name as updated_by','nc.osa_charges as osa_charges','nc.updated_at as updated_at');
+
+        $datatable = Datatables::of($shipments)
+        ->editColumn('tracking_number',function ($shipments){
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        });
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments = $shipments->whereBetween('nc.updated_at', [$from,$to]);
         }
         return $datatable->make(true);
     }

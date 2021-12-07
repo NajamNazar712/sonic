@@ -1687,6 +1687,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('rider_information', 'Admins\AdminTrackingController@rider_information')->name('rider_information');
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
         Route::post('pieces_print', 'Admins\AdminTrackingController@pieces_print')->name('pieces_print');
+        Route::post('estimation_check', 'Admins\AdminTrackingController@estimation_check')->name('estimation_check');
 
     });
 
@@ -2376,6 +2377,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
 
+        });
+        Route::prefix('osa_charges')->name('osa_charges.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@osa_charges_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@osa_charges_list')->name('list');
         });
 //        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
 //            Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');

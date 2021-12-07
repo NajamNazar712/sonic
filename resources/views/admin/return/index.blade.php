@@ -197,9 +197,39 @@
                             <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
 
                         </div>
-                        <input type="hidden" id="eec_shipment_id">
+                        <input type="hidden" id="eec_shipment_id_Reattempt">
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Update Charges</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="EditEstimateChargesModalNSAreattempt" role="dialog" aria-labelledby="EditEstimateChargesModalNSAreattempt" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Estimate Charges For NSA Reattempt</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_charges_NSAreattempt_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <input type="text" name="estimate_charges" id="estimated_charges_NSAreattempt_input" class="form-control decimal" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
+                        </div>
+                        <input type="hidden" id="eec_shipment_id_NSAreattempt">
+                        <input type="hidden" id="eec_shipment_remark_NSAreattempt">
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Re-attempt</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -967,7 +997,7 @@
                 rowId: 'shId',
                 order: [[21, 'desc']],
                 columns: [
-                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
@@ -1003,10 +1033,14 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.shId, selected_rows) !== -1) {
-                        table.row(row).select();
+                    
+                    if (data.NsaOsaStatus == 0) {
+                        $('td:eq(0)', row).addClass('select-checkbox');
+
+                        if ($.inArray(data.shId, selected_rows) !== -1) {
+                            table.row(row).select();
+                        }
                     }
                 },
 
@@ -1105,6 +1139,9 @@
             $('#ReturnConfirmReasonSingleModal').on('hide.bs.modal', function (e) {
                 $('#single_return_reason_select').val('').trigger('change');
                 $('#return_reason_shipment_remarks_single').val('');
+            });
+            $('#EditEstimateChargesModalNSAreattempt').on('hide.bs.modal', function (e) {
+                $('#estimated_charges_NSAreattempt_input').val('');
             });
 
             var hub_ids = [];
@@ -1255,6 +1292,7 @@
             });
             $('body').on('click','.returnMarkStatus',function () {
                 var action = $(this).data('action');
+                var id = $(this).data('id');
                 var row_id = $(this).parents('tr').attr('id');
                 var remark = $(this).parents('tr').find('td.shipment_remarks textarea').val();
                 if(action === 'confirm'){
@@ -1265,8 +1303,17 @@
                 }else if(action === 'reattempt'){
                     atext = 'Select Yes to change shipment status to Re-Attempt!';
                 }
+                if(row_id != '' && action === 'reattempt' && id >= 1)
+                {
+                    var Shid =  $(this).parents('tr').attr('id');
+                    if(Shid){
+                        $('#EditEstimateChargesModalNSAreattempt').modal('show');
+                        $('#eec_shipment_id_NSAreattempt').val(Shid);
+                        $('#eec_shipment_remark_NSAreattempt').val(remark);
+                    }
+                }
+                if(row_id != '' && action === 'reattempt'&& id == ''){
 
-                if(row_id != '' && action === 'reattempt'){
                     swal({
                         title: 'Are You Sure?',
                         text: atext,
@@ -1650,6 +1697,76 @@
                     $('#eec_shipment_id').val(id);
                 }
 
+            });
+            $('#update_charges_NSAreattempt_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update Estimated Charges with change of shipment status to Re-Attempt!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            var charges = $('#estimated_charges_NSAreattempt_input').val();
+                            var shipment_id = $('#eec_shipment_id_NSAreattempt').val();
+                            var shipment_remark = $('#eec_shipment_remark_NSAreattempt').val();
+                            $.ajax({
+                                url:"{{route('admin.return.marked.status.single')}}",
+                                method: 'POST',
+                                data: {
+                                    'charges': charges,
+                                    'shipment_id': shipment_id,
+                                    '_token': '{{ csrf_token() }}',
+                                    'action': 'reattempt',
+                                    'remark': shipment_remark
+                                    
+                                }
+                            }).done(function (data) {
+                                UnblockPagePermanently();
+                                $('#EditEstimateChargesModal').modal('hide');
+
+                                if(data.status == 1){
+                                UnblockPagePermanently();
+                                table.draw(false);
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                                else{
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                                $('#estimated_charges_NSAreattempt_input').val('');
+                                $('#eec_shipment_id_NSAreattempt').val('');
+                                $('#EditEstimateChargesModalNSAreattempt').modal('hide');
+                            });
+
+                        }
+                    });
+                }
             });
             $('#update_charges_form').validate({
                 errorClass: 'danger',

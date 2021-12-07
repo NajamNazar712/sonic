@@ -57,6 +57,9 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use function foo\func;
 use App\Http\Models\Shipper\UserShippingInfo;
+use Illuminate\Support\Str;
+use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Admin\NsaChargesLog;
 
 class ReturnController extends Controller
 {
@@ -137,7 +140,7 @@ class ReturnController extends Controller
                     ->where('consolidations.consolidation_id','=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
             })
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by','consolidations.consolidation_id','ras.admin_id as assigned_agent_id','tat_options.value as tat_value','u.rcp_tat_option_id as tat_option_id')
+            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by','consolidations.consolidation_id','ras.admin_id as assigned_agent_id','tat_options.value as tat_value','u.rcp_tat_option_id as tat_option_id')
             ->whereIn('shipments.shipper_status_id', [12,52])
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
@@ -321,10 +324,24 @@ class ReturnController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('NsaOsaStatus', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable
+                $shipmentaddress = $shipments->consignee_address;
+                $check = NonServiceArea::pluck('name')->toArray();
+                $contains = Str::contains($shipmentaddress, $check); 
+                if($contains){
+                    return $contains;
+                }
+                else{
+                    return $contains;
+                }
+            })
             ->addColumn("action", function ($result) {
+                $shipmentaddress = $result->consignee_address;
+                $check = NonServiceArea::pluck('name')->toArray();
+                $contains = Str::contains($shipmentaddress, $check);
                 $open_intercept = CityDelivery::where('city_id', $result->consignee_city_id)->where('shipping_mode_id',$result->shipping_mode_id)->exists();
-                $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
-                $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';
+                $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';//data-id is checking whter it is OSA/NSA or not 1 for yes and 0 for no
+                $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';//data-id is checking whter it is OSA/NSA or not 1 for yes and 0 for no
                 $intercept = '<a href="javascript:void(0);" class="dropdown-item intercept"><i class="ft-plus-circle primary"></i> Intercept/Re-Book</a>';
                 $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
                 $edit_estimate_charges = '<a href="javascript:void(0);" class="dropdown-item editEstimateCharges" data-action="editEstimateCharges"><i class="ft-plus-circle primary"></i> Edit Estimate Charges</a>';
@@ -626,6 +643,19 @@ class ReturnController extends Controller
 
         }else if($request->action == 'reattempt'){
             $parcel = Shipment::find($request->shipment_id);
+            if($request->has('charges'))
+            {
+                if($request->charges != null){
+                    $check= $this->update_estimatecharges($request->shipment_id, $request->charges);
+                    if($check != 0)
+                    {
+                        return ['status'=>0,'error'=>"Shipment not found on Estimation Charges"];
+                    }
+                }
+                else{
+                    
+                }
+            }
             // $pickup_address_city = $parcel->pickup_address->city_id;
             // if(!in_array($pickup_address_city, session('hubs')))
             // {
@@ -731,7 +761,7 @@ class ReturnController extends Controller
                     $shipment->nsa_osa_estimated_charges = $charges;
                     $shipment->save();
                 }
-
+                $this->add_osa_charges($shipment_id,$charges);
                 return response()->json(['status' => 0, 'success' => 'Charges Updated!']);
             }else{
                 return response()->json(['status' => 1, 'error' => 'Charges not entered!']);
@@ -930,8 +960,9 @@ class ReturnController extends Controller
     public function excel_store(Request $request){
         $names = [
             'tracking_number' => 'Tracking Number',
-            'shipper_status_id' => 'Status (0 - Confirm / 1 - Re-Attempt)',
-            'remarks' => 'Remarks'
+            'shipper_status_id' => 'Status (0 - Confirm / 1 - Re-Attempt / 2 - NSA)',
+            'remarks' => 'Remarks',
+            'estimation_charges' => 'Estimation Charges'
         ];
         $messages = [
             'required' => ':attribute is Required.',
@@ -942,16 +973,17 @@ class ReturnController extends Controller
         $rules = [
             'tracking_number' => ['required', 'integer'],
             'shipper_status_id' => ['required', 'integer', 'digits_between:0,1'],
-            'remarks' => ['nullable', 'between:0,190']
+            'remarks' => ['nullable', 'between:0,190'],
+            'estimation_charges' => ['nullable', 'integer']
         ];
-        $fields = [0 => 'tracking_number', 1 => 'shipper_status_id', 2 => 'remarks'];
+        $fields = [0 => 'tracking_number', 1 => 'shipper_status_id', 2 => 'remarks', 3 => 'estimation_charges'];
 
         if($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt)', 'Remarks'];
+            $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt / 2 - NSA)', 'Remarks', 'Estimation Charges'];
         }
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
@@ -999,6 +1031,10 @@ class ReturnController extends Controller
                     $errors['Row #' . $row_id] = $validate->errors()->all();
                 }
                 if (empty($errors['Row #' . $row_id])) {
+                    $parcel = Shipment::where('tracking_number',$row['tracking_number'])->first();
+                    $shipmentaddress = $parcel->consignee_address;
+                    $check = NonServiceArea::pluck('name')->toArray();
+                    $contains = Str::contains($shipmentaddress, $check);
                     if (!empty(trim($row['tracking_number']))) {
                         if (empty($tracking_ids)) {
                             $tracking_ids[] = $row['tracking_number'];
@@ -1017,6 +1053,9 @@ class ReturnController extends Controller
                     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not ready for confirmation pending #' . $row['tracking_number'];
                     }
+                    if (!$contains >= 1) {
+                        $errors['Row #' . $row_id][] = 'Shipment is not OSA/NSA #' . $row['tracking_number'];
+                    }
                 }
 
 
@@ -1028,6 +1067,7 @@ class ReturnController extends Controller
                     $tracking = trim($row['tracking_number']);
                     $status = trim($row['shipper_status_id']);
                     $remarks = trim($row['remarks']);
+                    $estimation_charges = trim($row['estimation_charges']);
 
                     if (!empty($row['remarks'])) {
                         $remarks = trim($row['remarks']);
@@ -1067,6 +1107,50 @@ class ReturnController extends Controller
                         ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
                     }
                     else if($status == 1){
+                        $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
+                        if($journey){
+                            if ($shipment_details->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
+                                $shipment_details->nsa_osa_status = 1;
+                                $shipment_details->save();
+                                ShipmentChargesController::nsa_osa_charges($shipment_details->id);
+
+                                NotificationsController::send(33, $shipment_details->id);
+                            }
+                            else if ($shipment_details->shipper_status_id == 52) {
+                                $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
+
+                                if ($journey && ($journey->status_reason_id == 12)) {
+                                    $shipment_details->nsa_osa_status = 1;
+
+                                    $shipment_details->save();
+
+                                    ShipmentChargesController::nsa_osa_charges($shipment_details->id);
+                                }
+                            }
+                        }
+                        $shipment_details->shipper_status_id = 13; //Re-Attempt
+                        $shipment_details->consignee_status_id = 13;
+                        ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
+
+                       $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_details->id)->latest()->first();
+                       if($return_assign_shipment){
+                           $return_assign_shipment->status = 0;
+                           $return_assign_shipment->save();
+                       
+                           $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 1;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
+                       }
+                        NotificationsController::send(15, 0, $shipment_details->id);
+                        NotificationsController::send(16, 0, $shipment_details->id);
+
+                    }
+                    else if($status == 2){
+                        
+                        $check= $this->update_estimatecharges($shipment_details->id, $estimation_charges);
+
                         $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
                         if($journey){
                             if ($shipment_details->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
@@ -4594,5 +4678,41 @@ class ReturnController extends Controller
             }
         }
         return redirect()->back()->with(['success' => 'Shipments Reverted']);
+    }
+
+    public function update_estimatecharges($shipment, $charge)
+    {
+        $shipment_id = $shipment;
+        $charges = $charge;
+        if($shipment_id){
+            if($charges != null){
+                $consolidated_shipments = ConsolidationShipments::where('shipment_id', $shipment_id);
+                if($consolidated_shipments->exists()) {
+                    $consolidated_shipments = $consolidated_shipments->first();
+                    $all_consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidated_shipments->consolidation_id)->pluck('shipment_id')->toArray();
+                    Shipment::whereIn('id', $all_consolidation_shipments)->update(['nsa_osa_estimated_charges' => $charges]);
+                }else{
+                    $shipment = Shipment::find($shipment_id);
+                    $shipment->nsa_osa_estimated_charges = $charges;
+                    $shipment->save();
+                }
+                $this->add_osa_charges($shipment_id,$charges);
+
+                return 0;
+            }else{
+                return 1;
+            }
+
+        }else{
+            return 1;
+        }
+    }
+    public function add_osa_charges($shipment, $charge)//function to add in logs table
+    {
+        $nsa_charges_log = new NsaChargesLog;
+        $nsa_charges_log->shipment_id = $shipment;
+        $nsa_charges_log->osa_charges = $charge;
+        $nsa_charges_log->updated_by = Auth::id();
+        $nsa_charges_log->save();
     }
 }

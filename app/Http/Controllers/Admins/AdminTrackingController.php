@@ -48,6 +48,8 @@ use DB;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\NonServiceArea;
+use Illuminate\Support\Str;
 
 class AdminTrackingController extends Controller
 {
@@ -1570,5 +1572,13 @@ class AdminTrackingController extends Controller
         ';
 
         return $html;
+    }
+    public function estimation_check(Request $request) {
+        $shipment = Shipment::find($request->shipment_id);
+        $shipmentaddress = $shipment->consignee_address;
+        $check = NonServiceArea::pluck('name')->toArray();
+        $contains = Str::contains($shipmentaddress, $check);
+        return response()->json(['contains' => $contains]);
+
     }
 }

@@ -307,11 +307,16 @@
                             <div class="row old_scroll" id="reattempt_shipments">
                             </div>
                             <hr>
-                            <div class="feedback" id="request_feedback">
+                            <div class="remarks" id="request_remarks">
                                 <div class="row justify-content-center">
+                                    <div class="col-12 d-none" id="reattempt_charges">
+                                        <fieldset class="form-group">
+                                            <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
+                                        </fieldset>  
+                                    </div>
                                     <div class="col-12">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="reattempt_remarks" id="reattempt_remarks" rows="5" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                            <textarea class="form-control" name="reattempt_remarks" id="reattempt_remarks" rows="3" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
@@ -1474,6 +1479,21 @@
                 $('#reattempt_shipment_id').val(id);
                 $('#reattempt_shipments').html(tracking_rows);
                 $('#reattempt_remarks').val('');
+                $('#estimated_charges_input').val('');
+                $('#reattempt_charges').addClass('d-none');
+                $.ajax({
+                    url: '{!! route('admin.tracking.estimation_check') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipment_id': id
+                    }
+                })
+                    .done(function (data) {
+                        if(data.contains){
+                        $('#reattempt_charges').removeClass('d-none');
+                        }
+                    });
                 $('#ReattemptModal').modal('show');
 
             });
@@ -2174,6 +2194,7 @@
             },
             submitHandler: function(form) {
                     var reattempt_remarks = $('#reattempt_remarks').val();
+                    var charges = $('#estimated_charges_input').val();
                     swal({
                             title: 'Please Wait!',
                             text: ' ',
@@ -2189,7 +2210,8 @@
                             '_token': '{{ csrf_token() }}',
                             'shipment_id': $('#reattempt_shipment_id').val(),
                             'remark': reattempt_remarks,
-                            'action': 'reattempt'
+                            'action': 'reattempt',
+                            'charges': charges
                         }
                     })
                     .done(function (data) {
