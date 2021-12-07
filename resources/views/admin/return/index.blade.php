@@ -197,7 +197,7 @@
                             <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
 
                         </div>
-                        <input type="hidden" id="eec_shipment_id_Reattempt">
+                        <input type="hidden" id="eec_shipment_id">
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Update Charges</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
@@ -1035,7 +1035,7 @@
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     
-                    if (data.NsaOsaStatus == 0) {
+                    if (data.NsaOsaStatus == 0 ) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shId, selected_rows) !== -1) {

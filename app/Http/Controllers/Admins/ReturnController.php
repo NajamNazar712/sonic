@@ -327,9 +327,10 @@ class ReturnController extends Controller
             ->addColumn('NsaOsaStatus', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable
                 $shipmentaddress = $shipments->consignee_address;
                 $check = NonServiceArea::pluck('name')->toArray();
-                $contains = Str::contains($shipmentaddress, $check); 
-                if($contains){
-                    return $contains;
+                $contains = Str::contains($shipmentaddress, $check);
+
+                if($contains || $shipments->reason_id == 12){
+                    return "1";
                 }
                 else{
                     return $contains;
@@ -339,6 +340,9 @@ class ReturnController extends Controller
                 $shipmentaddress = $result->consignee_address;
                 $check = NonServiceArea::pluck('name')->toArray();
                 $contains = Str::contains($shipmentaddress, $check);
+                if($contains || $result->reason_id == 12){
+                    $contains = "1";
+                }
                 $open_intercept = CityDelivery::where('city_id', $result->consignee_city_id)->where('shipping_mode_id',$result->shipping_mode_id)->exists();
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';//data-id is checking whter it is OSA/NSA or not 1 for yes and 0 for no
                 $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';//data-id is checking whter it is OSA/NSA or not 1 for yes and 0 for no
