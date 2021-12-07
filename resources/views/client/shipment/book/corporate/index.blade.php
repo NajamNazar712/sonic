@@ -1159,28 +1159,6 @@
                 shipping_mode_same_day(pickup_city, consignee_city);
             });
 
-            $('#return_address').select2({
-                width: '100%',
-                placeholder: 'Return Address*'
-            }).bind('change', function() {
-                $(this).valid();
-
-                shipping_modes();
-
-                if (this.value == 0) {
-                    $('#new_return_address').removeClass('d-none');
-                }
-                else {
-                    $('#new_return_address').addClass('d-none');
-                }
-
-                var return_city = $(this).find(':selected').data('city-id');
-                var consignee_city = $('#consignee_city').val();
-
-                shipping_mode_same_day(return_city, consignee_city);
-            });
-
-
 
             $('#new_pickup_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -1227,13 +1205,17 @@
             }).bind('change', function () {
                 $(this).valid();
 
+                if (this.value == 0) {
+                    $('#new_return_address').removeClass('d-none');
+                }
+                else {
+                    $('#new_return_address').addClass('d-none');
+                }
                 set_return_city();
             });
 
             //return address end
-
-
-
+            
             $("#consignee_info").select2({
                 width:'100%',
                 placeholder: "Search Here...",
