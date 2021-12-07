@@ -3254,8 +3254,19 @@ class ShipperShipmentBookController extends Controller
             $air_waybill = null;
         }
         $approve_ftl_requests = FtlRequest::where('shipper_id',session('user_id'))->where('status_id',3)->get();
+        $omni_user = 0;
+        $settings = GlobalSettings::where('type', 'omni_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if($settings->text != NULL){
+                $omni_accounts = array_map('intval', explode(',', $settings->text));
+                if(in_array(session('user_id'),$omni_accounts)){
+                    $omni_user = 1;
+                }
+            }
+        }
 
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities,'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types,'approve_ftl_requests' => $approve_ftl_requests]);
+        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities,'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types,'approve_ftl_requests' => $approve_ftl_requests,'omni_user' => $omni_user]);
     }
 
     public function corporate_store(Request $request) {
