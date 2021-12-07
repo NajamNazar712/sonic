@@ -2036,7 +2036,8 @@ class DeliveryController extends Controller
                         }
 
                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                    } else if ($selected_status == 14) {
+                    }
+                    else if ($selected_status == 14) {
                         if ($shipment_details->booking_type_id == 2) {
                             ShipmentsJourneyController::add($shipment, 30, 30, NULL, NULL, NULL, Auth::id(), $delivery_note_id, NULL, 1, ($request->has($received_refused_by_name) ? $request->received_or_refused_by[$shipment] : null));
                             Shipment::where('id', $shipment)->update(['received_amount' => $shipment_details->amount, 'shipper_status_id' => 30, 'consignee_status_id' => 30]);
@@ -2127,12 +2128,13 @@ class DeliveryController extends Controller
                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                         }
                     }
-
-                    //auto agent assigning
-                    $data = array();
-                    $data['delivery_note_id'] = $delivery_note_id;
-                    $data['shipment_id'] = $shipment;
-                    dispatch(new ProcessAgentCallMonitoring($data));
+                    if ($selected_status != 14){
+                        //auto agent assigning
+                        $data = array();
+                        $data['delivery_note_id'] = $delivery_note_id;
+                        $data['shipment_id'] = $shipment;
+                        dispatch(new ProcessAgentCallMonitoring($data));
+                    }
                 }
             }
 
