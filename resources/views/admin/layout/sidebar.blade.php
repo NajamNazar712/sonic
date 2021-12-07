@@ -1786,11 +1786,14 @@
                 </ul>
             </li>
             @endif
-            @if (session('role_id') == 1 || count(array_intersect([535], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([535,648], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Quality Assurance</span></a>
                 <ul class="menu-content">
                     @if (session('role_id') == 1 || in_array(535, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.incidence_monitoring.index')}}">Incidence Monitoring</a></li>
+                    @endif
+                    @if (session('role_id') == 1 || in_array(648, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.qa_evaluation.add')}}">Evaluation Form</a></li>
                     @endif
                 </ul>
             </li>

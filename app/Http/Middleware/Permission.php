@@ -1224,6 +1224,7 @@ class Permission
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
 
+            'incidence_monitoring.add' => 648,
             
 
             

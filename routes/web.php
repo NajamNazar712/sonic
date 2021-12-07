@@ -3545,7 +3545,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
     });
 
-
+    Route::prefix('qa_evaluation')->name('qa_evaluation.')->group(function (){
+        Route::get('/add','Admins\QAEvaluationController@add')->name('add');
+        Route::post('/handlings','Admins\QAEvaluationController@handlings')->name('handlings');
+        Route::post('/submit','Admins\QAEvaluationController@submit')->name('submit');
+        
+    });
 });
 
 Route::prefix('retail')->name('retail.')->group(function () {
