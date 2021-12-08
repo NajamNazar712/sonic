@@ -314,7 +314,10 @@
                     console.log(data);
                     html = "";
                     $.each(data,function (i,v) {
-                       html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name} - ${v.trax_id}</option>`
+                        if(v.trax_id)
+                        html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name} - ${v.trax_id}</option>`
+                        else
+                        html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name}</option>`
                     });
                     $('#rider_name').html(html);
                     $('#rider_name').val(null).trigger('change');
