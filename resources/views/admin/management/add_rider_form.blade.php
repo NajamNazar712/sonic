@@ -178,10 +178,6 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        console.log('working')
-
-        var elem = document.querySelector('.special_rider_checkbox');
-        var switchery = new Switchery(elem);
         @if($type == 1)
         var ccd_elem = document.querySelector('.ccd_rider_checkbox');
         var ccd_switchery = new Switchery(ccd_elem);

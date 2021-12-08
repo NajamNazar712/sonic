@@ -242,7 +242,7 @@ class AdminHumanResourseController extends Controller
             ->join('employee_types as et', 'et.id', '=', 'employees.employee_type_id')
             ->join('employee_request_statuses as ers', 'ers.id', '=', 'employees.request_status_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category'])
+            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -734,6 +734,9 @@ class AdminHumanResourseController extends Controller
             $rider->created_by = Auth::id();
             $rider->trax_id = $trax_id;
             $rider->shift_id = $request->shift_id;
+            if($request->rider_type == 1) {
+                $rider->ccd = $request->edit_ccd_rider_checkbox ? 1 : 0;
+            }
             $rider->rider_type_id  = $request->rider_type;
             $rider->save();
 
@@ -760,6 +763,9 @@ class AdminHumanResourseController extends Controller
             $route_id = $request->route_id;
         }
 
+        if($request->rider_type == 1) {
+            $rider->ccd = $request->edit_ccd_rider_checkbox ? 1 : 0;
+        }
         $rider->route_id = $route_id;
         $rider->operation_rider_id = $request->category;
         $rider->rider_category_id = $request->rider_category;
@@ -776,6 +782,20 @@ class AdminHumanResourseController extends Controller
             $employee->rider_sub_category = $request->rider_category;
             $employee->rider_main_category = $request->rider_main_category;
             $employee->save();
+
+            if($request->has('rejoin_rider_bit'))
+            {
+                $rejoin_request = new \Illuminate\Http\Request();
+                $rejoin_request->query->add(['employee_id' => $request->employee_id]);
+                $response = $this->rejoin_employee($rejoin_request);
+                if($response->getData()->status == 0)
+                {
+                    return redirect()->back()->with('success',$response->getData()->success);
+                }
+                else{
+                    return redirect()->back()->with('error',$response->getData()->error);
+                }
+            }
             return redirect()->back()->with('success','Rider Updated successfully');
         }
     }

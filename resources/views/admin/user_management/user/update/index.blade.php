@@ -47,13 +47,13 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="email" name="email" class="form-control" placeholder="Outlook Id*" data-rule-required="true" data-msg-required="Outlook Id is required" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Outlook Id must be unique" value="{{ $user->email }}">
+											<input type="email" name="email" class="form-control" placeholder="Outlook Id" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Outlook Id must be unique" value="{{ $user->email }}">
 										</div>
 									</div>
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="password" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters">
+											<input type="password" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters">
 										</div>
 									</div>
 

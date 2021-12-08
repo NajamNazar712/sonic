@@ -55,7 +55,16 @@
                 <form action="{{route('admin.human_resource.employee_directory.rider.update')}}" method="post" class="mt-1"
                       id="editRiderForm" novalidate="novalidate">
                     {{csrf_field()}}
-                    <div class="modal-body">
+                        <div id="rejoin_div_html"></div>
+                        <div class="modal-body">
+                            <div class="col text-center edit_ccd_rider_checkbox_div">
+                                <label class="font-medium-2 font-weight-bold block">Credit Card on Delivery-CCD</label>
+                                <div class="form-group">
+                                    <label for="edit_ccd_rider_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                    <input type="checkbox" name="edit_ccd_rider_checkbox" id="edit_ccd_rider_checkbox" class="edit_ccd_rider_checkbox">
+                                    <label for="edit_ccd_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                                </div>
+                            </div>
                         <div id="unEditableFields">
                             <div class="row">
                                 <div class="col-4">
@@ -284,6 +293,8 @@
     <script type="text/javascript">
         $(document).ready(function () {
             let route_id;
+            var elm = document.getElementById("edit_ccd_rider_checkbox");
+            var switchery = new Switchery(elm, { className: "switchery switchery-small", color: "#37BC9B" });
             $('#editRiderForm #unEditableFields input,#editRiderForm #unEditableFields textarea,#editRiderForm #unEditableFields select').attr('disabled','disabled');
             $('#rider_type_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -860,63 +871,69 @@
 
             $('body').on('click', '.rejoin', function (e) {
                 var id = $(this).data('target-id');
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes To Rejoin Employee!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Employee is being Rejoin',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-
-                        $.ajax({
-                            url: '{!! route('admin.human_resource.employee_directory.rejoin') !!}',
-                            method: 'POST',
-                            data: {
-                                'employee_id': id,
-                                '_token': '{{ csrf_token() }}'
+                var employee_type = table.row($(this).parents('tr')).data().employee_type_id;
+                if(employee_type == 1) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes To Rejoin Employee!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
                             }
-                        })
-                            .done(function (data) {
-                                if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                swal.close();
-                                table.draw('false');
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Employee is being Rejoin',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
                             });
-                    }
-                });
+
+                            $.ajax({
+                                url: '{!! route('admin.human_resource.employee_directory.rejoin') !!}',
+                                method: 'POST',
+                                data: {
+                                    'employee_id': id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function (data) {
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                    swal.close();
+                                    table.draw('false');
+                                });
+                        }
+                    });
+                }
+                else{
+                    edit_Rider_function(this,true);
+                }
             });
 
             $('body').on('click', '.reject', function (e) {
@@ -980,32 +997,36 @@
                 });
             });
 
-            $('body').on('click', '.update_rider', function (e) {
-                var id = $(this).data('target-id');
-                var rider_name = table.row($(this).parents('tr')).data().employee_name;
-                var cnic = table.row($(this).parents('tr')).data().cnic;
-                var phone_no = table.row($(this).parents('tr')).data().phone_number;
-                var pin = table.row($(this).parents('tr')).data().pin;
-                var address = table.row($(this).parents('tr')).data().address;
-                var city_id = table.row($(this).parents('tr')).data().city_id;
-                var shift_id = table.row($(this).parents('tr')).data().shift_id;
-                var check_bit = table.row($(this).parents('tr')).data().check_if_rider_present_bit;
-                var sub_category = table.row($(this).parents('tr')).data().rider_sub_category;
-                var main_category = table.row($(this).parents('tr')).data().rider_main_category;
+            function edit_Rider_function(elm,rejoin=false)
+            {
+                var id = $(elm).data('target-id');
+                var rider_name = table.row($(elm).parents('tr')).data().employee_name;
+                var cnic = table.row($(elm).parents('tr')).data().cnic;
+                var phone_no = table.row($(elm).parents('tr')).data().phone_number;
+                var pin = table.row($(elm).parents('tr')).data().pin;
+                var address = table.row($(elm).parents('tr')).data().address;
+                var city_id = table.row($(elm).parents('tr')).data().city_id;
+                var shift_id = table.row($(elm).parents('tr')).data().shift_id;
+                var check_bit = table.row($(elm).parents('tr')).data().check_if_rider_present_bit;
+                var sub_category = table.row($(elm).parents('tr')).data().rider_sub_category;
+                var main_category = table.row($(elm).parents('tr')).data().rider_main_category;
                 $('#city_list').val(city_id).trigger('change');
                 $('#shift_list').val(shift_id).trigger('change');
                 if(check_bit != null)
                 {
-                    var rider_type = table.row($(this).parents('tr')).data().active_rider_type_id;
-                    $('#main_category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
-                     $('#category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
-                    $('#category').val(table.row($(this).parents('tr')).data().operation_id).trigger('change');
-                    route_id = table.row($(this).parents('tr')).data().route_id;
+                    var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;
+                    $('#main_category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
+                    $('#category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
+                    $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
+                    route_id = table.row($(elm).parents('tr')).data().route_id;
+                    var ccd = table.row($(elm).parents('tr')).data().ccd;
                 }
                 else{
-                    var rider_type = table.row($(this).parents('tr')).data().inactive_rider_type_id;
+                    var rider_type = table.row($(elm).parents('tr')).data().inactive_rider_type_id;
+                    var ccd = false;
                     route_id = null;
                 }
+                ccd = Boolean(ccd)
                 $('#editRiderModal #employee_id').val(id);
                 $('#rider_name').val(rider_name);
                 $('#rider_cnic').val(cnic);
@@ -1015,7 +1036,34 @@
                 $('#rider_type_list').val(rider_type).trigger('change');
                 $('#main_category_list').val(main_category).trigger('change');
                 $('#category_list').val(sub_category).trigger('change');
+                if(rider_type == 1)
+                {
+                    $(".edit_ccd_rider_checkbox_div").show();
+                    if(ccd != document.getElementById("edit_ccd_rider_checkbox").checked) {
+                        switchery.setPosition(true);
+                        switchery.handleOnchange(true);
+                    }
+                }
+                else{
+                    $(".edit_ccd_rider_checkbox_div").hide();
+                }
+
+                if(rejoin)
+                {
+                    $('#editRiderModal .modal-title').text("Rejoin Rider");
+                    $('#editRiderModal .modal-footer #confirmAction').text("Rejoin Rider");
+                    $("#editRiderForm #rejoin_div_html").html("<input type='hidden' name='rejoin_rider_bit' value='1'>");
+                }
+                else{
+                    $('#editRiderModal .modal-title').text("Update Rider");
+                    $('#editRiderModal .modal-footer #confirmAction').text("Update Rider");
+                    $("#editRiderForm #rejoin_div_html").html("");
+                }
                 $('#editRiderModal').modal('show');
+            }
+
+            $('body').on('click', '.update_rider', function (e) {
+                edit_Rider_function(this);
 
             });
 

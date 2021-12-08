@@ -47,7 +47,7 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="email" name="email" class="form-control" placeholder="Outlook Id*" data-rule-required="true" data-msg-required="Outlook Id is required" data-rule-remote="{{ route('admin.user_management.users.email') }}" data-msg-remote="Outlook Id must be unique">
+											<input type="email" name="email" class="form-control" placeholder="Outlook Id" data-rule-remote="{{ route('admin.user_management.users.email') }}" data-msg-remote="Outlook Id must be unique">
 										</div>
 									</div>
 
