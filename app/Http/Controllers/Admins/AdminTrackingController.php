@@ -40,6 +40,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\WMS\WmsUserInformation;
 
 use Auth;
 use Yajra\Datatables\Datatables;
@@ -816,9 +817,20 @@ class AdminTrackingController extends Controller
                         else{
                             $tagged_kae_name = "-";
                         }
+                        $wms_user = WmsUserInformation::where('user_id', $shipper->id);
+                        if ($wms_user->exists()){
+                            $wms_user = $wms_user->first();
+                            if($wms_user->warehousing == 1)
+                                $wms_user_name = "(W)";
+                            else
+                                $wms_user_name = "";
+                        }
+                        else{
+                            $wms_user_name = "";
+                        }
                         if($shipment->shipment_type == 1){
                             $details['shipment_type'] = 1;
-                            $details['shipper']['name'] = $shipper->name;
+                            $details['shipper']['name'] = $shipper->name . ' ' . $wms_user_name;
                             $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                             $details['shipper']['city'] = $shipper->city->name;
                             $details['shipper']['phone_number_1'] = $shipper->phone;
