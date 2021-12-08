@@ -256,6 +256,45 @@
                 buttons: [
                     @if (session('role_id') == 1 || in_array(372, session('permissions')))
                     {
+                        text: 'Wait for Remaining piece',
+                        className: 'btn btn-primary remaining_piece',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                $('#RiderModal').modal('show');
+                            }
+
+                        }
+                    },
+                    @endif
+                    @if (session('role_id') == 1 || in_array(372, session('permissions')))
+                    {
+                        text: 'Return back to shipper',
+                        className: 'btn btn-primary return_back_shipper',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                $('#RiderModal').modal('show');
+                            }
+
+                        }
+                    },
+                    @endif
+                    @if (session('role_id') == 1 || in_array(372, session('permissions')))
+                    {
+                        text: 'Switch to Single piece',
+                        className: 'btn btn-primary single_piece',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                $('#RiderModal').modal('show');
+                            }
+
+                        }
+                    },
+                    @endif
+                    @if (session('role_id') == 1 || in_array(372, session('permissions')))
+                    {
                         text: '<i class="la la-print"></i> Print & Create Return Note',
                         className: 'btn btn-primary print',
                         enabled: false,
@@ -289,6 +328,9 @@
                                     }
 
                                     table.button('.print').enable();
+                                    table.button('.remaining_piece').enable();
+                                    table.button('.return_back_shipper').enable();
+                                    table.button('.single_piece').enable();
                                 }
                             });
                         }
@@ -315,6 +357,9 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.print').disable();
+                                        table.button('.remaining_piece').disable();
+                                        table.button('.return_back_shipper').disable();
+                                        table.button('.single_piece').disable();
                                     }
                                 }
                             });
@@ -371,7 +416,7 @@
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if (data.request_status_id == 3) {
+                    if (data.request_status_id == 3 || data.status == 'Pending') {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shId, selected_rows) !== -1) {
@@ -469,9 +514,15 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.print').enable();
+                    table.button('.remaining_piece').enable();
+                    table.button('.return_back_shipper').enable();
+                    table.button('.single_piece').enable();
                 }
                 else {
                     table.button('.print').disable();
+                    table.button('.remaining_piece').disable();
+                    table.button('.return_back_shipper').disable();
+                    table.button('.single_piece').disable();
                 }
             });
 
