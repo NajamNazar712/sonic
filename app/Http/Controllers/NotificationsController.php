@@ -2122,6 +2122,7 @@ class NotificationsController extends Controller
                                 $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
 
                                 $cc = array();
+                                $bcc = array('danish.zahid@trax.pk');
 
 //                  $general_admins = Admin::whereIn('role_id', [15, 21])->where('status', 1);
 //
@@ -2129,7 +2130,7 @@ class NotificationsController extends Controller
 //                    $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
 //                  }
 
-                                self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
+                                self::email($subject, $body, $to, $cc, $bcc, 'returns@trax.pk');
 
                                 $subject = $original_subject;
                                 $body = $original_body;
