@@ -2122,7 +2122,7 @@ class NotificationsController extends Controller
                                 $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
 
                                 $cc = array();
-                                $
+
 
 //                  $general_admins = Admin::whereIn('role_id', [15, 21])->where('status', 1);
 //
