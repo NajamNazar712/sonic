@@ -2285,7 +2285,7 @@ class APIController extends Controller
             'item_description' => ['required', 'between:0,500'],
             'item_quantity' => ['required', 'integer', 'digits_between:1,10', 'between:1,10000'],
             'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
-            'order_id' => ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+            'order_id' => ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })],
             'reference_number' => ['nullable', 'filled', 'between:0,100'],
