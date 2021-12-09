@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', '('.$webhook->shipper->name.') Status Webhook Subscription - Status Edit')
+@section('title', $webhook->shipper->name.' - Status Webhook Subscription (Status Edit)')
 
 @section('content')
     <h1 class="mb-1">
-        ({{$webhook->shipper->name}}) Status Webhook Subscription - Status Edit
+        {{$webhook->shipper->name}} - Status Webhook Subscription (Status Edit)
     </h1>
 
     <div class="card">

@@ -115,8 +115,7 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());

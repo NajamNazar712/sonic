@@ -5324,6 +5324,23 @@ public function sales_incentive()
         $shippers = ShipmentStatusSubscription::leftjoin('users as s', 's.id', '=', 'shipment_status_subscriptions.user_id')
             ->select('s.id as account_id', 's.name as shipper_name', 'shipment_status_subscriptions.url as url','shipment_status_subscriptions.id as id')->where('shipment_status_subscriptions.status', 1);
 
+        if(session('role_id') != 1)
+        {
+            $shippers = $shippers
+                ->leftjoin('sale_person_tags as spt',function($join){
+                    $join->on('spt.user_id','=','s.id')
+                        ->where('spt.status',0);
+                })
+                ->leftjoin('sale_tier_tags as stt',function($join){
+                    $join->on('stt.user_id','=','s.id')
+                        ->where('stt.kam','!=',null);
+                })
+                ->where(function($q){
+                        $q->where('spt.admin_id',Auth::id())
+                            ->orWhere('stt.kam',Auth::id());
+                });
+        }
+
         $datatable = Datatables::of($shippers)
             ->addColumn('action', function ($shipper) {
                 if (session('role_id') == 1 || in_array(646, session('permissions'))) {
