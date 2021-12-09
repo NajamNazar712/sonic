@@ -3982,7 +3982,7 @@ class APIController extends Controller
                     } else {
                         $remark = null;
                     }
-                    if (!in_array($shipment->shipper_status_id, [20, 52]) && $shipment->shipper_status_id == 12) {
+                    if ($shipment->shipper_status_id == 12) {
                         if (!$shipment->packaging_material_request) {
                             Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                             $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
