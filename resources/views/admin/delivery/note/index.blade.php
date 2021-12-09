@@ -504,9 +504,9 @@
 
                         if (data.status == 1) {
                             var html = "";
-                            $.each(data.riders, function(key,value) {
+                            $.each(data.riders, function(key,v) {
                                 if(v.trax_id)
-                                    html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name} - ${v.trax_id}</option>`
+                                    html +=  `<option value="${data.id}" data-id="${v.route_id}">${v.name} - ${v.trax_id}</option>`
                                 else
                                     html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name}</option>`
                             });
