@@ -4348,9 +4348,14 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_excel_store(Request $request) {
-
+       
         $user_id = session('user_id');
-        $omni = 0;
+        if(!$request->has('omni')){
+            $omni = 0;
+        }
+        else{
+            $omni = $request->omni;
+        }
         $rate_type_id = session('rate_type_id');
 
         Validator::extend('phone_number', function($attribute, $value, $parameters) {
@@ -4715,7 +4720,7 @@ class ShipperShipmentBookController extends Controller
                     $rules['order_id'] = ['nullable', 'filled', 'between:0,100'];
                 }
             }
-
+           
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
 
@@ -5069,7 +5074,7 @@ class ShipperShipmentBookController extends Controller
 
             }
                 else{
-                    return view('client.shipment.book.corporate.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id]);
+                    return view('client.shipment.book.corporate.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id,'omni' => $omni]);
                 }
             }
             else {

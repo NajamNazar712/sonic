@@ -307,7 +307,7 @@
                                     <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
-                                            <th colspan="2" class="border-primary border-darken-1">Pickup Addresses</th>
+                                            <th colspan="2" class="border-primary border-darken-1">Pickup Addresses @if($omni_user == 1)/Return Addresses @endif</th>
                                         </tr>
                                         <tr role="row" class="bg-primary bg-lighten-1 white">
                                             <th class="text-center border-primary border-lighten-2">ID</th>
