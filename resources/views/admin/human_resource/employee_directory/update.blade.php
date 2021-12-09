@@ -48,51 +48,51 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Employee Name<span class="text-danger">*</span></label>
-                                                <input type="text" id="employee_name" class="form-control border-primary" value="{{$employee->name}}" data-rule-required="true" data-msg-required="Employee Name is required" name="employee_name">
+                                                <input type="text" id="employee_name" class="form-control" value="{{$employee->name}}" data-rule-required="true" data-msg-required="Employee Name is required" name="employee_name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Father/Husband Name<span class="text-danger">*</span></label>
-                                                <input type="text" id="name" class="form-control border-primary" value="{{$employee->guardian_name}}" data-rule-required="true" data-msg-required="Father/Husband Name is required" name="name">
+                                                <input type="text" id="name" class="form-control" value="{{$employee->guardian_name}}" data-rule-required="true" data-msg-required="Father/Husband Name is required" name="name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Mother Name<span class="text-danger">*</span></label>
-                                                <input type="text" id="mother_name" class="form-control border-primary" value="{{$employee->mother_name}}" data-rule-required="true" data-msg-required="Mother Name is required" name="mother_name">
+                                                <input type="text" id="mother_name" class="form-control" value="{{$employee->mother_name}}" data-rule-required="true" data-msg-required="Mother Name is required" name="mother_name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Personal Number<span class="text-danger">*</span></label>
-                                                <input type="text" id="personal_number" class="form-control border-primary" value="{{$employee->phone_number}}" data-rule-required="true" data-msg-required="Phone Number is required" name="personal_number">
+                                                <input type="text" id="personal_number" class="form-control" value="{{$employee->phone_number}}" data-rule-required="true" data-msg-required="Phone Number is required" name="personal_number">
                                             </div>
                                         </div>
                                         @if($employee->employee_type_id == 1)
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>Personal Email<span class="text-danger">*</span></label>
-                                                    <input type="text" id="personal_email" data-rule-required="true" data-msg-required="Email is required" class="form-control border-primary email_mask" value="{{$employee->personal_email}}" name="personal_email">
+                                                    <input type="text" id="personal_email" data-rule-required="true" data-msg-required="Email is required" class="form-control email_mask" value="{{$employee->personal_email}}" name="personal_email">
                                                 </div>
                                             </div>
                                         @endif
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>CNIC<span class="text-danger">*</span></label>
-                                                <input type="text" id="cnic" data-rule-required="true"  data-msg-required="CNIC is required" class="form-control border-primary" value="{{$employee->cnic}}" name="cnic">
+                                                <input type="text" id="cnic" data-rule-required="true"  data-msg-required="CNIC is required" class="form-control" value="{{$employee->cnic}}" name="cnic">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Address<span class="text-danger">*</span></label>
-                                                <textarea data-rule-required="true" data-msg-required="Address is required"  class="form-control border-primary" id="address" name="address">{{$employee->address}}</textarea>
+                                                <textarea data-rule-required="true" data-msg-required="Address is required"  class="form-control" id="address" name="address">{{$employee->address}}</textarea>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Emergency Contact<span class="text-danger">*</span></label>
-                                                <input type="text" id="emergency_contact" data-rule-required="true"  data-msg-required="Emergency Contact is required" class="form-control border-primary" value="{{$employee->emergency_contact}}" name="emergency_contact">
+                                                <input type="text" id="emergency_contact" data-rule-required="true"  data-msg-required="Emergency Contact is required" class="form-control" value="{{$employee->emergency_contact}}" name="emergency_contact">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -258,20 +258,25 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
-                                                <input type="password" id="bolt_pin" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" class="form-control border-primary" value="{{$employee->pin}}" name="bolt_pin" data-rule-minlength="4" data-rule-maxlength="4">
+                                                <div class="form-group position-relative">
+                                                    <input type="password" id="bolt_pin" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" class="form-control" value="{{$employee->pin}}" name="bolt_pin" data-rule-minlength="4" data-rule-maxlength="4">
+                                                    <div class="form-control-position" id="peye">
+                                                        <i class="la la-eye success"></i>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Official Number</label>
-                                                <input type="text" id="official_number" class="form-control border-primary" value="{{$employee->official_phone_number}}" name="official_number" >
+                                                <input type="text" id="official_number" class="form-control" value="{{$employee->official_phone_number}}" name="official_number" >
                                             </div>
                                         </div>
                                         @if($employee->employee_type_id == 1)
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Official & Outlook ID</label>
-                                                <input type="text" id="official_email" class="form-control border-primary email_mask" value="{{$employee->official_email}}" name="official_email" >
+                                                <input type="text" id="official_email" class="form-control email_mask" value="{{$employee->official_email}}" name="official_email" >
                                             </div>
                                         </div>
                                         @endif
@@ -317,7 +322,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Name Of Family Member<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary name_family_member" value="{{$medical_info->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name is required">
+                                                            <input type="text" class="form-control name_family_member" value="{{$medical_info->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -366,7 +371,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Name Of Family Member<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary name_family_member" value="" name="name[0]" data-rule-required="true" data-msg-required="Name is required">
+                                                            <input type="text" class="form-control name_family_member" value="" name="name[0]" data-rule-required="true" data-msg-required="Name is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -443,19 +448,19 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Account Title<span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control border-primary" id="account_title" value="{{$bank_info->account_title ?? ''}}" name="account_title" data-rule-required="true" data-msg-required="Account Title is required">
+                                                <input type="text" class="form-control" id="account_title" value="{{$bank_info->account_title ?? ''}}" name="account_title" data-rule-required="true" data-msg-required="Account Title is required">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Branch Name<span class="text-danger">*</span></label>
-                                                <input type="text" data-rule-required="true" data-msg-required="Branch Name is required" class="form-control border-primary" id="branch_name" value="{{$bank_info->branch_name ?? ''}}" name="branch_name">
+                                                <input type="text" data-rule-required="true" data-msg-required="Branch Name is required" class="form-control" id="branch_name" value="{{$bank_info->branch_name ?? ''}}" name="branch_name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>IBAN Number<span class="text-danger">*</span></label>
-                                                <input type="text" data-rule-required="true" data-msg-required="IBAN Number is required" placeholder="(e.g: PK37MEZN0001220100004069)" class="form-control border-primary" id="iban_number" value="{{$bank_info->iban ?? ''}}" name="iban_number">
+                                                <input type="text" data-rule-required="true" data-msg-required="IBAN Number is required" placeholder="(e.g: PK37MEZN0001220100004069)" class="form-control" id="iban_number" value="{{$bank_info->iban ?? ''}}" name="iban_number">
                                             </div>
                                         </div>
                                     </div>
@@ -489,13 +494,13 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Name Of Institute<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary name_institute" value="{{$education->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name Of Institute is required">
+                                                            <input type="text" class="form-control name_institute" value="{{$education->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name Of Institute is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Degree Awarded<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary degree" value="{{$education->degree}}" name="degree[{{$index}}]" data-rule-required="true" data-msg-required="Degree is required">
+                                                            <input type="text" class="form-control degree" value="{{$education->degree}}" name="degree[{{$index}}]" data-rule-required="true" data-msg-required="Degree is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -538,13 +543,13 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Name Of Institute<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary name_institute" value="" name="name[0]" data-rule-required="true" data-msg-required="Name Of Institute is required">
+                                                            <input type="text" class="form-control name_institute" value="" name="name[0]" data-rule-required="true" data-msg-required="Name Of Institute is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Degree Awarded<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary degree" value="" name="degree[0]" data-rule-required="true" data-msg-required="Degree is required">
+                                                            <input type="text" class="form-control degree" value="" name="degree[0]" data-rule-required="true" data-msg-required="Degree is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -611,13 +616,13 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Company/Organization Name<span class="text-danger">*</span></label>
-                                                            <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment" value="{{$employment->name ?? ''}}" name="name[{{$index}}]">
+                                                            <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control name_emplotment" value="{{$employment->name ?? ''}}" name="name[{{$index}}]">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Position/Designation<span class="text-danger">*</span></label>
-                                                            <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment" value="{{$employment->designation ?? ''}}" name="position[{{$index}}]">
+                                                            <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control position_employment" value="{{$employment->designation ?? ''}}" name="position[{{$index}}]">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -645,7 +650,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Reason<span class="text-danger">*</span></label>
-                                                            <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment" name="reason[{{$index}}]">{{$employment->reason}}</textarea>
+                                                            <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control reason_employment" name="reason[{{$index}}]">{{$employment->reason}}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -663,13 +668,13 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Company/Organization Name<span class="text-danger">*</span></label>
-                                                            <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment" value="" name="name[0]">
+                                                            <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control name_emplotment" value="" name="name[0]">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Position/Designation<span class="text-danger">*</span></label>
-                                                            <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment" value="" name="position[0]">
+                                                            <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control position_employment" value="" name="position[0]">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -697,7 +702,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Reason<span class="text-danger">*</span></label>
-                                                            <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment" name="reason[0]"></textarea>
+                                                            <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control reason_employment" name="reason[0]"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -733,37 +738,37 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Name</label>
-                                                <input type="text" class="form-control border-primary" id="reference_name" value="{{$reference->name ?? ''}}" name="name">
+                                                <input type="text" class="form-control" id="reference_name" value="{{$reference->name ?? ''}}" name="name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Occupation</label>
-                                                <input type="text" class="form-control border-primary" id="reference_occupation" value="{{$reference->occupation ?? ''}}" name="occupation">
+                                                <input type="text" class="form-control" id="reference_occupation" value="{{$reference->occupation ?? ''}}" name="occupation">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Relationship</label>
-                                                <input type="text" class="form-control border-primary" id="reference_relationship" value="{{$reference->relationship ?? ''}}" name="relationship">
+                                                <input type="text" class="form-control" id="reference_relationship" value="{{$reference->relationship ?? ''}}" name="relationship">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Years</label>
-                                                <input type="text" class="form-control border-primary" id="reference_years" value="{{$reference->years ?? ''}}" name="years">
+                                                <input type="text" class="form-control" id="reference_years" value="{{$reference->years ?? ''}}" name="years">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Phone Number</label>
-                                                <input type="text" class="form-control border-primary" id="references_phone" value="{{$reference->phone_number ?? ''}}" name="phone">
+                                                <input type="text" class="form-control" id="references_phone" value="{{$reference->phone_number ?? ''}}" name="phone">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Email</label>
-                                                <input type="text" class="form-control border-primary email_mask" id="references_email" value="{{$reference->email ?? ''}}" name="email">
+                                                <input type="text" class="form-control email_mask" id="references_email" value="{{$reference->email ?? ''}}" name="email">
                                             </div>
                                         </div>
                                     </div>
@@ -1997,6 +2002,8 @@
         var today = new Date();
         today.setHours(0,0,0,0);
         $(document).ready(function() {
+            $('#peye').on('mousedown',function(){$('#bolt_pin').attr('type','text')}).on('mouseup',function(){$('#bolt_pin').attr('type','password')});
+
             $('#profile-form #emergency_contact, #profile-form #personal_number , #profile-form #official_number , #references-form #references_phone').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
@@ -2276,7 +2283,7 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Name Of Family Member<span class="text-danger">*</span></label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Name is required" class="form-control border-primary name_family_member validated" value="" name="name[${family_member_index}]" id="family_name${family_member_index}">
+                                        <input type="text" data-rule-required="true" data-msg-required="Name is required" class="form-control name_family_member validated" value="" name="name[${family_member_index}]" id="family_name${family_member_index}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -2345,13 +2352,13 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Name Of Institute<span class="text-danger">*</span></label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Name of Institute is required" class="form-control border-primary name_institute validated" value="" name="name[${education_background_index}]" id="education_name${education_background_index}">
+                                        <input type="text" data-rule-required="true" data-msg-required="Name of Institute is required" class="form-control name_institute validated" value="" name="name[${education_background_index}]" id="education_name${education_background_index}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Degree Awarded<span class="text-danger">*</span></label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Degree is required" class="form-control border-primary degree validated" value="" name="degree[${education_background_index}]" id="degree${education_background_index}">
+                                        <input type="text" data-rule-required="true" data-msg-required="Degree is required" class="form-control degree validated" value="" name="degree[${education_background_index}]" id="degree${education_background_index}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -2410,13 +2417,13 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Company/Organization Name<span class="text-danger">*</span></label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment validated" value="" name="name[${employment_index}]" id="employment_name${employment_index}">
+                                        <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control name_emplotment validated" value="" name="name[${employment_index}]" id="employment_name${employment_index}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Position/Designation<span class="text-danger">*</span></label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment validated" value="" name="position[${employment_index}]" id="position${employment_index}">
+                                        <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control position_employment validated" value="" name="position[${employment_index}]" id="position${employment_index}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -2444,7 +2451,7 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Reason<span class="text-danger">*</span></label>
-                                        <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment validated" name="reason[${employment_index}]" id="employment_reason${employment_index}"></textarea>
+                                        <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control reason_employment validated" name="reason[${employment_index}]" id="employment_reason${employment_index}"></textarea>
                                     </div>
                                 </div>
                             </div>

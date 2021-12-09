@@ -261,7 +261,12 @@
                         {{csrf_field()}}
                         <input type="hidden" name="employee_id" id="employee_id" value="">
                         <div class="form-group">
-                            <input type="password" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" data-rule-minlength="4" data-rule-maxlength="4">
+                            <div class="form-group position-relative">
+                                <input type="password" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" data-rule-minlength="4" data-rule-maxlength="4">
+                                <div class="form-control-position" id="peye">
+                                    <i class="la la-eye success"></i>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>
@@ -295,6 +300,7 @@
             let route_id;
             var elm = document.getElementById("edit_ccd_rider_checkbox");
             var switchery = new Switchery(elm, { className: "switchery switchery-small", color: "#37BC9B" });
+            $('#peye').on('mousedown',function(){$('#pin').attr('type','text')}).on('mouseup',function(){$('#pin').attr('type','password')});
             $('#editRiderForm #unEditableFields input,#editRiderForm #unEditableFields textarea,#editRiderForm #unEditableFields select').attr('disabled','disabled');
             $('#rider_type_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
