@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'NSA/OSA charges Log Report')
+@section('title', 'OSA charges Log Report')
 
 @section('content')
     <h1 class="mb-1">
-        NSA/OSA charges Log Report
+        OSA charges Log Report
     </h1>
 
     <div class="card">

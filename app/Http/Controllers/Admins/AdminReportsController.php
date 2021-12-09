@@ -41,7 +41,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
-use App\Http\Models\Admin\NsaChargesLog;
+use App\Http\Models\Admin\OSAChargesLog;
 
 class AdminReportsController extends Controller
 {
@@ -9866,7 +9866,7 @@ class AdminReportsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),482);
         }
-        $shipments = Shipment::join('nsa_charges_logs as nc', 'shipments.id', '=', 'nc.shipment_id')
+        $shipments = Shipment::join('osa_charges_logs as nc', 'shipments.id', '=', 'nc.shipment_id')
         ->leftjoin('admins as a','a.id','=','nc.updated_by')
         ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','a.name as updated_by','nc.osa_charges as osa_charges','nc.updated_at as updated_at');
 

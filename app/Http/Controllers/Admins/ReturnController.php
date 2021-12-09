@@ -59,7 +59,7 @@ use function foo\func;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Support\Str;
 use App\Http\Models\Admin\NonServiceArea;
-use App\Http\Models\Admin\NsaChargesLog;
+use App\Http\Models\Admin\OSAChargesLog;
 
 class ReturnController extends Controller
 {
@@ -324,25 +324,20 @@ class ReturnController extends Controller
                     return '-';
                 }
             })
-            ->addColumn('NsaOsaStatus', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable
-                $shipmentaddress = $shipments->consignee_address;
-                $check = NonServiceArea::pluck('name')->toArray();
-                $contains = Str::contains($shipmentaddress, $check);
-
-                if($contains || $shipments->reason_id == 12){
-                    return "1";
+            ->addColumn('OsaStatus', function ($shipments){//using for checking the nsa shipment to not add checkbox in the datatable
+               if($shipments->reason_id == 12){
+                    return 1;
                 }
                 else{
-                    return $contains;
+                    return 0;
                 }
             })
             ->addColumn("action", function ($result) {
-                $shipmentaddress = $result->consignee_address;
-                $check = NonServiceArea::pluck('name')->toArray();
-                $contains = Str::contains($shipmentaddress, $check);
-                if($contains || $result->reason_id == 12){
-                    $contains = "1";
-                }
+                
+                if($result->reason_id == 12)
+                    $contains = 1;
+                else
+                    $contains = 0;
                 $open_intercept = CityDelivery::where('city_id', $result->consignee_city_id)->where('shipping_mode_id',$result->shipping_mode_id)->exists();
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';//data-id is checking whter it is OSA/NSA or not 1 for yes and 0 for no
                 $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';//data-id is checking whter it is OSA/NSA or not 1 for yes and 0 for no
@@ -964,7 +959,7 @@ class ReturnController extends Controller
     public function excel_store(Request $request){
         $names = [
             'tracking_number' => 'Tracking Number',
-            'shipper_status_id' => 'Status (0 - Confirm / 1 - Re-Attempt / 2 - NSA)',
+            'shipper_status_id' => 'Status (0 - Confirm / 1 - Re-Attempt / 2 - OSA)',
             'remarks' => 'Remarks',
             'estimation_charges' => 'Estimation Charges'
         ];
@@ -987,7 +982,7 @@ class ReturnController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt / 2 - NSA)', 'Remarks', 'Estimation Charges'];
+            $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt / 2 - OSA)', 'Remarks', 'Estimation Charges'];
         }
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
@@ -1035,10 +1030,12 @@ class ReturnController extends Controller
                     $errors['Row #' . $row_id] = $validate->errors()->all();
                 }
                 if (empty($errors['Row #' . $row_id])) {
-                    $parcel = Shipment::where('tracking_number',$row['tracking_number'])->first();
-                    $shipmentaddress = $parcel->consignee_address;
-                    $check = NonServiceArea::pluck('name')->toArray();
-                    $contains = Str::contains($shipmentaddress, $check);
+                    $shid = Shipment::where('tracking_number',$row['tracking_number'])->first();
+                    $parcel = ShipmentsJourney::where('shipment_id',$shid->id)->latest('id')->first();
+                    if(($parcel->status_reason_id == 12 && $row['shipper_status_id'] == 2) || $row['shipper_status_id'] == 0 || $row['shipper_status_id'] == 1 )
+                        $contains = 1;
+                    else
+                        $contains = 0;
                     if (!empty(trim($row['tracking_number']))) {
                         if (empty($tracking_ids)) {
                             $tracking_ids[] = $row['tracking_number'];
@@ -1057,8 +1054,8 @@ class ReturnController extends Controller
                     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not ready for confirmation pending #' . $row['tracking_number'];
                     }
-                    if (!$contains >= 1) {
-                        $errors['Row #' . $row_id][] = 'Shipment is not OSA/NSA #' . $row['tracking_number'];
+                    if ($contains == 0) {
+                        $errors['Row #' . $row_id][] = 'Shipment is not OSA #' . $row['tracking_number'];
                     }
                 }
 
@@ -4713,7 +4710,7 @@ class ReturnController extends Controller
     }
     public function add_osa_charges($shipment, $charge)//function to add in logs table
     {
-        $nsa_charges_log = new NsaChargesLog;
+        $nsa_charges_log = new OSAChargesLog;
         $nsa_charges_log->shipment_id = $shipment;
         $nsa_charges_log->osa_charges = $charge;
         $nsa_charges_log->updated_by = Auth::id();

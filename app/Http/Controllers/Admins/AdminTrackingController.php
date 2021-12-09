@@ -1575,11 +1575,6 @@ class AdminTrackingController extends Controller
     }
     public function estimation_check(Request $request) {
 
-        $shipment = Shipment::find($request->shipment_id);
-        $shipmentaddress = $shipment->consignee_address;
-        $check = NonServiceArea::pluck('name')->toArray();
-        $contains = Str::contains($shipmentaddress, $check);
-
         $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest('status_reason_id')->first();
 
         if($journey->status_reason_id == 12)

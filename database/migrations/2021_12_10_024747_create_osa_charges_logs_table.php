@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateNsaChargesLogsTable extends Migration
+class CreateOsaChargesLogsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateNsaChargesLogsTable extends Migration
      */
     public function up()
     {
-        Schema::create('nsa_charges_logs', function (Blueprint $table) {
+        Schema::create('osa_charges_logs', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('shipment_id')->index();
             $table->integer('osa_charges');
@@ -29,6 +29,6 @@ class CreateNsaChargesLogsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('nsa_charges_logs');
+        Schema::dropIfExists('osa_charges_logs');
     }
 }

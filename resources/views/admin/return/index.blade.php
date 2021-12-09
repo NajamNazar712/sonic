@@ -1035,7 +1035,7 @@
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     
-                    if (data.NsaOsaStatus == 0 ) {
+                    if (data.OsaStatus == 0 ) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shId, selected_rows) !== -1) {

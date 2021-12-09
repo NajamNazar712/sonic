@@ -12,7 +12,7 @@ class UpdateModulePermissionForOsaChargesLog extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-           array('id' => 647, 'name' => 'NSA/OSA Charges Log - View', 'module_id' => 9),
+           array('id' => 647, 'name' => 'OSA Charges Log - View', 'module_id' => 9),
         ));
     }
 }
