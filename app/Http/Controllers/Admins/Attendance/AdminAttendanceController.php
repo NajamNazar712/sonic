@@ -404,6 +404,7 @@ class AdminAttendanceController extends Controller
         $attendances->groupBy('employee_attendances.employee_id');
 
         $periods =  $this->admin_attendance_horizontal_table($request,true);
+        $today = Carbon::now();
 
         $datatable = Datatables::of($attendances)
             ->editColumn('trax_id', function ($employee) {
@@ -440,9 +441,14 @@ class AdminAttendanceController extends Controller
             });
             foreach($periods['display'] as $key => $period)
             {
-                $datatable->addColumn($period, function ($employee) use ($key, $periods) {
+                $datatable->addColumn($period, function ($employee) use ($key, $periods,$today) {
                     $data = EmployeeAttendance::where('employee_id',$employee->employee_id)
-                        ->where('attendance_date',$periods['search'][$key])->first();
+                        ->where('attendance_date',$periods['search'][$key])
+                        ->where(function ($query){
+                            $query->where('clock_in_datetime','!=',null)
+                                ->orWhere('clock_in','!=',null);
+                        })
+                        ->first();
 
                     if($data) {
                         if ($data->clock_in_datetime) {
@@ -458,6 +464,9 @@ class AdminAttendanceController extends Controller
                         } else {
                             $time .= $data->clock_out;
                         }
+                    }
+                    else if($periods['search'][$key] > $today){
+                        $time = "-";
                     }
                     else{
                         $time = "<span class='text-danger'>A</span>";
@@ -476,7 +485,7 @@ class AdminAttendanceController extends Controller
         }
         if ($search_department = $request->get('search_department')) {
             if($search_department != 6) {
-                $datatable->where('department_id', $search_department)->where('employee_type',1);
+                $datatable->where('ad.id', $search_department)->where('employee_type',1);
             }
             else{
                 $datatable->where(function($query) use($search_department){
