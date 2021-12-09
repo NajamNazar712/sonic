@@ -299,7 +299,7 @@ class UserManagementController extends Controller
                 $employee = new Employee();
                 $employee->trax_id = $trax_id;
                 $employee->name = $request->name;
-                $employee->city_id = $request->default_hub_id;
+                $employee->city_id = $request->default_hub;
                 $employee->cnic = $request->cnic;
                 $employee->phone_number = $request->phone_number;
                 $employee->official_phone_number = $request->official_phone_number;
@@ -331,7 +331,7 @@ class UserManagementController extends Controller
                 $employee = new Employee();
                 $employee->trax_id = $trax_id;
                 $employee->name = $request->name;
-                $employee->city_id = $request->default_hub_id;
+                $employee->city_id = $request->default_hub;
                 $employee->cnic = $request->cnic;
                 $employee->phone_number = $request->phone_number;
                 $employee->official_phone_number = $request->official_phone_number;
@@ -522,6 +522,7 @@ class UserManagementController extends Controller
             {
                 $employee = $employee->first();
                 $employee->designation_id = $admin->designation_id;
+                $employee->city_id = $admin->default_hub_id;
                 $employee->phone_number = $admin->phone_number;
                 $employee->official_phone_number = $admin->official_phone_number;
                 $employee->official_email = $admin->email;
