@@ -382,7 +382,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -397,7 +397,7 @@
                     {data: 'request_status', name: 'request_status', class: 'align-middle request_status'},
                     {data: 'last_updated_at', name: 'shipment_pieces_requests.last_updated_at', class: 'align-middle last_updated_at'},
                     {data: 'last_updated_by', name: 'last_updated_by', class: 'align-middle last_updated_by'},
-                    {data: 'image_view', name: 'image_view', class: 'align-middle image_view'},
+                    {data: 'image_view', name: 'image_view', class: 'align-middle image_viewa',orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -427,7 +427,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.image_viewa')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
