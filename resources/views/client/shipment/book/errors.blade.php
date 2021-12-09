@@ -16,6 +16,7 @@
                         <div class="card-body">
                         {!! Form::model($data,['method' => 'POST', 'route' => 'cod.shipment.book.excel_store']) !!}
                             {!! Form::hidden('service_type_check_id', $service_type_check_id) !!}
+                            {!! Form::hidden('omni', $omni) !!}
                             <div class="table-responsive">
                                 <table class='table table-bordered' id='tbl'>
                             <thead>
@@ -441,9 +442,9 @@
                                 @endif
                                 @if($service_type_check_id == 1 && $omni == 1)
                                         @if(isset($errors[$no]['return_address_id']))
-                                            <td>{!! Form::text('form[' . $no . '][return_address_id]', $ro['return_address_id'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['return_address_id']}}</font></td>
+                                            <td>{!! Form::text('form[' . $no . '][return_address_id]',$ro['return_address_id'], ['class' => 'form-control is-invalid','style'=>'width:80px']) !!}<font color="red">{{$errors[$no]['return_address_id']}}</font></td>
                                         @else
-                                            <td>{!! Form::text('form[' . $no . '][return_address_id]', $ro['return_address_id'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                            <td>{!! Form::text('form[' . $no . '][return_address_id]', $ro['return_address_id'], ['class' => 'form-control','style'=>'width:80px', 'readonly' => 'readonly']) !!}</td>
                                         @endif
                                 @endif
                                     <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>

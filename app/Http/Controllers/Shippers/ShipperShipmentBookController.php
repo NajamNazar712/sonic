@@ -2369,7 +2369,13 @@ class ShipperShipmentBookController extends Controller
     public function excel_store(Request $request) {
 
         $user_id = session('user_id');
-        $omni = 0;
+        if(!$request->has('omni')){
+            $omni = 0;
+        }
+        else{
+            $omni = $request->omni;
+        }
+        
         Validator::extend('phone_number', function($attribute, $value, $parameters) {
             if ($value) {
                 $value = $this->phone_number($value);
@@ -3055,7 +3061,7 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                     else {
-                        return view('client.shipment.book.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id]);
+                        return view('client.shipment.book.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id,'omni' => $omni]);
                     }
                 }
                     else {
