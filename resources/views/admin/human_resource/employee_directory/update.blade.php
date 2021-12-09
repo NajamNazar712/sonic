@@ -2056,7 +2056,7 @@
             var cnic_expiry_date = $('#profile-form #cnic_expiry_date').pickadate({
                 firstDay: 1,
                 clear: '',
-                selectYears: true,
+                selectYears: 100,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
@@ -2076,7 +2076,7 @@
             var passing_year = $('#education-form .passing_year').pickadate({
                 firstDay: 1,
                 clear: '',
-                selectYears: true,
+                selectYears: 100,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenPrefix: 'formatted_',
@@ -2086,7 +2086,7 @@
             var from = $('#employment_history-form .from_employment').pickadate({
                 firstDay: 1,
                 clear: '',
-                selectYears: true,
+                selectYears: 100,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenPrefix: 'formatted_',
@@ -2096,7 +2096,7 @@
             var to = $('#employment_history-form .to_employment').pickadate({
                 firstDay: 1,
                 clear: '',
-                selectYears: true,
+                selectYears: 100,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenPrefix: 'formatted_',
