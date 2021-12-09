@@ -740,6 +740,7 @@ class AdminHumanResourseController extends Controller
             $rider->rider_type_id  = $request->rider_type;
             $rider->save();
 
+            $employee->first_inactive = 1;
             $employee->status_id = self::GetStatusOfEmployee($employee->id);
             $employee->save();
 
