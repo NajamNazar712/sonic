@@ -212,6 +212,10 @@ class LeadManagementController extends Controller
                     return $days;
                 }
             })
+            ->editColumn('lead_id',function ($lead){
+                $route = route('admin.leads.view_remarks', ['id' => $lead->lead_id]);
+                return "<u><a href='{$route}\' class='tracking' target='_blank'>". str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT)."</a></u>";
+            })
             ->addColumn('action', function($lead){
                 $dropdown = '
               <div class="btn-group">
