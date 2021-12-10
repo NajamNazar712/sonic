@@ -41,8 +41,7 @@ class ShipmentStatusWebhookController extends Controller
 
             $data['date_time'] = $date;
             $data['url'] = $subscriber->url;
-            Log::error($data);
-//            dispatch(new ProcessShipmentStatusWebhook($data));
+            dispatch(new ProcessShipmentStatusWebhook($data));
 
         }
     }
