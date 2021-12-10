@@ -928,6 +928,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function (){
+        Route::post('upload_attachment', 'Admins\AdminShipmentPieceController@upload_attachment')->name('upload_attachment');
+        Route::get('view_attachment/{id}', 'Admins\AdminShipmentPieceController@view_attachment')->name('view_attachment');
         Route::prefix('hold')->name('hold.')->group(function () {
             Route::get('', 'Admins\AdminShipmentPieceController@hold_index')->name('index');
             Route::get('list', 'Admins\AdminShipmentPieceController@hold_list')->name('list');
