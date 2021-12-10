@@ -188,6 +188,7 @@
                         <th class="border-primary border-darken-1">Re-Open Status Date</th>
                         <th class="border-primary border-darken-1">Launched By</th>
                         <th class="border-primary border-darken-1">Launched By User Type</th>
+                        <th class="border-primary border-darken-1">Admin User's Department</th>
                         <th class="border-primary border-darken-1">Launched Date</th>
                         <th class="border-primary border-darken-1">Launched To Date (TAT)</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
@@ -463,6 +464,7 @@
                             head.push('Re Open Status Date');
                             head.push('Launched By');
                             head.push('Launched By User Type');
+                            head.push('Admin User Department');
                             head.push('Launched Date');
                             head.push('Launched To Date (TAT)');
                             head.push('Assigned Date');
@@ -505,6 +507,7 @@
                                 row.push(values.reopen_date);
                                 row.push(values.launched_by_name);
                                 row.push(values.launched_by_type);
+                                row.push(values.admin_department);
                                 row.push(values.launched_date);
                                 row.push(values.launched_to_today);
                                 row.push(values.assigned_date);
@@ -579,7 +582,7 @@
                     }
                 },
                 // rowId: 'shipment_id',
-                order: [[22, 'desc']],
+                order: [[23, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle request_number'},
@@ -603,6 +606,7 @@
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle launched_by_name'},
                     {data: 'launched_by_type', name: 'crm_requests.launched_by', class: 'align-middle launched_by_type'},
+                    {data: 'admin_department', name: 'admin_department', class: 'align-middle admin_department'},
                     {data: 'launched_date', name: 'crm_requests.created_at', class: 'align-middle launched_date'},
                     {data: 'launched_to_today', name: 'launched_to_today', class: 'align-middle launched_to_today', orderable: false, searchable: false},
                     {data: 'assigned_date', name: 'crah.created_at', class: 'align-middle assigned_date'},
