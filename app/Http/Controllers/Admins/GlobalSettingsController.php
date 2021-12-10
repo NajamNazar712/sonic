@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalesIncentiveDate;
 use App\Http\Models\Admin\AdminAppSlider;
 use App\Http\Models\Admin\RetailAppSlider;use App\Http\Models\FleetDriver;
@@ -88,6 +89,7 @@ use App\Http\Models\Rider\RidersShipmentWeightRange;
 use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\Runner;
 use App\Http\Models\RunnerJunction;
+use App\Http\Models\SaleTierTag;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
@@ -5361,8 +5363,19 @@ public function sales_incentive()
     public function status_webhook_edit($id, Request $request)
     {
         $webhook = ShipmentStatusSubscription::where('user_id',$id)->first();
+
         if($webhook)
         {
+            if(session('role_id') != 1)
+            {
+                $spt = SalePersonTag::where('user_id',$id)->where('admin_id',Auth::id())->where('status',0);
+                $stt = SaleTierTag::where('user_id',$id)->where('kam',Auth::id());
+
+                if($spt->doesntExist() && $stt->doesntExist())
+                {
+                    return back()->with(['error'=>"Shipper Not Assigned to you"]);
+                }
+            }
             $statuses = ShipmentStatus::where('status',1)->get();
             $shippers_statuses = ShipmentStatusesForShipperWebhook::where('user_id',$webhook->user_id)->get(['status_id','webhook_status']);
 
