@@ -202,11 +202,11 @@ class ProcessSMS implements ShouldQueue
             }
         }
         catch (RequestException $e) {
-            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-            $subject = '[Error] SMS API';
-            $body = 'Error in Generate Session ID SMS API.<br/>No Response';
+            // $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            // $subject = '[Error] SMS API';
+            // $body = 'Error in Generate Session ID SMS API.<br/>No Response';
 
-            $mail = Mail::to($to)->send(new Notifications($subject, $body));
+            // $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
             $sms->status = 1;
 
@@ -290,11 +290,11 @@ class ProcessSMS implements ShouldQueue
                 }
             }
             catch (RequestException $e) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-                $subject = '[Error] SMS API';
-                $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>No Response';
+                // $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                // $subject = '[Error] SMS API';
+                // $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>No Response';
 
-                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+                // $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
                 $sms->status = 1;
 
@@ -347,11 +347,11 @@ class ProcessSMS implements ShouldQueue
                 }
             }
             catch (RequestException $e) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-                $subject = '[Error] SMS API';
-                $body = 'Error in Ping SMS API.<br/>No Response';
+                // $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                // $subject = '[Error] SMS API';
+                // $body = 'Error in Ping SMS API.<br/>No Response';
 
-                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+                // $mail = Mail::to($to)->send(new Notifications($subject, $body));
             }
         }
         else {
