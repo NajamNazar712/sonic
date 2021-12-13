@@ -249,10 +249,14 @@
 				$(this).attr({type: 'datetime-local'});
 			});
 
-			$("#call_duaration").focus( function() {
-				$(this).attr({type: 'time'});
-			});
+			// $("#call_duaration").focus( function() {
+			// 	$(this).attr({type: 'time'});
+			// });
 			
+			$('#call_duaration').inputmask({
+                'mask': '99:99:99',
+                'clearIncomplete': true
+            });
 
 			$('#contact_number').inputmask({
                 'mask': '9999-9999999',
@@ -287,6 +291,31 @@
 				width: '100%',
 				placeholder: 'Agent*'
 			});
+			// $('#campaign_id').change(function(){
+            //     var campaign_id = $(this).val();
+
+			// 	if(campaign_id == 1){
+			// 				//call
+			// 				$(".contact_number").css("display","block")
+			// 				$(".complain_number").css("display","none")
+			// 				$(".call_duaration").css("display","block")
+	
+			// 				$('#contact_number').attr('disabled',false);
+			// 				$('#call_duaration').attr('disabled',false);
+			// 				$('#complain_number').attr('disabled',true);
+	
+			// 			}else{
+			// 				$(".contact_number").css("display","none")
+			// 				$(".complain_number").css("display","block")
+			// 				$(".call_duaration").css("display","none")
+	
+							
+			// 				$('#contact_number').attr('disabled',true);
+			// 				$('#call_duaration').attr('disabled',true);
+			// 				$('#complain_number').attr('disabled',false);
+	
+			// 	}
+			// });
 
             $('#campaign_id').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
@@ -370,6 +399,7 @@
                         });
                     });
             });
+			
 
 			
 
@@ -378,11 +408,14 @@
 				successClass: 'success',
                 // $('.activity').val();
 				normalizer: function(value) {
-					if($('.activity').filter(':checked').length == 0){
-						toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-					}else if($('.activity').filter(':checked').length == 4){
-						toastr.error('Please select  Max 3 activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-					}
+					
+					// if($('.activity').filter(':checked').length == 0){
+					// 	toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					// 	// $('#call_duaration').val('');
+					// 	console.log('a');
+					// }else if($('.activity').filter(':checked').length == 4){
+					// 	toastr.error('Please select  Max 3 activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					// }
                     return $.trim(value);
 				},
 				errorPlacement: function(error, element) {
@@ -391,17 +424,28 @@
 				submitHandler: function(form) {
                     console.log($('.activity').filter(':checked').length)
 					$(form).find('button[type=submit]').attr('disabled', 'disabled');
+					if($('.activity').filter(':checked').length == 0){
+							toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+							swal.close();
+							$(form).find('button[type=submit]').attr('disabled', false);
+						}else if($('.activity').filter(':checked').length == 4){
+							toastr.error('Please select  Max 3 activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+							swal.close();
+							$(form).find('button[type=submit]').attr('disabled', false);
+							
+						}else{
 
-					swal({
-						title: 'Please Wait!',
-						text: 'Evaluation is being added!',
-						icon: 'info',
-						buttons: false,
-						closeOnClickOutside: false,
-						closeOnEsc: false
-					});
-
-					form.submit();
+							swal({
+								title: 'Please Wait!',
+								text: 'Evaluation is being added!',
+								icon: 'info',
+								buttons: false,
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
+							form.submit();
+						}
+					
 				}
 			});
 		});
