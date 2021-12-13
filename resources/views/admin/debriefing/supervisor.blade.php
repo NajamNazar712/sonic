@@ -814,7 +814,7 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-control'));
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
 
