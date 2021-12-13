@@ -959,7 +959,7 @@ class ReturnController extends Controller
     public function excel_store(Request $request){
         $names = [
             'tracking_number' => 'Tracking Number',
-            'shipper_status_id' => 'Status (0 - Confirm / 1 - Re-Attempt / 2 - OSA)',
+            'shipper_status_id' => 'Status (0 - Confirm / 1 - Re-Attempt)',
             'remarks' => 'Remarks',
             'estimation_charges' => 'Estimation Charges'
         ];
@@ -982,7 +982,7 @@ class ReturnController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt / 2 - OSA)', 'Remarks', 'Estimation Charges'];
+            $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt)', 'Remarks', 'Estimation Charges'];
         }
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
@@ -1032,10 +1032,19 @@ class ReturnController extends Controller
                 if (empty($errors['Row #' . $row_id])) {
                     $shid = Shipment::where('tracking_number',$row['tracking_number'])->first();
                     $parcel = ShipmentsJourney::where('shipment_id',$shid->id)->latest('id')->first();
-                    if(($parcel->status_reason_id == 12 && $row['shipper_status_id'] == 2) || $row['shipper_status_id'] == 0 || $row['shipper_status_id'] == 1 )
-                        $contains = 1;
-                    else
-                        $contains = 0;
+                    $contains = 0;
+                    if($parcel)
+                    {
+                        if(($parcel->status_reason_id == 12 && $row['shipper_status_id'] == 1 && !is_null($row['estimation_charges'])) || ($parcel->status_reason_id != 12 && $row['shipper_status_id'] == 1 && is_null($row['estimation_charges']))){
+                            $contains = 1;
+                        }
+                        else{
+                            if(is_null($row['estimation_charges']))
+                                $contains = 2;
+                            else
+                                $contains = 0;
+                        }
+                    }
                     if (!empty(trim($row['tracking_number']))) {
                         if (empty($tracking_ids)) {
                             $tracking_ids[] = $row['tracking_number'];
@@ -1054,8 +1063,12 @@ class ReturnController extends Controller
                     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not ready for confirmation pending #' . $row['tracking_number'];
                     }
+                    if($contains == 0 || $contains == 2)
                     if ($contains == 0) {
                         $errors['Row #' . $row_id][] = 'Shipment is not OSA #' . $row['tracking_number'];
+                    }
+                    else if ($contains == 2) {
+                        $errors['Row #' . $row_id][] = 'OSA Shipment required estimation charges #' . $row['tracking_number'];
                     }
                 }
 
@@ -1064,6 +1077,7 @@ class ReturnController extends Controller
             if(empty($errors)){
                 $tracking_numbers = array();
                 foreach ($rows as $key => $row) {
+                    dd(1);
                     $row_id = $key + 2;
                     $tracking = trim($row['tracking_number']);
                     $status = trim($row['shipper_status_id']);
@@ -1115,6 +1129,8 @@ class ReturnController extends Controller
                                 $shipment_details->save();
                                 ShipmentChargesController::nsa_osa_charges($shipment_details->id);
 
+                                $check= $this->update_estimatecharges($shipment_details->id, $estimation_charges);
+                                
                                 NotificationsController::send(33, $shipment_details->id);
                             }
                             else if ($shipment_details->shipper_status_id == 52) {
@@ -1143,51 +1159,7 @@ class ReturnController extends Controller
                             $return_assign_log->status = 1;
                             $return_assign_log->assigned_by = Auth::id();
                             $return_assign_log->save();
-                       }
-                        NotificationsController::send(15, 0, $shipment_details->id);
-                        NotificationsController::send(16, 0, $shipment_details->id);
-
-                    }
-                    else if($status == 2){
-                        
-                        $check= $this->update_estimatecharges($shipment_details->id, $estimation_charges);
-
-                        $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
-                        if($journey){
-                            if ($shipment_details->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
-                                $shipment_details->nsa_osa_status = 1;
-                                $shipment_details->save();
-                                ShipmentChargesController::nsa_osa_charges($shipment_details->id);
-
-                                NotificationsController::send(33, $shipment_details->id);
-                            }
-                            else if ($shipment_details->shipper_status_id == 52) {
-                                $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
-
-                                if ($journey && ($journey->status_reason_id == 12)) {
-                                    $shipment_details->nsa_osa_status = 1;
-
-                                    $shipment_details->save();
-
-                                    ShipmentChargesController::nsa_osa_charges($shipment_details->id);
-                                }
-                            }
                         }
-                        $shipment_details->shipper_status_id = 13; //Re-Attempt
-                        $shipment_details->consignee_status_id = 13;
-                        ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
-
-                       $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_details->id)->latest()->first();
-                       if($return_assign_shipment){
-                           $return_assign_shipment->status = 0;
-                           $return_assign_shipment->save();
-                       
-                           $return_assign_log = new ReturnAssignedShipmentLogs();
-                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                            $return_assign_log->status = 1;
-                            $return_assign_log->assigned_by = Auth::id();
-                            $return_assign_log->save();
-                       }
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
 
