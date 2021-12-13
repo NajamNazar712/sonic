@@ -2410,7 +2410,7 @@ class AdminHumanResourseController extends Controller
     {
         $designation = EmployeeDesignation::find($request->designation_id);
         $designation->name = $request->name;
-        $designation->department_id = $request->department_id;
+//        $designation->department_id = $request->department_id;
         $designation->role_id = $request->role_id;
         $designation->description = $request->description;
         $designation->save();
