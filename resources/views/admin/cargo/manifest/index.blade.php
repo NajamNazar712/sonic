@@ -309,7 +309,7 @@
                     {data: 'shipping_mode', name: 'sm.id', class: 'align-middle shipping_mode'},
                     {data: 'manifest_id', name: 'cm.id', class: 'align-middle manifest_id'},
                     {data: 'junctions', name: 'junctions', class: 'align-middle junctions'},
-                    {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles'},
+                    {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles',orderable: false},
                     /*{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'},*/
                     {data: 'status', name: 'bs.id', class: 'align-middle status'},
                     {data: 'status_updated_at', name: 'cmbj.created_at', class: 'align-middle status_updated_at'},
