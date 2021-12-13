@@ -302,7 +302,7 @@ class AdminInternationalShipmentsController extends Controller
 
     public function shipment_status_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),441);
-        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [3,4,5,8,14,17,18])->get();
+        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [3,4,5,8,14,17,18,21,22,23,24,25])->get();
         return view('admin.international.shipment_status')->with(['shipment_status' => $shipment_status]);
     }
 
@@ -366,6 +366,7 @@ class AdminInternationalShipmentsController extends Controller
     }
 
     public function shipment_status_update(Request $request){
+        dd($request);
         $shipper_status_id = $request->shipment_status_id;
         if($shipper_status_id){
             $shipments = explode(',', $request->shipment_ids);

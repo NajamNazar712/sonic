@@ -63,7 +63,36 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="AddSealNumberModal" role="dialog" aria-labelledby="AddSealNumberModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Estimate Charges</h4>
 
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_seal_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <input type="text" name="seal_number" id="seal_number_input" class="form-control decimal" placeholder="Enter Seal Number" data-rule-required="true" data-msg-required="Seal Number is required">
+
+                        </div>
+                        <input type="hidden" id="eec_shipment_id">
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Update Charges</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -201,6 +230,8 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    var shipment_status_id = ('#shipment_status_select').val();
+                    alert(shipment_status_id);
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to update Shipments!',
