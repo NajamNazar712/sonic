@@ -972,8 +972,6 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_profile_update(Employee $employee, Request $request)
     {
-        dd($request);
-
 //        return $request;
         $request->validate([
             'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id),Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
