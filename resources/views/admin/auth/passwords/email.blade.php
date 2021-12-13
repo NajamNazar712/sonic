@@ -75,7 +75,7 @@
                                                 <i class="ft-phone"></i>
                                             </div>
                                         </fieldset>
-                                        <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Reset Password</button>
+                                        <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Reset Pin</button>
                                     </form>
                                 </div>
                                 <p class="card-subtitle line-on-side text-muted text-center font-small-3 mx-2 my-1">
