@@ -311,7 +311,7 @@
                                 <div class="row justify-content-center">
                                     <div class="col-12 d-none" id="reattempt_charges">
                                         <fieldset class="form-group">
-                                            <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
+                                            <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" maxlength="6" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
                                         </fieldset>  
                                     </div>
                                     <div class="col-12">
@@ -421,6 +421,15 @@
                 'max': 1000000.00
             });
             $('#claim_product_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
+            $('#estimated_charges_input').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
