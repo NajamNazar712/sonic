@@ -243,11 +243,12 @@ class UserManagementController extends Controller
                 $employee = $employee->first();
                 if($request->status) {
                     $employee->status_id = AdminHumanResourseController::GetStatusOfEmployee($employee->id);
+
                 }
                 else{
                     $employee->status_id = 2;
                 }
-
+                $employee->first_inactive = 1;
                 $employee->update();
             }
 
