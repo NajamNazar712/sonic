@@ -68,7 +68,7 @@ class V2AdminPickupsController extends Controller
 
         ActivityTrailController::createActivityTrailLog(Auth::id(), 6);
 
-        $riders = Rider::where('status', 1)->select(['id', 'name']);
+        $riders = Rider::where('status', 1)->select(['id', 'name','trax_id']);
         $pickup_statuses = V2PickupRequestStatus::all();
         $rider_statuses = V2PickupRequestRiderStatus::all();
         if (session('role_id') != 1) {
@@ -668,7 +668,7 @@ class V2AdminPickupsController extends Controller
         } else {
             $global_rider_id = 0;
         }
-        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        $riders = Rider::where('status', 1)->select('id', 'name', 'trax_id')->get();
         return view('admin.v2_pickups.arrival_single_weight')->with(['riders' => $riders, 'global_rider_id' => $global_rider_id]);
     }
     public function arrival_bulk_shipment_details(Request $request)
@@ -1288,7 +1288,7 @@ class V2AdminPickupsController extends Controller
         } else {
             $global_rider_id = 0;
         }
-        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        $riders = Rider::where('status', 1)->select('id', 'name','trax_id')->get();
         return view('admin.v2_pickups.arrival_individual_weight')->with(['riders' => $riders, 'global_rider_id' => $global_rider_id]);
     }
 
