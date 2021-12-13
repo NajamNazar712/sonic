@@ -62,16 +62,49 @@
 										</div>
 									</div>
                                     
-                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-										<div class="form-group">
-                                            <input type="time" class="form-control" name="call_duaration" id="call_duaration">
-                                          
-											
+                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 call_duaration">
+										<div class="form-group input-group ">
+											<div class="input-group-prepend">
+												<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+													<span class="la la-clock-o"></span>
+												</span>
+											</div>
+                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_duaration" id="call_duaration" placeholder="Call Duration" data-rule-required="true" data-msg-required="Date/Time is required">
 										</div>
 									</div>
+
+								
+									{{-- <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+										<div class="form-group input-group ">
+											<div class="input-group-prepend">
+								<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+									<span class="la la-calendar-o"></span>
+								</span>
+											</div>
+	
+											<input type="text" name="call_duration" class="form-control pickadate bg-primary border-primary white rounded-right" id="call_duration" placeholder="Date/Time" data-rule-required="true" data-msg-required="Date/Time is required">
+										</div>
+									</div>
+
+									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+										<div class="form-group input-group ">
+											<div class="input-group-prepend">
+								<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+									<span class="la la-calendar-o"></span>
+								</span>
+											</div>
+	
+											<input type="text" name="call_date_time" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date is required">
+										</div>
+									</div> --}}
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-										<div class="form-group">
-                                            <input type="time" class="form-control" name="call_date_time" id="call_date_time">
+										<div class="form-group input-group ">
+											<div class="input-group-prepend">
+												<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+													<span class="la la-calendar-o"></span>
+												</span>
+															</div>
+                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_date_time" id="call_date_time" placeholder="Date/Time" data-rule-required="true" data-msg-required="Date/Time is required">
 										</div>
 									</div>
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
@@ -84,12 +117,26 @@
 											
 										</div>
 									</div>
+									
 
-                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 contact_number">
 										<div class="form-group">
-                                            <input type="text" class="form-control" name="contact_number" id="contact_number" placeholder="Contact #">
+                                            <input type="text" class="form-control" name="contact_number" id="contact_number" placeholder="Caller's Contact #" >
 										</div>
 									</div>
+									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 complain_number">
+										<div class="form-group">
+                                            <input type="text" class="form-control text-left" name="complain_number" id="complain_number" placeholder="Request/Complain #" data-rule-required="true" data-msg-required="Request/Complain # is required">
+										</div>
+									</div>
+
+									
+									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+										<div class="form-group">
+											<textarea name="remarks" id="remarks_input" class="form-control" cols="30" rows="3" placeholder="Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+										</div>
+									</div>
+
 
 									<div class="col-12">
 									</div>
@@ -126,15 +173,99 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
+
 @endsection
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
 
 	<script>
 		$(document).ready(function() {
+			$('#contact_number').attr('disabled',true);
+						$('#complain_number').attr('disabled',true);
+						$('#call_duaration').attr('disabled',true);
+						$(".contact_number").css("display","none");
+						$(".complain_number").css("display","none");
+						$(".call_duaration").css("display","none");
+
+			// var from_date = $('#call_duration').pickadatetime({
+            //     formatSubmit: 'yyyy-mm-dd 00:00:00',
+            //     // hiddenSuffix: '_formatted',
+            //     // onSet: function(context) {
+            //     //     if (context.select) {
+            //     //         var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
+            //     //         var currentDate = moment(old_date_formatted);
+
+            //     //         var to_date_formatted = $('input[name="search_date_to_formatted"]').val();
+            //     //         var toDate = moment(to_date_formatted);
+
+            //     //         if (currentDate.format('x') > toDate.format('x')) {
+            //     //             to_date.pickadate('picker').clear();
+            //     //         }
+
+            //     //         var afterDate = currentDate.add(30, 'days');
+            //     //         to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
+
+
+            //     //     }
+            //     // }
+            // });
+            // var to_date = $('#search_form #search_date_to').pickadate({
+            //     firstDay: 1,
+            //     clear: '',
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 23:59:59',
+            //     hiddenSuffix: '_formatted',
+            //     onSet: function(context) {
+            //         if (context.select) {
+            //             var current_date_formatted = $('input[name="search_date_to_formatted"]').val();
+            //             var currentDate = moment(current_date_formatted);
+
+            //             var from_date_formatted = $('input[name="search_date_from_formatted"]').val();
+            //             var fromDate = moment(from_date_formatted);
+
+            //             if (currentDate.format('x') < fromDate.format('x')) {
+            //                 from_date.pickadate('picker').clear();
+            //             }
+
+            //             var beforeDate = currentDate.subtract(30, 'days');
+            //             from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
+            //         }
+            //     }
+            // });
+			$("#call_date_time").focus( function() {
+				$(this).attr({type: 'datetime-local'});
+			});
+
+			$("#call_duaration").focus( function() {
+				$(this).attr({type: 'time'});
+			});
+			
+
+			$('#contact_number').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+			$('#complain_number').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+            });
+			
+			
+
 			$('#query_by').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Query By*'
@@ -162,6 +293,27 @@
 				placeholder: 'Campaign*'
 			}).bind('change',function(){
                 var campaign_id = $(this).val();
+					if(campaign_id == 1){
+						//call
+						$(".contact_number").css("display","block")
+						$(".complain_number").css("display","none")
+						$(".call_duaration").css("display","block")
+
+						$('#contact_number').attr('disabled',false);
+						$('#call_duaration').attr('disabled',false);
+						$('#complain_number').attr('disabled',true);
+
+					}else{
+						$(".contact_number").css("display","none")
+						$(".complain_number").css("display","block")
+						$(".call_duaration").css("display","none")
+
+						
+						$('#contact_number').attr('disabled',true);
+						$('#call_duaration').attr('disabled',true);
+						$('#complain_number').attr('disabled',false);
+
+					}
                     $.ajax({
                         url: '{!! route('admin.qa_evaluation.handlings') !!}',
                         type: 'POST',
@@ -184,8 +336,8 @@
                                 $.each(data.evaluated_activities, function (index, val) {
                                     if(v.id == val.evaluation_handling_id){
                                         html1 +='<fieldset class="d-inline-block m-1">';
-                                        html1 +='<input type="checkbox" id="permission_'+val.id+'" class="permission" name="permission_ids[]" value="'+val.id+'">';
-                                        html1 +='<label for="permission_'+val.id+'">'+val.activity+'</label>';
+                                        html1 +='<input type="checkbox" id="activity_'+val.id+'" class="activity" name="activity_ids[]" value="'+val.id+'">';
+                                        html1 +='<label for="activity_'+val.id+'">'+val.activity+'</label>';
                                         html1 +='</fieldset>';
                                     }
                                 });
@@ -202,7 +354,7 @@
                             //     $(this).val('').trigger('change');
                             // });
                         }
-                        $('#role_form .permission').each(function() {
+                        $('#role_form .activity').each(function() {
                             var checkbox = $(this);
                             var label = checkbox.next();
                             var text = label.text();
@@ -224,19 +376,20 @@
 			$('#role_form').validate({
                 errorClass: 'danger',
 				successClass: 'success',
-                // $('.permission').val();
+                // $('.activity').val();
 				normalizer: function(value) {
-                    // if($('.permission').filter(':checked').length == 0){
-                        
-                    //     toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    // }
+					if($('.activity').filter(':checked').length == 0){
+						toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					}else if($('.activity').filter(':checked').length == 4){
+						toastr.error('Please select  Max 3 activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					}
                     return $.trim(value);
 				},
 				errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
-                    console.log($('.permission').filter(':checked').length)
+                    console.log($('.activity').filter(':checked').length)
 					$(form).find('button[type=submit]').attr('disabled', 'disabled');
 
 					swal({
