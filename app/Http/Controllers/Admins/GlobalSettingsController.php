@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalesIncentiveDate;
-use App\Http\Models\FleetDriver;
+use App\Http\Models\Admin\AdminAppSlider;
+use App\Http\Models\Admin\RetailAppSlider;use App\Http\Models\FleetDriver;
 use App\Http\Models\FleetVendor;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
@@ -87,18 +89,20 @@ use App\Http\Models\Rider\RidersShipmentWeightRange;
 use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\Runner;
 use App\Http\Models\RunnerJunction;
+use App\Http\Models\SaleTierTag;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
+use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
+use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Admin\SalesDesignationJourney;
 use App\Http\Models\Admin\SalesDesignation;
 use App\Http\Models\Zone;
-use App\OmniUsers;
 use Carbon\Carbon;
 use http\Env\Response;
 use Illuminate\Http\Request;
@@ -3724,7 +3728,9 @@ class GlobalSettingsController extends Controller
     public function rider_ticker_index()
     {
         $rider_ticker = RiderTickerImage::orderBy('id', 'ASC')->get();
-        return view('admin.settings.rider_ticker')->with(['id' => 1, 'rider_ticker' => $rider_ticker]);
+        $admin_ticker = AdminAppSlider::orderBy('id', 'ASC')->get();
+        $retail_ticker = RetailAppSlider::orderBy('id', 'ASC')->get();
+        return view('admin.settings.rider_ticker')->with(['id' => 1, 'rider_ticker' => $rider_ticker, 'admin_ticker' => $admin_ticker, 'retail_ticker' => $retail_ticker]);
     }
 
     public function rider_ticker_store(Request $request)
@@ -5112,7 +5118,301 @@ public function sales_incentive()
         }
     }
 
-    public function omni_user_setting_index(){
+    public function admin_ticker_store(Request $request)
+    {
+        $request->validate([
+            'upload_image_6' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_7' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_8' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_9' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_10' => 'nullable|image|mimes:jpeg,png|max:2048',
+        ]);
+
+        if (!$request->hasFile('upload_image_6') && !$request->hasFile('upload_image_7') && !$request->hasFile('upload_image_8') && !$request->hasFile('upload_image_9') && !$request->hasFile('upload_image_10')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image_6')) {
+            if ($request->has('admin_ticker_id_1')) {
+                $ticker_id = $request->get('admin_ticker_id_1');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_6));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_7')) {
+            if ($request->has('admin_ticker_id_2')) {
+                $ticker_id = $request->get('admin_ticker_id_2');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_7));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_8')) {
+            if ($request->has('admin_ticker_id_3')) {
+                $ticker_id = $request->get('admin_ticker_id_3');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_8));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_9')) {
+            if ($request->has('admin_ticker_id_4')) {
+                $ticker_id = $request->get('admin_ticker_id_4');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_9));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        if ($request->hasFile('upload_image_10')) {
+            if ($request->has('admin_ticker_id_5')) {
+                $ticker_id = $request->get('admin_ticker_id_5');
+                $admin_ticker = AdminAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($admin_ticker->picture_path);
+            } else {
+
+                $admin_ticker = new AdminAppSlider();
+                $admin_ticker->save();
+            }
+
+            $picture_path = 'admin_ticker/' . $admin_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_10));
+            $admin_ticker->picture_path = $picture_path;
+            $admin_ticker->save();
+        }
+        return redirect()->back()->with(['success' => 'Images Uploaded!']);
+    }
+
+    public function retail_ticker_store(Request $request)
+    {
+        $request->validate([
+            'upload_image_11' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_12' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_13' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_14' => 'nullable|image|mimes:jpeg,png|max:2048',
+            'upload_image_15' => 'nullable|image|mimes:jpeg,png|max:2048',
+        ]);
+
+        if (!$request->hasFile('upload_image_11') && !$request->hasFile('upload_image_12') && !$request->hasFile('upload_image_13') && !$request->hasFile('upload_image_14') && !$request->hasFile('upload_image_15')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image_11')) {
+            if ($request->has('retail_ticker_id_1')) {
+                $ticker_id = $request->get('retail_ticker_id_1');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_11));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_12')) {
+            if ($request->has('retail_ticker_id_2')) {
+                $ticker_id = $request->get('retail_ticker_id_2');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_12));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_13')) {
+            if ($request->has('retail_ticker_id_3')) {
+                $ticker_id = $request->get('retail_ticker_id_3');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_13));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_14')) {
+            if ($request->has('retail_ticker_id_4')) {
+                $ticker_id = $request->get('retail_ticker_id_4');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_14));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        if ($request->hasFile('upload_image_15')) {
+            if ($request->has('retail_ticker_id_5')) {
+                $ticker_id = $request->get('retail_ticker_id_5');
+                $retail_ticker = RetailAppSlider::find($ticker_id);
+                Storage::disk('public')->delete($retail_ticker->picture_path);
+            } else {
+
+                $retail_ticker = new RetailAppSlider();
+                $retail_ticker->save();
+            }
+
+            $picture_path = 'retail_ticker/' . $retail_ticker->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_15));
+            $retail_ticker->picture_path = $picture_path;
+            $retail_ticker->save();
+        }
+        return redirect()->back()->with(['success' => 'Images Uploaded!']);
+    }
+
+    public function status_webhook_index(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 478);
+        return view('admin.settings.shipper.status_webhook_index');
+    }
+
+    public function status_webhook_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 479);
+        }
+        $shippers = ShipmentStatusSubscription::leftjoin('users as s', 's.id', '=', 'shipment_status_subscriptions.user_id')
+            ->select('s.id as account_id', 's.name as shipper_name', 'shipment_status_subscriptions.url as url','shipment_status_subscriptions.id as id')->where('shipment_status_subscriptions.status', 1);
+
+        if(session('role_id') != 1)
+        {
+            $shippers = $shippers
+                ->leftjoin('sale_person_tags as spt',function($join){
+                    $join->on('spt.user_id','=','s.id')
+                        ->where('spt.status',0);
+                })
+                ->leftjoin('sale_tier_tags as stt',function($join){
+                    $join->on('stt.user_id','=','s.id')
+                        ->where('stt.kam','!=',null);
+                })
+                ->where(function($q){
+                        $q->where('spt.admin_id',Auth::id())
+                            ->orWhere('stt.kam',Auth::id());
+                });
+        }
+
+        $datatable = Datatables::of($shippers)
+            ->addColumn('action', function ($shipper) {
+                if (session('role_id') == 1 || in_array(646, session('permissions'))) {
+                    $route = route('admin.settings.shippers.status_webhook.edit',$shipper->account_id);
+                    $dropdown = '
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <a href="'.$route.'" class="dropdown-item">Update Status Mapping</a></div></div>';
+
+                    return $dropdown;
+                }
+                return '';
+            });
+        return $datatable->make(true);
+    }
+
+    public function status_webhook_edit($id, Request $request)
+    {
+        $webhook = ShipmentStatusSubscription::where('user_id',$id)->first();
+
+        if($webhook)
+        {
+            if(session('role_id') != 1)
+            {
+                $spt = SalePersonTag::where('user_id',$id)->where('admin_id',Auth::id())->where('status',0);
+                $stt = SaleTierTag::where('user_id',$id)->where('kam',Auth::id());
+
+                if($spt->doesntExist() && $stt->doesntExist())
+                {
+                    return back()->with(['error'=>"Shipper Not Assigned to you"]);
+                }
+            }
+            $statuses = ShipmentStatus::where('status',1)->get();
+            $shippers_statuses = ShipmentStatusesForShipperWebhook::where('user_id',$webhook->user_id)->get(['status_id','webhook_status']);
+
+
+            $shipper_statuses = array();
+            foreach ($shippers_statuses as $status)
+            {
+                $shipper_statuses[$status->status_id] = $status->webhook_status;
+            }
+
+            return view('admin.settings.shipper.status_webhook_edit',compact('statuses','shipper_statuses','webhook'));
+        }
+        return back()->with(['error'=>"Invalid Shipper ID"]);
+    }
+
+    public function status_webhook_update(Request $request)
+    {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 480);
+        ShipmentStatusesForShipperWebhook::where('user_id',$request->shipper_id)->delete();
+
+        foreach ($request->webhook_status as $key => $status)
+        {
+           if($status != null)
+           {
+               $shipper_status = new ShipmentStatusesForShipperWebhook();
+               $shipper_status->user_id = $request->shipper_id;
+               $shipper_status->status_id = $key;
+               $shipper_status->webhook_status = $status;
+               $shipper_status->save();
+           }
+        }
+
+        return redirect()->route('admin.settings.shippers.status_webhook.index')->with(['success'=>'Shipper Statuses Updated Successfully']);
+    }
+
+ public function omni_user_setting_index(){
         $shippers = array();
         $omni_accounts = array();
         $settings = GlobalSettings::where('type', 'omni_users');
@@ -5129,6 +5429,7 @@ public function sales_incentive()
         $users = User::where('status',3)->where('blacklist', 0)->select('id','name')->get();
         return view('admin.settings.omni_user')->with(['shippers' => $shippers,'users' => $users]);
     }
+
     public function omni_user_setting_update(Request $request){
         if ($request->has('shippers')) {
             if (count($request->shippers) > 0) {
@@ -5154,4 +5455,5 @@ public function sales_incentive()
         }
 
     }
+
 }

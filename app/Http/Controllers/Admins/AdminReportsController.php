@@ -6235,6 +6235,8 @@ class AdminReportsController extends Controller
                 $join->on('al.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(0));
             })
+            ->leftjoin('admin_roles as ar' ,'ar.id', '=' , 'al.role_id')
+            ->leftjoin('admin_departments as ad' ,'ad.id', '=' , 'ar.department_id')
             ->leftJoin('users as us', function ($join) {
                 $join->on('us.id', '=', 'crm_requests.launched_by_id')
                     ->where('crm_requests.launched_by', '=', DB::raw(1));
@@ -6300,7 +6302,7 @@ class AdminReportsController extends Controller
                     ->where('ccse.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id AND crm_comments.comment_type = 0)'));
             })
             
-            ->select('ccse.created_at as last_comment_date_external', 'ccse.comment as last_comment_external','crm_requests.id as request_number', 's.tracking_number as tracking_number','crsh.created_at as reopen_date','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin')
+            ->select('ccse.created_at as last_comment_date_external', 'ccse.comment as last_comment_external','crm_requests.id as request_number', 's.tracking_number as tracking_number','crsh.created_at as reopen_date','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin','ad.name as admin_department')
             ->groupBy('crm_requests.id');
 
         $datatable = Datatables::of($crm)
@@ -6398,6 +6400,15 @@ class AdminReportsController extends Controller
                     $name = $requests->shipper;
                 }else{
                     $name = $requests->sub_shipper;
+                }
+                return $name;
+            })
+            ->editColumn('admin_department', function ($requests){
+                $name = '';
+                if($requests->launched_by_type == 0){
+                    $name = $requests->admin_department;
+                }else{
+                    $name ='-';
                 }
                 return $name;
             })
@@ -9800,16 +9811,18 @@ class AdminReportsController extends Controller
     }
 
     public function dws_report_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),476);
+
         return view('admin.reports.dws_report');
 
     }
 
     public function dws_report_list(Request $request){
 
-        // if($request->get('excel') && $request->get('excel') == true)
-        // {
-        //     ActivityTrailController::createActivityTrailLog(Auth::id(),268);
-        // }
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),477);
+        }
         $shipments = DB::connection('reports')->table('shipments')->join('shipment_details as sd', 'shipments.id', '=', 'sd.shipment_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')

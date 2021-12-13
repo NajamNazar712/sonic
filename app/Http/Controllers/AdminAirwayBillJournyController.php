@@ -44,7 +44,7 @@ class AdminAirwayBillJournyController extends Controller
         $details = array();
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-            ShipmentScanningJourneyController::add($shipment->id, 417, 1, Auth::id(), null,null);
+            ShipmentScanningJourneyController::add($shipment->id, 28, 1, Auth::id(), null,null);
             $scanning_histories = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->orderBy('updated_at','DESC')->get();
             if (count($scanning_histories) > 0) {
                 foreach ($scanning_histories as $index => $scanning_history) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Webhook;
 
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Jobs\ProcessShipmentStatusWebhook;
 use Carbon\Carbon;
@@ -28,7 +29,16 @@ class ShipmentStatusWebhookController extends Controller
 
             $data['user_id'] = $user_id;
             $data['tracking_number'] = $shipment->tracking_number;
-            $data['status'] = ShipmentStatus::find($shipper_status_id)->name;
+            $status = ShipmentStatusesForShipperWebhook::where('user_id',$user_id)->where('status_id',$shipper_status_id);
+            if($status->exists())
+            {
+                $status = $status->first();
+                $data['status'] = $status->webhook_status;
+            }
+            else{
+                $data['status'] = ShipmentStatus::find($shipper_status_id)->name;
+            }
+
             $data['date_time'] = $date;
             $data['url'] = $subscriber->url;
             dispatch(new ProcessShipmentStatusWebhook($data));
