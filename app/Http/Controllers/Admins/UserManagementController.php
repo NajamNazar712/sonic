@@ -673,8 +673,15 @@ class UserManagementController extends Controller
         return response()->json(['status' => 1, 'error'=> 'User not found!']);
     }
     public function user_phone_update(Request $request){
-        $admin_id = $request->admin_id;
-        $phone = $request->phone;
+        $admin_id = $request->id;
+        $phone = $request->phone_number;
+        $validate = $this->validate_phone($request);
+
+        if($validate == "false")
+        {
+            return redirect()->back()->with('error', 'Phone Number Already Exists!!');
+        }
+
         if($admin_id){
             $admin = Admin::find($admin_id);
             if($admin){
@@ -685,7 +692,7 @@ class UserManagementController extends Controller
                 if($employee->exists())
                 {
                     $employee = $employee->first();
-                    $employee->phone_number = $request->phone;
+                    $employee->phone_number = $phone;
                     $employee->update();
                 }
                 return redirect()->back()->with('success', 'Phone Number updated!');

@@ -113,9 +113,9 @@
 						@method('POST')
 						@csrf
 						<div class="container">
-							<input type="hidden" name="admin_id" id="phone_admin_id"/>
+							<input type="hidden" name="id" id="phone_admin_id"/>
 							<div class="form-group">
-								<input type="text" name="phone" id="phone" class="form-control" data-rule-required="true" data-msg-required="Phone Number required">
+								<input type="text" name="phone_number" id="phone" class="form-control" data-rule-required="true" data-msg-required="Phone Number required">
 							</div>
 							<div class="row justify-content-center">
 								<div class="col-6">

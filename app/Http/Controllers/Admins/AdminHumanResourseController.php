@@ -2426,9 +2426,12 @@ class AdminHumanResourseController extends Controller
             $designation_hub->save();
         }
 
-        $admins = Admin::where('designation_id',$designation->id)->get(['id']);
+        $admins = Admin::where('designation_id',$designation->id)->get();
         foreach ($admins as $admin)
         {
+            $admin->role_id = $request->role_id;
+            $admin->update();
+
             AdminHub::where('admin_id',$admin->id)->delete();
             foreach ($request->hub_id as $hub)
             {

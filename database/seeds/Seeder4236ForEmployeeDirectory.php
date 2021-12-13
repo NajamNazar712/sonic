@@ -1808,6 +1808,41 @@ class Seeder4236ForEmployeeDirectory extends Seeder
             array('trax_id' => 'Trax06260','name' => 'Mehboob Khan','gender' => '1','city' => '283','cnic' => '54400-0473105-3','phone' => '0345-8325601','type' => '1', 'designation' => '19','department' => '2','shift' => '2',),
             array('trax_id' => 'Trax06261','name' => 'Muhammad Bilal Shabbir','gender' => '1','city' => '202','cnic' => '42401-6431186-1','phone' => '0317-2988252','type' => '1', 'designation' => '139','department' => '8','shift' => '2',),
             array('trax_id' => 'Trax06262','name' => 'Saqlian Ali Raza','gender' => '1','city' => '223','cnic' => '35202-4881353-1','phone' => '0321-7338817','type' => '1', 'designation' => '87','department' => '6','shift' => '2',),
+
+
+
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '1', 'designation' => '87','department' => '6','shift' => '1',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '1',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '1',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '1',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '1',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '1',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '1',),
+
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
+            array('trax_id' => '','name' => '','gender' => '','city' => '','cnic' => '','phone' => '','type' => '', 'designation' => '','department' => '','shift' => '',),
         );
 
         foreach ($employees as $employee)
