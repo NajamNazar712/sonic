@@ -43,16 +43,6 @@
 									</div>
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
 										<div class="form-group">
-                                            <select name="evaluated_by" class="select2" id="evaluated_by" data-rule-required="true" data-msg-required="Evaluated By is required">
-												@foreach($evaluated_by as $evaluated_admin)
-													<option value="{{ $evaluated_admin->id }}">{{ $evaluated_admin->name }}</option>
-												@endforeach
-											</select>
-											
-										</div>
-									</div>
-                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-										<div class="form-group">
                                             <select name="nature_id" class="select2" id="nature_id" data-rule-required="true" data-msg-required="Nature is required">
 												@foreach($natures as $nature)
 													<option value="{{ $nature->id }}">{{ $nature->nature }}</option>
@@ -422,18 +412,18 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
-                    console.log($('.activity').filter(':checked').length)
+                    // console.log($('.activity').filter(':checked').length)
 					$(form).find('button[type=submit]').attr('disabled', 'disabled');
-					if($('.activity').filter(':checked').length == 0){
-							toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-							swal.close();
-							$(form).find('button[type=submit]').attr('disabled', false);
-						}else if($('.activity').filter(':checked').length == 4){
-							toastr.error('Please select  Max 3 activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-							swal.close();
-							$(form).find('button[type=submit]').attr('disabled', false);
+					// if($('.activity').filter(':checked').length == 0){
+					// 		toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					// 		swal.close();
+					// 		$(form).find('button[type=submit]').attr('disabled', false);
+					// 	}else if($('.activity').filter(':checked').length == 4){
+					// 		toastr.error('Please select  Max 3 activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					// 		swal.close();
+					// 		$(form).find('button[type=submit]').attr('disabled', false);
 							
-						}else{
+					// 	}else{
 
 							swal({
 								title: 'Please Wait!',
@@ -444,7 +434,7 @@
 								closeOnEsc: false
 							});
 							form.submit();
-						}
+						// }
 					
 				}
 			});

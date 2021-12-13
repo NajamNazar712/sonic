@@ -12,6 +12,7 @@ use App\Http\Models\EvaluationNature;
 use App\Http\Models\QAEvaluation;
 use App\Http\Models\QAEvaluationActivity;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class QAEvaluationController extends Controller
 {
@@ -42,18 +43,24 @@ class QAEvaluationController extends Controller
     }
 
     public function submit(Request $request){
+        
         $score = 100;
-        foreach ($request->activity_ids as $activity_id) {
-            $activity = EvaluationActivity::find($activity_id);
-            if(in_array($activity->handling->id, [4,10,17])){
+        if($request->has('activity_ids')){
+            if(count($request->activity_ids) >=4){
                 $score = 0;
             }else{
-                $score-=$activity->weightage;
+                foreach ($request->activity_ids as $activity_id) {
+                    $activity = EvaluationActivity::find($activity_id);
+                    if(in_array($activity->handling->id, [4,10,17])){
+                        $score = 0;
+                        break;
+                    }else{
+                        $score-=$activity->weightage;
+                    }
+                }
             }
         }
-        if(count($request->activity_ids) >=3){
-            $score = 0;
-        }
+        
         //0 fatal, 1 non fatal, 3 accurate
         if($score <= 0){
             $status = 0;
@@ -66,7 +73,7 @@ class QAEvaluationController extends Controller
         $qa_evaluation = QAEvaluation::create([
             'agent_id' => $request->agent_id,
             'campaign_id' => $request->campaign_id,
-            'evaluated_by' => $request->evaluated_by,
+            'evaluated_by' => Auth::id(),
             'evaluation_date' => Carbon::today(),
             'nature_id' => $request->nature_id,
             'call_duration' => $request->call_duaration,
@@ -76,12 +83,15 @@ class QAEvaluationController extends Controller
             'status' => $status,
             'score' => $score,
         ]);
-        foreach ($request->activity_ids as $activity_id) {
-            QAEvaluationActivity::create([
-                'agent_id' => $request->agent_id,
-                'qa_evaluation_id' => $qa_evaluation->id,
-                'evaluation_activity_id' => $activity_id,
-            ]);
+        if($request->has('activity_ids')){
+            // dump('ss');
+            foreach ($request->activity_ids as $activity_id) {
+                QAEvaluationActivity::create([
+                    'agent_id' => $request->agent_id,
+                    'qa_evaluation_id' => $qa_evaluation->id,
+                    'evaluation_activity_id' => $activity_id,
+                ]);
+            }
         }
         return redirect()->back()->with('success', 'QA Evaluation Added');
 
