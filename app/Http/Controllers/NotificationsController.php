@@ -8628,7 +8628,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[otp]', $admin->reset_pin_otp, $body);
                         }
                         $to = $reference_2_id;
-                        self::sms_otp($body, $to, $admin->name, 1, 1);
+                        self::sms_otp($body, $to, $admin->name, $admin->reset_pin_otp, 1);
                     }
                 }
                 else if ($id == 163){
