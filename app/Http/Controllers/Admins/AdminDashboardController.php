@@ -160,7 +160,7 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Models\HR\EmployeeDesignation;
 
 
 class AdminDashboardController extends Controller
@@ -11465,7 +11465,8 @@ class AdminDashboardController extends Controller
         $department = Admin::join('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
         ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
         ->where('admins.id', Auth::id())->first();
-        return response()->json(['full_name' => $user->name,'department' => $department->name,'designation' => $user->designation,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
+        $designations = EmployeeDesignation::where('status',1)->where('id',$user->designation_id)->first();
+        return response()->json(['full_name' => $user->name,'department' => $department->name,'designation' => $designations->name,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
    }
 
 }
