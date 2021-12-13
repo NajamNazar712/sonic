@@ -2,10 +2,13 @@
 
 namespace App\Http\Models\HR;
 
+use App\Http\Models\Rider\RiderRequest;
 use Illuminate\Database\Eloquent\Model;
 
 class Employee extends Model
 {
+    protected $fillable = ['first_inactive'];
+
     public function medical_infos() {
         return $this->HasMany('App\Http\Models\HR\EmployeeMedicalInformation');
     }
@@ -40,6 +43,11 @@ class Employee extends Model
 
     public function city() {
         return $this->belongsTo('App\Http\Models\City');
+    }
+
+    public function rider_request()
+    {
+        return $this->belongsTo(RiderRequest::class,'rider_request_id');
     }
 
 }

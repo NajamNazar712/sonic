@@ -662,7 +662,6 @@
                         }
 
                         if (data.shipments != undefined) {
-                            
                             $.each(data.shipments, function (index, details) {
                                 
                                 var id = details.shipment_id;
@@ -670,17 +669,21 @@
                                 var shipment = '';
                                 var open_box_iocn = '';
                                 var ccd_icon = '';
+                                var $international_tracking_number = '';
                                 var roll_id = @json(session('role_id') == 1);
                                 var department_id =  @json(session('department_id') == 6);
                                 if(details.open_box){
-                                    open_box_iocn = '<span><i class="fas fa-box-open"></i></span>';
+                                    open_box_iocn = ' <span><i class="fas fa-box-open"></i></span> ';
                                 }
                                 if(details.ccd){
-                                    ccd_icon = '<span><i class="fas fa-credit-card"></i> (Credit Card on Delivery-CCD)</span>';
+                                    ccd_icon = ' <span><i class="fas fa-credit-card"></i> (Credit Card on Delivery-CCD)</span> ';
+                                }
+                                if(details.international_shipment){
+                                    $international_tracking_number = ' <span>(' + details.international_tracking_number + ')</span> ';
                                 }
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
-                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '  '+ open_box_iocn +'  '+ ccd_icon +'</div>';
+                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon +'</div>';
                                 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 @if (session('role_id') == 1 || in_array(45, session('permissions')))
@@ -694,7 +697,7 @@
                                 @endif
                                 console.log(details.dws_image);
                                 if(details.dws_image != null){
-                                    shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.dws_image + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> DWS File</a>';
+                                    shipment += '<a class="btn btn-secondary d-sm-inline-block file mr-1" href="' + details.dws_image + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> DWS File</a>';
                                 }
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
@@ -1480,7 +1483,6 @@
             $('#tracking').on('click','.intercept', function () {
                 id = $(this).attr('id');
                 status_id = $(this).attr('data-tracking');
-                debugger;
                 if(id != ''){
                     var redirect = '{!! route('admin.intercept.index', ':id') !!}';
                     if(status_id==12 ||status_id==52)

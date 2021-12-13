@@ -1040,7 +1040,7 @@ class DailyPickupSalesReportController extends Controller
         $file_name_without_path = '';
 
 
-        $file_name_without_path = "reports/daily_pickup_sales_report_".$date_file_name.'_'.$shipper_sales_person_name.'_'.$time_string.".xlsx";
+        $file_name_without_path = "reports/daily_pickup_sales_report_".$date_file_name.'_'.$sale_person_id.'_'.$time_string.".xlsx";
         $file_name = public_path() .'/'.$file_name_without_path ;
 
 

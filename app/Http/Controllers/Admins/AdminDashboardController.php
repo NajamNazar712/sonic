@@ -33,6 +33,7 @@ use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DuplicateUser;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\InternationalUsersInformation;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
@@ -159,7 +160,7 @@ use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Models\HR\EmployeeDesignation;
 
 
 class AdminDashboardController extends Controller
@@ -10558,18 +10559,30 @@ class AdminDashboardController extends Controller
 
     public function update_profile_password_submit(Request $request){
         $request->validate([
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:4',
         ]);
         if($request->password == $request->confirm_password){
-            Admin::where('id',Auth::id())->update(['password' => Hash::make($request->password), 'updated_by' => Auth::id()]);
-            if(session()->has('first_login') && session('first_login') != 1){
-                session(['first_login' => 1]);
-                Admin::where('id',Auth::id())->update(['first_login' => 1]);
+            $admin = Admin::where('id',Auth::id());
+
+            $admin->update(['password' => Hash::make($request->password),'dummy_pin' => $request->password , 'updated_by' => Auth::id()]);
+
+            $admin = $admin->first();
+            $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
+            if($employee->exists())
+            {
+                $employee = $employee->first();
+                $employee->pin = $admin->dummy_pin;
+                $employee->update();
             }
-            return redirect()->back()->with(['success'=>"Password Updated Successfully!"]);
+
+//            if(session()->has('first_login') && session('first_login') != 1){
+//                session(['first_login' => 1]);
+//                Admin::where('id',Auth::id())->update(['first_login' => 1]);
+//            }
+            return redirect()->back()->with(['success'=>"Pin Updated Successfully!"]);
         }
         else{
-            return redirect()->back()->with(['error'=>"The password and confirmation password do not match!"]);
+            return redirect()->back()->with(['error'=>"The pin and confirmation pin do not match!"]);
         }
     }
 
@@ -11452,7 +11465,8 @@ class AdminDashboardController extends Controller
         $department = Admin::join('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
         ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
         ->where('admins.id', Auth::id())->first();
-        return response()->json(['full_name' => $user->name,'department' => $department->name,'designation' => $user->designation,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
+        $designations = EmployeeDesignation::where('status',1)->where('id',$user->designation_id)->first();
+        return response()->json(['full_name' => $user->name,'department' => $department->name,'designation' => $designations->name,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
    }
 
 }
