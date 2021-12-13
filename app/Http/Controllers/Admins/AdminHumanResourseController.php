@@ -972,7 +972,6 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_profile_update(Employee $employee, Request $request)
     {
-
 //        return $request;
         $request->validate([
             'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id),Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
@@ -1001,7 +1000,7 @@ class AdminHumanResourseController extends Controller
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
         $employee->designation_id = $request->designation;
         $employee->city_id = $request->city;
-        $employee->department_id = $request->department;
+        $employee->department_id = ($request->has('department')) ? $request->department : 6;
         $employee->zone_id = $request->zone;
         $employee->official_email = $request->official_email;
         $employee->official_phone_number = $request->official_number;
