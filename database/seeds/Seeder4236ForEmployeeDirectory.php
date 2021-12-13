@@ -1841,6 +1841,7 @@ class Seeder4236ForEmployeeDirectory extends Seeder
             array('trax_id' => 'Trax06318','name' => 'muhammad Zohaib 45','gender' => '1','city' => '223','cnic' => '35201-7851242-9','phone' => '0313-4326007','type' => '2', 'designation' => '77','department' => '6','shift' => '1',),
         );
 
+        Employee::truncate();
         foreach ($employees as $employee)
         {
             try {
