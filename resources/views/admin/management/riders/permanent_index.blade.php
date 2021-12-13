@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 <div style="display: none;">
-                    <form id="rider_active_form" action="{{route('admin.management.rider.status')}}" method="post" class="mt-2">
+                    <form id="rider_active_form" action="{{route('admin.management.riders.status')}}" method="post" class="mt-2">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="cid" id="cid">

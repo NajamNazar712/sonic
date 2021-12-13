@@ -396,7 +396,9 @@ class RiderManagementController extends Controller
         $id = $request->cid;
         $status = $request->status;
         if($status == 'riderActive'){
-            $rider = Rider::where('id',$id)->update(['status'=>1]);
+            $rider = Rider::where('id',$id)->first();
+            $rider->status = 1;
+            $rider->update();
             $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
             if($employee->exists())
             {
@@ -409,7 +411,9 @@ class RiderManagementController extends Controller
                 return redirect()->back()->with('success','Rider is activated successfully');
             }
         }else if($status == 'riderInactive'){
-            $rider =Rider::where('id',$id)->update(['status'=>0]);
+            $rider =Rider::where('id',$id)->first();
+            $rider->status = 0;
+            $rider->update();
             $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
             if($employee->exists())
             {
