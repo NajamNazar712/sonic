@@ -2430,7 +2430,7 @@ class AdminHumanResourseController extends Controller
         foreach ($admins as $admin)
         {
             $admin->role_id = $request->role_id;
-            $admin->update();
+            $admin->save();
 
             AdminHub::where('admin_id',$admin->id)->delete();
             foreach ($request->hub_id as $hub)
