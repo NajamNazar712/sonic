@@ -1035,7 +1035,7 @@ class ReturnController extends Controller
                     $contains = 0;
                     if($parcel)
                     {
-                        if(($parcel->status_reason_id == 12 && $row['shipper_status_id'] == 1 && !is_null($row['estimation_charges'])) || ($parcel->status_reason_id != 12 && ($row['shipper_status_id'] == 1 || $row['shipper_status_id'] == 0) && is_null($row['estimation_charges']))){
+                        if(($parcel->status_reason_id == 12 && $row['shipper_status_id'] == 1 && !is_null($row['estimation_charges'])) || (($row['shipper_status_id'] == 1 || $row['shipper_status_id'] == 0) && is_null($row['estimation_charges']))){
                             $contains = 1;
                         }
                         else{
