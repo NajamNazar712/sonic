@@ -33,6 +33,47 @@ class UserManagementController extends Controller
       $this->middleware('Permission');
     }
 
+    public function rejoin(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Admin not found!']);
+        }
+        $employee = Admin::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Admin not found!']);
+        }
+
+        $staff = Employee::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Admin not associated with any Employee!']);
+        }
+        $staff = $staff->first();
+
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+        if ($global_setting->exists()) {
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+        } else {
+            $trax_id = null;
+        }
+
+        $employee->status = 1;
+        $employee->updated_by = Auth::id();
+        $employee->trax_id = $trax_id;
+        $employee->save();
+
+        $staff->status_id = AdminHumanResourseController::GetStatusOfEmployee($staff->id);
+        $staff->trax_id = $trax_id;
+        $staff->save();
+        return response()->json(['status' => 0, 'success' => 'Admin Rejoined Successfully!']);
+    }
+
     public function user_index() {
       ActivityTrailController::createActivityTrailLog(Auth::id(),358);
       $hubs=City::select('id','name')->where('hub',1)->get();
@@ -46,10 +87,12 @@ class UserManagementController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),359);
         }
         $users = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
-        ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
-        ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
+            ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
+            ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
+            ->leftjoin('employee_designations as ed', 'admins.designation_id', '=', 'ed.id')
+            ->leftjoin('employees as emp', 'emp.trax_id', '=', 'admins.trax_id')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation');
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name');
 
         if(!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
@@ -67,14 +110,20 @@ class UserManagementController extends Controller
         ->editColumn('status', function ($user) {
             return (($user->status) ? 'Enabled' : 'Disabled');
         })
+        ->editColumn('designation', function ($user) {
+            return (($user->designation_name != null) ? $user->designation_name : $user->designation);
+        })
         ->removeColumn('department')
         ->addColumn('action', function($user) {
-            if (session('role_id') == 1 || count(array_intersect([83, 84, 542], session('permissions'))) !== 0) {
+            if (session('role_id') == 1 || count(array_intersect([83, 84, 542,620], session('permissions'))) !== 0) {
                 $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
                 $phone_edit_button = '<button type="button" class="dropdown-item phone"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Phone No. Update</div></button>';
+
+                $rejoin_button = '<button type="button" class="dropdown-item rejoin" data-target-id="'.$user->id.'"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Rejoin Admin</div></button>';
+
                 $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -96,6 +145,13 @@ class UserManagementController extends Controller
 
                 if (session('role_id') == 1 || in_array(542, session('permissions'))) {
                     $dropdown .= $phone_edit_button;
+                }
+
+
+                if (session('role_id') == 1 || in_array(620, session('permissions'))) {
+                    if($user->status == 0 && $user->first_inactive == 1) {
+                        $dropdown .= $rejoin_button;
+                    }
                 }
 
                 $dropdown .= '
@@ -181,6 +237,21 @@ class UserManagementController extends Controller
 
             $admin->save();
 
+            $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
+            if($employee->exists())
+            {
+                $employee = $employee->first();
+                if($request->status) {
+                    $employee->status_id = AdminHumanResourseController::GetStatusOfEmployee($employee->id);
+
+                }
+                else{
+                    $employee->status_id = 2;
+                }
+                $employee->first_inactive = 1;
+                $employee->update();
+            }
+
             if ($request->status) {
                 return ['status' => 0, 'success' => 'Admin has been enabled'];
             }
@@ -203,9 +274,8 @@ class UserManagementController extends Controller
         $hubs = City::where('hub', 1)->get();
         $shifts = EmployeeShift::where('status', 1)->get();
         $designations = EmployeeDesignation::where('status',1)->get();
-        $reporting_locations = ReportingLocation::where('status',1)->get();
 
-        return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs, 'shifts' => $shifts,'designations'=>$designations, 'reporting_locations' => $reporting_locations]);
+        return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs, 'shifts' => $shifts,'designations'=>$designations]);
     }
 
     public function user_add_store(Request $request) {
@@ -215,14 +285,14 @@ class UserManagementController extends Controller
         $admin->name = $request->input('name');
         $admin->email = $request->input('email');
         $admin->phone_number = $request->input('phone_number');
+        $admin->official_phone_number = $request->input('official_phone_number');
         $admin->cnic = $request->input('cnic');
         $admin->role_id = $request->input('role_id');
         $admin->default_hub_id = $request->input('default_hub');
-        $admin->password = bcrypt($request->input('password'));
-        $admin->designation = $request->input('designation');
+        $admin->password = bcrypt($request->input('pin'));
+        $admin->dummy_pin = $request->input('pin');
         $admin->shift_id = $request->input('shift_id');
         $admin->designation_id = $request->input('designation_id');
-        $admin->reporting_location_id = $request->input('location_id');
 
         if($request->trax_id != null){
             $trax_id = $request->trax_id;
@@ -230,6 +300,27 @@ class UserManagementController extends Controller
             if($employee->exists()){
                 $employee = $employee->first();
                 $employee_id = $employee->id;
+            }
+            else{
+                $employee = new Employee();
+                $employee->trax_id = $trax_id;
+                $employee->name = $request->name;
+                $employee->city_id = $request->default_hub;
+                $employee->cnic = $request->cnic;
+                $employee->phone_number = $request->phone_number;
+                $employee->official_phone_number = $request->official_phone_number;
+                $employee->employee_type_id = 1;
+                $employee->request_status_id = 3;
+                $employee->status_id = 3;
+                $employee->official_email = $request->email;
+                $employee->designation_id = $request->designation_id;
+                $employee->department_id = EmployeeDesignation::find($request->designation_id)->department_id ?? null;
+                $employee->pin = $request->pin;
+                $employee->shift_id = $request->shift_id;
+                $employee->save();
+
+                $employee_id = $employee->id;
+
             }
 
         }
@@ -242,6 +333,25 @@ class UserManagementController extends Controller
                 $global_setting->setting_value = $trax_id;
                 $global_setting->save();
                 $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+
+                $employee = new Employee();
+                $employee->trax_id = $trax_id;
+                $employee->name = $request->name;
+                $employee->city_id = $request->default_hub;
+                $employee->cnic = $request->cnic;
+                $employee->phone_number = $request->phone_number;
+                $employee->official_phone_number = $request->official_phone_number;
+                $employee->employee_type_id = 1;
+                $employee->request_status_id = 3;
+                $employee->status_id = 3;
+                $employee->official_email = $request->email;
+                $employee->designation_id = $request->designation_id;
+                $employee->department_id = EmployeeDesignation::find($request->designation_id)->department_id ?? null;
+                $employee->pin = $request->pin;
+                $employee->shift_id = $request->shift_id;
+                $employee->save();
+
+                $employee_id = $employee->id;
             }
             else{
                 $trax_id = null;
@@ -252,6 +362,8 @@ class UserManagementController extends Controller
         $admin->employee_id = $employee_id;
 
         $admin->save();
+
+
 
         if ($request->has('hub_ids')) {
             foreach($request->input('hub_ids') as $hub_id) {
@@ -305,20 +417,70 @@ class UserManagementController extends Controller
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();
         $shifts = EmployeeShift::where('status', 1)->get();
         $designations = EmployeeDesignation::where('status',1)->get();
-        $reporting_locations = ReportingLocation::where('status',1)->get();
+//        $reporting_locations = ReportingLocation::where('status',1)->get();
 
         ActivityTrailController::createActivityTrailLog(Auth::id(),231,1);
-        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs, 'shifts' => $shifts,'designations'=>$designations, 'reporting_locations' => $reporting_locations]);
+        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs, 'shifts' => $shifts,'designations'=>$designations]);
         
     }
 
+    public function validate_phone(Request $request)
+    {
+        $id = null;
+        if($request->has('id'))
+        {
+            $id = $request->id;
+        }
+
+        $phone_number = null;
+        if($request->has('phone_number'))
+        {
+            $phone_number = $request->phone_number;
+        }
+
+        if($request->has('official_phone_number'))
+        {
+            $phone_number = $request->official_phone_number;
+        }
+
+        $phone_validate = Admin::where('id','!=',$id)->where(function ($query) use ($phone_number){
+            $query->where('phone_number',$phone_number)
+                ->orwhere('official_phone_number',$phone_number);
+            })->exists();
+
+        if($phone_validate)
+        {
+            return "false";
+        }
+
+        $trax_id = null;
+        if($id != null)
+        {
+            $admin = Admin::find($id);
+            $trax_id = $admin->trax_id;
+        }
+
+        $phone_validate = Employee::where('trax_id','!=',$trax_id)->where(function ($query) use ($phone_number){
+            $query->where('phone_number',$phone_number)
+                ->orwhere('official_phone_number',$phone_number);
+            })->exists();
+
+        if($phone_validate)
+        {
+            return "false";
+        }
+
+        return "true";
+    }
+
     public function user_update_store(Request $request, $id) {
-        
+
             $admin = Admin::find($id);
 
             $admin->name = $request->input('name');
             $admin->email = $request->input('email');
             $admin->phone_number = $request->input('phone_number');
+            $admin->official_phone_number = $request->input('official_phone_number');
             $admin->cnic = $request->input('cnic');
             if($admin->role_id != $request->input('role_id'))
             {
@@ -328,14 +490,15 @@ class UserManagementController extends Controller
             $admin->default_hub_id = $request->input('default_hub');
             $admin->updated_by = Auth::id();
             $admin->trax_id = $request->trax_id;
-            $admin->designation = $request->input('designation');
             $admin->shift_id = $request->input('shift_id');
-            $admin->reporting_location_id = $request->input('location_id');
             $admin->designation_id = $request->input('designation_id');
 
-            if ($request->filled('password')) {
-                $admin->password = bcrypt($request->input('password'));
+            if ($request->filled('pin')) {
+                $admin->password = bcrypt($request->input('pin'));
+                $admin->dummy_pin = $request->input('pin');
             }
+
+
 
             $admin->save();
 
@@ -360,6 +523,23 @@ class UserManagementController extends Controller
                 AdminHub::where('admin_id', $id)->delete();
             }
 
+            $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
+            if($employee->exists())
+            {
+                $employee = $employee->first();
+                $employee->designation_id = $admin->designation_id;
+                $employee->department_id = EmployeeDesignation::find($admin->designation_id)->department_id ?? null;
+                $employee->city_id = $admin->default_hub_id;
+                $employee->phone_number = $admin->phone_number;
+                $employee->official_phone_number = $admin->official_phone_number;
+                $employee->official_email = $admin->email;
+                $employee->cnic = $admin->cnic;
+                $employee->name = $admin->name;
+                $employee->pin = $admin->dummy_pin;
+                $employee->shift_id = $admin->shift_id;
+
+                $employee->update();
+            }
             return redirect()->route('admin.user_management.users.index')->with(['success' => 'User: ' . $request->input('name') . ' has been updated!']);
     }
 
@@ -472,11 +652,11 @@ class UserManagementController extends Controller
     }
 
     public function admin_otp_list(Request $request){
-        $admins = Admin::select('cities.name as city','admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.last_login_attempt')
+        $admins = Admin::select('cities.name as city','admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.reset_pin_otp as reset_pin_otp', 'admins.last_login_attempt')
             ->where('admins.status', 1)
             ->join('cities', 'admins.default_hub_id', '=', 'cities.id')
             ->whereNotNull('admins.otp');
-        if(!in_array(session('role_id'), [1, 58, 61, 56, 71])) {
+        if(!in_array(session('role_id'), [1, 58, 61, 56, 71, 70, 63])) {
             $admins = $admins->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->where('ar.department_id', session('department_id'));
         }
         $datatable = Datatables::of($admins);
@@ -499,13 +679,28 @@ class UserManagementController extends Controller
         return response()->json(['status' => 1, 'error'=> 'User not found!']);
     }
     public function user_phone_update(Request $request){
-        $admin_id = $request->admin_id;
-        $phone = $request->phone;
+        $admin_id = $request->id;
+        $phone = $request->phone_number;
+        $validate = $this->validate_phone($request);
+
+        if($validate == "false")
+        {
+            return redirect()->back()->with('error', 'Phone Number Already Exists!!');
+        }
+
         if($admin_id){
             $admin = Admin::find($admin_id);
             if($admin){
                 $admin->phone_number = $phone;
                 $admin->save();
+
+                $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
+                if($employee->exists())
+                {
+                    $employee = $employee->first();
+                    $employee->phone_number = $phone;
+                    $employee->update();
+                }
                 return redirect()->back()->with('success', 'Phone Number updated!');
 
             }

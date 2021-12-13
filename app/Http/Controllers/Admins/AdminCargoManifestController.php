@@ -1121,11 +1121,11 @@ class AdminCargoManifestController extends Controller
                         $origin = $shipment->consignee_city->hub_city->hub_id;
                     }
                     else{
-                        $destination = $shipment->pickup_address->city->hub_city;
+                        $destination = $shipment->pickup_address->city->hub_city->id;
                         $origin =  Auth::user()->default_hub_id;
                     }
                 }
-
+              
                 $bag = new CargoManifestBag();
                 $bag->seal_number = $shipment->tracking_number;
                 $bag->origin_hub_id = $origin;
@@ -2076,6 +2076,16 @@ class AdminCargoManifestController extends Controller
                 }
                 return $vehicle_data;
             })
+            ->filterColumn('vehicles',function ($query,$keyword){
+                $fleet = Fleet::where('reg_number',$keyword)->first();
+                if($fleet){
+                    $query->where('cm.vehicle_id', 'like', '%' . $fleet->id . '%');
+                }
+                else{
+                    $query->where('cm.vehicle_number', 'like', '%' . $keyword . '%');
+                }
+            })
+
         ;
 
         if ($tracking_number = $request->get('tracking_number')) {
@@ -2088,7 +2098,14 @@ class AdminCargoManifestController extends Controller
             $datatables->where('cargo_manifest_bags.seal_number', '=', $bag_number);
         }
         if ($vehicle_number = $request->get('vehicle_number')) {
-            $datatables->where('cm.vehicle_id', '=', $vehicle_number);
+            /*$datatables->where('cm.vehicle_id', '=', $vehicle_number);*/
+            $fleet = Fleet::where('reg_number',$vehicle_number)->first();
+            if($fleet){
+                $datatables->where('cm.vehicle_id', 'like', '%' . $fleet->id . '%');
+            }
+            else{
+                $datatables->where('cm.vehicle_number', 'like', '%' . $vehicle_number . '%');
+            }
         }
         if ($manifest_id = $request->get('manifest_number')) {
             $datatables->where('cm.id', '=', $manifest_id);
