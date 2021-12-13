@@ -402,6 +402,7 @@ class RiderManagementController extends Controller
             {
                 $employee = $employee->first();
                 $employee->status_id = AdminHumanResourseController::GetStatusOfEmployee($employee->id);
+                $employee->first_inactive = 1;
                 $employee->update();
             }
             if($rider){
@@ -414,6 +415,7 @@ class RiderManagementController extends Controller
             {
                 $employee = $employee->first();
                 $employee->status_id = 2;
+                $employee->first_inactive = 1;
                 $employee->update();
             }
             if($rider){
