@@ -10332,6 +10332,7 @@ class RiderAPIController extends Controller
                             $employee_request->pin = $request->pin;
                             $employee_request->rider_main_category = $request->rider_main_category;
                             $employee_request->rider_sub_category = $request->rider_sub_category;
+                            $employee_request->department_id = 6;
 
                             $employee_request->save();
 
