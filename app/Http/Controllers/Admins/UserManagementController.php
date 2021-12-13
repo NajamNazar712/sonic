@@ -89,9 +89,10 @@ class UserManagementController extends Controller
         $users = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
             ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
             ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
+            ->leftjoin('employee_designations as ed', 'admins.designation_id', '=', 'ed.id')
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'admins.trax_id')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation','admins.official_phone_number','emp.first_inactive');
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name');
 
         if(!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
@@ -108,6 +109,9 @@ class UserManagementController extends Controller
         })
         ->editColumn('status', function ($user) {
             return (($user->status) ? 'Enabled' : 'Disabled');
+        })
+        ->editColumn('designation', function ($user) {
+            return (($user->designation_name != null) ? $user->designation_name : $user->designation);
         })
         ->removeColumn('department')
         ->addColumn('action', function($user) {
