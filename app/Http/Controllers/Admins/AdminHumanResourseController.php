@@ -983,7 +983,7 @@ class AdminHumanResourseController extends Controller
             'official_email'=> 'bail|nullable|'.Rule::unique('employees', 'personal_email')->ignore($employee->id).'|'.Rule::unique('employees', 'official_email')->ignore($employee->id).'',
         ]);
 
-        $employee->request_status_id = 2;
+//        $employee->request_status_id = 2;
         $employee->name = $request->employee_name;
         $employee->phone_number = $request->personal_number;
         $employee->guardian_name = $request->name;
@@ -1065,7 +1065,7 @@ class AdminHumanResourseController extends Controller
                 $rider = $rider->first();
                 $rider->city_id = $employee->city_id;
                 $rider->name = $employee->name;
-                $rider->phone = $employee->official_phone_number;
+                $rider->phone = $employee->phone_number;
                 $rider->cnic = $employee->cnic;
                 $rider->address = $employee->address;
                 $rider->dummy_pin = $employee->pin;
@@ -1098,7 +1098,7 @@ class AdminHumanResourseController extends Controller
             echo $request->formatted_dob[$key];
         }
         if (count($request->name) > 0) {
-            $employee->request_status_id = 2;
+//            $employee->request_status_id = 2;
             $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
             $employee->update();
         }
@@ -1122,7 +1122,7 @@ class AdminHumanResourseController extends Controller
         }
 
         if (count($request->name) > 0) {
-            $employee->request_status_id = 2;
+//            $employee->request_status_id = 2;
             $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
             $employee->update();
         }
@@ -1146,7 +1146,7 @@ class AdminHumanResourseController extends Controller
         }
 
         if (count($request->name) > 0) {
-            $employee->request_status_id = 2;
+//            $employee->request_status_id = 2;
             $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
             $employee->update();
         }
@@ -1170,7 +1170,7 @@ class AdminHumanResourseController extends Controller
         $bank_info->iban = $request->iban_number;
         $bank_info->save();
 
-        $employee->request_status_id = 2;
+//        $employee->request_status_id = 2;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
 
@@ -1195,7 +1195,7 @@ class AdminHumanResourseController extends Controller
         $reference->email = $request->email;
         $reference->save();
 
-        $employee->request_status_id = 2;
+//        $employee->request_status_id = 2;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
 
@@ -2200,7 +2200,7 @@ class AdminHumanResourseController extends Controller
 
         $attachments->save();
 
-        $employee->request_status_id = 2;
+//        $employee->request_status_id = 2;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
 

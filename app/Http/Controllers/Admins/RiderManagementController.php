@@ -380,7 +380,7 @@ class RiderManagementController extends Controller
             $employee = $employee->first();
             $employee->city_id = $rider->city_id;
             $employee->name = $rider->name;
-            $employee->official_phone_number = $rider->phone;
+            $employee->phone_number = $rider->phone;
             $employee->cnic = $rider->cnic;
             $employee->address = $rider->address;
             $employee->pin = $rider->dummy_pin;
