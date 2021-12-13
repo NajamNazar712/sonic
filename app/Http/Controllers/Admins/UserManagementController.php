@@ -680,6 +680,14 @@ class UserManagementController extends Controller
             if($admin){
                 $admin->phone_number = $phone;
                 $admin->save();
+
+                $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
+                if($employee->exists())
+                {
+                    $employee = $employee->first();
+                    $employee->phone_number = $request->phone;
+                    $employee->update();
+                }
                 return redirect()->back()->with('success', 'Phone Number updated!');
 
             }
