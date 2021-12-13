@@ -528,6 +528,7 @@ class UserManagementController extends Controller
             {
                 $employee = $employee->first();
                 $employee->designation_id = $admin->designation_id;
+                $employee->department_id = EmployeeDesignation::find($admin->designation_id)->department_id ?? null;
                 $employee->city_id = $admin->default_hub_id;
                 $employee->phone_number = $admin->phone_number;
                 $employee->official_phone_number = $admin->official_phone_number;
