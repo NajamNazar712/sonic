@@ -928,6 +928,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function (){
+        Route::post('upload_attachment', 'Admins\AdminShipmentPieceController@upload_attachment')->name('upload_attachment');
+        Route::get('view_attachment/{id}', 'Admins\AdminShipmentPieceController@view_attachment')->name('view_attachment');
         Route::prefix('hold')->name('hold.')->group(function () {
             Route::get('', 'Admins\AdminShipmentPieceController@hold_index')->name('index');
             Route::get('list', 'Admins\AdminShipmentPieceController@hold_list')->name('list');
@@ -2505,7 +2507,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('pickup_settings_store', 'Admins\GlobalSettingsController@pickup_cut_off_settings_store')->name('pickup_settings_store');
         });
 
-
+        Route::prefix('shippers')->name('shippers.')->group(function (){
+            Route::prefix('status_webhook')->name('status_webhook.')->group(function (){
+                Route::get('','Admins\GlobalSettingsController@status_webhook_index')->name('index');
+                Route::get('list','Admins\GlobalSettingsController@status_webhook_list')->name('list');
+                Route::get('{id}/edit','Admins\GlobalSettingsController@status_webhook_edit')->name('edit');
+                Route::put('update','Admins\GlobalSettingsController@status_webhook_update')->name('update');
+            });
+        });
 
         Route::prefix('fleet')->name('fleet.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@fleet_index')->name('index');

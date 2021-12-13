@@ -122,7 +122,11 @@
                                     <div class="form-group m-0">
                                         <select name="rider" class="select2 rider" data-rule-required="true" data-msg-required="Rider is required">
                                             @foreach($riders as $rider)
+                                            @if($rider->trax_id)
+                                                <option value="{{ $rider->id }}">{{ $rider->name }} - {{ $rider->trax_id }}</option>
+                                            @else
                                                 <option value="{{ $rider->id }}">{{ $rider->name }}</option>
+                                            @endif
                                             @endforeach
                                         </select>
                                     </div>

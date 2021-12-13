@@ -786,10 +786,14 @@
                                     else {
                                         shipment += '<td colspan="3"></td>';
                                     }
-                                    shipment += '<td><strong>Sales Person</strong></td>';
+                                    shipment += '<td><strong>Sales Person<br>Tagged KAE</strong></td>';
 
-                                    if (details.shipper.sales_person != null) {
-                                        shipment += '<td colspan="3">' + details.shipper.sales_person + '</td>';
+                                    if (details.shipper.sales_person != null || details.shipper.tagged_kae != null) {
+                                       if(details.shipper.sales_person == null)
+                                            shipment += '<td colspan="3">&nbsp<br>' + details.shipper.tagged_kae + '</td>';
+                                       else
+                                            shipment += '<td colspan="3">' + details.shipper.sales_person + '<br>' + details.shipper.tagged_kae + '</td>';
+
                                     }
                                     else {
                                         shipment += '<td colspan="3"></td>'

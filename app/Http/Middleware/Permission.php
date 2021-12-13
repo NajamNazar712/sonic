@@ -714,6 +714,11 @@ class Permission
             'crm.consignee_info.index' => 363,
             'crm.consignee_info.list' => 363,
 
+            'settings.shippers.status_webhook.index' => 646,
+            'settings.shippers.status_webhook.list' => 646,
+            'settings.shippers.status_webhook.edit' => 646,
+            'settings.shippers.status_webhook.update' => 646,
+
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
 

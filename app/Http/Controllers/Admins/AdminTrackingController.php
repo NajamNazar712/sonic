@@ -40,6 +40,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\WMS\WmsUserInformation;
 
 use Auth;
 use Yajra\Datatables\Datatables;
@@ -48,8 +49,7 @@ use DB;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Models\Admin\NonServiceArea;
-use Illuminate\Support\Str;
+use App\Http\Models\SaleTierTag;
 
 class AdminTrackingController extends Controller
 {
@@ -70,6 +70,7 @@ class AdminTrackingController extends Controller
     }
 
     public function track(Request $request) {
+
     	$tracking_numbers = explode(',', $request->tracking_numbers);
 
     	$tracking = array();
@@ -110,6 +111,17 @@ class AdminTrackingController extends Controller
                         $sales_person_name = null;
                     }
 
+                    $tagged_kae = SaleTierTag::where('user_id',$shipper->id);
+                    if ($tagged_kae->exists()){
+                        $tagged_kae = $tagged_kae->first();
+                        if($tagged_kae->kam)
+                            $tagged_kae_name = $tagged_kae->kam_admin->name;
+                        else
+                            $tagged_kae_name = "-";
+                    }
+                    else{
+                        $tagged_kae_name = "-";
+                    }
                     $details['shipper']['name'] = $shipper->name;
                     $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                     $details['shipper']['city'] = $shipper->city->name;
@@ -117,6 +129,7 @@ class AdminTrackingController extends Controller
                     $details['shipper']['phone_number_2'] = $shipper->phone2;
                     $details['shipper']['email'] = $shipper->email;
                     $details['shipper']['sales_person'] = $sales_person_name;
+                    $details['shipper']['tagged_kae'] = $tagged_kae_name;
 
                     $pickup = $shipment->pickup_address;
 
@@ -793,16 +806,38 @@ class AdminTrackingController extends Controller
                         else{
                             $sales_person_name = null;
                         }
-
+                        $tagged_kae = SaleTierTag::where('user_id',$shipper->id);
+                        if ($tagged_kae->exists()){
+                            $tagged_kae = $tagged_kae->first();
+                            if($tagged_kae->kam)
+                                $tagged_kae_name = $tagged_kae->kam_admin->name;
+                            else
+                                $tagged_kae_name = "-";
+                        }
+                        else{
+                            $tagged_kae_name = "-";
+                        }
+                        $wms_user = WmsUserInformation::where('user_id', $shipper->id);
+                        if ($wms_user->exists()){
+                            $wms_user = $wms_user->first();
+                            if($wms_user->warehousing == 1)
+                                $wms_user_name = "(W)";
+                            else
+                                $wms_user_name = "";
+                        }
+                        else{
+                            $wms_user_name = "";
+                        }
                         if($shipment->shipment_type == 1){
                             $details['shipment_type'] = 1;
-                            $details['shipper']['name'] = $shipper->name;
+                            $details['shipper']['name'] = $shipper->name . ' ' . $wms_user_name;
                             $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                             $details['shipper']['city'] = $shipper->city->name;
                             $details['shipper']['phone_number_1'] = $shipper->phone;
                             $details['shipper']['phone_number_2'] = $shipper->phone2;
                             $details['shipper']['email'] = $shipper->email;
                             $details['shipper']['sales_person'] = $sales_person_name;
+                            $details['shipper']['tagged_kae'] = $tagged_kae_name;
                         }
                         else{
                             $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();

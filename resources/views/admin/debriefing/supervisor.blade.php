@@ -129,6 +129,13 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="row justify-content-center">
+                            <div class="col-6 form-group d-none" id="cn_input">
+                                <label for="cn_point_id">Add CN</label>
+                                <select class="form-control" name="cn_id" id="cn_id" multiple="multiple" required data-rule-required="true" data-msg-required="CN is required">
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button id="AssignAgentBtn" type="submit" class="btn btn-info">Add</button>
@@ -250,21 +257,27 @@
 				width: '100%',
 			});
 
+            $('#cn_id').prepend('<option value="" selected="selected"></option>').select2({
+				placeholder: 'Select CN *',
+				width: '100%',
+			});
+
             $('#hub_id').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Select Hub *'
 			}).bind('select2:select', function() {
-
+                // 'delivery_note_id': $('#delivery_note_id_input').val(),
+                var delivery_id = $('#delivery_note_id_input').val()
                 $.ajax({
                         url: '{!! route('admin.debriefing.supervisor.agents') !!}',
                         method: 'POST',
                         data: {
                             'hub_id': $(this).val(),
+                            'delivery_id': delivery_id,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
                         .done(function (data) {
-
                             if(data.status){
                                 $('#assign_agent_id').empty().append('<option selected="selected" placeholder="Select Hub *" value="">text</option>');
                                 $('#agend_input').removeClass('d-none');
@@ -272,8 +285,19 @@
 
                                     $('#assign_agent_id').append('<option value="'+agent.id+'" >'+agent.name+'</option>')
                                 });
+
+                                $('#cn_id').empty();
+                                $('#cn_input').removeClass('d-none');
+                                $.each(data.delivery_note_id, function (index, delivery_note) {
+
+                                    $('#cn_id').append('<option value="'+delivery_note.shipment_id+'" >'+delivery_note.tracking_number+'</option>')
+                                });
+                               
+                             
                             }else{
                                 $('#agend_input').addClass('d-none');
+                                $('#cn_input').addClass('d-none');
+                                
 
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }
@@ -747,6 +771,8 @@
             $('#AssignAgentModal').on('hide.bs.modal', function (){
                $('#assign_agent_form #hub_id').val('').trigger('change');
                 $('#agend_input').addClass('d-none');
+                $('#cn_input').addClass('d-none');
+
             });
 
             $('body').on('click','.printdeliverynote',function () {
@@ -788,7 +814,7 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-control'));
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
 
@@ -819,13 +845,15 @@
 
                             var delivery_note_id = $('#delivery_note_id_input').val();
                             var assign_agent_id = $('#assign_agent_id').val();
+                            var cn_id = $('#cn_id').val();
                             $.ajax({
                                 url: '{!! route('admin.debriefing.supervisor.assign_agents') !!}',
                                 method: 'POST',
                                 data: {
                                     '_token': '{{ csrf_token() }}',
                                     'delivery_note_id': delivery_note_id,
-                                    'agent_id': assign_agent_id
+                                    'agent_id': assign_agent_id,
+                                    'cn_id': cn_id
                                 }
                             })
                             .done(function (data){
