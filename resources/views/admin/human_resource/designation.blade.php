@@ -101,7 +101,7 @@
                             <input type="text" name="name" id="edit_name" class="form-control" placeholder="Designation Name*" data-rule-required="true" data-msg-required="Name is required">
                         </div>
                         <div class="form-group">
-                            <select name="department_id" id="department_edit" class="select2 form-control " data-rule-required="true" data-msg-required="Department is required" style="width: 100%">
+                            <select name="department_id" id="department_edit" disabled class="select2 form-control " data-rule-required="true" data-msg-required="Department is required" style="width: 100%">
                                 @foreach($departments as $department)
                                     <option value="{{$department->id}}">{{$department->name}}</option>
                                 @endforeach
