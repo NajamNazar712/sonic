@@ -2123,6 +2123,7 @@ class NotificationsController extends Controller
 
                                 $cc = array();
 
+
 //                  $general_admins = Admin::whereIn('role_id', [15, 21])->where('status', 1);
 //
 //                  if ($general_admins->exists()) {

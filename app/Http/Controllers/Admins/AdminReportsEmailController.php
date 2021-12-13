@@ -1559,7 +1559,7 @@ class AdminReportsEmailController extends Controller
                     $retail_done_payment_report->iban_number = $iban;
                     $retail_done_payment_report->save();
                     $serial++;
-                    $retail_done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $retail_done_payment->retail_done_payment_id, 'Shipper Name' => $retail_done_payment->retail_done_payment->shipper->name, 'IBAN Number' => $iban, 'Amount' => number_format($retail_done_payment->payable)];
+                    $retail_done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $retail_done_payment->retail_done_payment_id, 'Shipper Name' => $retail_done_payment->retail_done_payment->shipper->shipper_name, 'IBAN Number' => $iban, 'Amount' => number_format($retail_done_payment->payable)];
                     $total_amount = $total_amount + $retail_done_payment->payable;
                 }
             }
