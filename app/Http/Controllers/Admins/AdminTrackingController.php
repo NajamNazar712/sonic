@@ -1575,7 +1575,7 @@ class AdminTrackingController extends Controller
     }
     public function estimation_check(Request $request) {
 
-        $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest('status_reason_id')->first();
+        $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest('id')->first();
 
         if($journey->status_reason_id == 12)
         {
