@@ -1369,7 +1369,12 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($done_payment_array, NULL, 'A2', true);
             $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
             $sheet->getStyle("A7:E7")->applyFromArray($cell_st);
+            $userid = '';
+            if (Session::has('user_id')){
+                $userid = session('user_id');
+            }
             $date_file_name = Carbon::today()->format('Y_m_d');
+            $date_file_name .= $userid;
             $sheet->setTitle('Done Payments ' . $date_file_name);
             $writer = new Xlsx($spreadsheet);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
