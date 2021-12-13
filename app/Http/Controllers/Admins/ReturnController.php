@@ -1077,7 +1077,6 @@ class ReturnController extends Controller
             if(empty($errors)){
                 $tracking_numbers = array();
                 foreach ($rows as $key => $row) {
-                    dd(1);
                     $row_id = $key + 2;
                     $tracking = trim($row['tracking_number']);
                     $status = trim($row['shipper_status_id']);
