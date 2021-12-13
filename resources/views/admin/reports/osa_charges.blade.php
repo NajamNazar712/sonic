@@ -163,7 +163,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'NSA/OSA charges Log Report',
+                        title: 'OSA charges Log Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
