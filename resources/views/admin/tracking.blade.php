@@ -430,13 +430,13 @@
                 'max': 1000000.00
             });
             $('#estimated_charges_input').inputmask({
-                'alias': 'decimal',
+                'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false,
                 'digits': 2,
-                'min': 0.00,
-                'max': 1000000.00
+                'min': 0,
+                'max': 1000000
             });
             $('#return_reason_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
