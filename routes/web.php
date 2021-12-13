@@ -3262,6 +3262,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminInternationalShipmentsController@shipment_status_index')->name('index');
             Route::post('shipment_info', 'Admins\AdminInternationalShipmentsController@get_shipment_info')->name('shipment_info');
             Route::post('update', 'Admins\AdminInternationalShipmentsController@shipment_status_update')->name('update');
+            Route::post('updatemodal', 'Admins\AdminInternationalShipmentsController@shipment_status_update_modal')->name('updatemodal');
 
         });
             Route::prefix('rates')->name('rates.')->group(function () {

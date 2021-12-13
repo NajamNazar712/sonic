@@ -67,22 +67,23 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Edit Estimate Charges</h4>
+                    <h4 class="modal-title">Add Seal Number</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_seal_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
-
+                    <form id="add_seal_form" action="{{route('admin.international.shipment_status.updatemodal')}}" method="POST" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        {{ csrf_field() }}
                         <div class="form-group">
-                            <input type="text" name="seal_number" id="seal_number_input" class="form-control decimal" placeholder="Enter Seal Number" data-rule-required="true" data-msg-required="Seal Number is required">
+                            <input type="hidden" id="shipment_status_id" name="shipment_status_id">
+                            <input type="hidden" id="shipment_ids" name="shipment_ids">
+                            <input type="text" name="seal_number" id="seal_number_input" class="form-control integer" placeholder="Enter Seal Number" data-rule-required="true" data-msg-required="Seal Number is required">
 
                         </div>
-                        <input type="hidden" id="eec_shipment_id">
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Update Charges</button>
+                            <button type="submit" name="add" class="btn btn-primary" value="Add">Add Seal Number</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -114,6 +115,14 @@
             $('#shipment_status_select').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select a status',
                 width:'100%'
+            });
+            $('#add_seal_form .integer').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 100000
             });
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
@@ -229,9 +238,72 @@
                     return $.trim(value);
                 },
                 submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    var shipment_status_id = ('#shipment_status_select').val();
-                    alert(shipment_status_id);
+                    //$(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    var shipment_status_id = $('#shipment_status_select').val();
+                    if(shipment_status_id == 3 || shipment_status_id == 21){
+                        $('#AddSealNumberModal').modal('show');
+                        $('#add_seal_form #shipment_ids').val(shipment_ids);
+                        $('#add_seal_form #shipment_status_id').val(shipment_status_id);
+                    }
+                    else{
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to update Shipments!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                blockPagePermanently();
+                                $('#update_shipment_form button[type="submit"]').attr('disabled', 'disabled');
+                                $('#update_shipment_form input#shipment_ids').val(shipment_ids);
+                                form.submit();
+                            }
+                        });
+                    }
+                }
+            });
+
+
+            $('body').on('click','.action a.removerow',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, shipment_ids);
+
+                if (index !== -1) {
+                    shipment_ids.splice(index, 1);
+                }
+                table.row( $(this).parents('tr') ).remove().draw();
+                if(shipment_ids.length == 0){
+                    $('#update_shipment_form button[type="submit"]').attr('disabled', 'disabled');
+                    $('#default_status_id').val(0);
+                }
+            });
+
+            $('#add_seal_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to update Shipments!',
@@ -257,26 +329,14 @@
                         if(confirm){
                             blockPagePermanently();
                             $('#update_shipment_form button[type="submit"]').attr('disabled', 'disabled');
-                            $('#update_shipment_form input#shipment_ids').val(shipment_ids);
                             form.submit();
                         }
                     });
                 }
             });
 
-
-            $('body').on('click','.action a.removerow',function () {
-                var rid = parseInt($(this).parents('tr').attr('id'));
-                var index = $.inArray(rid, shipment_ids);
-
-                if (index !== -1) {
-                    shipment_ids.splice(index, 1);
-                }
-                table.row( $(this).parents('tr') ).remove().draw();
-                if(shipment_ids.length == 0){
-                    $('#update_shipment_form button[type="submit"]').attr('disabled', 'disabled');
-                    $('#default_status_id').val(0);
-                }
+            $('#AddSealNumberModal').on('hide.bs.modal', function (e) {
+                $('#seal_number_input').val('');
             });
 
         });
