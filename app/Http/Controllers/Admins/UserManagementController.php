@@ -87,10 +87,11 @@ class UserManagementController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),359);
         }
         $users = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
-        ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
-        ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
+            ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
+            ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
+            ->leftjoin('employees as emp', 'emp.trax_id', '=', 'admins.trax_id')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation','admins.official_phone_number');
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation','admins.official_phone_number','emp.first_inactive');
 
         if(!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
@@ -144,7 +145,7 @@ class UserManagementController extends Controller
 
 
                 if (session('role_id') == 1 || in_array(620, session('permissions'))) {
-                    if($user->status == 0) {
+                    if($user->status == 0 && $user->first_inactive == 1) {
                         $dropdown .= $rejoin_button;
                     }
                 }

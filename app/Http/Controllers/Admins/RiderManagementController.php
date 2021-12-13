@@ -66,7 +66,8 @@ class RiderManagementController extends Controller
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
+            ->leftjoin('employees as emp', 'emp.trax_id', '=', 'riders.trax_id')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at','emp.first_inactive')
         ->where('riders.rider_type_id', 1)
         ->where('riders.blacklist', 0);
         if (session('role_id') != 1) {
@@ -137,7 +138,7 @@ class RiderManagementController extends Controller
 
 
                     if (session('role_id') == 1 || in_array(620, session('permissions'))) {
-                        if($rider->status == 0) {
+                        if($rider->status == 0 && $rider->first_inactive == 1) {
                             $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
                         }
                     }
@@ -618,7 +619,8 @@ class RiderManagementController extends Controller
             ->leftjoin('rider_main_categories','riders.rider_main_category_id','=','rider_main_categories.id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_main_categories.name as main_category','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
+            ->leftjoin('employees as emp', 'emp.trax_id', '=', 'riders.trax_id')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_main_categories.name as main_category','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at','emp.first_inactive')
             ->where('riders.rider_type_id', 2)
             ->where('riders.blacklist', 0);
 
@@ -689,7 +691,7 @@ class RiderManagementController extends Controller
                     }
 
                     if (session('role_id') == 1 || in_array(620, session('permissions'))) {
-                        if($rider->status == 0) {
+                        if($rider->status == 0 && $rider->first_inactive == 1) {
                             $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
                         }
                     }
