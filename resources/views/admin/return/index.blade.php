@@ -214,7 +214,7 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Estimate Charges For NSA Reattempt</h4>
+                    <h4 class="modal-title">Estimated Charges for OSA Reattempt</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
