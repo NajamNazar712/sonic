@@ -66,7 +66,8 @@ class RiderManagementController extends Controller
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
+            ->leftjoin('employees as emp', 'emp.trax_id', '=', 'riders.trax_id')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at as created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at','emp.first_inactive')
         ->where('riders.rider_type_id', 1)
         ->where('riders.blacklist', 0);
         if (session('role_id') != 1) {
@@ -109,7 +110,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -133,6 +134,13 @@ class RiderManagementController extends Controller
                     }
                     if (session('role_id') == 1 || in_array(382, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
+                    }
+
+
+                    if (session('role_id') == 1 || in_array(620, session('permissions'))) {
+                        if($rider->status == 0 && $rider->first_inactive == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
+                        }
                     }
 
 
@@ -230,6 +238,7 @@ class RiderManagementController extends Controller
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
             'ccd' => ($request->has('ccd_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
+            'dummy_pin'=> $request->pin,
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
             'rider_type_id' => $type,
@@ -237,6 +246,23 @@ class RiderManagementController extends Controller
             'reporting_location_id' => $request->location_id,
         ]);
         if($rider){
+            $employee = new Employee();
+            $employee->city_id = $request->city_id;
+            $employee->name = $request->rider_name;
+            $employee->official_phone_number = $request->phone;
+            $employee->cnic = $request->cnic;
+            $employee->employee_type_id = 2;
+            $employee->request_status_id = 3;
+            $employee->status_id = 3;
+            $employee->address = $request->address;
+            $employee->pin =  $request->pin;
+            $employee->shift_id = $request->shift_id;
+            $employee->trax_id = $trax_id;
+            $employee->save();
+
+            $rider->employee_id = $employee->id;
+            $rider->update();
+
             NotificationsController::send(61, $rider->id, $request->pin);
             return redirect()->back()->with('success','Rider added successfully');
         }
@@ -318,6 +344,7 @@ class RiderManagementController extends Controller
 
         $rider->updated_by = Auth::id();
 
+
         if($request->route_id == 'other'){
             $route = new Route();
             $route->city_id = $request->city_id;
@@ -346,6 +373,21 @@ class RiderManagementController extends Controller
 
         $rider->save();
 
+
+        $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+        if($employee->exists())
+        {
+            $employee = $employee->first();
+            $employee->city_id = $rider->city_id;
+            $employee->name = $rider->name;
+            $employee->phone_number = $rider->phone;
+            $employee->cnic = $rider->cnic;
+            $employee->address = $rider->address;
+            $employee->pin = $rider->dummy_pin;
+            $employee->shift_id = $rider->shift_id;
+            $employee->save();
+        }
+
         if($rider){
             return redirect()->back()->with('success','Rider updated successfully');
         }
@@ -354,19 +396,81 @@ class RiderManagementController extends Controller
         $id = $request->cid;
         $status = $request->status;
         if($status == 'riderActive'){
-            $rider = Rider::where('id',$id)->update(['status'=>1]);
+            $rider = Rider::where('id',$id)->first();
+            $rider->status = 1;
+            $rider->update();
+            $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+            if($employee->exists())
+            {
+                $employee = $employee->first();
+                $employee->status_id = AdminHumanResourseController::GetStatusOfEmployee($employee->id);
+                $employee->first_inactive = 1;
+                $employee->update();
+            }
             if($rider){
                 return redirect()->back()->with('success','Rider is activated successfully');
             }
         }else if($status == 'riderInactive'){
-            $rider =Rider::where('id',$id)->update(['status'=>0]);
+            $rider =Rider::where('id',$id)->first();
+            $rider->status = 0;
+            $rider->update();
+            $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+            if($employee->exists())
+            {
+                $employee = $employee->first();
+                $employee->status_id = 2;
+                $employee->first_inactive = 1;
+                $employee->update();
+            }
             if($rider){
-                return redirect()->back()->with('success','Route is now inactive');
+                return redirect()->back()->with('success','Rider is now inactive');
             }
 
         }
 
     }
+
+    public function rejoin(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+        $employee = Rider::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+
+        $staff = Employee::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Rider not associated with any Employee!']);
+        }
+        $staff = $staff->first();
+
+        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+        if ($global_setting->exists()) {
+            $global_setting = $global_setting->first();
+            $trax_id = $global_setting->setting_value + 1;
+            $global_setting->setting_value = $trax_id;
+            $global_setting->save();
+            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+        } else {
+            $trax_id = null;
+        }
+
+        $employee->status = 1;
+        $employee->updated_by = Auth::id();
+        $employee->trax_id = $trax_id;
+        $employee->save();
+
+        $staff->status_id = AdminHumanResourseController::GetStatusOfEmployee($staff->id);
+        $staff->trax_id = $trax_id;
+        $staff->save();
+        return response()->json(['status' => 0, 'success' => 'Rider Rejoined Successfully!']);
+    }
+
     public function rider_phone_unique(Request $request) {
         if ($request->filled('phone')) {
             if ($request->input('phone') == '0213-8772222') {
@@ -417,9 +521,29 @@ class RiderManagementController extends Controller
             if($rider){
                 $rider_status = $rider->rider_type_id;
                 if($rider_status == 2){
+                    $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+                    if ($global_setting->exists()) {
+                        $global_setting = $global_setting->first();
+                        $trax_id = $global_setting->setting_value + 1;
+                        $global_setting->setting_value = $trax_id;
+                        $global_setting->save();
+                        $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    } else {
+                        $trax_id = null;
+                    }
+
+                    $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+                    if($employee->exists())
+                    {
+                        $employee->trax_id = $trax_id;
+                        $employee->update();
+                    }
+                    $rider->trax_id = $trax_id;
                     $rider->rider_type_id = 1;
                     $rider->updated_by = Auth::id();
                     $rider->save();
+
                     return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                 }
                 return response()->json(['status' => 1, 'error' => 'Rider already Marked as Permanent Rider!']);
@@ -501,7 +625,8 @@ class RiderManagementController extends Controller
             ->leftjoin('rider_main_categories','riders.rider_main_category_id','=','rider_main_categories.id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_main_categories.name as main_category','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at')
+            ->leftjoin('employees as emp', 'emp.trax_id', '=', 'riders.trax_id')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_main_categories.name as main_category','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist','riders.updated_at','emp.first_inactive')
             ->where('riders.rider_type_id', 2)
             ->where('riders.blacklist', 0);
 
@@ -545,7 +670,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -569,6 +694,12 @@ class RiderManagementController extends Controller
                     }
                     if (session('role_id') == 1 || in_array(382, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
+                    }
+
+                    if (session('role_id') == 1 || in_array(620, session('permissions'))) {
+                        if($rider->status == 0 && $rider->first_inactive == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $rider->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
+                        }
                     }
 
 

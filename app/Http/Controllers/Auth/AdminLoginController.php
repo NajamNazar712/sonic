@@ -38,11 +38,12 @@ class AdminLoginController extends Controller
         //validate the form
 //        $errors = new MessageBag;
         $this->validate($request, [
-            'email' =>'required|email',
-            'password' => 'required|min:6'
+            'phone_number' =>'required',
+            'pin' => 'required|min:4'
         ]);
+
         //Attempt to login
-        if(Auth::guard('admin')->attempt(['email' => $request->email , 'password'=>$request->password], $request->remember)){
+        if(Auth::guard('admin')->attempt(['phone_number' => $request->phone_number , 'password'=>$request->pin], $request->remember) || Auth::guard('admin')->attempt(['official_phone_number' => $request->phone_number , 'password'=>$request->pin], $request->remember)){
             //if Successfull then redirect to intended location
 
             $admin = Auth::guard('admin');
@@ -118,7 +119,7 @@ class AdminLoginController extends Controller
 
     public function username()
     {
-        return 'email';
+        return 'phone_number';
     }
 
 
@@ -148,13 +149,13 @@ class AdminLoginController extends Controller
 
     }
     public function credentials(Request $request){
-        $admin = Admin::where('email', $request->email);
+        $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number',$request->phone_number);
         if ($admin->exists()) {
             $admin = $admin->first();
         } else {
             return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
         }
-        if (Hash::check($request->input('password'), $admin->password)) {
+        if (Hash::check($request->input('pin'), $admin->password)) {
             $environment = config('app.env');
 
             if ($environment == 'production' || $environment == 'staging') {
@@ -162,7 +163,8 @@ class AdminLoginController extends Controller
                 $admin->otp = $otp;
                 $admin->last_login_attempt = Carbon::now();
                 $admin->save();
-                NotificationsController::send(138, $admin, $otp);
+                $data = array("otp"=>$otp,"phone_number"=>$request->phone_number);
+                NotificationsController::send(138, $admin, $data);
             }
 
             return response()->json(['status' => 1]);
@@ -174,7 +176,7 @@ class AdminLoginController extends Controller
     public function verify_otp(Request $request){
         $environment = config('app.env');
         if($environment == 'production' || $environment == 'staging') {
-            $admin = Admin::where('email', $request->email);
+            $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number',$request->phone_number);
             if ($admin->exists()) {
                 $admin = $admin->first();
                 if ($admin->otp == $request->otp) {

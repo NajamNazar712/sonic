@@ -61,7 +61,7 @@
                             <a class="dropdown-item" href="#" id="adminprofileshow"><span class="menu-title adminprofile"><i class="ft-user"></i> Profile</span></a>
                             <a class="dropdown-item" href="http://bit.ly/sonic_manuals" target="_blank"><i class="ft-help-circle"></i> HELP</a>
                             <a class="dropdown-item" href="{{ route('admin.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
-                            <a class="dropdown-item" href="{{ route('admin.update.profile.password') }}"><span class="menu-title"><i class="ft-edit"></i>Change Password</span></a>
+                            <a class="dropdown-item" href="{{ route('admin.update.profile.password') }}"><span class="menu-title"><i class="ft-edit"></i>Change Pin</span></a>
                             <a class="dropdown-item" href="{{route('admin.logout')}}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();"><i class="ft-power"></i> Logout</a>
                             <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
@@ -83,6 +83,7 @@
                     url:'{!! route('admin.dashboard.admin_profile') !!}',
                     type:'GET'
                 }).done(function (data) {
+
                     if(data){
                         full_name = data.full_name;
                         department = data.department;

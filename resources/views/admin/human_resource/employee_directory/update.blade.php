@@ -48,25 +48,67 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Employee Name<span class="text-danger">*</span></label>
-                                                <input type="text" id="employee_name" class="form-control border-primary" value="{{$employee->name}}" data-rule-required="true" data-msg-required="Employee Name is required" name="employee_name">
+                                                <input type="text" id="employee_name" class="form-control" value="{{$employee->name}}" data-rule-required="true" data-msg-required="Employee Name is required" name="employee_name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Father/Husband Name<span class="text-danger">*</span></label>
-                                                <input type="text" id="name" class="form-control border-primary" value="{{$employee->guardian_name}}" data-rule-required="true" data-msg-required="Father/Husband Name is required" name="name">
+                                                <input type="text" id="name" class="form-control" value="{{$employee->guardian_name}}" data-rule-required="true" data-msg-required="Father/Husband Name is required" name="name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Mother Name<span class="text-danger">*</span></label>
-                                                <input type="text" id="mother_name" class="form-control border-primary" value="{{$employee->mother_name}}" data-rule-required="true" data-msg-required="Mother Name is required" name="mother_name">
+                                                <input type="text" id="mother_name" class="form-control" value="{{$employee->mother_name}}" data-rule-required="true" data-msg-required="Mother Name is required" name="mother_name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Religion</label>
-                                                <select name="religion" id="religion" class="select2 form-control " style="width: 100%">
+                                                <label>Personal Number<span class="text-danger">*</span></label>
+                                                <input type="text" id="personal_number" class="form-control" value="{{$employee->phone_number}}" data-rule-required="true" data-msg-required="Phone Number is required" name="personal_number">
+                                            </div>
+                                        </div>
+                                        @if($employee->employee_type_id == 1)
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Personal Email<span class="text-danger">*</span></label>
+                                                    <input type="text" id="personal_email" data-rule-required="true" data-msg-required="Email is required" class="form-control email_mask" value="{{$employee->personal_email}}" name="personal_email">
+                                                </div>
+                                            </div>
+                                        @endif
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>CNIC<span class="text-danger">*</span></label>
+                                                <input type="text" id="cnic" data-rule-required="true"  data-msg-required="CNIC is required" class="form-control" value="{{$employee->cnic}}" name="cnic">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Address<span class="text-danger">*</span></label>
+                                                <textarea data-rule-required="true" data-msg-required="Address is required"  class="form-control" id="address" name="address">{{$employee->address}}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Emergency Contact<span class="text-danger">*</span></label>
+                                                <input type="text" id="emergency_contact" data-rule-required="true"  data-msg-required="Emergency Contact is required" class="form-control" value="{{$employee->emergency_contact}}" name="emergency_contact">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Gender<span class="text-danger">*</span></label>
+                                                <select name="gender" id="gender" data-rule-required="true"  data-msg-required="Gender is required" class="select2 form-control " style="width: 100%" >
+                                                    @foreach($genders as $gender)
+                                                        <option value="{{$gender->id}}">{{$gender->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Religion<span class="text-danger">*</span></label>
+                                                <select name="religion" id="religion" data-rule-required="true" data-msg-required="Religion is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($religions as $religion)
                                                         <option value="{{$religion->id}}">{{$religion->name}}</option>
                                                     @endforeach
@@ -75,10 +117,20 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Nationality</label>
-                                                <select name="nationality" id="nationality" class="select2 form-control " style="width: 100%">
+                                                <label>Nationality<span class="text-danger">*</span></label>
+                                                <select name="nationality" id="nationality" data-rule-required="true" data-msg-required="Nationality is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($nationalities as $nationality)
                                                         <option value="{{$nationality->id}}">{{$nationality->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Marital Status<span class="text-danger">*</span></label>
+                                                <select name="marital_status" id="marital_status" data-rule-required="true" data-msg-required="Marital Status is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($maritial_statuses as $maritial_status)
+                                                        <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -95,16 +147,6 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Marital Status</label>
-                                                <select name="marital_status" id="marital_status" class="select2 form-control " style="width: 100%">
-                                                    @foreach($maritial_statuses as $maritial_status)
-                                                        <option value="{{$maritial_status->id}}">{{$maritial_status->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
                                                 <label>Blood Group</label>
                                                 <select name="blood_group" id="blood_group" class="select2 form-control " style="width: 100%">
                                                     @foreach($blood_groups as $blood_group)
@@ -114,76 +156,14 @@
                                             </div>
                                         </div>
                                         <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Personal Number<span class="text-danger">*</span></label>
-                                                <input type="text" id="personal_number" class="form-control border-primary" value="{{$employee->phone_number}}" data-rule-required="true" data-msg-required="Phone Number is required" name="personal_number">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Personal Email</label>
-                                                <input type="email" id="personal_email" class="form-control border-primary" value="{{$employee->personal_email}}" name="personal_email">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Address<span class="text-danger">*</span></label>
-                                                <textarea data-rule-required="true" data-msg-required="Address is required"  class="form-control border-primary" id="address" name="address">{{$employee->address}}</textarea>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Emergency Contact<span class="text-danger">*</span></label>
-                                                <input type="text" id="emergency_contact" data-rule-required="true"  data-msg-required="Emergency Contact is required" class="form-control border-primary" value="{{$employee->emergency_contact}}" name="emergency_contact">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Place Of Birth</label>
-                                                <select name="place_of_birth" id="place_of_birth" class="select2 form-control " style="width: 100%">
-                                                    @foreach($place_of_birth_cities as $place_of_birth_city)
-                                                        <option value="{{$place_of_birth_city->id}}">{{$place_of_birth_city->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label>Date Of Birth</label>
+                                            <label>Date Of Birth<span class="text-danger">*</span></label>
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="date_of_birth" data-value="{{$employee->date_of_birth != null ? $employee->date_of_birth : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="date_of_birth" placeholder="Date of Birth">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>CNIC<span class="text-danger">*</span></label>
-                                                <input type="text" id="cnic" data-rule-required="true"  data-msg-required="CNIC is required" class="form-control border-primary" value="{{$employee->cnic}}" name="cnic">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label>CNIC Issue Date</label>
-                                            <div class="form-group input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                        <span class="la la-calendar-o small-calender-icon"></span>
-                                                    </span>
-                                                </div>
-                                                <input type="text" name="cnic_issue_date" data-value="{{$employee->cnic_issue_date != null ? date('Y/m/d',strtotime($employee->cnic_issue_date)) : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_issue_date" placeholder="CNIC Issue Date">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label>CNIC Expiry Date</label>
-                                            <div class="form-group input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                        <span class="la la-calendar-o small-calender-icon"></span>
-                                                    </span>
-                                                </div>
-                                                <input type="text" name="cnic_expiry_date" data-value="{{$employee->cnic_expiry_date != null ? date('Y/m/d',strtotime($employee->cnic_expiry_date)) : ''}}"  class="form-control bg-primary border-primary white rounded-right pickadate" id="cnic_expiry_date" placeholder="CNIC Expiry Date">
+                                                <input type="text" name="date_of_birth" data-rule-required="true" data-msg-required="Date of Birth is required" data-value="{{$employee->date_of_birth != null ? $employee->date_of_birth : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="date_of_birth" placeholder="Date of Birth">
                                             </div>
                                         </div>
                                     </div>
@@ -191,16 +171,6 @@
                                 <div class="col-md-6">
                                     <div class="form-body">
                                         <h4 class="form-section">Official Info</h4>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>City<span class="text-danger">*</span></label>
-                                                <select name="city" id="city" class="select2 form-control " data-rule-required="true"  data-msg-required="City is required" style="width: 100%">
-                                                    @foreach($cities as $city)
-                                                        <option value="{{$city->id}}">{{$city->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Zone<span class="text-danger">*</span></label>
@@ -213,6 +183,17 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
+                                                <label>City<span class="text-danger">*</span></label>
+                                                <select name="city" id="city" class="select2 form-control " data-rule-required="true"  data-msg-required="City is required" style="width: 100%">
+                                                    @foreach($cities as $city)
+                                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        @if($employee->employee_type_id == 1)
+                                        <div class="col-md-12">
+                                            <div class="form-group">
                                                 <label>Department<span class="text-danger">*</span></label>
                                                 <select name="department" id="department" data-rule-required="true"  data-msg-required="Department is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($departments as $department)
@@ -221,7 +202,6 @@
                                                 </select>
                                             </div>
                                         </div>
-
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Designation<span class="text-danger">*</span></label>
@@ -231,29 +211,22 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
-                                                <input type="text" id="bolt_pin" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" class="form-control border-primary" value="{{$employee->pin}}" name="bolt_pin" data-rule-minlength="4" data-rule-maxlength="4">
+                                                <label>Staff Category<span class="text-danger">*</span></label>
+                                                <select name="staff_category" id="staff_category" data-rule-required="true" data-msg-required="Staff Category is Required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($staff_categories as $staff_category)
+                                                        <option value="{{$staff_category->id}}">{{$staff_category->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
+                                        @endif
+                                        @if($employee->employee_type_id == 2)
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Official Number</label>
-                                                <input type="text" id="official_number" class="form-control border-primary" value="{{$employee->official_phone_number}}" name="official_number" >
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Official & Outlook ID</label>
-                                                <input type="email" id="official_email" class="form-control border-primary" value="{{$employee->official_email}}" name="official_email" >
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Reporting Location</label>
-                                                <select name="reporting_location" id="reporting_location" class="select2 form-control " style="width: 100%">
-                                                    @foreach($reporting_locations as $reporting_location)
-                                                        <option value="{{$reporting_location->id}}">{{$reporting_location->name}}</option>
+                                                <label>Rider Type<span class="text-danger">*</span></label>
+                                                <select name="rider_type" id="rider_type" data-rule-required="true"  data-msg-required="Rider Type is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($rider_types as $rider_type)
+                                                        <option value="{{$rider_type->id}}">{{$rider_type->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -261,10 +234,59 @@
 
                                         <div class="col-md-12">
                                             <div class="form-group">
+                                                <label>Rider Main Category<span class="text-danger">*</span></label>
+                                                <select name="rider_main_category" id="rider_main_category" data-rule-required="true" data-msg-required="Main Category is Required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($main_categories as $main_category)
+                                                        <option value="{{$main_category->id}}">{{$main_category->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Rider Sub Category<span class="text-danger">*</span></label>
+                                                <select name="rider_sub_category" id="rider_sub_category" data-rule-required="true" data-msg-required="Sub Category is Required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($sub_categories as $sub_category)
+                                                        <option value="{{$sub_category->id}}">{{$sub_category->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Bolt & Sonic Pin<span class="text-danger">*</span></label>
+                                                <div class="form-group position-relative">
+                                                    <input type="password" id="bolt_pin" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" class="form-control" value="{{$employee->pin}}" name="bolt_pin" data-rule-minlength="4" data-rule-maxlength="4">
+                                                    <div class="form-control-position" id="peye">
+                                                        <i class="la la-eye success"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Official Number</label>
+                                                <input type="text" id="official_number" class="form-control" value="{{$employee->official_phone_number}}" name="official_number" >
+                                            </div>
+                                        </div>
+                                        @if($employee->employee_type_id == 1)
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Official & Outlook ID</label>
+                                                <input type="text" id="official_email" class="form-control email_mask" value="{{$employee->official_email}}" name="official_email" >
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
                                                 <label>Working Shift<span class="text-danger">*</span></label>
                                                 <select name="shift_id" id="shift_list" data-rule-required="true"  data-msg-required="Shift is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($shifts as $shift)
-                                                        <option value="{{$shift->id}}">{{$shift->name}}</option>
+                                                        <option value="{{$shift->id}}">{{$shift->name}} ({{$shift->start_time}} - {{$shift->end_time}})</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -300,7 +322,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Name Of Family Member<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary name_family_member" value="{{$medical_info->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name is required">
+                                                            <input type="text" class="form-control name_family_member" value="{{$medical_info->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -349,7 +371,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Name Of Family Member<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary name_family_member" value="" name="name[0]" data-rule-required="true" data-msg-required="Name is required">
+                                                            <input type="text" class="form-control name_family_member" value="" name="name[0]" data-rule-required="true" data-msg-required="Name is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -415,24 +437,6 @@
                                         <h4 class="form-section">Bank Information</h4>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Account Title<span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control border-primary" id="account_title" value="{{$bank_info->account_title ?? ''}}" name="account_title" data-rule-required="true" data-msg-required="Account Title is required">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Branch Code<span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control border-primary" id="branch_code" value="{{$bank_info->branch_code ?? ''}}" name="branch_code" data-rule-required="true" data-msg-required="Branch Code is required">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Account Number<span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control border-primary" id="account_number" value="{{$bank_info->account_no ?? ''}}" name="account_number" data-rule-required="true" data-msg-required="Account Number is required">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
                                                 <label>Bank Name<span class="text-danger">*</span></label>
                                                 <select name="bank_name" id="bank_name" data-rule-required="true" data-msg-required="Bank Name is required" class="select2 form-control required" style="width: 100%">
                                                     @foreach($banks as $bank)
@@ -443,14 +447,20 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
+                                                <label>Account Title<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="account_title" value="{{$bank_info->account_title ?? ''}}" name="account_title" data-rule-required="true" data-msg-required="Account Title is required">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
                                                 <label>Branch Name<span class="text-danger">*</span></label>
-                                                <input type="text" data-rule-required="true" data-msg-required="Branch Name is required" class="form-control border-primary" id="branch_name" value="{{$bank_info->branch_name ?? ''}}" name="branch_name">
+                                                <input type="text" data-rule-required="true" data-msg-required="Branch Name is required" class="form-control" id="branch_name" value="{{$bank_info->branch_name ?? ''}}" name="branch_name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>IBAN Number<span class="text-danger">*</span></label>
-                                                <input type="text" data-rule-required="true" data-msg-required="IBAN Number is required" placeholder="(e.g: PK37MEZN0001220100004069)" class="form-control border-primary" id="iban_number" value="{{$bank_info->iban ?? ''}}" name="iban_number">
+                                                <input type="text" data-rule-required="true" data-msg-required="IBAN Number is required" placeholder="(e.g: PK37MEZN0001220100004069)" class="form-control" id="iban_number" value="{{$bank_info->iban ?? ''}}" name="iban_number">
                                             </div>
                                         </div>
                                     </div>
@@ -484,13 +494,13 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Name Of Institute<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary name_institute" value="{{$education->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name Of Institute is required">
+                                                            <input type="text" class="form-control name_institute" value="{{$education->name}}" name="name[{{$index}}]" data-rule-required="true" data-msg-required="Name Of Institute is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Degree Awarded<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary degree" value="{{$education->degree}}" name="degree[{{$index}}]" data-rule-required="true" data-msg-required="Degree is required">
+                                                            <input type="text" class="form-control degree" value="{{$education->degree}}" name="degree[{{$index}}]" data-rule-required="true" data-msg-required="Degree is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -533,13 +543,13 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Name Of Institute<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary name_institute" value="" name="name[0]" data-rule-required="true" data-msg-required="Name Of Institute is required">
+                                                            <input type="text" class="form-control name_institute" value="" name="name[0]" data-rule-required="true" data-msg-required="Name Of Institute is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Degree Awarded<span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control border-primary degree" value="" name="degree[0]" data-rule-required="true" data-msg-required="Degree is required">
+                                                            <input type="text" class="form-control degree" value="" name="degree[0]" data-rule-required="true" data-msg-required="Degree is required">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -606,13 +616,13 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Company/Organization Name<span class="text-danger">*</span></label>
-                                                            <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment" value="{{$employment->name ?? ''}}" name="name[{{$index}}]">
+                                                            <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control name_emplotment" value="{{$employment->name ?? ''}}" name="name[{{$index}}]">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Position/Designation<span class="text-danger">*</span></label>
-                                                            <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment" value="{{$employment->designation ?? ''}}" name="position[{{$index}}]">
+                                                            <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control position_employment" value="{{$employment->designation ?? ''}}" name="position[{{$index}}]">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -640,7 +650,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Reason<span class="text-danger">*</span></label>
-                                                            <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment" name="reason[{{$index}}]">{{$employment->reason}}</textarea>
+                                                            <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control reason_employment" name="reason[{{$index}}]">{{$employment->reason}}</textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -658,13 +668,13 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Company/Organization Name<span class="text-danger">*</span></label>
-                                                            <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment" value="" name="name[0]">
+                                                            <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control name_emplotment" value="" name="name[0]">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Position/Designation<span class="text-danger">*</span></label>
-                                                            <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment" value="" name="position[0]">
+                                                            <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control position_employment" value="" name="position[0]">
                                                         </div>
                                                     </div>
                                                     <div class="col-md-12">
@@ -692,7 +702,7 @@
                                                     <div class="col-md-12">
                                                         <div class="form-group">
                                                             <label>Reason<span class="text-danger">*</span></label>
-                                                            <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment" name="reason[0]"></textarea>
+                                                            <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control reason_employment" name="reason[0]"></textarea>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -728,37 +738,37 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Name</label>
-                                                <input type="text" class="form-control border-primary" id="reference_name" value="{{$reference->name ?? ''}}" name="name">
+                                                <input type="text" class="form-control" id="reference_name" value="{{$reference->name ?? ''}}" name="name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Occupation</label>
-                                                <input type="text" class="form-control border-primary" id="reference_occupation" value="{{$reference->occupation ?? ''}}" name="occupation">
+                                                <input type="text" class="form-control" id="reference_occupation" value="{{$reference->occupation ?? ''}}" name="occupation">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Relationship</label>
-                                                <input type="text" class="form-control border-primary" id="reference_relationship" value="{{$reference->relationship ?? ''}}" name="relationship">
+                                                <input type="text" class="form-control" id="reference_relationship" value="{{$reference->relationship ?? ''}}" name="relationship">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Years</label>
-                                                <input type="text" class="form-control border-primary" id="reference_years" value="{{$reference->years ?? ''}}" name="years">
+                                                <input type="text" class="form-control" id="reference_years" value="{{$reference->years ?? ''}}" name="years">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Phone Number</label>
-                                                <input type="text" class="form-control border-primary" id="references_phone" value="{{$reference->phone_number ?? ''}}" name="phone">
+                                                <input type="text" class="form-control" id="references_phone" value="{{$reference->phone_number ?? ''}}" name="phone">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Email</label>
-                                                <input type="email" class="form-control border-primary" id="references_email" value="{{$reference->email ?? ''}}" name="email">
+                                                <input type="text" class="form-control email_mask" id="references_email" value="{{$reference->email ?? ''}}" name="email">
                                             </div>
                                         </div>
                                     </div>
@@ -784,6 +794,95 @@
                                     <div class="form-body" id="employment_info_container">
                                         <h4 class="form-section">Attachments</h4>
                                         <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label>Scanned CNIC</label>
+                                                    @if(isset($attachments) && $attachments->cnic != null)
+                                                        @php
+                                                            $cnics = explode(',', $attachments->cnic);
+                                                        @endphp
+                                                    @endif
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_1_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_2_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_3_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="row">
+                                                                <div class="col-md-8">
+                                                                    <input type="file" name="cnic_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    @if(isset($cnics))
+                                                                        @foreach($cnics as $cnic)
+                                                                            @php
+                                                                                $pos = strpos($cnic, "cnic_4_");
+                                                                            @endphp
+                                                                            @if($pos !== false)
+                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
+                                                                            @endif
+                                                                        @endforeach
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <div class="col-md-12">
                                                 <div class="form-group">
                                                     <label>CV/Resume</label>
@@ -871,95 +970,6 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>Scanned CNIC</label>
-                                                    @if(isset($attachments) && $attachments->cnic != null)
-                                                        @php
-                                                            $cnics = explode(',', $attachments->cnic);
-                                                        @endphp
-                                                    @endif
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <div class="row">
-                                                                <div class="col-md-8">
-                                                                    <input type="file" name="cnic_1" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    @if(isset($cnics))
-                                                                        @foreach($cnics as $cnic)
-                                                                            @php
-                                                                                $pos = strpos($cnic, "cnic_1_");
-                                                                            @endphp
-                                                                            @if($pos !== false)
-                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
-                                                                            @endif
-                                                                        @endforeach
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="row">
-                                                                <div class="col-md-8">
-                                                                    <input type="file" name="cnic_2" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    @if(isset($cnics))
-                                                                        @foreach($cnics as $cnic)
-                                                                            @php
-                                                                                $pos = strpos($cnic, "cnic_2_");
-                                                                            @endphp
-                                                                            @if($pos !== false)
-                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
-                                                                            @endif
-                                                                        @endforeach
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="row">
-                                                                <div class="col-md-8">
-                                                                    <input type="file" name="cnic_3" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    @if(isset($cnics))
-                                                                        @foreach($cnics as $cnic)
-                                                                            @php
-                                                                                    $pos = strpos($cnic, "cnic_3_");
-                                                                            @endphp
-                                                                            @if($pos !== false)
-                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
-                                                                            @endif
-                                                                        @endforeach
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="row">
-                                                                <div class="col-md-8">
-                                                                    <input type="file" name="cnic_4" class="w-100 p-1 border-primary" title="Select File" data-rule-extension="docx|pdf|doc" data-msg-extension="Only file with extension docx , doc or pdf allowed" data-rule-accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-msg-accept="Only Pdf or Word file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    @if(isset($cnics))
-                                                                        @foreach($cnics as $cnic)
-                                                                            @php
-                                                                                $pos = strpos($cnic, "cnic_4_");
-                                                                            @endphp
-                                                                            @if($pos !== false)
-                                                                                <a href="{{asset(Storage::url($cnic))}}" target="_blank"><button type="button" class="btn btn-primary btn-block w-100">View</button></a>
-                                                                            @endif
-                                                                        @endforeach
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    </div>
                                             </div>
 
                                             <div class="col-md-12">
@@ -1992,6 +2002,8 @@
         var today = new Date();
         today.setHours(0,0,0,0);
         $(document).ready(function() {
+            $('#peye').on('mousedown',function(){$('#bolt_pin').attr('type','text')}).on('mouseup',function(){$('#bolt_pin').attr('type','password')});
+
             $('#profile-form #emergency_contact, #profile-form #personal_number , #profile-form #official_number , #references-form #references_phone').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
@@ -2006,6 +2018,11 @@
                 'clearIncomplete': true,
             });
 
+
+			$('.email_mask').inputmask({
+                'alias': 'email',
+                'clearIncomplete': true
+            });
             $('#profile-form #cnic').inputmask({
                 'mask': '99999-9999999-9',
                 'clearIncomplete': true
@@ -2046,7 +2063,7 @@
             var cnic_expiry_date = $('#profile-form #cnic_expiry_date').pickadate({
                 firstDay: 1,
                 clear: '',
-                selectYears: true,
+                selectYears: 100,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
@@ -2066,7 +2083,7 @@
             var passing_year = $('#education-form .passing_year').pickadate({
                 firstDay: 1,
                 clear: '',
-                selectYears: true,
+                selectYears: 100,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenPrefix: 'formatted_',
@@ -2076,7 +2093,7 @@
             var from = $('#employment_history-form .from_employment').pickadate({
                 firstDay: 1,
                 clear: '',
-                selectYears: true,
+                selectYears: 100,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenPrefix: 'formatted_',
@@ -2086,7 +2103,7 @@
             var to = $('#employment_history-form .to_employment').pickadate({
                 firstDay: 1,
                 clear: '',
-                selectYears: true,
+                selectYears: 100,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenPrefix: 'formatted_',
@@ -2098,6 +2115,12 @@
                 width:'100%',
             });
             $("#religion").val("{{$employee->religion_id ?? ''}}").trigger('change');
+
+            $("#gender").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Gender",
+                width:'100%',
+            });
+            $("#gender").val("{{$employee->employee_gender_id ?? ''}}").trigger('change');
 
             $("#domicile").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Domicile",
@@ -2127,7 +2150,11 @@
                 placeholder: "Select Designation",
                 width:'100%',
             });
-            $("#designation").val("{{$employee->designation_id ?? ''}}").trigger('change');
+
+            $("#staff_category").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Staff Category",
+                width:'100%',
+            });
 
             $("#city").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select City",
@@ -2135,12 +2162,6 @@
             });
             $("#city").val("{{$employee->city_id ?? ''}}").trigger('change');
 
-
-            $("#reporting_location").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Reporting Location",
-                width:'100%',
-            });
-            $("#reporting_location").val("{{$employee->reporting_location_id ?? ''}}").trigger('change');
 
             $("#shift_list").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Working Shift",
@@ -2160,11 +2181,32 @@
             });
             $("#zone").val("{{$employee->zone_id ?? ''}}").trigger('change');
 
+            $("#rider_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rider Type",
+                width:'100%',
+            });
+
+            $("#rider_main_category").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rider Main Category",
+                width:'100%',
+            });
+
+            $("#rider_sub_category").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rider Sub Category",
+                width:'100%',
+            });
+
             $("#department").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department",
                 width:'100%',
             });
+            @if($employee->employee_type_id == 2)
+            $("#rider_sub_category").val("{{$employee->rider_sub_category ?? ''}}").trigger('change');
+            $("#rider_main_category").val("{{$employee->rider_main_category ?? ''}}").trigger('change');
+            $("#rider_type").val("{{$rider_request->rider_type_id ?? ''}}").trigger('change');
+            @endif
 
+            @if($employee->employee_type_id == 1)
             $("#department").on('change',function(){
                 id = $(this).val();
                 $.ajax({
@@ -2194,7 +2236,9 @@
             });
 
             $("#department").val("{{$employee->department_id ?? ''}}").trigger('change');
-
+            $("#designation").val("{{$employee->designation_id ?? ''}}").trigger('change');
+            $("#staff_category").val("{{$employee->staff_category_id ?? ''}}").trigger('change');
+            @endif
 
             var family_member_index = 0;
             $(".marital_status_family_member").prepend('<option value="" selected></option>').select2({
@@ -2239,7 +2283,7 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Name Of Family Member<span class="text-danger">*</span></label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Name is required" class="form-control border-primary name_family_member validated" value="" name="name[${family_member_index}]" id="family_name${family_member_index}">
+                                        <input type="text" data-rule-required="true" data-msg-required="Name is required" class="form-control name_family_member validated" value="" name="name[${family_member_index}]" id="family_name${family_member_index}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -2308,13 +2352,13 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Name Of Institute<span class="text-danger">*</span></label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Name of Institute is required" class="form-control border-primary name_institute validated" value="" name="name[${education_background_index}]" id="education_name${education_background_index}">
+                                        <input type="text" data-rule-required="true" data-msg-required="Name of Institute is required" class="form-control name_institute validated" value="" name="name[${education_background_index}]" id="education_name${education_background_index}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Degree Awarded<span class="text-danger">*</span></label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Degree is required" class="form-control border-primary degree validated" value="" name="degree[${education_background_index}]" id="degree${education_background_index}">
+                                        <input type="text" data-rule-required="true" data-msg-required="Degree is required" class="form-control degree validated" value="" name="degree[${education_background_index}]" id="degree${education_background_index}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -2373,13 +2417,13 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Company/Organization Name<span class="text-danger">*</span></label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control border-primary name_emplotment validated" value="" name="name[${employment_index}]" id="employment_name${employment_index}">
+                                        <input type="text" data-rule-required="true" data-msg-required="Company/Organization Name is required" class="form-control name_emplotment validated" value="" name="name[${employment_index}]" id="employment_name${employment_index}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Position/Designation<span class="text-danger">*</span></label>
-                                        <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control border-primary position_employment validated" value="" name="position[${employment_index}]" id="position${employment_index}">
+                                        <input type="text" data-rule-required="true" data-msg-required="Position/Designation is required" class="form-control position_employment validated" value="" name="position[${employment_index}]" id="position${employment_index}">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -2407,7 +2451,7 @@
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label>Reason<span class="text-danger">*</span></label>
-                                        <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control border-primary reason_employment validated" name="reason[${employment_index}]" id="employment_reason${employment_index}"></textarea>
+                                        <textarea data-rule-required="true" data-msg-required="Reason is required" class="form-control reason_employment validated" name="reason[${employment_index}]" id="employment_reason${employment_index}"></textarea>
                                     </div>
                                 </div>
                             </div>

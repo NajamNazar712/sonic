@@ -51,6 +51,7 @@ use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PayslipPdf;
@@ -58,6 +59,7 @@ use App\Http\Models\Product;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\Rider\RidersIncentive;
+use App\Http\Models\RiderCategory;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\Rider\RiderTickerImage;
@@ -74,6 +76,7 @@ use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Zone;
 use App\RiderDeliveryNoteStatus;
 use App\RiderLocationLog;
+use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -4453,7 +4456,7 @@ class RiderAPIController extends Controller
     public function signup_data(Request $request)
     {
         $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
-        $designation = EmployeeDesignation::select('id', 'name')->get();
+        $designation = EmployeeDesignation::where('status', 1)->select('id', 'name', 'department_id')->get();
         $domicile = EmployeeDomicile::select('id', 'name')->get();
         $marital_status = EmployeeMaritalStatus::select('id', 'name')->get();
         $nationality = EmployeeNationality::select('id', 'name')->get();
@@ -4466,7 +4469,18 @@ class RiderAPIController extends Controller
         $blood_group = EmployeeBloodGroup::select('id', 'name')->get();
         $banks = BanksList::select('id', 'name')->where('status', 1)->get();
         $rider_type = RiderType::select('id', 'name')->get();
-        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type]);
+        $staff_categories = StaffCategory::select('id', 'name')->get();
+        $shifts = EmployeeShift::where('name' ,'!=', 'Default')->select('id', 'name', 'start_time', 'end_time')->get();
+        $category = RiderCategory::all();
+        $main_category = RiderMainCategory::all();
+        $shift_data = array();
+        foreach($shifts as $shift){
+            $datum = array();
+            $datum['id'] = $shift->id;
+            $datum['name'] = $shift->name. '( '.$shift->start_time.' - '. $shift->end_time.' )';
+            $shift_data[] = $datum;
+        }
+        return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
     }
 
     public function rider_signup_v2(Request $request)
@@ -9994,11 +10008,11 @@ class RiderAPIController extends Controller
             if ($rider->exists()) {
                 $rider = $rider->first();
                 if($rider->status){
-                    $pin = rand(1000, 9999);
+                    $pin = rand(100000, 999999);
                     $rider->reset_pin_otp = $pin;
                     $rider->save();
                     NotificationsController::send(158, $rider->id);
-                    return response()->json(['status' => 0, 'message' => 'Pin has been sent to your registered number', 'otp' => $pin]);
+                    return response()->json(['status' => 0, 'message' => 'Otp has been sent to your registered number', 'otp' => $pin]);
                 }else{
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }
@@ -10012,7 +10026,7 @@ class RiderAPIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'otp' => ['required', 'integer', 'digits:4'],
+            'otp' => ['required', 'integer', 'digits:6'],
             'pin' => ['required', 'integer', 'digits:4'],
         ];
 
@@ -10188,6 +10202,275 @@ class RiderAPIController extends Controller
             }
         }
 
+    }
+
+    public function signup_required_details(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $rules = [
+                'rider_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
+                'rider_sub_category' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_categories,id'],
+                'rider_main_category' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_main_categories,id'],
+                //Employees
+                'name' => ['required'],
+                'mother_name' => ['required'],
+                'employee_gender_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_genders,id'],
+                'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'shift_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
+                'cnic_no' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+                'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'guardian_name' => ['required'],
+                'religion_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
+                'nationality_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
+                'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
+                'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
+                'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+                'address' => ['required'],
+                'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
+                'date_of_birth' => ['required'],
+                'pin' => ['required', 'integer', 'digits:4'],
+                'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+
+                //BankInformation
+                'bank_id' => ['required', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
+                'account_title' => ['required'],
+                'branch_name' => ['required'],
+                'iban' => ['required'],
+            ];
+            $response = ['status' => 1];
+            $message = 'Unknown';
+
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $message = 'Error(s) in Input';
+                $response['phone_number'] = $request->phone_number;
+                $response['cnic'] = $request->cnic_no;
+                $response['errors'] = $validate->errors();
+            } else {
+                $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                $employee = Employee::where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                //Check RiderRequest Already Exist
+                if ($rider_request->exists()) {
+                    $rider_request = $rider_request->first();
+                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } else if ($employee->exists()) {
+                    $employee = $employee->first();
+                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($employee->phone_number == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($employee->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } //Check Rider Already Exist
+                else {
+                    $rider = Rider::where('phone', $request->input('phone_number'))->orWhere('cnic', $request->input('cnic_no'));
+
+                    if ($rider->exists()) {
+                        $rider = $rider->first();
+                        if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic_no')) {
+                            $message = "Phone Number & CNIC Already Exists";
+
+                        } else if ($rider->phone == $request->phone_number) {
+                            $message = "Phone Number Already Exist";
+
+                        } else if ($rider->cnic == $request->input('cnic_no')) {
+                            $message = "CNIC Already Exist";
+                        }
+
+                    } else {
+                        try {
+                            $rider_request = new RiderRequest();
+                            $rider_request->name = $request->name;
+                            $rider_request->cnic = $request->cnic_no;
+                            $rider_request->phone_no = $request->phone_number;
+                            $rider_request->pin = $request->pin;
+                            $rider_request->city_id = $request->city_id;
+                            $rider_request->rider_type_id = $request->rider_type_id;
+                            $rider_request->save();
+
+                            $employee_request = new Employee();
+                            $employee_request->name = $request->name;
+                            $employee_request->employee_gender_id = $request->employee_gender_id;
+                            $employee_request->city_id = $request->city_id;
+                            $employee_request->cnic = $request->cnic_no;
+                            $employee_request->phone_number = $request->phone_number;
+                            $employee_request->employee_type_id = 2;
+                            $employee_request->rider_request_id = $rider_request->id;
+                            $employee_request->status_id = 2;
+                            $employee_request->guardian_name = $request->guardian_name;
+                            $employee_request->religion_id = $request->religion_id;
+                            $employee_request->nationality_id = $request->nationality_id;
+                            $employee_request->domicile_id = $request->domicile_id;
+                            $employee_request->marital_status_id = $request->marital_status_id;
+                            $employee_request->blood_group = $request->blood_group_id;
+                            $employee_request->address = $request->address;
+                            $employee_request->emergency_contact = $request->emergency_contact;
+                            $employee_request->zone_id = $request->zone_id;
+                            $employee_request->shift_id = $request->shift_id;
+                            $employee_request->date_of_birth = $request->date_of_birth;
+                            $employee_request->mother_name = $request->mother_name;
+                            $employee_request->pin = $request->pin;
+                            $employee_request->rider_main_category = $request->rider_main_category;
+                            $employee_request->rider_sub_category = $request->rider_sub_category;
+                            $employee_request->department_id = 6;
+
+                            $employee_request->save();
+
+                            $employee_bank_info = new EmployeeBankInformation();
+                            $employee_bank_info->employee_id = $employee_request->id;
+                            $employee_bank_info->account_title = $request->account_title;
+                            $employee_bank_info->bank_id = $request->bank_id;
+                            $employee_bank_info->branch_name = $request->branch_name;
+                            $employee_bank_info->iban = $request->iban;
+                            $employee_bank_info->save();
+
+                            if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
+                                $employee_id = $employee_request->id;
+                                $date = Carbon::now()->format('Y_m_d');
+                                $attachments = new EmployeeAttachment();
+                                $attachments->employee_id = $employee_id;
+                                $cnic_array = [];
+                                if ($request->hasFile('cnic_1')) {
+                                    $file = $request->file('cnic_1');
+                                    $filename = 'cnic_1_' . $date . '.' . $file->extension();
+                                    $directory = 'employee_directory/employee_' . $employee_id . '';
+                                    Storage::disk('public')->putFileAs($directory, $file, $filename);
+                                    $cnic_array[0] = $directory . '/' . $filename;
+                                }
+                                if ($request->hasFile('cnic_2')) {
+                                    $file = $request->file('cnic_2');
+                                    $filename = 'cnic_2_' . $date . '.' . $file->extension();
+                                    $directory = 'employee_directory/employee_' . $employee_id . '';
+                                    Storage::disk('public')->putFileAs($directory, $file, $filename);
+                                    $cnic_array[1] = $directory . '/' . $filename;
+                                }
+                                $attachments->cnic = implode(',', $cnic_array);
+                                $attachments->save();
+                            }
+
+                            $response['status'] = 0;
+                            $response['employee_id'] = $employee_request->id;
+                            $message = 'Request Has Been Submitted and Pending for Approval';
+                        } catch (Exception $ex) {
+                            $response['message'] = $ex;
+                        }
+                    }
+                }
+            }
+        } else {
+            $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        $response['phone_number'] = $request->phone_number;
+        $response['cnic'] = $request->cnic_no;
+        return response()->json($response);
+    }
+
+    public function signup_optional_details(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $rules = [
+                'employees_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+
+                //EducationalDetails
+                'education_details' => ['nullable'],
+
+                //EmploymentHistory
+                'employment_history' => ['nullable'],
+
+                //MedicalDetails
+                'medical_details' => ['nullable'],
+            ];
+            $response = ['status' => 1];
+            $message = 'Unknown';
+
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $message = 'Error(s) in Input';
+                $response['errors'] = $validate->errors();
+            } else {
+                $employee_request = Employee::find($request->employees_id);
+                if ($employee_request) {
+                    try {
+                        if ($request->has('employment_history')) {
+                            $employment_histories = json_decode($request->employment_history, true);
+                            foreach ($employment_histories as $employment_history) {
+                                $history = new EmployeeEmployementHistory();
+                                $history->employee_id = $employee_request->id;
+                                $history->name = $employment_history['organization_name'];
+                                $history->designation = $employment_history['designation'];
+                                $history->from = $employment_history['from_date'];
+                                $history->to = $employment_history['to_date'];
+                                $history->reason = $employment_history['reason_for_leaving'];
+                                $history->save();
+                            }
+                        }
+
+                        if ($request->has('medical_details')) {
+                            $medical_details = json_decode($request->medical_details, true);
+                            foreach ($medical_details as $medical_detail) {
+                                $medical_info = new EmployeeMedicalInformation();
+                                $medical_info->employee_id = $employee_request->id;
+                                $medical_info->name = $medical_detail['name_of_family_member'];
+                                $medical_info->relationship_id = $medical_detail['relation_ship'];
+                                $medical_info->date_of_birth = $medical_detail['date_of_birth'];
+                                $medical_info->marital_status = $medical_detail['marital_status'];
+                                $medical_info->save();
+                            }
+                        }
+
+                        if ($request->has('education_details')) {
+                            $education_details = json_decode($request->education_details, true);
+                            foreach ($education_details as $education_detail) {
+                                $employee_education = new EmployeeEducationalBackground();
+                                $employee_education->employee_id = $employee_request->id;
+                                $employee_education->name = $education_detail['institute'];
+                                $employee_education->degree = $education_detail['degree'];
+                                $employee_education->grade = $education_detail['position'];
+                                $employee_education->passing_year = $education_detail['graduation_year'];
+                                $employee_education->save();
+                            }
+                        }
+
+                        $response['status'] = 0;
+                        $response['employee_id'] = $employee_request->id;
+                        $message = 'Optional details Has Been Submitted and Pending for Approval';
+                    } catch (Exception $ex) {
+                        $response['message'] = $ex;
+                    }
+                } else {
+                    $response['status'] = 1;
+                    $message = 'Invalid Employee ID';
+                }
+            }
+        } else {
+            $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
     }
 
     public function leave_index(Request $request){

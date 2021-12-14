@@ -31,7 +31,7 @@ class AdminTraxDirectory extends Controller
         $admin = Admin::join('admin_roles as ar','admins.role_id','=','ar.id')
             ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-            ->select('admins.name as name', 'admins.phone_number as phone','ad.name as department', 'admins.email as email', 'admins.designation as designation', 'admins.created_at as date','h.name as city')->
+            ->select('admins.name as name', 'admins.phone_number as phone','ad.name as department', 'admins.email as email', 'admins.designation as designation', 'admins.created_at as date','h.name as city','admins.official_phone_number as official_phone')->
             where('admins.status',1)->where('ar.id','!=',1);
 
         $datatable = Datatables::of($admin)

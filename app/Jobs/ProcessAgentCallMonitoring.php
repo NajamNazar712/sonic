@@ -73,7 +73,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
                 ->where('admins.role_id', 18)
                 ->where('admins.status',1)
                 ->where('ea.clock_out_datetime','=',null)
-                ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))->pluck('admins.id')->toArray();
+                ->whereDate('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))->pluck('admins.id')->toArray();
 
                 $recs = array();
                 if(count($admins) > 0){

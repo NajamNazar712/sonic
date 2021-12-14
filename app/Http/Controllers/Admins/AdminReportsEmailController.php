@@ -1369,7 +1369,7 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($done_payment_array, NULL, 'A2', true);
             $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
             $sheet->getStyle("A7:E7")->applyFromArray($cell_st);
-            $date_file_name = Carbon::today()->format('Y_m_d');
+            $date_file_name = Carbon::today()->format('Y_m_d_i');
             $sheet->setTitle('Done Payments ' . $date_file_name);
             $writer = new Xlsx($spreadsheet);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -1559,7 +1559,7 @@ class AdminReportsEmailController extends Controller
                     $retail_done_payment_report->iban_number = $iban;
                     $retail_done_payment_report->save();
                     $serial++;
-                    $retail_done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $retail_done_payment->retail_done_payment_id, 'Shipper Name' => $retail_done_payment->retail_done_payment->shipper->name, 'IBAN Number' => $iban, 'Amount' => number_format($retail_done_payment->payable)];
+                    $retail_done_payment_array[] = ['S No.' => $serial, 'Payment ID' => $retail_done_payment->retail_done_payment_id, 'Shipper Name' => $retail_done_payment->retail_done_payment->shipper->shipper_name, 'IBAN Number' => $iban, 'Amount' => number_format($retail_done_payment->payable)];
                     $total_amount = $total_amount + $retail_done_payment->payable;
                 }
             }
