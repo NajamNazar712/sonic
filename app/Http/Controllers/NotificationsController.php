@@ -1898,8 +1898,10 @@ class NotificationsController extends Controller
                     if ($general_admins->exists()) {
                         $to = array_merge($to, $general_admins->pluck('email')->toArray());
                     }
-
-                    $to[] = Admin::find($reference_2_id)->email;
+                    $reference_2_id_email = Admin::find($reference_2_id)->email;
+                    if($reference_2_id_email != null){
+                        $to[] = $reference_2_id_email;
+                    }
 
                     self::email($subject, $body, $to);
                 } else if ($id == 22) {
@@ -8215,8 +8217,9 @@ class NotificationsController extends Controller
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
                     }
-
-                    self::email($subject, $body, $to);
+                    if(!empty($to)){
+                        self::email($subject, $body, $to);
+                    }
                 }
 				else if($id == 148){
                     $hub = City::find($reference_1_id);
