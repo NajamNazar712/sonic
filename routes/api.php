@@ -227,6 +227,8 @@ Route::name('api.')->group(function () {
                 Route::get('list', 'Rider\RiderAPIController@employee_leave_list')->name('list');
                 Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
             });
+
+            Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
 		});
 
 	});
@@ -303,6 +305,7 @@ Route::name('api.')->group(function () {
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
             });
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
+            Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
             Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
 
         });

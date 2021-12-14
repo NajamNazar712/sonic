@@ -10701,6 +10701,23 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function get_employee_id(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $riders = Rider::find($rider_id);
+        if ($riders) {
+            $employee = Employee::where('trax_id', $riders->trax_id);
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                return response()->json(['status' => 0, 'employee_id' => $employee->id]);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Rider Not Found"]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'message' => "Rider Not Found"]);
+        }
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){

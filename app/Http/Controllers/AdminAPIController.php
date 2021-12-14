@@ -5665,4 +5665,21 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function get_employee_id(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admins = Admin::find($admin_id);
+        if ($admins) {
+            $employee = Employee::where('trax_id', $admins->trax_id);
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                return response()->json(['status' => 0, 'employee_id' => $employee->id]);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Employee Not Found"]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'message' => "Employee Not Found"]);
+        }
+    }
+
 }
