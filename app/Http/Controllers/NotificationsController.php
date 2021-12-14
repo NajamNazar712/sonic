@@ -156,17 +156,34 @@ class NotificationsController extends Controller
     }
 
     static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL) {
-      $mail = Mail::to($to);
+        if($to){
+            if(is_array($to)){
+                $to = array_values(array_filter($to));
+                if(empty($to)){
+                    return false;
+                }
 
-      if ($cc) {
-        $mail->cc($cc);
-      }
+                if($cc){
+                    $cc = array_values(array_filter($cc));
+                }
+                if($bcc){
+                    $bcc = array_values(array_filter($bcc));
+                }
 
-      if ($bcc) {
-        $mail->bcc($bcc);
-      }
+            }
 
-      $mail->send(new Notifications($subject, $body, $from));
+            $mail = Mail::to($to);
+
+            if ($cc) {
+                $mail->cc($cc);
+            }
+
+            if ($bcc) {
+                $mail->bcc($bcc);
+            }
+
+            $mail->send(new Notifications($subject, $body, $from));
+        }
     }
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
