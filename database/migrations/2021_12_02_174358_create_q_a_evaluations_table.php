@@ -26,6 +26,7 @@ class CreateQAEvaluationsTable extends Migration
             $table->string('caller_contact');
             $table->tinyInteger('status')->default(0);
             $table->integer('score')->default(0);
+            $table->string('remarks');
             $table->timestamps();
         });
     }

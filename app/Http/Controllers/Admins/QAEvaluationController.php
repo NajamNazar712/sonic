@@ -13,6 +13,7 @@ use App\Http\Models\QAEvaluation;
 use App\Http\Models\QAEvaluationActivity;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Yajra\Datatables\Facades\Datatables;
 
 class QAEvaluationController extends Controller
 {
@@ -82,6 +83,7 @@ class QAEvaluationController extends Controller
             'caller_contact' => $request->contact_number,
             'status' => $status,
             'score' => $score,
+            'remarks' => $request->remarks,
         ]);
         if($request->has('activity_ids')){
             // dump('ss');
@@ -95,5 +97,79 @@ class QAEvaluationController extends Controller
         }
         return redirect()->back()->with('success', 'QA Evaluation Added');
 
+    }
+
+    public function index(){
+        return view('admin.qa_evaluation.index');
+    }
+
+    public function list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            // ActivityTrailController::createActivityTrailLog(Auth::id(),420);
+        }
+         $evaluation = QAEvaluation::leftjoin('admins as ad','ad.id','=','q_a_evaluations.agent_id')
+                ->leftjoin('admins as ev','ev.id','=','q_a_evaluations.evaluated_by')
+                ->leftjoin('evaluation_campaigns as ec','ec.campaign_id','=','q_a_evaluations.campaign_id')
+                ->leftjoin('evaluation_natures as en','en.id','=','q_a_evaluations.nature_id')
+             ->select(['ad.name as agent_name','ec.campaign as campaign','ev.name as evaluated_by','q_a_evaluations.evaluation_date as evaluation_date','en.nature as nature','q_a_evaluations.date_time as date_time','q_a_evaluations.status as status','q_a_evaluations.score as score','q_a_evaluations.score as score','q_a_evaluations.remarks as remarks']);
+    
+         $datatables = Datatables::of($evaluation)
+         
+             ->editColumn('status',function ($evaluation) {
+                 if($evaluation->status == 0){
+                     return 'Fatal';
+                 }elseif ($evaluation->status == 1) {
+                     return 'Non-Fatal';
+                 }else{
+                    return 'Accurate';
+
+                 }
+             })
+             ->setRowAttr([
+                'class' => function ($evaluation){
+
+                    if ($evaluation->status == 0) {
+                        return 'fatal';
+                    }
+                    if ($evaluation->status == 1) {
+                        return 'non_fatal';
+                    }
+                    if ($evaluation->status == 2) {
+                        return 'accurate';
+                    }
+                    
+                },
+            ])
+             ->addColumn("actions", function ($result) {
+                 if (session('role_id') == 1 || count(array_intersect([570,571,572,573,574,575,576,577,578], session('permissions'))) !== 0) {
+                     $dropdown = '
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+    
+                     if (session('role_id') == 1 || $result->reporting_manager == Auth::id() || in_array(570, session('permissions'))) {
+                         $dropdown .= '<button type="button" class="dropdown-item rm_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reporting Manager View</div></button>';
+    
+                     }
+                     if (session('role_id') == 1 || in_array(571, session('permissions'))) {
+                         $dropdown .= '<button type="button" class="dropdown-item cs_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Customer Experience View</div></button>';
+    
+                     }
+                   
+                     $dropdown .= '
+                            </div>
+                          </div>
+                        ';
+    
+                     return $dropdown;
+                 }
+                 else {
+                     return '';
+                 }
+             });
+         ;
+         return $datatables->make(true);
     }
 }
