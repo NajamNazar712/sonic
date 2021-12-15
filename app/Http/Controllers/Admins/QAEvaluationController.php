@@ -108,10 +108,10 @@ class QAEvaluationController extends Controller
         {
             // ActivityTrailController::createActivityTrailLog(Auth::id(),420);
         }
-         $evaluation = QAEvaluation::leftjoin('admins as ad','ad.id','=','q_a_evaluations.agent_id')
-                ->leftjoin('admins as ev','ev.id','=','q_a_evaluations.evaluated_by')
-                ->leftjoin('evaluation_campaigns as ec','ec.campaign_id','=','q_a_evaluations.campaign_id')
-                ->leftjoin('evaluation_natures as en','en.id','=','q_a_evaluations.nature_id')
+         $evaluation = Admin::join('q_a_evaluations as ad','ad.agent_id','=','admins.id')
+                ->join('q_a_evaluations as ev','ev.evaluated_by','=','admins.id')
+                ->join('evaluation_campaigns as ec','ec.campaign_id','=','q_a_evaluations.campaign_id')
+                ->join('evaluation_natures as en','en.id','=','q_a_evaluations.nature_id')
              ->select(['ad.name as agent_name','ec.campaign as campaign','ev.name as evaluated_by','q_a_evaluations.evaluation_date as evaluation_date','en.nature as nature','q_a_evaluations.date_time as date_time','q_a_evaluations.status as status','q_a_evaluations.score as score','q_a_evaluations.score as score','q_a_evaluations.remarks as remarks']);
     
          $datatables = Datatables::of($evaluation)
@@ -141,7 +141,7 @@ class QAEvaluationController extends Controller
                     
                 },
             ])
-             ->addColumn("actions", function ($result) {
+             ->addColumn("action", function ($result) {
                  if (session('role_id') == 1 || count(array_intersect([570,571,572,573,574,575,576,577,578], session('permissions'))) !== 0) {
                      $dropdown = '
                           <div class="btn-group">
