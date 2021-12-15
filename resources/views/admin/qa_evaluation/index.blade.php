@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Summary Report')
+@section('title', 'QA Evaluation')
 
 @section('content')
     <h1 class="mb-1">
@@ -65,10 +65,11 @@
             font-size: 13px;
         }
         .fatal{
-            background-color: red;
+            background-color: #FF0000;
         }
         .accurate{
-            background-color: green;
+            background-color: #BFEFE2;
+            
 
         }
     </style>
@@ -132,7 +133,7 @@
             } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
+                
                 buttons: [
                     {
                         extend: 'excelHtml5',

@@ -108,12 +108,13 @@ class QAEvaluationController extends Controller
         {
             // ActivityTrailController::createActivityTrailLog(Auth::id(),420);
         }
-         $evaluation = Admin::join('q_a_evaluations as ad','ad.agent_id','=','admins.id')
-                ->join('q_a_evaluations as ev','ev.evaluated_by','=','admins.id')
-                ->join('evaluation_campaigns as ec','ec.campaign_id','=','q_a_evaluations.campaign_id')
+        
+        $evaluation = QAEvaluation::join('admins as ad','ad.id','=','q_a_evaluations.agent_id')
                 ->join('evaluation_natures as en','en.id','=','q_a_evaluations.nature_id')
-             ->select(['ad.name as agent_name','ec.campaign as campaign','ev.name as evaluated_by','q_a_evaluations.evaluation_date as evaluation_date','en.nature as nature','q_a_evaluations.date_time as date_time','q_a_evaluations.status as status','q_a_evaluations.score as score','q_a_evaluations.score as score','q_a_evaluations.remarks as remarks']);
+                ->join('admins as ev','ev.id','=','q_a_evaluations.evaluated_by')
+             ->select(['ad.name as agent_name','ev.name as evaluated_by','en.nature as nature','q_a_evaluations.evaluation_date as evaluation_date','q_a_evaluations.date_time as date_time','q_a_evaluations.status as status','q_a_evaluations.score as score','q_a_evaluations.score as score','q_a_evaluations.remarks as remarks']);
     
+
          $datatables = Datatables::of($evaluation)
          
              ->editColumn('status',function ($evaluation) {
