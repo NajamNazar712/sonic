@@ -122,7 +122,7 @@
                 'allowPlus': false,
                 'rightAlign': false,
                 'min': 0,
-                'max': 100000
+                'max': 100000000
             });
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
