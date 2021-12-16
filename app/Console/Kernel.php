@@ -346,7 +346,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('returnsheet:receive')->dailyAt('05:00')->runInBackground();
 
         $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
-        $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
+//        $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
         $schedule->command('email:RiderDeactivateAutomaticallyAndGenerateEmail')->dailyAt('03:30')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'last_mile_cron_time');
