@@ -5262,6 +5262,8 @@ class RiderAPIController extends Controller
         $rules = [
             //Attachments
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'attachment_update' => ['nullable', 'integer', 'digits_between:1,10'],
+
             'cv_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
             'cv_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
             'cv_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
@@ -6261,6 +6263,10 @@ class RiderAPIController extends Controller
                 }
 
                 $attachments->cheque = implode(',', $cheque_array);
+            }
+
+            if($request->has('attachment_update')){
+                $attachments = $request->attachment_update;
             }
 
             $attachments->save();
