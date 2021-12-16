@@ -11461,7 +11461,7 @@ class AdminDashboardController extends Controller
         }
     }
     public function admin_profile(Request $request){
-        $user =Admin::where('id', Auth::id())->first();
+        $user = Admin::where('id', Auth::id())->first();
         $department = Admin::join('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
         ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
         ->where('admins.id', Auth::id())->first();
