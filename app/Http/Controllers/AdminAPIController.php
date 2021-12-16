@@ -75,6 +75,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Password;
+use phpDocumentor\Reflection\PseudoTypes\False_;
 
 class AdminAPIController extends Controller
 {
@@ -4796,7 +4797,7 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+            return response()->json(false);
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number);
             if ($shipment->exists()) {
@@ -4852,8 +4853,7 @@ class AdminAPIController extends Controller
                                 }
                             }
                         } else {
-
-                            return response()->json(['status' => 1, 'message' => 'dws charges not set']);
+                            return response()->json(false);
                         }
 
                     }
@@ -5134,15 +5134,16 @@ class AdminAPIController extends Controller
                             $shipment_detail->dimension_h = $request->dimension_h;
                             $shipment_detail->save();
                         }
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'out of status']);
+                    return response()->json(true);
 
+                } else {
+                    return response()->json(false);
                 }
 
                 // arrive function end
 
             } else {
-                return response()->json(['status' => 1, 'message' => 'shipment not found']);
+                return response()->json(false);
             }
 
 
