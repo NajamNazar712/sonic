@@ -4853,7 +4853,7 @@ class AdminAPIController extends Controller
                             }
                         } else {
 
-                            return response()->json(['status' => 1, 'message' => 'dws chareges not set']);
+                            return response()->json(['status' => 1, 'message' => 'dws charges not set']);
                         }
 
                     }
