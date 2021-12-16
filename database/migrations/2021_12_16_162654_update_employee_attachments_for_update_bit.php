@@ -13,7 +13,7 @@ class UpdateEmployeeAttachmentsForUpdateBit extends Migration
      */
     public function up()
     {
-        Schema::table('employee_attachments', function (Blueprint $table) {
+        Schema::table('employees', function (Blueprint $table) {
             $table->tinyInteger('attachment_update')->default(0)->index();
         });
     }
@@ -25,7 +25,7 @@ class UpdateEmployeeAttachmentsForUpdateBit extends Migration
      */
     public function down()
     {
-        Schema::table('employee_attachments', function (Blueprint $table) {
+        Schema::table('employees', function (Blueprint $table) {
             $table->dropColumn('attachment_update');
         });
     }

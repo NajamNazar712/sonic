@@ -1117,6 +1117,7 @@ class AdminAPIController extends Controller
             $response['errors'] = $validate->errors();
         } else {
             $employee_id = $request->employee_id;
+            $employees = Employee::find($request->employee_id);
             $attachments = EmployeeAttachment::where('employee_id', $employee_id);
             if ($attachments->exists()) {
                 $attachments = $attachments->first();
@@ -2053,7 +2054,8 @@ class AdminAPIController extends Controller
             }
 
             if($request->has('attachment_update')){
-                $attachments = $request->attachment_update;
+                $employees->attachment_update = $request->attachment_update;
+                $employees->save();
             }
             $attachments->save();
             $response['status'] = 0;
@@ -5661,9 +5663,10 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $admin_profile = Admin::join('admin_roles as ar','admins.role_id', '=', 'ar.id')
-            ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
             ->join('cities as h', 'h.id', '=', 'admins.default_hub_id')
-            ->select('admins.trax_id as trax_id', 'admins.name as name', 'admins.email as email', 'admins.phone_number as phone', 'admins.cnic as cnic', 'h.name as hub', 'admins.designation as designation', 'ad.name as department_name')
+            ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+            ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+            ->select('admins.trax_id as trax_id', 'admins.name as name', 'admins.email as email', 'admins.phone_number as phone', 'admins.cnic as cnic', 'h.name as hub', 'd.name as designation', 'ad.name as department_name')
             ->where('admins.id', $admin_id);
         if ($admin_profile->exists()) {
         $admin_profile = $admin_profile->get();

@@ -5330,6 +5330,7 @@ class RiderAPIController extends Controller
             $response['errors'] = $validate->errors();
         } else {
             $employee_id = $request->employee_id;
+            $employees = Employee::find($request->employee_id);
             $attachments = EmployeeAttachment::where('employee_id', $employee_id);
             if ($attachments->exists()) {
                 $attachments = $attachments->first();
@@ -6266,7 +6267,8 @@ class RiderAPIController extends Controller
             }
 
             if($request->has('attachment_update')){
-                $attachments = $request->attachment_update;
+                $employees->attachment_update = $request->attachment_update;
+                $employees->save();
             }
 
             $attachments->save();
