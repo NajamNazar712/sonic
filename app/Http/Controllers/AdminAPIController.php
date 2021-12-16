@@ -4784,7 +4784,7 @@ class AdminAPIController extends Controller
             'dimension_l' => ['required'],
             'dimension_w' => ['required'],
             'dimension_h' => ['required'],
-            'image_name' => ['required', 'mimes:pdf,png,jpeg,jpg,docx,doc'],
+            'image_name' => ['nullable', 'mimes:pdf,png,jpeg,jpg,docx,doc'],
             'machine' => ['required'],
             'date' => ['required'],
             'package_type' => ['required'],
@@ -5101,6 +5101,9 @@ class AdminAPIController extends Controller
                         $directory = 'dws_images';
                         Storage::disk('public')->putFileAs($directory, $file, $filename);
                         $link = $directory . '/' . $filename;
+                    }else{
+                        $link = null;
+                    }
 
                         $shipment_detail = ShipmentDetail::where('shipment_id', $shipment_id);
                         if ($shipment_detail->exists()) {
@@ -5131,7 +5134,6 @@ class AdminAPIController extends Controller
                             $shipment_detail->dimension_h = $request->dimension_h;
                             $shipment_detail->save();
                         }
-                    }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'out of status']);
 
