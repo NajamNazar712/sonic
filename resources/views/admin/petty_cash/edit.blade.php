@@ -708,12 +708,8 @@
             }
 
             function edit_finance() {
-                status = table.row(0).data().petty_status;
-                if(status == 0)
-                {
-                    $("#select_statement_sdn").attr('disabled',false);
-                    $(".dncc_select").attr('disabled',false);
-                }
+                $("#select_statement_sdn").attr('disabled',false);
+                $(".dncc_select").attr('disabled',false);
                 table.rows().nodes().each(function(index) {
                     var row = table.row(index);
                     var id = parseInt(row.id());
