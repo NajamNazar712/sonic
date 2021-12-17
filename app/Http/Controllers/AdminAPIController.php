@@ -5454,7 +5454,7 @@ class AdminAPIController extends Controller
                     } else if ($admin->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    }else if ($admin->email == $request->input('personal_email')) {
+                    }else if ($request->has("personal_email") && $admin->email == $request->input('personal_email')) {
                         $message = "Email Already Exist";
                     }
                 } else if ($employee->exists()) {
@@ -5468,7 +5468,7 @@ class AdminAPIController extends Controller
                     } else if ($employee->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    } else if ($employee->personal_email == $request->input('personal_email')) {
+                    } else if ($request->has("personal_email") && $employee->personal_email == $request->input('personal_email')) {
                         $message = "Email Already Exist";
                     }
                 } else if ($user_request->exists()) {
@@ -5482,7 +5482,7 @@ class AdminAPIController extends Controller
                     } else if ($user_request->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    } else if ($user_request->email == $request->input('personal_email')) {
+                    } else if ($request->has("personal_email") && $user_request->email == $request->input('personal_email')) {
                         $message = "Email Already Exist";
                     }
                 } else {
