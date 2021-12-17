@@ -5431,22 +5431,19 @@ class AdminAPIController extends Controller
                 $response['errors'] = $validate->errors();
             } else {
                 $admin = Admin::where('phone_number', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic_no'))
-                    ->orWhere('email', $request->input('personal_email'));
+                    ->orWhere('cnic', $request->input('cnic_no'));
 
                 $employee = Employee::where('phone_number', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic_no'))
-                    ->orWhere('personal_email', $request->input('personal_email'));
+                    ->orWhere('cnic', $request->input('cnic_no'));
 
                 $user_request = AdminUserRequest::where('phone_number', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic_no'))
-                    ->orWhere('email', $request->input('personal_email'));
+                    ->orWhere('cnic', $request->input('cnic_no'));
 
                 //Check Admin Already Exist
                 if ($admin->exists()) {
                     $admin = $admin->first();
-                    if ($admin->phone_number == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no') && $admin->email == $request->input('personal_email')) {
-                        $message = "Email, Phone Number & CNIC Already Exists";
+                    if ($admin->phone_number == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
 
                     } else if ($admin->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
@@ -5454,13 +5451,11 @@ class AdminAPIController extends Controller
                     } else if ($admin->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    }else if ($request->has("personal_email") && $admin->email == $request->input('personal_email')) {
-                        $message = "Email Already Exist";
                     }
                 } else if ($employee->exists()) {
                     $employee = $employee->first();
-                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no') && $employee->personal_email == $request->input('personal_email')) {
-                        $message = "Email, Phone Number & CNIC Already Exists";
+                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
 
                     } else if ($employee->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
@@ -5468,13 +5463,11 @@ class AdminAPIController extends Controller
                     } else if ($employee->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    } else if ($request->has("personal_email") && $employee->personal_email == $request->input('personal_email')) {
-                        $message = "Email Already Exist";
                     }
                 } else if ($user_request->exists()) {
                     $user_request = $user_request->first();
-                    if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no') && $user_request->email == $request->input('personal_email')) {
-                        $message = "Email, Phone Number & CNIC Already Exists";
+                    if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
 
                     } else if ($user_request->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
@@ -5482,8 +5475,6 @@ class AdminAPIController extends Controller
                     } else if ($user_request->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    } else if ($request->has("personal_email") && $user_request->email == $request->input('personal_email')) {
-                        $message = "Email Already Exist";
                     }
                 } else {
                     try {
