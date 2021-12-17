@@ -108,7 +108,11 @@
 											</div>
 											<div class="col">
 												<div class="form-group text-right">
-													<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+													@if($omni_user != 1)
+														<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+													@else
+														<a href="{{ asset('file/Trax Book Omni Overall Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall Omni</a>
+							  						@endif
 												</div>
 											</div>
 											@if($omni_user == 1)

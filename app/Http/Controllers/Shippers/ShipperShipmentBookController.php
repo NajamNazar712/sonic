@@ -2673,6 +2673,9 @@ class ShipperShipmentBookController extends Controller
                 $omni = 1;
                 $service_type_check_id = 1;
             }
+            elseif ($excel_type == 6) {      //for omni overall
+
+            }
             else{
                 return redirect()->back()->with('error', 'Invalid Template Selected');
             }
