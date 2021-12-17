@@ -10234,7 +10234,7 @@ class RiderAPIController extends Controller
                 'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
                 'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
                 'address' => ['required'],
-                'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'emergency_contact' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
                 'date_of_birth' => ['required'],
                 'pin' => ['required', 'integer', 'digits:4'],
