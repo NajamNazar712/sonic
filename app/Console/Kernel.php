@@ -105,6 +105,8 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\SaleIncentiveReport',
         'App\Console\Commands\AutoAssignCrmAgent',
         'App\Console\Commands\PendingPaymentCalculationJob',
+
+        '\App\Console\Commands\EmployeeDocumentsUpdateNotification',
     ];
 
     /**
@@ -364,6 +366,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
 
         $schedule->command('sum:pendingpayments')->dailyAt('6:00')->runInBackground();
+
+        $schedule->command('employee_directory:documents_update')->dailyAt('12:00')->runInBackground();
 
     }
     /**
