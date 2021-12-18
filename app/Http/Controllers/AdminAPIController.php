@@ -5395,9 +5395,9 @@ class AdminAPIController extends Controller
                 'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
                 'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
                 'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
-                'personal_email' => ['required', 'email'],
+                'personal_email' => ['nullable', 'email'],
                 'address' => ['required'],
-                'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'emergency_contact' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'designation_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_designations,id'],
                 'department_id' => ['required', 'integer', 'digits_between:1,10', 'exists:admin_departments,id'],
                 'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
@@ -5407,10 +5407,10 @@ class AdminAPIController extends Controller
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
                 //BankInformation
-                'bank_id' => ['required', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
-                'account_title' => ['required'],
-                'branch_name' => ['required'],
-                'iban' => ['required'],
+                'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
+                'account_title' => ['nullable'],
+                'branch_name' => ['nullable'],
+                'iban' => ['nullable'],
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -5424,22 +5424,19 @@ class AdminAPIController extends Controller
                 $response['errors'] = $validate->errors();
             } else {
                 $admin = Admin::where('phone_number', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic_no'))
-                    ->orWhere('email', $request->input('personal_email'));
+                    ->orWhere('cnic', $request->input('cnic_no'));
 
                 $employee = Employee::where('phone_number', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic_no'))
-                    ->orWhere('personal_email', $request->input('personal_email'));
+                    ->orWhere('cnic', $request->input('cnic_no'));
 
                 $user_request = AdminUserRequest::where('phone_number', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic_no'))
-                    ->orWhere('email', $request->input('personal_email'));
+                    ->orWhere('cnic', $request->input('cnic_no'));
 
                 //Check Admin Already Exist
                 if ($admin->exists()) {
                     $admin = $admin->first();
-                    if ($admin->phone_number == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no') && $admin->email == $request->input('personal_email')) {
-                        $message = "Email, Phone Number & CNIC Already Exists";
+                    if ($admin->phone_number == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
 
                     } else if ($admin->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
@@ -5447,13 +5444,11 @@ class AdminAPIController extends Controller
                     } else if ($admin->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    }else if ($admin->email == $request->input('personal_email')) {
-                        $message = "Email Already Exist";
                     }
                 } else if ($employee->exists()) {
                     $employee = $employee->first();
-                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no') && $employee->personal_email == $request->input('personal_email')) {
-                        $message = "Email, Phone Number & CNIC Already Exists";
+                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
 
                     } else if ($employee->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
@@ -5461,13 +5456,11 @@ class AdminAPIController extends Controller
                     } else if ($employee->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    } else if ($employee->personal_email == $request->input('personal_email')) {
-                        $message = "Email Already Exist";
                     }
                 } else if ($user_request->exists()) {
                     $user_request = $user_request->first();
-                    if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no') && $user_request->email == $request->input('personal_email')) {
-                        $message = "Email, Phone Number & CNIC Already Exists";
+                    if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
 
                     } else if ($user_request->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
@@ -5475,8 +5468,6 @@ class AdminAPIController extends Controller
                     } else if ($user_request->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    } else if ($user_request->email == $request->input('personal_email')) {
-                        $message = "Email Already Exist";
                     }
                 } else {
                     try {
@@ -5507,13 +5498,15 @@ class AdminAPIController extends Controller
                         $employee_request->staff_category_id = $request->staff_category_id;
                         $employee_request->save();
 
-                        $employee_bank_info = new EmployeeBankInformation();
-                        $employee_bank_info->employee_id = $employee_request->id;
-                        $employee_bank_info->account_title = $request->account_title;
-                        $employee_bank_info->bank_id = $request->bank_id;
-                        $employee_bank_info->branch_name = $request->branch_name;
-                        $employee_bank_info->iban = $request->iban;
-                        $employee_bank_info->save();
+                        if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
+                            $employee_bank_info = new EmployeeBankInformation();
+                            $employee_bank_info->employee_id = $employee_request->id;
+                            $employee_bank_info->account_title = $request->account_title;
+                            $employee_bank_info->bank_id = $request->bank_id;
+                            $employee_bank_info->branch_name = $request->branch_name;
+                            $employee_bank_info->iban = $request->iban;
+                            $employee_bank_info->save();
+                        }
 
 
                         if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
