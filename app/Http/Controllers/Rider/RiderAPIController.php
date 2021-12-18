@@ -10341,18 +10341,15 @@ class RiderAPIController extends Controller
                             $employee_request->rider_main_category = $request->rider_main_category;
                             $employee_request->rider_sub_category = $request->rider_sub_category;
                             $employee_request->department_id = 6;
-
                             $employee_request->save();
 
-                            if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
-                                $employee_bank_info = new EmployeeBankInformation();
-                                $employee_bank_info->employee_id = $employee_request->id;
-                                $employee_bank_info->account_title = $request->account_title;
-                                $employee_bank_info->bank_id = $request->bank_id;
-                                $employee_bank_info->branch_name = $request->branch_name;
-                                $employee_bank_info->iban = $request->iban;
-                                $employee_bank_info->save();
-                            }
+                            $employee_bank_info = new EmployeeBankInformation();
+                            $employee_bank_info->employee_id = $employee_request->id;
+                            $employee_bank_info->account_title = $request->account_title;
+                            $employee_bank_info->bank_id = $request->bank_id;
+                            $employee_bank_info->branch_name = $request->branch_name;
+                            $employee_bank_info->iban = $request->iban;
+                            $employee_bank_info->save();
 
                             if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
                                 $employee_id = $employee_request->id;

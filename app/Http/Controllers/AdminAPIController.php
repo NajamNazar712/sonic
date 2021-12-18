@@ -5505,15 +5505,13 @@ class AdminAPIController extends Controller
                         $employee_request->staff_category_id = $request->staff_category_id;
                         $employee_request->save();
 
-                        if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
-                            $employee_bank_info = new EmployeeBankInformation();
-                            $employee_bank_info->employee_id = $employee_request->id;
-                            $employee_bank_info->account_title = $request->account_title;
-                            $employee_bank_info->bank_id = $request->bank_id;
-                            $employee_bank_info->branch_name = $request->branch_name;
-                            $employee_bank_info->iban = $request->iban;
-                            $employee_bank_info->save();
-                        }
+                        $employee_bank_info = new EmployeeBankInformation();
+                        $employee_bank_info->employee_id = $employee_request->id;
+                        $employee_bank_info->account_title = $request->account_title;
+                        $employee_bank_info->bank_id = $request->bank_id;
+                        $employee_bank_info->branch_name = $request->branch_name;
+                        $employee_bank_info->iban = $request->iban;
+                        $employee_bank_info->save();
 
                         if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
                             $employee_id = $employee_request->id;
