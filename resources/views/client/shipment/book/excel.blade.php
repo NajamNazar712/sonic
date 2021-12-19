@@ -35,8 +35,13 @@
 												<div class="row justify-content-center">
 													<fieldset>
 														<div class="custom-control custom-radio col">
-															<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_1" value="1">
-															<label class="custom-control-label" for="excel_type_1">Overall</label>
+															@if($omni_user != 1)
+																<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_1" value="1">
+																<label class="custom-control-label" for="excel_type_1">Overall</label>
+															@else
+																<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_7" value="7">
+																<label class="custom-control-label" for="excel_type_7">Overall Omni</label>
+															@endif
 														</div>
 													</fieldset>
 													<fieldset>
