@@ -610,7 +610,7 @@
                        <tr>
                         <th><strong>Employee ID</strong></th>
                         <th><strong>Full Name</strong></th>
-                        <th><strong>Email</strong></th>
+                        <th><strong>Outlook ID</strong></th>
                         <th><strong>Contact</strong></th>
                         <th><strong>Department</strong></th>
                         <th><strong>Designation</strong></th>

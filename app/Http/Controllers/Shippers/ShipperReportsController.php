@@ -844,7 +844,7 @@ class ShipperReportsController extends Controller
             }
         })
         ->editColumn('current_status', function ($shipment) {
-            if($shipment->status_id == 2 ||$shipment->status_id == 3 ||$shipment->status_id == 4 ||$shipment->current_status == 5 ||$shipment->status_id == 8 ||$shipment->status_id == 9 ||$shipment->status_id == 12 ||$shipment->status_id == 6 ||$shipment->status_id == 7 ||$shipment->status_id == 10 || $shipment->status_id == 11 || $shipment->status_id == 13  || $shipment->status_id == 15 || $shipment->status_id == 49 || $shipment->status_id == 52 || $shipment->status_id == 54  || $shipment->status_id == 55 || $shipment->status_id == 61 || $shipment->status_id == 62 || $shipment->status_id == 63){
+            if($shipment->status_id == 2 ||$shipment->status_id == 3 ||$shipment->status_id == 4 ||$shipment->status_id == 5 ||$shipment->status_id == 8 ||$shipment->status_id == 9 ||$shipment->status_id == 12 ||$shipment->status_id == 6 ||$shipment->status_id == 7 ||$shipment->status_id == 10 || $shipment->status_id == 11 || $shipment->status_id == 13  || $shipment->status_id == 15 || $shipment->status_id == 49 || $shipment->status_id == 52 || $shipment->status_id == 54  || $shipment->status_id == 55 || $shipment->status_id == 61 || $shipment->status_id == 62 || $shipment->status_id == 63){
                 return 'In Process';
             }elseif($shipment->status_id == 14){
                 return 'Delivered';

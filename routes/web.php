@@ -751,6 +751,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add/{type?}', 'Admins\RiderManagementController@addRiderView')->name('add');
             Route::get('categoryAjax', 'Admins\RiderManagementController@categoryListAjax')->name('category.ajax');
             Route::post('/add', 'Admins\RiderManagementController@addRiderDetails')->name('add');
+            Route::post('rejoin', 'Admins\RiderManagementController@rejoin')->name('rejoin');
             Route::get('{id}/edit/{type?}', 'Admins\RiderManagementController@editRiderView')->name('edit');
             Route::put('{id}/edit', 'Admins\RiderManagementController@editRiderDetails')->name('edit');
             Route::put('/status', 'Admins\RiderManagementController@riderStatus')->name('status');
@@ -1689,6 +1690,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('rider_information', 'Admins\AdminTrackingController@rider_information')->name('rider_information');
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
         Route::post('pieces_print', 'Admins\AdminTrackingController@pieces_print')->name('pieces_print');
+        Route::post('estimation_check', 'Admins\AdminTrackingController@estimation_check')->name('estimation_check');
 
     });
 
@@ -1705,12 +1707,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('user_management')->name('user_management.')->group(function() {
         Route::prefix('users')->name('users.')->group(function() {
             Route::get('', 'Admins\UserManagementController@user_index')->name('index');
+            Route::post('rejoin', 'Admins\UserManagementController@rejoin')->name('rejoin');
             Route::get('list', 'Admins\UserManagementController@user_list')->name('list');
             Route::get('email', 'Admins\UserManagementController@user_email')->name('email');
             Route::get('trax_id', 'Admins\UserManagementController@user_trax_id')->name('trax_id');
             Route::post('status', 'Admins\UserManagementController@user_status')->name('status');
             Route::post('assign_hubs', 'Admins\UserManagementController@user_assign_hub')->name('assign_hubs');
 
+            Route::get('validate_phone','Admins\UserManagementController@validate_phone')->name('validate_phone');
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\UserManagementController@user_add_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@user_add_store')->name('store');
@@ -2379,6 +2383,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         });
+        Route::prefix('osa_charges')->name('osa_charges.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@osa_charges_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@osa_charges_list')->name('list');
+        });
 //        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
 //            Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');
 //            Route::get('list', 'Admins\AdminReportsController@confirmation_shipments_list')->name('list');
@@ -2468,7 +2476,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/accounts/pending/{id}/rates' ,'Admins\AdminDashboardController@viewShipperRates');
     //Reset Password
     Route::post('password/email','Auth\AdminForgotPasswordController@sendResetLinkEmail')->name('password.email');
+    Route::post('get/otp','Auth\AdminForgotPasswordController@GenerateOTP')->name('password.generate.otp');
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
+    Route::post('password/reset/pin','Auth\AdminResetPasswordController@reset_pin')->name('password.reset.pin');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset')->name('password.reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
 
@@ -3393,6 +3403,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
 
         Route::prefix('employee_directory')->name('employee_directory.')->group(function () {
+            Route::post('rejoin', 'Admins\AdminHumanResourseController@rejoin_employee')->name('rejoin');
             Route::post('pin', 'Admins\AdminHumanResourseController@employee_directory_pin')->name('pin');
             Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');

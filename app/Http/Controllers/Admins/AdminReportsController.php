@@ -41,6 +41,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\Admin\OSAChargesLog;
 
 class AdminReportsController extends Controller
 {
@@ -4060,7 +4061,7 @@ class AdminReportsController extends Controller
             ->leftjoin('petty_cash_account_titles as pct', 'pct.id','=','petty_cash_statement_details.account_title_id')
             ->leftjoin('shipments','shipments.id','=','pcs.shipment_id')
             ->leftjoin('admins as chb','chb.id','=', 'pcs.checked_by')
-            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by','employee.trax_id as employee_id','petty_cash_statement_details.employee_name','petty_cash_statement_details.employee_designation','sdn.id as sdn_id','sdn.dncc_count');
+            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pcs.date as p_entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by','employee.trax_id as employee_id','petty_cash_statement_details.employee_name','petty_cash_statement_details.employee_designation','sdn.id as sdn_id','sdn.dncc_count');
 //            ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
@@ -4081,7 +4082,12 @@ class AdminReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$petty->tracking_number' class='tracking' target='_blank'>$petty->tracking_number</a></u>";
             })
             ->addColumn('entry_date',function($petty){
-                return Carbon::parse($petty->entry_date)->toDateString();
+                if($petty->entry_date != "0000-00-00 00:00:00") {
+                    return Carbon::parse($petty->entry_date)->toDateString();
+                }
+                else{
+                    return Carbon::parse($petty->p_entry_date)->toDateString();
+                }
             })
             ->editColumn('sdn_id_link', function ($sdn) {
                 if($sdn->sdn_id != null) {
@@ -9852,6 +9858,44 @@ class AdminReportsController extends Controller
         }
         if ($tracking_number = $request->get('tracking_number')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_number));
+        }
+        return $datatable->make(true);
+    }
+    public function osa_charges_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),481);
+        $filter_dates = DB::connection('reports')->table('sales_incentive_filter_dates')
+            ->select('id','date')
+            ->orderBy('id', 'desc')
+            ->get();
+        $admins = DB::connection('reports')->table('admins')->whereExists(function($query) {
+            $query->from('admin_roles')
+                ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
+                ->where('department_id', '=', 7);
+        })->select('id', 'name')->get();
+        $cities = City::where('business_category_id', 1)->where('hub', 1)->select('id', 'name')->get();
+        return view('admin.reports.osa_charges')->with(['filter_dates' => $filter_dates, 'admins' => $admins, 'cities' => $cities]);
+    }
+    public function osa_charges_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),482);
+        }
+        $shipments = Shipment::join('osa_charges_logs as nc', 'shipments.id', '=', 'nc.shipment_id')
+        ->leftjoin('admins as a','a.id','=','nc.updated_by')
+        ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','a.name as updated_by','nc.osa_charges as osa_charges','nc.updated_at as updated_at');
+
+        $datatable = Datatables::of($shipments)
+        ->editColumn('tracking_number',function ($shipments){
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        });
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments = $shipments->whereBetween('nc.updated_at', [$from,$to]);
         }
         return $datatable->make(true);
     }
