@@ -306,7 +306,24 @@ class AdminShipmentPieceController extends Controller
     public function return_note_create(Request $request){
         $shipment_ids = $request->shipment_ids;
         $shipment_ids = explode(',', $shipment_ids);
+        $invalid_shipment = array();
 
+        foreach ($shipment_ids as $shipment_id){
+            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id)->first();
+            $status = $shipment_piece_request->status;
+            $request_status = $shipment_piece_request->request_status_id;
+            if($status != 2 && ($request_status != 3 || $request_status != NULL)){
+                $shipment = Shipment::where('id', $shipment_id);
+
+                $shipment = $shipment->first();
+
+                $invalid_shipment[] = $shipment->tracking_number;
+            }
+        }
+        if (count($invalid_shipment) > 0) {
+            $invalid_shipments = implode(", ", $invalid_shipment);
+            return redirect()->back()->with(['error' => "Selected Shipment have different status: " . $invalid_shipments]); 
+        }
         $rider = $request->rider_select;
         if(!$rider){
             return redirect()->back()->with('error', 'Rider not selected!');
@@ -852,6 +869,141 @@ class AdminShipmentPieceController extends Controller
         return $html;
 
 
+    }
+
+    public function single_piece_bulk(Request $request){
+        
+        $shipment_ids = $request->shipment_ids;
+        $invalid_shipment = array();
+
+        foreach ($shipment_ids as $shipment_id){
+            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id)->first();
+            $status = $shipment_piece_request->status;
+            $request_status = $shipment_piece_request->request_status_id;
+            if($status == 2 && $request_status == 3){
+                $shipment = Shipment::where('id', $shipment_id);
+
+                $shipment = $shipment->first();
+
+                $invalid_shipment[] = $shipment->tracking_number;
+            }
+        }
+        if (count($invalid_shipment) > 0) {
+            $invalid_shipments = implode(", ", $invalid_shipment);
+            return response()->json(['status' => 1,'error' => 'Selected Shipments has Resolved status: '. $invalid_shipments ]); 
+        }
+        foreach ($shipment_ids as $shipment_id){
+            if($shipment_id){
+                $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id)->where('status', 1);
+                if($shipment_piece_request->exists()){
+                    $shipment = Shipment::find($shipment_id);
+                    if($shipment->shipper_status_id == 62){
+                        $shipment_piece_request = $shipment_piece_request->first();
+
+                        $shipment->pieces = 1;
+                        $shipment->save();
+
+                        ShipmentPiece::where('shipment_id', $shipment_id)->delete();
+                        $shipment_piece_request->status = 2;
+                        $shipment_piece_request->request_status_id = 1;
+                        $shipment_piece_request->last_updated_by_admin = Auth::id();
+                        $shipment_piece_request->last_updated_at = Carbon::now();
+                        $shipment_piece_request->department_id = session('department_id');
+                        $shipment_piece_request->save();
+
+                        // return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+                    }
+                    // return response()->json(['status' => 1,'error' => 'Shipment is already modified!']);
+                }
+                // return response()->json(['status' => 1,'error' => 'Shipment request not found!']);
+            }
+        }
+        return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+    }
+    public function wait_remaining_pieces_bulk(Request $request){
+        $shipment_ids = $request->shipment_ids;
+        $invalid_shipment = array();
+
+        foreach ($shipment_ids as $shipment_id){
+            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id)->first();
+            $status = $shipment_piece_request->status;
+            $request_status = $shipment_piece_request->request_status_id;
+            if($status == 2 && $request_status == 3){
+                $shipment = Shipment::where('id', $shipment_id);
+
+                $shipment = $shipment->first();
+
+                $invalid_shipment[] = $shipment->tracking_number;
+            }
+        }
+        if (count($invalid_shipment) > 0) {
+            $invalid_shipments = implode(", ", $invalid_shipment);
+            return response()->json(['status' => 1,'error' => 'Selected Shipments has Resolved status: '. $invalid_shipments ]); 
+        }
+        foreach ($shipment_ids as $shipment_id){
+            if($shipment_id){
+                $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id)->where('status', 1);
+                if($shipment_piece_request->exists()){
+                    $shipment = Shipment::find($shipment_id);
+                    if($shipment->shipper_status_id == 62){
+                        $shipment_piece_request = $shipment_piece_request->first();
+                        $shipment_piece_request->status = 2;
+                        $shipment_piece_request->request_status_id = 2;
+                        $shipment_piece_request->last_updated_by_admin = Auth::id();
+                        $shipment_piece_request->last_updated_at = Carbon::now();
+                        $shipment_piece_request->department_id = session('department_id');
+                        $shipment_piece_request->save();
+
+                        // return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+                    }
+                }
+                // return response()->json(['status' => 1,'error' => 'Shipment request not found!']);
+            }
+        }
+        return response()->json(['status' => 0,'success' => 'Shipment successfully converted to wait for remaining!']);
+    }
+    public function return_back_to_shipper_bulk(Request $request){
+        $shipment_ids = $request->shipment_ids;
+        $invalid_shipment = array();
+
+        foreach ($shipment_ids as $shipment_id){
+            $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id)->first();
+            $status = $shipment_piece_request->status;
+            $request_status = $shipment_piece_request->request_status_id;
+            if($status == 2 && $request_status == 3){
+                $shipment = Shipment::where('id', $shipment_id);
+
+                $shipment = $shipment->first();
+
+                $invalid_shipment[] = $shipment->tracking_number;
+            }
+        }
+        if (count($invalid_shipment) > 0) {
+            $invalid_shipments = implode(", ", $invalid_shipment);
+            return response()->json(['status' => 1,'error' => 'Selected Shipments has Resolved status: '. $invalid_shipments ]); 
+        }
+        foreach ($shipment_ids as $shipment_id){
+            if($shipment_id){
+                $shipment = Shipment::find($shipment_id);
+                if($shipment && ($shipment->shipper_status_id == 62)){
+                    $shipment_piece_request = ShipmentPiecesRequest::where('shipment_id', $shipment_id);
+                    if($shipment_piece_request->exists()){
+                        $shipment_piece_request = $shipment_piece_request->first();
+                        $shipment_piece_request->status = 2;
+                        $shipment_piece_request->request_status_id = 3;
+                        $shipment_piece_request->last_updated_by_admin = Auth::id();
+                        $shipment_piece_request->last_updated_at = Carbon::now();
+                        $shipment_piece_request->department_id = session('department_id');
+                        $shipment_piece_request->save();
+
+                        // return response()->json(['status' => 0,'success' => 'Shipment successfully converted to single!']);
+                    }
+                    // return response()->json(['status' => 1,'error' => 'Shipment request not found!']);
+                }
+                // return response()->json(['status' => 1,'error' => 'Shipment is not on Multiple Piece Hold Status!']);
+            }
+        }
+        return response()->json(['status' => 0,'success' => 'Shipment successfully converted to return to shipper!']);
     }
 
 }
