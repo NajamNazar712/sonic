@@ -40,7 +40,7 @@
 																<label class="custom-control-label" for="excel_type_1">Overall</label>
 															@else
 																<input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_7" value="7">
-																<label class="custom-control-label" for="excel_type_7">Overall Omni</label>
+																<label class="custom-control-label" for="excel_type_7">Overall</label>
 															@endif
 														</div>
 													</fieldset>
@@ -116,7 +116,7 @@
 													@if($omni_user != 1)
 														<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
 													@else
-														<a href="{{ asset('file/Trax Book Omni Overall Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall Omni</a>
+														<a href="{{ asset('file/Trax Book Omni Overall Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
 							  						@endif
 												</div>
 											</div>
