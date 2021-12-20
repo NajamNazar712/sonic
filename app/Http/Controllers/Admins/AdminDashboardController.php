@@ -11462,11 +11462,17 @@ class AdminDashboardController extends Controller
     }
     public function admin_profile(Request $request){
         $user = Admin::where('id', Auth::id())->first();
-        $department = Admin::join('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
-        ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
-        ->where('admins.id', Auth::id())->first();
-        $designations = EmployeeDesignation::where('status',1)->where('id',$user->designation_id)->first();
-        return response()->json(['full_name' => $user->name,'department' => $department->name,'designation' => $designations->name,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
+        if($user){
+            $department = Admin::join('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
+                ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
+                ->where('admins.id', Auth::id())->first();
+            $designations = EmployeeDesignation::where('status',1)->where('id',$user->designation_id)->first();
+            return response()->json(['full_name' => $user->name,'department' => $department->name,'designation' => $designations->name,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
+        }
+        else{
+            return response()->json(['error' => 'User not found!']);
+        }
+
    }
 
 }
