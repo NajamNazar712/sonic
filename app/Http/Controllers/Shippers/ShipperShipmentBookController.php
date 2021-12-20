@@ -1251,8 +1251,8 @@ class ShipperShipmentBookController extends Controller
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
-                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                                 </td>
                                 <tr>
                                     <td class="color secondary border twice-top twice-left"><strong>Type</strong></td>
@@ -1268,8 +1268,8 @@ class ShipperShipmentBookController extends Controller
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
-                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                                 </td>
                                 <tr>
                                     <td class="color primary border twice-left"><strong>Type</strong></td>
@@ -1293,8 +1293,8 @@ class ShipperShipmentBookController extends Controller
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
-                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                                 </td>
                               </tr>
                             </tbody>
@@ -1306,8 +1306,8 @@ class ShipperShipmentBookController extends Controller
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
-                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                                 </td>
                               </tr>
                             </tbody>
@@ -1371,8 +1371,8 @@ class ShipperShipmentBookController extends Controller
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
-                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                                 </td>
                         ';
 
@@ -1389,8 +1389,8 @@ class ShipperShipmentBookController extends Controller
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
-                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                                 </td>
                         ';
 
@@ -1474,7 +1474,7 @@ class ShipperShipmentBookController extends Controller
 
                                     $table_start .='
                                               <tr>
-                                                <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
+                                                <td colspan="3" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
                                                 <td colspan="4" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
                                               </tr>
                                               <tr>
@@ -1512,7 +1512,7 @@ class ShipperShipmentBookController extends Controller
 
                             $table_start .='
                                               <tr>
-                                                <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
+                                                <td colspan="3" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
                                                 <td colspan="4" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
                                               </tr>
                                               <tr>
@@ -1544,11 +1544,11 @@ class ShipperShipmentBookController extends Controller
 
                         if ($shipment->booking_type_id != 4) {
                             $table_start .= '
-                                <td colspan="3" class="border twice-right">' . $company_name . '</td>
+                                <td colspan="2" class="border twice-right">' . $company_name . '</td>
                     ';
                         } else {
                             $table_start .= '
-                                <td colspan="3" class="border twice-right">' . $company_name . ' (' . $shipment->pickup_address->poc . ')</td>
+                                <td colspan="2" class="border twice-right">' . $company_name . ' (' . $shipment->pickup_address->poc . ')</td>
                     ';
                         }
                         $table_start .= '
@@ -1571,12 +1571,12 @@ class ShipperShipmentBookController extends Controller
                             if ($shipment->booking_type_id != 4) {
                                 $table_start .= '
                                 '.$addressstyle.'
-                                <td colspan="3" class="border twice-right">' . $address . '</td>
+                                <td colspan="2" class="border twice-right">' . $address . '</td>
                         ';
                             } else {
                                 $table_start .= '
                                 '.$addressstyle.'
-                                <td colspan="3" class="border twice-right">' . $address . '</td>
+                                <td colspan="2" class="border twice-right">' . $address . '</td>
                         ';
                             }
 
@@ -1584,7 +1584,7 @@ class ShipperShipmentBookController extends Controller
 
                     } else {
                             $table_start .= '
-                                <td colspan="4" class="border twice-bottom twice-right"></td>
+                                <td colspan="3" class="border twice-bottom twice-right"></td>
                                 ';
 
 
@@ -1610,27 +1610,27 @@ class ShipperShipmentBookController extends Controller
                         if ($shipment->booking_type_id != 4) {
                                 $table_start .= '
                                     '.$phonenumberstyle.'
-                                    <td colspan="3" class="border twice-bottom twice-right">' . $phonenumber . '</td>
+                                    <td colspan="2" class="border twice-bottom twice-right">' . $phonenumber . '</td>
                                 ';
 
                         } else {
                             $table_start .= '
                             '.$phonenumberstyle.'
-                            <td colspan="3" class="border twice-bottom twice-right">' . $phonenumber . '</td>
+                            <td colspan="2" class="border twice-bottom twice-right">' . $phonenumber . '</td>
                         ';
                         }
                     } else {
                         if ($shipment->booking_type_id != 4) {
                                 $table_start .= '
                                     <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
-                                    <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                                    <td colspan="2" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
                                 ';
 
 
                         } else {
                             $table_start .= '
                             <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
-                            <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                            <td colspan="2" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
                         ';
                         }
                     }
