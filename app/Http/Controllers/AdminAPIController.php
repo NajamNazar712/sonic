@@ -37,6 +37,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DwsDetail;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
@@ -5138,6 +5139,25 @@ class AdminAPIController extends Controller
                             $shipment_detail->dimension_h = $request->dimension_h;
                             $shipment_detail->save();
                         }
+
+                        $dws_detail = DwsDetail::where('shipment_id', $shipment_id);
+                        if ($dws_detail->exists()) {
+                            $dws_detail = $dws_detail->get()->first();
+                            $dws_detail->dws_machine = $request->machine;
+                            $dws_detail->dws_package_type = $request->package_type;
+                            $dws_detail->dws_is_uploaded = $request->is_uploaded;
+                            $dws_detail->dws_date = $request->date;
+                            $dws_detail->save();
+                        } else {
+                            $dws_detail = new DwsDetail;
+                            $dws_detail->shipment_id = $shipment_id;
+                            $dws_detail->dws_machine = $request->machine;
+                            $dws_detail->dws_package_type = $request->package_type;
+                            $dws_detail->dws_is_uploaded = $request->is_uploaded;
+                            $dws_detail->dws_date = $request->date;
+                            $dws_detail->save();
+                        }
+                        
                     return response()->json(true);
 
                 } else {
