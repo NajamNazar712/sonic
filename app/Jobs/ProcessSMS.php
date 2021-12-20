@@ -60,7 +60,7 @@ class ProcessSMS implements ShouldQueue
 
     private function telecard($sms) {
         try {
-            $client = new Client(['base_uri' => 'https://bsms.telecard.com.pk/SMSPortal/Customer/ProcessSMS.aspx', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            $client = new Client(['base_uri' => 'https://bsms.telecard.com.pk/SMSPortal/Customer/ProcessSMS.aspx', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
             $response = $client->get('', [
                 'query' => [
@@ -147,7 +147,7 @@ class ProcessSMS implements ShouldQueue
     }
 
     private function telenor_generate_session_id($base_uri, $sms) {
-        $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+        $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120, 'verify' => false]);
 
         try {
             $error = FALSE;
@@ -202,11 +202,11 @@ class ProcessSMS implements ShouldQueue
             }
         }
         catch (RequestException $e) {
-            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-            $subject = '[Error] SMS API';
-            $body = 'Error in Generate Session ID SMS API.<br/>No Response';
+            // $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            // $subject = '[Error] SMS API';
+            // $body = 'Error in Generate Session ID SMS API.<br/>No Response';
 
-            $mail = Mail::to($to)->send(new Notifications($subject, $body));
+            // $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
             $sms->status = 1;
 
@@ -220,7 +220,7 @@ class ProcessSMS implements ShouldQueue
         $telenor = Telenor::latest()->first();
 
         if ($telenor) {
-            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120, 'verify' => false]);
 
             try {
                 $error = FALSE;
@@ -290,11 +290,11 @@ class ProcessSMS implements ShouldQueue
                 }
             }
             catch (RequestException $e) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-                $subject = '[Error] SMS API';
-                $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>No Response';
+                // $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                // $subject = '[Error] SMS API';
+                // $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>No Response';
 
-                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+                // $mail = Mail::to($to)->send(new Notifications($subject, $body));
 
                 $sms->status = 1;
 
@@ -318,7 +318,7 @@ class ProcessSMS implements ShouldQueue
         $telenor = Telenor::latest()->first();
 
         if ($telenor) {
-            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120, 'verify' => false]);
 
             try {
                 $error = FALSE;
@@ -347,11 +347,11 @@ class ProcessSMS implements ShouldQueue
                 }
             }
             catch (RequestException $e) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-                $subject = '[Error] SMS API';
-                $body = 'Error in Ping SMS API.<br/>No Response';
+                // $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                // $subject = '[Error] SMS API';
+                // $body = 'Error in Ping SMS API.<br/>No Response';
 
-                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+                // $mail = Mail::to($to)->send(new Notifications($subject, $body));
             }
         }
         else {

@@ -2123,6 +2123,7 @@ class NotificationsController extends Controller
 
                                 $cc = array();
 
+
 //                  $general_admins = Admin::whereIn('role_id', [15, 21])->where('status', 1);
 //
 //                  if ($general_admins->exists()) {
@@ -5690,6 +5691,7 @@ class NotificationsController extends Controller
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'jahanzaib.qamar@trax.pk';
                         $to[] = 'zakee.rasheed@trax.pk';
+                        $bcc[] = 'muhammad.waqas@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
@@ -7779,7 +7781,7 @@ class NotificationsController extends Controller
                     self::delivery_note_otp_sms($body, $to);
                 } else if ($id == 138) {
                     $admin = $reference_1_id;
-                    $otp = $reference_2_id;
+                    $otp = $reference_2_id['otp'];
                     $name = '';
                     if (strpos($body, '[name]') !== FALSE) {
                         $body = str_replace('[name]', $admin->name, $body);
@@ -7788,7 +7790,7 @@ class NotificationsController extends Controller
                     if (strpos($body, '[code]') !== FALSE) {
                         $body = str_replace('[code]', $otp, $body);
                     }
-                    $to = $admin->phone_number;
+                    $to = $reference_2_id['phone_number'];
                     // self::sms($body, $to, 1);
 
                     self::sms_otp($body, $to, $name, $otp, 1);
@@ -8616,6 +8618,19 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.waqas@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
+                }
+                else if ($id == 162) {
+                    $admin = Admin::find($reference_1_id);
+                    if ($admin) {
+                        if (strpos($body, '[user_name]') !== FALSE) {
+                            $body = str_replace('[user_name]', $admin->name, $body);
+                        }
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $admin->reset_pin_otp, $body);
+                        }
+                        $to = $reference_2_id;
+                        self::sms_otp($body, $to, $admin->name, $admin->reset_pin_otp, 1);
+                    }
                 }
                 else if ($id == 163){
                     $shipment = Shipment::find($reference_1_id);

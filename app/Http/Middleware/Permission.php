@@ -609,6 +609,8 @@ class Permission
             'packaging.inventory.index' => 221,
             'packaging.inventory.list' => 221,
 
+            'user_management.users.rejoin' => 620,
+
             'user_management.users.index' => 81,
             'user_management.users.list' => 81,
             'user_management.users.status' => 84,
@@ -657,6 +659,8 @@ class Permission
             'management.route.add' => 93,
             'management.route.edit' => 94,
             'management.route.status' => 95,
+
+            'management.riders.rejoin' => 620,
 
             'management.rider.index' => 96,
             'management.rider.ajax' => 96,
@@ -1012,6 +1016,8 @@ class Permission
             'human_resource.employee_directory.index' => 467,
             'human_resource.employee_directory.list' => 467,
 
+            'human_resource.employee_directory.rejoin' => 620,
+
             'human_resource.employee_directory.edit' => 468,
             'human_resource.employee_directory.profile.update' => 468,
             'human_resource.employee_directory.medical.update' => 468,
@@ -1137,6 +1143,7 @@ class Permission
             'settings.auto_tagging.index' => 639,
             'settings.auto_tagging.list' => 639,
             'reports.dws_report.index' => 642,
+            'reports.osa_charges.index' => 647,
 
 
         ],
