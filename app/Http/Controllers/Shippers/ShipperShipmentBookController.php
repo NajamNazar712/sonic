@@ -1022,7 +1022,7 @@ class ShipperShipmentBookController extends Controller
                       body {
                         background: none !important;
                         color: #09262e !important;
-                        font-size: 0.8rem !important;
+                        font-size: 0.7rem !important;
                       }
 
                       hr {
@@ -1154,7 +1154,7 @@ class ShipperShipmentBookController extends Controller
                 $html .= '
                     <style>
                       body {
-                        font-size: 0.75rem !important;
+                        font-size: 0.7rem !important;
                         font-weight: bold !important;
                       }
 
