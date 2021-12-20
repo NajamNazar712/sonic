@@ -4815,7 +4815,7 @@ class AdminAPIController extends Controller
                 //     return response()->json(['status' => 1, 'message' => 'weight not found']);
                 // }
 
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if (($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 ) && ($shipment->booking_type_id != 3 && $shipment->pieces == 1)) {
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
 
