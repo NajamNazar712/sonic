@@ -3173,7 +3173,7 @@ class AdminAPIController extends Controller
                 'sonic_id' => ['nullable'],
                 'place_of_birth' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'date_of_birth' => ['nullable'],
-                'pin' => ['require', 'integer', 'digits:4'],
+                'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
@@ -4815,7 +4815,11 @@ class AdminAPIController extends Controller
                 //     return response()->json(['status' => 1, 'message' => 'weight not found']);
                 // }
 
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if (($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 ) && ($shipment->booking_type_id != 3 && $shipment->pieces == 1)) {
+                    if($request->dimension_l < 0 || $request->dimension_w < 0 || $request->dimension_h < 0){
+                            return response()->json(false);
+    
+                    }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
 
@@ -5550,7 +5554,6 @@ class AdminAPIController extends Controller
 
     public function signup_optional_details(Request $request)
     {
-        //return response()->json(['status' => 0,'education_details' => $request->education_details, 'employment_history' => $request->employment_history, 'medical_details' => $request->medical_details]);
         if ($request->isMethod('post')) {
             $rules = [
                 //Employees
