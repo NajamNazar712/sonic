@@ -3173,7 +3173,7 @@ class AdminAPIController extends Controller
                 'sonic_id' => ['nullable'],
                 'place_of_birth' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'date_of_birth' => ['nullable'],
-                'pin' => ['require', 'integer', 'digits:4'],
+                'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
@@ -5550,7 +5550,6 @@ class AdminAPIController extends Controller
 
     public function signup_optional_details(Request $request)
     {
-        //return response()->json(['status' => 0,'education_details' => $request->education_details, 'employment_history' => $request->employment_history, 'medical_details' => $request->medical_details]);
         if ($request->isMethod('post')) {
             $rules = [
                 //Employees
