@@ -116,14 +116,14 @@
                 placeholder:'Select a status',
                 width:'100%'
             });
-            // $('#add_seal_form .integer').inputmask({
-            //     'alias': 'integer',
-            //     'allowMinus': false,
-            //     'allowPlus': false,
-            //     'rightAlign': false,
-            //     'min': 0,
-            //     'max': 100000000
-            // });
+            $('#add_seal_form .integer').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 999999999
+            });
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
