@@ -856,7 +856,7 @@ class RetailShipmentBookController extends Controller
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment_item->id . '</strong></span>
                             </td>
-                            <td rowspan="4" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                            <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                 <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
                             <tr>
@@ -911,8 +911,8 @@ class RetailShipmentBookController extends Controller
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
-                            <td rowspan="4" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                            <td rowspan="7" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 12, 12) . '" class="d-block mx-auto">
                             </td>
                     ';
 
@@ -971,7 +971,7 @@ class RetailShipmentBookController extends Controller
                             <td colspan="3" class="border twice-bottom twice-right"><strong>' . $shipment->business_category->name . '</strong></td>
                           </tr>
                           <tr>
-                            <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
+                            <td colspan="3" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
                             <td colspan="4" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
                           </tr>
                           <tr>
@@ -979,7 +979,7 @@ class RetailShipmentBookController extends Controller
                 ';
 
                     $table_start .= '
-                            <td colspan="3" class="border twice-right">' . $shipment->retail->shipper_name . '</td>
+                            <td colspan="2" class="border twice-right">' . $shipment->retail->shipper_name . '</td>
                 ';
 
                     $table_start .= '
@@ -992,7 +992,7 @@ class RetailShipmentBookController extends Controller
 
                     $table_start .= '
                         <td class="color secondary"><strong>Address</strong></td>
-                        <td colspan="3" class="border twice-right">' . $shipment->retail->shipper_address . '</td>
+                        <td colspan="2" class="border twice-right">' . $shipment->retail->shipper_address . '</td>
                 ';
 
                     $table_start .= '
@@ -1004,7 +1004,7 @@ class RetailShipmentBookController extends Controller
 
                     $table_start .= '
                     <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                    <td colspan="3" class="border twice-bottom twice-right">' . $shipment->retail->shipper_phone_no . '</td>
+                    <td colspan="2" class="border twice-bottom twice-right">' . $shipment->retail->shipper_phone_no . '</td>
                 ';
 
                     $table_start .= '
