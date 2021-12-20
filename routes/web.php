@@ -3551,6 +3551,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/submit','Admins\QAEvaluationController@submit')->name('submit');
         Route::get('','Admins\QAEvaluationController@index')->name('index');
         Route::get('list','Admins\QAEvaluationController@list')->name('list');
+        Route::get('edit/{id}','Admins\QAEvaluationController@edit')->name('edit');
+        Route::get('view/{id}','Admins\QAEvaluationController@view')->name('view');
         
         
     });

@@ -150,6 +150,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                rowId: 'id',
                 ajax:{
                     url: '{{ route('admin.qa_evaluation.list') }}',
                     // data: function (d) {
@@ -186,7 +187,23 @@
                 }
             });
             
+            $('body').on('click','button.qa_edit',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var link = '{{ route('admin.qa_evaluation.edit', ["id" => 0]) }}';
+                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
+                
+                
 
+            });
+
+            $('body').on('click','button.qa_view',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var link = '{{ route('admin.qa_evaluation.view', ["id" => 0]) }}';
+                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
+
+                
+
+            });
 
         });
 

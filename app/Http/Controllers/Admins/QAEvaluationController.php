@@ -112,7 +112,7 @@ class QAEvaluationController extends Controller
         $evaluation = QAEvaluation::join('admins as ad','ad.id','=','q_a_evaluations.agent_id')
                 ->join('evaluation_natures as en','en.id','=','q_a_evaluations.nature_id')
                 ->join('admins as ev','ev.id','=','q_a_evaluations.evaluated_by')
-             ->select(['ad.name as agent_name','ev.name as evaluated_by','en.nature as nature','q_a_evaluations.evaluation_date as evaluation_date','q_a_evaluations.date_time as date_time','q_a_evaluations.status as status','q_a_evaluations.score as score','q_a_evaluations.score as score','q_a_evaluations.remarks as remarks']);
+             ->select(['q_a_evaluations.id','ad.name as agent_name','ev.name as evaluated_by','en.nature as nature','q_a_evaluations.evaluation_date as evaluation_date','q_a_evaluations.date_time as date_time','q_a_evaluations.status as status','q_a_evaluations.score as score','q_a_evaluations.score as score','q_a_evaluations.remarks as remarks']);
     
 
          $datatables = Datatables::of($evaluation)
@@ -150,12 +150,12 @@ class QAEvaluationController extends Controller
                             <div class="dropdown-menu dropdown-menu-sm">
                         ';
     
-                     if (session('role_id') == 1 || $result->reporting_manager == Auth::id() || in_array(570, session('permissions'))) {
-                         $dropdown .= '<button type="button" class="dropdown-item rm_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reporting Manager View</div></button>';
+                     if (session('role_id') == 1 || in_array(571, session('permissions'))) {
+                         $dropdown .= '<button type="button" class="dropdown-item qa_edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
     
                      }
                      if (session('role_id') == 1 || in_array(571, session('permissions'))) {
-                         $dropdown .= '<button type="button" class="dropdown-item cs_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Customer Experience View</div></button>';
+                         $dropdown .= '<button type="button" class="dropdown-item qa_view" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View</div></button>';
     
                      }
                    
@@ -172,5 +172,23 @@ class QAEvaluationController extends Controller
              });
          ;
          return $datatables->make(true);
+    }
+
+    public function edit($id){
+        $qa_evaluation = QAEvaluation::find($id);
+        $agents = Admin::all(); // 74,50,49,37.29,28,26,21,74
+        $campaigns = EvaluationCampaign::all();
+        $evaluated_by = Admin::all();
+        $natures = EvaluationNature::all();
+        return view('admin.qa_evaluation.edit',compact('agents','campaigns','evaluated_by','natures','qa_evaluation'));
+    }
+
+    public function view($id){
+        $qa_evaluations = QAEvaluation::find($id);
+        $agents = Admin::all(); // 74,50,49,37.29,28,26,21,74
+        $campaigns = EvaluationCampaign::all();
+        $evaluated_by = Admin::all();
+        $natures = EvaluationNature::all();
+        return view('admin.qa_evaluation.view',compact('agents','campaigns','evaluated_by','natures','qa_evaluations'));
     }
 }
