@@ -3703,10 +3703,10 @@ class AdminHumanResourseController extends Controller
         $employee->staff_category_id = 1;
         $employee->rider_sub_category = null;
         $employee->rider_main_category = null;
-        $employee->route_id = null;
-        $employee->rider_type_id = null;
-        $employee->operation_rider_id = null;
-        $employee->ccd = null;
+//        $employee->route_id = null;
+//        $employee->rider_type_id = null;
+//        $employee->operation_rider_id = null;
+//        $employee->ccd = null;
 
         $employee->update();
 
