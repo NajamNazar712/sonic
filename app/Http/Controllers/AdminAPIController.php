@@ -5122,6 +5122,12 @@ class AdminAPIController extends Controller
                             $shipment_detail->dimension_l = $request->dimension_l;
                             $shipment_detail->dimension_w = $request->dimension_w;
                             $shipment_detail->dimension_h = $request->dimension_h;
+                            $shipment_detail->dimension_h = $request->dimension_h;
+
+                            $shipment_detail->dws_machine = $request->machine;
+                            $shipment_detail->dws_package_type = $request->package_type;
+                            $shipment_detail->dws_is_uploaded = $request->is_uploaded;
+                            $shipment_detail->dws_date = $request->date;
                             $shipment_detail->save();
                         } else {
                             $shipment_detail = new ShipmentDetail;
@@ -5136,6 +5142,10 @@ class AdminAPIController extends Controller
                             $shipment_detail->dimension_l = $request->dimension_l;
                             $shipment_detail->dimension_w = $request->dimension_w;
                             $shipment_detail->dimension_h = $request->dimension_h;
+                            $shipment_detail->dws_machine = $request->machine;
+                            $shipment_detail->dws_package_type = $request->package_type;
+                            $shipment_detail->dws_is_uploaded = $request->is_uploaded;
+                            $shipment_detail->dws_date = $request->date;
                             $shipment_detail->save();
                         }
                     return response()->json(true);
