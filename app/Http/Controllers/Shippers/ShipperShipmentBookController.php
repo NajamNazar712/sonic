@@ -2781,7 +2781,7 @@ class ShipperShipmentBookController extends Controller
                 }
                 $rows[$key]['open_shipment'] = $row['open_shipment'];
 
-                if(!isset($row['return_address_id']) || $row['return_address_id'] == null){
+                if(!isset($row['return_address_id']) || $row['return_address_id'] == null || $row['service_type_id'] != 1){
                     $row['return_address_id'] = NULL;
                 }
 
@@ -4253,7 +4253,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         }
-
+        
        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights,'distribution_products'=>$distribution_products,'omni_user' => $omni_user]);
     }
 
@@ -4796,7 +4796,7 @@ class ShipperShipmentBookController extends Controller
 
                 $rows[$key]['self_collection'] = $row['self_collection'];
 
-                if(!isset($row['return_address_id']) || $row['return_address_id'] == null){
+                if(!isset($row['return_address_id']) || $row['return_address_id'] == null ||  $row['service_type_id'] != 1){
                     $row['return_address_id'] = NULL;
                 }
 
@@ -4867,7 +4867,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address ID #' . $row['pickup_address_id'] . ' is disabled';
                         }
 
-                        if($row['service_type_id'] == 1 || $row['service_type_id'] == 2  && $omni == 1){
+                        if($row['service_type_id'] == 1 && $omni == 1){
                             if($row['return_address_id'] != NULL){
                                 $user_return_info = UserShippingInfo::find($row['return_address_id']);
 
