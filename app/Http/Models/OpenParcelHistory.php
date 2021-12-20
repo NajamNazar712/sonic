@@ -10,7 +10,7 @@ class OpenParcelHistory extends Model
         'shipment_id','user_id','remarks','amount', 'date'
     ];
     public function rider(){
-        return $this->belongsTo('App\Http\Models\Rider');
+        return $this->belongsTo('App\Http\Models\Rider')->withTrashed();
     }
     public function user(){
         return $this->belongsTo('App\Http\Models\Shipper\User');

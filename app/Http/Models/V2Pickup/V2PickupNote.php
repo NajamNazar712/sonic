@@ -16,7 +16,7 @@ class V2PickupNote extends Model
     }
 
     public function rider() {
-        return $this->belongsTo('App\Http\Models\Rider');
+        return $this->belongsTo('App\Http\Models\Rider')->withTrashed();
     }
     public function city() {
         return $this->belongsTo('App\Http\Models\City');

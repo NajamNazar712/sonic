@@ -18,7 +18,7 @@ class ReturnNote extends Model
     }
 
     public function rider(){
-    return $this->belongsTo('App\Http\Models\Rider');
+    return $this->belongsTo('App\Http\Models\Rider')->withTrashed();
 }
     public function route(){
         return $this->belongsTo('App\Http\Models\Route');

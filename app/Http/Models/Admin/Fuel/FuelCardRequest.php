@@ -13,7 +13,7 @@ class FuelCardRequest extends Model
     }
 
     public function riders() {
-        return $this->belongsTo(Rider::class, 'card_holder_id', 'id');
+        return $this->belongsTo(Rider::class, 'card_holder_id', 'id')->withTrashed();
     }
 
     public function fleet() {

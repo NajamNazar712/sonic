@@ -27,7 +27,7 @@ class City extends Model
         return $this->hasMany('App\Http\Models\Route');
     }
     public function riders(){
-        return $this->hasMany('App\Http\Models\Rider');
+        return $this->hasMany('App\Http\Models\Rider')->withTrashed();
     }
     public function admins(){
         return $this->hasMany('App\Http\Models\Admin\Admin');

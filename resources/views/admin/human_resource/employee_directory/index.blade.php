@@ -276,6 +276,41 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="convertRiderModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="convertRiderModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Convert Rider</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.employee_directory.rider.convert')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="convertRiderForm" novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="employee_id" id="employee_id" value="">
+                        <div class="form-group">
+                            <select name="department_id" id="department" class="select2 form-control " data-rule-required="true" data-msg-required="Department is required" style="width: 100%">
+                                @foreach($employee_department as $department)
+                                    <option value="{{$department->id}}">{{$department->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <select name="designation_id" id="designation" class="select2 form-control " data-rule-required="true" data-msg-required="Designation is required" style="width: 100%">
+                            </select>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" class="btn btn-primary" value="edit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -333,6 +368,45 @@
                 width: '100%',
                 placeholder: 'Select Rider Main Category',
                 dropdownParent: $('#editRiderModal')
+            });
+
+            $('#department').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Department',
+                dropdownParent: $('#convertRiderModal')
+            }).bind('change',function (){
+                var id = $(this).val();
+                if(id != "") {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.employee_directory.get.designation') !!}',
+                        method: 'POST',
+                        data: {
+                            'department_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            $("#designation").html("");
+                            if (data.status == 1) {
+                                let options = "";
+                                $.each(data.designations, function (i, v) {
+                                    options += "<option value='" + v.id + "'>" + v.name + "</option>";
+                                });
+                                $("#designation").html(options).val("").trigger('change');
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                }
+            });
+
+            $('#designation').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Designation',
+                dropdownParent: $('#convertRiderModal')
             });
             $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -1538,6 +1612,65 @@
                     }
                 });
             });
+
+
+            $('body').on('click', '.convert_rider_to_staff', function (e) {
+                var id = $(this).data('target-id');
+                var employee_type = table.row($(this).parents('tr')).data().employee_type_id;
+                if(employee_type == 2) {
+                    $("#convertRiderForm #employee_id").val(id);
+                    $("#convertRiderModal").modal('show');
+                }
+            });
+
+            $('body').on('hidden.bs.modal', '#convertRiderModal', function () {
+                $('#convertRiderForm #employee_id').val('');
+                $('#convertRiderForm #department').val('').trigger('change');
+                $('#convertRiderForm #designation').val('').trigger('change');
+            });
+
+            $("#convertRiderForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes To Make Rider An Employee!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            form.submit();
+                        }
+                    });
+                }
+            });
+
 
 
         });

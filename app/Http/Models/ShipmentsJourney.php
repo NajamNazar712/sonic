@@ -35,6 +35,6 @@ class ShipmentsJourney extends Model
         return $this->belongsTo('App\Http\Models\City');
     }
     public function rider() {
-        return $this->belongsTo('App\Http\Models\Rider', 'rider_id', 'id');
+        return $this->belongsTo('App\Http\Models\Rider', 'rider_id', 'id')->withTrashed();
     }
 }

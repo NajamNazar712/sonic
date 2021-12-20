@@ -13,7 +13,7 @@ class Route extends Model
         return $this->belongsTo('App\Http\Models\City');
     }
     public function rider(){
-        return $this->hasMany('App\Http\Models\Rider');
+        return $this->hasMany('App\Http\Models\Rider')->withTrashed();
     }
     public function deliverynotes(){
         return $this->hasMany('App\Http\Models\Route');

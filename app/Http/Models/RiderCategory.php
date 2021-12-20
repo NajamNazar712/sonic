@@ -7,6 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class RiderCategory extends Model
 {
     public function rider(){
-        return $this->hasMany('App\Http\Models\Rider');
+        return $this->hasMany('App\Http\Models\Rider')->withTrashed();
     }
 }

@@ -16,7 +16,7 @@ class RiderReturnDelivery extends Model
     }
 
     public function rider_id() {
-        return $this->belongsTo('App\Http\Models\Rider', 'rider_id', 'id');
+        return $this->belongsTo('App\Http\Models\Rider', 'rider_id', 'id')->withTrashed();
     }
 
     public function rider_status_id() {

@@ -10,6 +10,6 @@ class WmsPickupRun extends Model
 		return $this->hasMany('App\Http\Models\WMS\WmsPickupRunRequest', 'pickup_run_id', 'id');
 	}
 	public function rider(){
-        return $this->belongsTo('App\Http\Models\Rider', 'wms_rider_id', 'id');
+        return $this->belongsTo('App\Http\Models\Rider', 'wms_rider_id', 'id')->withTrashed();
     }
 }

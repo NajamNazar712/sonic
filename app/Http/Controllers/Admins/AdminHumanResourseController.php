@@ -314,7 +314,7 @@ class AdminHumanResourseController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                if(session('role_id') == 1 || in_array(468, session('permissions')) || in_array(469, session('permissions'))  || in_array(98, session('permissions')) || in_array(381, session('permissions')) || in_array(620, session('permissions'))) {
+                if(session('role_id') == 1 || in_array(652, session('permissions'))) {
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -323,7 +323,7 @@ class AdminHumanResourseController extends Controller
 
 
                         if ($result->request_status_id == 1 || $result->request_status_id == 2) {
-                            if (session('role_id') == 1 || in_array(469, session('permissions'))) {
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
 
                                 $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
 
@@ -332,16 +332,17 @@ class AdminHumanResourseController extends Controller
                             }
                         }
                         if ($result->request_status_id == 3 && $result->employee_type_id == 1) {
-                            if ($result->status_id != 2 && (session('role_id') == 1 || in_array(591, session('permissions')))) {
+                            if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) {
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
+
                             }
 
                             if ($result->status_id == 2) {
-                                if (session('role_id') == 1 || in_array(591, session('permissions'))) {
+                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                     $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
                                 }
 
-                                if (session('role_id') == 1 || in_array(620, session('permissions'))) {
+                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                     if ($result->first_inactive == 1) {
                                         $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Staff</div></button>';
                                     }
@@ -350,12 +351,12 @@ class AdminHumanResourseController extends Controller
                         }
 
                         if ($result->request_status_id == 3 && $result->employee_type_id == 2) {
-                            if (session('role_id') == 1 || in_array(98, session('permissions'))) {
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                 $dropdown .= '<button type="button" class="dropdown-item update_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
                             }
 
                             if ($result->status_id != 2) {
-                                if (session('role_id') == 1 || in_array(381, session('permissions'))) {
+                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                     if ($result->active_rider_type_id == 1) {
                                         $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Incentive</div></button>';
                                     }
@@ -365,23 +366,23 @@ class AdminHumanResourseController extends Controller
 
                                 }
 
-//                            if (session('role_id') == 1 || in_array(382, session('permissions'))) {
-//                                $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
-//                            }
 
-                                if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                     $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
+
+
+                                    $dropdown .= '<button type="button" class="dropdown-item convert_rider_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Rider</div></button>';
                                 }
 
 
                             }
 
                             if ($result->status_id == 2 && $result->check_if_rider_present_bit != null) {
-                                if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                     $dropdown .= '<button type="button" class="dropdown-item activate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
                                 }
 
-                                if (session('role_id') == 1 || in_array(620, session('permissions'))) {
+                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                     if ($result->first_inactive == 1) {
                                         $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
                                     }
@@ -389,7 +390,7 @@ class AdminHumanResourseController extends Controller
                             }
                         }
 
-                        if (session('role_id') == 1 || in_array(468, session('permissions'))) {
+                        if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                             $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
                             $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
                         }
@@ -3655,5 +3656,30 @@ class AdminHumanResourseController extends Controller
                 }
                 return redirect()->back()->with('error', 'Invalid Leave ID');
             }
+    }
+
+    public function convert_rider_to_staff(Request $request)
+    {
+        return $request;
+        $employee = Employee::find($request->employee_id);
+        if(!$employee)
+        {
+
+        }
+
+        $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
+        if($rider->doesntExist())
+        {
+
+        }
+
+        $rider = $rider->first();
+
+
+
+
+
+        $rider->delete();
+
     }
 }
