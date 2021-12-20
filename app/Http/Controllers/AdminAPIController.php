@@ -37,6 +37,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DwsDetail;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
@@ -4816,6 +4817,10 @@ class AdminAPIController extends Controller
                 // }
 
                 if (($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 ) && ($shipment->booking_type_id != 3 && $shipment->pieces == 1)) {
+                    if($request->dimension_l < 0 || $request->dimension_w < 0 || $request->dimension_h < 0){
+                            return response()->json(false);
+    
+                    }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
 
@@ -5134,6 +5139,25 @@ class AdminAPIController extends Controller
                             $shipment_detail->dimension_h = $request->dimension_h;
                             $shipment_detail->save();
                         }
+
+                        $dws_detail = DwsDetail::where('shipment_id', $shipment_id);
+                        if ($dws_detail->exists()) {
+                            $dws_detail = $dws_detail->get()->first();
+                            $dws_detail->dws_machine = $request->machine;
+                            $dws_detail->dws_package_type = $request->package_type;
+                            $dws_detail->dws_is_uploaded = $request->is_uploaded;
+                            $dws_detail->dws_date = $request->date;
+                            $dws_detail->save();
+                        } else {
+                            $dws_detail = new DwsDetail;
+                            $dws_detail->shipment_id = $shipment_id;
+                            $dws_detail->dws_machine = $request->machine;
+                            $dws_detail->dws_package_type = $request->package_type;
+                            $dws_detail->dws_is_uploaded = $request->is_uploaded;
+                            $dws_detail->dws_date = $request->date;
+                            $dws_detail->save();
+                        }
+                        
                     return response()->json(true);
 
                 } else {

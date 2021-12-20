@@ -396,7 +396,7 @@ class ShipperReceivingSheetController extends Controller
                       body {
                         background: none !important;
                         color: #09262e !important;
-                        font-size: 0.9rem !important;
+                        font-size: 0.7rem !important;
                       }
 
                       hr {
@@ -904,7 +904,7 @@ class ShipperReceivingSheetController extends Controller
                       body {
                         background: none !important;
                         color: #09262e !important;
-                        font-size: 0.9rem !important;
+                        font-size: 0.7rem !important;
                       }
 
                       hr {
