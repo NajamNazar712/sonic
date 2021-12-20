@@ -3660,26 +3660,62 @@ class AdminHumanResourseController extends Controller
 
     public function convert_rider_to_staff(Request $request)
     {
-        return $request;
         $employee = Employee::find($request->employee_id);
         if(!$employee)
         {
-
+            return back()->with("error","Rider Not Found");
         }
 
         $rider = Rider::where('trax_id',$employee->trax_id)->where('trax_id','!=',null);
         if($rider->doesntExist())
         {
-
+            return back()->with("error","Rider Not Found");
         }
 
         $rider = $rider->first();
 
+        $admin = new Admin();
+        $admin->name = $rider->name;
+        $admin->phone_number = $rider->phone;
+        $admin->cnic = $rider->cnic;
+        $admin->role_id = EmployeeDesignation::where('id',$request->designation_id)->first()->role_id ?? 79;
+        $admin->password = $rider->pin;
+        $admin->default_hub_id = $rider->city_id;
+        $admin->trax_id = $rider->trax_id;
+        $admin->designation_id = $request->designation_id;
+        $admin->employee_id = $rider->employee_id;
+        $admin->shift_id = $rider->shift_id;
+        $admin->dummy_pin = $rider->dummy_pin;
+        $admin->save();
 
+        $hubs = EmployeeDesignationHub::where('designation_id',$request->designation_id)->get();
+        foreach ($hubs as $hub)
+        {
+            $admin_hub = new AdminHub();
+            $admin_hub->admin_id = $admin->id;
+            $admin_hub->hub_id = $hub->hub_id;
+            $admin_hub->save();
+        }
 
+        $employee->employee_type_id = 1;
+        $employee->designation_id = $request->designation_id;
+        $employee->department_id = $request->department_id;
+        $employee->staff_category_id = 1;
+        $employee->rider_sub_category = null;
+        $employee->rider_main_category = null;
+        $employee->route_id = null;
+        $employee->rider_type_id = null;
+        $employee->operation_rider_id = null;
+        $employee->ccd = null;
 
+        $employee->update();
+
+        $rider->route_id = null;
+
+        $rider->update();
 
         $rider->delete();
 
+        return back()->with("success","Rider Converted To Staff Successfully");
     }
 }
