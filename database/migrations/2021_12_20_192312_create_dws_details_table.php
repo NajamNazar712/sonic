@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateShipmentDetailsForDwsFields extends Migration
+class CreateDwsDetailsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,14 @@ class UpdateShipmentDetailsForDwsFields extends Migration
      */
     public function up()
     {
-        Schema::table('shipment_details', function (Blueprint $table) {
+        Schema::create('dws_details', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('shipment_id')->index();
             $table->string('dws_machine')->nullable();
             $table->string('dws_package_type')->nullable();
             $table->string('dws_is_uploaded')->nullable();
             $table->string('dws_date')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -28,11 +31,6 @@ class UpdateShipmentDetailsForDwsFields extends Migration
      */
     public function down()
     {
-        Schema::table('shipment_details', function (Blueprint $table) {
-            $table->dropColumn('dws_machine');
-            $table->dropColumn('dws_package_type');
-            $table->dropColumn('dws_is_uploaded');
-            $table->dropColumn('dws_date');
-        });
+        Schema::dropIfExists('dws_details');
     }
 }
