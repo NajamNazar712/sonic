@@ -20,13 +20,14 @@
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
-                                    <th class="border-primary border-darken-1">Employee FullName</th>
+                                    <th class="border-primary border-darken-1">Employee Name</th>
                                     <th class="border-primary border-darken-1">Gender</th>
+                                    <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
-                                    <th class="border-primary border-darken-1">Staff Department</th>
+                                    <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
@@ -54,36 +55,55 @@
                 <form action="{{route('admin.human_resource.employee_directory.rider.update')}}" method="post" class="mt-1"
                       id="editRiderForm" novalidate="novalidate">
                     {{csrf_field()}}
-                    <div class="modal-body">
+                        <div id="rejoin_div_html"></div>
+                        <div class="modal-body">
+                            <div class="col text-center edit_ccd_rider_checkbox_div">
+                                <label class="font-medium-2 font-weight-bold block">Credit Card on Delivery-CCD</label>
+                                <div class="form-group">
+                                    <label for="edit_ccd_rider_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                    <input type="checkbox" name="edit_ccd_rider_checkbox" id="edit_ccd_rider_checkbox" class="edit_ccd_rider_checkbox">
+                                    <label for="edit_ccd_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                                </div>
+                            </div>
                         <div id="unEditableFields">
                             <div class="row">
-                            <div class="col">
-                                <fieldset class="form-group">
-                                    <select name="rider_type" id="rider_type_list" class="form-control select2"
-                                            data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($rider_types as $rider_type)
-                                            <option value="{{$rider_type->id}}">{{$rider_type->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
-                            </div>
-                        </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="rider_type" id="rider_type_list" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($rider_types as $rider_type)
+                                                <option value="{{$rider_type->id}}">{{$rider_type->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="city_id" id="city_list" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="shift_id" id="shift_list" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="This field is required">
+                                            @foreach($employee_shifts as $shift)
+                                                <option value="{{$shift->id}}">{{$shift->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
 
-                            <div class="row">
-                            <div class="col">
-                                <fieldset class="form-group">
-                                    <select name="city_id" id="city_list" class="form-control select2"
-                                            data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($cities as $city)
-                                            <option value="{{$city->id}}">{{$city->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
                             </div>
-                        </div>
+
+
                             <input type="hidden" name="employee_id" id="employee_id">
                             <div>
-                            <div class="row mb-2">
+                                <div class="row mb-2">
                                 <div class="col">
                                     <fieldset class="form-group">
                                         <input type="text" class="form-control" name="rider_name" id="rider_name"
@@ -115,7 +135,7 @@
                                     </fieldset>
                                 </div>
                             </div>
-                        </div>
+                            </div>
 
                             <div class="row mb-2">
                             <div class="col">
@@ -241,7 +261,12 @@
                         {{csrf_field()}}
                         <input type="hidden" name="employee_id" id="employee_id" value="">
                         <div class="form-group">
-                            <input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" data-rule-minlength="4" data-rule-maxlength="4">
+                            <div class="form-group position-relative">
+                                <input type="password" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" data-rule-minlength="4" data-rule-maxlength="4">
+                                <div class="form-control-position" id="peye">
+                                    <i class="la la-eye success"></i>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>
@@ -273,6 +298,9 @@
     <script type="text/javascript">
         $(document).ready(function () {
             let route_id;
+            var elm = document.getElementById("edit_ccd_rider_checkbox");
+            var switchery = new Switchery(elm, { className: "switchery switchery-small", color: "#37BC9B" });
+            $('#peye').on('mousedown',function(){$('#pin').attr('type','text')}).on('mouseup',function(){$('#pin').attr('type','password')});
             $('#editRiderForm #unEditableFields input,#editRiderForm #unEditableFields textarea,#editRiderForm #unEditableFields select').attr('disabled','disabled');
             $('#rider_type_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -288,6 +316,12 @@
             $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select City',
+                dropdownParent: $('#editRiderModal')
+            });
+
+            $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Shift',
                 dropdownParent: $('#editRiderModal')
             });
             $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
@@ -384,8 +418,9 @@
                             head = [];
                             head.push('S.No');
                             head.push('Employee ID');
-                            head.push('Employee FullName');
+                            head.push('Employee Name');
                             head.push('Gender');
+                            head.push('Hub');
                             head.push('City');
                             head.push('CNIC');
                             head.push('Phone No.');
@@ -401,6 +436,7 @@
                                 row.push(values.trax_id);
                                 row.push(values.employee_name);
                                 row.push(values.gender);
+                                row.push(values.employee_hub);
                                 row.push(values.city);
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
@@ -636,7 +672,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[12, 'desc']],
+                order: [[13, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -645,6 +681,7 @@
                     {data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
                     {data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name'},
                     {data: 'gender', name: 'eg.name', class: 'align-middle gender'},
+                    {data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
@@ -677,7 +714,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')|| $(header).is('.employee_hub')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.employee_type'))
@@ -836,6 +873,75 @@
                 // $('#approveRiderModal').modal('show');
             });
 
+
+
+            $('body').on('click', '.rejoin', function (e) {
+                var id = $(this).data('target-id');
+                var employee_type = table.row($(this).parents('tr')).data().employee_type_id;
+                if(employee_type == 1) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes To Rejoin Employee!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Employee is being Rejoin',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
+                            $.ajax({
+                                url: '{!! route('admin.human_resource.employee_directory.rejoin') !!}',
+                                method: 'POST',
+                                data: {
+                                    'employee_id': id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                                .done(function (data) {
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                    swal.close();
+                                    table.draw('false');
+                                });
+                        }
+                    });
+                }
+                else{
+                    edit_Rider_function(this,true);
+                }
+            });
+
             $('body').on('click', '.reject', function (e) {
                 var id = $(this).data('target-id');
                 swal({
@@ -897,28 +1003,36 @@
                 });
             });
 
-            $('body').on('click', '.update_rider', function (e) {
-                var id = $(this).data('target-id');
-                var rider_name = table.row($(this).parents('tr')).data().employee_name;
-                var cnic = table.row($(this).parents('tr')).data().cnic;
-                var phone_no = table.row($(this).parents('tr')).data().phone_number;
-                var pin = table.row($(this).parents('tr')).data().pin;
-                var address = table.row($(this).parents('tr')).data().address;
-                var city_id = table.row($(this).parents('tr')).data().city_id;
-                var check_bit = table.row($(this).parents('tr')).data().check_if_rider_present_bit;
+            function edit_Rider_function(elm,rejoin=false)
+            {
+                var id = $(elm).data('target-id');
+                var rider_name = table.row($(elm).parents('tr')).data().employee_name;
+                var cnic = table.row($(elm).parents('tr')).data().cnic;
+                var phone_no = table.row($(elm).parents('tr')).data().phone_number;
+                var pin = table.row($(elm).parents('tr')).data().pin;
+                var address = table.row($(elm).parents('tr')).data().address;
+                var city_id = table.row($(elm).parents('tr')).data().city_id;
+                var shift_id = table.row($(elm).parents('tr')).data().shift_id;
+                var check_bit = table.row($(elm).parents('tr')).data().check_if_rider_present_bit;
+                var sub_category = table.row($(elm).parents('tr')).data().rider_sub_category;
+                var main_category = table.row($(elm).parents('tr')).data().rider_main_category;
                 $('#city_list').val(city_id).trigger('change');
+                $('#shift_list').val(shift_id).trigger('change');
                 if(check_bit != null)
                 {
-                    var rider_type = table.row($(this).parents('tr')).data().active_rider_type_id;
-                    $('#main_category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
-                     $('#category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
-                    $('#category').val(table.row($(this).parents('tr')).data().operation_id).trigger('change');
-                    route_id = table.row($(this).parents('tr')).data().route_id;
+                    var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;
+                    $('#main_category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
+                    $('#category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
+                    $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
+                    route_id = table.row($(elm).parents('tr')).data().route_id;
+                    var ccd = table.row($(elm).parents('tr')).data().ccd;
                 }
                 else{
-                    var rider_type = table.row($(this).parents('tr')).data().inactive_rider_type_id;
+                    var rider_type = table.row($(elm).parents('tr')).data().inactive_rider_type_id;
+                    var ccd = false;
                     route_id = null;
                 }
+                ccd = Boolean(ccd)
                 $('#editRiderModal #employee_id').val(id);
                 $('#rider_name').val(rider_name);
                 $('#rider_cnic').val(cnic);
@@ -926,7 +1040,36 @@
                 $('#rider_pin').val(pin);
                 $('#address').val(address);
                 $('#rider_type_list').val(rider_type).trigger('change');
+                $('#main_category_list').val(main_category).trigger('change');
+                $('#category_list').val(sub_category).trigger('change');
+                if(rider_type == 1)
+                {
+                    $(".edit_ccd_rider_checkbox_div").show();
+                    if(ccd != document.getElementById("edit_ccd_rider_checkbox").checked) {
+                        switchery.setPosition(true);
+                        switchery.handleOnchange(true);
+                    }
+                }
+                else{
+                    $(".edit_ccd_rider_checkbox_div").hide();
+                }
+
+                if(rejoin)
+                {
+                    $('#editRiderModal .modal-title').text("Rejoin Rider");
+                    $('#editRiderModal .modal-footer #confirmAction').text("Rejoin Rider");
+                    $("#editRiderForm #rejoin_div_html").html("<input type='hidden' name='rejoin_rider_bit' value='1'>");
+                }
+                else{
+                    $('#editRiderModal .modal-title').text("Update Rider");
+                    $('#editRiderModal .modal-footer #confirmAction').text("Update Rider");
+                    $("#editRiderForm #rejoin_div_html").html("");
+                }
                 $('#editRiderModal').modal('show');
+            }
+
+            $('body').on('click', '.update_rider', function (e) {
+                edit_Rider_function(this);
 
             });
 

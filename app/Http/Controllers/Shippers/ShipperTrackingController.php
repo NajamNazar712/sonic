@@ -6,6 +6,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
@@ -80,6 +81,20 @@ class ShipperTrackingController extends Controller
                     if ($track_check == true) {
                         $details = array();
 
+                        if($shipment->business_category_id == 2){
+                            $international_shipment = InternationalShipment::where('shipment_id', $shipment->id)->whereNotNull('international_tracking_number');
+                            if($international_shipment->exists()){
+                                $international_shipment = $international_shipment->first();
+                                $details['international_shipment'] = 1;
+                                $details['international_tracking_number'] = $international_shipment->international_tracking_number;
+                            }
+                            else{
+                                $details['international_shipment'] = 0;
+                            }
+                        }
+                        else{
+                            $details['international_shipment'] = 0;
+                        }
                         $details['tracking_number'] = $tracking_number;
                         if($shipment->pod_image()->exists()){
                             $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);

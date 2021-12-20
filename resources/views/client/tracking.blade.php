@@ -356,11 +356,15 @@
 
                         if (data.shipments != undefined) {
                             $.each(data.shipments, function(id, details) {
+                                var $international_tracking_number = '';
                                 var shipment = '';
 
+                                if(details.international_shipment){
+                                    $international_tracking_number = ' <span>(' + details.international_tracking_number + ')</span> ';
+                                }
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex align-items-center bg-primary">';
-                                shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + '</div>';
+                                shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + '</div>';
                                 shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1  add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 if(details.pod_file){
                               

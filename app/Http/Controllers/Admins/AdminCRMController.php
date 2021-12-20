@@ -2314,7 +2314,7 @@ class AdminCRMController extends Controller
                                                     'crm_request_id' => $crm_request->id,
                                                     'crm_request_tagging_type_id' => 4,
                                                     'tagged_id' => $tagged_id,
-                                                    'agent_id' => Auth::id(),
+                                                    'agent_id' => 306,
                                                     'hub_id' => NULL
                                                 ]);
                                                 NotificationsController::send(31,$crm_request->id);
@@ -2332,7 +2332,7 @@ class AdminCRMController extends Controller
                                                 'crm_request_id' => $crm_request->id,
                                                 'crm_request_tagging_type_id' => 4,
                                                 'tagged_id' => $tagged_id,
-                                                'agent_id' => Auth::id(),
+                                                'agent_id' => 306,
                                                 'hub_id' => NULL
                                             ]);
                                             NotificationsController::send(31,$crm_request->id);
@@ -2366,7 +2366,7 @@ class AdminCRMController extends Controller
                                         'crm_request_id' => $crm_request->id,
                                         'crm_request_tagging_type_id' => 5,
                                         'tagged_id' => $crm_auto_tag_user->admin_id,
-                                        'agent_id' => Auth::id(),
+                                        'agent_id' => 306,
                                         'hub_id' => NULL
                                     ]);
                                     NotificationsController::send(31,$crm_request->id);
@@ -2384,7 +2384,7 @@ class AdminCRMController extends Controller
                                     'crm_request_id' => $crm_request->id,
                                     'crm_request_tagging_type_id' => 5,
                                     'tagged_id' => $crm_auto_tag_user->admin_id,
-                                    'agent_id' => Auth::id(),
+                                    'agent_id' => 306,
                                     'hub_id' => NULL
                                 ]);
                                 NotificationsController::send(31,$crm_request->id);
@@ -2996,7 +2996,7 @@ class AdminCRMController extends Controller
                                                             'crm_request_id' => $crm_request->id,
                                                             'crm_request_tagging_type_id' => 4,
                                                             'tagged_id' => $tagged_id,
-                                                            'agent_id' => Auth::id(),
+                                                            'agent_id' => 306,
                                                             'hub_id' => NULL
                                                         ]);
                                                         NotificationsController::send(31,$crm_request->id);
@@ -3014,7 +3014,7 @@ class AdminCRMController extends Controller
                                                         'crm_request_id' => $crm_request->id,
                                                         'crm_request_tagging_type_id' => 4,
                                                         'tagged_id' => $tagged_id,
-                                                        'agent_id' => Auth::id(),
+                                                        'agent_id' => 306,
                                                         'hub_id' => NULL
                                                     ]);
                                                     NotificationsController::send(31,$crm_request->id);
@@ -3042,7 +3042,7 @@ class AdminCRMController extends Controller
                                             'crm_request_id' => $crm_request->id,
                                             'crm_request_tagging_type_id' => 5,
                                             'tagged_id' => $crm_auto_tag_user->admin_id,
-                                            'agent_id' => Auth::id(),
+                                            'agent_id' => 306,
                                             'hub_id' => NULL
                                         ]);
                                         NotificationsController::send(31,$crm_request->id);
@@ -3060,7 +3060,7 @@ class AdminCRMController extends Controller
                                         'crm_request_id' => $crm_request->id,
                                         'crm_request_tagging_type_id' => 5,
                                         'tagged_id' => $crm_auto_tag_user->admin_id,
-                                        'agent_id' => Auth::id(),
+                                        'agent_id' => 306,
                                         'hub_id' => NULL
                                     ]);
                                     NotificationsController::send(31,$crm_request->id);
