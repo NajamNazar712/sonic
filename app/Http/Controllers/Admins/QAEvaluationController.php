@@ -191,4 +191,14 @@ class QAEvaluationController extends Controller
         $natures = EvaluationNature::all();
         return view('admin.qa_evaluation.view',compact('agents','campaigns','evaluated_by','natures','qa_evaluations'));
     }
+
+    public function handlings_Edit(Request $request){
+        $evaluation_handlings = EvaluationHandling::where('campaign_id',$request->id)->get();
+        $handlings = EvaluationHandling::where('campaign_id',$request->id)->pluck('id')->toArray();
+
+        $qa_handings = QAEvaluationActivity::where('qa_evaluation_id',$request->qa_evaluation_id)->pluck('evaluation_activity_id')->toArray();
+        $evaluated_activities = EvaluationActivity::whereIn('evaluation_handling_id', $handlings)->get();
+        return response()->json(['status'=>1,'evaluation_handlings'=>$evaluation_handlings, 'evaluated_activities' => $evaluated_activities,'qa_handings' => $qa_handings]);
+
+    }
 }

@@ -3553,6 +3553,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list','Admins\QAEvaluationController@list')->name('list');
         Route::get('edit/{id}','Admins\QAEvaluationController@edit')->name('edit');
         Route::get('view/{id}','Admins\QAEvaluationController@view')->name('view');
+        Route::post('/handlings_edit','Admins\QAEvaluationController@handlings_edit')->name('handlings_edit');
+
         
         
     });

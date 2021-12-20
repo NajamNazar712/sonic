@@ -17,7 +17,7 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-						
+                                <input type="hidden" name="qa_evaluation_id" id="qa_evaluation_id" value="{{$qa_evaluations->id}}">
 
 								<div class="row">
 									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
@@ -78,7 +78,7 @@
 													<span class="la la-calendar-o"></span>
 												</span>
 															</div>
-                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_date_time" id="call_date_time" value="{{$qa_evaluations->call_date_time}}" placeholder="Date/Time" data-rule-required="true" data-msg-required="Date/Time is required" readonly disabled>
+                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_date_time" id="call_date_time" value="{{$qa_evaluations->date_time}}" placeholder="Date/Time" data-rule-required="true" data-msg-required="Date/Time is required" readonly disabled>
 										</div>
 									</div>
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
@@ -162,56 +162,8 @@
 	<script>
 		$(document).ready(function() {
             var campaign_id = $('#campaign_id').val();
-            $.ajax({
-                        url: '{!! route('admin.qa_evaluation.handlings') !!}',
-                        type: 'POST',
-                        data: {
-                            'id': campaign_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if (data.status) {
-                            console.log(data);
-                            var html = '';
-                            $.each(data.evaluation_handlings, function (i, v) {
-                                // console.log(v);
-                                html +='<a class="nav-link rounded-0" id="handling_'+v.id+'_tab" data-toggle="pill" href="#module_'+v.id+'_tabpanel" role="tab" aria-controls="module_'+v.id+'_tabpanel" aria-selected="true">'+v.handling+'</a>';
-
-                            });
-                            var html1 = '';
-                            $.each(data.evaluation_handlings, function (i, v) {
-                                html1 +='<div class="tab-pane fade" id="module_'+v.id+'_tabpanel" role="tabpanel" aria-labelledby="module_'+v.id+'_tab">';
-                                $.each(data.evaluated_activities, function (index, val) {
-                                    if(v.id == val.evaluation_handling_id){
-                                        html1 +='<fieldset class="d-inline-block m-1">';
-                                        html1 +='<input type="checkbox" id="activity_'+val.id+'" class="activity" name="activity_ids[]" value="'+val.id+'">';
-                                        html1 +='<label for="activity_'+val.id+'">'+val.activity+'</label>';
-                                        html1 +='</fieldset>';
-                                    }
-                                });
-                                html1 +='</div>';
-                            });
-                            
-
-                            $("#handlings").html(html);
-                            $("#activities").html(html1);
-                           
-                        }
-                        $('#role_form .activity').each(function() {
-                            var checkbox = $(this);
-                            var label = checkbox.next();
-                            var text = label.text();
-
-                            label.remove();
-
-                            checkbox.iCheck({
-                                checkboxClass: 'icheckbox_line pt-1 pb-1',
-                                checkedClass: 'checked bg-success',
-                                uncheckedClass: 'bg-danger',
-                                insert: '<div class="icheck_line-icon"></div>' + text
-                            });
-                        });
-                    });
+            var qa_evaluation_id = $('#qa_evaluation_id').val();
+            
 
 			$('#contact_number').attr('disabled',true);
 						$('#complain_number').attr('disabled',true);
@@ -295,6 +247,65 @@
 					}
                     
             });
+            $.ajax({
+                        url: '{!! route('admin.qa_evaluation.handlings_edit') !!}',
+                        type: 'POST',
+                        data: {
+                            'id': campaign_id,
+                            'qa_evaluation_id': qa_evaluation_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status) {
+                            console.log(data);
+                            var html = '';
+                            $.each(data.evaluation_handlings, function (i, v) {
+                                // console.log(v);
+                                html +='<a class="nav-link rounded-0" id="handling_'+v.id+'_tab" data-toggle="pill" href="#module_'+v.id+'_tabpanel" role="tab" aria-controls="module_'+v.id+'_tabpanel" aria-selected="true">'+v.handling+'</a>';
+
+                            });
+                            var html1 = '';
+                            $.each(data.evaluation_handlings, function (i, v) {
+                                html1 +='<div class="tab-pane fade" id="module_'+v.id+'_tabpanel" role="tabpanel" aria-labelledby="module_'+v.id+'_tab">';
+                                $.each(data.evaluated_activities, function (index, val) {
+                                    if(v.id == val.evaluation_handling_id){
+                                        if(data.qa_handings.includes(val.id)){
+
+                                            html1 +='<fieldset class="d-inline-block m-1">';
+                                            html1 +='<input type="checkbox" id="activity_'+val.id+'" class="activity" name="activity_ids[]" value="'+val.id+'" disabled checked>';
+                                            html1 +='<label for="activity_'+val.id+'">'+val.activity+'</label>';
+                                            html1 +='</fieldset>';
+                                        }else{
+                                            html1 +='<fieldset class="d-inline-block m-1">';
+                                            html1 +='<input type="checkbox" id="activity_'+val.id+'" class="activity" name="activity_ids[]" value="'+val.id+'" disabled>';
+                                            html1 +='<label for="activity_'+val.id+'">'+val.activity+'</label>';
+                                            html1 +='</fieldset>';
+                                        }
+                                    }
+                                });
+                                html1 +='</div>';
+                            });
+                            
+
+                            $("#handlings").html(html);
+                            $("#activities").html(html1);
+                           
+                        }
+                        $('.activity').each(function() {
+                            var checkbox = $(this);
+                            var label = checkbox.next();
+                            var text = label.text();
+
+                            label.remove();
+
+                            checkbox.iCheck({
+                                checkboxClass: 'icheckbox_line pt-1 pb-1',
+                                checkedClass: 'checked bg-success',
+                                uncheckedClass: 'bg-danger',
+                                insert: '<div class="icheck_line-icon"></div>' + text
+                            });
+                        });
+                    });
 			
 
 			
