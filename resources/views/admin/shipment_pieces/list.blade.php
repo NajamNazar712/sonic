@@ -254,7 +254,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                    @if (session('role_id') == 1 || in_array(349, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(649, session('permissions')))
                     {
                         text: 'Wait for Remaining piece',
                         className: 'btn btn-primary remaining_piece',
@@ -332,7 +332,7 @@
                         }
                     },
                     @endif
-                    @if (session('role_id') == 1 || in_array(350, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(650, session('permissions')))
                     {
                         text: 'Return back to shipper',
                         className: 'btn btn-primary return_back_shipper',
@@ -410,7 +410,7 @@
                         }
                     },
                     @endif
-                    @if (session('role_id') == 1 || in_array(351, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(651, session('permissions')))
                     {
                         text: 'Switch to Single piece',
                         className: 'btn btn-primary single_piece',
