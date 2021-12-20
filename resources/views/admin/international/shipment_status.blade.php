@@ -79,7 +79,7 @@
                         <div class="form-group">
                             <input type="hidden" id="shipment_status_id" name="shipment_status_id">
                             <input type="hidden" id="shipment_ids" name="shipment_ids">
-                            <input type="text" name="seal_number" id="seal_number_input" class="form-control integer" placeholder="Enter Seal Number" data-rule-required="true" data-msg-required="Seal Number is required">
+                            <input type="text" name="seal_number" id="seal_number_input" maxlength="9" class="form-control integer" placeholder="Enter Seal Number" data-rule-required="true" data-msg-required="Seal Number is required">
 
                         </div>
                         <div class="form-group ml-1">
@@ -116,14 +116,14 @@
                 placeholder:'Select a status',
                 width:'100%'
             });
-            $('#add_seal_form .integer').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'min': 0,
-                'max': 100000000
-            });
+            // $('#add_seal_form .integer').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false,
+            //     'rightAlign': false,
+            //     'min': 0,
+            //     'max': 100000000
+            // });
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
