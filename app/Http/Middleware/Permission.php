@@ -897,6 +897,8 @@ class Permission
             'settings.shipment_status_eta.index' => 534,
             'settings.shipment_status_eta.list' => 534,
 
+
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -1128,6 +1130,7 @@ class Permission
             'settings.international_automation_user.index' => 582,
 
             'settings.ccd_booking.index' => 558,
+            'settings.omni.index' => 644,
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
