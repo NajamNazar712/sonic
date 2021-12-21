@@ -398,7 +398,10 @@
 				successClass: 'success',
                 // $('.activity').val();
 				normalizer: function(value) {
-					
+					// if($('#contact_number').val() == null || $('#contact_number').val() == ''){
+					// 	toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+					// }
 					// if($('.activity').filter(':checked').length == 0){
 					// 	toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					// 	// $('#call_duaration').val('');
