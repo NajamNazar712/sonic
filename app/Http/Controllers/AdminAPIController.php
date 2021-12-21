@@ -5677,11 +5677,10 @@ class AdminAPIController extends Controller
     public function admin_profile(Request $request)
     {
         $admin_id = $request->admin_id;
-        $admin_profile = Admin::leftjoin('admin_roles as ar','admins.role_id', '=', 'ar.id')
-            ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-            ->leftjoin('employee_designations as d', 'd.id', '=', 'admins.designation_id')
-            ->leftjoin('admin_departments as ad', 'd.department_id', '=', 'ad.id')
-            ->select('admins.trax_id as trax_id', 'admins.name as name', 'admins.email as email', 'admins.phone_number as phone', 'admins.cnic as cnic', 'h.name as hub', 'd.name as designation', 'ad.name as department_name')
+        $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
+            ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+            ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+            ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name')
             ->where('admins.id', $admin_id);
         if ($admin_profile->exists()) {
         $admin_profile = $admin_profile->get();
