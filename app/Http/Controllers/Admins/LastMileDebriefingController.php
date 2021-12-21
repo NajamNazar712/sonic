@@ -74,10 +74,14 @@ class LastMileDebriefingController extends Controller
 
     public function supervisor_agents(Request $request){
         $admin_ids = AdminHub::where('hub_id',$request->hub_id)->pluck('admin_id')->toArray();
+        $delivery_note_id = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
+        ->join('shipments as s','s.id','=','dns.shipment_id')
+        ->where('delivery_notes.id',$request->delivery_id)
+        ->where('dns.status',1)
+        ->select('s.id as shipment_id','s.tracking_number as tracking_number')
+        ->get();
         if(count($admin_ids) > 0){
-
             //$agents = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->get();
-
             $agents = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.id')
             ->whereIn('admins.id', $admin_ids)
             ->where('admins.role_id', 18)
@@ -86,7 +90,7 @@ class LastMileDebriefingController extends Controller
             ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))
             ->select('admins.id', 'admins.name')->get();
            
-            return response()->json(['status' => 1, 'agents' => $agents]);
+            return response()->json(['status' => 1, 'agents' => $agents,'delivery_note_id'=>$delivery_note_id]);
         }
         else{
             return response()->json(['status' => 0, 'error' => 'Agents Does\'nt exist!']);
@@ -96,10 +100,9 @@ class LastMileDebriefingController extends Controller
     public function supervisor_assign_agents(Request $request){
         $delivery_note_details = DeliveryNote::find($request->delivery_note_id);
         if($delivery_note_details->status == 0){
-            $delivery_note_shipments = $delivery_note_details->delivery_note_undelivered_shipments;
-            if(count($delivery_note_shipments) > 0){
-                foreach ($delivery_note_shipments as $delivery_note_shipment){
-                    $agent_call_monitor = AgentCallMonitoring::where('shipment_id', $delivery_note_shipment->shipment_id)->where('delivery_note_id', $delivery_note_shipment->delivery_note_id);
+            if(count($request->cn_id) > 0){
+                foreach ($request->cn_id as $value) {
+                    $agent_call_monitor = AgentCallMonitoring::where('shipment_id', $value)->where('delivery_note_id', $delivery_note_details->id);
                     if($agent_call_monitor->exists()){
                         $agent_call_monitor = $agent_call_monitor->first();
                         if($agent_call_monitor->completed == 0){
@@ -107,9 +110,9 @@ class LastMileDebriefingController extends Controller
                         }
                     }
                     else{
-                        $agent_call_monitor = new AgentCallMonitoring;
+                        $agent_call_monitor = new AgentCallMonitoring();
                         $agent_call_monitor->agent_id = $request->agent_id;
-                        $agent_call_monitor->shipment_id = $delivery_note_shipment->shipment_id;
+                        $agent_call_monitor->shipment_id = $value;
                         $agent_call_monitor->delivery_note_id = $delivery_note_details->id;
                     }
                     $agent_call_monitor->save();
@@ -117,7 +120,7 @@ class LastMileDebriefingController extends Controller
                 return response()->json(['status' => 0, 'success' => 'Agent Assign successfully.']);
             }
             else{
-                return response()->json(['status' => 1, 'error' => 'Undelivered shipments not found!']);
+                return response()->json(['status' => 1, 'error' => 'Please Select At Least One Shipment!']);
             }
         }
         else{

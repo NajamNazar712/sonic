@@ -294,6 +294,9 @@
                 $('#password-error').addClass('danger');
             }
         });
+        $('#OtpModal').on('shown.bs.modal', function () {
+            $('#otp_input').focus();
+        }); 
 
         function getLocation() {
             if (navigator.geolocation) {
@@ -325,6 +328,7 @@
             // $('#longitude').val(longitude);
         }
         getLocation();
+
     });
 </script>
 </body>

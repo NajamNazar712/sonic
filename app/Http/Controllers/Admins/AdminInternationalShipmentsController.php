@@ -37,7 +37,7 @@ class AdminInternationalShipmentsController extends Controller
         }
         $shipments = InternationalShipment::join('shipments', 'shipments.id', '=', 'international_shipments.shipment_id')
         ->leftjoin('international_shipment_service_providers as issp', 'issp.id', '=', 'international_shipments.service_provider_id')
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number','international_shipments.international_tracking_number','international_shipments.postal_code','shipments.created_at as booking_date','international_shipments.actual_weight as actual_weight', 'issp.name as provider');
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number','international_shipments.international_tracking_number','international_shipments.postal_code','shipments.created_at as booking_date','international_shipments.actual_weight as actual_weight', 'issp.name as provider','international_shipments.seal_number');
 
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
@@ -302,7 +302,7 @@ class AdminInternationalShipmentsController extends Controller
 
     public function shipment_status_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),441);
-        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [3,4,5,8,14,17,18])->get();
+        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [3,4,5,8,14,17,18,21,22,23,24,25])->get();
         return view('admin.international.shipment_status')->with(['shipment_status' => $shipment_status]);
     }
 
@@ -386,6 +386,41 @@ class AdminInternationalShipmentsController extends Controller
                         Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                         ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
 
+                    }
+                }
+
+                return redirect()->back()->with('success', 'Shipments updated successfully!');
+            }
+            return redirect()->back()->with('error', 'No shipment selected!');
+
+        }
+        return redirect()->back()->with('error', 'Shipment Status not selected!');
+    }
+    public function shipment_status_update_modal(Request $request){
+       
+        $shipper_status_id = $request->shipment_status_id;
+        $seal_number = $request->seal_number;
+        if($shipper_status_id){
+            $shipments = explode(',', $request->shipment_ids);
+            if(count($shipments) > 0){
+                if($shipper_status_id == 14){
+                    foreach ($shipments as $shipment_id){
+                        Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
+                        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
+                        AdminFinanceController::add_payment($shipment_id, 0);
+                        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
+                        $international_shipment->sync = 0;
+                        $international_shipment->save();
+
+                    }
+                }
+                else{
+                    foreach ($shipments as $shipment_id){
+                        Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
+                        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
+                        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
+                        $international_shipment->seal_number = $seal_number;
+                        $international_shipment->save();
                     }
                 }
 

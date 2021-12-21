@@ -685,8 +685,20 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
                 }
 
-                if ($service_type_id == 1 || $service_type_id == 2) {
+                if ($service_type_id == 1) {
                     if ($request->has('return_address_id') && $request->input('return_address_id') != null) {
+
+                        $settings = GlobalSettings::where('type', 'omni_users');
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                            if($settings->text != NULL){
+                                $omni_accounts = array_map('intval', explode(',', $settings->text));
+                                if(!in_array($user_id,$omni_accounts)){
+                                    return response()->json(['status' => 1, 'message' => $user_type['name'] . 'is not an omni account']);
+                                }
+                            }
+                        }
+
                         $user_shipping_info_return = UserShippingInfo::find($request->input('return_address_id'));
 
                         if (!$user_shipping_info_return->status) {
@@ -890,7 +902,7 @@ class APIController extends Controller
             }
 
             $return_address_id = null;
-            if ($service_type_id == 1 || $service_type_id == 2) {
+            if ($service_type_id == 1) {
                 if ($request->filled('return_address_id')) {
                     $return_address_id = $request->input('return_address_id');
                 }

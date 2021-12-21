@@ -321,6 +321,9 @@
                 }
             }
         });
+        $('#OtpModal').on('shown.bs.modal', function () {
+            $('#otp_input').focus();
+        });  
     });
 </script>
 </body>

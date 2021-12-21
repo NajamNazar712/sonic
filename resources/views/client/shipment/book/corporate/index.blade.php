@@ -93,7 +93,62 @@
                                             </div>
                                         </div>
 
+                                        @if($omni_user == 1)
+                                        <div class="form-group" id="return_address_div">
+                                            <select name="return_address" class="select2" id="return_address">
+                                                <option value="0">New</option>
 
+                                                @php ($default_pickup_address = FALSE)
+
+                                                @foreach($user->shipping as $shipping_information)
+                                                    @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
+                                                        @if ($shipping_information['default_address'] == 1)
+                                                            @php ($default_pickup_address = TRUE)
+
+                                                            <option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+                                                        @else
+                                                            <option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+                                                        @endif
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group" id="return_city_name_div">
+                                            <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="return_city_name"></p>
+                                        </div>
+
+                                        <div id="new_return_address" class="d-none">
+                                            <div class="form-group">
+                                                <textarea name="new_return_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <select name="new_return_city" class="select2" id="new_return_city" data-rule-required="true" data-msg-required="City is required">
+                                                    @foreach($cities as $city)
+                                                        <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <input type="text" name="new_return_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <input type="text" name="new_return_vendor" class="form-control" placeholder="Vendor" data-rule-maxlength="100" data-msg-maxlength="Vendor can be maximum 100 characters">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <input type="text" name="new_return_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <input type="email" name="new_return_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
+                                            </div>
+                                        </div>
+
+                                        @endif
 
                                         @if($air_waybill != null)
                                             <div id="info_display" class="form-group text-center p-1 border border-light rounded">
@@ -760,6 +815,7 @@
                 if ($('#pickup_address').val() == 0) {
                     var pickup_city_id = $('#new_pickup_city').val();
                     $('#pickup_city_name').addClass('d-none');
+
                 }
                 else {
                     var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
@@ -874,6 +930,8 @@
             if (service_type == 2) {
                 $('#replacement').removeClass('d-none');
                 $('#try_and_buy_charges_div').addClass('d-none');
+
+
             }
             if (service_type == 3) {
                 $('#regular').addClass('d-none');
@@ -943,6 +1001,7 @@
                         $('#frieght_div').addClass('d-none');
                         $('#ftl_collection_type_div').addClass('d-none');
                         $('#charges_div').addClass('d-none');
+                        $('#return_address_div').removeClass('d-none');
                     }
                     else if (service_type == 2) {
                         $('#shipping_header_div').removeClass('col col_6');
@@ -968,6 +1027,8 @@
                         $('#frieght_div').addClass('d-none');
                         $('#ftl_collection_type_div').addClass('d-none');
                         $('#charges_div').addClass('d-none');
+                        $('#return_city_name').addClass('d-none');
+                        $('#return_address_div').addClass('d-none');
                     }
                     else if (service_type == 3) {
                         $('#shipping_header_div').removeClass('col col_6');
@@ -996,6 +1057,8 @@
                         $('.quantity_label_div ').removeClass('d-none');
                         $('.product_label_div ').removeClass('d-none');
                         $('.repeater ').removeClass('d-none');
+                        $('#return_city_name').addClass('d-none');
+                        $('#return_address_div').addClass('d-none');
                     }
                     else if (service_type == 5) {
                         $('#shipping_header_div').removeClass('col col_custom');
@@ -1026,6 +1089,8 @@
                         consignee_email.attr('data-placement', 'top');
                         consignee_email.attr('data-original-title', 'Please add email address so that we can sent address label to your customer.');
                         consignee_email.tooltip('show');
+                        $('#return_city_name').addClass('d-none');
+                        $('#return_address_div').addClass('d-none');
 
                     }
                     else if(service_type == 6){
@@ -1045,8 +1110,8 @@
                         $('#regular ').removeClass('d-none');
                         $('#shipper_header_info h6').addClass('d-none');
                         $('#consignee_header_info h6').addClass('d-none');
-
-
+                        $('#return_city_name').addClass('d-none');
+                        $('#return_address_div').addClass('d-none');
 
                     }
                     $('#booking_form #selected_service_type').val(service_type);
@@ -1056,6 +1121,7 @@
                     $('#select_service_type').modal('hide');
 
                     shipping_modes();
+                    set_return_city();
                 }
                 else {
                     $('#select_service_type form #service_type-error').removeClass('d-none');
@@ -1069,6 +1135,7 @@
 
             @if (!$default_pickup_address)
             $('#pickup_address').prepend('<option value="" selected="selected"></option>');
+           /* $('#return_address').prepend('<option value="" selected="selected"></option>');*/
             @endif
 
             $('#pickup_address').select2({
@@ -1092,6 +1159,7 @@
                 shipping_mode_same_day(pickup_city, consignee_city);
             });
 
+
             $('#new_pickup_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'City*'
@@ -1106,8 +1174,48 @@
                 shipping_mode_same_day(pickup_city, consignee_city);
             });
 
+            $('#new_return_city').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'City*'
+            }).bind('change', function() {
+                $(this).valid();
+            });
 
 
+            function set_return_city(){
+                if ($('#return_address').val() == 0 || service_type != 1)
+                {
+
+                    var return_city_id = $('#return_address').val();
+                    $('#return_city_name').addClass('d-none');
+
+                }
+                else{
+                    var return_city_name = $('#return_address').find(':selected').data('city-name');
+                    $('#return_city_name').removeClass('d-none');
+                    $('#return_city_name').html('City : ' + return_city_name);
+                }
+
+            }
+
+
+            $('#return_address').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Return Address'
+            }).bind('change', function () {
+                $(this).valid();
+
+                if (this.value == 0) {
+                    $('#new_return_address').removeClass('d-none');
+                }
+                else {
+                    $('#new_return_address').addClass('d-none');
+                }
+                set_return_city();
+            });
+
+            //return address end
+            
             $("#consignee_info").select2({
                 width:'100%',
                 placeholder: "Search Here...",

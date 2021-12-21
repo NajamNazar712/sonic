@@ -929,6 +929,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function (){
+        Route::post('upload_attachment', 'Admins\AdminShipmentPieceController@upload_attachment')->name('upload_attachment');
+        Route::get('view_attachment/{id}', 'Admins\AdminShipmentPieceController@view_attachment')->name('view_attachment');
         Route::prefix('hold')->name('hold.')->group(function () {
             Route::get('', 'Admins\AdminShipmentPieceController@hold_index')->name('index');
             Route::get('list', 'Admins\AdminShipmentPieceController@hold_list')->name('list');
@@ -937,6 +939,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('return_back_to_shipper','Admins\AdminShipmentPieceController@return_back_to_shipper')->name('return_back_to_shipper');
             Route::post('return_note_create', 'Admins\AdminShipmentPieceController@return_note_create')->name('return_note_create');
             Route::post('return_note_print', 'Admins\AdminShipmentPieceController@return_note_print')->name('return_note_print');
+            Route::post('single_piece_bulk','Admins\AdminShipmentPieceController@single_piece_bulk')->name('single_piece_bulk');
+            Route::post('wait_remaining_pieces_bulk','Admins\AdminShipmentPieceController@wait_remaining_pieces_bulk')->name('wait_remaining_pieces_bulk');
+            Route::post('return_back_to_shipper_bulk','Admins\AdminShipmentPieceController@return_back_to_shipper_bulk')->name('return_back_to_shipper_bulk');
         });
         Route::prefix('add')->name('add.')->group(function () {
             Route::get('', 'Admins\AdminShipmentPieceController@hold_add_index')->name('index');
@@ -1688,6 +1693,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('rider_information', 'Admins\AdminTrackingController@rider_information')->name('rider_information');
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
         Route::post('pieces_print', 'Admins\AdminTrackingController@pieces_print')->name('pieces_print');
+        Route::post('estimation_check', 'Admins\AdminTrackingController@estimation_check')->name('estimation_check');
 
     });
 
@@ -2380,6 +2386,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         });
+        Route::prefix('osa_charges')->name('osa_charges.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@osa_charges_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@osa_charges_list')->name('list');
+        });
 //        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
 //            Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');
 //            Route::get('list', 'Admins\AdminReportsController@confirmation_shipments_list')->name('list');
@@ -2505,7 +2515,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('pickup_settings_store', 'Admins\GlobalSettingsController@pickup_cut_off_settings_store')->name('pickup_settings_store');
         });
 
-
+        Route::prefix('shippers')->name('shippers.')->group(function (){
+            Route::prefix('status_webhook')->name('status_webhook.')->group(function (){
+                Route::get('','Admins\GlobalSettingsController@status_webhook_index')->name('index');
+                Route::get('list','Admins\GlobalSettingsController@status_webhook_list')->name('list');
+                Route::get('{id}/edit','Admins\GlobalSettingsController@status_webhook_edit')->name('edit');
+                Route::put('update','Admins\GlobalSettingsController@status_webhook_update')->name('update');
+            });
+        });
 
         Route::prefix('fleet')->name('fleet.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@fleet_index')->name('index');
@@ -2999,6 +3016,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@debriefing_time_setting_update')->name('update');
         });
 
+        Route::prefix('omni')->name('omni.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@omni_user_setting_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@omni_user_setting_update')->name('update');
+        });
+
         Route::prefix('shipment_status_eta')->name('shipment_status_eta.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shipment_status_eta_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@shipment_status_eta_list')->name('list');
@@ -3258,6 +3280,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminInternationalShipmentsController@shipment_status_index')->name('index');
             Route::post('shipment_info', 'Admins\AdminInternationalShipmentsController@get_shipment_info')->name('shipment_info');
             Route::post('update', 'Admins\AdminInternationalShipmentsController@shipment_status_update')->name('update');
+            Route::post('updatemodal', 'Admins\AdminInternationalShipmentsController@shipment_status_update_modal')->name('updatemodal');
 
         });
             Route::prefix('rates')->name('rates.')->group(function () {

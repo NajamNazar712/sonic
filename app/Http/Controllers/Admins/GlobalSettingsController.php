@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalesIncentiveDate;
 use App\Http\Models\Admin\AdminAppSlider;
 use App\Http\Models\Admin\RetailAppSlider;use App\Http\Models\FleetDriver;
@@ -88,12 +89,15 @@ use App\Http\Models\Rider\RidersShipmentWeightRange;
 use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\Runner;
 use App\Http\Models\RunnerJunction;
+use App\Http\Models\SaleTierTag;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
+use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
+use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Admin\SalesDesignationJourney;
@@ -5307,4 +5311,151 @@ public function sales_incentive()
         }
         return redirect()->back()->with(['success' => 'Images Uploaded!']);
     }
+
+    public function status_webhook_index(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 478);
+        return view('admin.settings.shipper.status_webhook_index');
+    }
+
+    public function status_webhook_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 479);
+        }
+        $shippers = ShipmentStatusSubscription::leftjoin('users as s', 's.id', '=', 'shipment_status_subscriptions.user_id')
+            ->select('s.id as account_id', 's.name as shipper_name', 'shipment_status_subscriptions.url as url','shipment_status_subscriptions.id as id')->where('shipment_status_subscriptions.status', 1);
+
+        if(session('role_id') != 1)
+        {
+            $shippers = $shippers
+                ->leftjoin('sale_person_tags as spt',function($join){
+                    $join->on('spt.user_id','=','s.id')
+                        ->where('spt.status',0);
+                })
+                ->leftjoin('sale_tier_tags as stt',function($join){
+                    $join->on('stt.user_id','=','s.id')
+                        ->where('stt.kam','!=',null);
+                })
+                ->where(function($q){
+                        $q->where('spt.admin_id',Auth::id())
+                            ->orWhere('stt.kam',Auth::id());
+                });
+        }
+
+        $datatable = Datatables::of($shippers)
+            ->addColumn('action', function ($shipper) {
+                if (session('role_id') == 1 || in_array(646, session('permissions'))) {
+                    $route = route('admin.settings.shippers.status_webhook.edit',$shipper->account_id);
+                    $dropdown = '
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <a href="'.$route.'" class="dropdown-item">Update Status Mapping</a></div></div>';
+
+                    return $dropdown;
+                }
+                return '';
+            });
+        return $datatable->make(true);
+    }
+
+    public function status_webhook_edit($id, Request $request)
+    {
+        $webhook = ShipmentStatusSubscription::where('user_id',$id)->first();
+
+        if($webhook)
+        {
+            if(session('role_id') != 1)
+            {
+                $spt = SalePersonTag::where('user_id',$id)->where('admin_id',Auth::id())->where('status',0);
+                $stt = SaleTierTag::where('user_id',$id)->where('kam',Auth::id());
+
+                if($spt->doesntExist() && $stt->doesntExist())
+                {
+                    return back()->with(['error'=>"Shipper Not Assigned to you"]);
+                }
+            }
+            $statuses = ShipmentStatus::where('status',1)->get();
+            $shippers_statuses = ShipmentStatusesForShipperWebhook::where('user_id',$webhook->user_id)->get(['status_id','webhook_status']);
+
+
+            $shipper_statuses = array();
+            foreach ($shippers_statuses as $status)
+            {
+                $shipper_statuses[$status->status_id] = $status->webhook_status;
+            }
+
+            return view('admin.settings.shipper.status_webhook_edit',compact('statuses','shipper_statuses','webhook'));
+        }
+        return back()->with(['error'=>"Invalid Shipper ID"]);
+    }
+
+    public function status_webhook_update(Request $request)
+    {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 480);
+        ShipmentStatusesForShipperWebhook::where('user_id',$request->shipper_id)->delete();
+
+        foreach ($request->webhook_status as $key => $status)
+        {
+           if($status != null)
+           {
+               $shipper_status = new ShipmentStatusesForShipperWebhook();
+               $shipper_status->user_id = $request->shipper_id;
+               $shipper_status->status_id = $key;
+               $shipper_status->webhook_status = $status;
+               $shipper_status->save();
+           }
+        }
+
+        return redirect()->route('admin.settings.shippers.status_webhook.index')->with(['success'=>'Shipper Statuses Updated Successfully']);
+    }
+
+ public function omni_user_setting_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),483);
+        
+        $shippers = array();
+        $omni_accounts = array();
+        $settings = GlobalSettings::where('type', 'omni_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if($settings->text != NULL){
+                $omni_accounts = array_map('intval', explode(',', $settings->text));
+                foreach ($omni_accounts as $user_id){
+                    $user = User::find($user_id);
+                    $shippers[] = $user->id;
+                }
+            }
+        }
+        $users = User::where('status',3)->where('blacklist', 0)->select('id','name')->get();
+        return view('admin.settings.omni_user')->with(['shippers' => $shippers,'users' => $users]);
+    }
+
+    public function omni_user_setting_update(Request $request){
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'omni_users');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'omni_users';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
+    }
+
 }
