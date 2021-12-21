@@ -6515,7 +6515,7 @@ class NotificationsController extends Controller
                     $new_rider_id = $riders['new_rider_id'];
 
 //                    $rider = Rider::find($rider);
-                    $old_rider = Rider::find($old_rider_id);
+                    $old_rider = Rider::withTrashed()->find($old_rider_id);
                     $new_rider = Rider::find($new_rider_id);
                     $admin_name = V2PickupRequest::find($pickup_request_id)->last_admin->name;
 
@@ -6545,7 +6545,7 @@ class NotificationsController extends Controller
                     $new_rider_id = $riders['new_rider_id'];
 
 //                    $rider = Rider::find($rider);
-                    $old_rider = Rider::find($old_rider_id);
+                    $old_rider = Rider::withTrashed()->find($old_rider_id);
                     $new_rider = Rider::find($new_rider_id);
                     $admin_name = V2PickupRequest::find($pickup_request_id)->last_admin->name;
 
@@ -8403,7 +8403,7 @@ class NotificationsController extends Controller
                 else if ($id == 155) {
                     $getdata = $reference_1_id;
 
-                    $datas = Rider::wherein("id",$getdata)->get();
+                    $datas = Rider::withTrashed()->wherein("id",$getdata)->get();
 
                     $html = '<p>Dear (HR / It support),
                     The Rider(s)  have been deactivated from system,
@@ -8417,7 +8417,7 @@ class NotificationsController extends Controller
                     $html .= '</tr></thead><tbody>';
 
                     foreach($datas as $data){
-                        $data_set = Rider::find($data->id);
+                        $data_set = Rider::withTrashed()->find($data->id);
 
                         $data_set->status = 0;
                         $data_set->save();
