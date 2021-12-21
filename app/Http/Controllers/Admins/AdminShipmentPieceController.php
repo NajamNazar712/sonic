@@ -1052,4 +1052,5 @@ public function single_piece_bulk(Request $request){
             }
         }
         return response()->json(['status' => 0,'success' => 'Shipment successfully converted to return to shipper!']);
-    }}
+    }
+}
