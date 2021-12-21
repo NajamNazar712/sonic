@@ -41,6 +41,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\Admin\OSAChargesLog;
 
 class AdminReportsController extends Controller
 {
@@ -4060,7 +4061,7 @@ class AdminReportsController extends Controller
             ->leftjoin('petty_cash_account_titles as pct', 'pct.id','=','petty_cash_statement_details.account_title_id')
             ->leftjoin('shipments','shipments.id','=','pcs.shipment_id')
             ->leftjoin('admins as chb','chb.id','=', 'pcs.checked_by')
-            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by','employee.trax_id as employee_id','petty_cash_statement_details.employee_name','petty_cash_statement_details.employee_designation','sdn.id as sdn_id','sdn.dncc_count');
+            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pcs.date as p_entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by','employee.trax_id as employee_id','petty_cash_statement_details.employee_name','petty_cash_statement_details.employee_designation','sdn.id as sdn_id','sdn.dncc_count');
 //            ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
@@ -4081,7 +4082,12 @@ class AdminReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$petty->tracking_number' class='tracking' target='_blank'>$petty->tracking_number</a></u>";
             })
             ->addColumn('entry_date',function($petty){
-                return Carbon::parse($petty->entry_date)->toDateString();
+                if($petty->entry_date != "0000-00-00 00:00:00") {
+                    return Carbon::parse($petty->entry_date)->toDateString();
+                }
+                else{
+                    return Carbon::parse($petty->p_entry_date)->toDateString();
+                }
             })
             ->editColumn('sdn_id_link', function ($sdn) {
                 if($sdn->sdn_id != null) {
@@ -6301,8 +6307,12 @@ class AdminReportsController extends Controller
                 $join->on('ccse.crm_request_id', '=', 'crm_requests.id')
                     ->where('ccse.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id AND crm_comments.comment_type = 0)'));
             })
-            
-            ->select('ccse.created_at as last_comment_date_external', 'ccse.comment as last_comment_external','crm_requests.id as request_number', 's.tracking_number as tracking_number','crsh.created_at as reopen_date','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin','ad.name as admin_department')
+            ->leftJoin('shipments_journey as sjcc', function ($join) {
+                $join->on('sjcc.shipment_id', '=', 'crm_requests.shipment_id')
+                    ->where('sjcc.id','=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 51)'));
+            })
+            ->select('ccse.created_at as last_comment_date_external', 'ccse.comment as last_comment_external','crm_requests.id as request_number', 's.tracking_number as tracking_number','crsh.created_at as reopen_date','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin','ad.name as admin_department','sjcc.remarks as case_closed_remark')
             ->groupBy('crm_requests.id');
 
         $datatable = Datatables::of($crm)
@@ -6475,6 +6485,13 @@ class AdminReportsController extends Controller
                 else{
                     return '-';
                 }
+            })
+            ->editColumn('case_closed_remark', function($requests){
+
+                if($requests->case_closed_remark)
+                    return $requests->case_closed_remark;
+                else
+                    return '-';
             })
             ->editColumn('resolved_date', function($requests){
                 if($requests->current_status_id == 3 || $requests->current_status_id == 4) {
@@ -9852,6 +9869,44 @@ class AdminReportsController extends Controller
         }
         if ($tracking_number = $request->get('tracking_number')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_number));
+        }
+        return $datatable->make(true);
+    }
+    public function osa_charges_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),481);
+        $filter_dates = DB::connection('reports')->table('sales_incentive_filter_dates')
+            ->select('id','date')
+            ->orderBy('id', 'desc')
+            ->get();
+        $admins = DB::connection('reports')->table('admins')->whereExists(function($query) {
+            $query->from('admin_roles')
+                ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
+                ->where('department_id', '=', 7);
+        })->select('id', 'name')->get();
+        $cities = City::where('business_category_id', 1)->where('hub', 1)->select('id', 'name')->get();
+        return view('admin.reports.osa_charges')->with(['filter_dates' => $filter_dates, 'admins' => $admins, 'cities' => $cities]);
+    }
+    public function osa_charges_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),482);
+        }
+        $shipments = Shipment::join('osa_charges_logs as nc', 'shipments.id', '=', 'nc.shipment_id')
+        ->leftjoin('admins as a','a.id','=','nc.updated_by')
+        ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','a.name as updated_by','nc.osa_charges as osa_charges','nc.updated_at as updated_at');
+
+        $datatable = Datatables::of($shipments)
+        ->editColumn('tracking_number',function ($shipments){
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        });
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments = $shipments->whereBetween('nc.updated_at', [$from,$to]);
         }
         return $datatable->make(true);
     }

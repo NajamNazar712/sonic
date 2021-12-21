@@ -190,7 +190,7 @@
                         columns.push({data: 'department', name: 'ad.name', class: 'align-middle department'});
                         columns.push({data: 'designation', name: 'a.designation', class: 'align-middle designation'});
                         $.each(data.period,function (i,date){
-                            columns.push({data: ''+date+'', class: 'align-middle dates',orderable:false, searchable:false});
+                            columns.push({data: ''+date+'', class: 'align-middle text-center dates',orderable:false, searchable:false});
                         });
 
                         $('#attendance_container').html('');

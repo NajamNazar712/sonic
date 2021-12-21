@@ -504,8 +504,11 @@
 
                         if (data.status == 1) {
                             var html = "";
-                            $.each(data.riders, function(key,value) {
-                                html += `<option value="${value.id}">${value.name}</option>`;
+                            $.each(data.riders, function(key,v) {
+                                if(v.trax_id)
+                                    html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name} - ${v.trax_id}</option>`
+                                else
+                                    html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name}</option>`
                             });
                             $('#rider_name').html(html);
                             $('#rider_name').val('').trigger('change');

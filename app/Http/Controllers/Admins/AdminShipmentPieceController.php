@@ -22,6 +22,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\ShipmentPieceRequestImage;
 
 class AdminShipmentPieceController extends Controller
 {
@@ -192,16 +194,25 @@ class AdminShipmentPieceController extends Controller
                      return $data->updated_by_shipper . ' (Shipper)';
                  }
             })
+            ->addColumn('image_view',function ($data){
+                $url = $this->view_attachment($data->shId);
+                if($url)
+                    return '<a class="btn btn-sm btn-outline-info align-middle" href="'.$url.'" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                else
+                    return '-';
+            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || in_array(371, session('permissions'))) {
                     $single_piece_button = '<a href="javascript:void(0);" class="dropdown-item single_piece"><i class="ft-plus-circle primary"></i> Switch to Single Piece</a>';
                     $remaining_piece_button = '<a href="javascript:void(0);" class="dropdown-item remaining_piece"><i class="ft-plus-circle primary"></i> Wait for Remaining Piece</a>';
                     $return_button = '<a href="javascript:void(0);" class="dropdown-item return_to_shipper"><i class="ft-plus-circle primary"></i> Return Back to Shipper</a>';
+                    $image_upload_button = '<a href="javascript:void(0);" class="dropdown-item image_upload"><i class="ft-plus-circle primary"></i> Image Upload</a>';
 
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">';
+                    $dropdown .= $image_upload_button;
                     if($result->request_status_id == null){
                         $dropdown .= $single_piece_button;
                         $dropdown .= $remaining_piece_button;
@@ -870,8 +881,45 @@ class AdminShipmentPieceController extends Controller
 
 
     }
+    public function upload_attachment(Request $request){
+        $shipment_id = $request->shipment_image_id;
+        if ($request->hasFile('upload_attachment')) {
+            $filename = 'shipment_piece_' . $shipment_id . '.png';
 
-    public function single_piece_bulk(Request $request){
+            $file = $request->file('upload_attachment');
+
+            Storage::disk('public')->putFileAs('shipment_pieces\attachment', $file, $filename);
+            if(ShipmentPieceRequestImage::where('shipment_id','=',$shipment_id)->exists()) {
+                $image = ShipmentPieceRequestImage::where('shipment_id','=',$shipment_id)->first();
+                $image->image = $filename;
+                $image->shipment_id = $shipment_id;
+                $image->updated_by = Auth::id();
+                $image->save();
+            }
+            else{
+                $image = new ShipmentPieceRequestImage();
+                $image->image = $filename;
+                $image->shipment_id = $shipment_id;
+                $image->created_by = Auth::id();
+                $image->save();
+            }
+            return redirect()->back()->with('success', 'Image Uploaded Successfully');
+        }
+        else{
+            return redirect()->back()->with('error', 'Image not Uploaded!');
+        }
+    }
+    public function view_attachment($id){
+         $image = ShipmentPieceRequestImage::where('shipment_id','=',$id)->first();
+         if($image){
+            $file = $image->image;
+            $url = Storage::url('shipment_pieces/attachment/'. $file);
+            return $url;
+         }else{
+           return '';  
+         }
+    }
+public function single_piece_bulk(Request $request){
         
         $shipment_ids = $request->shipment_ids;
         $invalid_shipment = array();
@@ -1004,6 +1052,4 @@ class AdminShipmentPieceController extends Controller
             }
         }
         return response()->json(['status' => 0,'success' => 'Shipment successfully converted to return to shipper!']);
-    }
-
-}
+    }}

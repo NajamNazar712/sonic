@@ -307,11 +307,16 @@
                             <div class="row old_scroll" id="reattempt_shipments">
                             </div>
                             <hr>
-                            <div class="feedback" id="request_feedback">
+                            <div class="remarks" id="request_remarks">
                                 <div class="row justify-content-center">
+                                    <div class="col-12 d-none" id="reattempt_charges">
+                                        <fieldset class="form-group">
+                                            <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" maxlength="6" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
+                                        </fieldset>  
+                                    </div>
                                     <div class="col-12">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="reattempt_remarks" id="reattempt_remarks" rows="5" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                            <textarea class="form-control" name="reattempt_remarks" id="reattempt_remarks" rows="3" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
@@ -423,6 +428,15 @@
                 'digits': 2,
                 'min': 0.00,
                 'max': 1000000.00
+            });
+            $('#estimated_charges_input').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0,
+                'max': 1000000
             });
             $('#return_reason_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -662,7 +676,6 @@
                         }
 
                         if (data.shipments != undefined) {
-                            
                             $.each(data.shipments, function (index, details) {
                                 
                                 var id = details.shipment_id;
@@ -670,17 +683,21 @@
                                 var shipment = '';
                                 var open_box_iocn = '';
                                 var ccd_icon = '';
+                                var $international_tracking_number = '';
                                 var roll_id = @json(session('role_id') == 1);
                                 var department_id =  @json(session('department_id') == 6);
                                 if(details.open_box){
-                                    open_box_iocn = '<span><i class="fas fa-box-open"></i></span>';
+                                    open_box_iocn = ' <span><i class="fas fa-box-open"></i></span> ';
                                 }
                                 if(details.ccd){
-                                    ccd_icon = '<span><i class="fas fa-credit-card"></i> (Credit Card on Delivery-CCD)</span>';
+                                    ccd_icon = ' <span><i class="fas fa-credit-card"></i> (Credit Card on Delivery-CCD)</span> ';
+                                }
+                                if(details.international_shipment){
+                                    $international_tracking_number = ' <span>(' + details.international_tracking_number + ')</span> ';
                                 }
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
-                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '  '+ open_box_iocn +'  '+ ccd_icon +'</div>';
+                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon +'</div>';
                                 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 @if (session('role_id') == 1 || in_array(45, session('permissions')))
@@ -694,7 +711,7 @@
                                 @endif
                                 console.log(details.dws_image);
                                 if(details.dws_image != null){
-                                    shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.dws_image + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> DWS File</a>';
+                                    shipment += '<a class="btn btn-secondary d-sm-inline-block file mr-1" href="' + details.dws_image + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> DWS File</a>';
                                 }
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
@@ -772,10 +789,14 @@
                                     else {
                                         shipment += '<td colspan="3"></td>';
                                     }
-                                    shipment += '<td><strong>Sales Person</strong></td>';
+                                    shipment += '<td><strong>Sales Person<br>Tagged KAE</strong></td>';
 
-                                    if (details.shipper.sales_person != null) {
-                                        shipment += '<td colspan="3">' + details.shipper.sales_person + '</td>';
+                                    if (details.shipper.sales_person != null || details.shipper.tagged_kae != null) {
+                                       if(details.shipper.sales_person == null)
+                                            shipment += '<td colspan="3">&nbsp<br>' + details.shipper.tagged_kae + '</td>';
+                                       else
+                                            shipment += '<td colspan="3">' + details.shipper.sales_person + '<br>' + details.shipper.tagged_kae + '</td>';
+
                                     }
                                     else {
                                         shipment += '<td colspan="3"></td>'
@@ -1474,13 +1495,27 @@
                 $('#reattempt_shipment_id').val(id);
                 $('#reattempt_shipments').html(tracking_rows);
                 $('#reattempt_remarks').val('');
+                $('#estimated_charges_input').val('');
+                $('#reattempt_charges').addClass('d-none');
+                $.ajax({
+                    url: '{!! route('admin.tracking.estimation_check') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipment_id': id
+                    }
+                })
+                    .done(function (data) {
+                        if(data.contains){
+                        $('#reattempt_charges').removeClass('d-none');
+                        }
+                    });
                 $('#ReattemptModal').modal('show');
 
             });
             $('#tracking').on('click','.intercept', function () {
                 id = $(this).attr('id');
                 status_id = $(this).attr('data-tracking');
-                debugger;
                 if(id != ''){
                     var redirect = '{!! route('admin.intercept.index', ':id') !!}';
                     if(status_id==12 ||status_id==52)
@@ -2174,6 +2209,7 @@
             },
             submitHandler: function(form) {
                     var reattempt_remarks = $('#reattempt_remarks').val();
+                    var charges = $('#estimated_charges_input').val();
                     swal({
                             title: 'Please Wait!',
                             text: ' ',
@@ -2189,7 +2225,8 @@
                             '_token': '{{ csrf_token() }}',
                             'shipment_id': $('#reattempt_shipment_id').val(),
                             'remark': reattempt_remarks,
-                            'action': 'reattempt'
+                            'action': 'reattempt',
+                            'charges': charges
                         }
                     })
                     .done(function (data) {

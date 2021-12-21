@@ -53,6 +53,7 @@
                         <th class="border-primary border-darken-1">Request Status</th>
                         <th class="border-primary border-darken-1">Last Status By Date</th>
                         <th class="border-primary border-darken-1">Last Status By</th>
+                        <th class="border-primary border-darken-1">Image</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -99,7 +100,38 @@
         </div>
     </div>
     <!--Rider popup -->
+    <!--Image Upload popup -->
+    <div class="modal fade text-left" id="uploadImage" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadImage"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Image Upload</h4>
 
+                </div>
+                <div class="modal-body  text-center">
+                    <form id="attachment_upload_form" class="form-horizontal" method="post" action="{{route('admin.multiple_pieces.upload_attachment')}}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="col text-center mt-2">
+                            <h4><b>Upload Attachment</b></h4>
+                        </div>
+                        <div class="col form-group">
+                            <input type="hidden" name="shipment_image_id" id="shipment_image_id"/>
+                            <input class="form-control form-control-sm" type="file" name="upload_attachment" id="upload_attachment" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-rule-required="true" data-msg-required="Image is required" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-3">
+                                <button type="submit" name="update" id="attachment_upload_form_submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>                   
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -589,7 +621,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -604,6 +636,7 @@
                     {data: 'request_status', name: 'request_status', class: 'align-middle request_status'},
                     {data: 'last_updated_at', name: 'shipment_pieces_requests.last_updated_at', class: 'align-middle last_updated_at'},
                     {data: 'last_updated_by', name: 'last_updated_by', class: 'align-middle last_updated_by'},
+                    {data: 'image_view', name: 'image_view', class: 'align-middle image_viewa',orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -633,7 +666,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.image_viewa')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -864,6 +897,10 @@
                             }
                         });
                     }
+                    else if($(this).hasClass('image_upload')){
+                        $('#uploadImage #shipment_image_id').val(id);
+                        $('#uploadImage').modal('show');
+                    }
                 }
 
 
@@ -924,7 +961,32 @@
                     });
             }
             @endif
-
+            $('#attachment_upload_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Uploading Attachment!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+            });
+            $('#uploadImage').on('hidden.bs.modal', function () {
+                $("#attachment_upload_form").validate().resetForm();
+                $('#upload_attachment').val('');
+            });
         });
     </script>
 @endsection

@@ -57,7 +57,7 @@ class ProcessDeliveryNoteOtpSmsITS implements ShouldQueue
 
     private function its($sms, $name, $otp) {
         try {
-            $client = new Client(['base_uri' => 'https://gateway.its.com.pk/api/otp', 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            $client = new Client(['base_uri' => 'https://gateway.its.com.pk/api/otp', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
             $response = $client->get('', [
                 'query' => [

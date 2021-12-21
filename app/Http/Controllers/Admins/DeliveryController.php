@@ -7318,7 +7318,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             });
         }
         if($riders){
-            $riders = $riders->select('id','name')->get();
+            $riders = $riders->select('id','name','trax_id')->get();
             return response()->json(['status'=> 1,'riders' => $riders,'success'=>'Riders Found']);
         }
         else{
