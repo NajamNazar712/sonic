@@ -21,7 +21,7 @@ class CreateQAEvaluationsTable extends Migration
             $table->string('evaluation_date');
             $table->integer('nature_id')->index();
             $table->string('call_duration')->nullable();
-            $table->date('date_time')->nullable();
+            $table->dateTime('date_time')->nullable();
             $table->integer('query_by')->index();
             $table->string('caller_contact');
             $table->tinyInteger('status')->default(0);

@@ -12,7 +12,7 @@ class UpdateModulePermissionForQAEvaluation extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 648, 'module_id' => 31)
+            array('id' => 648, 'name' => 'QA Evaluation - ADD', 'module_id' => 31)
         ));
     }
 }

@@ -86,7 +86,6 @@ class QAEvaluationController extends Controller
             'remarks' => $request->remarks,
         ]);
         if($request->has('activity_ids')){
-            // dump('ss');
             foreach ($request->activity_ids as $activity_id) {
                 QAEvaluationActivity::create([
                     'agent_id' => $request->agent_id,
@@ -175,12 +174,12 @@ class QAEvaluationController extends Controller
     }
 
     public function edit($id){
-        $qa_evaluation = QAEvaluation::find($id);
+        $qa_evaluations = QAEvaluation::find($id);
         $agents = Admin::all(); // 74,50,49,37.29,28,26,21,74
         $campaigns = EvaluationCampaign::all();
         $evaluated_by = Admin::all();
         $natures = EvaluationNature::all();
-        return view('admin.qa_evaluation.edit',compact('agents','campaigns','evaluated_by','natures','qa_evaluation'));
+        return view('admin.qa_evaluation.edit',compact('agents','campaigns','evaluated_by','natures','qa_evaluations'));
     }
 
     public function view($id){
@@ -192,7 +191,7 @@ class QAEvaluationController extends Controller
         return view('admin.qa_evaluation.view',compact('agents','campaigns','evaluated_by','natures','qa_evaluations'));
     }
 
-    public function handlings_Edit(Request $request){
+    public function handlings_edit(Request $request){
         $evaluation_handlings = EvaluationHandling::where('campaign_id',$request->id)->get();
         $handlings = EvaluationHandling::where('campaign_id',$request->id)->pluck('id')->toArray();
 
@@ -200,5 +199,63 @@ class QAEvaluationController extends Controller
         $evaluated_activities = EvaluationActivity::whereIn('evaluation_handling_id', $handlings)->get();
         return response()->json(['status'=>1,'evaluation_handlings'=>$evaluation_handlings, 'evaluated_activities' => $evaluated_activities,'qa_handings' => $qa_handings]);
 
+    }
+
+    public function update(Request $request){
+
+
+        $score = 100;
+        if($request->has('activity_ids')){
+            if(count($request->activity_ids) >=4){
+                $score = 0;
+            }else{
+                foreach ($request->activity_ids as $activity_id) {
+                    $activity = EvaluationActivity::find($activity_id);
+                    if(in_array($activity->handling->id, [4,10,17])){
+                        $score = 0;
+                        break;
+                    }else{
+                        $score-=$activity->weightage;
+                    }
+                }
+            }
+        }
+        
+        //0 fatal, 1 non fatal, 3 accurate
+        if($score <= 0){
+            $status = 0;
+            $score = 0;
+        }elseif ($score == 100) {
+            $status = 3;
+        }else{
+            $status = 1;
+        }
+        $qa_evaluation = QAEvaluation::find($request->qa_evaluation_id);
+
+        $qa_evaluation->agent_id = $request->agent_id ;
+        $qa_evaluation->campaign_id = $request->campaign_id ;
+        $qa_evaluation->evaluated_by = Auth::id() ;
+        $qa_evaluation->evaluation_date = Carbon::today() ;
+        $qa_evaluation->nature_id = $request->nature_id ;
+        $qa_evaluation->call_duration = $request->call_duaration ;
+        $qa_evaluation->date_time = $request->call_date_time ;
+        $qa_evaluation->query_by = $request->query_by ;
+        $qa_evaluation->caller_contact = $request->contact_number ;
+        $qa_evaluation->status = $status ;
+        $qa_evaluation->score = $score ;
+        $qa_evaluation->remarks = $request->remarks ;
+            
+        QAEvaluationActivity::where('qa_evaluation_id',$request->qa_evaluation_id)->delete();
+
+        if($request->has('activity_ids')){
+            foreach ($request->activity_ids as $activity_id) {
+                QAEvaluationActivity::create([
+                    'agent_id' => $request->agent_id,
+                    'qa_evaluation_id' => $qa_evaluation->id,
+                    'evaluation_activity_id' => $activity_id,
+                ]);
+            }
+        }
+        return redirect()->back()->with('success', 'QA Evaluation Updated');
     }
 }

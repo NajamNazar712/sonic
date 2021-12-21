@@ -17,15 +17,20 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<form id="role_form" class="form-horizontal" method="POST" action="{{ route('admin.qa_evaluation.submit') }}" novalidate="novalidate">
+							<form id="role_form" class="form-horizontal" method="POST" action="{{ route('admin.qa_evaluation.update') }}" novalidate="novalidate">
 								{{ csrf_field() }}
 
+                                <input type="hidden" name="qa_evaluation_id" id="qa_evaluation_id" value="{{$qa_evaluations->id}}">
 								<div class="row">
 									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
 										<div class="form-group">
                                             <select name="agent_id" class="select2" id="agent_id" data-rule-required="true" data-msg-required="Agent is required">
 												@foreach($agents as $agent)
-													<option value="{{ $agent->id }}">{{ $agent->name }}</option>
+													@if ($agent->id == $qa_evaluations->agent_id)
+													<option value="{{ $agent->id }}" selected>{{ $agent->name }}</option>
+													@else
+														<option value="{{ $agent->id }}">{{ $agent->name }}</option>
+													@endif
 												@endforeach
 											</select>
 										</div>
@@ -35,7 +40,11 @@
 										<div class="form-group">
                                             <select name="campaign_id" class="select2" id="campaign_id" data-rule-required="true" data-msg-required="Campaign is required">
 												@foreach($campaigns as $campaign)
-													<option value="{{ $campaign->campaign_id }}">{{ $campaign->campaign }}</option>
+													@if ($campaign->id == $qa_evaluations->campaign_id)
+															<option value="{{ $campaign->campaign_id }}" selected>{{ $campaign->campaign }}</option>
+													@else
+														<option value="{{ $campaign->campaign_id }}">{{ $campaign->campaign }}</option>
+													@endif
 												@endforeach
 											</select>
 											
@@ -45,7 +54,11 @@
 										<div class="form-group">
                                             <select name="nature_id" class="select2" id="nature_id" data-rule-required="true" data-msg-required="Nature is required">
 												@foreach($natures as $nature)
-													<option value="{{ $nature->id }}">{{ $nature->nature }}</option>
+													@if ($nature->id == $qa_evaluations->nature_id)
+															<option value="{{ $nature->id }}" selected>{{ $nature->nature }}</option>
+													@else
+															<option value="{{ $nature->id }}">{{ $nature->nature }}</option>
+													@endif
 												@endforeach
 											</select>
 											
@@ -59,34 +72,10 @@
 													<span class="la la-clock-o"></span>
 												</span>
 											</div>
-                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_duaration" id="call_duaration" placeholder="Call Duration" data-rule-required="true" data-msg-required="Date/Time is required">
+                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_duaration" value="{{$qa_evaluations->call_duaration}}" id="call_duaration" placeholder="Call Duration" data-rule-required="true" data-msg-required="Date/Time is required">
 										</div>
 									</div>
 
-								
-									{{-- <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-										<div class="form-group input-group ">
-											<div class="input-group-prepend">
-								<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-									<span class="la la-calendar-o"></span>
-								</span>
-											</div>
-	
-											<input type="text" name="call_duration" class="form-control pickadate bg-primary border-primary white rounded-right" id="call_duration" placeholder="Date/Time" data-rule-required="true" data-msg-required="Date/Time is required">
-										</div>
-									</div>
-
-									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-										<div class="form-group input-group ">
-											<div class="input-group-prepend">
-								<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-									<span class="la la-calendar-o"></span>
-								</span>
-											</div>
-	
-											<input type="text" name="call_date_time" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date is required">
-										</div>
-									</div> --}}
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
 										<div class="form-group input-group ">
 											<div class="input-group-prepend">
@@ -94,7 +83,7 @@
 													<span class="la la-calendar-o"></span>
 												</span>
 															</div>
-                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_date_time" id="call_date_time" placeholder="Date/Time" data-rule-required="true" data-msg-required="Date/Time is required">
+                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_date_time" value="{{$qa_evaluations->date_time}}" id="call_date_time" placeholder="Date/Time" data-rule-required="true" data-msg-required="Date/Time is required">
 										</div>
 									</div>
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
@@ -111,19 +100,19 @@
 
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 contact_number">
 										<div class="form-group">
-                                            <input type="text" class="form-control" name="contact_number" id="contact_number" placeholder="Caller's Contact #" >
+                                            <input type="text" class="form-control" name="contact_number" value="{{$qa_evaluations->contact_number}}" id="contact_number" placeholder="Caller's Contact #" >
 										</div>
 									</div>
 									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 complain_number">
 										<div class="form-group">
-                                            <input type="text" class="form-control text-left" name="complain_number" id="complain_number" placeholder="Request/Complain #" data-rule-required="true" data-msg-required="Request/Complain # is required">
+                                            <input type="text" class="form-control text-left" name="complain_number" value="{{$qa_evaluations->complain_number}}" id="complain_number" placeholder="Request/Complain #" data-rule-required="true" data-msg-required="Request/Complain # is required">
 										</div>
 									</div>
 
 									
 									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
 										<div class="form-group">
-											<textarea name="remarks" id="remarks_input" class="form-control" cols="30" rows="3" placeholder="Remarks*" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+											<textarea name="remarks" id="remarks_input" class="form-control" cols="30" rows="3" placeholder="Remarks*" data-rule-required="true" data-msg-required="Remarks is required">{{$qa_evaluations->remarks}}</textarea>
 										</div>
 									</div>
 
@@ -146,7 +135,7 @@
 
 									<div class="col-12">
 										<div class="form-group text-center">
-											<button type="submit" class="btn btn-primary">Add</button>
+											<button type="submit" class="btn btn-primary">Update</button>
 										</div>
 									</div>
 								</div>
@@ -182,6 +171,72 @@
 
 	<script>
 		$(document).ready(function() {
+            var qa_evaluation_id = $('#qa_evaluation_id').val();
+            var campaign_id = $('#campaign_id').val();
+
+
+function activities(qa_evaluation_id,campaign_id){
+	$.ajax({
+                        url: '{!! route('admin.qa_evaluation.handlings_edit') !!}',
+                        type: 'POST',
+                        data: {
+                            'id': campaign_id,
+							'qa_evaluation_id': qa_evaluation_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status) {
+                            console.log(data);
+                            var html = '';
+                            $.each(data.evaluation_handlings, function (i, v) {
+                                html +='<a class="nav-link rounded-0" id="handling_'+v.id+'_tab" data-toggle="pill" href="#module_'+v.id+'_tabpanel" role="tab" aria-controls="module_'+v.id+'_tabpanel" aria-selected="true">'+v.handling+'</a>';
+
+                            });
+                            var html1 = '';
+                            $.each(data.evaluation_handlings, function (i, v) {
+                                html1 +='<div class="tab-pane fade" id="module_'+v.id+'_tabpanel" role="tabpanel" aria-labelledby="module_'+v.id+'_tab">';
+                                $.each(data.evaluated_activities, function (index, val) {
+                                    if(v.id == val.evaluation_handling_id){
+										if(data.qa_handings.includes(val.id)){
+										html1 +='<fieldset class="d-inline-block m-1">';
+										html1 +='<input type="checkbox" id="activity_'+val.id+'" class="activity" name="activity_ids[]" value="'+val.id+'" checked>';
+										html1 +='<label for="activity_'+val.id+'">'+val.activity+'</label>';
+										html1 +='</fieldset>';
+										}else{
+										html1 +='<fieldset class="d-inline-block m-1">';
+										html1 +='<input type="checkbox" id="activity_'+val.id+'" class="activity" name="activity_ids[]" value="'+val.id+'" >';
+										html1 +='<label for="activity_'+val.id+'">'+val.activity+'</label>';
+										html1 +='</fieldset>';
+										}
+                                        
+                                    }
+                                });
+                                html1 +='</div>';
+                            });
+                            
+
+                            $("#handlings").html(html);
+                            $("#activities").html(html1);
+                            
+                        }
+                        $('#role_form .activity').each(function() {
+                            var checkbox = $(this);
+                            var label = checkbox.next();
+                            var text = label.text();
+
+                            label.remove();
+
+                            checkbox.iCheck({
+                                checkboxClass: 'icheckbox_line pt-1 pb-1',
+                                checkedClass: 'checked bg-success',
+                                uncheckedClass: 'bg-danger',
+                                insert: '<div class="icheck_line-icon"></div>' + text
+                            });
+                        });
+                    });
+}
+
+activities(qa_evaluation_id,campaign_id);
 			$('#contact_number').attr('disabled',true);
 						$('#complain_number').attr('disabled',true);
 						$('#call_duaration').attr('disabled',true);
@@ -189,59 +244,10 @@
 						$(".complain_number").css("display","none");
 						$(".call_duaration").css("display","none");
 
-			// var from_date = $('#call_duration').pickadatetime({
-            //     formatSubmit: 'yyyy-mm-dd 00:00:00',
-            //     // hiddenSuffix: '_formatted',
-            //     // onSet: function(context) {
-            //     //     if (context.select) {
-            //     //         var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
-            //     //         var currentDate = moment(old_date_formatted);
-
-            //     //         var to_date_formatted = $('input[name="search_date_to_formatted"]').val();
-            //     //         var toDate = moment(to_date_formatted);
-
-            //     //         if (currentDate.format('x') > toDate.format('x')) {
-            //     //             to_date.pickadate('picker').clear();
-            //     //         }
-
-            //     //         var afterDate = currentDate.add(30, 'days');
-            //     //         to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
-
-
-            //     //     }
-            //     // }
-            // });
-            // var to_date = $('#search_form #search_date_to').pickadate({
-            //     firstDay: 1,
-            //     clear: '',
-            //     selectYears: true,
-            //     selectMonths: true,
-            //     formatSubmit: 'yyyy-mm-dd 23:59:59',
-            //     hiddenSuffix: '_formatted',
-            //     onSet: function(context) {
-            //         if (context.select) {
-            //             var current_date_formatted = $('input[name="search_date_to_formatted"]').val();
-            //             var currentDate = moment(current_date_formatted);
-
-            //             var from_date_formatted = $('input[name="search_date_from_formatted"]').val();
-            //             var fromDate = moment(from_date_formatted);
-
-            //             if (currentDate.format('x') < fromDate.format('x')) {
-            //                 from_date.pickadate('picker').clear();
-            //             }
-
-            //             var beforeDate = currentDate.subtract(30, 'days');
-            //             from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
-            //         }
-            //     }
-            // });
 			$("#call_date_time").focus( function() {
 				$(this).attr({type: 'datetime-local'});
 			});
 
-			// $("#call_duaration").focus( function() {
-			// 	$(this).attr({type: 'time'});
-			// });
 			
 			$('#call_duaration').inputmask({
                 'mask': '99:99:99',
@@ -260,54 +266,30 @@
 			
 			
 
-			$('#query_by').prepend('<option value="" selected="selected"></option>').select2({
+			$('#query_by').select2({
 				width: '100%',
 				placeholder: 'Query By*'
 			});
 
-            $('#nature_id').prepend('<option value="" selected="selected"></option>').select2({
+            $('#nature_id').select2({
 				width: '100%',
 				placeholder: 'Nature*'
 			});
             
-            $('#evaluated_by').prepend('<option value="" selected="selected"></option>').select2({
+            $('#evaluated_by').select2({
 				width: '100%',
 				placeholder: 'Evaluated By*'
 			});
             
             
             
-            $('#agent_id').prepend('<option value="" selected="selected"></option>').select2({
+            $('#agent_id').select2({
 				width: '100%',
 				placeholder: 'Agent*'
 			});
-			// $('#campaign_id').change(function(){
-            //     var campaign_id = $(this).val();
+			
 
-			// 	if(campaign_id == 1){
-			// 				//call
-			// 				$(".contact_number").css("display","block")
-			// 				$(".complain_number").css("display","none")
-			// 				$(".call_duaration").css("display","block")
-	
-			// 				$('#contact_number').attr('disabled',false);
-			// 				$('#call_duaration').attr('disabled',false);
-			// 				$('#complain_number').attr('disabled',true);
-	
-			// 			}else{
-			// 				$(".contact_number").css("display","none")
-			// 				$(".complain_number").css("display","block")
-			// 				$(".call_duaration").css("display","none")
-	
-							
-			// 				$('#contact_number').attr('disabled',true);
-			// 				$('#call_duaration').attr('disabled',true);
-			// 				$('#complain_number').attr('disabled',false);
-	
-			// 	}
-			// });
-
-            $('#campaign_id').prepend('<option value="" selected="selected"></option>').select2({
+            $('#campaign_id').select2({
 				width: '100%',
 				placeholder: 'Campaign*'
 			}).bind('change',function(){
@@ -333,61 +315,7 @@
 						$('#complain_number').attr('disabled',false);
 
 					}
-                    $.ajax({
-                        url: '{!! route('admin.qa_evaluation.handlings') !!}',
-                        type: 'POST',
-                        data: {
-                            'id': campaign_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if (data.status) {
-                            console.log(data);
-                            var html = '';
-                            $.each(data.evaluation_handlings, function (i, v) {
-                                // console.log(v);
-                                html +='<a class="nav-link rounded-0" id="handling_'+v.id+'_tab" data-toggle="pill" href="#module_'+v.id+'_tabpanel" role="tab" aria-controls="module_'+v.id+'_tabpanel" aria-selected="true">'+v.handling+'</a>';
-
-                            });
-                            var html1 = '';
-                            $.each(data.evaluation_handlings, function (i, v) {
-                                html1 +='<div class="tab-pane fade" id="module_'+v.id+'_tabpanel" role="tabpanel" aria-labelledby="module_'+v.id+'_tab">';
-                                $.each(data.evaluated_activities, function (index, val) {
-                                    if(v.id == val.evaluation_handling_id){
-                                        html1 +='<fieldset class="d-inline-block m-1">';
-                                        html1 +='<input type="checkbox" id="activity_'+val.id+'" class="activity" name="activity_ids[]" value="'+val.id+'">';
-                                        html1 +='<label for="activity_'+val.id+'">'+val.activity+'</label>';
-                                        html1 +='</fieldset>';
-                                    }
-                                });
-                                html1 +='</div>';
-                            });
-                            
-
-                            $("#handlings").html(html);
-                            $("#activities").html(html1);
-                            // $(".delivered_shipment_input").val('');
-                            // $('.dncc_select').each(function (elm) {
-                            //     $(this).empty().trigger('change');
-                            //     $(this).html(dncc_data);
-                            //     $(this).val('').trigger('change');
-                            // });
-                        }
-                        $('#role_form .activity').each(function() {
-                            var checkbox = $(this);
-                            var label = checkbox.next();
-                            var text = label.text();
-
-                            label.remove();
-
-                            checkbox.iCheck({
-                                checkboxClass: 'icheckbox_line pt-1 pb-1',
-                                checkedClass: 'checked bg-success',
-                                uncheckedClass: 'bg-danger',
-                                insert: '<div class="icheck_line-icon"></div>' + text
-                            });
-                        });
-                    });
+                    activities(qa_evaluation_id,campaign_id);
             });
 			
 
@@ -396,46 +324,23 @@
 			$('#role_form').validate({
                 errorClass: 'danger',
 				successClass: 'success',
-                // $('.activity').val();
 				normalizer: function(value) {
-					
-					// if($('.activity').filter(':checked').length == 0){
-					// 	toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-					// 	// $('#call_duaration').val('');
-					// 	console.log('a');
-					// }else if($('.activity').filter(':checked').length == 4){
-					// 	toastr.error('Please select  Max 3 activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-					// }
                     return $.trim(value);
 				},
 				errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
-                    // console.log($('.activity').filter(':checked').length)
 					$(form).find('button[type=submit]').attr('disabled', 'disabled');
-					// if($('.activity').filter(':checked').length == 0){
-					// 		toastr.error('Please select an activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-					// 		swal.close();
-					// 		$(form).find('button[type=submit]').attr('disabled', false);
-					// 	}else if($('.activity').filter(':checked').length == 4){
-					// 		toastr.error('Please select  Max 3 activity', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-					// 		swal.close();
-					// 		$(form).find('button[type=submit]').attr('disabled', false);
-							
-					// 	}else{
-
 							swal({
 								title: 'Please Wait!',
-								text: 'Evaluation is being added!',
+								text: 'Evaluation is being updated!',
 								icon: 'info',
 								buttons: false,
 								closeOnClickOutside: false,
 								closeOnEsc: false
 							});
 							form.submit();
-						// }
-					
 				}
 			});
 		});
