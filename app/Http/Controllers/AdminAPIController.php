@@ -37,6 +37,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DwsDetail;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
@@ -3180,7 +3181,7 @@ class AdminAPIController extends Controller
                 'sonic_id' => ['nullable'],
                 'place_of_birth' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'date_of_birth' => ['nullable'],
-                'pin' => ['require', 'integer', 'digits:4'],
+                'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
@@ -4822,7 +4823,11 @@ class AdminAPIController extends Controller
                 //     return response()->json(['status' => 1, 'message' => 'weight not found']);
                 // }
 
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if (($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 ) && ($shipment->booking_type_id != 3 && $shipment->pieces == 1)) {
+                    if($request->dimension_l < 0 || $request->dimension_w < 0 || $request->dimension_h < 0){
+                            return response()->json(false);
+    
+                    }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
 
@@ -5141,6 +5146,25 @@ class AdminAPIController extends Controller
                             $shipment_detail->dimension_h = $request->dimension_h;
                             $shipment_detail->save();
                         }
+
+                        $dws_detail = DwsDetail::where('shipment_id', $shipment_id);
+                        if ($dws_detail->exists()) {
+                            $dws_detail = $dws_detail->get()->first();
+                            $dws_detail->dws_machine = $request->machine;
+                            $dws_detail->dws_package_type = $request->package_type;
+                            $dws_detail->dws_is_uploaded = $request->is_uploaded;
+                            $dws_detail->dws_date = $request->date;
+                            $dws_detail->save();
+                        } else {
+                            $dws_detail = new DwsDetail;
+                            $dws_detail->shipment_id = $shipment_id;
+                            $dws_detail->dws_machine = $request->machine;
+                            $dws_detail->dws_package_type = $request->package_type;
+                            $dws_detail->dws_is_uploaded = $request->is_uploaded;
+                            $dws_detail->dws_date = $request->date;
+                            $dws_detail->save();
+                        }
+                        
                     return response()->json(true);
 
                 } else {
@@ -5505,13 +5529,15 @@ class AdminAPIController extends Controller
                         $employee_request->staff_category_id = $request->staff_category_id;
                         $employee_request->save();
 
-                        $employee_bank_info = new EmployeeBankInformation();
-                        $employee_bank_info->employee_id = $employee_request->id;
-                        $employee_bank_info->account_title = $request->account_title;
-                        $employee_bank_info->bank_id = $request->bank_id;
-                        $employee_bank_info->branch_name = $request->branch_name;
-                        $employee_bank_info->iban = $request->iban;
-                        $employee_bank_info->save();
+                        if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
+                            $employee_bank_info = new EmployeeBankInformation();
+                            $employee_bank_info->employee_id = $employee_request->id;
+                            $employee_bank_info->account_title = $request->account_title;
+                            $employee_bank_info->bank_id = $request->bank_id;
+                            $employee_bank_info->branch_name = $request->branch_name;
+                            $employee_bank_info->iban = $request->iban;
+                            $employee_bank_info->save();
+                        }
 
                         if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
                             $employee_id = $employee_request->id;
@@ -5554,7 +5580,6 @@ class AdminAPIController extends Controller
 
     public function signup_optional_details(Request $request)
     {
-        //return response()->json(['status' => 0,'education_details' => $request->education_details, 'employment_history' => $request->employment_history, 'medical_details' => $request->medical_details]);
         if ($request->isMethod('post')) {
             $rules = [
                 //Employees
