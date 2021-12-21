@@ -62,12 +62,12 @@ class QAEvaluationController extends Controller
             }
         }
         
-        //0 fatal, 1 non fatal, 3 accurate
+        //0 fatal, 1 non fatal, 2 accurate
         if($score <= 0){
             $status = 0;
             $score = 0;
         }elseif ($score == 100) {
-            $status = 3;
+            $status = 2;
         }else{
             $status = 1;
         }
