@@ -661,8 +661,8 @@ class ShipperDashboardController extends Controller
     {
         if(isset($request->action) && $request->action == 'verify_pincode')
         {
-            $user_id    = session('user_id');
-            $pin        = rand(1000,9999);
+            $user_id = session('user_id');
+            $pin = rand(1000,9999);
             NotificationsController::send(91,$user_id,$pin);
             $data['code'] = $pin;
             return json_encode($data);

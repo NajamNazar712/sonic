@@ -4051,7 +4051,7 @@ class AdminReportsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),156);
         }
         $petty = DB::connection('reports')->table('petty_cash_statement_details')->join('petty_cash_statements as pcs','pcs.id','=','petty_cash_statement_details.petty_cash_statement_id')
-            ->join('cities as dc','dc.id','=', 'petty_cash_statement_details.city_id')
+            ->leftjoin('cities as dc','dc.id','=', 'petty_cash_statement_details.city_id')
             ->leftjoin('cities as h','h.id','=', 'pcs.hub_id')
             ->leftjoin('admins as employee','employee.id','=', 'petty_cash_statement_details.employee_id')
             ->leftjoin('station_deposit_notes as sdn','sdn.id','=','pcs.sdn_id')

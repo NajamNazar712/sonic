@@ -104,6 +104,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
 		'App\Console\Commands\SaleIncentiveReport',
         'App\Console\Commands\AutoAssignCrmAgent',
+        'App\Console\Commands\PendingPaymentCalculationJob',
     ];
 
     /**
@@ -173,6 +174,7 @@ class Kernel extends ConsoleKernel
         }
 
         $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
+
 
         $schedule->command('email:activitytraillog')->dailyAt('2:00')->runInBackground();
         $schedule->command('sms:clear')->everyTenMinutes()->withoutOverlapping()->runInBackground();
@@ -344,7 +346,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('returnsheet:receive')->dailyAt('05:00')->runInBackground();
 
         $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
-        $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
+//        $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
         $schedule->command('email:RiderDeactivateAutomaticallyAndGenerateEmail')->dailyAt('03:30')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'last_mile_cron_time');
@@ -361,6 +363,7 @@ class Kernel extends ConsoleKernel
 		//        }
         $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
 
+        $schedule->command('sum:pendingpayments')->dailyAt('6:00')->runInBackground();
 
     }
     /**

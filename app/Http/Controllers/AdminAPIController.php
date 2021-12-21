@@ -37,6 +37,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DwsDetail;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
@@ -75,6 +76,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Password;
+use phpDocumentor\Reflection\PseudoTypes\False_;
 
 class AdminAPIController extends Controller
 {
@@ -3172,7 +3174,7 @@ class AdminAPIController extends Controller
                 'sonic_id' => ['nullable'],
                 'place_of_birth' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'date_of_birth' => ['nullable'],
-                'pin' => ['require', 'integer', 'digits:4'],
+                'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
@@ -4784,7 +4786,7 @@ class AdminAPIController extends Controller
             'dimension_l' => ['required'],
             'dimension_w' => ['required'],
             'dimension_h' => ['required'],
-            'image_name' => ['required', 'mimes:pdf,png,jpeg,jpg,docx,doc'],
+            'image_name' => ['nullable', 'mimes:pdf,png,jpeg,jpg,docx,doc'],
             'machine' => ['required'],
             'date' => ['required'],
             'package_type' => ['required'],
@@ -4796,7 +4798,7 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+            return response()->json(false);
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number);
             if ($shipment->exists()) {
@@ -4814,7 +4816,11 @@ class AdminAPIController extends Controller
                 //     return response()->json(['status' => 1, 'message' => 'weight not found']);
                 // }
 
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if (($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 ) && ($shipment->booking_type_id != 3 && $shipment->pieces == 1)) {
+                    if($request->dimension_l < 0 || $request->dimension_w < 0 || $request->dimension_h < 0){
+                            return response()->json(false);
+    
+                    }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
 
@@ -4852,8 +4858,7 @@ class AdminAPIController extends Controller
                                 }
                             }
                         } else {
-
-                            return response()->json(['status' => 1, 'message' => 'dws chareges not set']);
+                            return response()->json(false);
                         }
 
                     }
@@ -5101,6 +5106,9 @@ class AdminAPIController extends Controller
                         $directory = 'dws_images';
                         Storage::disk('public')->putFileAs($directory, $file, $filename);
                         $link = $directory . '/' . $filename;
+                    }else{
+                        $link = null;
+                    }
 
                         $shipment_detail = ShipmentDetail::where('shipment_id', $shipment_id);
                         if ($shipment_detail->exists()) {
@@ -5131,16 +5139,35 @@ class AdminAPIController extends Controller
                             $shipment_detail->dimension_h = $request->dimension_h;
                             $shipment_detail->save();
                         }
-                    }
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'out of status']);
 
+                        $dws_detail = DwsDetail::where('shipment_id', $shipment_id);
+                        if ($dws_detail->exists()) {
+                            $dws_detail = $dws_detail->get()->first();
+                            $dws_detail->dws_machine = $request->machine;
+                            $dws_detail->dws_package_type = $request->package_type;
+                            $dws_detail->dws_is_uploaded = $request->is_uploaded;
+                            $dws_detail->dws_date = $request->date;
+                            $dws_detail->save();
+                        } else {
+                            $dws_detail = new DwsDetail;
+                            $dws_detail->shipment_id = $shipment_id;
+                            $dws_detail->dws_machine = $request->machine;
+                            $dws_detail->dws_package_type = $request->package_type;
+                            $dws_detail->dws_is_uploaded = $request->is_uploaded;
+                            $dws_detail->dws_date = $request->date;
+                            $dws_detail->save();
+                        }
+                        
+                    return response()->json(true);
+
+                } else {
+                    return response()->json(false);
                 }
 
                 // arrive function end
 
             } else {
-                return response()->json(['status' => 1, 'message' => 'shipment not found']);
+                return response()->json(false);
             }
 
 
@@ -5392,9 +5419,9 @@ class AdminAPIController extends Controller
                 'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
                 'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
                 'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
-                'personal_email' => ['required', 'email'],
+                'personal_email' => ['nullable', 'email'],
                 'address' => ['required'],
-                'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'emergency_contact' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'designation_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_designations,id'],
                 'department_id' => ['required', 'integer', 'digits_between:1,10', 'exists:admin_departments,id'],
                 'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
@@ -5404,10 +5431,10 @@ class AdminAPIController extends Controller
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
                 //BankInformation
-                'bank_id' => ['required', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
-                'account_title' => ['required'],
-                'branch_name' => ['required'],
-                'iban' => ['required'],
+                'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
+                'account_title' => ['nullable'],
+                'branch_name' => ['nullable'],
+                'iban' => ['nullable'],
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -5421,22 +5448,19 @@ class AdminAPIController extends Controller
                 $response['errors'] = $validate->errors();
             } else {
                 $admin = Admin::where('phone_number', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic_no'))
-                    ->orWhere('email', $request->input('personal_email'));
+                    ->orWhere('cnic', $request->input('cnic_no'));
 
                 $employee = Employee::where('phone_number', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic_no'))
-                    ->orWhere('personal_email', $request->input('personal_email'));
+                    ->orWhere('cnic', $request->input('cnic_no'));
 
                 $user_request = AdminUserRequest::where('phone_number', $request->input('phone_number'))
-                    ->orWhere('cnic', $request->input('cnic_no'))
-                    ->orWhere('email', $request->input('personal_email'));
+                    ->orWhere('cnic', $request->input('cnic_no'));
 
                 //Check Admin Already Exist
                 if ($admin->exists()) {
                     $admin = $admin->first();
-                    if ($admin->phone_number == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no') && $admin->email == $request->input('personal_email')) {
-                        $message = "Email, Phone Number & CNIC Already Exists";
+                    if ($admin->phone_number == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
 
                     } else if ($admin->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
@@ -5444,13 +5468,11 @@ class AdminAPIController extends Controller
                     } else if ($admin->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    }else if ($admin->email == $request->input('personal_email')) {
-                        $message = "Email Already Exist";
                     }
                 } else if ($employee->exists()) {
                     $employee = $employee->first();
-                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no') && $employee->personal_email == $request->input('personal_email')) {
-                        $message = "Email, Phone Number & CNIC Already Exists";
+                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
 
                     } else if ($employee->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
@@ -5458,13 +5480,11 @@ class AdminAPIController extends Controller
                     } else if ($employee->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    } else if ($employee->personal_email == $request->input('personal_email')) {
-                        $message = "Email Already Exist";
                     }
                 } else if ($user_request->exists()) {
                     $user_request = $user_request->first();
-                    if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no') && $user_request->email == $request->input('personal_email')) {
-                        $message = "Email, Phone Number & CNIC Already Exists";
+                    if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
 
                     } else if ($user_request->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
@@ -5472,8 +5492,6 @@ class AdminAPIController extends Controller
                     } else if ($user_request->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
 
-                    } else if ($user_request->email == $request->input('personal_email')) {
-                        $message = "Email Already Exist";
                     }
                 } else {
                     try {
@@ -5504,13 +5522,15 @@ class AdminAPIController extends Controller
                         $employee_request->staff_category_id = $request->staff_category_id;
                         $employee_request->save();
 
-                        $employee_bank_info = new EmployeeBankInformation();
-                        $employee_bank_info->employee_id = $employee_request->id;
-                        $employee_bank_info->account_title = $request->account_title;
-                        $employee_bank_info->bank_id = $request->bank_id;
-                        $employee_bank_info->branch_name = $request->branch_name;
-                        $employee_bank_info->iban = $request->iban;
-                        $employee_bank_info->save();
+                        if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
+                            $employee_bank_info = new EmployeeBankInformation();
+                            $employee_bank_info->employee_id = $employee_request->id;
+                            $employee_bank_info->account_title = $request->account_title;
+                            $employee_bank_info->bank_id = $request->bank_id;
+                            $employee_bank_info->branch_name = $request->branch_name;
+                            $employee_bank_info->iban = $request->iban;
+                            $employee_bank_info->save();
+                        }
 
 
                         if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
@@ -5554,7 +5574,6 @@ class AdminAPIController extends Controller
 
     public function signup_optional_details(Request $request)
     {
-        //return response()->json(['status' => 0,'education_details' => $request->education_details, 'employment_history' => $request->employment_history, 'medical_details' => $request->medical_details]);
         if ($request->isMethod('post')) {
             $rules = [
                 //Employees
