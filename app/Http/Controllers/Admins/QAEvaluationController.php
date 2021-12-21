@@ -205,6 +205,7 @@ class QAEvaluationController extends Controller
 
 
         $score = 100;
+        
         if($request->has('activity_ids')){
             if(count($request->activity_ids) >=4){
                 $score = 0;
@@ -244,7 +245,7 @@ class QAEvaluationController extends Controller
         $qa_evaluation->status = $status ;
         $qa_evaluation->score = $score ;
         $qa_evaluation->remarks = $request->remarks ;
-            
+        $qa_evaluation->save();
         QAEvaluationActivity::where('qa_evaluation_id',$request->qa_evaluation_id)->delete();
 
         if($request->has('activity_ids')){
@@ -257,5 +258,16 @@ class QAEvaluationController extends Controller
             }
         }
         return redirect()->back()->with('success', 'QA Evaluation Updated');
+    }
+
+    public function edit_activites(Request $request){
+        $evaluation_handlings = EvaluationHandling::all();
+
+        return view('admin.qa_evaluation.edit_activites',compact('evaluation_handlings'));
+    }
+
+    public function actvities_data(Request $request){
+        $activities = EvaluationActivity::where('evaluation_handling_id',$request->id)->get();
+        return response()->json(['status'=>1,'activities'=>$activities]);
     }
 }
