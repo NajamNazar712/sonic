@@ -5413,6 +5413,8 @@ public function sales_incentive()
     }
 
  public function omni_user_setting_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),483);
+        
         $shippers = array();
         $omni_accounts = array();
         $settings = GlobalSettings::where('type', 'omni_users');
