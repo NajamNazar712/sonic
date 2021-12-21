@@ -802,7 +802,7 @@
                                     shipment += '<tr>';
                                     shipment += '<td><strong>Tagged KAE</strong></td>';
                                     if(details.shipper.tagged_kae != null) {
-                                        shipment += '<td colspan="3">&nbsp<br>' + details.shipper.tagged_kae + '</td>';
+                                        shipment += '<td colspan="3">' + details.shipper.tagged_kae + '</td>';
                                     }
                                     else{
                                         shipment += '<td colspan="3"></td>'
