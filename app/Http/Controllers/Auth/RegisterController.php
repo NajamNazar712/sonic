@@ -545,10 +545,13 @@ class RegisterController extends Controller
                 }
             }
         }
+        $to = array_values(array_filter($to));
+        if(!empty($to)){
+            $mail = Mail::to($to);
 
-        $mail = Mail::to($to);
+            $mail->send(new Notifications($subject, $body, null));
+        }
 
-        $mail->send(new Notifications($subject, $body, null));
 
         return $newUser;
     }

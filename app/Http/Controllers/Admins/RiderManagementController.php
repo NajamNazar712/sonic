@@ -249,7 +249,7 @@ class RiderManagementController extends Controller
             $employee = new Employee();
             $employee->city_id = $request->city_id;
             $employee->name = $request->rider_name;
-            $employee->official_phone_number = $request->phone;
+            $employee->phone_number = $request->phone;
             $employee->cnic = $request->cnic;
             $employee->employee_type_id = 2;
             $employee->request_status_id = 3;
@@ -257,6 +257,7 @@ class RiderManagementController extends Controller
             $employee->address = $request->address;
             $employee->pin =  $request->pin;
             $employee->shift_id = $request->shift_id;
+            $employee->department_id = 6;
             $employee->trax_id = $trax_id;
             $employee->save();
 

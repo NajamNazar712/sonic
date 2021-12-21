@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controller\Admins\DwsWeightChargesController;
+use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\CorporateRateTypeHistory;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CorporateRateType;

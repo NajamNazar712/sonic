@@ -971,7 +971,7 @@ class AdminPettyCashController extends Controller
                     $petty_detail->save();
                 }
             }
-            if($petty_cash->status == 0 && $request->has('select_statement_sdn') && $request->select_statement_sdn != $petty_cash->sdn_id)
+            if($request->has('select_statement_sdn') && $request->select_statement_sdn != $petty_cash->sdn_id)
             {
                 $sdn_log = new PettyCashSdnLog();
                 $sdn_log->petty_cash_statement_id = $petty_cash->id;

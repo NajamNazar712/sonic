@@ -156,17 +156,40 @@ class NotificationsController extends Controller
     }
 
     static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL) {
-      $mail = Mail::to($to);
+        if($to){
+            if(is_array($to)){
+                $to = array_values(array_filter($to));
+                if(empty($to)){
+                    return false;
+                }
 
-      if ($cc) {
-        $mail->cc($cc);
-      }
+                if(is_array($cc)){
+                    $cc = array_values(array_filter($cc));
+                    if(empty($cc)){
+                        $cc = NULL;
+                    }
+                }
+                if(is_array($bcc)){
+                    $bcc = array_values(array_filter($bcc));
+                    if(empty($bcc)){
+                        $bcc = NULL;
+                    }
+                }
 
-      if ($bcc) {
-        $mail->bcc($bcc);
-      }
+            }
 
-      $mail->send(new Notifications($subject, $body, $from));
+            $mail = Mail::to($to);
+
+            if ($cc) {
+                $mail->cc($cc);
+            }
+
+            if ($bcc) {
+                $mail->bcc($bcc);
+            }
+
+            $mail->send(new Notifications($subject, $body, $from));
+        }
     }
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
@@ -1898,8 +1921,10 @@ class NotificationsController extends Controller
                     if ($general_admins->exists()) {
                         $to = array_merge($to, $general_admins->pluck('email')->toArray());
                     }
-
-                    $to[] = Admin::find($reference_2_id)->email;
+                    $reference_2_id_email = Admin::find($reference_2_id)->email;
+                    if($reference_2_id_email != null){
+                        $to[] = $reference_2_id_email;
+                    }
 
                     self::email($subject, $body, $to);
                 } else if ($id == 22) {
@@ -5686,10 +5711,9 @@ class NotificationsController extends Controller
                         $to[] = 'hassan@trax.pk';
                         $to[] = 'mohsin.qamar@trax.pk';
                         $to[] = 'fawad.ahmed@trax.pk';
-                        $to[] = 'talha.motiwala@trax.pk';
+                        $to[] = 'danyal.touheed@trax.pk';
                         $to[] = 'shafay.tariq@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
-                        $to[] = 'jahanzaib.qamar@trax.pk';
                         $to[] = 'zakee.rasheed@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
@@ -7991,14 +8015,13 @@ class NotificationsController extends Controller
                         $bcc = array();
                         $to[] = 'hassan@trax.pk';
                         $to[] = 'mohsin.qamar@trax.pk';
-                        $to[] = 'talha.motiwala@trax.pk';
+                        $to[] = 'fawad.ahmed@trax.pk';
+                        $to[] = 'danyal.touheed@trax.pk';
                         $to[] = 'shafay.tariq@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
-                        $to[] = 'jahanzaib.qamar@trax.pk';
                         $to[] = 'zakee.rasheed@trax.pk';
-                        $bcc[] = 'muhammad.yousuf@trax.pk';
                         $bcc[] = 'muhammad.waqas@trax.pk';
-                        $bcc[] = 'danish.zahid@trax.pk';
+                        $bcc[] = 'muhammad.yousuf@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -8215,8 +8238,9 @@ class NotificationsController extends Controller
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
                     }
-
-                    self::email($subject, $body, $to);
+                    if(!empty($to)){
+                        self::email($subject, $body, $to);
+                    }
                 }
 				else if($id == 148){
                     $hub = City::find($reference_1_id);
