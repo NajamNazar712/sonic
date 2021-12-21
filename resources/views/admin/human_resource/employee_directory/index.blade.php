@@ -532,7 +532,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(469, session('permissions')))
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(652, session('permissions')))
                     {
                         text: 'Approve',
                         className: 'btn btn-primary bulk_approve',
