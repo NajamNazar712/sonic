@@ -104,7 +104,6 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Retail\OtherParcelReceiving;
 use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
 use App\Http\Models\Admin\Retail\OtherRetailShipment;
-use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\SubCategorySegment;
 
 //use Illuminate\Support\Facades\Auth;
@@ -662,8 +661,8 @@ class ShipperDashboardController extends Controller
     {
         if(isset($request->action) && $request->action == 'verify_pincode')
         {
-            $user_id    = session('user_id');
-            $pin        = rand(1000,9999);
+            $user_id = session('user_id');
+            $pin = rand(1000,9999);
             NotificationsController::send(91,$user_id,$pin);
             $data['code'] = $pin;
             return json_encode($data);
@@ -1111,31 +1110,7 @@ class ShipperDashboardController extends Controller
     public function view_rates_index(){
         
         $id = session('user_id');
-        $dws_weight = PendingDwsWeightCharges::where('user_id',$id);
-
-        $on_dws_charges = null;
-        $ol_dws_charges = null;
-        $detain_dws_charges = null;
-        $sameday_dws_charges = null;
-
-        if($dws_weight->exists()){
-            $dws_weight = $dws_weight->get();
-            foreach ($dws_weight as $value) {
-                if($value->shipping_mode_id == 1){
-                    $on_dws_charges = $value->dws_weight_status;
-
-                }elseif($value->shipping_mode_id == 2){
-                    $ol_dws_charges = $value->dws_weight_status;
-
-                }elseif($value->shipping_mode_id == 3){
-                    $detain_dws_charges = $value->dws_weight_status;
-                    
-                }elseif($value->shipping_mode_id == 4){
-                    $sameday_dws_charges = $value->dws_weight_status;
-                    
-                }
-            }
-        }
+        
         $user = User::find($id);
         if(session('account_type') == 1){
             $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -1234,7 +1209,7 @@ class ShipperDashboardController extends Controller
 
                 }
             }
-            return view('client.rates.view')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+            return view('client.rates.view')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
         }
         else {
             if ($user->corporate_rate_type_id != 3) {
@@ -1333,7 +1308,7 @@ class ShipperDashboardController extends Controller
 
                     }
                 }
-                return view('client.rates.corporate.view')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                return view('client.rates.corporate.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
 
             } else {
                 $switches = CorporateDefaultRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1430,7 +1405,7 @@ class ShipperDashboardController extends Controller
 
                     }
                 }
-                return view('client.rates.default.view')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                return view('client.rates.default.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
 
             }
         }

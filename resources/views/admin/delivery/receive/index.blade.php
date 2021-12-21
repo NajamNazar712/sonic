@@ -87,7 +87,7 @@
     <!--Shipments popup -->
     <!--reassign popup -->
     <div class="modal fade" id="reassign_modal" data-backdrop="static" role="dialog" aria-labelledby="reassign_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <form id="reassign_rider_form" class="form" nonvalidate="nonvalidate" >
                 <input type="hidden" id="delivery_note_id" value="">
                 <div class="modal-content">
@@ -511,7 +511,11 @@
                         if (data.status == 1) {
                             var html = "";
                             $.each(data.riders, function(key,value) {
-                                html += `<option value="${value.id}">${value.name}</option>`;
+                                if(value.trax_id)
+                                    html += `<option value="${value.id}">${value.name} - ${value.trax_id}</option>`;
+                                else
+                                    html += `<option value="${value.id}">${value.name}</option>`;
+
                             });
                             $('#riders').html(html);
                             $('#riders').val('').trigger('change');

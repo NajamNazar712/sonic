@@ -37,6 +37,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DwsDetail;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
@@ -75,6 +76,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Password;
+use phpDocumentor\Reflection\PseudoTypes\False_;
 
 class AdminAPIController extends Controller
 {
@@ -181,12 +183,13 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $user = Admin::where('email', $request->input('email_address'));
+            $password = substr($request->input('password'), 2);
             if ($user->exists()) {
                 $user = $user->first();
                 if($user->status == 0){
                     return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                 }
-                if (Hash::check($request->input('password'), $user->password)) {
+                if (Hash::check($password, $user->password)) {
                     $employee = Employee::where('trax_id', $user->trax_id);
                     $information = array();
 
@@ -3171,7 +3174,7 @@ class AdminAPIController extends Controller
                 'sonic_id' => ['nullable'],
                 'place_of_birth' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
                 'date_of_birth' => ['nullable'],
-                'pin' => ['nullable', 'integer', 'digits:4'],
+                'pin' => ['required', 'integer', 'digits:4'],
                 'cnic_1' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
                 'cnic_2' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
@@ -4783,7 +4786,7 @@ class AdminAPIController extends Controller
             'dimension_l' => ['required'],
             'dimension_w' => ['required'],
             'dimension_h' => ['required'],
-            'image_name' => ['required', 'mimes:pdf,png,jpeg,jpg,docx,doc'],
+            'image_name' => ['nullable', 'mimes:pdf,png,jpeg,jpg,docx,doc'],
             'machine' => ['required'],
             'date' => ['required'],
             'package_type' => ['required'],
@@ -4795,7 +4798,7 @@ class AdminAPIController extends Controller
         $validate->setAttributeNames($this->names);
 
         if ($validate->fails()) {
-            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+            return response()->json(false);
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number);
             if ($shipment->exists()) {
@@ -4813,7 +4816,11 @@ class AdminAPIController extends Controller
                 //     return response()->json(['status' => 1, 'message' => 'weight not found']);
                 // }
 
-                if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
+                if (($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 ) && ($shipment->booking_type_id != 3 && $shipment->pieces == 1)) {
+                    if($request->dimension_l < 0 || $request->dimension_w < 0 || $request->dimension_h < 0){
+                            return response()->json(false);
+    
+                    }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
 
@@ -4851,8 +4858,7 @@ class AdminAPIController extends Controller
                                 }
                             }
                         } else {
-
-                            return response()->json(['status' => 1, 'message' => 'dws chareges not set']);
+                            return response()->json(false);
                         }
 
                     }
@@ -5100,6 +5106,9 @@ class AdminAPIController extends Controller
                         $directory = 'dws_images';
                         Storage::disk('public')->putFileAs($directory, $file, $filename);
                         $link = $directory . '/' . $filename;
+                    }else{
+                        $link = null;
+                    }
 
                         $shipment_detail = ShipmentDetail::where('shipment_id', $shipment_id);
                         if ($shipment_detail->exists()) {
@@ -5130,16 +5139,35 @@ class AdminAPIController extends Controller
                             $shipment_detail->dimension_h = $request->dimension_h;
                             $shipment_detail->save();
                         }
-                    }
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'out of status']);
 
+                        $dws_detail = DwsDetail::where('shipment_id', $shipment_id);
+                        if ($dws_detail->exists()) {
+                            $dws_detail = $dws_detail->get()->first();
+                            $dws_detail->dws_machine = $request->machine;
+                            $dws_detail->dws_package_type = $request->package_type;
+                            $dws_detail->dws_is_uploaded = $request->is_uploaded;
+                            $dws_detail->dws_date = $request->date;
+                            $dws_detail->save();
+                        } else {
+                            $dws_detail = new DwsDetail;
+                            $dws_detail->shipment_id = $shipment_id;
+                            $dws_detail->dws_machine = $request->machine;
+                            $dws_detail->dws_package_type = $request->package_type;
+                            $dws_detail->dws_is_uploaded = $request->is_uploaded;
+                            $dws_detail->dws_date = $request->date;
+                            $dws_detail->save();
+                        }
+                        
+                    return response()->json(true);
+
+                } else {
+                    return response()->json(false);
                 }
 
                 // arrive function end
 
             } else {
-                return response()->json(['status' => 1, 'message' => 'shipment not found']);
+                return response()->json(false);
             }
 
 
@@ -5217,6 +5245,416 @@ class AdminAPIController extends Controller
             }
             return response()->json(['status' => 0, 'data' => $data]);
         }
+    }
+
+	public function login_v3(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+            'device_token' => ['nullable']
+        ];
+
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $user = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($user->exists()) {
+                $user = $user->first();
+                if($user->status == 0){
+                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                }
+                if (Hash::check($request->input('pin'), $user->password)) {
+                    $employee = Employee::where('trax_id', $user->trax_id);
+                    $information = array();
+
+                    $information['id'] = $user->id;
+                    $information['name'] = $user->name;
+                    $information['phone'] = $user->phone_number;
+                    $information['cnic'] = $user->cnic;
+                    $information['cargo_user'] = ($user->role_id == 11) ? 1 : 0;
+                    if ($employee->exists()) {
+                        $employee = $employee->first();
+                        $information['address'] = ($employee->address) ? $employee->address : "" ;
+                    } else {
+                        $information['address'] = '';
+                    }
+                    $information['role'] = 'staff';
+
+                    if($request->has('device_token')){
+                        $employee_device_token = EmployeeDeviceToken::where('employee_id', $user->id)
+                            ->where('employee_type_id', 1);
+                        if ($employee_device_token->exists()) {
+                            $employee_device_token = $employee_device_token->first();
+                        } else {
+                            $employee_device_token = new EmployeeDeviceToken();
+                            $employee_device_token->employee_id = $user->id;
+                            $employee_device_token->employee_type_id = 1;
+                        }
+                        $employee_device_token->device_token = $request->get('device_token');
+                        $employee_device_token->save();
+                    }
+
+                    $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                        ->join('admins as a', 'e.id', 'a.employee_id')
+                        ->where('a.id', $user->id);
+
+                    if ($reporting_location->exists()) {
+                        $reporting_location = $reporting_location->first();
+                        $information['distance'] = $reporting_location->radius;
+                        $information['lat'] = $reporting_location->lat;
+                        $information['long'] = $reporting_location->long;
+                    }else{
+                        $information['distance'] = 0;
+                        $information['lat'] = 0;
+                        $information['long'] = 0;
+                    }
+
+                    if ($user->api_token) {
+                        $information['api_token'] = $user->api_token;
+                    } else {
+                        $api_token = uniqid(base64_encode(str_random(60)));
+
+                        $user->api_token = $api_token;
+
+                        $user->save();
+
+                        $information['api_token'] = $api_token;
+                    }
+
+                    return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid PIN!']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+            }
+        }
+    }
+
+    public function forget_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admins = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($admins->exists()) {
+                $admins = $admins->first();
+                if($admins->status == 1){
+                    $pin = rand(100000, 999999);
+                    $admins->reset_pin_otp = $pin;
+                    $admins->save();
+                    NotificationsController::send(162, $admins->id, $request->phone_number);
+                    return response()->json(['status' => 0, 'message' => 'Otp has been sent to your phone number', 'otp' => $pin]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function reset_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'otp' => ['required', 'integer', 'digits:6'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($admin->exists()) {
+                $admin = $admin->first();
+                if($request->input('otp') == $admin->reset_pin_otp){
+                    $admin->password = bcrypt($request->pin);
+                    $admin->reset_pin_otp = NULL;
+                    $admin->save();
+                    return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
+                }else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function signup_required_details(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $rules = [
+                //Employees
+                'name' => ['required'],
+                'mother_name' => ['required'],
+                'employee_gender_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_genders,id'],
+                'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'shift_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
+                'staff_category_id' => ['required', 'integer', 'digits_between:1,10', 'exists:staff_categories,id'],
+                'cnic_no' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+                'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'guardian_name' => ['required'],
+                'religion_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
+                'nationality_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
+                'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
+                'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
+                'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+                'personal_email' => ['nullable', 'email'],
+                'address' => ['required'],
+                'emergency_contact' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'designation_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_designations,id'],
+                'department_id' => ['required', 'integer', 'digits_between:1,10', 'exists:admin_departments,id'],
+                'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
+                'date_of_birth' => ['required'],
+                'pin' => ['required', 'integer', 'digits:4'],
+                'cnic_1' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+
+                //BankInformation
+                'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
+                'account_title' => ['nullable'],
+                'branch_name' => ['nullable'],
+                'iban' => ['nullable'],
+            ];
+            $response = ['status' => 1];
+            $message = 'Unknown';
+
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $message = 'Error(s) in Input';
+                $response['errors'] = $validate->errors();
+            } else {
+                $admin = Admin::where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                $employee = Employee::where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                $user_request = AdminUserRequest::where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                //Check Admin Already Exist
+                if ($admin->exists()) {
+                    $admin = $admin->first();
+                    if ($admin->phone_number == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($admin->phone_number == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($admin->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+
+                    }
+                } else if ($employee->exists()) {
+                    $employee = $employee->first();
+                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($employee->phone_number == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($employee->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+
+                    }
+                } else if ($user_request->exists()) {
+                    $user_request = $user_request->first();
+                    if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($user_request->phone_number == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($user_request->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+
+                    }
+                } else {
+                    try {
+                        $employee_request = new Employee();
+                        $employee_request->name = $request->name;
+                        $employee_request->employee_gender_id = $request->employee_gender_id;
+                        $employee_request->city_id = $request->city_id;
+                        $employee_request->cnic = $request->cnic_no;
+                        $employee_request->phone_number = $request->phone_number;
+                        $employee_request->employee_type_id = 1;
+                        $employee_request->status_id = 2;
+                        $employee_request->guardian_name = $request->guardian_name;
+                        $employee_request->religion_id = $request->religion_id;
+                        $employee_request->nationality_id = $request->nationality_id;
+                        $employee_request->domicile_id = $request->domicile_id;
+                        $employee_request->marital_status_id = $request->marital_status_id;
+                        $employee_request->blood_group = $request->blood_group_id;
+                        $employee_request->personal_email = $request->personal_email;
+                        $employee_request->address = $request->address;
+                        $employee_request->emergency_contact = $request->emergency_contact;
+                        $employee_request->designation_id = $request->designation_id;
+                        $employee_request->department_id = $request->department_id;
+                        $employee_request->zone_id = $request->zone_id;
+                        $employee_request->date_of_birth = $request->date_of_birth;
+                        $employee_request->pin = $request->pin;
+                        $employee_request->mother_name = $request->mother_name;
+                        $employee_request->shift_id = $request->shift_id;
+                        $employee_request->staff_category_id = $request->staff_category_id;
+                        $employee_request->save();
+
+                        if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
+                            $employee_bank_info = new EmployeeBankInformation();
+                            $employee_bank_info->employee_id = $employee_request->id;
+                            $employee_bank_info->account_title = $request->account_title;
+                            $employee_bank_info->bank_id = $request->bank_id;
+                            $employee_bank_info->branch_name = $request->branch_name;
+                            $employee_bank_info->iban = $request->iban;
+                            $employee_bank_info->save();
+                        }
+
+
+                        if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
+                            $employee_id = $employee_request->id;
+                            $date = Carbon::now()->format('Y_m_d');
+                            $attachments = new EmployeeAttachment();
+                            $attachments->employee_id = $employee_id;
+                            $cnic_array = [];
+                            if ($request->hasFile('cnic_1')) {
+                                $file = $request->file('cnic_1');
+                                $filename = 'cnic_1_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_id . '';
+                                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                                $cnic_array[0] = $directory . '/' . $filename;
+                            }
+                            if ($request->hasFile('cnic_2')) {
+                                $file = $request->file('cnic_2');
+                                $filename = 'cnic_2_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_id . '';
+                                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                                $cnic_array[1] = $directory . '/' . $filename;
+                            }
+                            $attachments->cnic = implode(',', $cnic_array);
+                            $attachments->save();
+                        }
+
+                        $response['status'] = 0;
+                        $response['employee_id'] = $employee_request->id;
+                        $message = 'Request Has Been Submitted and Pending for Approval';
+                    } catch (Exception $ex) {
+                        $response['message'] = $ex;
+                    }
+                }
+            }
+        } else {
+            $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
+    }
+
+    public function signup_optional_details(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $rules = [
+                //Employees
+                'employees_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+
+                //EducationalDetails
+                'education_details' => ['nullable'],
+
+                //EmploymentHistory
+                'employment_history' => ['nullable'],
+
+                //MedicalDetails
+                'medical_details' => ['nullable'],
+            ];
+            $response = ['status' => 1];
+            $message = 'Unknown';
+
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $message = 'Error(s) in Input';
+                $response['errors'] = $validate->errors();
+            } else {
+                $employee_request = Employee::find($request->employees_id);
+                if ($employee_request) {
+                    try {
+                        if ($request->has('employment_history')) {
+                            $employment_histories = json_decode($request->employment_history, true);
+                            foreach ($employment_histories as $employment_history) {
+                                $history = new EmployeeEmployementHistory();
+                                $history->employee_id = $employee_request->id;
+                                $history->name = $employment_history['organization_name'];
+                                $history->designation = $employment_history['designation'];
+                                $history->from = $employment_history['from_date'];
+                                $history->to = $employment_history['to_date'];
+                                $history->reason = $employment_history['reason_for_leaving'];
+                                $history->save();
+                            }
+                        }
+
+                        if ($request->has('medical_details')) {
+                            $medical_details = json_decode($request->medical_details, true);
+                            foreach ($medical_details as $medical_detail) {
+                                $medical_info = new EmployeeMedicalInformation();
+                                $medical_info->employee_id = $employee_request->id;
+                                $medical_info->name = $medical_detail['name_of_family_member'];
+                                $medical_info->relationship_id = $medical_detail['relation_ship'];
+                                $medical_info->date_of_birth = $medical_detail['date_of_birth'];
+                                $medical_info->marital_status = $medical_detail['marital_status'];
+                                $medical_info->save();
+                            }
+                        }
+
+                        if ($request->has('education_details')) {
+                            $education_details = json_decode($request->education_details, true);
+                            foreach ($education_details as $education_detail) {
+                                $employee_education = new EmployeeEducationalBackground();
+                                $employee_education->employee_id = $employee_request->id;
+                                $employee_education->name = $education_detail['institute'];
+                                $employee_education->degree = $education_detail['degree'];
+                                $employee_education->grade = $education_detail['position'];
+                                $employee_education->passing_year = $education_detail['graduation_year'];
+                                $employee_education->save();
+                            }
+                        }
+
+                        $response['status'] = 0;
+                        $response['employee_id'] = $employee_request->id;
+                        $message = 'Optional details Has Been Submitted and Pending for Approval';
+                    } catch (Exception $ex) {
+                        $response['message'] = $ex;
+                    }
+                }
+            }
+        } else {
+            $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
     }
 
     public function admin_ticker_images(Request $request)

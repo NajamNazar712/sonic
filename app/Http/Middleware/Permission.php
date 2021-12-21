@@ -609,6 +609,8 @@ class Permission
             'packaging.inventory.index' => 221,
             'packaging.inventory.list' => 221,
 
+            'user_management.users.rejoin' => 620,
+
             'user_management.users.index' => 81,
             'user_management.users.list' => 81,
             'user_management.users.status' => 84,
@@ -657,6 +659,8 @@ class Permission
             'management.route.add' => 93,
             'management.route.edit' => 94,
             'management.route.status' => 95,
+
+            'management.riders.rejoin' => 620,
 
             'management.rider.index' => 96,
             'management.rider.ajax' => 96,
@@ -713,6 +717,11 @@ class Permission
             'crm.escalate' => 353,
             'crm.consignee_info.index' => 363,
             'crm.consignee_info.list' => 363,
+
+            'settings.shippers.status_webhook.index' => 646,
+            'settings.shippers.status_webhook.list' => 646,
+            'settings.shippers.status_webhook.edit' => 646,
+            'settings.shippers.status_webhook.update' => 646,
 
             'settings.pickup.index' => 104,
             'settings.pickup.weight.add' => 104,
@@ -888,6 +897,8 @@ class Permission
             'settings.shipment_status_eta.index' => 534,
             'settings.shipment_status_eta.list' => 534,
 
+
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -1007,6 +1018,8 @@ class Permission
             'human_resource.employee_directory.index' => 467,
             'human_resource.employee_directory.list' => 467,
 
+            'human_resource.employee_directory.rejoin' => 620,
+
             'human_resource.employee_directory.edit' => 468,
             'human_resource.employee_directory.profile.update' => 468,
             'human_resource.employee_directory.medical.update' => 468,
@@ -1117,6 +1130,7 @@ class Permission
             'settings.international_automation_user.index' => 582,
 
             'settings.ccd_booking.index' => 558,
+            'settings.omni.index' => 644,
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
@@ -1132,6 +1146,7 @@ class Permission
             'settings.auto_tagging.index' => 639,
             'settings.auto_tagging.list' => 639,
             'reports.dws_report.index' => 642,
+            'reports.osa_charges.index' => 647,
 
 
         ],

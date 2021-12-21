@@ -278,14 +278,7 @@ class AdminPettyCashController extends Controller
                 $petty_cash_draft->station_manager_id = $request->select_statement_station_manager;
                 $petty_cash_draft->created_by = Auth::id();
                 $petty_cash_draft->save();
-                $first = true;
                 foreach ($selected_ids as $selected_id) {
-                    if($first)
-                    {
-                        $first = false;
-                        $petty_cash_draft->destination_hub_id = Admin::find($request->operation_manager[$selected_id])->default_hub_id ?? 0;
-                        $petty_cash_draft->save();
-                    }
                     $total_amount += $request->amount[$selected_id];
 
                     $petty_detail_draft = new PettyCashStatementDetailDraft();
@@ -978,7 +971,7 @@ class AdminPettyCashController extends Controller
                     $petty_detail->save();
                 }
             }
-            if($petty_cash->status == 0 && $request->has('select_statement_sdn') && $request->select_statement_sdn != $petty_cash->sdn_id)
+            if($request->has('select_statement_sdn') && $request->select_statement_sdn != $petty_cash->sdn_id)
             {
                 $sdn_log = new PettyCashSdnLog();
                 $sdn_log->petty_cash_statement_id = $petty_cash->id;

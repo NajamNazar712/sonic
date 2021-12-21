@@ -77,7 +77,8 @@
 										<th class="border-primary border-darken-1">Employee Id</th>
 										<th class="border-primary border-darken-1">Name</th>
 										<th class="border-primary border-darken-1">Phone Number</th>
-										<th class="border-primary border-darken-1">Email</th>
+										<th class="border-primary border-darken-1">Official Phone Number</th>
+										<th class="border-primary border-darken-1">Outlook ID</th>
 										<th class="border-primary border-darken-1">CNIC</th>
 										<th class="border-primary border-darken-1">Designation</th>
 										<th class="border-primary border-darken-1">Role</th>
@@ -112,9 +113,9 @@
 						@method('POST')
 						@csrf
 						<div class="container">
-							<input type="hidden" name="admin_id" id="phone_admin_id"/>
+							<input type="hidden" name="id" id="phone_admin_id"/>
 							<div class="form-group">
-								<input type="text" name="phone" id="phone" class="form-control" data-rule-required="true" data-msg-required="Phone Number required">
+								<input type="text" name="phone_number" id="phone" class="form-control" data-rule-required="true" data-msg-required="Phone Number required">
 							</div>
 							<div class="row justify-content-center">
 								<div class="col-6">
@@ -174,7 +175,8 @@
                             head.push('Employee Id');
                             head.push('Name');
                             head.push('Phone Number');
-                            head.push('Email');
+                            head.push('Official Phone Number');
+                            head.push('Outlook ID');
                             head.push('CNIC');
                             head.push('Designation');
                             head.push('Role');
@@ -188,6 +190,7 @@
                                 row.push(values.trax_id);
                                 row.push(values.name);
                                 row.push(values.phone_number);
+                                row.push(values.official_phone_number);
                                 row.push(values.email);
                                 row.push(values.cnic);
                                 row.push(values.designation);
@@ -315,13 +318,14 @@
 				}
 				},
 				rowId: 'id',
-				order: [[10, 'desc']],
+				order: [[11, 'desc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'trax_id', name: 'admins.trax_id', class: 'align-middle trax_id'},
 					{data: 'name', name: 'admins.name', class: 'align-middle name'},
 					{data: 'phone_number', name: 'admins.phone_number', class: 'align-middle phone_number'},
+					{data: 'official_phone_number', name: 'admins.official_phone_number', class: 'align-middle official_phone_number'},
 					{data: 'email', name: 'admins.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'admins.cnic', class: 'align-middle cnic'},
 					{data: 'designation', name: 'admins.designation', class: 'align-middle designation'},
@@ -389,6 +393,69 @@
 			$('#search_filter_btn').on('click',function () {
 				table.draw();
 			});
+
+			$('body').on('click', '.rejoin', function (e) {
+				var id = $(this).data('target-id');
+				console.log(id);
+				swal({
+					title: 'Are You Sure?',
+					text: 'Select Yes To Rejoin Admin!',
+					icon: 'warning',
+					buttons: {
+						cancel: {
+							text: 'No',
+							value: null,
+							visible: true,
+							closeModal: true,
+						},
+						confirm: {
+							text: 'Yes',
+							value: true,
+							visible: true,
+							closeModal: true
+						}
+					},
+					closeOnClickOutside: false,
+					closeOnEsc: false,
+					dangerMode: true
+				}).then(function (confirm) {
+					if (confirm) {
+						swal({
+							title: 'Please Wait!',
+							text: 'Admin is being Rejoin',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+
+						$.ajax({
+							url: '{!! route('admin.user_management.users.rejoin') !!}',
+							method: 'POST',
+							data: {
+								'employee_id': id,
+								'_token': '{{ csrf_token() }}'
+							}
+						})
+								.done(function (data) {
+									if (data.status == 0) {
+										toastr.success(data.success, 'Success!', {
+											positionClass: 'toast-bottom-center',
+											containerId: 'toast-bottom-center'
+										});
+									} else {
+										toastr.error(data.error, 'Error!', {
+											positionClass: 'toast-top-center',
+											containerId: 'toast-top-center'
+										});
+									}
+									swal.close();
+									table.draw('false');
+								});
+					}
+				});
+			});
+
 
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));

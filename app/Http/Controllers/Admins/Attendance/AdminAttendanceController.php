@@ -328,13 +328,17 @@ class AdminAttendanceController extends Controller
     public function admin_attendance_horizontal_table(Request $request,$array = false)
     {
         $date = Carbon::createFromFormat('M Y',$request->get('search_month'));
-        $from = new \DateTime($date->startOfMonth()->toDateString());
-        $to = new \DateTime($date->endOfMonth()->toDateString());
+        $year = $date->year;
+        $month = $date->month;
+        $prev_month = $date->subMonth(1)->month;
+        $from = new \DateTime(Carbon::createFromDate($year,$prev_month,26)->toDateString());
+        $to = new \DateTime(Carbon::createFromDate($year,$month,25)->toDateString());
         $to = $to->modify( '+1 day' );
         $period = array();
 
         $interval = new \DateInterval('P1D');;
         $daterange = new \DatePeriod($from, $interval ,$to);
+
 
         foreach ($daterange as $date) {
             if($array)
@@ -389,14 +393,18 @@ class AdminAttendanceController extends Controller
 
         if ($request->get('search_month')) {
             $date = Carbon::createFromFormat('M Y',$request->get('search_month'));
-            $from = $date->startOfMonth()->toDateString();
-            $to = $date->endOfMonth()->toDateString();
+            $year = $date->year;
+            $month = $date->month;
+            $prev_month = $date->subMonth(1)->month;
+            $from = Carbon::createFromDate($year,$prev_month,26)->toDateString();
+            $to = Carbon::createFromDate($year,$month,25)->toDateString();
             $attendances->whereBetween('employee_attendances.attendance_date', [$from, $to]);
         }
 
         $attendances->groupBy('employee_attendances.employee_id');
 
         $periods =  $this->admin_attendance_horizontal_table($request,true);
+        $today = Carbon::now();
 
         $datatable = Datatables::of($attendances)
             ->editColumn('trax_id', function ($employee) {
@@ -433,9 +441,14 @@ class AdminAttendanceController extends Controller
             });
             foreach($periods['display'] as $key => $period)
             {
-                $datatable->addColumn($period, function ($employee) use ($key, $periods) {
+                $datatable->addColumn($period, function ($employee) use ($key, $periods,$today) {
                     $data = EmployeeAttendance::where('employee_id',$employee->employee_id)
-                        ->where('attendance_date',$periods['search'][$key])->first();
+                        ->where('attendance_date',$periods['search'][$key])
+                        ->where(function ($query){
+                            $query->where('clock_in_datetime','!=',null)
+                                ->orWhere('clock_in','!=',null);
+                        })
+                        ->first();
 
                     if($data) {
                         if ($data->clock_in_datetime) {
@@ -452,8 +465,11 @@ class AdminAttendanceController extends Controller
                             $time .= $data->clock_out;
                         }
                     }
-                    else{
+                    else if($periods['search'][$key] > $today){
                         $time = "-";
+                    }
+                    else{
+                        $time = "<span class='text-danger'>A</span>";
                     }
 
                     return $time;
@@ -469,7 +485,7 @@ class AdminAttendanceController extends Controller
         }
         if ($search_department = $request->get('search_department')) {
             if($search_department != 6) {
-                $datatable->where('department_id', $search_department)->where('employee_type',1);
+                $datatable->where('ad.id', $search_department)->where('employee_type',1);
             }
             else{
                 $datatable->where(function($query) use($search_department){

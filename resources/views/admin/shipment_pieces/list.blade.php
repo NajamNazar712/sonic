@@ -53,6 +53,7 @@
                         <th class="border-primary border-darken-1">Request Status</th>
                         <th class="border-primary border-darken-1">Last Status By Date</th>
                         <th class="border-primary border-darken-1">Last Status By</th>
+                        <th class="border-primary border-darken-1">Image</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -99,7 +100,38 @@
         </div>
     </div>
     <!--Rider popup -->
+    <!--Image Upload popup -->
+    <div class="modal fade text-left" id="uploadImage" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadImage"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Image Upload</h4>
 
+                </div>
+                <div class="modal-body  text-center">
+                    <form id="attachment_upload_form" class="form-horizontal" method="post" action="{{route('admin.multiple_pieces.upload_attachment')}}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="col text-center mt-2">
+                            <h4><b>Upload Attachment</b></h4>
+                        </div>
+                        <div class="col form-group">
+                            <input type="hidden" name="shipment_image_id" id="shipment_image_id"/>
+                            <input class="form-control form-control-sm" type="file" name="upload_attachment" id="upload_attachment" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-rule-required="true" data-msg-required="Image is required" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-3">
+                                <button type="submit" name="update" id="attachment_upload_form_submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>                   
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -254,6 +286,239 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
+                    @if (session('role_id') == 1 || in_array(649, session('permissions')))
+                    {
+                        text: 'Wait For Remaining Piece(s)',
+                        className: 'btn btn-primary remaining_piece',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to change shipments to Wait for Remaining piece!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if(confirm){
+                                        blockPagePermanently();
+                                        $.ajax({
+                                            url:"{{route('admin.multiple_pieces.hold.wait_remaining_pieces_bulk')}}",
+                                            method:'POST',
+                                            data:{
+                                                'shipment_ids': selected_rows,
+                                                '_token':'{{ csrf_token() }}',
+                                            }
+                                        }).done(function (data) {
+                                            if(data.status == 0){
+                                                table.rows().nodes().each(function(index) {
+                                                    var row = table.row(index);
+
+                                                    if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                                        row.deselect();
+
+                                                        id = parseInt(row.id());
+
+                                                        var index = $.inArray(id, selected_rows);
+
+                                                        if (index !== -1) {
+                                                            selected_rows.splice(index, 1);
+                                                        }
+
+                                                        if (selected_rows.length == 0) {
+                                                            table.button('.print').disable();
+                                                            table.button('.remaining_piece').disable();
+                                                            table.button('.return_back_shipper').disable();
+                                                            table.button('.single_piece').disable();
+                                                        }
+                                                    }
+                                                });
+                                                table.draw('false');
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }else{
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                            }
+                                            UnblockPagePermanently();
+
+                                        });
+                                    }
+                                });
+                            }
+
+                        }
+                    },
+                    @endif
+                    @if (session('role_id') == 1 || in_array(650, session('permissions')))
+                    {
+                        text: 'Return Back To Shipper',
+                        className: 'btn btn-primary return_back_shipper',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to change shipments to Return Back to Shipper!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if(confirm){
+                                        blockPagePermanently();
+                                        $.ajax({
+                                            url:"{{route('admin.multiple_pieces.hold.return_back_to_shipper_bulk')}}",
+                                            method:'POST',
+                                            data:{
+                                                'shipment_ids': selected_rows,
+                                                '_token':'{{ csrf_token() }}',
+                                            }
+                                        }).done(function (data) {
+                                            if(data.status == 0){
+                                                table.rows().nodes().each(function(index) {
+                                                    var row = table.row(index);
+
+                                                    if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                                        row.deselect();
+
+                                                        id = parseInt(row.id());
+
+                                                        var index = $.inArray(id, selected_rows);
+
+                                                        if (index !== -1) {
+                                                            selected_rows.splice(index, 1);
+                                                        }
+
+                                                        if (selected_rows.length == 0) {
+                                                            table.button('.print').disable();
+                                                            table.button('.remaining_piece').disable();
+                                                            table.button('.return_back_shipper').disable();
+                                                            table.button('.single_piece').disable();
+                                                        }
+                                                    }
+                                                });
+                                                table.draw('false');
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }else{
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                            }
+                                            UnblockPagePermanently();
+
+                                        });
+                                    }
+                                });
+                            }
+
+                        }
+                    },
+                    @endif
+                    @if (session('role_id') == 1 || in_array(651, session('permissions')))
+                    {
+                        text: 'Switch To Single Piece',
+                        className: 'btn btn-primary single_piece',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to change shipments to Single Piece!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if(confirm){
+                                        blockPagePermanently();
+                                        $.ajax({
+                                            url:"{{route('admin.multiple_pieces.hold.single_piece_bulk')}}",
+                                            method:'POST',
+                                            data:{
+                                                'shipment_ids': selected_rows,
+                                                '_token':'{{ csrf_token() }}',
+                                            }
+                                        }).done(function (data) {
+                                            if(data.status == 0){
+                                                table.rows().nodes().each(function(index) {
+                                                    var row = table.row(index);
+
+                                                    if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                                        row.deselect();
+
+                                                        id = parseInt(row.id());
+
+                                                        var index = $.inArray(id, selected_rows);
+
+                                                        if (index !== -1) {
+                                                            selected_rows.splice(index, 1);
+                                                        }
+
+                                                        if (selected_rows.length == 0) {
+                                                            table.button('.print').disable();
+                                                            table.button('.remaining_piece').disable();
+                                                            table.button('.return_back_shipper').disable();
+                                                            table.button('.single_piece').disable();
+                                                        }
+                                                    }
+                                                });
+                                                table.draw('false');
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }else{
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                            }
+                                            UnblockPagePermanently();
+
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    },
+                    @endif
                     @if (session('role_id') == 1 || in_array(372, session('permissions')))
                     {
                         text: '<i class="la la-print"></i> Print & Create Return Note',
@@ -289,6 +554,9 @@
                                     }
 
                                     table.button('.print').enable();
+                                    table.button('.remaining_piece').enable();
+                                    table.button('.return_back_shipper').enable();
+                                    table.button('.single_piece').enable();
                                 }
                             });
                         }
@@ -315,6 +583,9 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.print').disable();
+                                        table.button('.remaining_piece').disable();
+                                        table.button('.return_back_shipper').disable();
+                                        table.button('.single_piece').disable();
                                     }
                                 }
                             });
@@ -350,7 +621,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -365,13 +636,14 @@
                     {data: 'request_status', name: 'request_status', class: 'align-middle request_status'},
                     {data: 'last_updated_at', name: 'shipment_pieces_requests.last_updated_at', class: 'align-middle last_updated_at'},
                     {data: 'last_updated_by', name: 'last_updated_by', class: 'align-middle last_updated_by'},
+                    {data: 'image_view', name: 'image_view', class: 'align-middle image_viewa',orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if (data.request_status_id == 3) {
+                    if (data.request_status_id == 3 || data.status == 'Pending') {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shId, selected_rows) !== -1) {
@@ -394,7 +666,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.image_viewa')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -469,9 +741,15 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.print').enable();
+                    table.button('.remaining_piece').enable();
+                    table.button('.return_back_shipper').enable();
+                    table.button('.single_piece').enable();
                 }
                 else {
                     table.button('.print').disable();
+                    table.button('.remaining_piece').disable();
+                    table.button('.return_back_shipper').disable();
+                    table.button('.single_piece').disable();
                 }
             });
 
@@ -619,6 +897,10 @@
                             }
                         });
                     }
+                    else if($(this).hasClass('image_upload')){
+                        $('#uploadImage #shipment_image_id').val(id);
+                        $('#uploadImage').modal('show');
+                    }
                 }
 
 
@@ -679,7 +961,32 @@
                     });
             }
             @endif
-
+            $('#attachment_upload_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Uploading Attachment!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+            });
+            $('#uploadImage').on('hidden.bs.modal', function () {
+                $("#attachment_upload_form").validate().resetForm();
+                $('#upload_attachment').val('');
+            });
         });
     </script>
 @endsection

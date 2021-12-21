@@ -29,7 +29,13 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" value="{{ $user->phone_number }}">
+											<input type="text" name="phone_number" id="phone_number" class="form-control unique_phone" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required" data-rule-remote="{{ route('admin.user_management.users.validate_phone',['id'=>$user->id]) }}" data-msg-remote="Phone Number is not unique" value="{{ $user->phone_number }}">
+										</div>
+									</div>
+
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<input type="text" name="official_phone_number" id="official_phone_number" class="form-control unique_phone" placeholder="Official Phone Number" data-rule-remote="{{ route('admin.user_management.users.validate_phone',['id'=>$user->id]) }}" data-msg-remote="Official Phone Number is not unique" value="{{ $user->official_phone_number }}">
 										</div>
 									</div>
 
@@ -41,13 +47,13 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Email must be unique" value="{{ $user->email }}">
+											<input type="email" name="email" class="form-control" placeholder="Outlook Id" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Outlook Id must be unique" value="{{ $user->email }}">
 										</div>
 									</div>
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="password" name="password" class="form-control" placeholder="Password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 characters">
+											<input type="password" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters">
 										</div>
 									</div>
 
@@ -59,6 +65,20 @@
 														<option value="{{ $role->id }}" selected="selected">{{ $role->name }} - {{ $role->department->name }}</option>
 													@else
 														<option value="{{ $role->id }}">{{ $role->name }} - {{ $role->department->name }}</option>
+													@endif
+												@endforeach
+											</select>
+										</div>
+									</div>
+
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<select name="designation_id" class="select2" id="designation_id" data-rule-required="true" data-msg-required="Designation is required">
+												@foreach($designations as $designation)
+													@if ($designation->id == $user->designation_id)
+														<option value="{{ $designation->id }}" selected="selected">{{ $designation->name }} - {{$designation->department->name}}</option>
+													@else
+														<option value="{{ $designation->id }}">{{ $designation->name }} - {{$designation->department->name ?? ""}}</option>
 													@endif
 												@endforeach
 											</select>
@@ -79,28 +99,10 @@
 									</div>
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="designation" class="form-control" placeholder="Designation" value="{{ $user->designation }}">
-										</div>
-									</div>
-
-									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-										<div class="form-group">
 											<input type="text" name="trax_id" class="form-control" placeholder="Trax Id" value="{{ $user->trax_id }}">
 										</div>
 									</div>
-									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-										<div class="form-group">
-											<select name="designation_id" class="select2" id="designation_id">
-												@foreach($designations as $designation)
-													@if ($designation->id == $user->designation_id)
-														<option value="{{ $designation->id }}" selected="selected">{{ $designation->name }}</option>
-													@else
-														<option value="{{ $designation->id }}">{{ $designation->name }}</option>
-													@endif
-												@endforeach
-											</select>
-										</div>
-									</div>
+
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
@@ -110,20 +112,6 @@
 														<option value="{{$shift->id}}" selected="selected"> {{$shift->name}}</option>
 													@else
 														<option value="{{$shift->id}}"> {{$shift->name}}</option>
-													@endif
-												@endforeach
-											</select>
-										</div>
-									</div>
-
-									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-										<div class="form-group">
-											<select name="location_id" class="select2" id="location_list">
-												@foreach($reporting_locations as $reporting_location)
-													@if ($reporting_location->id == $user->reporting_location_id)
-														<option value="{{$reporting_location->id}}" selected="selected"> {{$reporting_location->name}}</option>
-													@else
-														<option value="{{$reporting_location->id}}"> {{$reporting_location->name}}</option>
 													@endif
 												@endforeach
 											</select>
@@ -230,8 +218,17 @@
 				});
 			@endif
 
-			$('#user_form #phone_number').inputmask({
+			$('#user_form #phone_number,#user_form #official_phone_number').inputmask({
 				'mask': '9999-9999999',
+				'clearIncomplete': true
+			});
+
+			$('#user_form #pin').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false,
+				'rightAlign': false,
+				'mask': '9999',
 				'clearIncomplete': true
 			});
 
@@ -303,5 +300,19 @@
 				e.preventDefault();
 			}
 		});
+
+		$.validator.addMethod("unique_phone", function(value, element) {
+			var parentForm = $(element).closest('form');
+			var timeRepeated = 0;
+			if (value != '') {
+				$(parentForm.find('.unique_phone')).each(function () {
+					if ($(this).val() === value && value != 0) {
+						timeRepeated++;
+					}
+				});
+			}
+			return timeRepeated === 1 || timeRepeated === 0;
+
+		}, "Phone Number Can Not Be Duplicate");
 	</script>
 @endsection

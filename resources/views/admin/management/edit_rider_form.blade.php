@@ -15,23 +15,15 @@
     @csrf
     @method('PUT')
     <div class="row justify-content-center">
-        <div class="col text-center">
-            <label class="font-medium-2 font-weight-bold block">Special Rider</label>
-            <div class="form-group">
-                <label for="all_shippers_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
-                <input type="checkbox" name="special_rider_checkbox" id="special_rider_checkbox" class="switchery special_rider_checkbox" data-size="sm" data-switchery="true" {{ ($rider->special_rider)? 'checked':'' }}>
-                <label for="special_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
-            </div>
-        </div>
         @if($type == 1)
-            <div class="col text-center">
-                <label class="font-medium-2 font-weight-bold block">Credit Card on Delivery-CCD</label>
-                <div class="form-group">
-                    <label for="edit_ccd_rider_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
-                    <input type="checkbox" name="edit_ccd_rider_checkbox" id="edit_ccd_rider_checkbox" class="switchery edit_ccd_rider_checkbox" data-size="sm" data-switchery="true" {{ ($rider->ccd)? 'checked':'' }}>
-                    <label for="edit_ccd_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                <div class="col text-center">
+                    <label class="font-medium-2 font-weight-bold block">Credit Card on Delivery-CCD</label>
+                    <div class="form-group">
+                        <label for="edit_ccd_rider_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
+                        <input type="checkbox" name="edit_ccd_rider_checkbox" id="edit_ccd_rider_checkbox" class="switchery edit_ccd_rider_checkbox" data-size="sm" data-switchery="true" {{ ($rider->ccd)? 'checked':'' }}>
+                        <label for="edit_ccd_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                    </div>
                 </div>
-            </div>
         @endif
     </div>
 
@@ -199,8 +191,8 @@
 <script type="text/javascript">
     $(document).ready(function () {
 
-        var elem = document.querySelector('.special_rider_checkbox');
-        var switchery = new Switchery(elem);
+        // var elem = document.querySelector('.special_rider_checkbox');
+        // var switchery = new Switchery(elem);
         @if($type == 1)
         var edit_ccd_elem = document.querySelector('.edit_ccd_rider_checkbox');
         var edit_ccd_switchery = new Switchery(edit_ccd_elem);

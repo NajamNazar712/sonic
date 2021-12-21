@@ -24,6 +24,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentsJourney;
@@ -40,6 +41,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\WMS\WmsUserInformation;
 
 use Auth;
 use Yajra\Datatables\Datatables;
@@ -48,6 +50,7 @@ use DB;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Models\SaleTierTag;
 
 class AdminTrackingController extends Controller
 {
@@ -68,6 +71,7 @@ class AdminTrackingController extends Controller
     }
 
     public function track(Request $request) {
+
     	$tracking_numbers = explode(',', $request->tracking_numbers);
 
     	$tracking = array();
@@ -86,7 +90,6 @@ class AdminTrackingController extends Controller
                     }
                 }
                 ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null,null);
-
                 if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
                     $details = array();
 
@@ -108,6 +111,17 @@ class AdminTrackingController extends Controller
                         $sales_person_name = null;
                     }
 
+                    $tagged_kae = SaleTierTag::where('user_id',$shipper->id);
+                    if ($tagged_kae->exists()){
+                        $tagged_kae = $tagged_kae->first();
+                        if($tagged_kae->kam)
+                            $tagged_kae_name = $tagged_kae->kam_admin->name;
+                        else
+                            $tagged_kae_name = "-";
+                    }
+                    else{
+                        $tagged_kae_name = "-";
+                    }
                     $details['shipper']['name'] = $shipper->name;
                     $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                     $details['shipper']['city'] = $shipper->city->name;
@@ -115,6 +129,7 @@ class AdminTrackingController extends Controller
                     $details['shipper']['phone_number_2'] = $shipper->phone2;
                     $details['shipper']['email'] = $shipper->email;
                     $details['shipper']['sales_person'] = $sales_person_name;
+                    $details['shipper']['tagged_kae'] = $tagged_kae_name;
 
                     $pickup = $shipment->pickup_address;
 
@@ -768,6 +783,21 @@ class AdminTrackingController extends Controller
                     if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
                         $details = array();
 
+                        if($shipment->business_category_id == 2){
+                            $international_shipment = InternationalShipment::where('shipment_id', $shipment->id)->whereNotNull('international_tracking_number');
+                            if($international_shipment->exists()){
+                                $international_shipment = $international_shipment->first();
+                                $details['international_shipment'] = 1;
+                                $details['international_tracking_number'] = $international_shipment->international_tracking_number;
+                            }
+                            else{
+                                $details['international_shipment'] = 0;
+                            }
+                        }
+                        else{
+                            $details['international_shipment'] = 0;
+                        }
+
                         $details['tracking_number'] = $tracking_number;
                     if($shipment->pod_image()->exists()){
                         $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);
@@ -791,16 +821,38 @@ class AdminTrackingController extends Controller
                         else{
                             $sales_person_name = null;
                         }
-
+                        $tagged_kae = SaleTierTag::where('user_id',$shipper->id);
+                        if ($tagged_kae->exists()){
+                            $tagged_kae = $tagged_kae->first();
+                            if($tagged_kae->kam)
+                                $tagged_kae_name = $tagged_kae->kam_admin->name;
+                            else
+                                $tagged_kae_name = "-";
+                        }
+                        else{
+                            $tagged_kae_name = "-";
+                        }
+                        $wms_user = WmsUserInformation::where('user_id', $shipper->id);
+                        if ($wms_user->exists()){
+                            $wms_user = $wms_user->first();
+                            if($wms_user->warehousing == 1)
+                                $wms_user_name = "(W)";
+                            else
+                                $wms_user_name = "";
+                        }
+                        else{
+                            $wms_user_name = "";
+                        }
                         if($shipment->shipment_type == 1){
                             $details['shipment_type'] = 1;
-                            $details['shipper']['name'] = $shipper->name;
+                            $details['shipper']['name'] = $shipper->name . ' ' . $wms_user_name;
                             $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                             $details['shipper']['city'] = $shipper->city->name;
                             $details['shipper']['phone_number_1'] = $shipper->phone;
                             $details['shipper']['phone_number_2'] = $shipper->phone2;
                             $details['shipper']['email'] = $shipper->email;
                             $details['shipper']['sales_person'] = $sales_person_name;
+                            $details['shipper']['tagged_kae'] = $tagged_kae_name;
                         }
                         else{
                             $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
@@ -957,20 +1009,21 @@ class AdminTrackingController extends Controller
                                     }
                                     else if($cargo_bag_shipment->exists()){
                                         $bag_shipment = $cargo_bag_shipment->orderBy('id','desc')->skip($manifest_bag_seal_number)->take(1)->first();
-                                        $manifest_bag_seal_number++;
-                                        $bag = CargoManifestBag::where('id',$bag_shipment->cargo_manifest_bag_id);
-                                        if($bag->exists()){
-                                            $bag= $bag->first();
-                                            $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
-                                            if($cargo_manifest->exists()){
+                                        if($bag_shipment){
+                                            $manifest_bag_seal_number++;
+                                            $bag = CargoManifestBag::where('id',$bag_shipment->cargo_manifest_bag_id);
+                                            if($bag->exists()){
+                                                $bag= $bag->first();
+                                                $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
+                                                if($cargo_manifest->exists()){
 
-                                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
-                                            }
-                                            else{
-                                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                                }
+                                                else{
+                                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                                }
                                             }
                                         }
-
                                     }
                                     else{
 
@@ -1570,5 +1623,15 @@ class AdminTrackingController extends Controller
         ';
 
         return $html;
+    }
+    public function estimation_check(Request $request) {
+
+        $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest('id')->first();
+
+        if($journey->status_reason_id == 12)
+        {
+            $contains= "1";
+        }
+        return response()->json(['contains' => $contains]);
     }
 }
