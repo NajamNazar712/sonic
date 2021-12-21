@@ -111,7 +111,7 @@
 
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 contact_number">
 										<div class="form-group">
-                                            <input type="text" class="form-control" name="contact_number" id="contact_number" placeholder="Caller's Contact #" >
+                                            <input type="text" class="form-control" name="contact_number" id="contact_number" placeholder="Caller's Contact #"  data-rule-required="true" data-msg-required="Caller's Contact # is required">
 										</div>
 									</div>
 									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 complain_number">
