@@ -234,6 +234,17 @@
 
                                         <div class="col-md-12">
                                             <div class="form-group">
+                                                <label>Rider Functional Category<span class="text-danger">*</span></label>
+                                                <select name="rider_functional_category" id="rider_functional_category" data-rule-required="true"  data-msg-required="Rider Functional Category is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($functional_categories as $functional_category)
+                                                        <option value="{{$functional_category->id}}">{{$functional_category->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
                                                 <label>Rider Main Category<span class="text-danger">*</span></label>
                                                 <select name="rider_main_category" id="rider_main_category" data-rule-required="true" data-msg-required="Main Category is Required" class="select2 form-control " style="width: 100%">
                                                     @foreach($main_categories as $main_category)
@@ -249,6 +260,17 @@
                                                 <select name="rider_sub_category" id="rider_sub_category" data-rule-required="true" data-msg-required="Sub Category is Required" class="select2 form-control " style="width: 100%">
                                                     @foreach($sub_categories as $sub_category)
                                                         <option value="{{$sub_category->id}}">{{$sub_category->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Rider Routes<span class="text-danger">*</span></label>
+                                                <select name="rider_route" id="rider_route" data-rule-required="true"  data-msg-required="Rider Route is required" class="select2 form-control " style="width: 100%">
+                                                    @foreach($rider_routes as $route)
+                                                        <option value="{{$route->id}}">{{$route->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -2138,6 +2160,7 @@
                 placeholder: "Select Blood Group",
                 width:'100%',
             });
+
             $("#blood_group").val("{{$employee->blood_group ?? ''}}").trigger('change');
 
             $("#nationality").prepend('<option value="" selected></option>').select2({
@@ -2156,9 +2179,70 @@
                 width:'100%',
             });
 
+            $("#zone").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Zone",
+                width:'100%',
+            }).bind('change',function (){
+                let id = $(this).val();
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.employee_directory.get.cities') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'zone_id': id
+                        }
+                    })
+                    .done(function (data) {
+                        $("#city").html('');
+                        if (data.status == 1) {
+                            $.each(data.cities, function (i, value) {
+                                $("#city").append('<option value=' + value.id + '>' + value.name + '</option>');
+                            });
+                            $("#city").val("{{$employee->city_id}}").trigger('change');
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
+
+            $("#zone").val("{{$employee->zone_id ?? ''}}").trigger('change');
+
             $("#city").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select City",
                 width:'100%',
+            }).bind("change",function(){
+                @if($employee->employee_type_id == 2)
+                let id = $(this).val();
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.employee_directory.get.routes') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'city_id': id
+                        }
+                    })
+                        .done(function (data) {
+                            $("#rider_route").html('');
+                            if (data.status == 1) {
+                                $.each(data.routes, function (i, value) {
+                                    $("#rider_route").append("<option value=" + value.id + ">" + value.code + " ("  + value.start + " to " + value.end +")" +"</option>");
+                                });
+                                $("#rider_route").val("{{$rider_route_id ?? ''}}").trigger('change');
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                }
+                @endif
             });
             $("#city").val("{{$employee->city_id ?? ''}}").trigger('change');
 
@@ -2175,14 +2259,13 @@
             });
             $("#place_of_birth").val("{{$employee->place_of_birth ?? ''}}").trigger('change');
 
-            $("#zone").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Zone",
-                width:'100%',
-            });
-            $("#zone").val("{{$employee->zone_id ?? ''}}").trigger('change');
-
             $("#rider_type").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Rider Type",
+                width:'100%',
+            });
+
+            $("#rider_functional_category").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rider Functional Category",
                 width:'100%',
             });
 
@@ -2196,6 +2279,11 @@
                 width:'100%',
             });
 
+            $("#rider_route").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rider Route",
+                width:'100%',
+            });
+
             $("#department").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department",
                 width:'100%',
@@ -2203,7 +2291,9 @@
             @if($employee->employee_type_id == 2)
             $("#rider_sub_category").val("{{$employee->rider_sub_category ?? ''}}").trigger('change');
             $("#rider_main_category").val("{{$employee->rider_main_category ?? ''}}").trigger('change');
-            $("#rider_type").val("{{$rider_request->rider_type_id ?? ''}}").trigger('change');
+            $("#rider_type").val("{{$employee->rider_type_id ?? ''}}").trigger('change');
+            $("#rider_functional_category").val("{{$rider_functional_category ?? ''}}").trigger('change');
+            $("#rider_route").val("{{$rider_route_id ?? ''}}").trigger('change');
             @endif
 
             @if($employee->employee_type_id == 1)

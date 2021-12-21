@@ -3406,6 +3406,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('reject', 'Admins\AdminHumanResourseController@employee_directory_reject')->name('reject');
             Route::get('{employee}/edit', 'Admins\AdminHumanResourseController@employee_directory_edit')->name('edit');
             Route::post('get_designation', 'Admins\AdminHumanResourseController@employee_get_designation')->name('get.designation');
+            Route::post('get_cities', 'Admins\AdminHumanResourseController@employee_get_cities')->name('get.cities');
+            Route::post('get_routes', 'Admins\AdminHumanResourseController@employee_get_routes')->name('get.routes');
             Route::post('{employee}/profile', 'Admins\AdminHumanResourseController@employee_directory_profile_update')->name('profile.update');
             Route::post('{employee}/medical', 'Admins\AdminHumanResourseController@employee_directory_medical_update')->name('medical.update');
             Route::post('{employee}/bank', 'Admins\AdminHumanResourseController@employee_directory_bank_update')->name('bank.update');

@@ -5361,8 +5361,17 @@ class AdminAPIController extends Controller
                 $admin = $admin->first();
                 if($request->input('otp') == $admin->reset_pin_otp){
                     $admin->password = bcrypt($request->pin);
+                    $admin->dummy_pin = $request->pin;
                     $admin->reset_pin_otp = NULL;
                     $admin->save();
+
+                    $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
+                    if($employee->exists())
+                    {
+                        $employee = $employee->first();
+                        $employee->pin = $request->pin;
+                        $employee->update();
+                    }
                     return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
                 }else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);

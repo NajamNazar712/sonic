@@ -239,10 +239,12 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('rider_requests as rr', 'rr.id', '=', 'employees.rider_request_id')
             ->leftjoin('rider_types as rr_rt', 'rr_rt.id', '=', 'rr.rider_type_id')
             ->leftjoin('rider_types as r_rt', 'r_rt.id', '=', 'r.rider_type_id')
+            ->leftjoin('rider_types as er_rt', 'er_rt.id', '=', 'employees.rider_type_id')
+            ->leftjoin('staff_categories as est', 'est.id', '=', 'employees.staff_category_id')
             ->join('employee_types as et', 'et.id', '=', 'employees.employee_type_id')
             ->join('employee_request_statuses as ers', 'ers.id', '=', 'employees.request_status_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category'])
+            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -265,15 +267,15 @@ class AdminHumanResourseController extends Controller
                 } elseif ($keyword == 2) {
                     return $query->where('et.name', '=', 'Rider')
                         ->where(function ($q) {
-                            $q->where([['employees.status_id', '!=', 2], ['r_rt.id', 1]])
-                                ->orwhere([['employees.status_id', '=', 2], ['rr_rt.id', 1]]);
+                            $q->where('employees.rider_type_id',1)
+                                ->orwhere('r_rt.id', 1);
                         });
 
                 } elseif ($keyword == 3) {
                     return $query->where('et.name', '=', 'Rider')
                         ->where(function ($q) {
-                            $q->where([['employees.status_id', '!=', 2], ['r_rt.id', 2]])
-                                ->orwhere([['employees.status_id', '=', 2], ['rr_rt.id', 2]]);
+                            $q->where('employees.rider_type_id',2)
+                                ->orwhere('r_rt.id', 2);
                         });
                 }
 
@@ -284,21 +286,37 @@ class AdminHumanResourseController extends Controller
             })
 			->editColumn('employee_type', function ($user) {
                 if ($user->employee_type_id == 1) {
-                    return $user->employee_type;
+
+                    if($user->staff_category_id == 2) {
+                        return $user->employee_type." - ".$user->staff_category;
+                    }
+                    else{
+                        return $user->employee_type;
+                    }
                 } else {
 
                     $type = $user->employee_type;
-                    if ($user->status_id != 2) {
-                        if (isset($user->active_rider_type)) {
-                            $type .= ' - ' . $user->active_rider_type;
-                        }
-                        return $type;
-                    } else {
-                        if (isset($user->inactive_rider_type)) {
-                            $type .= ' - ' . $user->inactive_rider_type;
-                        }
-                        return $type;
+
+                    if($user->rider_type != null)
+                    {
+                        $type .= ' - '.$user->rider_type;
                     }
+                    else if (isset($user->active_rider_type)) {
+                        $type .= ' - ' . $user->active_rider_type;
+                    }
+//                    if ($user->status_id != 2) {
+//                        if (isset($user->active_rider_type)) {
+//                            $type .= ' - ' . $user->active_rider_type;
+//                        }
+//                        return $type;
+//                    } else {
+//                        if (isset($user->inactive_rider_type)) {
+//                            $type .= ' - ' . $user->inactive_rider_type;
+//                        }
+//                        return $type;
+//                    }
+
+                    return $type;
 
                 }
             })
@@ -510,6 +528,9 @@ class AdminHumanResourseController extends Controller
                         $rider->rider_type_id = 2;
                         $rider->updated_by = Auth::id();
                         $rider->save();
+
+                        $employee->rider_type_id = 2;
+                        $employee->update();
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                     }
 
@@ -551,6 +572,7 @@ class AdminHumanResourseController extends Controller
                         $rider->save();
 
                         $employee->trax_id = $trax_id;
+                        $employee->rider_type_id = 1;
                         $employee->update();
                         return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
                     }
@@ -783,6 +805,7 @@ class AdminHumanResourseController extends Controller
             }
             $employee->rider_sub_category = $request->rider_category;
             $employee->rider_main_category = $request->rider_main_category;
+            $employee->rider_type_id = $request->rider_type;
             $employee->save();
 
             if($request->has('rejoin_rider_bit'))
@@ -901,12 +924,19 @@ class AdminHumanResourseController extends Controller
 
                             $admin->save();
 
-                            foreach ($employee->designation->hubs as $hub)
-                            {
+                            if(count($employee->designation->hubs) == 0) {
                                 $admin_hub = new AdminHub();
                                 $admin_hub->admin_id = $admin->id;
-                                $admin_hub->hub_id = $hub->hub_id;
+                                $admin_hub->hub_id = $admin->default_hub_id;
                                 $admin_hub->save();
+                            }
+                            else{
+                                foreach ($employee->designation->hubs as $hub) {
+                                    $admin_hub = new AdminHub();
+                                    $admin_hub->admin_id = $admin->id;
+                                    $admin_hub->hub_id = $hub->hub_id;
+                                    $admin_hub->save();
+                                }
                             }
                         }
 
@@ -966,9 +996,12 @@ class AdminHumanResourseController extends Controller
         $genders = EmployeeGender::all();
         $rider_types = RiderType::all();
         $main_categories = RiderMainCategory::all();
+        $functional_categories = OperationRidersCategory::all();
         $sub_categories = RiderCategory::all();
-        $rider_request = $employee->rider_request;
-        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_request'));
+        $rider_routes = Route::all();
+        $rider_functional_category = $employee->rider->operation_rider_id ?? null;
+        $rider_route_id = $employee->rider->route_id ?? null;
+        return view('admin.human_resource.employee_directory.update',compact('employments','blood_groups','attachments','educations','reference','bank_info','banks','medical_infos','employee','religions','nationalities','domiciles','maritial_statuses','designations','departments','zones','relationships', 'place_of_birth_cities','cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category','functional_categories','rider_route_id','rider_routes'));
     }
 
     public function employee_directory_profile_update(Employee $employee, Request $request)
@@ -1014,6 +1047,7 @@ class AdminHumanResourseController extends Controller
         $employee->staff_category_id = $request->staff_category;
         $employee->rider_sub_category = $request->rider_sub_category;
         $employee->rider_main_category = $request->rider_main_category;
+        $employee->rider_type_id = $request->rider_type;
         $employee->update();
 
         $rider_request = RiderRequest::find($employee->rider_request_id);
@@ -1034,12 +1068,19 @@ class AdminHumanResourseController extends Controller
                     AdminHub::where('admin_id',$admin->id)->delete();
 
                     $hubs = EmployeeDesignationHub::where('designation_id',$employee->designation_id)->get(['hub_id']);
-                    foreach ($hubs as $hub)
-                    {
+                    if(count($hubs) == 0) {
                         $admin_hub = new AdminHub();
                         $admin_hub->admin_id = $admin->id;
-                        $admin_hub->hub_id = $hub->hub_id;
+                        $admin_hub->hub_id = $employee->city->hub_city->id;
                         $admin_hub->save();
+                    }
+                    else{
+                        foreach ($hubs as $hub) {
+                            $admin_hub = new AdminHub();
+                            $admin_hub->admin_id = $admin->id;
+                            $admin_hub->hub_id = $hub->hub_id;
+                            $admin_hub->save();
+                        }
                     }
                 }
 
@@ -1074,6 +1115,8 @@ class AdminHumanResourseController extends Controller
                 $rider->rider_type_id = $request->rider_type;
                 $rider->rider_main_category_id = $request->rider_main_category;
                 $rider->rider_category_id = $request->rider_sub_category;
+                $rider->operation_rider_id = $request->rider_functional_category;
+                $rider->route_id = $request->rider_route;
                 $rider->save();
             }
         }
@@ -2394,12 +2437,13 @@ class AdminHumanResourseController extends Controller
         $designation->description = $request->description;
         $designation->save();
 
-        foreach ($request->hub_id as $hub)
-        {
-            $designation_hub = new EmployeeDesignationHub();
-            $designation_hub->designation_id = $designation->id;
-            $designation_hub->hub_id = $hub;
-            $designation_hub->save();
+        if($request->has('hub_id')) {
+            foreach ($request->hub_id as $hub) {
+                $designation_hub = new EmployeeDesignationHub();
+                $designation_hub->designation_id = $designation->id;
+                $designation_hub->hub_id = $hub;
+                $designation_hub->save();
+            }
         }
 
         $designation->code = 'Des'. str_pad($designation->id, 3, '0', STR_PAD_LEFT);
@@ -2418,12 +2462,13 @@ class AdminHumanResourseController extends Controller
 
         EmployeeDesignationHub::where('designation_id',$designation->id)->delete();
 
-        foreach ($request->hub_id as $hub)
-        {
-            $designation_hub = new EmployeeDesignationHub();
-            $designation_hub->designation_id = $designation->id;
-            $designation_hub->hub_id = $hub;
-            $designation_hub->save();
+        if($request->has('hub_id')) {
+            foreach ($request->hub_id as $hub) {
+                $designation_hub = new EmployeeDesignationHub();
+                $designation_hub->designation_id = $designation->id;
+                $designation_hub->hub_id = $hub;
+                $designation_hub->save();
+            }
         }
 
         $admins = Admin::where('designation_id',$designation->id)->get();
@@ -2433,11 +2478,19 @@ class AdminHumanResourseController extends Controller
             $admin->save();
 
             AdminHub::where('admin_id',$admin->id)->delete();
-            foreach ($request->hub_id as $hub)
+            if($request->has('hub_id') && count($request->hub_id) > 0)
             {
+                foreach ($request->hub_id as $hub) {
+                    $admin_hub = new AdminHub();
+                    $admin_hub->admin_id = $admin->id;
+                    $admin_hub->hub_id = $hub;
+                    $admin_hub->save();
+                }
+            }
+            else {
                 $admin_hub = new AdminHub();
                 $admin_hub->admin_id = $admin->id;
-                $admin_hub->hub_id = $hub;
+                $admin_hub->hub_id = $admin->default_hub_id;
                 $admin_hub->save();
             }
         }
@@ -2454,8 +2507,40 @@ class AdminHumanResourseController extends Controller
             {
                 return response()->json(['status'=>1,'designations'=>$designations->get()]);
             }
+
+            return response()->json(['status'=>1]);
         } else {
             return response()->json(['status' => 0, 'error' => 'Department is Required']);
+        }
+    }
+
+    public function employee_get_cities(Request $request)
+    {
+        if($request->has('zone_id'))
+        {
+            $cities = City::where('zone_id',$request->zone_id)->where('status',1);
+            if($cities->exists())
+            {
+                return response()->json(['status'=>1,'cities'=>$cities->get(['id','name'])]);
+            }
+            return response()->json(['status'=>1]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Zone is Required']);
+        }
+    }
+
+    public function employee_get_routes(Request $request)
+    {
+        if($request->has('city_id'))
+        {
+            $routes = Route::where('city_id',$request->city_id)->where('status',1);
+            if($routes->exists())
+            {
+                return response()->json(['status'=>1,'routes'=>$routes->get()]);
+            }
+            return response()->json(['status'=>1]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'City is Required']);
         }
     }
 
@@ -3680,7 +3765,7 @@ class AdminHumanResourseController extends Controller
         $admin->cnic = $rider->cnic;
         $admin->role_id = EmployeeDesignation::where('id',$request->designation_id)->first()->role_id ?? 79;
         $admin->password = $rider->pin;
-        $admin->default_hub_id = $rider->city_id;
+        $admin->default_hub_id = $rider->city->hub_city->id;
         $admin->trax_id = $rider->trax_id;
         $admin->designation_id = $request->designation_id;
         $admin->employee_id = $rider->employee_id;
@@ -3689,12 +3774,20 @@ class AdminHumanResourseController extends Controller
         $admin->save();
 
         $hubs = EmployeeDesignationHub::where('designation_id',$request->designation_id)->get();
-        foreach ($hubs as $hub)
+        if(count($hubs) == 0)
         {
             $admin_hub = new AdminHub();
             $admin_hub->admin_id = $admin->id;
-            $admin_hub->hub_id = $hub->hub_id;
+            $admin_hub->hub_id = $admin->default_hub_id;
             $admin_hub->save();
+        }
+        else {
+            foreach ($hubs as $hub) {
+                $admin_hub = new AdminHub();
+                $admin_hub->admin_id = $admin->id;
+                $admin_hub->hub_id = $hub->hub_id;
+                $admin_hub->save();
+            }
         }
 
         $employee->employee_type_id = 1;
@@ -3703,10 +3796,7 @@ class AdminHumanResourseController extends Controller
         $employee->staff_category_id = 1;
         $employee->rider_sub_category = null;
         $employee->rider_main_category = null;
-//        $employee->route_id = null;
-//        $employee->rider_type_id = null;
-//        $employee->operation_rider_id = null;
-//        $employee->ccd = null;
+        $employee->rider_type_id = null;
 
         $employee->update();
 

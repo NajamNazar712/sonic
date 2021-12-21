@@ -258,6 +258,9 @@ class RiderManagementController extends Controller
             $employee->pin =  $request->pin;
             $employee->shift_id = $request->shift_id;
             $employee->trax_id = $trax_id;
+            $employee->rider_main_category = $request->rider_main_category;
+            $employee->rider_sub_category = $request->rider_category;
+            $employee->rider_type_id = $type;
             $employee->save();
 
             $rider->employee_id = $employee->id;
@@ -385,6 +388,9 @@ class RiderManagementController extends Controller
             $employee->address = $rider->address;
             $employee->pin = $rider->dummy_pin;
             $employee->shift_id = $rider->shift_id;
+
+            $employee->rider_main_category = $request->rider_category;
+            $employee->rider_sub_category = $request->rider_main_category;
             $employee->save();
         }
 
@@ -506,6 +512,13 @@ class RiderManagementController extends Controller
                     $rider->rider_type_id = 2;
                     $rider->updated_by = Auth::id();
                     $rider->save();
+
+                    $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+                    if($employee->exists())
+                    {
+                        $employee->rider_type_id = 2;
+                        $employee->update();
+                    }
                     return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                 }
                 return response()->json(['status' => 1, 'error' => 'Rider already Marked as Incentive Rider!']);
@@ -537,6 +550,7 @@ class RiderManagementController extends Controller
                     if($employee->exists())
                     {
                         $employee->trax_id = $trax_id;
+                        $employee->rider_type_id = 1;
                         $employee->update();
                     }
                     $rider->trax_id = $trax_id;

@@ -61,7 +61,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <select name="hub_id[]" id="hubs" multiple class="select2 form-control " data-rule-required="true" data-msg-required="Hub(s) is required" style="width: 100%">
+                            <select name="hub_id[]" id="hubs" multiple class="select2 form-control " style="width: 100%">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach
@@ -112,7 +112,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <select name="hub_id[]" id="hubs_edit" multiple class="select2 form-control " data-rule-required="true" data-msg-required="Hub(s) is required" style="width: 100%">
+                            <select name="hub_id[]" id="hubs_edit" multiple class="select2 form-control " style="width: 100%">
                                 @foreach($hubs as $hub)
                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach
@@ -435,7 +435,7 @@
             });
 
             $("#addDesignationForm #hubs").select2({
-                placeholder: "Select Hubs*",
+                placeholder: "Select Hubs",
                 width:'100%',
                 dropdownParent: $("#addDesignationForm")
             });
@@ -469,7 +469,7 @@
             });
 
             $("#editDesignationForm #hubs_edit").select2({
-                placeholder: "Select Hubs*",
+                placeholder: "Select Hubs",
                 width:'100%',
                 dropdownParent: $("#editDesignationForm")
             });

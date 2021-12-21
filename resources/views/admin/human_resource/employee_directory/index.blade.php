@@ -1095,8 +1095,8 @@
                 if(check_bit != null)
                 {
                     var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;
-                    $('#main_category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
-                    $('#category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
+                    // $('#main_category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
+                    // $('#category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
                     $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
                     route_id = table.row($(elm).parents('tr')).data().route_id;
                     var ccd = table.row($(elm).parents('tr')).data().ccd;

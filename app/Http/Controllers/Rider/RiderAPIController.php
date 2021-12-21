@@ -10042,8 +10042,17 @@ class RiderAPIController extends Controller
                 $rider = $rider->first();
                 if($request->input('otp') == $rider->reset_pin_otp){
                     $rider->pin = bcrypt($request->pin);
+                    $rider->dummy_pin = $request->pin;
                     $rider->reset_pin_otp = NULL;
                     $rider->save();
+
+                    $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+                    if($employee->exists())
+                    {
+                        $employee = $employee->first();
+                        $employee->pin = $request->pin;
+                        $employee->update();
+                    }
                     return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
                 }else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
@@ -10259,18 +10268,19 @@ class RiderAPIController extends Controller
                     ->orWhere('cnic', $request->input('cnic_no'));
 
                 //Check RiderRequest Already Exist
-                if ($rider_request->exists()) {
-                    $rider_request = $rider_request->first();
-                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
-                        $message = "Phone Number & CNIC Already Exists";
-
-                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
-                        $message = "Phone Number Already Exist";
-
-                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
-                        $message = "CNIC Already Exist";
-                    }
-                } else if ($employee->exists()) {
+//                if ($rider_request->exists()) {
+//                    $rider_request = $rider_request->first();
+//                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
+//                        $message = "Phone Number & CNIC Already Exists";
+//
+//                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
+//                        $message = "Phone Number Already Exist";
+//
+//                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
+//                        $message = "CNIC Already Exist";
+//                    }
+//                } else
+                if ($employee->exists()) {
                     $employee = $employee->first();
                     if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
@@ -10332,6 +10342,7 @@ class RiderAPIController extends Controller
                             $employee_request->pin = $request->pin;
                             $employee_request->rider_main_category = $request->rider_main_category;
                             $employee_request->rider_sub_category = $request->rider_sub_category;
+                            $employee_request->rider_type_id = $request->rider_type_id;
                             $employee_request->department_id = 6;
 
                             $employee_request->save();
