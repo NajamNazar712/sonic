@@ -16,6 +16,7 @@ use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
+use App\Http\Models\EmployeeConvertHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
@@ -3743,6 +3744,7 @@ class AdminHumanResourseController extends Controller
             }
     }
 
+    // 1 = From Rider To Staff , 0 = From Staff To Rider
     public function convert_rider_to_staff(Request $request)
     {
         $employee = Employee::find($request->employee_id);
@@ -3805,6 +3807,12 @@ class AdminHumanResourseController extends Controller
         $rider->update();
 
         $rider->delete();
+
+        EmployeeConvertHistory::create([
+           'employee_id' => $employee->id,
+            'converted_to' => 1,
+            'converted_by' => Auth::id(),
+        ]);
 
         return back()->with("success","Rider Converted To Staff Successfully");
     }
