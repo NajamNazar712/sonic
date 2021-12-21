@@ -47,7 +47,7 @@ class QAEvaluationController extends Controller
         
         $score = 100;
         if($request->has('activity_ids')){
-            if(count($request->activity_ids) >=4){
+            if(count($request->activity_ids) > 4){
                 $score = 0;
             }else{
                 foreach ($request->activity_ids as $activity_id) {
