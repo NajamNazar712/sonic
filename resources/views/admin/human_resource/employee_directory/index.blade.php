@@ -1660,6 +1660,7 @@
                         if (confirm) {
                             swal({
                                 title: 'Please Wait!',
+                                text: 'Converting Rider To Staff!',
                                 icon: 'info',
                                 buttons: false,
                                 closeOnClickOutside: false,

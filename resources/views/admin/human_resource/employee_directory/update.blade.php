@@ -224,7 +224,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Rider Type<span class="text-danger">*</span></label>
-                                                <select name="rider_type" id="rider_type" data-rule-required="true"  data-msg-required="Rider Type is required" class="select2 form-control " style="width: 100%">
+                                                <select name="rider_type" disabled id="rider_type" data-rule-required="true"  data-msg-required="Rider Type is required" class="select2 form-control " style="width: 100%">
                                                     @foreach($rider_types as $rider_type)
                                                         <option value="{{$rider_type->id}}">{{$rider_type->name}}</option>
                                                     @endforeach

@@ -60,6 +60,7 @@
                             <select name="role_id" id="role" class="select2 form-control " data-rule-required="true" data-msg-required="Role is required" style="width: 100%">
                             </select>
                         </div>
+                        @if(session('role_id') == 1)
                         <div class="form-group">
                             <select name="hub_id[]" id="hubs" multiple class="select2 form-control " style="width: 100%">
                                 @foreach($hubs as $hub)
@@ -71,6 +72,7 @@
                             <button type="button" id="selectAll" class="btn btn-success">Select All</button>
                             <button type="button" id="unselectAll" class="btn btn-danger">Un-Select All</button>
                         </div>
+                        @endif
                         <div class="form-group">
                             <textarea name="description" class="form-control" id="description" placeholder="Description"></textarea>
                         </div>
@@ -111,6 +113,7 @@
                             <select name="role_id" id="role_edit" class="select2 form-control " data-rule-required="true" data-msg-required="Role is required" style="width: 100%">
                             </select>
                         </div>
+                        @if(session('role_id') == 1)
                         <div class="form-group">
                             <select name="hub_id[]" id="hubs_edit" multiple class="select2 form-control " style="width: 100%">
                                 @foreach($hubs as $hub)
@@ -122,6 +125,7 @@
                             <button type="button" id="selectAll" class="btn btn-success">Select All</button>
                             <button type="button" id="unselectAll" class="btn btn-danger">Un-Select All</button>
                         </div>
+                        @endif
                         <div class="form-group">
                             <textarea name="description" class="form-control" id="edit_description" placeholder="Description"></textarea>
                         </div>
@@ -294,7 +298,6 @@
                 $.each(hubs_array,function (i,v){
                     hubs.push(v['hub_id']);
                 });
-                console.log(hubs);
                 $('#designation_id').val(id);
                 $('#edit_name').val(name);
                 $('#department_edit').val(department_id).trigger('change');
@@ -434,6 +437,7 @@
                 dropdownParent: $("#addDesignationForm")
             });
 
+            @if(session('role_id') == 1)
             $("#addDesignationForm #hubs").select2({
                 placeholder: "Select Hubs",
                 width:'100%',
@@ -449,7 +453,7 @@
                 $("#addDesignationForm #hubs > option").prop("selected","");
                 $("#addDesignationForm #hubs").trigger("change");
             });
-
+            @endif
             $("#editDesignationForm #department_edit").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Department*",
                 width:'100%',
@@ -468,6 +472,7 @@
                 dropdownParent: $("#addDesignationForm")
             });
 
+            @if(session('role_id') == 1)
             $("#editDesignationForm #hubs_edit").select2({
                 placeholder: "Select Hubs",
                 width:'100%',
@@ -483,7 +488,7 @@
                 $("#editDesignationForm #hubs_edit > option").prop("selected","");
                 $("#editDesignationForm #hubs_edit").trigger("change");
             });
-
+            @endif
 
             $("#addDesignationForm #department").on('change',function (){
                 department_id = $(this).val();

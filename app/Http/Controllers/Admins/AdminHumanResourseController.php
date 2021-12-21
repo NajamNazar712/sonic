@@ -302,20 +302,6 @@ class AdminHumanResourseController extends Controller
                     {
                         $type .= ' - '.$user->rider_type;
                     }
-                    else if (isset($user->active_rider_type)) {
-                        $type .= ' - ' . $user->active_rider_type;
-                    }
-//                    if ($user->status_id != 2) {
-//                        if (isset($user->active_rider_type)) {
-//                            $type .= ' - ' . $user->active_rider_type;
-//                        }
-//                        return $type;
-//                    } else {
-//                        if (isset($user->inactive_rider_type)) {
-//                            $type .= ' - ' . $user->inactive_rider_type;
-//                        }
-//                        return $type;
-//                    }
 
                     return $type;
 
@@ -390,7 +376,7 @@ class AdminHumanResourseController extends Controller
                                     $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
 
 
-                                    $dropdown .= '<button type="button" class="dropdown-item convert_rider_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Rider</div></button>';
+                                    $dropdown .= '<button type="button" class="dropdown-item convert_rider_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Rider To Staff</div></button>';
                                 }
 
 
@@ -1048,14 +1034,7 @@ class AdminHumanResourseController extends Controller
         $employee->staff_category_id = $request->staff_category;
         $employee->rider_sub_category = $request->rider_sub_category;
         $employee->rider_main_category = $request->rider_main_category;
-        $employee->rider_type_id = $request->rider_type;
         $employee->update();
-
-        $rider_request = RiderRequest::find($employee->rider_request_id);
-        if($rider_request){
-            $rider_request->rider_type_id = $request->rider_type;
-            $rider_request->save();
-        }
 
         if($employee->employee_type_id == 1)
         {
@@ -2438,15 +2417,16 @@ class AdminHumanResourseController extends Controller
         $designation->description = $request->description;
         $designation->save();
 
-        if($request->has('hub_id')) {
-            foreach ($request->hub_id as $hub) {
-                $designation_hub = new EmployeeDesignationHub();
-                $designation_hub->designation_id = $designation->id;
-                $designation_hub->hub_id = $hub;
-                $designation_hub->save();
+        if(session('role_id') == 1) {
+            if ($request->has('hub_id')) {
+                foreach ($request->hub_id as $hub) {
+                    $designation_hub = new EmployeeDesignationHub();
+                    $designation_hub->designation_id = $designation->id;
+                    $designation_hub->hub_id = $hub;
+                    $designation_hub->save();
+                }
             }
         }
-
         $designation->code = 'Des'. str_pad($designation->id, 3, '0', STR_PAD_LEFT);
         $designation->save();
         return redirect()->back()->with('success', 'Designation Added Successfully!');
@@ -2461,38 +2441,39 @@ class AdminHumanResourseController extends Controller
         $designation->description = $request->description;
         $designation->save();
 
-        EmployeeDesignationHub::where('designation_id',$designation->id)->delete();
+        if(session('role_id') == 1) {
+            EmployeeDesignationHub::where('designation_id', $designation->id)->delete();
 
-        if($request->has('hub_id')) {
-            foreach ($request->hub_id as $hub) {
-                $designation_hub = new EmployeeDesignationHub();
-                $designation_hub->designation_id = $designation->id;
-                $designation_hub->hub_id = $hub;
-                $designation_hub->save();
-            }
-        }
-
-        $admins = Admin::where('designation_id',$designation->id)->get();
-        foreach ($admins as $admin)
-        {
-            $admin->role_id = $request->role_id;
-            $admin->save();
-
-            AdminHub::where('admin_id',$admin->id)->delete();
-            if($request->has('hub_id') && count($request->hub_id) > 0)
-            {
+            if ($request->has('hub_id')) {
                 foreach ($request->hub_id as $hub) {
-                    $admin_hub = new AdminHub();
-                    $admin_hub->admin_id = $admin->id;
-                    $admin_hub->hub_id = $hub;
-                    $admin_hub->save();
+                    $designation_hub = new EmployeeDesignationHub();
+                    $designation_hub->designation_id = $designation->id;
+                    $designation_hub->hub_id = $hub;
+                    $designation_hub->save();
                 }
             }
-            else {
-                $admin_hub = new AdminHub();
-                $admin_hub->admin_id = $admin->id;
-                $admin_hub->hub_id = $admin->default_hub_id;
-                $admin_hub->save();
+            $admins = Admin::where('designation_id',$designation->id)->get();
+            foreach ($admins as $admin)
+            {
+                $admin->role_id = $request->role_id;
+                $admin->save();
+
+                AdminHub::where('admin_id',$admin->id)->delete();
+                if($request->has('hub_id') && count($request->hub_id) > 0)
+                {
+                    foreach ($request->hub_id as $hub) {
+                        $admin_hub = new AdminHub();
+                        $admin_hub->admin_id = $admin->id;
+                        $admin_hub->hub_id = $hub;
+                        $admin_hub->save();
+                    }
+                }
+                else {
+                    $admin_hub = new AdminHub();
+                    $admin_hub->admin_id = $admin->id;
+                    $admin_hub->hub_id = $admin->default_hub_id;
+                    $admin_hub->save();
+                }
             }
         }
 
@@ -3803,6 +3784,9 @@ class AdminHumanResourseController extends Controller
         $employee->update();
 
         $rider->route_id = null;
+        $rider->trax_id = null;
+        $rider->cnic = null;
+        $rider->phone = null;
 
         $rider->update();
 
