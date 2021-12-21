@@ -394,6 +394,7 @@ class AdminMonthClosingController extends Controller
     }
     public function month_closing_closed(Request $request){
         $shipment_ids = $request->shipment_ids;
+        $shipment_remarks = $request->remark;
         $date = Carbon::now();
         if(count($shipment_ids) > 0){
             $status_not_allowed = array(1, 5, 6, 14, 17, 25, 31, 38, 51, 53);
@@ -422,7 +423,7 @@ class AdminMonthClosingController extends Controller
                         $month_closing = MonthClosing::where('shipment_id', $shipment_id)->where('status_id', 2);
                         if($month_closing->exists()){
                             $month_closing = $month_closing->first();
-                            $remarks = $month_closing->remarks;
+                            $remarks = $shipment_remarks[$shipment_id];
                             if(!in_array($shipment_details->shipper_status_id, $status_not_allowed)){
                                 if(in_array($shipment_details->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20, 30])) {
                                     $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_details->id);
@@ -571,6 +572,7 @@ class AdminMonthClosingController extends Controller
                                 $month_closing->closing_date = $date;
                                 $month_closing->closing_updated_at = $date;
                                 $month_closing->updated_by = Auth::id();
+                                $month_closing->remarks = $remarks;
                                 $month_closing->save();
                                 $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
 
