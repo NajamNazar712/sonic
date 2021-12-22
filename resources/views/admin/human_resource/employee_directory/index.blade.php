@@ -31,6 +31,7 @@
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
+                                    <th class="border-primary border-darken-1">Joining Date & Time</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -503,6 +504,7 @@
                             head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
+                            head.push('Joining Date & Time');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -519,6 +521,7 @@
                                 row.push(values.request_status);
                                 row.push(values.status);
                                 row.push(values.requested_at);
+                                row.push(values.joining_date);
                                 body.push(row);
                             });
                         },
@@ -760,10 +763,11 @@
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
-                    {data: 'department_name', name: 'ads.id', class: 'align-middle department_name'},
+                    {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
+                    {data: 'joining_date', name: 'employees.joining_date', class: 'align-middle joining_date'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -780,8 +784,8 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var employee_type = '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">' +
                         '</select>';
-                    var department_type = '<select name="department_type_search" id="department_type_search" class="select2 form-control">' +
-                        '</select>';
+                    // var department_type = '<select name="department_type_search" id="department_type_search" class="select2 form-control">' +
+                    //     '</select>';
                     var employee_status = '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' +
                         '</select>';
                     this.api().columns().every(function (column_id) {
@@ -805,13 +809,13 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
-                        else if($(header).is('.department_name'))
-                        {
-                            $(department_type).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
+                        // else if($(header).is('.department_name'))
+                        // {
+                        //     $(department_type).appendTo($(search))
+                        //         .on( 'change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         } ).wrap(td);
+                        // }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
@@ -845,17 +849,17 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    var department_name_data = $.map({!! $employee_department !!}, function (obj) {
-                        obj.text = obj.name;
-                        return obj;
-                    });
-                    $("#department_type_search").prepend('<option value="" selected></option>').select2({
-                        data: department_name_data,
-                        placeholder: "Select Department Type",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    {{--var department_name_data = $.map({!! $employee_department !!}, function (obj) {--}}
+                    {{--    obj.text = obj.name;--}}
+                    {{--    return obj;--}}
+                    {{--});--}}
+                    {{--$("#department_type_search").prepend('<option value="" selected></option>').select2({--}}
+                    {{--    data: department_name_data,--}}
+                    {{--    placeholder: "Select Department Type",--}}
+                    {{--    width: '100%',--}}
+                    {{--    containerCssClass: 'select-xs',--}}
+                    {{--    dropdownCssClass: 'form-control-sm p-0'--}}
+                    {{--});--}}
 
                     this.api().table().columns.adjust();
                 }

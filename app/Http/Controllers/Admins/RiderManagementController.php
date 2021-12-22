@@ -473,6 +473,7 @@ class RiderManagementController extends Controller
 
         $staff->status_id = AdminHumanResourseController::GetStatusOfEmployee($staff->id);
         $staff->trax_id = $trax_id;
+        $staff->joining_date = Carbon::now();
         $staff->save();
         return response()->json(['status' => 0, 'success' => 'Rider Rejoined Successfully!']);
     }
@@ -578,11 +579,22 @@ class RiderManagementController extends Controller
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
 
+        $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+        if($employee->doesntExist())
+        {
+
+        }
+
+        $employee = $employee->first();
         if($action == 'block'){
             $rider->blacklist = 1;
             $rider->status = 0;
             $rider->updated_by = Auth::id();
             $rider->save();
+
+            $employee->status_id = 2;
+            $employee->update();
+
             return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
         }
         if($action == 'unblock'){
@@ -590,6 +602,10 @@ class RiderManagementController extends Controller
             $rider->status = 1;
             $rider->updated_by = Auth::id();
             $rider->save();
+
+            $employee->status_id = AdminHumanResourseController::GetStatusOfEmployee($employee->id);
+            $employee->update();
+
             return response()->json(['status' => 0, 'success' => 'Rider is Unblocked!']);
         }
 

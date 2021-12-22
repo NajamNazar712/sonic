@@ -70,6 +70,7 @@ class UserManagementController extends Controller
 
         $staff->status_id = AdminHumanResourseController::GetStatusOfEmployee($staff->id);
         $staff->trax_id = $trax_id;
+        $staff->joining_date = Carbon::now();
         $staff->save();
         return response()->json(['status' => 0, 'success' => 'Admin Rejoined Successfully!']);
     }

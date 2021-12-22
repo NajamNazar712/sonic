@@ -72,8 +72,8 @@
                                         @if($employee->employee_type_id == 1)
                                             <div class="col-md-12">
                                                 <div class="form-group">
-                                                    <label>Personal Email<span class="text-danger">*</span></label>
-                                                    <input type="text" id="personal_email" data-rule-required="true" data-msg-required="Email is required" class="form-control email_mask" value="{{$employee->personal_email}}" name="personal_email">
+                                                    <label>Personal Email</label>
+                                                    <input type="text" id="personal_email" class="form-control email_mask" value="{{$employee->personal_email}}" name="personal_email">
                                                 </div>
                                             </div>
                                         @endif
@@ -311,6 +311,18 @@
                                                         <option value="{{$shift->id}}">{{$shift->name}} ({{$shift->start_time}} - {{$shift->end_time}})</option>
                                                     @endforeach
                                                 </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label>Joining Date & Time<span class="text-danger">*</span></label>
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                                </div>
+                                                <input type="text" name="joining_date" data-rule-required="true" data-msg-required="Joining Date & Time is required" data-value="{{$employee->joining_date != null ? $employee->joining_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="joining_date" placeholder="Joining Date & Time">
                                             </div>
                                         </div>
                                     </div>
@@ -2070,6 +2082,16 @@
                         $('#profile-form #cnic_expiry_date').pickadate('picker').set('min', $('#profile-form #cnic_issue_date').pickadate('picker').get('select'));
                     }
                 }
+            });
+
+            var joining_date = $('#profile-form #joining_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: 100,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                max: today,
             });
 
             var date_of_birth = $('#profile-form #date_of_birth').pickadate({

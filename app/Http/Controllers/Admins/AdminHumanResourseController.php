@@ -11,8 +11,10 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
+use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
@@ -40,6 +42,7 @@ use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\HR\EmployeeType;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\HR\LeaveStatus;
+use App\Http\Models\PickupNote;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
@@ -245,7 +248,7 @@ class AdminHumanResourseController extends Controller
             ->join('employee_types as et', 'et.id', '=', 'employees.employee_type_id')
             ->join('employee_request_statuses as ers', 'ers.id', '=', 'employees.request_status_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id'])
+            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -313,7 +316,7 @@ class AdminHumanResourseController extends Controller
             ->filterColumn('ads.name', function ($query, $keyword) {
 
                 if ($keyword != '') {
-                    $query->where('ads.name', $keyword);
+                    $query->where('ads.name', "like","%".$keyword."%");
                 } else {
                     $query->whereRaw('false');
                 }
@@ -371,6 +374,9 @@ class AdminHumanResourseController extends Controller
 
                                 }
 
+                                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                                    $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist Rider</div></button>';
+                                }
 
                                 if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                     $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
@@ -496,6 +502,7 @@ class AdminHumanResourseController extends Controller
 
         $employee->status_id = self::GetStatusOfEmployee($employee->id);
         $employee->trax_id = $trax_id;
+        $employee->joining_date = Carbon::now();
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Employee Rejoined Successfully!']);
     }
@@ -593,6 +600,9 @@ class AdminHumanResourseController extends Controller
         $rider->status = 0;
         $rider->updated_by = Auth::id();
         $rider->save();
+
+        $employee->status_id = 2;
+        $employee->update();
         return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
 
     }
@@ -993,7 +1003,7 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_profile_update(Employee $employee, Request $request)
     {
-//        return $request;
+//        return $request->joining_date_formatted;
         $request->validate([
             'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id),Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
             'official_number'=> 'bail|nullable|'.Rule::unique('employees', 'phone_number')->ignore($employee->id).'|'.Rule::unique('employees', 'official_phone_number')->ignore($employee->id).'',
@@ -1034,6 +1044,7 @@ class AdminHumanResourseController extends Controller
         $employee->staff_category_id = $request->staff_category;
         $employee->rider_sub_category = $request->rider_sub_category;
         $employee->rider_main_category = $request->rider_main_category;
+        $employee->joining_date = $request->joining_date_formatted;
         $employee->update();
 
         if($employee->employee_type_id == 1)
@@ -3741,6 +3752,23 @@ class AdminHumanResourseController extends Controller
         }
 
         $rider = $rider->first();
+
+        if(DeliveryNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
+        {
+            return back()->with("error","Rider has an unfinished delivery note");
+        }
+
+
+        if(PickupNote::where('rider_id',$rider->id)->where('status_id','!=',4)->exists())
+        {
+            return back()->with("error","Rider has an unfinished pickup note");
+        }
+
+
+        if(ReturnNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
+        {
+            return back()->with("error","Rider has an unfinished return note");
+        }
 
         $admin = new Admin();
         $admin->name = $rider->name;
