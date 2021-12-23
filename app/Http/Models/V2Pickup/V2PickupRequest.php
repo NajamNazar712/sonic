@@ -10,7 +10,7 @@ class V2PickupRequest extends Model
 		return $this->belongsTo('App\Http\Models\Shipper\User', 'shipper_id', 'id');
     }
     public function rider() {
-        return $this->belongsTo('App\Http\Models\Rider','current_rider_id','id')->withTrashed();
+        return $this->belongsTo('App\Http\Models\Rider','current_rider_id','id');
     }
     public function pickup_address() {
         return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo');

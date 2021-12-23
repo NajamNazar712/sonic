@@ -1531,7 +1531,7 @@ class DeliveryController extends Controller
                       </table>
         ';
             $delivery_note_details = DeliveryNote::where('id', $request->id)->first();
-            $rider = Rider::withTrashed()->where('id', $delivery_note_details->rider_id)->first();
+            $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
             $city_name = $delivery_note_details->hub->name;
             $delivery_note = $delivery_note->first();
             $rider_id = NULL;
@@ -3590,7 +3590,7 @@ class DeliveryController extends Controller
 //                      </table>
 //        ';
             $delivery_note_details = DeliveryNote::where('id', $request->id)->first();
-            $rider = Rider::withTrashed()->where('id', $delivery_note_details->rider_id)->first();
+            $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
             $city_name = $delivery_note_details->hub->name;
             $rider_name = $rider->name;
             $category = $rider->rider_category->name;
@@ -3906,7 +3906,7 @@ class DeliveryController extends Controller
                       </table>
         ';
             $delivery_note_details = DeliveryNote::where('id', $request->id)->first();
-            $rider = Rider::withTrashed()->where('id', $delivery_note_details->rider_id)->first();
+            $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
             $city_name = $delivery_note_details->hub->name;
             $rider_name = $rider->name;
             $category = $rider->rider_category->name;
@@ -5565,7 +5565,7 @@ class DeliveryController extends Controller
                       </table>
         ';
             $delivery_note_details = DeliveryNote::where('id', $request->id)->first();
-            $rider = Rider::withTrashed()->where('id', $delivery_note_details->rider_id)->first();
+            $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
             $city_name = $delivery_note_details->hub->name;
             $rider_name = $rider->name;
             $category = $rider->rider_category->name;

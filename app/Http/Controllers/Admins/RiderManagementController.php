@@ -9,6 +9,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
+use App\Http\Models\EmployeeConvertHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\ReportingLocation;
@@ -110,7 +111,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) {
+                if ((session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id',$rider->rider_id)->doesntExist())) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -700,7 +701,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) {
+                if ((session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id',$rider->rider_id)->doesntExist())) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -809,7 +810,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) {
+                if ((session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id',$rider->rider_id)->doesntExist())) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>

@@ -15,8 +15,7 @@ class CreateEmployeeConvertHistoriesTable extends Migration
     {
         Schema::create('employee_convert_histories', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('employee_id')->index();
-            $table->boolean('converted_to');
+            $table->integer('rider_id')->index();
             $table->integer('converted_by')->index();
             $table->timestamps();
         });

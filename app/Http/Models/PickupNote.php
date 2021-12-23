@@ -11,7 +11,7 @@ class PickupNote extends Model
 	}
 
 	public function rider() {
-        return $this->belongsTo('App\Http\Models\Rider')->withTrashed();
+        return $this->belongsTo('App\Http\Models\Rider');
     }
 
     public function city() {

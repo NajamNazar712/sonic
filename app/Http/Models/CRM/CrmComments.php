@@ -19,6 +19,6 @@ class CrmComments extends Model
         return $this->belongsTo('App\Http\Models\Shipper\User','comment_by_id','id');
     }
     public function rider() {
-        return $this->belongsTo('App\Http\Models\Rider','comment_by_id','id')->withTrashed();
+        return $this->belongsTo('App\Http\Models\Rider','comment_by_id','id');
     }
 }

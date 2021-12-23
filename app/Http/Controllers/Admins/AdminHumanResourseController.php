@@ -3737,7 +3737,6 @@ class AdminHumanResourseController extends Controller
             }
     }
 
-    // 1 = From Rider To Staff , 0 = From Staff To Rider
     public function convert_rider_to_staff(Request $request)
     {
         $employee = Employee::find($request->employee_id);
@@ -3811,12 +3810,15 @@ class AdminHumanResourseController extends Controller
         $employee->rider_type_id = null;
 
         $employee->update();
-        
-        $rider->delete();
+
+        $rider->cnic = null;
+        $rider->phone = null;
+        $rider->route_id = null;
+        $rider->status = 0;
+        $rider->update();
 
         EmployeeConvertHistory::create([
-           'employee_id' => $employee->id,
-            'converted_to' => 1,
+           'rider_id' => $rider->id,
             'converted_by' => Auth::id(),
         ]);
 
