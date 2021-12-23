@@ -289,6 +289,9 @@
                     // }else{
                     //     msg = 'Runner On Route is being updated!';
                     // }
+                    $('#activities_id').val(activity_id_array);
+                    $('#activities_weightage').val(activity_weightage_array);
+                    $('#activities_name').val(activity_name_array);
                     swal({
                         type: 'info',
                         title: 'Please Wait!',
