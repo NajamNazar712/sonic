@@ -1144,7 +1144,7 @@ class Permission
             'settings.auto_tagging.list' => 639,
             'reports.dws_report.index' => 642,
             'reports.osa_charges.index' => 647,
-
+            'reports.revert.index' => 653,
 
         ],
 

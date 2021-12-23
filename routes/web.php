@@ -2456,7 +2456,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@dws_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@dws_report_list')->name('list');
         });
-
+        Route::prefix('revert')->name('revert.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@return_revert_log')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@return_revert_list')->name('list');
+        });
         
     });
 

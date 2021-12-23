@@ -60,6 +60,7 @@ use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Support\Str;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\OSAChargesLog;
+use App\Http\Models\Admin\ReturnRevertLog;
 
 class ReturnController extends Controller
 {
@@ -4644,9 +4645,17 @@ class ReturnController extends Controller
             $shipment = Shipment::find($shipment_id);
             if($shipment)
             {
+                $return_note_id = ReturnNoteShipment::where('shipment_id', $shipment->id)->orderBy('return_note_id', 'desc')->first();
                 $shipment->shipper_status_id = 47;
                 $shipment->save();
                 ShipmentsJourneyController::add($shipment_id, 47, 47, null, null, null, Auth::id());
+
+                $return_revert_log = new ReturnRevertLog;
+                $return_revert_log->return_note = $return_note_id->return_note_id;
+                $return_revert_log->shipment_id = $shipment->id;
+                $return_revert_log->shipper = $shipment->user->name;
+                $return_revert_log->updated_by = Auth::id();
+                $return_revert_log->save();
             }
         }
         return redirect()->back()->with(['success' => 'Shipments Reverted']);
