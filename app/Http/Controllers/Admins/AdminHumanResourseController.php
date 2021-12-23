@@ -3811,14 +3811,7 @@ class AdminHumanResourseController extends Controller
         $employee->rider_type_id = null;
 
         $employee->update();
-
-        $rider->route_id = null;
-        $rider->trax_id = null;
-        $rider->cnic = null;
-        $rider->phone = null;
-
-        $rider->update();
-
+        
         $rider->delete();
 
         EmployeeConvertHistory::create([
