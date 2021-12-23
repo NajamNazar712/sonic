@@ -260,7 +260,7 @@ class QAEvaluationController extends Controller
         return redirect()->back()->with('success', 'QA Evaluation Updated');
     }
 
-    public function edit_activites(Request $request){
+    public function edit_activities(Request $request){
         $evaluation_handlings = EvaluationHandling::all();
 
         return view('admin.qa_evaluation.edit_activites',compact('evaluation_handlings'));
@@ -269,5 +269,33 @@ class QAEvaluationController extends Controller
     public function actvities_data(Request $request){
         $activities = EvaluationActivity::where('evaluation_handling_id',$request->id)->get();
         return response()->json(['status'=>1,'activities'=>$activities]);
+    }
+
+    public function update_activities(Request $request){
+        
+        dd($request->all());
+        $activities_id = explode(',', $request->activities_id);
+        $score = 0;
+        foreach ($request->activity_weightage as $key => $value) {
+            $score+=$value;
+        }
+        $campaign__id = EvaluationHandling::find($request->handling_id)->campaign_id;
+        $handlings = EvaluationHandling::where('campaign_id',$campaign__id)->pluck('id')->toArray();
+        $activity_score = EvaluationActivity::whereIn('evaluation_handling_id',$handlings)->whereNotIn('id',$activities_id)->sum('weightage');
+        if($score+$activity_score != 100){
+            return redirect()->back()->with('error', 'Weigtage must be equal to 100');
+        }else{
+            foreach ($activities_id as $key => $value) {
+                if($value == 0){
+                    EvaluationActivity::create([
+                        'evaluation_handling_id' => $request->handling_id,
+                        'activity' => $request->activity_name[$key],
+                        'weightage' => $request->activity_weightage[$key],
+                    ]);
+                }
+            }
+            return redirect()->back()->with('success', 'Activity Added');
+
+        }
     }
 }
