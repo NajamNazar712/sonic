@@ -140,7 +140,13 @@
                         className: 'btn btn-primary',
                         title: 'QA Evaluation',
                         text:'<i class="la la-file-excel-o"></i> Excel',
-                    },
+                    },{
+                    text: '<i class="ft-plus-circle"></i> Add',
+                    className: 'btn btn-primary add',
+                    action: function (e, dt, node, config) {
+                        window.location = '{{ route('admin.qa_evaluation.add') }}';
+                    }
+                }
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,

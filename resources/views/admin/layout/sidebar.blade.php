@@ -1804,7 +1804,7 @@
                         <li><a class="menu-item" href="{{ route('admin.incidence_monitoring.index')}}">Incidence Monitoring</a></li>
                     @endif
                     @if (session('role_id') == 1 || in_array(648, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.qa_evaluation.add')}}">Evaluation Form</a></li>
+                        <li><a class="menu-item" href="{{ route('admin.qa_evaluation.index')}}">Evaluation Form</a></li>
                     @endif
                 </ul>
             </li>
