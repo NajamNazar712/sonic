@@ -3754,21 +3754,24 @@ class AdminHumanResourseController extends Controller
 
         $rider = $rider->first();
 
-        if(DeliveryNote::where('rider_id',$rider->id)->where('status','!=',1)->where('dncc_status','!=',1)->exists())
+        if(!DeliveryNote::where('rider_id',$rider->id)->where(function($q){
+            $q->where('status','=',1)
+            ->orWhere('dncc_status','=',1);
+        })->exists())
         {
             return back()->with("error","Rider Has An Unfinished Delivery Note");
         }
 
         $DN = DeliveryNote::where('rider_id',$rider->id)->where('status','=',1)->where('dncc_status','=',1)->first();
-        $sdn_note = DeliveryNoteStationDepositNote::leftjoin('station_deposit_notes as sdn','sdn.id','delivery_note_station_deposit_notes.station_deposit_note_id')
-            ->select(['sdn.status'])
-            ->where('delivery_note_id',$DN->id)
-            ->first();
+        $sdn_note = DeliveryNoteStationDepositNote::leftjoin('station_deposit_notes as sdn', 'sdn.id', 'delivery_note_station_deposit_notes.station_deposit_note_id')
+                ->select(['sdn.status'])
+                ->where('delivery_note_id', $DN->id)
+                ->first();
 
-        if($sdn_note->status != 1)
-        {
-            return back()->with("error","Rider Has An Unfinished Delivery Note");
+        if ($sdn_note->status != 1) {
+            return back()->with("error", "Rider Has An Unfinished Delivery Note");
         }
+
 
         if(V2PickupNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
         {
