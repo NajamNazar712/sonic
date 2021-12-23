@@ -8417,7 +8417,7 @@ class NotificationsController extends Controller
                     $html .= '</tr></thead><tbody>';
 
                     foreach($datas as $data){
-                        $data_set = Rider::->find($data->id);
+                        $data_set = Rider::find($data->id);
 
                         $data_set->status = 0;
                         $data_set->save();
