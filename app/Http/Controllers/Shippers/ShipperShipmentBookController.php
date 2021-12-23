@@ -551,7 +551,7 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
 
-                if ($request->input('return_address') == 0) {
+                if ($request->input('return_address') == 0 && $request->input('return_address') != null) {
                     if ($service_type_id == 5) {
                         return redirect()->back()->with('error', 'New Return Address cannot be selected for Reverse Pickup');
                     }
@@ -572,7 +572,7 @@ class ShipperShipmentBookController extends Controller
 
                 }
                  /*  if ($service_type_id == 1 || $service_type_id == 2) {
-                        if ($request->filled('return_address')) {
+                        if ($request->filled('repickup_addressturn_address')) {
                             $return_address_id = $request->return_address;
                         } else {
                             $return_address_id = FALSE;
@@ -3317,7 +3317,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
-        //dd($request);
+       
         if($request->open_shipment=='on'){
             $open_shipment=1;
         }else{
@@ -3375,7 +3375,7 @@ class ShipperShipmentBookController extends Controller
 	            else{
 	                $return_address_id = FALSE;
 	            }*/
-            if ($request->input('return_address') == 0) {
+            if ($request->input('return_address') == 0 && $request->input('return_address') != null ) {
                 if ($service_type_id == 5) {
                     return redirect()->back()->with('error', 'New Return Address cannot be selected for Reverse Pickup');
                 }
@@ -3386,6 +3386,7 @@ class ShipperShipmentBookController extends Controller
                 $return_address_id = $this->add_pickup_address($user_id, $request->input('new_return_address'), $request->input('new_return_person_of_contact'), $request->input('new_return_vendor'), $request->input('new_return_phone_number'), $request->input('new_return_email_address'), $return_city_id,$default);
             }
             else {
+
                 if ($service_type_id == 1) {
                     if ($request->filled('return_address')) {
                         $return_address_id = $request->return_address;

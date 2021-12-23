@@ -5422,14 +5422,10 @@ public function sales_incentive()
             $settings = $settings->first();
             if($settings->text != NULL){
                 $omni_accounts = array_map('intval', explode(',', $settings->text));
-                foreach ($omni_accounts as $user_id){
-                    $user = User::find($user_id);
-                    $shippers[] = $user->id;
-                }
             }
         }
         $users = User::where('status',3)->where('blacklist', 0)->select('id','name')->get();
-        return view('admin.settings.omni_user')->with(['shippers' => $shippers,'users' => $users]);
+        return view('admin.settings.omni_user')->with(['shippers' => $omni_accounts,'users' => $users]);
     }
 
     public function omni_user_setting_update(Request $request){
