@@ -14,7 +14,7 @@ class UpdatetableInternationalShipments extends Migration
     public function up()
     {
         Schema::table('international_shipments', function (Blueprint $table) {
-            $table->integer('seal_number')->nullable();
+            $table->integer('seal_number')->index()->nullable();
         });
     }
 
