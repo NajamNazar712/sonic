@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        QA Evaluation
+        CX Evaluation
     </h1>
 
     <div class="card">
@@ -136,16 +136,16 @@
                 
                 buttons: [
                     {
-                        extend: 'excelHtml5',
-                        className: 'btn btn-primary',
-                        title: 'QA Evaluation',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
-                    },{
                     text: '<i class="ft-plus-circle"></i> Add',
                     className: 'btn btn-primary add',
                     action: function (e, dt, node, config) {
                         window.location = '{{ route('admin.qa_evaluation.add') }}';
-                    }
+                    },{
+                        extend: 'excelHtml5',
+                        className: 'btn btn-primary',
+                        title: 'QA Evaluation',
+                        text:'<i class="la la-file-excel-o"></i> Excel',
+                    },
                 }
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -170,7 +170,7 @@
                     //     d.search_date_to = $('input[name="to_date_formatted"]').val();
                     // }
                 },
-                order: [[8, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'agent_name' ,name: 'shipments.tracking_number', class: 'align-middle agent_name'},
