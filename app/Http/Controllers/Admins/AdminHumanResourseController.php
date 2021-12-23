@@ -3774,7 +3774,7 @@ class AdminHumanResourseController extends Controller
                 return back()->with("error", "Rider Has An Unfinished Delivery Note");
             }
         }
-        
+
         if(V2PickupNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
         {
             return back()->with("error","Rider Has An Unfinished Pickup Note");

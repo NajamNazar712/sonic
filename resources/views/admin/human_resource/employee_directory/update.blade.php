@@ -322,7 +322,7 @@
                                                         <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
                                                 </div>
-                                                <input type="text" name="joining_date" data-rule-required="true" data-msg-required="Joining Date & Time is required" data-value="{{$employee->joining_date != null ? $employee->joining_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="joining_date" placeholder="Joining Date & Time">
+                                                <input type="text" name="joining_date" data-rule-required="true" data-msg-required="Joining Date is required" data-value="{{$employee->joining_date != null ? $employee->joining_date : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="joining_date" placeholder="Joining Date">
                                             </div>
                                         </div>
                                     </div>
