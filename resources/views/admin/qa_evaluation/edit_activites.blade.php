@@ -172,7 +172,7 @@
                 
                     $.each(data.activities, function (i, v) {
                                                     
-                        table.row.add([counter,'<div class="form-group input-group"><input type="text" id="activity_'+v.id+'" class="form-control activity_name" name="activity_name[]" value="'+v.activity+'"  data-rule-required="true" data-msg-required="Activity is required"></div>','<div class="form-group input-group"><input type="number" id="weightage_'+v.id+'" class="form-control activity_weightage" name="activity_weightage[]" value="'+v.weightage+'"  data-rule-required="true" data-msg-required="Weeightage is required"></div>','<a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="ft-minus-circle"></i></a>']).node().id = rowNo;
+                        table.row.add([counter,'<div class="form-group input-group"><input type="text" id="activity_'+v.id+'" class="form-control activity_name" name="activity_name[]" value="'+v.activity+'"  data-rule-required="true" data-msg-required="Activity is required"></div>','<div class="form-group input-group"><input type="number" id="weightage_'+v.id+'" class="form-control activity_weightage" name="activity_weightage[]" value="'+v.weightage+'"  data-rule-required="true" data-msg-required="Weeightage is required"></div>','<div class="form-group input-group"><a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="ft-minus-circle"></i></a></div>']).node().id = rowNo;
                         counter++;
                                     activity_id_array.push(v.id);
                                     activity_weightage_array.push(v.weightage);
@@ -234,7 +234,7 @@
 
                 var rowNo = table.rows().count();
                
-                table.row.add([rowNo,'<div class="form-group input-group"><input type="text" id="" class="form-control activity_name" name="activity_name['+rowNo+']" data-rule-required="true" data-msg-required="Activity is required"></div>','<div class="form-group input-group"><input type="number" id="" class="form-control activity_weightage" name="activity_weightage['+rowNo+']" data-rule-required="true" data-msg-required="Weeightage is required"></div>','<a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="ft-minus-circle"></i></a>']).node().id = rowNo;
+                table.row.add([rowNo,'<div class="form-group input-group"><input type="text" id="" class="form-control activity_name" name="activity_name['+rowNo+']" data-rule-required="true" data-msg-required="Activity is required"></div>','<div class="form-group input-group"><input type="number" id="" class="form-control activity_weightage" name="activity_weightage['+rowNo+']" data-rule-required="true" data-msg-required="Weeightage is required"></div>','<div class="form-group input-group"><a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="ft-minus-circle"></i></a></div>']).node().id = rowNo;
                                     activity_id_array.push(0);
                                     activity_index_array.push(rowNo);
                                     rowNo++;

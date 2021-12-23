@@ -133,7 +133,7 @@
 
 									<div class="col-6 col-xs-6 col-sm-6 col-md-4 col-lg-3">
 										<h4 class="form-section mb-2">Handlings</h4>
-                                        <div class="nav flex-column nav-pills border-info rounded-0" role="tablist" aria-orientation="vertical" id="handlings">
+                                        <div class="nav flex-column nav-pills rounded-0" role="tablist" aria-orientation="vertical" id="handlings">
                                         </div>    
 										
 									</div>

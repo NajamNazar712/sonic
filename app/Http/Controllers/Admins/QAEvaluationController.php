@@ -283,7 +283,8 @@ class QAEvaluationController extends Controller
         $handlings = EvaluationHandling::where('campaign_id',$campaign__id)->pluck('id')->toArray();
         $activity_score = EvaluationActivity::whereIn('evaluation_handling_id',$handlings)->whereNotIn('id',$activities_id)->sum('weightage');
         if($score+$activity_score != 100){
-            return redirect()->back()->with('error', 'Weigtage must be equal to 100');
+            return redirect()->back()->with('error', 'Cannot Update Activities ! <br>
+            Current Weightage is "'.$score+$activity_score.'". Weightage should not be greater than 100.');
         }else{
             foreach ($activities_id as $key => $value) {
                 if($value == 0){
