@@ -274,7 +274,6 @@ class QAEvaluationController extends Controller
 
     public function update_activities(Request $request){
         $activities_id = explode(',', $request->activities_id);
-        // dump($activities_id);
         $score = 0;
         foreach ($request->activity_weightage as $key => $value) {
             $score+=$value;
@@ -282,8 +281,11 @@ class QAEvaluationController extends Controller
         $campaign__id = EvaluationHandling::find($request->handling_id)->campaign_id;
         $handlings = EvaluationHandling::where('campaign_id',$campaign__id)->pluck('id')->toArray();
         $activity_score = EvaluationActivity::whereIn('evaluation_handling_id',$handlings)->whereNotIn('id',$activities_id)->sum('weightage');
+        // dump($score);
+        // dump($activity_score);
+        // dd($request->all());
         // dd($activity_score);
-        if($score+$activity_score != 100){
+        if($score+$activity_score != 100 ){
             $total_score = $score+$activity_score;
             return redirect()->back()->with('error', 'Cannot Update Activities!  Current Weightage is "'.$total_score.'". Weightage should not be greater than 100.');
         }else{

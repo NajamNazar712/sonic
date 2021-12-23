@@ -140,13 +140,14 @@
                     className: 'btn btn-primary add',
                     action: function (e, dt, node, config) {
                         window.location = '{{ route('admin.qa_evaluation.add') }}';
-                    },{
+                    }
+                    },
+                    {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
                         title: 'QA Evaluation',
                         text:'<i class="la la-file-excel-o"></i> Excel',
-                    },
-                }
+                    }
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -173,14 +174,14 @@
                 order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'agent_name' ,name: 'shipments.tracking_number', class: 'align-middle agent_name'},
-                    { data:'evaluated_by' ,name: 'shipments.order_id', class: 'align-middle evaluated_by'},
-                    { data:'evaluation_date' ,name: 'u.name', class: 'align-middle evaluation_date'},
-                    { data:'nature' ,name: 'u.name', class: 'align-middle nature'},
-                    { data:'date_time' ,name: 'ss.name', class: 'align-middle date_time'},
-                    { data:'status' ,name: 'reason', class: 'align-middle status'},
-                    { data:'score' ,name: 'score', class: 'align-middle score'},
-                    { data:'remarks' ,name: 'remarks', class: 'align-middle remarks'},
+                    { data:'agent_name' ,name: 'ad.name', class: 'align-middle agent_name'},
+                    { data:'evaluated_by' ,name: 'ev.name', class: 'align-middle evaluated_by'},
+                    { data:'evaluation_date' ,name: 'q_a_evaluations.evaluation_date', class: 'align-middle evaluation_date'},
+                    { data:'nature' ,name: 'en.nature', class: 'align-middle nature'},
+                    { data:'date_time' ,name: 'q_a_evaluations.date_time', class: 'align-middle date_time'},
+                    { data:'status' ,name: 'q_a_evaluations.status', class: 'align-middle status'},
+                    { data:'score' ,name: 'q_a_evaluations.score', class: 'align-middle score'},
+                    { data:'remarks' ,name: 'q_a_evaluations.remarks', class: 'align-middle remarks'},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
 
                 ],
