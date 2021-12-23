@@ -75,6 +75,9 @@
             pointer-events: none;
             cursor: default;
         }
+        .remove{
+            margin: 0 auto;
+        }
     </style>
 
 

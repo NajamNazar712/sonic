@@ -273,7 +273,6 @@ class QAEvaluationController extends Controller
     }
 
     public function update_activities(Request $request){
-        dd($request->all());
         $activities_id = explode(',', $request->activities_id);
         // dump($activities_id);
         $score = 0;
