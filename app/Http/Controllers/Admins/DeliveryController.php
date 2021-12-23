@@ -2908,10 +2908,10 @@ class DeliveryController extends Controller
             $delivered_status_array = array(14, 30, 36, 37);
 
             $restrict_statuses = array(5, 7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56);
-            foreach ($shipments as $shipment){
+            foreach ($shipments as $index => $shipment){
                 $shipment_details = Shipment::find($shipment);
                 if(!in_array($shipment_details->shipper_status_id, $restrict_statuses)){
-                    unset($shipments[$shipment]);
+                    unset($shipments[$index]);
                 }
             }
 
