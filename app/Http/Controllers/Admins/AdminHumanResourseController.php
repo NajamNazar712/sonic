@@ -50,6 +50,7 @@ use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\RouteType;
+use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\Zone;
 use App\RiderMainCategory;
 use Auth;
@@ -3759,7 +3760,7 @@ class AdminHumanResourseController extends Controller
         }
 
 
-        if(PickupNote::where('rider_id',$rider->id)->where('status_id','!=',4)->exists())
+        if(V2PickupNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
         {
             return back()->with("error","Rider has an unfinished pickup note");
         }

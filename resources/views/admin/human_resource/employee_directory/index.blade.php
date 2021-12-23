@@ -31,7 +31,7 @@
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
-                                    <th class="border-primary border-darken-1">Joining Date & Time</th>
+                                    <th class="border-primary border-darken-1">Joining Date</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -504,7 +504,7 @@
                             head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
-                            head.push('Joining Date & Time');
+                            head.push('Joining Date');
 
                             $.each(result.data, function (index, values) {
                                 row = [];

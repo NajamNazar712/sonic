@@ -315,7 +315,7 @@
                                         </div>
 
                                         <div class="col-md-12">
-                                            <label>Joining Date & Time<span class="text-danger">*</span></label>
+                                            <label>Joining Date<span class="text-danger">*</span></label>
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
