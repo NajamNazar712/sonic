@@ -4681,7 +4681,7 @@ class ReturnController extends Controller
     }
     public function add_osa_charges($shipment, $charge)//function to add in logs table
     {
-        $nsa_charges_log = new OSAChargesLog;
+        $nsa_charges_log = new OSAChargesLog();
         $nsa_charges_log->shipment_id = $shipment;
         $nsa_charges_log->osa_charges = $charge;
         $nsa_charges_log->updated_by = Auth::id();
