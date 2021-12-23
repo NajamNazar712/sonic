@@ -1427,9 +1427,12 @@ class AdminDashboardController extends Controller
 
         $id = $request->shid; //shipper id
         $status = $request->status;
-
+        $user = User::find($id);
+        if(!$user){
+            return back()->with('danger', 'User not found.');
+        }
         if($status == 'activate'){
-            $user = User::find($id);
+
             if($user->status == 2){
                 $now = Carbon::now();
                 $action = User::where('id',$id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now ,'reactivated_at'=>$now ]);
