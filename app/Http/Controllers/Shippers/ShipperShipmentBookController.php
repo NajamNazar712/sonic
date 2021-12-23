@@ -491,7 +491,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
-
+         //dd($request);
         if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
 
             if($request->filled('open_shipment')){
@@ -551,9 +551,27 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
 
+                if ($request->input('return_address') == 0) {
+                    if ($service_type_id == 5) {
+                        return redirect()->back()->with('error', 'New Return Address cannot be selected for Reverse Pickup');
+                    }
 
-					
-                    if ($service_type_id == 1 || $service_type_id == 2) {
+                    $return_city_id = $request->input('new_return_city');
+                    $default = 0;
+
+                    $return_address_id = $this->add_pickup_address($user_id, $request->input('new_return_address'), $request->input('new_return_person_of_contact'), $request->input('new_return_vendor'), $request->input('new_return_phone_number'), $request->input('new_return_email_address'), $return_city_id,$default);
+                }
+                else {
+                    if ($service_type_id == 1){
+                        if ($request->filled('return_address')) {
+                            $return_address_id = $request->return_address;
+                        } else {
+                            $return_address_id = FALSE;
+                        }
+                    }
+
+                }
+                 /*  if ($service_type_id == 1 || $service_type_id == 2) {
                         if ($request->filled('return_address')) {
                             $return_address_id = $request->return_address;
                         } else {
@@ -562,7 +580,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     else{
                         $return_address_id = FALSE;
-                    }
+                    }*/
 
                     if ($service_type_id != 5) {
                         if ($request->filled('information_display')) {
@@ -3299,6 +3317,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
+        //dd($request);
         if($request->open_shipment=='on'){
             $open_shipment=1;
         }else{
@@ -3346,7 +3365,7 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
 
-				if ($service_type_id == 1 || $service_type_id == 2) {
+			/*	if ($service_type_id == 1 || $service_type_id == 2) {
 	                if ($request->filled('return_address')) {
 	                    $return_address_id = $request->return_address;
 	                } else {
@@ -3355,7 +3374,27 @@ class ShipperShipmentBookController extends Controller
 	            }
 	            else{
 	                $return_address_id = FALSE;
-	            }
+	            }*/
+            if ($request->input('return_address') == 0) {
+                if ($service_type_id == 5) {
+                    return redirect()->back()->with('error', 'New Return Address cannot be selected for Reverse Pickup');
+                }
+
+                $return_city_id = $request->input('new_return_city');
+                $default = 0;
+
+                $return_address_id = $this->add_pickup_address($user_id, $request->input('new_return_address'), $request->input('new_return_person_of_contact'), $request->input('new_return_vendor'), $request->input('new_return_phone_number'), $request->input('new_return_email_address'), $return_city_id,$default);
+            }
+            else {
+                if ($service_type_id == 1) {
+                    if ($request->filled('return_address')) {
+                        $return_address_id = $request->return_address;
+                    } else {
+                        $return_address_id = FALSE;
+                    }
+                }
+
+            }
 
                 if ($service_type_id != 5) {
                     if ($request->filled('information_display')) {
