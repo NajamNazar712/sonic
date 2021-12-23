@@ -70,7 +70,12 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
-
+    <style>
+        a.disabled {
+            pointer-events: none;
+            cursor: default;
+        }
+    </style>
 
 
 @endsection
@@ -95,7 +100,7 @@
             var activity_index_array = [];
 
             $('#submit_button').attr('disabled', true);
-            $('a.add_activity').attr('disabled', true);
+            $('a.add_activity').addClass('disabled');
             
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
@@ -177,7 +182,7 @@
                                     
                     });
                     $('#submit_button').attr('disabled', false);
-                    $('a.add_activity').attr('disabled', false);
+                    $('a.add_activity').removeClass('disabled')
                     
                     // console.log('activity_id_array');
                     //                 console.log(activity_id_array);
@@ -211,7 +216,7 @@
                 table.row( $(this).parents('tr') ).remove().draw();
                 if(table.rows().count() == 0){
                     $('#submit_button').attr('disabled', true);
-                    $('a.add_activity').attr('disabled', true);
+                    $('a.add_activity').addClass('disabled')
                     
                 }
                                     console.log('activity_id_array');
