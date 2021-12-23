@@ -283,19 +283,19 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    var msg = "";
+                    // var msg = "";
                     // if($('#status').val() == 1){
                     //     msg = "Runner On Route is being marked as completed!"
                     // }else{
                     //     msg = 'Runner On Route is being updated!';
                     // }
                     swal({
+                        type: 'info',
                         title: 'Please Wait!',
-                        text: msg,
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
+                        text: 'Your Request is being generated!',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
                     });
 
                     form.submit();
