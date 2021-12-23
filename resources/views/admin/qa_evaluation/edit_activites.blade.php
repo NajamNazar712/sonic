@@ -293,13 +293,13 @@
                     $('#activities_weightage').val(activity_weightage_array);
                     $('#activities_name').val(activity_name_array);
                     swal({
-                        type: 'info',
-                        title: 'Please Wait!',
-                        text: 'Your Request is being generated!',
-                        showCancelButton: false,
-                        showConfirmButton: false,
-                        allowOutsideClick: false,
-                    });
+                                title: 'Please Wait!',
+                                text: 'Evaluation is being added!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
 
                     form.submit();
                 }

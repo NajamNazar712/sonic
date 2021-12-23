@@ -286,8 +286,7 @@ class QAEvaluationController extends Controller
         // dd($activity_score);
         if($score+$activity_score != 100){
             $total_score = $score+$activity_score;
-            return redirect()->back()->with('error', 'Cannot Update Activities ! <br>
-            Current Weightage is "'.$total_score.'". Weightage should not be greater than 100.');
+            return redirect()->back()->with('error', 'Cannot Update Activities!  Current Weightage is "'.$total_score.'". Weightage should not be greater than 100.');
         }else{
             foreach ($activities_id as $key => $value) {
                 if($value == 0){
