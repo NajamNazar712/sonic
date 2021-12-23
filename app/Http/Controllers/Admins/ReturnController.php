@@ -4616,7 +4616,7 @@ class ReturnController extends Controller
     }
     public function return_revert_shipment_details(Request $request)
     {
-        $shipment = Shipment::where('tracking_number', $request->tracking_number)->where('shipper_status_id', 25)->first();
+        $shipment = Shipment::where('tracking_number', $request->tracking_number)->whereIn('shipper_status_id', [25,31,38])->first();
         if($shipment)
         {
             $details = array();
