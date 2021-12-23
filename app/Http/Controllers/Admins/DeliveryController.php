@@ -1975,13 +1975,6 @@ class DeliveryController extends Controller
         $selected_reason = $request->selected_reason;
 
         if($delivery_note_id != ''){
-            $restrict_statuses = array(7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56);
-            foreach ($shipment_ids as $shipment){
-                $shipment_details = Shipment::find($shipment);
-                if(!in_array($shipment_details->shipper_status_id, $restrict_statuses)){
-                    unset($shipment_ids[$shipment]);
-                }
-            }
 
             foreach ($shipment_ids as $shipment) {
                 $shipment_details = Shipment::find($shipment);
@@ -2198,14 +2191,6 @@ class DeliveryController extends Controller
             return redirect()->back()->with('error', 'Wrong Password!');
         }
         if ($delivery_note_id != '') {
-
-            $restrict_statuses = array(7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56);
-            foreach ($shipments as $shipment){
-                $shipment_details = Shipment::find($shipment);
-                if(!in_array($shipment_details->shipper_status_id, $restrict_statuses)){
-                    unset($shipments[$shipment]);
-                }
-            }
 
             foreach ($shipments as $shipment) {
 				$consolidation_shipments = ConsolidationShipments::where('shipment_id', $shipment);
@@ -2908,13 +2893,7 @@ class DeliveryController extends Controller
             $dispute_shipments = array();
             $delivered_status_array = array(14, 30, 36, 37);
 
-            $restrict_statuses = array(7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56);
-            foreach ($shipments as $shipment){
-                $shipment_details = Shipment::find($shipment);
-                if(!in_array($shipment_details->shipper_status_id, $restrict_statuses)){
-                    unset($shipments[$shipment]);
-                }
-            }
+            
 
             $return_status_array = array(21, 22, 23, 24, 25, 44, 47, 48);
             if ($delivery_note_id != '') {
