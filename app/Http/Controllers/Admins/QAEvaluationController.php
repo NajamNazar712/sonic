@@ -94,7 +94,8 @@ class QAEvaluationController extends Controller
                 ]);
             }
         }
-        return redirect()->back()->with('success', 'QA Evaluation Added');
+
+        return redirect()->route('admin.qa_evaluation.index')->with('success', 'QA Evaluation Added');
 
     }
 
@@ -257,7 +258,7 @@ class QAEvaluationController extends Controller
                 ]);
             }
         }
-        return redirect()->back()->with('success', 'QA Evaluation Updated');
+        return redirect()->route('admin.qa_evaluation.index')->with('success', 'QA Evaluation Updated');
     }
 
     public function edit_activities(Request $request){
@@ -293,7 +294,8 @@ class QAEvaluationController extends Controller
                     ]);
                 }
             }
-            return redirect()->back()->with('success', 'Activity Added');
+            
+            return redirect()->back()->with('success', 'Activity Updated');
 
         }
     }
