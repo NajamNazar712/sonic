@@ -8676,12 +8676,12 @@ class NotificationsController extends Controller
                         $to = $shipment->consignee_phone_number_1;
                         self::sms($body, $to);
                     }
-                }
-
-                else if ($id == 164) {
+                } else if ($id == 164) {
                     $getdata = $reference_1_id;
 
-                    $data = Employee::wherein("id",$getdata)->get();
+                    $data = Employee::wherein("id", $getdata)->get();
+
+                    $is_sent = false;
 
                     $html = '<p>Dear HR,
 
@@ -8696,28 +8696,42 @@ class NotificationsController extends Controller
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Category</th>';
                     $html .= '</tr></thead><tbody>';
 
-                    foreach($data as $datum){
+                    $admins = Admin::whereIn('role_id', [1, 2])->pluck('id')->toArray();
+                    foreach ($admins as $admin) {
+                        $admin_hubs = AdminHub::where('admin_id', $admin)->pluck('hub_id')->toArray();
+                        foreach ($data as $datum) {
 
-                        $data_set = Employee::find($datum->id);
-                        $data_set->attachment_update = 0;
-                        $data_set->save();
+                            $data_set = Employee::find($datum->id);
+                            $employee_hub = City::find($data_set->city_id);
+                            $hub_id = $employee_hub->hub_id;
 
-                        $category = ($datum->employee_type_id == 1) ? "Staff" : "Rider";
+                            if (in_array($hub_id, $admin_hubs)) {
+                                $category = ($datum->employee_type_id == 1) ? "Staff" : "Rider";
 
-                        $html .= '<tr>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->trax_id . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->name . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->phone_number . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->cnic . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $category . '</td>';
+                                $html .= '<tr>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->trax_id . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->name . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->phone_number . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->cnic . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $category . '</td>';
 
+                                $data_set->attachment_update = 0;
+                                $data_set->save();
+
+                                $is_sent = true;
+                            }
+                        }
+                        $html .= '</tr></tbody></table>';
+                        $body_updated = $body;
+                        $body_updated = str_replace('[preview]', $html, $body_updated);
+                        $subject = ' Employee Documents Update';
+                        if ($is_sent) {
+                        $admin_email = Admin::find($admin);
+                        if ($admin_email->email) {
+                            $to = $admin_email->email;
+                            self::email($subject, $body_updated, $to);
+                        }
                     }
-                    $html .= '</tr></tbody></table>';
-                    $body_updated = $body;
-                    $body_updated = str_replace('[preview]', $html, $body_updated);
-                    $subject = ' Employee Documents Update';
-                    $to = ['maher.noraiz@trax.pk', 'muzaffar.kareem@trax.pk'];
-                    self::email($subject, $body_updated, $to);
                 }
             }
         }
