@@ -8676,10 +8676,14 @@ class NotificationsController extends Controller
                         $to = $shipment->consignee_phone_number_1;
                         self::sms($body, $to);
                     }
-                } else if ($id == 164) {
+                }
+                else if ($id == 164) {
                     $getdata = $reference_1_id;
 
-                    $data = Employee::wherein("id", $getdata)->get();
+                    $data = Employee::leftjoin('employee_designations as d', 'd.id', '=', 'employees.designation_id')
+                        ->leftjoin('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                        ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.cnic as cnic', 'employees.phone_number as phone_number', 'employees.employee_type_id as employee_type_id', 'd.name as designation', 'ad.name as department_name')
+                        ->wherein('employees.id', $getdata)->get();
 
                     $is_sent = false;
 
@@ -8694,9 +8698,11 @@ class NotificationsController extends Controller
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">CNIC Number</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Category</th>';
+                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Department</th>';
+                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Designation</th>';
                     $html .= '</tr></thead><tbody>';
 
-                    $admins = Admin::whereIn('role_id', [1, 2])->pluck('id')->toArray();
+                    $admins = Admin::whereIn('role_id', [70, 69, 63])->pluck('id')->toArray();
                     foreach ($admins as $admin) {
                         $admin_hubs = AdminHub::where('admin_id', $admin)->pluck('hub_id')->toArray();
                         foreach ($data as $datum) {
@@ -8707,6 +8713,7 @@ class NotificationsController extends Controller
 
                             if (in_array($hub_id, $admin_hubs)) {
                                 $category = ($datum->employee_type_id == 1) ? "Staff" : "Rider";
+                                $designation = ($datum->employee_type_id == 1) ? $datum->designation : "-";
 
                                 $html .= '<tr>';
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->trax_id . '</td>';
@@ -8714,6 +8721,8 @@ class NotificationsController extends Controller
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->phone_number . '</td>';
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->cnic . '</td>';
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $category . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->department_name . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $designation . '</td>';
 
                                 $data_set->attachment_update = 0;
                                 $data_set->save();
@@ -8726,10 +8735,11 @@ class NotificationsController extends Controller
                         $body_updated = str_replace('[preview]', $html, $body_updated);
                         $subject = ' Employee Documents Update';
                         if ($is_sent) {
-                        $admin_email = Admin::find($admin);
-                        if ($admin_email->email) {
-                            $to = $admin_email->email;
-                            self::email($subject, $body_updated, $to);
+                            $admin_email = Admin::find($admin);
+                            if ($admin_email->email) {
+                                $to = $admin_email->email;
+                                self::email($subject, $body_updated, $to);
+                            }
                         }
                     }
                 }
