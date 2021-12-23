@@ -3373,6 +3373,7 @@ class ShipperShipmentBookController extends Controller
 	            else{
 	                $return_address_id = FALSE;
 	            }*/
+            $return_address_id = FALSE;
             if ($request->input('return_address') == 0 && $request->input('return_address') != null ) {
                 if ($service_type_id == 5) {
                     return redirect()->back()->with('error', 'New Return Address cannot be selected for Reverse Pickup');
