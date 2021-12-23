@@ -59,7 +59,7 @@ use function foo\func;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Support\Str;
 use App\Http\Models\Admin\NonServiceArea;
-use App\Http\Models\Admin\OSAChargesLog;
+use App\Http\Models\Admin\OsaChargesLog;
 
 class ReturnController extends Controller
 {
@@ -4681,7 +4681,7 @@ class ReturnController extends Controller
     }
     public function add_osa_charges($shipment, $charge)//function to add in logs table
     {
-        $nsa_charges_log = new OSAChargesLog();
+        $nsa_charges_log = new OsaChargesLog();
         $nsa_charges_log->shipment_id = $shipment;
         $nsa_charges_log->osa_charges = $charge;
         $nsa_charges_log->updated_by = Auth::id();
