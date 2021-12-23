@@ -21,6 +21,7 @@
 								{{ csrf_field() }}
 
                                 <input type="hidden" name="qa_evaluation_id" id="qa_evaluation_id" value="{{$qa_evaluations->id}}">
+
 								<div class="row">
 									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
 										<div class="form-group">
@@ -72,7 +73,7 @@
 													<span class="la la-clock-o"></span>
 												</span>
 											</div>
-                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_duaration" value="{{$qa_evaluations->call_duaration}}" id="call_duaration" placeholder="Call Duration" data-rule-required="true" data-msg-required="Date/Time is required">
+                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_duaration" value="{{$qa_evaluations->call_duration}}" id="call_duaration" placeholder="Call Duration" data-rule-required="true" data-msg-required="Date/Time is required">
 										</div>
 									</div>
 
@@ -89,9 +90,20 @@
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
 										<div class="form-group">
                                             <select name="query_by" class="select2" id="query_by" data-rule-required="true" data-msg-required="Query By is required">
-													<option value="Consignee">Consignee</option>
-													<option value="Shipper">Shipper</option>
-													<option value="Others">Others</option>
+													@if ($qa_evaluations->query_by == 1)
+														
+														<option value="1" selected>Consignee</option>
+														<option value="2">Shipper</option>
+														<option value="3">Others</option>
+													@elseif($qa_evaluations->query_by == 2)
+														<option value="1">Consignee</option>
+														<option value="2" selected>Shipper</option>
+														<option value="3">Others</option>
+													@else
+														<option value="1">Consignee</option>
+														<option value="2">Shipper</option>
+														<option value="3" selected>Others</option>
+													@endif
 											</select>
 											
 										</div>
@@ -100,7 +112,7 @@
 
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 contact_number">
 										<div class="form-group">
-                                            <input type="text" class="form-control" name="contact_number" value="{{$qa_evaluations->contact_number}}" id="contact_number" placeholder="Caller's Contact #" >
+                                            <input type="text" class="form-control" name="contact_number" value="{{$qa_evaluations->caller_contact}}" id="contact_number" placeholder="Caller's Contact #" >
 										</div>
 									</div>
 									<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 complain_number">
@@ -173,7 +185,8 @@
 		$(document).ready(function() {
             var qa_evaluation_id = $('#qa_evaluation_id').val();
             var campaign_id = $('#campaign_id').val();
-
+			console.log(campaign_id);
+			
 
 function activities(qa_evaluation_id,campaign_id){
 	$.ajax({
@@ -233,6 +246,28 @@ function activities(qa_evaluation_id,campaign_id){
                                 insert: '<div class="icheck_line-icon"></div>' + text
                             });
                         });
+
+						if(campaign_id == 1){
+						//call
+						$(".contact_number").css("display","block")
+						$(".complain_number").css("display","none")
+						$(".call_duaration").css("display","block")
+
+						$('#contact_number').attr('disabled',false);
+						$('#call_duaration').attr('disabled',false);
+						$('#complain_number').attr('disabled',true);
+
+					}else{
+						$(".contact_number").css("display","none")
+						$(".complain_number").css("display","block")
+						$(".call_duaration").css("display","none")
+
+						
+						$('#contact_number').attr('disabled',true);
+						$('#call_duaration').attr('disabled',true);
+						$('#complain_number').attr('disabled',false);
+
+					}
                     });
 }
 

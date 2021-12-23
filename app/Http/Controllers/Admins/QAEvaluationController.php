@@ -236,7 +236,7 @@ class QAEvaluationController extends Controller
         $qa_evaluation->agent_id = $request->agent_id ;
         $qa_evaluation->campaign_id = $request->campaign_id ;
         $qa_evaluation->evaluated_by = Auth::id() ;
-        $qa_evaluation->evaluation_date = Carbon::today() ;
+        $qa_evaluation->evaluation_date = Carbon::today()->format('Y-m-d');
         $qa_evaluation->nature_id = $request->nature_id ;
         $qa_evaluation->call_duration = $request->call_duaration ;
         $qa_evaluation->date_time = $request->call_date_time ;
@@ -273,7 +273,6 @@ class QAEvaluationController extends Controller
 
     public function update_activities(Request $request){
         
-        dd($request->all());
         $activities_id = explode(',', $request->activities_id);
         $score = 0;
         foreach ($request->activity_weightage as $key => $value) {

@@ -24,6 +24,7 @@ class CreateQAEvaluationsTable extends Migration
             $table->dateTime('date_time')->nullable();
             $table->integer('query_by')->index();
             $table->string('caller_contact')->nullable();
+            $table->string('complain_number')->nullable();
             $table->tinyInteger('status')->default(0);
             $table->integer('score')->default(0);
             $table->string('remarks');

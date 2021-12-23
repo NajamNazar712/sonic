@@ -100,9 +100,9 @@
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
 										<div class="form-group">
                                             <select name="query_by" class="select2" id="query_by" data-rule-required="true" data-msg-required="Query By is required">
-													<option value="Consignee">Consignee</option>
-													<option value="Shipper">Shipper</option>
-													<option value="Others">Others</option>
+													<option value="1">Consignee</option>
+													<option value="2">Shipper</option>
+													<option value="3">Others</option>
 											</select>
 											
 										</div>
