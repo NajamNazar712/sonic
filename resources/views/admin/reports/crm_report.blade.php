@@ -196,6 +196,7 @@
                         <th class="border-primary border-darken-1">Valid/Invalid Date</th>
                         <th class="border-primary border-darken-1">Resolved Date</th>
                         <th class="border-primary border-darken-1">Closed Date</th>
+                        <th class="border-primary border-darken-1">Case Closed Remark</th>
                         <th class="border-primary border-darken-1">Last Internal Comment By</th>
                         <th class="border-primary border-darken-1">Last Internal Comment</th>
                         <th class="border-primary border-darken-1">Last Internal Comment Date</th>
@@ -472,6 +473,7 @@
                             head.push('Valid/Invalid Date');
                             head.push('Resolved Date');
                             head.push('Closed Date');
+                            head.push('Case closed Remarks');
                             head.push('Last Internal Comment By');
                             head.push('Last Internal Comment');
                             head.push('Last Internal Comment Date');
@@ -515,6 +517,7 @@
                                 row.push(values.valid_invalid_date);
                                 row.push(values.resolved_date);
                                 row.push(values.closed_date);
+                                row.push(values.case_closed_remark);
                                 row.push(values.last_comment_name);
                                 row.push(values.last_comment.replace(/<br>/gi, '\n'));
                                 row.push(values.last_comment_date);
@@ -614,6 +617,7 @@
                     {data: 'valid_invalid_date', name: 'crsh.created_at', class: 'align-middle valid_invalid_date', orderable: false, searchable: false},
                     {data: 'resolved_date', name: 'crshr.created_at', class: 'align-middle resolved_date'},
                     {data: 'closed_date', name: 'crshc.created_at', class: 'align-middle closed_date'},
+                    {data: 'case_closed_remark', name: 'sjcc.remarks', class: 'align-middle case_closed_remark'},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
                     {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},

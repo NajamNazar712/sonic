@@ -194,6 +194,7 @@ Route::name('api.')->group(function () {
 
             Route::get('rider_wallet', 'Rider\RiderAPIController@rider_wallet')->name('rider_wallet');
             Route::get('rider_profile', 'Rider\RiderAPIController@rider_profile')->name('rider_profile');
+            Route::get('profile', 'Rider\RiderAPIController@rider_profile')->name('profile');
             Route::get('notification_history', 'Rider\RiderAPIController@notification_history')->name('notification_history');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
@@ -226,6 +227,8 @@ Route::name('api.')->group(function () {
                 Route::get('list', 'Rider\RiderAPIController@employee_leave_list')->name('list');
                 Route::post('calender', 'Rider\RiderAPIController@view_calender')->name('calender');
             });
+
+            Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
 		});
 
 	});
@@ -301,8 +304,8 @@ Route::name('api.')->group(function () {
                 Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
             });
-
-
+            Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
+            Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
             Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
 
         });

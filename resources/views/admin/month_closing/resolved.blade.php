@@ -345,18 +345,27 @@
                                 }).then(function (confirm) {
                                     if (confirm) {
                                         blockPagePermanently();
-
+                                        table.rows().nodes().each(function (index) {
+                                            var row = table.row(index);
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                var remarks = $(row.node()).find('td.remarks input').val();
+                                                shipment_remarks[id] = remarks;
+                                            }
+                                        });
                                         $.ajax({
                                             url:"{{route('admin.month_closing.resolved.closed')}}",
                                             method:'POST',
                                             data:{
                                                 'shipment_ids':selected_rows,
                                                 '_token':'{{ csrf_token() }}',
+                                                'remark': shipment_remarks
                                             }
                                         }).done(function (data) {
                                             UnblockPagePermanently();
                                             table.rows().deselect();
                                             selected_rows = [];
+                                            shipment_remarks = {};
                                             table.button('.close_action').disable();
                                             table.button('.re-attempt').disable();
                                             table.button('.return_confirm').disable();
