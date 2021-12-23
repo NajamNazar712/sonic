@@ -285,6 +285,10 @@
                                                                 <a href="{{asset(Storage::url($rider_delivery->cnic_image))}}" target="_blank"><button type="button" class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-image"></i> View CNIC</button></a>
                                                             @elseif($rider_delivery->delivered_status == 0)
                                                                 <a href="{{asset(Storage::url($rider_delivery->picture_path))}}" target="_blank"><button type="button" class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-image"></i> View Image</button></a>
+                                                                @if($rider_delivery->audio_path != Null)
+                                                                    <a href="{{asset(Storage::url($rider_delivery->audio_path))}}" target="_blank"><button type="button" class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-file-sound-o"></i> Audio</button></a>
+                                                                @endif
+                                                                <a href="{{'http://www.google.com/maps/place/'. $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude}}" target="_blank"><button type="button" class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-map-marker align-middle"></i>Location</button></a>
                                                             @endif
                                                         @endif
                                                     </div>
