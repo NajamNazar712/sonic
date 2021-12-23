@@ -273,7 +273,7 @@ class QAEvaluationController extends Controller
     }
 
     public function update_activities(Request $request){
-        // dd($request->all());
+        dd($request->all());
         $activities_id = explode(',', $request->activities_id);
         // dump($activities_id);
         $score = 0;
@@ -295,6 +295,12 @@ class QAEvaluationController extends Controller
                         'activity' => $request->activity_name[$key],
                         'weightage' => $request->activity_weightage[$key],
                     ]);
+                }else{
+                    $activity = EvaluationActivity::find($value);
+                    $activity->evaluation_handling_id = $request->handling_id;
+                    $activity->activity = $request->activity_name[$key];
+                    $activity->weightage = $request->activity_weightage[$key];
+                    $activity->save();
                 }
             }
             
