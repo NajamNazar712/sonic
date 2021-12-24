@@ -18,17 +18,17 @@
                             @include('admin.inc.messages')
 
                             @if($data)
-                            <div class="row mb-2 justify-content-center">
+                            {{--<div class="row justify-content-center">
 
                                 <div class="col-6 text-center border tracking_box ">
-                                    {{-- <fieldset class="position-relative has-icon-left"> --}}
+                                    --}}{{-- <fieldset class="position-relative has-icon-left"> --}}{{--
                                         <u><a href='{{route('admin.tracking.index')}}?tracking_number={{$shipment->tracking_number}}' class='tracking' target='_blank'>{{$shipment->tracking_number}}</a></u>
-                                        {{-- <input type="text" class="form-control" placeholder="Tracking Number" value="{{$shipment->tracking_number}}" readonly style="text-align: center;"> --}}
-                                    {{-- </fieldset> --}}
+                                        --}}{{-- <input type="text" class="form-control" placeholder="Tracking Number" value="{{$shipment->tracking_number}}" readonly style="text-align: center;"> --}}{{--
+                                    --}}{{-- </fieldset> --}}{{--
                                 </div>
-                            </div>
+                            </div>--}}
 
-                            <div class="row mb-2 justify-content-center">
+                            <div class="row justify-content-center">
                                 <div class="col-4">
                                     <div class="card bg-gradient-directional-total-calls pull-up">
                                         <div class="card-content">
@@ -37,9 +37,9 @@
                                                     <div class="align-self-center">
                                                         <i class="icon-flag text-white font-large-2 float-left"></i>
                                                     </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">{{$total_calls}}</h3>
-                                                        <span>Total Call(s)</span>
+                                                    <div class="media-body text-white text-center">
+                                                        <h3 class="text-white">Total Calls : {{$total_calls}}</h3>
+                                                      {{--  <span>Total Call(s)</span>--}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -54,9 +54,9 @@
                                                     <div class="align-self-center">
                                                         <i class="icon-check text-white font-large-2 float-left"></i>
                                                     </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">{{$completed_calls}}</h3>
-                                                        <span>Completed Call(s)</span>
+                                                    <div class="media-body text-white text-center">
+                                                        <h3 class="text-white">Completed Call(s) : {{$completed_calls}}</h3>
+                                                       {{-- <span>Completed Call(s)</span>--}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -71,9 +71,9 @@
                                                     <div class="align-self-center">
                                                         <i class="icon-close text-white font-large-2 float-left"></i>
                                                     </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">{{$pending_calls}}</h3>
-                                                        <span>Pending Call(s)</span>
+                                                    <div class="media-body text-white text-center">
+                                                        <h3 class="text-white">Pending Call(s) : {{$pending_calls}}</h3>
+                                                      {{--  <span>Pending Call(s)</span>--}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -82,13 +82,16 @@
                                 </div>
                             </div>
 
-                            <div class="mt-2 border-primary">
+                            <div class="border-primary">
                                 <div class="align-items-center bg-primary">
                                     <div class="d-flex flex-wrap ml-1 mr-1 font-medium-3 white">
-                                        <div>
+                                        <div class="col-4">
+                                            <a href='{{route('admin.tracking.index')}}?tracking_number={{$shipment->tracking_number}}' class="tracking font-medium-2 text-white" target='_blank'>{{$shipment->tracking_number}}</a>
+                                        </div>
+                                        <div class="col-4 text-center">
                                                 Rider Name : <span class="font-medium-2">{{$delivery_note->rider->name}}</span>
                                         </div>
-                                        <div class="ml-auto mr-0 mr-sm-1">
+                                        <div class="col-4 text-right">
                                             Rider Phone Number : <span class="font-medium-2">{{$delivery_note->rider->phone}}</span>
                                         </div>
                                     </div>
@@ -122,18 +125,18 @@
                                         </div>
                                         <div class="col-12 mb-1">
                                             <h4><u>Consignee Information</u></h4>
-                                            <div class="border table-responsive">
+                                            <div class="border table-responsive" style="border:3px solid black !important;">
                                                 <table class="table table-sm table-borderless mb-0">
                                                     <tbody>
                                                         <tr>
                                                             <td><strong>Name :</strong></td>
-                                                            <td>{{$shipment->consignee_name}}</td>
+                                                            <td><strong>{{$shipment->consignee_name}}</strong></td>
                                                             <td><strong>Phone :</strong></td>
-                                                            <td>{{$shipment->consignee_phone_number_1}}</td>
+                                                            <td><strong>{{$shipment->consignee_phone_number_1}}</strong></td>
                                                         </tr>
                                                         <tr>
                                                             <td><strong>Address :</strong></td>
-                                                            <td>{{$shipment->consignee_address}}</td>
+                                                            <td><strong>{{$shipment->consignee_address}}</strong></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
