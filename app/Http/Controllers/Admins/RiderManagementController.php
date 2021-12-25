@@ -9,6 +9,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
+use App\Http\Models\EmployeeConvertHistory;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\ReportingLocation;
@@ -110,7 +111,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) {
+                if ((session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id',$rider->rider_id)->doesntExist())) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -249,7 +250,7 @@ class RiderManagementController extends Controller
             $employee = new Employee();
             $employee->city_id = $request->city_id;
             $employee->name = $request->rider_name;
-            $employee->official_phone_number = $request->phone;
+            $employee->phone_number = $request->phone;
             $employee->cnic = $request->cnic;
             $employee->employee_type_id = 2;
             $employee->request_status_id = 3;
@@ -257,7 +258,11 @@ class RiderManagementController extends Controller
             $employee->address = $request->address;
             $employee->pin =  $request->pin;
             $employee->shift_id = $request->shift_id;
+            $employee->department_id = 6;
             $employee->trax_id = $trax_id;
+            $employee->rider_main_category = $request->rider_main_category;
+            $employee->rider_sub_category = $request->rider_category;
+            $employee->rider_type_id = $type;
             $employee->save();
 
             $rider->employee_id = $employee->id;
@@ -385,6 +390,9 @@ class RiderManagementController extends Controller
             $employee->address = $rider->address;
             $employee->pin = $rider->dummy_pin;
             $employee->shift_id = $rider->shift_id;
+
+            $employee->rider_main_category = $request->rider_category;
+            $employee->rider_sub_category = $request->rider_main_category;
             $employee->save();
         }
 
@@ -467,6 +475,7 @@ class RiderManagementController extends Controller
 
         $staff->status_id = AdminHumanResourseController::GetStatusOfEmployee($staff->id);
         $staff->trax_id = $trax_id;
+        $staff->joining_date = Carbon::now();
         $staff->save();
         return response()->json(['status' => 0, 'success' => 'Rider Rejoined Successfully!']);
     }
@@ -506,6 +515,14 @@ class RiderManagementController extends Controller
                     $rider->rider_type_id = 2;
                     $rider->updated_by = Auth::id();
                     $rider->save();
+
+                    $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+                    if($employee->exists())
+                    {
+                        $employee = $employee->first();
+                        $employee->rider_type_id = 2;
+                        $employee->update();
+                    }
                     return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
                 }
                 return response()->json(['status' => 1, 'error' => 'Rider already Marked as Incentive Rider!']);
@@ -536,7 +553,9 @@ class RiderManagementController extends Controller
                     $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
                     if($employee->exists())
                     {
+                        $employee = $employee->first();
                         $employee->trax_id = $trax_id;
+                        $employee->rider_type_id = 1;
                         $employee->update();
                     }
                     $rider->trax_id = $trax_id;
@@ -564,11 +583,22 @@ class RiderManagementController extends Controller
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
         }
 
+        $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+        if($employee->doesntExist())
+        {
+
+        }
+
+        $employee = $employee->first();
         if($action == 'block'){
             $rider->blacklist = 1;
             $rider->status = 0;
             $rider->updated_by = Auth::id();
             $rider->save();
+
+            $employee->status_id = 2;
+            $employee->update();
+
             return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
         }
         if($action == 'unblock'){
@@ -576,6 +606,10 @@ class RiderManagementController extends Controller
             $rider->status = 1;
             $rider->updated_by = Auth::id();
             $rider->save();
+
+            $employee->status_id = AdminHumanResourseController::GetStatusOfEmployee($employee->id);
+            $employee->update();
+
             return response()->json(['status' => 0, 'success' => 'Rider is Unblocked!']);
         }
 
@@ -670,7 +704,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) {
+                if ((session('role_id') == 1 || count(array_intersect([98, 99, 381, 382,620], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id',$rider->rider_id)->doesntExist())) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -779,7 +813,7 @@ class RiderManagementController extends Controller
                 }
             })
             ->addColumn("action", function ($rider) {
-                if (session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) {
+                if ((session('role_id') == 1 || count(array_intersect([99, 382], session('permissions'))) !== 0) && (EmployeeConvertHistory::where('rider_id',$rider->rider_id)->doesntExist())) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>

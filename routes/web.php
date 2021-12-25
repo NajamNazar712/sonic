@@ -939,6 +939,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('return_back_to_shipper','Admins\AdminShipmentPieceController@return_back_to_shipper')->name('return_back_to_shipper');
             Route::post('return_note_create', 'Admins\AdminShipmentPieceController@return_note_create')->name('return_note_create');
             Route::post('return_note_print', 'Admins\AdminShipmentPieceController@return_note_print')->name('return_note_print');
+            Route::post('single_piece_bulk','Admins\AdminShipmentPieceController@single_piece_bulk')->name('single_piece_bulk');
+            Route::post('wait_remaining_pieces_bulk','Admins\AdminShipmentPieceController@wait_remaining_pieces_bulk')->name('wait_remaining_pieces_bulk');
+            Route::post('return_back_to_shipper_bulk','Admins\AdminShipmentPieceController@return_back_to_shipper_bulk')->name('return_back_to_shipper_bulk');
         });
         Route::prefix('add')->name('add.')->group(function () {
             Route::get('', 'Admins\AdminShipmentPieceController@hold_add_index')->name('index');
@@ -3013,6 +3016,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@debriefing_time_setting_update')->name('update');
         });
 
+        Route::prefix('omni')->name('omni.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@omni_user_setting_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@omni_user_setting_update')->name('update');
+        });
+
         Route::prefix('shipment_status_eta')->name('shipment_status_eta.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shipment_status_eta_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@shipment_status_eta_list')->name('list');
@@ -3272,6 +3280,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminInternationalShipmentsController@shipment_status_index')->name('index');
             Route::post('shipment_info', 'Admins\AdminInternationalShipmentsController@get_shipment_info')->name('shipment_info');
             Route::post('update', 'Admins\AdminInternationalShipmentsController@shipment_status_update')->name('update');
+            Route::post('updatemodal', 'Admins\AdminInternationalShipmentsController@shipment_status_update_modal')->name('updatemodal');
 
         });
             Route::prefix('rates')->name('rates.')->group(function () {
@@ -3406,6 +3415,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('reject', 'Admins\AdminHumanResourseController@employee_directory_reject')->name('reject');
             Route::get('{employee}/edit', 'Admins\AdminHumanResourseController@employee_directory_edit')->name('edit');
             Route::post('get_designation', 'Admins\AdminHumanResourseController@employee_get_designation')->name('get.designation');
+            Route::post('get_cities', 'Admins\AdminHumanResourseController@employee_get_cities')->name('get.cities');
+            Route::post('get_routes', 'Admins\AdminHumanResourseController@employee_get_routes')->name('get.routes');
             Route::post('{employee}/profile', 'Admins\AdminHumanResourseController@employee_directory_profile_update')->name('profile.update');
             Route::post('{employee}/medical', 'Admins\AdminHumanResourseController@employee_directory_medical_update')->name('medical.update');
             Route::post('{employee}/bank', 'Admins\AdminHumanResourseController@employee_directory_bank_update')->name('bank.update');
@@ -3424,6 +3435,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_rider_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_rider_deactivate')->name('deactivate');
                 Route::post('update', 'Admins\AdminHumanResourseController@employee_directory_make_rider_update')->name('update');
+                Route::post('convert-to-staff', 'Admins\AdminHumanResourseController@convert_rider_to_staff')->name('convert');
             });
 
         });

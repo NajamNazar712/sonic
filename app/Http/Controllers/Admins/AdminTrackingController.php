@@ -1627,10 +1627,10 @@ class AdminTrackingController extends Controller
     public function estimation_check(Request $request) {
 
         $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest('id')->first();
-
+        $contains = 0;
         if($journey->status_reason_id == 12)
         {
-            $contains= "1";
+            $contains = 1;
         }
         return response()->json(['contains' => $contains]);
     }

@@ -5411,4 +5411,47 @@ public function sales_incentive()
 
         return redirect()->route('admin.settings.shippers.status_webhook.index')->with(['success'=>'Shipper Statuses Updated Successfully']);
     }
+
+ public function omni_user_setting_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),483);
+        
+        $shippers = array();
+        $omni_accounts = array();
+        $settings = GlobalSettings::where('type', 'omni_users');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if($settings->text != NULL){
+                $omni_accounts = array_map('intval', explode(',', $settings->text));
+            }
+        }
+        $users = User::where('status',3)->where('blacklist', 0)->select('id','name')->get();
+        return view('admin.settings.omni_user')->with(['shippers' => $omni_accounts,'users' => $users]);
+    }
+
+    public function omni_user_setting_update(Request $request){
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'omni_users');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'omni_users';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
+    }
+
 }

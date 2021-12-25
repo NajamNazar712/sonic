@@ -34,8 +34,13 @@
                                                 <div class="row justify-content-center">
                                                     <fieldset>
                                                         <div class="custom-control custom-radio col">
-                                                            <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_1" value="1">
-                                                            <label class="custom-control-label" for="excel_type_1">Overall</label>
+                                                            @if($omni_user != 1)
+                                                                <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_1" value="1">
+                                                                <label class="custom-control-label" for="excel_type_1">Overall</label>
+                                                            @else
+                                                                <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_7" value="7">
+                                                                <label class="custom-control-label" for="excel_type_7">Overall</label>
+                                                            @endif
                                                         </div>
                                                     </fieldset>
                                                     <fieldset>
@@ -62,6 +67,14 @@
                                                             <label class="custom-control-label" for="excel_type_5">Reverse Pickup</label>
                                                         </div>
                                                     </fieldset>
+                                                    @if($omni_user == 1)
+                                                        <fieldset>
+                                                            <div class="custom-control custom-radio col">
+                                                                <input type="radio" class="custom-control-input iad_radio" name="excel_type" id="excel_type_6" value="6">
+                                                                <label class="custom-control-label" for="excel_type_6">Omni</label>
+                                                            </div>
+                                                        </fieldset>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -98,9 +111,20 @@
                                             </div>
                                             <div class="col">
                                                 <div class="form-group text-right">
-                                                    <a href="{{ asset('file/Trax Book Corporate Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+                                                    @if($omni_user != 1)
+                                                        <a href="{{ asset('file/Trax Book Corporate Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+                                                        @else
+                                                        <a href="{{ asset('file/Trax Book Omni Corporate Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+                                                    @endif
                                                 </div>
                                             </div>
+                                            @if($omni_user == 1)
+                                                <div class="col">
+                                                    <div class="form-group text-right">
+                                                        <a href="{{ asset('file/Trax Book Corporate Omni Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Omni</a>
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -292,7 +316,7 @@
                                     <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
-                                            <th colspan="2" class="border-primary border-darken-1">Pickup Addresses</th>
+                                            <th colspan="2" class="border-primary border-darken-1">Pickup Addresses @if($omni_user == 1)/Return Addresses @endif</th>
                                         </tr>
                                         <tr role="row" class="bg-primary bg-lighten-1 white">
                                             <th class="text-center border-primary border-lighten-2">ID</th>

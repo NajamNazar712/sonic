@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controller\Admins\DwsWeightChargesController;
+use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -1427,9 +1427,12 @@ class AdminDashboardController extends Controller
 
         $id = $request->shid; //shipper id
         $status = $request->status;
-
+        $user = User::find($id);
+        if(!$user){
+            return back()->with('danger', 'User not found.');
+        }
         if($status == 'activate'){
-            $user = User::find($id);
+
             if($user->status == 2){
                 $now = Carbon::now();
                 $action = User::where('id',$id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now ,'reactivated_at'=>$now ]);
@@ -11461,12 +11464,18 @@ class AdminDashboardController extends Controller
         }
     }
     public function admin_profile(Request $request){
-        $user =Admin::where('id', Auth::id())->first();
-        $department = Admin::join('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
-        ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
-        ->where('admins.id', Auth::id())->first();
-        $designations = EmployeeDesignation::where('status',1)->where('id',$user->designation_id)->first();
-        return response()->json(['full_name' => $user->name,'department' => $department->name,'designation' => $designations->name,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
+        $user = Admin::where('id', Auth::id())->first();
+        if($user){
+            $department = Admin::join('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
+                ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
+                ->where('admins.id', Auth::id())->first();
+            $designations = EmployeeDesignation::where('status',1)->where('id',$user->designation_id)->first();
+            return response()->json(['full_name' => $user->name,'department' => $department->name,'designation' => $designations->name,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
+        }
+        else{
+            return response()->json(['error' => 'User not found!']);
+        }
+
    }
 
 }
