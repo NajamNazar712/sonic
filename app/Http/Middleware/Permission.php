@@ -897,6 +897,8 @@ class Permission
             'settings.shipment_status_eta.index' => 534,
             'settings.shipment_status_eta.list' => 534,
 
+
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -1016,29 +1018,29 @@ class Permission
             'human_resource.employee_directory.index' => 467,
             'human_resource.employee_directory.list' => 467,
 
-            'human_resource.employee_directory.rejoin' => 620,
+            'human_resource.employee_directory.rejoin' => 652,
 
-            'human_resource.employee_directory.edit' => 468,
-            'human_resource.employee_directory.profile.update' => 468,
-            'human_resource.employee_directory.medical.update' => 468,
-            'human_resource.employee_directory.bank.update' => 468,
-            'human_resource.employee_directory.reference.update' => 468,
-            'human_resource.employee_directory.education.update' => 468,
-            'human_resource.employee_directory.employment.update' => 468,
-            'human_resource.employee_directory.attachments.update' => 468,
-            'human_resource.employee_directory.rider.update' => 98,
+            'human_resource.employee_directory.edit' => 652,
+            'human_resource.employee_directory.profile.update' => 652,
+            'human_resource.employee_directory.medical.update' => 652,
+            'human_resource.employee_directory.bank.update' => 652,
+            'human_resource.employee_directory.reference.update' => 652,
+            'human_resource.employee_directory.education.update' => 652,
+            'human_resource.employee_directory.employment.update' => 652,
+            'human_resource.employee_directory.attachments.update' => 652,
+            'human_resource.employee_directory.rider.update' => 652,
             'human_resource.employee_directory.rider.deactivate' => 99,
             'human_resource.employee_directory.rider.activate' => 99,
-            'human_resource.employee_directory.rider.incentive' => 381,
-            'human_resource.employee_directory.rider.permanent' => 381,
-            'human_resource.employee_directory.rider.blacklist' => 382,
+            'human_resource.employee_directory.rider.incentive' => 652,
+            'human_resource.employee_directory.rider.permanent' => 652,
+            'human_resource.employee_directory.rider.blacklist' => 652,
 
 
-            'human_resource.employee_directory.staff.deactivate' => 591,
-            'human_resource.employee_directory.staff.activate' => 591,
+            'human_resource.employee_directory.staff.deactivate' => 652,
+            'human_resource.employee_directory.staff.activate' => 652,
 
-            'human_resource.employee_directory.approve' => 469,
-            'human_resource.employee_directory.reject' => 469,
+            'human_resource.employee_directory.approve' => 652,
+            'human_resource.employee_directory.reject' => 652,
 
             'human_resource.reporting_location.index' => 478,
             'human_resource.reporting_location.list' => 478,
@@ -1128,6 +1130,7 @@ class Permission
             'settings.international_automation_user.index' => 582,
 
             'settings.ccd_booking.index' => 558,
+            'settings.omni.index' => 644,
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,

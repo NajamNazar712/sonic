@@ -58,6 +58,7 @@
                                                     <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                                     <input type="hidden" name="form[{{$no}}][service_type_id]" value="{{$ro['service_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][pickup_address_id]" value="{{$ro['pickup_address_id']}}">
+                                                    <input type="hidden" name="form[{{$no}}][return_address_id]" value="{{$ro['return_address_id']}}">
 
 
                                                     <input type="hidden" name="form[{{$no}}][information_display]" value="{{$ro['information_display']}}">
