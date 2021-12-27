@@ -1283,7 +1283,7 @@ class APIController extends Controller
                     $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
                 } else {
                     $current_status = $shipment->status_shipper->name;
-                    $current_status_datetime = Carbon::parse($shipment->created_at)->format('d/m/Y h:i A');
+                    $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
                 }
             } else {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
@@ -1301,7 +1301,7 @@ class APIController extends Controller
                     $current_status_datetime = Carbon::parse($shipment_journey->created_at)->format('d/m/Y h:i A');
                 } else {
                     $current_status = $shipment->status_consignee->name;
-                    $current_status_datetime = Carbon::parse($shipment->created_at)->format('d/m/Y h:i A');
+                    $current_status_datetime = Carbon::parse($shipment->updated_at)->format('d/m/Y h:i A');
                 }
             }
 
