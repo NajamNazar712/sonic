@@ -1264,6 +1264,9 @@ class APIController extends Controller
 
             $shipment = Shipment::whereIn('user_id', $user_ids)->where('tracking_number', $tracking_number)->first();
 
+            $origin = $shipment->pickup_address->city->name;
+            $destination = $shipment->consignee_city->name;
+
             if ($type == 0) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
                 if($shipment_journey->status_reason_id)
@@ -1277,8 +1280,10 @@ class APIController extends Controller
                 }
                 if ($shipment_journey) {
                     $current_status = $shipment_journey->shipment_status_shipper->name;
+                    $current_status_datetime = $shipment_journey->created_at;
                 } else {
                     $current_status = $shipment->status_shipper->name;
+                    $current_status_datetime = $shipment->created_at;
                 }
             } else {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
@@ -1290,15 +1295,17 @@ class APIController extends Controller
                 else
                 {
                     $reason=null;
-                }           
+                }
                 if ($shipment_journey) {
                     $current_status = $shipment_journey->shipment_status_consignee->name;
+                    $current_status_datetime = $shipment_journey->created_at;
                 } else {
                     $current_status = $shipment->status_consignee->name;
+                    $current_status_datetime = $shipment->created_at;
                 }
             }
 
-            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason]);
+            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason, 'current_status_datetime' => $current_status_datetime, 'origin' => $origin, 'destination' => $destination]);
         }
     }
 
