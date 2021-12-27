@@ -505,6 +505,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
         Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
         Route::get('admin_profile', 'Admins\AdminDashboardController@admin_profile')->name('admin_profile');
+        Route::get('edit_profile', 'Admins\AdminDashboardController@edit_profile')->name('edit_profile');
         //Search Sonic
 //        Route::get('search_sonic', 'Admins\AdminDashboardController@search_sonic')->name('search_sonic');
         
@@ -557,6 +558,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('update/profile/password','Admins\AdminDashboardController@update_profile_password')->name('update.profile.password');
     Route::post('update/profile/password/submit','Admins\AdminDashboardController@update_profile_password_submit')->name('update.profile.password.submit');
+    Route::post('update/profile/submit','Admins\AdminDashboardController@edit_profile_submit')->name('update.profile.submit');
 
 
 

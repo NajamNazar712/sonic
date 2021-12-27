@@ -34,6 +34,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DuplicateUser;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\InternationalUsersInformation;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
@@ -11464,16 +11465,47 @@ class AdminDashboardController extends Controller
         }
     }
     public function admin_profile(Request $request){
-        $user = Admin::where('id', Auth::id())->first();
-        if($user){
-            $department = Admin::join('admin_roles as ar', 'ar.id', '=', 'admins.role_id')
-                ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
-                ->where('admins.id', Auth::id())->first();
-            $designations = EmployeeDesignation::where('status',1)->where('id',$user->designation_id)->first();
-            return response()->json(['full_name' => $user->name,'department' => $department->name,'designation' => $designations->name,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone_number]);
+        $user = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
+            ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+            ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+            ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id')
+            ->where('admins.id', Auth::id());
+        if($user->exists()){
+            $user = $user->first();
+            return response()->json(['full_name' => $user->name,'department' => $user->department_name,'designation' => $user->designation,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone, 'blood_group' => $user->blood_group, 'emergency_contact_no'=> $user->emergency_contact_no, 'emergency_contact_person' => $user->emergency_contact_person]);
         }
         else{
             return response()->json(['error' => 'User not found!']);
+        }
+
+   }
+
+    public function edit_profile(Request $request){
+        $employee = Employee::where('trax_id', Auth::user()->trax_id)->where('trax_id', '!=', null);
+        if($employee->exists()){
+            $employee = $employee->first();
+            $blood_groups = EmployeeBloodGroup::all();
+            return view('admin.profile.edit_profile_form')->with(['blood_groups' => $blood_groups, 'employee' => $employee]);
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'User not found!']);
+        }
+
+   }
+
+    public function edit_profile_submit(Request $request){
+        $employee = Employee::where('trax_id', Auth::user()->trax_id)->where('trax_id', '!=', null);
+        if($employee->exists()){
+            $employee = $employee->first();
+            $employee->blood_group = $request->blood_group;
+            $employee->emergency_contact_person = $request->emergency_contact_name;
+            $employee->emergency_contact = $request->emergency_contact_no;
+            $employee->save();
+            return redirect()->back()->with('success', 'Profile Successfully Updated');
+        }
+        else{
+            return redirect()->back()->with('error', 'User not found!');
         }
 
    }
