@@ -1041,6 +1041,10 @@ class ReturnController extends Controller
                         else{
                             if(is_null($row['estimation_charges']))
                                 $contains = 2;
+                            if((($row['shipper_status_id'] == 1) && is_null($row['estimation_charges']) && $parcel->status_reason_id != 12))
+                            {
+                                $contains = 1;
+                            }
                             else
                                 $contains = 0;
                         }
