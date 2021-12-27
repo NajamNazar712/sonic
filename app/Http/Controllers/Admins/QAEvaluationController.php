@@ -262,51 +262,63 @@ class QAEvaluationController extends Controller
     }
 
     public function edit_activities(Request $request){
-        $evaluation_handlings = EvaluationHandling::all();
+        // $evaluation_handlings = EvaluationHandling::all();
 
-        return view('admin.qa_evaluation.edit_activites',compact('evaluation_handlings'));
+        return view('admin.qa_evaluation.edit_activites');
     }
 
     public function actvities_data(Request $request){
-        $activities = EvaluationActivity::where('evaluation_handling_id',$request->id)->get();
-        return response()->json(['status'=>1,'activities'=>$activities]);
+        $handlings = EvaluationHandling::where('campaign_id',$request->id)->get();
+        $activities = EvaluationActivity::leftjoin('evaluation_handlings as eh','eh.id','=','evaluation_activities.evaluation_handling_id')
+        ->where('eh.campaign_id',$request->id)->
+        select('evaluation_activities.id as id','evaluation_activities.activity as activity','evaluation_activities.weightage as weightage','eh.id as evaluation_handling_id')->get();
+        return response()->json(['status'=>1,'activities'=>$activities,'handlings'=>$handlings]);
     }
 
     public function update_activities(Request $request){
-        $activities_id = explode(',', $request->activities_id);
-        $score = 0;
-        foreach ($request->activity_weightage as $key => $value) {
-            $score+=$value;
-        }
-        $campaign__id = EvaluationHandling::find($request->handling_id)->campaign_id;
-        $handlings = EvaluationHandling::where('campaign_id',$campaign__id)->pluck('id')->toArray();
-        $activity_score = EvaluationActivity::whereIn('evaluation_handling_id',$handlings)->whereNotIn('id',$activities_id)->sum('weightage');
-        // dump($score);
-        // dump($activity_score);
-        // dd($request->all());
-        // dd($activity_score);
-        if($score+$activity_score != 100 ){
-            $total_score = $score+$activity_score;
-            return redirect()->back()->with('error', 'Cannot Update Activities!  Current Weightage is "'.$total_score.'". Weightage should not be greater than 100.');
-        }else{
-            foreach ($activities_id as $key => $value) {
-                if($value == 0){
-                    EvaluationActivity::create([
-                        'evaluation_handling_id' => $request->handling_id,
-                        'activity' => $request->activity_name[$key],
-                        'weightage' => $request->activity_weightage[$key],
-                    ]);
-                }else{
-                    $activity = EvaluationActivity::find($value);
-                    $activity->evaluation_handling_id = $request->handling_id;
-                    $activity->activity = $request->activity_name[$key];
-                    $activity->weightage = $request->activity_weightage[$key];
-                    $activity->save();
-                }
-            }
-            
-            return redirect()->back()->with('success', 'Activity Updated');
 
+        $removed_activity = [];
+        $new_activity = [];
+        foreach ($request->activity_name as $key => $value) {
+            // $evaluation_handlings = EvaluationHandling::find($key);
+                foreach ($value  as $activity_key => $activity_value) {
+                    if($activity_key == 0){
+                        //insert
+                        $activity = new EvaluationActivity;
+                            $activity->evaluation_handling_id = $key;
+                            $activity->activity = $activity_value;
+                            $activity->weightage = $request->activity_weightage[$key][$activity_key];
+                            $activity->save();
+                        array_push($new_activity,$activity->id);
+
+                    }else{
+                        //update
+                        $activity = EvaluationActivity::find($activity_key);
+                        $activity->evaluation_handling_id = $key;
+                        $activity->activity = $activity_value;
+                        $activity->weightage = $request->activity_weightage[$key][$activity_key];
+                        $activity->save();
+                    }
+                }
+            $ids = array_keys($request->activity_name[$key]);
+
+                $evaluated_activity = EvaluationActivity::where('evaluation_handling_id',$key)->whereNotIn('id',$ids);
+                if($evaluated_activity->exists()){
+                    $evaluated_activity = $evaluated_activity->pluck('id')->toArray();
+                    array_push($removed_activity,$evaluated_activity);
+                }
         }
+        // $removed_activity=array_diff($removed_activity,$new_activity);
+        if($removed_activity[0] == $new_activity){
+            $removed_activity = [];
+        }else{
+            $removed_activity =array_unique( array_merge($new_activity, $removed_activity[0]) );
+        }
+        foreach ($removed_activity as $key => $value) {
+            //delete
+            EvaluationActivity::where('id',$value)->delete();
+        }
+        return redirect()->back()->with('success', 'Activity Updated');
+        
     }
 }

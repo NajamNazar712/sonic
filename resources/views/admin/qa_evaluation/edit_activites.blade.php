@@ -21,36 +21,30 @@
                                 @csrf
 								<div class="row">
 									
-                                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                                    <div class="col-6">
 										<div class="form-group">
-                                            <select name="handling_id" class="select2" id="handling_id" data-rule-required="true" data-msg-required="Evaluation Handling is required">
-												@foreach($evaluation_handlings as $evaluation_handling)
-													<option value="{{ $evaluation_handling->id }}">{{ $evaluation_handling->handling }}</option>
-												@endforeach
+                                            <select name="campaign_id" class="select2" id="campaign_id" data-rule-required="true" data-msg-required="Evaluation Campaign is required">
+													<option value="1">Incoming/RCP</option>
+													<option value="2">Complains/Claim</option>
+													<option value="3">Email Live Chat</option>
 											</select>
 											
 										</div>
 									</div>
+                                    <div class="col-6 text-right">
+                                        <h3 class="text-success font-weight-bold" id="score_heading">Score:<span id="score_text">100</span></h3>
+                                </div>
                                     <input type="hidden" id="activities_id" name="activities_id">
                                     <input type="hidden" id="activities_weightage" name="activities_weightage">
                                     <input type="hidden" id="activities_name" name="activities_name">
+                                    <input type="hidden" id="score" name="score">
 									
 								</div>
-                                <div class="col-12 ">
-                                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                        <thead>
-                                            <tr role="row" class="bg-primary white">
-                                                <th class="border-primary border-darken-1">S. No.</th>
-                                                <th class="border-primary border-darken-1">Activity</th>
-                                                <th class="border-primary border-darken-1">Weightage</th>
-                                                <th class="border-primary border-darken-1"></th>
-                                            </tr>
-                                        </thead>
-                                    </table>
+                                <div id="activities_data">
+                                    
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group text-center">
-                                        <a href="javascript:void(0);" id="add_activity" class="btn btn-primary add_activity">Add</a>
                                         <button id="submit_button" type="submit" class="btn btn-success">Update</button>
                                     </div>
                                 </div>
@@ -97,183 +91,134 @@
 
 	<script>
 		$(document).ready(function() {
-            var activity_id_array = [];
-            var activity_weightage_array = [];
-            var activity_name_array = [];
-            var activity_index_array = [];
 
             $('#submit_button').attr('disabled', true);
+            $('#score_heading').css("display", "none");
             $('a.add_activity').addClass('disabled');
             
-            var table = $('#datatable').DataTable({
-                dom: 'ltipr',
-                paging: false,
-                ordering:false,
-                sorting:false,
-                bInfo:false,
-                columns: [
-                    {
-                        orderable: false,
-                        searchable: false,
-                        name: 'serial_number',
-                        class: 'align-middle serial_number',
-                        targets: 1,
-                        render: function (data, type, row) {
-                            return '';
-                        }
-                    },
-                    {
-                        
-                        name: 'activity',
-                        class: 'align-middle activity',
-                       
-                    },
-                    {
-                        
-                        name: 'weightage',
-                        class: 'align-middle weightage',
-                        
-                    },
-                    {
-                        
-                        name: 'action',
-                        class: 'align-middle action',
-                        
-                    }
-
-                ],
-                rowCallback: function (row, data, index) {
-                    var info = table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
-                },
-            });
-            
-            
-            $('#handling_id').prepend('<option value="" selected="selected"></option>').select2({
+            $('#campaign_id').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
-				placeholder: 'Select Handling*'
+				placeholder: 'Select Campaign*'
 			}).bind('change',function(){
-                var handling_id = $(this).val();
-                table.rows().remove();
-                 activity_id_array = [];
-                 activity_weightage_array = [];
-                 activity_name_array = [];
-                 activity_index_array = [];
+                var campaign_id = $(this).val();
+              
                 $.ajax({
                         url: '{!! route('admin.qa_evaluation.actvities_data') !!}',
                         type: 'POST',
                         data: {
-                            'id': handling_id,
+                            'id': campaign_id,
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
                             
-                        var counter = 1
-                        var rowNo = table.rows().count();
-                
-                    $.each(data.activities, function (i, v) {
-                                                    
-                        table.row.add([counter,'<div class="form-group input-group"><input type="text" id="activity_'+v.id+'" class="form-control activity_name" name="activity_name[]" value="'+v.activity+'"  data-rule-required="true" data-msg-required="Activity is required"></div>','<div class="form-group input-group"><input type="number" id="weightage_'+v.id+'" class="form-control activity_weightage" name="activity_weightage[]" value="'+v.weightage+'"  data-rule-required="true" data-msg-required="Weeightage is required"></div>','<div class="form-group input-group"><a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="ft-minus-circle"></i></a></div>']).node().id = rowNo;
-                        counter++;
-                                    activity_id_array.push(v.id);
-                                    activity_weightage_array.push(v.weightage);
-                                    activity_name_array.push(v.activity);
-                                    activity_index_array.push(rowNo);
-                                    rowNo++;
-                                    
+                        console.log(data);
+                html='';
+                        var score = 0;
+                    $.each(data.handlings, function (index, value) {
+                        console.log(value);
+                        html+='<div class="row"><div class="col-12"><h2>'+value.handling+'</h2></div>';
+                        $.each(data.activities, function (i, v) {
+                        console.log(v);
+
+                            if(v.evaluation_handling_id == value.id){
+                                score += v.weightage ;
+                                html+='<div class="row" style="width:100%">';
+                                html+='<div class="col-6"><div class="form-group input-group"><input type="text" id="activity_'+v.id+'" class="form-control activity_name" name="activity_name['+v.evaluation_handling_id+']['+v.id+']" value="'+v.activity+'"  data-rule-required="true" data-msg-required="Activity is required"></div></div>';
+                                html+='<div class="col-4"><div class="form-group input-group"><input type="number" id="weightage_'+v.id+'" class="form-control activity_weightage" name="activity_weightage['+v.evaluation_handling_id+']['+v.id+']" value="'+v.weightage+'" data-value="'+v.weightage+'"  data-rule-required="true" data-msg-required="Weeightage is required"></div></div>';
+                                html+='<div class="col-2"><div class="form-group input-group"><a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="ft-minus-circle"></i></a></div></div>';
+                                html+='</div>';
+                                
+                            }
+
+                        });
+                        
+                        html+='<div class="col-12 text-center"><a href="javascript:void(0);" id="'+value.id+'" class="btn btn-primary mb-1 add_activity">Add</a></div></div>';
+
                     });
+                    console.log(score);
+                    $('#score').val(score);
+                    $('#activities_data').html(html);
                     $('#submit_button').attr('disabled', false);
                     $('a.add_activity').removeClass('disabled')
+                    $('#score_heading').css("display", "block");
                     
-                    // console.log('activity_id_array');
-                    //                 console.log(activity_id_array);
-                    //                 console.log('activity_weightage_array');
-                    //                 console.log(activity_weightage_array);
-                    //                 console.log('activity_name_array');
-                    //                 console.log(activity_name_array);
-                    //                 console.log('activity_index_array');
-                    //                 console.log(activity_index_array);
-                    table.draw();
                 });
 
             });
 
             
 
-            $('#datatable').on('click', 'a.remove', function(){
-                var rowId = parseInt($(this).parents('tr').attr('id'));
-
-                var index = $.inArray(rowId, activity_index_array);
-
-                console.log(index);
-                if (index !== -1) {
-                console.log('inside');
-
-                    activity_id_array.splice(index, 1);
-                    activity_weightage_array.splice(index, 1);
-                    activity_name_array.splice(index, 1);
-                    activity_index_array.splice(index, 1);
-                }
-                table.row( $(this).parents('tr') ).remove().draw();
-                if(table.rows().count() == 0){
-                    $('#submit_button').attr('disabled', true);
-                    $('a.add_activity').addClass('disabled')
+            $('#activities_data').on('click', 'a.remove', function(){
+                var parent = $(this).parents()[3];
+                if(parent.childElementCount != 3){
+                    $(this).parents()[2].remove();
                     
                 }
-                                    console.log('activity_id_array');
-                                    console.log(activity_id_array);
-                                    console.log('activity_weightage_array');
-                                    console.log(activity_weightage_array);
-                                    console.log('activity_name_array');
-                                    console.log(activity_name_array);
-                                    console.log('activity_index_array');
-                                    console.log(activity_index_array);
+                var ss = 0;
+                $(".activity_weightage").each(function(){
+                ss += parseInt($(this).val());
+                });
+                if(ss != 100){
+                // $(this).val($(this).data("value"))
+                $('#score_heading').removeClass("text-success");
+                $('#score_heading').addClass("text-danger");
+
+                $('#score_text').html(ss);
+                $('#submit_button').attr('disabled', true);
+
+                }else{
+                $('#submit_button').attr('disabled', false);
+                $('#score_text').html(ss);
+
+                $('#score_heading').addClass("text-success");
+                $('#score_heading').removeClass("text-danger");
+                }
+                
             });
 
+            $('#activities_data').on('click', 'a.add_activity', function(){
 
-            $('a.add_activity').click(function () {
-
-                var rowNo = table.rows().count();
-               
-                table.row.add([rowNo,'<div class="form-group input-group"><input type="text" id="" class="form-control activity_name" name="activity_name['+rowNo+']" data-rule-required="true" data-msg-required="Activity is required"></div>','<div class="form-group input-group"><input type="number" id="" class="form-control activity_weightage" name="activity_weightage['+rowNo+']" data-rule-required="true" data-msg-required="Weeightage is required"></div>','<div class="form-group input-group"><a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="ft-minus-circle"></i></a></div>']).node().id = rowNo;
-                                    activity_id_array.push(0);
-                                    activity_index_array.push(rowNo);
-                                    rowNo++;
-                                    table.draw();
+                var handling_id = $(this).attr('id');
+                console.log($(this).parents());
+                var parent = $(this).parents()[1];
+                console.log(parent.childElementCount)
+                html1='<div class="row" style="width:100%">';
+                                html1+='<div class="col-6"><div class="form-group input-group"><input type="text" id="activity_0" class="form-control activity_name" name="activity_name['+handling_id+'][0]" value=""  data-rule-required="true" data-msg-required="Activity is required"></div></div>';
+                                html1+='<div class="col-4"><div class="form-group input-group"><input type="number" id="weightage_0" class="form-control activity_weightage" name="activity_weightage['+handling_id+'][0]" value=""  data-value="" data-rule-required="true" data-msg-required="Weeightage is required"></div></div>';
+                                html1+='<div class="col-2"><div class="form-group input-group"><a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="ft-minus-circle"></i></a></div></div>';
+                                html1+='</div>';
+                                console.log(html1);
+                                $(html1).insertBefore($(this).parents()[0]);
             });
 
+            $('#activities_data').on('change', '.activity_weightage', function(){
+                var ss = 0;
+                $(".activity_weightage").each(function(){
+
+                    ss += parseInt($(this).val());
+
+                });
+                if(ss != 100){
+                    // $(this).val($(this).data("value"))
+                    $('#score_heading').removeClass("text-success");
+                    $('#score_heading').addClass("text-danger");
+
+                    $('#score_text').html(ss);
+                    $('#submit_button').attr('disabled', true);
+
+                }else{
+                    $('#submit_button').attr('disabled', false);
+                    $('#score_text').html(ss);
+
+                    $('#score_heading').addClass("text-success");
+                    $('#score_heading').removeClass("text-danger");
+                }
+                console.log($(this).data("value"));
+                console.log($(this).val());
+                console.log(ss);
+            });
+          
             
-           
-
-
-            // $('#activities_form').validate({
-            //     // ignore: ":not(:visible),:disabled",
-            //     errorClass: 'danger',
-            //     successClass: 'success',
-            //     errorPlacement: function(error, element) {
-            //         error.addClass('w-100').appendTo(element.parent('.form-group'));
-            //     },
-            //     submitHandler: function(form) {
-            //         if(table.rows().count() > 0){
-            //             $('#activities_id').val(activity_id_array);
-            //             $('#activities_weightage').val(activity_weightage_array);
-            //             $('#activities_name').val(activity_name_array);
-            //                    Swal.fire({
-            //                         type: 'info',
-            //                         title: 'Please Wait!',
-            //                         text: 'Your Request is being generated!',
-            //                         showCancelButton: false,
-            //                         showConfirmButton: false,
-            //                         allowOutsideClick: false,
-            //                     });
-            //                     form.submit();
-
-            //         }
-            //     }
-            // });
-
             $('#activities_form').validate({
                 ignore: [],
                 errorClass: 'danger',
@@ -286,15 +231,6 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    // var msg = "";
-                    // if($('#status').val() == 1){
-                    //     msg = "Runner On Route is being marked as completed!"
-                    // }else{
-                    //     msg = 'Runner On Route is being updated!';
-                    // }
-                    $('#activities_id').val(activity_id_array);
-                    $('#activities_weightage').val(activity_weightage_array);
-                    $('#activities_name').val(activity_name_array);
                     swal({
                                 title: 'Please Wait!',
                                 text: 'Evaluation is being added!',
@@ -303,39 +239,9 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-
                     form.submit();
                 }
             });
-
-            
-            // $('#submit_form').click(function () {
-
-            //     $('#role_form').validate({
-            //         errorClass: 'danger',
-            //         successClass: 'success',
-            //         normalizer: function(value) {
-                        
-            //             return $.trim(value);
-            //         },
-            //         errorPlacement: function(error, element) {
-            //             error.addClass('w-100').appendTo(element.parent('.form-group'));
-            //         },
-            //         submitHandler: function(form) {
-            //             $(form).find('button[type=submit]').attr('disabled', 'disabled');
-            //                     swal({
-            //                         title: 'Please Wait!',
-            //                         text: 'Evaluation is being added!',
-            //                         icon: 'info',
-            //                         buttons: false,
-            //                         closeOnClickOutside: false,
-            //                         closeOnEsc: false
-            //                     });
-            //                     form.submit();
-            //         }
-			//     });
-            // });
-			
 		});
 	</script>
 @endsection
