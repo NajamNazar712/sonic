@@ -1512,8 +1512,8 @@
                     }
                 })
                     .done(function (data) {
-                        if(data.contains){
-                        $('#reattempt_charges').removeClass('d-none');
+                        if(data.contains == 1){
+                            $('#reattempt_charges').removeClass('d-none');
                         }
                     });
                 $('#ReattemptModal').modal('show');

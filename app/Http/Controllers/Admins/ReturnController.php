@@ -59,7 +59,7 @@ use function foo\func;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Support\Str;
 use App\Http\Models\Admin\NonServiceArea;
-use App\Http\Models\Admin\OSAChargesLog;
+use App\Http\Models\Admin\OsaChargesLog;
 
 class ReturnController extends Controller
 {
@@ -1035,12 +1035,16 @@ class ReturnController extends Controller
                     $contains = 0;
                     if($parcel)
                     {
-                        if(($parcel->status_reason_id == 12 && $row['shipper_status_id'] == 1 && !is_null($row['estimation_charges'])) || (($row['shipper_status_id'] == 1 || $row['shipper_status_id'] == 0) && is_null($row['estimation_charges']))){
+                        if(($parcel->status_reason_id == 12 && $row['shipper_status_id'] == 1 && !is_null($row['estimation_charges'])) || (($row['shipper_status_id'] == 0) && is_null($row['estimation_charges']))){
                             $contains = 1;
                         }
                         else{
                             if(is_null($row['estimation_charges']))
                                 $contains = 2;
+                            if((($row['shipper_status_id'] == 1) && is_null($row['estimation_charges']) && $parcel->status_reason_id != 12))
+                            {
+                                $contains = 1;
+                            }
                             else
                                 $contains = 0;
                         }
@@ -4067,8 +4071,8 @@ class ReturnController extends Controller
             $shipper_name = ReturnNoteShipment::join('shipments as s', 'return_note_shipments.shipment_id', '=', 's.id')
             ->join('users as u','u.id','=','s.user_id')
             ->where('return_note_shipments.return_note_id',$return_note_id)
-            ->select('u.id as id','u.name as name')->distinct()->get();//Xyedth
-
+            ->select('u.id as id','u.name as name')->distinct()->get();
+            
             // SELECT DISTINCT u.name FROM return_note_shipments rs, shipments s,users u WHERE rs.shipment_id=s.id AND u.id=s.user_id  AND rs.return_note_id=66
 
             $return = ReturnNote::find($return_note_id);
@@ -4149,7 +4153,7 @@ class ReturnController extends Controller
                     
                     return response()->json(['status' => 0, 'details' => $details,'shippers'=> $shipper_name]);
                 }else{
-                    return response()->json(['status' => 2]);
+                    return response()->json(['status' => 2,'shippers'=> $shipper_name]);
                 }
                 return response()->json(['status' => 1, 'error' => 'Return Note Images not found!']);
             }
@@ -4681,7 +4685,7 @@ class ReturnController extends Controller
     }
     public function add_osa_charges($shipment, $charge)//function to add in logs table
     {
-        $nsa_charges_log = new OSAChargesLog;
+        $nsa_charges_log = new OsaChargesLog();
         $nsa_charges_log->shipment_id = $shipment;
         $nsa_charges_log->osa_charges = $charge;
         $nsa_charges_log->updated_by = Auth::id();
