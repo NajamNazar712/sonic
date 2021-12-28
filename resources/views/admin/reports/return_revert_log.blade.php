@@ -166,7 +166,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'OSA charges Log Report',
+                        title: 'Return Revert Log Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
