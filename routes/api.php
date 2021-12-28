@@ -307,7 +307,7 @@ Route::name('api.')->group(function () {
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
             Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
-            Route::post('trax_directory', 'Rider\RiderAPIController@trax_directory')->name('trax_directory');
+            Route::post('trax_directory', 'AdminAPIController@trax_directory')->name('trax_directory');
 
         });
 
