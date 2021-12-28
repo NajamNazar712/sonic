@@ -208,7 +208,7 @@ class QAEvaluationController extends Controller
         $score = 100;
         
         if($request->has('activity_ids')){
-            if(count($request->activity_ids) >=4){
+            if(count($request->activity_ids) > 4){
                 $score = 0;
             }else{
                 foreach ($request->activity_ids as $activity_id) {
@@ -308,16 +308,19 @@ class QAEvaluationController extends Controller
                     array_push($removed_activity,$evaluated_activity);
                 }
         }
+        if(!empty($removed_activity)){
+
+            if($removed_activity[0] == $new_activity){
+                $removed_activity = [];
+            }else{
+                $removed_activity =array_unique( array_merge($new_activity, $removed_activity[0]) );
+            }
+            foreach ($removed_activity as $key => $value) {
+                //delete
+                EvaluationActivity::where('id',$value)->delete();
+            }
+        }
         // $removed_activity=array_diff($removed_activity,$new_activity);
-        if($removed_activity[0] == $new_activity){
-            $removed_activity = [];
-        }else{
-            $removed_activity =array_unique( array_merge($new_activity, $removed_activity[0]) );
-        }
-        foreach ($removed_activity as $key => $value) {
-            //delete
-            EvaluationActivity::where('id',$value)->delete();
-        }
         return redirect()->back()->with('success', 'Activity Updated');
         
     }
