@@ -7214,7 +7214,7 @@ class AdminReportsController extends Controller
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $destinations = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->select('id','name')->get();
-        $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
+        $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->where('business_category_id', 1)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
         return view('admin.reports.fake_statuses_shipments_report')->with(['riders' => $riders, 'hubs' => $hubs, 'destinations' => $destinations, 'shipping_modes' => $shipping_modes, 'zones' => $zones]);
     }
