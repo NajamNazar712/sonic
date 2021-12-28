@@ -7500,7 +7500,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select(['delivery_note_requests.id as id','r.name as rider', 'delivery_note_requests.delivery_note_id as delivery_note','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by','delivery_note_requests.status as status']);
+            ->select(['delivery_note_requests.id as id','r.name as rider', 'delivery_note_requests.delivery_note_id as delivery_note','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by','delivery_note_requests.status as status', 'r.id as rider_id']);
             if ($requests->search_hub) {
                 $request = $request->where('c.hub_id', $requests->search_hub);
             }
