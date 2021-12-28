@@ -45,6 +45,7 @@ use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
+use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeLeave;
@@ -5762,6 +5763,69 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 0, 'data' => $admin_profile]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'No data found!']);
+            }
+        }
+    }
+
+    public function check_profile(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
+            ->select('e.id as employee_id', 'e.blood_group as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
+            ->where('admins.id', $admin_id);
+        if ($admin_profile->exists()) {
+            $admin_profile = $admin_profile->first();
+            if(!$admin_profile->blood_group_id || !$admin_profile->emergency_contact_no || !$admin_profile->emergency_contact_person){
+                return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
+            }else{
+                return response()->json(['status' => 1, 'message' => "Profile already updated"]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+    }
+
+    public function get_profile(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $blood_group_list = EmployeeBloodGroup::all();
+        $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
+            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+            ->select('e.id as employee_id', 'bg.name as blood_group_name', 'bg.id as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
+            ->where('admins.id', $admin_id);
+        if ($admin_profile->exists()) {
+            $admin_profile = $admin_profile->first();
+            return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'blood_group_id' => $admin_profile->blood_group_id, 'blood_group_name' => $admin_profile->blood_group_name, 'employee_id' => $admin_profile->employee_id, 'emergency_contact_no' => $admin_profile->emergency_contact_no, 'emergency_contact_person' => $admin_profile->emergency_contact_person]);
+        } else {
+            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+    }
+
+    public function update_profile(Request $request)
+    {
+        $rules = [
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+            'emergency_contact_no' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'emergency_contact_person' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee = Employee::find($request->employee_id);
+            if ($employee) {
+                $employee->blood_group = $request->blood_group_id;
+                $employee->emergency_contact = $request->emergency_contact_no;
+                $employee->emergency_contact_person = $request->emergency_contact_person;
+                $employee->save();
+                return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'User not found!']);
             }
         }
     }

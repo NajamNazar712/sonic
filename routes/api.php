@@ -218,6 +218,12 @@ Route::name('api.')->group(function () {
                 Route::post('retail_shipment_store', 'Rider\RiderAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
 
+            Route::prefix('profile')->name('profile.')->group(function () {
+                Route::get('index', 'Rider\RiderAPIController@get_profile')->name('index');
+                Route::get('check', 'Rider\RiderAPIController@check_profile')->name('check');
+                Route::post('update', 'Rider\RiderAPIController@update_profile')->name('update');
+            });
+
             Route::post('payslip', 'Rider\RiderAPIController@rider_payslip')->name('payslip');
             Route::post('fake_status', 'Rider\RiderAPIController@fake_status_count')->name('fake_status');
 
@@ -303,6 +309,11 @@ Route::name('api.')->group(function () {
                 Route::post('detail', 'AdminAPIController@leave_detail')->name('detail');
                 Route::post('calender', 'AdminAPIController@view_calender')->name('calender');
                 Route::post('hr_edit', 'AdminAPIController@hr_leave_edit')->name('hr_edit');
+            });
+            Route::prefix('profile')->name('profile.')->group(function () {
+                Route::get('index', 'AdminAPIController@get_profile')->name('index');
+                Route::get('check', 'AdminAPIController@check_profile')->name('check');
+                Route::post('update', 'AdminAPIController@update_profile')->name('update');
             });
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
