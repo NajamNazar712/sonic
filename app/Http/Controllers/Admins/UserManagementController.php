@@ -70,6 +70,7 @@ class UserManagementController extends Controller
 
         $staff->status_id = AdminHumanResourseController::GetStatusOfEmployee($staff->id);
         $staff->trax_id = $trax_id;
+        $staff->joining_date = Carbon::now();
         $staff->save();
         return response()->json(['status' => 0, 'success' => 'Admin Rejoined Successfully!']);
     }
@@ -273,8 +274,7 @@ class UserManagementController extends Controller
         }
         $hubs = City::where('hub', 1)->get();
         $shifts = EmployeeShift::where('status', 1)->get();
-        $designations = EmployeeDesignation::where('status',1)->get();
-
+        $designations = EmployeeDesignation::where('status',1)->with('department')->get();
         return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs, 'shifts' => $shifts,'designations'=>$designations]);
     }
 
@@ -416,8 +416,7 @@ class UserManagementController extends Controller
         $user = Admin::find($id);
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();
         $shifts = EmployeeShift::where('status', 1)->get();
-        $designations = EmployeeDesignation::where('status',1)->get();
-//        $reporting_locations = ReportingLocation::where('status',1)->get();
+        $designations = EmployeeDesignation::where('status',1)->with('department')->get();
 
         ActivityTrailController::createActivityTrailLog(Auth::id(),231,1);
         return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs, 'shifts' => $shifts,'designations'=>$designations]);

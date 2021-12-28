@@ -387,8 +387,14 @@ class APIController extends Controller
         });
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
-            $shipping_mode_id = $data['shipping_mode_id'];
-            $service_type_id = $data['service_type_id'];
+            if(isset($data['shipping_mode_id']) && isset($data['service_type_id'])){
+                $shipping_mode_id = $data['shipping_mode_id'];
+                $service_type_id = $data['service_type_id'];
+            }
+            else{
+                return false;
+            }
+
             if ($value) {
                 if($service_type_id == 5){
                     return true;
@@ -404,8 +410,13 @@ class APIController extends Controller
 
         Validator::extend('destination_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
-            $shipping_mode_id = $data['shipping_mode_id'];
-            $service_type_id = $data['service_type_id'];
+            if(isset($data['shipping_mode_id']) && isset($data['service_type_id'])){
+                $shipping_mode_id = $data['shipping_mode_id'];
+                $service_type_id = $data['service_type_id'];
+            }
+            else{
+                return false;
+            }
             if ($value) {
                 if($service_type_id == 5){
                     return true;
@@ -421,8 +432,13 @@ class APIController extends Controller
 
         Validator::extend('destination_return_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
-            $shipping_mode_id = $data['shipping_mode_id'];
-            $service_type_id = $data['service_type_id'];
+            if(isset($data['shipping_mode_id']) && isset($data['service_type_id'])){
+                $shipping_mode_id = $data['shipping_mode_id'];
+                $service_type_id = $data['service_type_id'];
+            }
+            else{
+                return false;
+            }
             if ($value) {
                 if($service_type_id == 5){
                     return true;
@@ -442,6 +458,9 @@ class APIController extends Controller
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
                 })],
+                'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })],
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 }), 'origin_check'],
@@ -460,9 +479,7 @@ class APIController extends Controller
                 'package_type' => ['required_if:service_type_id,3', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
-                'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('rate_statuses', 'shipping_mode_id')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id)->where('status', 1);
-                })],
+
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric', 'min:0'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
@@ -668,8 +685,20 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
                 }
 
-                if ($service_type_id == 1 || $service_type_id == 2) {
+                if ($service_type_id == 1) {
                     if ($request->has('return_address_id') && $request->input('return_address_id') != null) {
+
+                        $settings = GlobalSettings::where('type', 'omni_users');
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                            if($settings->text != NULL){
+                                $omni_accounts = array_map('intval', explode(',', $settings->text));
+                                if(!in_array($user_id,$omni_accounts)){
+                                    return response()->json(['status' => 1, 'message' => $user_type['name'] . 'is not an omni account']);
+                                }
+                            }
+                        }
+
                         $user_shipping_info_return = UserShippingInfo::find($request->input('return_address_id'));
 
                         if (!$user_shipping_info_return->status) {
@@ -873,7 +902,7 @@ class APIController extends Controller
             }
 
             $return_address_id = null;
-            if ($service_type_id == 1 || $service_type_id == 2) {
+            if ($service_type_id == 1) {
                 if ($request->filled('return_address_id')) {
                     $return_address_id = $request->input('return_address_id');
                 }

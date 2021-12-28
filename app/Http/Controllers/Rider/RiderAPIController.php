@@ -5262,6 +5262,8 @@ class RiderAPIController extends Controller
         $rules = [
             //Attachments
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'attachment_update' => ['nullable', 'integer', 'digits_between:1,10'],
+
             'cv_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
             'cv_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
             'cv_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
@@ -5328,6 +5330,7 @@ class RiderAPIController extends Controller
             $response['errors'] = $validate->errors();
         } else {
             $employee_id = $request->employee_id;
+            $employees = Employee::find($request->employee_id);
             $attachments = EmployeeAttachment::where('employee_id', $employee_id);
             if ($attachments->exists()) {
                 $attachments = $attachments->first();
@@ -6261,6 +6264,11 @@ class RiderAPIController extends Controller
                 }
 
                 $attachments->cheque = implode(',', $cheque_array);
+            }
+
+            if($request->has('attachment_update')){
+                $employees->attachment_update = $request->attachment_update;
+                $employees->save();
             }
 
             $attachments->save();
@@ -10042,8 +10050,17 @@ class RiderAPIController extends Controller
                 $rider = $rider->first();
                 if($request->input('otp') == $rider->reset_pin_otp){
                     $rider->pin = bcrypt($request->pin);
+                    $rider->dummy_pin = $request->pin;
                     $rider->reset_pin_otp = NULL;
                     $rider->save();
+
+                    $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
+                    if($employee->exists())
+                    {
+                        $employee = $employee->first();
+                        $employee->pin = $request->pin;
+                        $employee->update();
+                    }
                     return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
                 }else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
@@ -10226,7 +10243,7 @@ class RiderAPIController extends Controller
                 'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
                 'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
                 'address' => ['required'],
-                'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'emergency_contact' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
                 'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
                 'date_of_birth' => ['required'],
                 'pin' => ['required', 'integer', 'digits:4'],
@@ -10234,10 +10251,10 @@ class RiderAPIController extends Controller
                 'cnic_2' => ['required', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
 
                 //BankInformation
-                'bank_id' => ['required', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
-                'account_title' => ['required'],
-                'branch_name' => ['required'],
-                'iban' => ['required'],
+                'bank_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:banks_lists,id'],
+                'account_title' => ['nullable'],
+                'branch_name' => ['nullable'],
+                'iban' => ['nullable'],
             ];
             $response = ['status' => 1];
             $message = 'Unknown';
@@ -10259,18 +10276,19 @@ class RiderAPIController extends Controller
                     ->orWhere('cnic', $request->input('cnic_no'));
 
                 //Check RiderRequest Already Exist
-                if ($rider_request->exists()) {
-                    $rider_request = $rider_request->first();
-                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
-                        $message = "Phone Number & CNIC Already Exists";
-
-                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
-                        $message = "Phone Number Already Exist";
-
-                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
-                        $message = "CNIC Already Exist";
-                    }
-                } else if ($employee->exists()) {
+//                if ($rider_request->exists()) {
+//                    $rider_request = $rider_request->first();
+//                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
+//                        $message = "Phone Number & CNIC Already Exists";
+//
+//                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
+//                        $message = "Phone Number Already Exist";
+//
+//                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
+//                        $message = "CNIC Already Exist";
+//                    }
+//                } else
+                if ($employee->exists()) {
                     $employee = $employee->first();
                     if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
@@ -10332,17 +10350,19 @@ class RiderAPIController extends Controller
                             $employee_request->pin = $request->pin;
                             $employee_request->rider_main_category = $request->rider_main_category;
                             $employee_request->rider_sub_category = $request->rider_sub_category;
+                            $employee_request->rider_type_id = $request->rider_type_id;
                             $employee_request->department_id = 6;
-
                             $employee_request->save();
 
-                            $employee_bank_info = new EmployeeBankInformation();
-                            $employee_bank_info->employee_id = $employee_request->id;
-                            $employee_bank_info->account_title = $request->account_title;
-                            $employee_bank_info->bank_id = $request->bank_id;
-                            $employee_bank_info->branch_name = $request->branch_name;
-                            $employee_bank_info->iban = $request->iban;
-                            $employee_bank_info->save();
+                            if($request->has("bank_id") && $request->has("account_title") && $request->has("branch_name") && $request->has("iban")){
+                                $employee_bank_info = new EmployeeBankInformation();
+                                $employee_bank_info->employee_id = $employee_request->id;
+                                $employee_bank_info->account_title = $request->account_title;
+                                $employee_bank_info->bank_id = $request->bank_id;
+                                $employee_bank_info->branch_name = $request->branch_name;
+                                $employee_bank_info->iban = $request->iban;
+                                $employee_bank_info->save();
+                            }
 
                             if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
                                 $employee_id = $employee_request->id;
@@ -10698,6 +10718,23 @@ class RiderAPIController extends Controller
                 $data[] = $datum;
             }
             return response()->json(['status' => 0, 'data' => $data]);
+        }
+    }
+
+    public function get_employee_id(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $riders = Rider::find($rider_id);
+        if ($riders) {
+            $employee = Employee::where('trax_id', $riders->trax_id);
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                return response()->json(['status' => 0, 'employee_id' => $employee->id]);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Rider Not Found"]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'message' => "Rider Not Found"]);
         }
     }
 
