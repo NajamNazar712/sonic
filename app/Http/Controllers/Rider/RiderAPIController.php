@@ -4279,7 +4279,9 @@ class RiderAPIController extends Controller
         $rider_profile = Rider::join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
             ->join('cities as c', 'c.id', '=', 'riders.city_id')
             ->join('cities as h', 'h.id', '=', 'c.hub_id')
-            ->select('riders.trax_id as trax_id', 'c.name as city_name', 'h.name as hub', 'riders.name as rider_name', 'riders.phone as phone', 'riders.cnic as cnic', 'riders.address as address', 'rc.name as category')
+            ->leftjoin('employees as e', 'e.trax_id', '=', 'riders.trax_id')
+            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+            ->select('riders.trax_id as trax_id', 'c.name as city_name', 'h.name as hub', 'riders.name as rider_name', 'riders.phone as phone', 'riders.cnic as cnic', 'riders.address as address', 'rc.name as category', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
             ->where('riders.id', $rider_id);
         if ($rider_profile->exists()) {
             $rider_profile = $rider_profile->get();

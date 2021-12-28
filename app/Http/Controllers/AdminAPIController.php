@@ -5689,7 +5689,8 @@ class AdminAPIController extends Controller
         $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
             ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
             ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
-            ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name')
+            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+            ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
             ->where('admins.id', $admin_id);
         if ($admin_profile->exists()) {
         $admin_profile = $admin_profile->get();
