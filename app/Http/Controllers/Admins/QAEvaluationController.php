@@ -26,11 +26,13 @@ class QAEvaluationController extends Controller
     }
 
     public function add(){
+        $max_date = Carbon::tomorrow();
+        $min_date = Carbon::now()->subYear(1);
         $agents = Admin::all(); // 74,50,49,37.29,28,26,21,74
         $campaigns = EvaluationCampaign::all();
         $evaluated_by = Admin::all();
         $natures = EvaluationNature::all();
-        return view('admin.qa_evaluation.add',compact('agents','campaigns','evaluated_by','natures'));
+        return view('admin.qa_evaluation.add',compact('agents','campaigns','evaluated_by','natures','min_date','max_date'));
     }
 
     public function handlings(Request $request){
@@ -100,13 +102,16 @@ class QAEvaluationController extends Controller
     }
 
     public function index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),486);
+
         return view('admin.qa_evaluation.index');
     }
 
     public function list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
-            // ActivityTrailController::createActivityTrailLog(Auth::id(),420);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),487);
         }
         
         $evaluation = QAEvaluation::join('admins as ad','ad.id','=','q_a_evaluations.agent_id')

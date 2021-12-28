@@ -65,10 +65,10 @@
             font-size: 13px;
         }
         .fatal{
-            background-color: #FF0000;
+            background-color: #EF5753;
         }
         .accurate{
-            background-color: #BFEFE2;
+            background-color: springgreen;
             
 
         }
@@ -96,7 +96,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.summary.list') }}',
+                        url: '{{ route('admin.qa_evaluation.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];

@@ -94,7 +94,7 @@
 													<span class="la la-calendar-o"></span>
 												</span>
 															</div>
-                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" name="call_date_time" id="call_date_time" placeholder="Date/Time" data-rule-required="true" data-msg-required="Date/Time is required">
+                                            <input type="text" class="form-control bg-primary border-primary white rounded-right" min="{{$min_date}}" max="{{$max_date}}" name="call_date_time" id="call_date_time" placeholder="Date/Time" data-rule-required="true" data-msg-required="Date/Time is required">
 										</div>
 									</div>
                                     <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">

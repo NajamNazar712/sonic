@@ -1239,9 +1239,15 @@ class Permission
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
 
-            'incidence_monitoring.add' => 648,
             
-
+            'qa_evaluation.index' => 648,
+            'qa_evaluation.add' => 654,
+            'qa_evaluation.edit' => 654,
+            'qa_evaluation.edit' => 654,
+            'qa_evaluation.view' => 655,
+            'qa_evaluation.edit_activities' => 656,
+            
+            
             
 
         ]
