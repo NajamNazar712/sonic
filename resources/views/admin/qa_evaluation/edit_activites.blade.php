@@ -32,7 +32,7 @@
 										</div>
 									</div>
                                     <div class="col-6 text-right">
-                                        <h2 class="text-success font-weight-bold" id="score_heading">Total Weightage:<span id="score_text">100</span></h2>
+                                        <h2 class="text-success font-weight-bold" id="score_heading">Total Weightage: <span id="score_text">100</span></h2>
                                 </div>
                                     <input type="hidden" id="activities_id" name="activities_id">
                                     <input type="hidden" id="activities_weightage" name="activities_weightage">
@@ -122,8 +122,8 @@
 
                             if(v.evaluation_handling_id == value.id){
                                 score += v.weightage ;
-                                html+='<div class="row" style="width:100%">';
-                                html+='<div class="col-6"><div class="form-group input-group"><input type="text" id="activity_'+v.id+'" class="form-control activity_name" name="activity_name['+v.evaluation_handling_id+']['+v.id+']" value="'+v.activity+'"  data-rule-required="true" data-msg-required="Activity is required"></div></div>';
+                                html+='<div class="row mt-1" style="width:100%">';
+                                html+='<div class="col-5 ml-3"><div class="form-group input-group"><input type="text" id="activity_'+v.id+'" class="form-control activity_name" name="activity_name['+v.evaluation_handling_id+']['+v.id+']" value="'+v.activity+'"  data-rule-required="true" data-msg-required="Activity is required"></div></div>';
                                 html+='<div class="col-4"><div class="form-group input-group"><input type="number" id="weightage_'+v.id+'" class="form-control activity_weightage" name="activity_weightage['+v.evaluation_handling_id+']['+v.id+']" value="'+v.weightage+'" data-value="'+v.weightage+'"  data-rule-required="true" data-msg-required="Weeightage is required"></div></div>';
                                 html+='<div class="col-2"><div class="form-group input-group"><a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="ft-minus-circle"></i></a></div></div>';
                                 html+='</div>';
@@ -182,8 +182,8 @@
                 console.log($(this).parents());
                 var parent = $(this).parents()[1];
                 console.log(parent.childElementCount)
-                html1='<div class="row" style="width:100%">';
-                                html1+='<div class="col-6"><div class="form-group input-group"><input type="text" id="activity_0" class="form-control activity_name" name="activity_name['+handling_id+'][0]" value=""  data-rule-required="true" data-msg-required="Activity is required"></div></div>';
+                html1='<div class="row mt-1" style="width:100%">';
+                                html1+='<div class="col-5 ml-3"><div class="form-group input-group"><input type="text" id="activity_0" class="form-control activity_name" name="activity_name['+handling_id+'][0]" value=""  data-rule-required="true" data-msg-required="Activity is required"></div></div>';
                                 html1+='<div class="col-4"><div class="form-group input-group"><input type="number" id="weightage_0" class="form-control activity_weightage" name="activity_weightage['+handling_id+'][0]" value=""  data-value="" data-rule-required="true" data-msg-required="Weeightage is required"></div></div>';
                                 html1+='<div class="col-2"><div class="form-group input-group"><a href="javascript:void(0);" class="btn btn-sm btn-danger remove"><i class="ft-minus-circle"></i></a></div></div>';
                                 html1+='</div>';
