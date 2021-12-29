@@ -541,7 +541,7 @@
                                     @if(session('role_id') == 1 || in_array(496, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.debriefing.agents_call_monitoring.index')}}">Agents Call Monitoring</a></li>
                                     @endif
-                                    @if(session('role_id') == 17 || session('role_id') == 1)
+                                    @if(session('role_id') == 18 || session('role_id') == 1)
                                         <li><a class="menu-item" href="{{route('admin.debriefing.caller_agent.index')}}">Caller Agent Screen</a></li>
                                     @endif
 
