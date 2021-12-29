@@ -178,10 +178,10 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'agent_name' ,name: 'ad.name', class: 'align-middle agent_name'},
-                    { data:'campaign' ,name: 'ec.campaign', class: 'align-middle campaign'},
+                    { data:'campaign' ,name: 'ec.campaign_id', class: 'align-middle campaign'},
                     { data:'evaluated_by' ,name: 'ev.name', class: 'align-middle evaluated_by'},
                     { data:'evaluation_date' ,name: 'q_a_evaluations.evaluation_date', class: 'align-middle evaluation_date'},
-                    { data:'nature' ,name: 'en.nature', class: 'align-middle nature'},
+                    { data:'nature' ,name: 'en.id', class: 'align-middle nature'},
                     { data:'date_time' ,name: 'q_a_evaluations.date_time', class: 'align-middle date_time'},
                     { data:'status' ,name: 'q_a_evaluations.status', class: 'align-middle status'},
                     { data:'score' ,name: 'q_a_evaluations.score', class: 'align-middle score'},
@@ -194,6 +194,82 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var nature_search = '<select name="nature_search" id="nature_search" class="select2 form-control"></select>';
+                    var campaign_search = '<select name="campaign_search" id="campaign_search" class="select2 form-control"></select>';
+                    var status_search = '<select name="status_search" id="status_search" class="select2 form-control"><option value="1">Non-Fatal</option><option value="0">Fatal</option></select>';
+
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.evaluation_date') || $(header).is('.date_time') || $(header).is('.score') || $(header).is('.remarks') ) {
+                            $(td).appendTo($(search));
+                        }else if($(header).is('.campaign')){
+                            $(campaign_search).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.nature')){
+                            $(nature_search).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.status')){
+                            $(status_search).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                    var data1 = $.map({!! $natures !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.nature;
+
+                        return obj;
+                    });
+
+                    var data2 = $.map({!! $campaigns !!}, function (obj) {
+                        obj.id = obj.campaign_id;
+                        obj.text = obj.campaign;
+
+                        return obj;
+                    });
+
+                    $("#nature_search").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Nature",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#campaign_search").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Campaign",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#status_search").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });

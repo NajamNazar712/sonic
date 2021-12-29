@@ -104,8 +104,10 @@ class QAEvaluationController extends Controller
     public function index(){
 
         ActivityTrailController::createActivityTrailLog(Auth::id(),486);
+        $campaigns = EvaluationCampaign::get(['campaign_id', 'campaign']);
+        $natures = EvaluationNature::get(['id', 'nature']);
 
-        return view('admin.qa_evaluation.index');
+        return view('admin.qa_evaluation.index',compact('natures','campaigns'));
     }
 
     public function list(Request $request){

@@ -1723,9 +1723,17 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(656, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.qa_evaluation.edit_activities')}}">CX Evaluation Activities</a></li>
+                        @if (session('role_id') == 1 || count(array_intersect([656], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title">Quality Assurance</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(656, session('permissions')))
+                                        <li class=" nav-item"><a href="{{route('admin.qa_evaluation.edit_activities')}}"><span class="menu-title">CX Evaluation Activities</span></a> </li>
+                                    @endif
+
+                                </ul>
+                            </li>
                         @endif
+               
                     </ul>
                 </li>
             @endif
