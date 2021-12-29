@@ -32,7 +32,7 @@
 										</div>
 									</div>
                                     <div class="col-6 text-right">
-                                        <h3 class="text-success font-weight-bold" id="score_heading">Score:<span id="score_text">100</span></h3>
+                                        <h2 class="text-success font-weight-bold" id="score_heading">Total Weightage:<span id="score_text">100</span></h2>
                                 </div>
                                     <input type="hidden" id="activities_id" name="activities_id">
                                     <input type="hidden" id="activities_weightage" name="activities_weightage">

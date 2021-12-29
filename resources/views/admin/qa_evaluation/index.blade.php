@@ -174,7 +174,7 @@
                     //     d.search_date_to = $('input[name="to_date_formatted"]').val();
                     // }
                 },
-                order: [[3, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'agent_name' ,name: 'ad.name', class: 'align-middle agent_name'},
