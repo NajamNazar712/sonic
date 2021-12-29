@@ -201,7 +201,7 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var nature_search = '<select name="nature_search" id="nature_search" class="select2 form-control"></select>';
                     var campaign_search = '<select name="campaign_search" id="campaign_search" class="select2 form-control"></select>';
-                    var status_search = '<select name="status_search" id="status_search" class="select2 form-control"><option value="1">Non-Fatal</option><option value="0">Fatal</option></select>';
+                    var status_search = '<select name="status_search" id="status_search" class="select2 form-control"><option value="1">Non-Fatal</option><option value="0">Fatal</option><option value="2">Accurate</option></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;

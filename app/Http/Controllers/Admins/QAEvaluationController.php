@@ -28,7 +28,7 @@ class QAEvaluationController extends Controller
     public function add(){
         $max_date = Carbon::tomorrow();
         $min_date = Carbon::now()->subYear(1);
-        $agents = Admin::all(); // 74,50,49,37.29,28,26,21,74
+        $agents = Admin::whereIn('role_id', [50,49,37.29,28,26,21,74])->where('status', 1)->get(); // 74,50,49,37.29,28,26,21,74
         $campaigns = EvaluationCampaign::all();
         $evaluated_by = Admin::all();
         $natures = EvaluationNature::all();
@@ -184,7 +184,7 @@ class QAEvaluationController extends Controller
 
     public function edit($id){
         $qa_evaluations = QAEvaluation::find($id);
-        $agents = Admin::all(); // 74,50,49,37.29,28,26,21,74
+        $agents = Admin::whereIn('role_id', [50,49,37.29,28,26,21,74])->where('status', 1)->get(); // 74,50,49,37.29,28,26,21,74
         $campaigns = EvaluationCampaign::all();
         $evaluated_by = Admin::all();
         $natures = EvaluationNature::all();
@@ -231,12 +231,12 @@ class QAEvaluationController extends Controller
             }
         }
         
-        //0 fatal, 1 non fatal, 3 accurate
+        //0 fatal, 1 non fatal, 2 accurate
         if($score <= 0){
             $status = 0;
             $score = 0;
         }elseif ($score == 100) {
-            $status = 3;
+            $status = 2;
         }else{
             $status = 1;
         }
