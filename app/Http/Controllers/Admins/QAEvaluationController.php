@@ -151,18 +151,18 @@ class QAEvaluationController extends Controller
                 },
             ])
              ->addColumn("action", function ($result) {
-                 if (session('role_id') == 1 || count(array_intersect([570,571,572,573,574,575,576,577,578], session('permissions'))) !== 0) {
+                 if (session('role_id') == 1 || count(array_intersect([654,655], session('permissions'))) !== 0) {
                      $dropdown = '
                           <div class="btn-group">
                             <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                             <div class="dropdown-menu dropdown-menu-sm">
                         ';
     
-                     if (session('role_id') == 1 || in_array(571, session('permissions'))) {
+                     if (session('role_id') == 1 || in_array(654, session('permissions'))) {
                          $dropdown .= '<button type="button" class="dropdown-item qa_edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
     
                      }
-                     if (session('role_id') == 1 || in_array(571, session('permissions'))) {
+                     if (session('role_id') == 1 || in_array(655, session('permissions'))) {
                          $dropdown .= '<button type="button" class="dropdown-item qa_view" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View</div></button>';
     
                      }

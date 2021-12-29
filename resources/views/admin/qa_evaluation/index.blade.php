@@ -138,6 +138,8 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 
                 buttons: [
+                    @if (session('role_id') == 1 || in_array(654, session('permissions')))
+
                     {
                     text: '<i class="ft-plus-circle"></i> Add',
                     className: 'btn btn-primary add',
@@ -145,6 +147,7 @@
                         window.location = '{{ route('admin.qa_evaluation.add') }}';
                     }
                     },
+                    @endif
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
@@ -163,16 +166,6 @@
                 rowId: 'id',
                 ajax:{
                     url: '{{ route('admin.qa_evaluation.list') }}',
-                    // data: function (d) {
-                    //     d.search_origin = $('#origin').val();
-                    //     d.search_destination = $('#destination').val();
-                    //    /* d.search_shipper = $('#shipper').val();*/
-                    //     d.search_shipper = $('#search_shipper').val();
-                    //     d.cards_filter = $('#cards_filter_input').val();
-                    //     d.search_shipping_mode = $('#search_shipping_mode').val();
-                    //     d.search_date_from = $('input[name="from_date_formatted"]').val();
-                    //     d.search_date_to = $('input[name="to_date_formatted"]').val();
-                    // }
                 },
                 order: [[4, 'desc']],
                 columns: [
