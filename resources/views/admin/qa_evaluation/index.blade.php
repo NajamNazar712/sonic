@@ -18,6 +18,7 @@
                             <tr role="row" class="bg-primary white">
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Agent Name</th>
+                                <th class="border-primary border-darken-1">Campaign</th>
                                 <th class="border-primary border-darken-1">Evaluated By</th>
                                 <th class="border-primary border-darken-1">Evaluation Date</th>
                                 <th class="border-primary border-darken-1">Nature</th>
@@ -102,6 +103,7 @@
                             head = [];
                             head.push('S. No.');
                             head.push('Agent Name');
+                            head.push('Campaign');
                             head.push('Evaluated By');
                             head.push('Evaluation Date');
                             head.push('Nature');
@@ -115,6 +117,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.agent_name);
+                                row.push(values.campaign);
                                 row.push(values.evaluated_by);
                                 row.push(values.evaluation_date);
                                 row.push(values.nature);
@@ -175,6 +178,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'agent_name' ,name: 'ad.name', class: 'align-middle agent_name'},
+                    { data:'campaign' ,name: 'ec.campaign', class: 'align-middle campaign'},
                     { data:'evaluated_by' ,name: 'ev.name', class: 'align-middle evaluated_by'},
                     { data:'evaluation_date' ,name: 'q_a_evaluations.evaluation_date', class: 'align-middle evaluation_date'},
                     { data:'nature' ,name: 'en.nature', class: 'align-middle nature'},

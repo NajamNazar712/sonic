@@ -12,10 +12,8 @@ class EvaluationCampaignNatureSeeder extends Seeder
     public function run()
     {
         DB::table('evaluation_campaigns')->insert(array(
-            array('id' => 1, 'campaign_id' => 1, 'campaign' => 'Incoming'),
-            array('id' => 2, 'campaign_id' => 1, 'campaign' => 'RCP'),
-            array('id' => 3, 'campaign_id' => 2, 'campaign' => 'Complains'),
-            array('id' => 4, 'campaign_id' => 2, 'campaign' => 'Claim'),
+            array('id' => 1, 'campaign_id' => 1, 'campaign' => 'Incoming/RCP'),
+            array('id' => 3, 'campaign_id' => 2, 'campaign' => 'Complains/Claim'),
             array('id' => 5, 'campaign_id' => 3, 'campaign' => 'Email Live Chat'),
         ));
 

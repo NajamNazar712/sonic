@@ -116,8 +116,9 @@ class QAEvaluationController extends Controller
         
         $evaluation = QAEvaluation::join('admins as ad','ad.id','=','q_a_evaluations.agent_id')
                 ->join('evaluation_natures as en','en.id','=','q_a_evaluations.nature_id')
+                ->join('evaluation_campaigns as ec','ec.id','=','q_a_evaluations.campaign_id')
                 ->join('admins as ev','ev.id','=','q_a_evaluations.evaluated_by')
-             ->select(['q_a_evaluations.id','ad.name as agent_name','ev.name as evaluated_by','en.nature as nature','q_a_evaluations.evaluation_date as evaluation_date','q_a_evaluations.date_time as date_time','q_a_evaluations.status as status','q_a_evaluations.score as score','q_a_evaluations.score as score','q_a_evaluations.remarks as remarks']);
+             ->select(['q_a_evaluations.id','ad.name as agent_name','ev.name as evaluated_by','en.nature as nature','ec.campaign as campaign','q_a_evaluations.updated_at as evaluation_date','q_a_evaluations.date_time as date_time','q_a_evaluations.status as status','q_a_evaluations.score as score','q_a_evaluations.score as score','q_a_evaluations.remarks as remarks']);
     
 
          $datatables = Datatables::of($evaluation)
