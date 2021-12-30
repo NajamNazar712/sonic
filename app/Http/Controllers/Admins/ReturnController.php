@@ -4550,11 +4550,10 @@ class ReturnController extends Controller
             }
             if($request->get('shipper')){
                 $shipper_id = $request->get('shipper');
-               
+
                 $agent_productivity->join('shipments as sh','sh.id','=','ras.shipment_id')
-                ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
-                ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-                ->where('h.id',$hub_id);
+                ->join('users AS u', 'sh.user_id', '=', 'u.id')
+                ->where('u.id',$shipper_id);
 
             }
              return $datatable->make(true);
