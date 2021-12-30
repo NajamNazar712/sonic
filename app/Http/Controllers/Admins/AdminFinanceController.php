@@ -12830,4 +12830,9 @@ class AdminFinanceController extends Controller
             $credit_user->save();
         }
     }
+    public function retail_done_payments_generate_report_to_email(){
+        $date = Carbon::today()->format('Y-m-d');
+        $response = AdminReportsEmailController::retail_done_payment($date . ' 00:00:00');
+        return ['status' => 1, 'success' => ' Retail Done Payment(s) Report Generated'];
+    }
 }
