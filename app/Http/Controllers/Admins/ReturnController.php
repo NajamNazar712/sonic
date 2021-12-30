@@ -729,11 +729,33 @@ class ReturnController extends Controller
                     Shipment::whereIn('id',$all_consolidation_shipments)->update(['shipper_status_id'=>15,'consignee_status_id'=>15]);
                     foreach ($all_consolidation_shipments as $shipment){
                         ShipmentsJourneyController::add($shipment, 15, 15, NULL, $remark, NULL, Auth::id());
+                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                       if($return_assign_shipment){
+                           $return_assign_shipment->status = 0;
+                           $return_assign_shipment->save();
+                       
+                           $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 7;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
+                        }
 
                     }
                 }else{
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>15,'consignee_status_id'=>15]);
                     ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, NULL, Auth::id());
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
+                       if($return_assign_shipment){
+                           $return_assign_shipment->status = 0;
+                           $return_assign_shipment->save();
+                       
+                           $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 7;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
+                        }
                 }
 
                 return ['status'=>0, 'success'=>"Shipment status successfully updated to Shipment - On Hold for Self Collection"];
@@ -4392,7 +4414,8 @@ class ReturnController extends Controller
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
         $hubs = City::where([['status',1],['hub',1]])->get();
-        return view('admin.return.rcp_agent', compact('agents','today','hubs'));
+        $shippers = User::select('id','name')->get();
+        return view('admin.return.rcp_agent', compact('agents','today','hubs','shippers'));
     }
 
     public function rcp_agent_list(Request $request){   
@@ -4409,6 +4432,8 @@ class ReturnController extends Controller
                 ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
                 ->where('rasl.status',0)
                 ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+
+
                 return $total_assigning;
 
             })
@@ -4449,6 +4474,15 @@ class ReturnController extends Controller
               
                 return $intercept;
              })
+             ->addColumn('on_hold_for_sc', function ($agent_productivity){
+
+                $intercept = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+                ->where('rasl.status',7)
+                ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+              
+                return $intercept;
+             })
              ->addColumn('pending', function ($agent_productivity){
                 
                 $total_assigning = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
@@ -4485,17 +4519,17 @@ class ReturnController extends Controller
                     }else{
                         return number_format(($actual_productivity/($total_assigning))*100,2);
                     }
-             })
-             ->addColumn('un_assigned', function ($agent_productivity){
-            
-                $un_assigned = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
-                    ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-                    ->where('rasl.status',4)
-                    ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
-                
-                    return $un_assigned;
-
              });
+            //  ->addColumn('un_assigned', function ($agent_productivity){
+            
+            //     $un_assigned = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            //         ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+            //         ->where('rasl.status',4)
+            //         ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+                
+            //         return $un_assigned;
+
+            //  });
              if ($request->get('from_date') && $request->get('to_date')) {
                 $from = $request->get('from_date');
                 $to = $request->get('to_date');
@@ -4507,6 +4541,15 @@ class ReturnController extends Controller
             }
             if($request->get('hub')){
                 $hub_id = $request->get('hub');
+               
+                $agent_productivity->join('shipments as sh','sh.id','=','ras.shipment_id')
+                ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
+                ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+                ->where('h.id',$hub_id);
+
+            }
+            if($request->get('shipper')){
+                $shipper_id = $request->get('shipper');
                
                 $agent_productivity->join('shipments as sh','sh.id','=','ras.shipment_id')
                 ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
