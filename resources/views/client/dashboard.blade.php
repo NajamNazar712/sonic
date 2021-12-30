@@ -640,13 +640,85 @@
                     });
             }
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    blockPagePermanently();
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    params.excel = true;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('cod.orders.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
 
+                            head.push('S.No');
+                            head.push('S No.');
+                            head.push('Tracking No.');
+                            head.push('Business Category');
+                            head.push('Order ID');
+                            head.push('Shipper');
+                            head.push('Booked By');
+                            head.push('Service Type');
+                            head.push('Status');
+                            head.push('Reason');
+                            head.push('Payment Status');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Consignee Name');
+                            head.push('Consignee Contact');
+                            head.push('Consignee Address');
+                            head.push('Collection Amount');
+                            head.push('Booking Date');
+                            head.push('Instructions');
+                            head.push('Cancellation Remarks');
+                            head.push('Payment Mode');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.tracking);
+                                row.push(values.business_category);
+                                row.push(values.order_id);
+                                row.push(values.user_name);
+                                row.push(values.booked_by);
+                                row.push(values.service_type);
+                                row.push(values.status);
+                                row.push(values.reason);
+                                row.push(values.payment_status);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.consignee_name);                           
+                                row.push(values.phone);
+                                row.push(values.consignee_address);
+                                row.push(values.amount);
+                                row.push(values.booking_date);
+                                row.push(values.instructions);
+                                row.push(values.cancellation_remarks);
+                                row.push(values.payment_module);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+                    UnblockPagePermanently();
+
+                    return {body: body, header: head};
+                }
+            } );
 
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Order Details',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
 
                         {{--{--}}
                         {{--    text: '<i class="la la-plus"></i> Consolidate',--}}
