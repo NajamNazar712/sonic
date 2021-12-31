@@ -327,18 +327,19 @@ class AdminAttendanceController extends Controller
 
     public function admin_attendance_horizontal_table(Request $request,$array = false)
     {
-        $date = Carbon::createFromFormat('M Y',$request->get('search_month'));
+        $month = "01 ".$request->get('search_month');
+        $date = Carbon::createFromFormat('d M Y',$month);
         $year = $date->year;
         $month = $date->month;
         $prev_month = $date->subMonth(1)->month;
-        $from = new \DateTime(Carbon::createFromDate($year,$prev_month,26)->toDateString());
+        $prev_year = $date->subMonth(1)->year;
+        $from = new \DateTime(Carbon::createFromDate($prev_year,$prev_month,26)->toDateString());
         $to = new \DateTime(Carbon::createFromDate($year,$month,25)->toDateString());
         $to = $to->modify( '+1 day' );
         $period = array();
 
         $interval = new \DateInterval('P1D');;
         $daterange = new \DatePeriod($from, $interval ,$to);
-
 
         foreach ($daterange as $date) {
             if($array)
@@ -392,11 +393,13 @@ class AdminAttendanceController extends Controller
 
 
         if ($request->get('search_month')) {
-            $date = Carbon::createFromFormat('M Y',$request->get('search_month'));
+            $month = "01 ".$request->get('search_month');
+            $date = Carbon::createFromFormat('d M Y',$month);
             $year = $date->year;
             $month = $date->month;
             $prev_month = $date->subMonth(1)->month;
-            $from = Carbon::createFromDate($year,$prev_month,26)->toDateString();
+            $prev_year = $date->subMonth(1)->year;
+            $from = Carbon::createFromDate($prev_year,$prev_month,26)->toDateString();
             $to = Carbon::createFromDate($year,$month,25)->toDateString();
             $attendances->whereBetween('employee_attendances.attendance_date', [$from, $to]);
         }
