@@ -748,7 +748,7 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                rowId: 'lead_id',
+                rowId: 'leadid',
                 order: [[14, 'desc']],
                 columns: [
                     {data: 'lead_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},

@@ -149,7 +149,7 @@ class LeadManagementController extends Controller
             ->leftjoin('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
-            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city','t.name as territory','at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at','sl.name as service','leads.brand as brand','leads.company as company','leads.reason as reason_id');
+            ->select('leads.id as lead_id','leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city','t.name as territory','at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at','sl.name as service','leads.brand as brand','leads.company as company','leads.reason as reason_id');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -243,8 +243,8 @@ class LeadManagementController extends Controller
             })
             ->editColumn('lead_id',function ($lead){
                 $route = route('admin.leads.view_remarks', ['id' => $lead->lead_id]);
-                //return "<u><a href='{$route}\' class='leads' target='_blank'>". str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT)."</a></u>";
-                return $lead->lead_id;
+                return "<u><a href='{$route}\' class='leads' target='_blank'>". str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT)."</a></u>";
+                //return $lead->lead_id;
             })
             ->addColumn('action', function($lead){
                 $dropdown = '
