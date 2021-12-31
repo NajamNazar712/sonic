@@ -331,8 +331,9 @@ class AdminAttendanceController extends Controller
         $date = Carbon::createFromFormat('d M Y',$month);
         $year = $date->year;
         $month = $date->month;
-        $prev_month = $date->subMonth(1)->month;
-        $prev_year = $date->subMonth(1)->year;
+        $prev = $date->subMonth(1);
+        $prev_month = $prev->month;
+        $prev_year = $prev->year;
         $from = new \DateTime(Carbon::createFromDate($prev_year,$prev_month,26)->toDateString());
         $to = new \DateTime(Carbon::createFromDate($year,$month,25)->toDateString());
         $to = $to->modify( '+1 day' );
@@ -397,8 +398,9 @@ class AdminAttendanceController extends Controller
             $date = Carbon::createFromFormat('d M Y',$month);
             $year = $date->year;
             $month = $date->month;
-            $prev_month = $date->subMonth(1)->month;
-            $prev_year = $date->subMonth(1)->year;
+            $prev = $date->subMonth(1);
+            $prev_month = $prev->month;
+            $prev_year = $prev->year;
             $from = Carbon::createFromDate($prev_year,$prev_month,26)->toDateString();
             $to = Carbon::createFromDate($year,$month,25)->toDateString();
             $attendances->whereBetween('employee_attendances.attendance_date', [$from, $to]);
