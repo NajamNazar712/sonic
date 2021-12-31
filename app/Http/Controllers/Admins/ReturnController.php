@@ -4651,10 +4651,12 @@ class ReturnController extends Controller
 
             }
             if($request->get('shipper')){
-                $shipper_id = $request->get('shipper');
+                // $shipper_id = $request->get('shipper');
 
-                $agent_productivity->join('shipments as sh','sh.id','=','ras.shipment_id')
-                ->where('sh.user_id',$shipper_id);
+                // $agent_productivity->join('shipments as sh','sh.id','=','ras.shipment_id')
+                // ->where('sh.user_id',$shipper_id);
+                $shipments = Shipment::where('user_id',$shipper_id)->pluck('id')->toArray();
+                $agent_productivity->whereIn('ras.shipment_id',$shipments);
 
             }
              return $datatable->make(true);
