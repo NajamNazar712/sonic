@@ -233,9 +233,9 @@ class LeadManagementController extends Controller
                     else if ($lead->reason_id == 7){
                         return "Sales Person Already Assigned";
                     }
-                    else if ($lead->reason_id == 0){
-                        return "Others";
-                    }
+                }
+                else if ($lead->reason_id == 0){
+                    return "Others";
                 }
                 else{
                     return "-";
@@ -398,7 +398,7 @@ class LeadManagementController extends Controller
         $reason = $request->reason;
         else
         $reason = NULL;
-        
+
         $lead = Lead::find($lead_id);
         $status = $request->status;
 
