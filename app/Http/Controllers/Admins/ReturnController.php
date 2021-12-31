@@ -4442,7 +4442,7 @@ class ReturnController extends Controller
                
                 $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
                 ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-                ->whereIn('rasl.status',[1,2,3])
+                ->whereIn('rasl.status',[1,2,3,7])
                 ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
               
                 return $actual_productivity;
@@ -4493,7 +4493,7 @@ class ReturnController extends Controller
             
                 $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
                 ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-                ->whereIn('rasl.status',[1,2,3,4])
+                ->whereIn('rasl.status',[1,2,3,7])
                 ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
                     
                 if($total_assigning == 0){
@@ -4512,7 +4512,7 @@ class ReturnController extends Controller
                 
                     $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
                     ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-                    ->whereIn('rasl.status',[1,2,3])
+                    ->whereIn('rasl.status',[1,2,3,7])
                     ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
 
                     if($total_assigning == 0){
@@ -4553,8 +4553,7 @@ class ReturnController extends Controller
                 $shipper_id = $request->get('shipper');
 
                 $agent_productivity->join('shipments as sh','sh.id','=','ras.shipment_id')
-                ->join('users AS u', 'sh.user_id', '=', 'u.id')
-                ->where('u.id',$shipper_id);
+                ->where('sh.user_id',$shipper_id);
 
             }
              return $datatable->make(true);
@@ -4579,7 +4578,7 @@ class ReturnController extends Controller
             ->join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
             ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->whereIn('rasl.status',[1,2,3])
+            ->whereIn('rasl.status',[1,2,3,7])
             ->where('h.id',$hub);
 
             $stats['rcp_reattempt'] = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
@@ -4595,7 +4594,7 @@ class ReturnController extends Controller
             ->where('rasl.status',0);
 
             $stats['completed'] = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
-            ->whereIn('rasl.status',[1,2,3]);
+            ->whereIn('rasl.status',[1,2,3,7]);
 
 
             $stats['rcp_reattempt'] = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
