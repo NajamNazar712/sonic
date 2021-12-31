@@ -260,7 +260,10 @@ class ShipperDashboardController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('phone',function ($shipments){
-                return $shipments->phone1."<br>".$shipments->phone2;
+                if($shipments->phone2)
+                    return $shipments->phone1.", ".$shipments->phone2;                    
+                else
+                    return $shipments->phone1." ".$shipments->phone2;
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);

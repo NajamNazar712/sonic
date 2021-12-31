@@ -655,7 +655,6 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('S No.');
                             head.push('Tracking No.');
                             head.push('Business Category');
                             head.push('Order ID');
