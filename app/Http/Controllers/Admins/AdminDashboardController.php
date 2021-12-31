@@ -11465,12 +11465,11 @@ class AdminDashboardController extends Controller
         }
     }
     public function admin_profile(Request $request){
-        $user = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
-            ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+        $user = Employee::join('employee_designations as d', 'd.id', '=', 'employees.designation_id')
             ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
-            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-            ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id')
-            ->where('admins.id', Auth::id());
+            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'employees.blood_group')
+            ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.personal_email as email', 'employees.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'employees.emergency_contact as emergency_contact_no', 'employees.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id')
+            ->where('employees.trax_id', Auth::user()->trax_id);
         if($user->exists()){
             $user = $user->first();
             return response()->json(['full_name' => $user->name,'department' => $user->department_name,'designation' => $user->designation,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone, 'blood_group' => $user->blood_group, 'emergency_contact_no'=> $user->emergency_contact_no, 'emergency_contact_person' => $user->emergency_contact_person]);

@@ -97,15 +97,15 @@
                         emergency_contact_person = data.emergency_contact_person;
                         emergency_contact_no = data.emergency_contact_no;
 
-                        $('#full_name').html(full_name);
-                        $('#department').html(department);
-                        $('#employee_id').html(employee_id);
-                        $('#email').html(email);
-                        $('#contact').html(contact);
-                        $('#designation').html(designation);
-                        $('#blood_group').html(blood_group);
-                        $('#emergency_contact_person').html(emergency_contact_person);
-                        $('#emergency_contact_no').html(emergency_contact_no);
+                        $('#adminprofile #admin_profile_body #full_name').html(full_name);
+                        $('#adminprofile #admin_profile_body #department').html(department);
+                        $('#adminprofile #admin_profile_body #employee_id').html(employee_id);
+                        $('#adminprofile #admin_profile_body #email').html(email);
+                        $('#adminprofile #admin_profile_body #contact').html(contact);
+                        $('#adminprofile #admin_profile_body #designation').html(designation);
+                        $('#adminprofile #admin_profile_body #blood_group').html(blood_group);
+                        $('#adminprofile #admin_profile_body #emergency_contact_person').html(emergency_contact_person);
+                        $('#adminprofile #admin_profile_body #emergency_contact_no').html(emergency_contact_no);
                         $('#adminprofile').modal('show');
                     }
                 });

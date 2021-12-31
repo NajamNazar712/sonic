@@ -1,4 +1,3 @@
-
 <form id="editProfileForm" class="form form-horizontal" method="post" action="{{route('admin.update.profile.submit')}}">
     @csrf
     <div class="form-body">
@@ -27,18 +26,19 @@
     </div>
 </form>
 
-
-<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-
-<script type="text/javascript">
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script type="text/javascript">
     $(document).ready(function () {
         $('#editProfileForm #emergency_contact_no').inputmask({
             'mask': '9999-9999999',
             'clearIncomplete': true
         });
 
+
         $("#editProfileForm #blood_group").prepend('<option value="" selected></option>').select2({
-            placeholder: "Select Blood Group",
+            placeholder: "Select Blood Group *",
+            dropdownParent: $("#editprofile"),
             width:'100%',
         });
         $("#blood_group").val("{{$employee->blood_group ?? ''}}").trigger('change');
