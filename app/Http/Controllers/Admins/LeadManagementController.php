@@ -149,7 +149,7 @@ class LeadManagementController extends Controller
             ->leftjoin('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
-            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city','t.name as territory','at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at','sl.name as service','leads.brand as brand','leads.company as company');
+            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city','t.name as territory','at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at','sl.name as service','leads.brand as brand','leads.company as company','leads.reason as reason_id');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -193,9 +193,6 @@ class LeadManagementController extends Controller
             $leads->whereBetween('leads.requested_date', [$from,$to]);
         }
         return Datatables::of($leads)
-            ->editColumn('lead_id', function ($lead) {
-                return str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT);
-            })
             ->filterColumn('status',function ($query,$keyword){
                 if ($keyword != '') {
                     $query->where('leads.status_id',$keyword);
@@ -212,9 +209,42 @@ class LeadManagementController extends Controller
                     return $days;
                 }
             })
+            ->editColumn('reason_id',function ($lead){
+                if($lead->reason_id)
+                {
+                    if($lead->reason_id == 1){
+                        return "Prohibited Items";
+                    }
+                    else if ($lead->reason_id == 2){
+                        return "Wrong Contact Details";
+                    }
+                    else if ($lead->reason_id == 3){
+                        return "Duplicate";
+                    }
+                    else if ($lead->reason_id == 4){
+                        return "A/C Query Call";
+                    }
+                    else if ($lead->reason_id == 5){
+                        return "Operational Query";
+                    }
+                    else if ($lead->reason_id == 6){
+                        return "HR Query";
+                    }
+                    else if ($lead->reason_id == 7){
+                        return "Sales Person Already Assigned";
+                    }
+                    else if ($lead->reason_id == 0){
+                        return "Others";
+                    }
+                }
+                else{
+                    return "-";
+                }
+            })
             ->editColumn('lead_id',function ($lead){
                 $route = route('admin.leads.view_remarks', ['id' => $lead->lead_id]);
-                return "<u><a href='{$route}\' class='tracking' target='_blank'>". str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT)."</a></u>";
+                //return "<u><a href='{$route}\' class='leads' target='_blank'>". str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT)."</a></u>";
+                return $lead->lead_id;
             })
             ->addColumn('action', function($lead){
                 $dropdown = '
@@ -363,6 +393,12 @@ class LeadManagementController extends Controller
 
     public function add_status(Request $request){
         $lead_id = $request->lead_id;
+
+        if($request->reason)
+        $reason = $request->reason;
+        else
+        $reason = NULL;
+        
         $lead = Lead::find($lead_id);
         $status = $request->status;
 
@@ -373,6 +409,7 @@ class LeadManagementController extends Controller
                     $lead_log->lead_id = $lead->id;
                     $lead_log->prev_status_id = $lead->status_id;
                     $lead_log->status_id = $status;
+                    $lead_log->reason = $reason;
                     $lead_log->sale_person_id = $lead->sale_person_id;
                     if($lead->reference_person_id == NULL){
                         $lead_log->reference_person_id = Auth::id();
@@ -384,6 +421,7 @@ class LeadManagementController extends Controller
                     $lead_log->save();
 
                     $lead->status_id = $status;
+                    $lead->reason = $reason;
                     $lead->updated_by = Auth::id();
                     $lead->save();
 
