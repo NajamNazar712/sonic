@@ -4431,7 +4431,7 @@ class ReturnController extends Controller
 
         }
         $agent_productivity = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
-                    ->leftjoin('return_assigned_shipments as ras','agent_return_confirmations.admin_id','=','ras.admin_id')
+                    ->join('return_assigned_shipments as ras','agent_return_confirmations.admin_id','=','ras.admin_id')
                     ->select('a.name as agent_name','a.id as agent_id','agent_return_confirmations.login_time as start_time','agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id')
                     ->groupBy('agent_return_confirmations.admin_id');;
         $datatable = Datatables::of($agent_productivity)
