@@ -70,6 +70,7 @@
                                         <th class="border-primary border-darken-1">Instructions</th>
                                         <th class="border-primary border-darken-1">Cancellation Remarks</th>
                                         <th class="border-primary border-darken-1">Payment Mode</th>
+                                        <th class="border-primary border-darken-1">POD Image</th>
 {{--                                        <th class="border-primary border-darken-1">Payment Mode</th>--}}
                                         <th class="border-primary border-darken-1"></th>
                                     </tr>
@@ -926,6 +927,7 @@
                         name: 'shipments.payment_mode_id',
                         class: 'align-middle payment_module'
                     },
+                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {
                         data: 'action',
                         name: 'action',
