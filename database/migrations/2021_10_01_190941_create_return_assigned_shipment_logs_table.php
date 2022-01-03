@@ -21,7 +21,7 @@ class CreateReturnAssignedShipmentLogsTable extends Migration
             $table->timestamps();
         });
     }
-    //0 asssigned,1 re-attempt,2 return, 3 intercept, 4 unassign, 5 reattemp request, 6 return confirm pending
+    //0 asssigned,1 re-attempt,2 return, 3 intercept, 4 unassign, 5 reattemp request, 6 return confirm pending, 7 on hold for selfcollection
     /**
      * Reverse the migrations.
      *

@@ -31,6 +31,7 @@
                                 <thead>
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No</th>
+                                    <th class="border-primary border-darken-1">Rider ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Pending DNCC</th>
                                     <th class="border-primary border-darken-1">Amount</th>
@@ -245,6 +246,7 @@
                             head = [];
 
                             head.push('S.No');
+                            head.push('Rider ID');
                             head.push('Rider');
                             head.push('Pending DNCC');
                             head.push('Amount');
@@ -259,6 +261,7 @@
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.rider_id);
                                 row.push(values.rider);
                                 row.push(values.delivery_note);
                                 row.push(values.amount);
@@ -321,7 +324,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[5, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
                     {
                         orderable: false,
@@ -333,7 +336,7 @@
                             return '';
                         }
                     },
-
+                    {data: 'rider_id', name: 'r.id', class: 'align-middle rider_id'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
                     {data: 'delivery_note', name: 'delivery_note_requests.delivery_note_id', class: 'align-middle delivery_note'},
                     {data: 'amount', name: 'delivery_note_requests.amount', class: 'align-middle amount'},

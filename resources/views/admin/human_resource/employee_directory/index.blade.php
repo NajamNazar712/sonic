@@ -27,6 +27,7 @@
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
+                                    <th class="border-primary border-darken-1">Rider Main Category</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
@@ -500,6 +501,7 @@
                             head.push('CNIC');
                             head.push('Phone No.');
                             head.push('Employee Type');
+                            head.push('Rider Main Category');
                             head.push('Department Name');
                             head.push('Request/Document Status');
                             head.push('Employee Status');
@@ -517,6 +519,7 @@
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
                                 row.push(values.employee_type);
+                                row.push(values.rider_main_category);
                                 row.push(values.department_name);
                                 row.push(values.request_status);
                                 row.push(values.status);
@@ -749,7 +752,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[13, 'desc']],
+                order: [[14, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -763,6 +766,7 @@
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
+                    {data: 'rider_main_category', name: 'rmc.name', class: 'align-middle rider_main_category'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
@@ -788,6 +792,9 @@
                     //     '</select>';
                     var employee_status = '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' +
                         '</select>';
+
+                    var rider_main_categories = '<select name="rider_main_categories_search" id="rider_main_categories_search" class="select2 form-control">' +
+                        '</select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
@@ -805,6 +812,13 @@
                         else if($(header).is('.status'))
                         {
                             $(employee_status).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.rider_main_category'))
+                        {
+                            $(rider_main_categories).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -845,6 +859,20 @@
                     $("#employee_status_search").prepend('<option value="" selected></option>').select2({
                         data: status_data,
                         placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var rider_main_categories_data = $.map({!! $rider_main_categories !!}, function (obj) {
+                        obj.id = obj.name;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $("#rider_main_categories_search").prepend('<option value="" selected></option>').select2({
+                        data: rider_main_categories_data,
+                        placeholder: "Select Rider Main Category",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

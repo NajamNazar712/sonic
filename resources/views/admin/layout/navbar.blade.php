@@ -61,6 +61,7 @@
                             <a class="dropdown-item" href="#" id="adminprofileshow"><span class="menu-title adminprofile"><i class="ft-user"></i> Profile</span></a>
                             <a class="dropdown-item" href="http://bit.ly/sonic_manuals" target="_blank"><i class="ft-help-circle"></i> HELP</a>
                             <a class="dropdown-item" href="{{ route('admin.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
+                            <a class="dropdown-item" href="#" id="editprofileshow"><span class="menu-title editprofile"><i class="ft-edit-2"></i>Edit Profile</span></a>
                             <a class="dropdown-item" href="{{ route('admin.update.profile.password') }}"><span class="menu-title"><i class="ft-edit"></i>Change Pin</span></a>
                             <a class="dropdown-item" href="{{route('admin.logout')}}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();"><i class="ft-power"></i> Logout</a>
@@ -77,8 +78,9 @@
 </nav>
 @section('js')
     <script type="text/javascript">
+
         $('body').on('click','.adminprofile',function(){
-            var full_name , department , employee_id , email , contact , designation;
+            var full_name , department , employee_id , email , contact , designation, blood_group, emergency_contact_no, emergency_contact_person;
             $.ajax({
                     url:'{!! route('admin.dashboard.admin_profile') !!}',
                     type:'GET'
@@ -91,14 +93,37 @@
                         email = data.email;
                         contact = data.contact;
                         designation = data.designation;
+                        blood_group = data.blood_group;
+                        emergency_contact_person = data.emergency_contact_person;
+                        emergency_contact_no = data.emergency_contact_no;
 
+                        $('#adminprofile #admin_profile_body #full_name').html(full_name);
+                        $('#adminprofile #admin_profile_body #department').html(department);
+                        $('#adminprofile #admin_profile_body #employee_id').html(employee_id);
+                        $('#adminprofile #admin_profile_body #email').html(email);
+                        $('#adminprofile #admin_profile_body #contact').html(contact);
+                        $('#adminprofile #admin_profile_body #designation').html(designation);
+                        $('#adminprofile #admin_profile_body #blood_group').html(blood_group);
+                        $('#adminprofile #admin_profile_body #emergency_contact_person').html(emergency_contact_person);
+                        $('#adminprofile #admin_profile_body #emergency_contact_no').html(emergency_contact_no);
                         $('#adminprofile').modal('show');
-                        $('#full_name').html(full_name);
-                        $('#department').html(department);
-                        $('#employee_id').html(employee_id);
-                        $('#email').html(email);
-                        $('#contact').html(contact);
-                        $('#designation').html(designation);
+                    }
+                });
+            });
+
+        $('body').on('click','.editprofile',function(){
+            $.ajax({
+                    url:'{!! route('admin.dashboard.edit_profile') !!}',
+                    type:'GET'
+                }).done(function (data) {
+                    if(data.status == 1){
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }else{
+                        $('#editprofile #editProfileDiv').html(data);
+                        $('#editprofile').modal('show');
                     }
                 });
             });

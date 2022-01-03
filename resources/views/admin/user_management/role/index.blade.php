@@ -74,7 +74,7 @@
 				serverSide: true,
 				ajax: '{{ route('admin.user_management.roles.list') }}',
 				rowId: 'id',
-				order: [[3, 'desc']],
+				order: [[4, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'admin_roles.name', class: 'align-middle name'},
