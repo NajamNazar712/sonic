@@ -1147,7 +1147,12 @@ class Permission
             'settings.auto_tagging.list' => 639,
             'reports.dws_report.index' => 642,
             'reports.osa_charges.index' => 647,
-
+            'reports.revert.index' => 653,
+            'qa_evaluation.index' => 648,
+            'qa_evaluation.add' => 654,
+            'qa_evaluation.edit' => 654,
+            'qa_evaluation.view' => 655,
+            'qa_evaluation.edit_activities' => 656,
 
         ],
 
@@ -1240,7 +1245,8 @@ class Permission
             'reports.weight_reconciliation.list' => 8,
 
             
-
+            
+            
             
 
         ]

@@ -2461,7 +2461,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@dws_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@dws_report_list')->name('list');
         });
-
+        Route::prefix('revert')->name('revert.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@return_revert_log')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@return_revert_list')->name('list');
+        });
         
     });
 
@@ -3579,7 +3582,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
     });
 
-
+    Route::prefix('qa_evaluation')->name('qa_evaluation.')->group(function (){
+        Route::get('/add','Admins\QAEvaluationController@add')->name('add');
+        Route::post('/handlings','Admins\QAEvaluationController@handlings')->name('handlings');
+        Route::post('/submit','Admins\QAEvaluationController@submit')->name('submit');
+        Route::get('','Admins\QAEvaluationController@index')->name('index');
+        Route::get('list','Admins\QAEvaluationController@list')->name('list');
+        Route::get('edit/{id}','Admins\QAEvaluationController@edit')->name('edit');
+        Route::get('view/{id}','Admins\QAEvaluationController@view')->name('view');
+        Route::get('edit_activities','Admins\QAEvaluationController@edit_activities')->name('edit_activities');
+        Route::post('/handlings_edit','Admins\QAEvaluationController@handlings_edit')->name('handlings_edit');
+        Route::post('/update','Admins\QAEvaluationController@update')->name('update');
+        Route::post('/actvities_data','Admins\QAEvaluationController@actvities_data')->name('actvities_data');
+        Route::post('update_activities','Admins\QAEvaluationController@update_activities')->name('update_activities');
+        
+        
+        
+    });
 });
 
 Route::prefix('retail')->name('retail.')->group(function () {

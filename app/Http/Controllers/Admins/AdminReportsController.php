@@ -42,6 +42,8 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\OSAChargesLog;
+use App\Http\Models\Admin\ReturnRevertLog;
+
 
 class AdminReportsController extends Controller
 {
@@ -7225,8 +7227,9 @@ class AdminReportsController extends Controller
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $destinations = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->select('id','name')->get();
+        $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->where('business_category_id', 1)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-        return view('admin.reports.fake_statuses_shipments_report')->with(['riders' => $riders, 'hubs' => $hubs, 'destinations' => $destinations, 'shipping_modes' => $shipping_modes]);
+        return view('admin.reports.fake_statuses_shipments_report')->with(['riders' => $riders, 'hubs' => $hubs, 'destinations' => $destinations, 'shipping_modes' => $shipping_modes, 'zones' => $zones]);
     }
 
     public function fake_status_shipments_list(request $request){
@@ -7245,6 +7248,7 @@ class AdminReportsController extends Controller
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
+            ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
             ->leftjoin('admins as a', 'a.id', '=', 'sj.admin_id')
             ->leftjoin('admin_roles as ar', 'ar.id', '=', 'admin.role_id')
@@ -7277,6 +7281,9 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatables->whereBetween('delivery_note_shipments.fake_status_updated_at', [$from, $to]);
+        }
+        if ($zone = $request->get('zone')) {
+            $datatables->where('z.id', '=', $zone);
         }
         return $datatables->make(true);
     }
@@ -9909,6 +9916,38 @@ class AdminReportsController extends Controller
             $shipments = $shipments->whereBetween('nc.updated_at', [$from,$to]);
         }
         return $datatable->make(true);
+    }
+    public function return_revert_log(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),484);
+
+        return view('admin.reports.return_revert_log');
+
+    }
+    public function return_revert_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),485);
+        }
+        $shipments = Shipment::join('return_revert_logs as rr', 'shipments.id', '=', 'rr.shipment_id')
+        ->leftjoin('admins as a','a.id','=','rr.updated_by')
+        ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','a.name as updated_by','rr.return_note as return_note','rr.updated_at as updated_at','rr.shipper as shipper');
+
+        $datatable = Datatables::of($shipments)
+        ->editColumn('tracking_number',function ($shipments){
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        })
+        ->editColumn('return_note', function ($shipments) {
+            return str_pad($shipments->return_note, 6, '0', STR_PAD_LEFT);
+        });
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments = $shipments->whereBetween('rr.updated_at', [$from,$to]);
+        }
+        return $datatable->make(true);
+
     }
 }
 
