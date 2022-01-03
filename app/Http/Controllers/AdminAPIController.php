@@ -4855,6 +4855,7 @@ class AdminAPIController extends Controller
                                     $actual_weight = $dense_weight;
                                 }
                             } else {
+
                                 if ($dense_weight < $volume_weight) {
                                     $actual_weight = $dense_weight;
                                 } else {
@@ -4863,6 +4864,11 @@ class AdminAPIController extends Controller
                                     $shipment->breadth = $request->dimension_w;
                                     $shipment->height = $request->dimension_h;
                                 }
+                                $dws_charges->dws_weight_status = 1;
+                                $dws_charges->admin_id = 174;
+                                $dws_charges->save();
+                                
+
                             }
                         } else {
                             return response()->json(false);
