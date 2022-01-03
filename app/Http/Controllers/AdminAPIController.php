@@ -5740,7 +5740,8 @@ class AdminAPIController extends Controller
                     ->join('cities as c', 'c.id', '=', 'e.city_id')
                     ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
                     ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city')
-                    ->where('e.name', $request->search_param);
+                    ->where('e.name', $request->search_param)
+                    ->where('admins.status', 1);
 
             } elseif ($request->search_with == 2) {
                 $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
@@ -5749,7 +5750,8 @@ class AdminAPIController extends Controller
                     ->join('cities as c', 'c.id', '=', 'e.city_id')
                     ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
                     ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city')
-                    ->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0));
+                    ->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
+                    ->where('admins.status', 1);
             } elseif ($request->search_with == 3) {
                 $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
                     ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
@@ -5757,7 +5759,8 @@ class AdminAPIController extends Controller
                     ->join('cities as c', 'c.id', '=', 'e.city_id')
                     ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
                     ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city')
-                    ->where('e.trax_id', $request->search_param);
+                    ->where('e.trax_id', $request->search_param)
+                    ->where('admins.status', 1);
             } else {
                 return response()->json(['status' => 1, 'message' => 'Provide atleast one parameter']);
             }
@@ -5765,7 +5768,7 @@ class AdminAPIController extends Controller
                 $admin_profile = $admin_profile->get();
                 return response()->json(['status' => 0, 'data' => $admin_profile]);
             } else {
-                return response()->json(['status' => 1, 'message' => 'No data found!']);
+                return response()->json(['status' => 1, 'message' => 'No User found!']);
             }
         }
     }
