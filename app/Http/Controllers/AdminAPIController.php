@@ -4845,7 +4845,6 @@ class AdminAPIController extends Controller
                         if ($dws_charges->exists()) {
                             $dws_charges = $dws_charges->get()->first();
                             $dws_charges_status = $dws_charges->dws_weight_status;
-                            if ($dws_charges_status == 1) {
                                 if ($dense_weight < $volume_weight) {
                                     $actual_weight = $volume_weight;
                                     $shipment->length = $request->dimension_l;
@@ -4854,22 +4853,29 @@ class AdminAPIController extends Controller
                                 } else {
                                     $actual_weight = $dense_weight;
                                 }
-                            } else {
+                                if ($dws_charges_status == 0) {
+                                      $dws_charges->dws_weight_status = 1;
+                                      $dws_charges->admin_id = 174;
+                                      $dws_charges->save();
+                                      $dws_charges_status = 1;
+                                }
+                            // if ($dws_charges_status == 1) {
+                            // } else {
 
-                                if ($dense_weight < $volume_weight) {
-                                    $actual_weight = $dense_weight;
-                                } else {
-                                    $actual_weight = $volume_weight;
-                                    $shipment->length = $request->dimension_l;
-                                    $shipment->breadth = $request->dimension_w;
-                                    $shipment->height = $request->dimension_h;
-                                }
-                                $dws_charges->dws_weight_status = 1;
-                                $dws_charges->admin_id = 174;
-                                $dws_charges->save();
+                            //     if ($dense_weight < $volume_weight) {
+                            //         $actual_weight = $dense_weight;
+                            //     } else {
+                            //         $actual_weight = $volume_weight;
+                            //         $shipment->length = $request->dimension_l;
+                            //         $shipment->breadth = $request->dimension_w;
+                            //         $shipment->height = $request->dimension_h;
+                            //     }
+                            //     $dws_charges->dws_weight_status = 1;
+                            //     $dws_charges->admin_id = 174;
+                            //     $dws_charges->save();
                                 
 
-                            }
+                            // }
                         } else {
                             return response()->json(false);
                         }
