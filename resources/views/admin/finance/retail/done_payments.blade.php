@@ -509,7 +509,7 @@
 			var table = $('#datatable').DataTable({
 				scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				@if (session('role_id') == 1 || count(array_intersect([457, 458], session('permissions'))) !== 0)
+				@if (session('role_id') == 1 || count(array_intersect([457, 458,657], session('permissions'))) !== 0)
 
 					buttons: [
 						@if (session('role_id') == 1 || in_array(657, session('permissions')))
