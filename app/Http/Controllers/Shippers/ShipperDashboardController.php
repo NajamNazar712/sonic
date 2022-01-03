@@ -105,7 +105,10 @@ use App\Http\Models\Admin\Retail\OtherParcelReceiving;
 use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
 use App\Http\Models\Admin\Retail\OtherRetailShipment;
 use App\Http\Models\SubCategorySegment;
-
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Admin\PODImage;
+use App\Http\Models\RiderDelivery;
+use App\Http\Models\InternationalShipment;
 //use Illuminate\Support\Facades\Auth;
 
 class ShipperDashboardController extends Controller
@@ -387,12 +390,51 @@ class ShipperDashboardController extends Controller
                 }
             })
             ->addColumn('pod_image',function ($shipments) {
-                $dropdown = '
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-            ';
-                return $dropdown;
+                $image = '';
+                if($shipments->status_id == 25){
+                    $rider_return_deliveries = RiderReturnDelivery::where('shipment_id', $shipments->shipment_id);
+                    if($rider_return_deliveries->exists()){
+                        $rider_return_deliveries = $rider_return_deliveries->get()->first();
+                        if($rider_return_deliveries->pod_image != null){
+                            $exists = Storage::disk('public')->exists($rider_return_deliveries->pod_image);
+                            if($exists){
+                                $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($rider_return_deliveries->pod_image)) . '"><i class="la la-image"></i> View</button></div>';
+                            }
+                        }
+                    }
+                }
+                else if($shipments->status_id == 14){
+
+                    $international_shipment = InternationalShipment::where('shipment_id', $shipments->shipment_id);
+                    if($international_shipment->exists()){
+                        $international_shipment = $international_shipment->get()->first();
+                        $images = PODImage::where('shipment_id', $shipments->shipment_id);
+                        if($images->exists()){
+                            $images = $images->get()->first();
+                            if($images->pod_image != null){
+                                $exists = Storage::disk('public')->exists($images->pod_file);
+                                if($exists){
+                                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($images->pod_file)) . '"><i class="la la-image"></i> View</button></div>';
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        $images = RiderDelivery::where('shipment_id', $shipments->shipment_id);
+                        if($images->exists()){
+                            $images = $images->get()->first();
+                            if($images->picture_path != null){
+                                $exists = Storage::disk('public')->exists($images->picture_path);
+                                if($exists){
+                                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($images->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+                                }
+                            }
+                        }
+                    }
+                }
+                else $image = '-';
+                return $image;
             });
             if ($tracking_numbers = $request->get('tracking_numbers')) {
                 $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));

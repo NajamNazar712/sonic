@@ -927,7 +927,7 @@
                         name: 'shipments.payment_mode_id',
                         class: 'align-middle payment_module'
                     },
-                    {data: 'pod_image', name: 'pod_imag', class: 'text-center align-middle action p-1'},
+                    {data: 'pod_image', name: 'pod_image', class: 'text-center align-middle action p-1', orderable: false, searchable: false},
                     {
                         data: 'action',
                         name: 'action',
@@ -1190,7 +1190,10 @@
                     $('#CancelReasonModal').modal('show');
                 }
             });
-
+            table.on('click', '.picture', function () {
+                var pod_image = $(this).data('link');
+                window.open(pod_image, "_blank")
+            });
             $('#CancelReasonSubmit').on('click',function () {
                 var reason = $('#cancel_reason').val();
                 var id = parseInt($('#cancel_shipment_id').val());
