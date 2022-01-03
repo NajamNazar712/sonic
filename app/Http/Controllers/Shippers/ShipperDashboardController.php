@@ -412,9 +412,9 @@ class ShipperDashboardController extends Controller
                         if($images->exists()){
                             $images = $images->get()->first();
                             if($images->pod_file != null){
-                                $exists = Storage::disk('public')->exists($images->pod_file);
+                                $exists = asset('uploads/pod_images/' . $images->pod_file);
                                 if($exists){
-                                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($images->pod_file)) . '"><i class="la la-image"></i> View</button></div>';
+                                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . $exists . '"><i class="la la-image"></i> View</button></div>';
                                 }
                             }
                         }
