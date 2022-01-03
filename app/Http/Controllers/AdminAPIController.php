@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
+use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
@@ -52,8 +53,8 @@ use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PayslipPdf;
-use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\Product;
+use App\Http\Models\RateStatus;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
@@ -4846,6 +4847,7 @@ class AdminAPIController extends Controller
                         if ($dws_charges->exists()) {
                             $dws_charges = $dws_charges->get()->first();
                             $dws_charges_status = $dws_charges->dws_weight_status;
+                            if ($dws_charges_status == 1) {
                                 if ($dense_weight < $volume_weight) {
                                     $actual_weight = $volume_weight;
                                     $shipment->length = $request->dimension_l;
@@ -4854,36 +4856,33 @@ class AdminAPIController extends Controller
                                 } else {
                                     $actual_weight = $dense_weight;
                                 }
-                                if ($dws_charges_status == 2) {
-                                      $dws_charges->dws_weight_status = 1;
-                                      $dws_charges->admin_id = 174;
-                                      $dws_charges->save();
-                                      $dws_charges_status = 1;
-
-                                      PendingDwsWeightCharges::where('user_id',$shipment->user_id)->update([
-                                        'dws_weight_status' => 1,
-                                        'admin_id' => 174
-                                        ]);
+                            } else {
+                                if ($dense_weight < $volume_weight) {
+                                    $actual_weight = $dense_weight;
+                                } else {
+                                    $actual_weight = $volume_weight;
+                                    $shipment->length = $request->dimension_l;
+                                    $shipment->breadth = $request->dimension_w;
+                                    $shipment->height = $request->dimension_h;
                                 }
-                            // if ($dws_charges_status == 1) {
-                            // } else {
-
-                            //     if ($dense_weight < $volume_weight) {
-                            //         $actual_weight = $dense_weight;
-                            //     } else {
-                            //         $actual_weight = $volume_weight;
-                            //         $shipment->length = $request->dimension_l;
-                            //         $shipment->breadth = $request->dimension_w;
-                            //         $shipment->height = $request->dimension_h;
-                            //     }
-                            //     $dws_charges->dws_weight_status = 1;
-                            //     $dws_charges->admin_id = 174;
-                            //     $dws_charges->save();
-                                
-
-                            // }
+                            }
                         } else {
-                            return response()->json(false);
+                            $rates =  RateStatus::whereIn('user_id',$shipment->user_id);
+                            if($rates->exists()){
+                                foreach ($rates->get() as $value) {
+                                    DwsWeightChargesController::add($value->user_id, $value->shipping_mode_id, 1,174);
+                                }
+                            }
+                            if ($dense_weight < $volume_weight) {
+                                $actual_weight = $volume_weight;
+                                $shipment->length = $request->dimension_l;
+                                $shipment->breadth = $request->dimension_w;
+                                $shipment->height = $request->dimension_h;
+                            } else {
+                                $actual_weight = $dense_weight;
+                            }
+                            $dws_charges_status = 1; 
+                            // return response()->json(false);
                         }
 
                     }
