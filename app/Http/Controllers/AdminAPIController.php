@@ -40,7 +40,6 @@ use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\DwsDetail;
 use App\Http\Models\DwsWeightCharges;
-use App\Http\Models\DwsWeightChargesHistory;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
@@ -4869,26 +4868,15 @@ class AdminAPIController extends Controller
                                 }
                             }
                         } else {
-                                // PendingDwsWeightCharges::where('user_id',$user_id)->where('shipping_mode_id',$shipping_mode_id)->delete();
                             DwsWeightCharges::create([
                                 'user_id' => $shipment->user_id,
                                 'shipping_mode_id' => $shipment->shipping_mode_id,
                                 'dws_weight_status' => 1,
                                 'admin_id' => 174
                             ]);
-                            DwsWeightChargesHistory::create([
-                                'user_id' => $shipment->user_id,
-                                'shipping_mode_id' => $shipment->shipping_mode_id,
-                                'dws_weight_status' => 1,
-                                'admin_id' => 174
-                            ]);
-                            PendingDwsWeightCharges::create([
-                                'user_id' => $shipment->user_id,
-                                'shipping_mode_id' => $shipment->shipping_mode_id,
-                                'dws_weight_status' => 1,
-                                'admin_id' => 174
-                            ]);
                             
+                            DwsWeightChargesController::add($shipment->user_id, $shipment->shipping_mode_id, 1, 174);
+                           
                             if ($dense_weight < $volume_weight) {
                                 $actual_weight = $volume_weight;
                                 $shipment->length = $request->dimension_l;
@@ -4899,23 +4887,7 @@ class AdminAPIController extends Controller
                             }
                             $dws_charges_status = 1; 
 
-                                // $dws_charges = DwsWeightCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
-
-                            // $rates =  RateStatus::whereIn('user_id',$shipment->user_id);
-                            // if($rates->exists()){
-                            //     foreach ($rates->get() as $value) {
-                            //         DwsWeightChargesController::add($value->user_id, $value->shipping_mode_id, 1,174);
-                            //     }
-                            // }
-                            // if ($dense_weight < $volume_weight) {
-                            //     $actual_weight = $volume_weight;
-                            //     $shipment->length = $request->dimension_l;
-                            //     $shipment->breadth = $request->dimension_w;
-                            //     $shipment->height = $request->dimension_h;
-                            // } else {
-                            //     $actual_weight = $dense_weight;
-                            // }
-                            // return response()->json(false);
+                           
                         }
 
                     }
