@@ -212,7 +212,10 @@ class LeadManagementController extends Controller
             ->editColumn('reason_id',function ($lead){
                 if($lead->reason_id)
                 {
-                    if($lead->reason_id == 1){
+                    if ($lead->reason_id == 10){
+                        return "Others";
+                    }
+                    else if($lead->reason_id == 1){
                         return "Prohibited Items";
                     }
                     else if ($lead->reason_id == 2){
@@ -233,9 +236,6 @@ class LeadManagementController extends Controller
                     else if ($lead->reason_id == 7){
                         return "Sales Person Already Assigned";
                     }
-                }
-                else if ($lead->reason_id == 0){
-                    return "Others";
                 }
                 else{
                     return "-";
@@ -393,7 +393,6 @@ class LeadManagementController extends Controller
 
     public function add_status(Request $request){
         $lead_id = $request->lead_id;
-
         if($request->reason)
         $reason = $request->reason;
         else

@@ -332,13 +332,13 @@
                                     <option value="1" > Prohibited Items </option>
                                     <option value="2" > Wrong Contact Details </option>
                                     <option value="3" > Duplicate </option>
-                                    <option value="0" > Others </option>
+                                    <option value="10" > Others </option>
                             </select>
                         </div>
                         <div id="div_lead_status_notinterested" class="form-group d-none">
                             <select name="lead_status_notinterested" id="lead_status_notinterested" class="form-control select2">
                                     <option value="4" > A/C Query Call </option>
-                                    <option value="0" > Others </option>
+                                    <option value="10" > Others </option>
                             </select>
                         </div>
                         <div id="div_lead_status_irrelevant" class="form-group d-none">
@@ -346,7 +346,7 @@
                                 <option value="5" > Operational Query </option>
                                 <option value="6" > HR Query </option>
                                 <option value="7" > Sales Person Already Assigned </option>
-                                <option value="0" > Others </option>
+                                <option value="10" > Others </option>
                             </select>
                         </div>
                         <div class="form-group ml-1">
@@ -605,6 +605,7 @@
                             head.push('Sale Person Tagged At');
                             head.push('Reference Person');
                             head.push('Lead Status');
+                            head.push('Reason');
                             head.push('Aging');
                             head.push('Updated By');
                             head.push('Updated At');
@@ -631,6 +632,7 @@
                                 row.push(values.sale_person_updated_at);
                                 row.push(values.reference_person);
                                 row.push(values.status);
+                                row.push(values.reason_id);
                                 row.push(values.aging);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
