@@ -7,6 +7,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ModulePermission;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
@@ -79,7 +80,8 @@ class UserManagementController extends Controller
       ActivityTrailController::createActivityTrailLog(Auth::id(),358);
       $hubs=City::select('id','name')->where('hub',1)->get();
       $roles = AdminRole::with('department')->get();
-      return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles]);
+      $blood_group = EmployeeBloodGroup::select('id','name')->get();
+      return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles, 'blood_groups' => $blood_group]);
     }
 
     public function user_list(Request $request) {
@@ -92,8 +94,9 @@ class UserManagementController extends Controller
             ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
             ->leftjoin('employee_designations as ed', 'admins.designation_id', '=', 'ed.id')
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'admins.trax_id')
+            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'emp.blood_group')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name');
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person');
 
         if(!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
@@ -114,6 +117,9 @@ class UserManagementController extends Controller
         ->editColumn('designation', function ($user) {
             return (($user->designation_name != null) ? $user->designation_name : $user->designation);
         })
+        ->filterColumn('bg.name', function ($query, $keyword) {
+                $query->where('bg.id', $keyword);
+            })
         ->removeColumn('department')
         ->addColumn('action', function($user) {
             if (session('role_id') == 1 || count(array_intersect([83, 84, 542,620], session('permissions'))) !== 0) {

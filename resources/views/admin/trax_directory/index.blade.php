@@ -26,6 +26,8 @@
                                     <th class="border-primary border-darken-1">Outlook ID</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Official Phone Number</th>
+                                    <th class="border-primary border-darken-1">Emergency Contact No.</th>
+                                    <th class="border-primary border-darken-1">Emergency Contact Person</th>
                                     <th class="border-primary border-darken-1">Created At</th>
                                    {{-- <th class="border-primary border-darken-1"></th>--}}
                                 </tr>
@@ -81,6 +83,8 @@
                             head.push('Outlook ID');
                             head.push('Phone');
                             head.push('Official Phone');
+                            head.push('Emergency Contact No.');
+                            head.push('Emergency Contact Person');
                             head.push('Created Datetime');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -91,6 +95,8 @@
                                 row.push(values.email);
                                 row.push(values.phone);
                                 row.push(values.official_phone);
+                                row.push(values.emergency_contact);
+                                row.push(values.emergency_contact_person);
                                 row.push(values.date);
                                 body.push(row);
                             });
@@ -126,7 +132,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.trax_directory.list') }}',
                 rowId: 'id',
-                order: [[6, 'asc']],
+                order: [[9, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_address_id', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'h.name', class: 'text-center align-middle city',},
@@ -135,6 +141,8 @@
                     {data: 'email', name: 'admins.email', class: 'align-middle email'},
                     {data: 'phone', name: 'admins.phone_number', class: 'align-middle phone'},
                     {data: 'official_phone', name: 'admins.official_phone_number', class: 'align-middle official_phone'},
+                    {data: 'emergency_contact', name: 'emp.emergency_contact', class: 'align-middle emergency_contact'},
+                    {data: 'emergency_contact_person', name: 'emp.emergency_contact_person', class: 'align-middle emergency_contact_person'},
                     {data: 'date', name: 'admins.created_at', class: 'align-middle date'},
                     //{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
