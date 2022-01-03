@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdatetableInternationalShipments extends Migration
+class AddRiderTypeIdToEmployees extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class UpdatetableInternationalShipments extends Migration
      */
     public function up()
     {
-        Schema::table('international_shipments', function (Blueprint $table) {
-            $table->integer('seal_number')->index()->nullable();
+        Schema::table('employees', function (Blueprint $table) {
+            $table->integer('rider_type_id')->nullable()->index();
         });
     }
 
@@ -25,8 +25,8 @@ class UpdatetableInternationalShipments extends Migration
      */
     public function down()
     {
-        Schema::table('international_shipments', function (Blueprint $table) {
-            $table->dropColumn('seal_number');
+        Schema::table('employees', function (Blueprint $table) {
+            $table->dropColumn('rider_type_id');
         });
     }
 }

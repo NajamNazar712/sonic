@@ -1050,6 +1050,8 @@ class AdminAPIController extends Controller
         $rules = [
             //Attachments
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'attachment_update' => ['nullable', 'integer', 'digits_between:1,10'],
+
             'cv_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
             'cv_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
             'cv_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
@@ -1116,6 +1118,7 @@ class AdminAPIController extends Controller
             $response['errors'] = $validate->errors();
         } else {
             $employee_id = $request->employee_id;
+            $employees = Employee::find($request->employee_id);
             $attachments = EmployeeAttachment::where('employee_id', $employee_id);
             if ($attachments->exists()) {
                 $attachments = $attachments->first();
@@ -2051,6 +2054,10 @@ class AdminAPIController extends Controller
                 $attachments->cheque = implode(',', $cheque_array);
             }
 
+            if($request->has('attachment_update')){
+                $employees->attachment_update = $request->attachment_update;
+                $employees->save();
+            }
             $attachments->save();
             $response['status'] = 0;
             $response['link'] = $link;
@@ -5388,8 +5395,17 @@ class AdminAPIController extends Controller
                 $admin = $admin->first();
                 if($request->input('otp') == $admin->reset_pin_otp){
                     $admin->password = bcrypt($request->pin);
+                    $admin->dummy_pin = $request->pin;
                     $admin->reset_pin_otp = NULL;
                     $admin->save();
+
+                    $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
+                    if($employee->exists())
+                    {
+                        $employee = $employee->first();
+                        $employee->pin = $request->pin;
+                        $employee->update();
+                    }
                     return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
                 }else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
@@ -5532,7 +5548,6 @@ class AdminAPIController extends Controller
                             $employee_bank_info->save();
                         }
 
-
                         if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
                             $employee_id = $employee_request->id;
                             $date = Carbon::now()->format('Y_m_d');
@@ -5665,6 +5680,39 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'images' => $admin_ticker_images]);
         } else {
             return response()->json(['status' => 1, 'message' => 'No Images Found']);
+        }
+    }
+
+    public function admin_profile(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
+            ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+            ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+            ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name')
+            ->where('admins.id', $admin_id);
+        if ($admin_profile->exists()) {
+        $admin_profile = $admin_profile->get();
+            return response()->json(['status' => 0, 'admin' => $admin_profile]);
+        } else {
+            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+    }
+
+    public function get_employee_id(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admins = Admin::find($admin_id);
+        if ($admins) {
+            $employee = Employee::where('trax_id', $admins->trax_id);
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                return response()->json(['status' => 0, 'employee_id' => $employee->id]);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Employee Not Found"]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'message' => "Employee Not Found"]);
         }
     }
 

@@ -507,10 +507,11 @@
                            '_token': '{{ csrf_token() }}'
                        }
                    }).done(function (data) {
+                       shipperdata = data.shippers;
                         if(data.status == 0) {
                             $('#image_return_note_id').val(return_note_id);
                             var image_html = '';
-                            shipperdata=data.shippers;
+                           
                             $.each(data.details, function (index, detail) {
                                 index++;
                                 var img = '';
@@ -560,7 +561,7 @@
             var return_image_table;
             function add_row() {
                 rows_count++;
-                console.log(shipperdata.length);
+
                 var return_image = '<input class="form-control form-control-sm" type="file" name="return_note_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
                 var shipper='<select name="shipper_name[]" id="shipper_name_' + rows_count + '" class="form-control select2" data-rule-required="true" data-msg-required="Shipper is required"">'; 
                     for(var c= 0;c<shipperdata.length;c++)
@@ -757,6 +758,7 @@
                 selected_rows = [];
                 rows_count = 0;
                 $('#return_note_image_view_table tbody').html('');
+                $('#ReturnNoteImageSubmitButton').attr('disabled', true);
             });
 
         });

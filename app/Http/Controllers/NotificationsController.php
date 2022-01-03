@@ -37,6 +37,7 @@ use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
 use App\Http\Models\FnfSectionEmployee;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\OvernightOverlandReportData;
@@ -8675,6 +8676,48 @@ class NotificationsController extends Controller
                         $to = $shipment->consignee_phone_number_1;
                         self::sms($body, $to);
                     }
+                }
+
+                else if ($id == 164) {
+                    $getdata = $reference_1_id;
+
+                    $data = Employee::wherein("id",$getdata)->get();
+
+                    $html = '<p>Dear HR,
+
+                    Following Employee(s) has updated their documents through Bolt App,
+                    please check and verify his/her documents.<p>';
+
+                    $html .= '<table style="width:100%;">';
+                    $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Employee ID</th>';
+                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Name</th>';
+                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>';
+                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">CNIC Number</th>';
+                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Category</th>';
+                    $html .= '</tr></thead><tbody>';
+
+                    foreach($data as $datum){
+
+                        $data_set = Employee::find($datum->id);
+                        $data_set->attachment_update = 0;
+                        $data_set->save();
+
+                        $category = ($datum->employee_type_id == 1) ? "Staff" : "Rider";
+
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->trax_id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->name . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->phone_number . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->cnic . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $category . '</td>';
+
+                    }
+                    $html .= '</tr></tbody></table>';
+                    $body_updated = $body;
+                    $body_updated = str_replace('[preview]', $html, $body_updated);
+                    $subject = ' Employee Documents Update';
+                    $to = ['maher.noraiz@trax.pk', 'muzaffar.kareem@trax.pk'];
+                    self::email($subject, $body_updated, $to);
                 }
             }
         }

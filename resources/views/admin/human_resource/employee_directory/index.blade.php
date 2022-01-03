@@ -31,6 +31,7 @@
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
+                                    <th class="border-primary border-darken-1">Joining Date</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -276,6 +277,41 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="convertRiderModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="convertRiderModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Convert Rider</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.employee_directory.rider.convert')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="convertRiderForm" novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="employee_id" id="employee_id" value="">
+                        <div class="form-group">
+                            <select name="department_id" id="department" class="select2 form-control " data-rule-required="true" data-msg-required="Department is required" style="width: 100%">
+                                @foreach($employee_department as $department)
+                                    <option value="{{$department->id}}">{{$department->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <select name="designation_id" id="designation" class="select2 form-control " data-rule-required="true" data-msg-required="Designation is required" style="width: 100%">
+                            </select>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" class="btn btn-primary" value="edit">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -333,6 +369,45 @@
                 width: '100%',
                 placeholder: 'Select Rider Main Category',
                 dropdownParent: $('#editRiderModal')
+            });
+
+            $('#department').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Department',
+                dropdownParent: $('#convertRiderModal')
+            }).bind('change',function (){
+                var id = $(this).val();
+                if(id != "") {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.employee_directory.get.designation') !!}',
+                        method: 'POST',
+                        data: {
+                            'department_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            $("#designation").html("");
+                            if (data.status == 1) {
+                                let options = "";
+                                $.each(data.designations, function (i, v) {
+                                    options += "<option value='" + v.id + "'>" + v.name + "</option>";
+                                });
+                                $("#designation").html(options).val("").trigger('change');
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                }
+            });
+
+            $('#designation').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Designation',
+                dropdownParent: $('#convertRiderModal')
             });
             $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -429,6 +504,7 @@
                             head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
+                            head.push('Joining Date');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -445,6 +521,7 @@
                                 row.push(values.request_status);
                                 row.push(values.status);
                                 row.push(values.requested_at);
+                                row.push(values.joining_date);
                                 body.push(row);
                             });
                         },
@@ -458,7 +535,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(469, session('permissions')))
+                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(652, session('permissions')))
                     {
                         text: 'Approve',
                         className: 'btn btn-primary bulk_approve',
@@ -686,10 +763,11 @@
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
-                    {data: 'department_name', name: 'ads.id', class: 'align-middle department_name'},
+                    {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
+                    {data: 'joining_date', name: 'employees.joining_date', class: 'align-middle joining_date'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -706,8 +784,8 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var employee_type = '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">' +
                         '</select>';
-                    var department_type = '<select name="department_type_search" id="department_type_search" class="select2 form-control">' +
-                        '</select>';
+                    // var department_type = '<select name="department_type_search" id="department_type_search" class="select2 form-control">' +
+                    //     '</select>';
                     var employee_status = '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' +
                         '</select>';
                     this.api().columns().every(function (column_id) {
@@ -731,13 +809,13 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
-                        else if($(header).is('.department_name'))
-                        {
-                            $(department_type).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
+                        // else if($(header).is('.department_name'))
+                        // {
+                        //     $(department_type).appendTo($(search))
+                        //         .on( 'change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         } ).wrap(td);
+                        // }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
@@ -771,17 +849,17 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    var department_name_data = $.map({!! $employee_department !!}, function (obj) {
-                        obj.text = obj.name;
-                        return obj;
-                    });
-                    $("#department_type_search").prepend('<option value="" selected></option>').select2({
-                        data: department_name_data,
-                        placeholder: "Select Department Type",
-                        width: '100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    {{--var department_name_data = $.map({!! $employee_department !!}, function (obj) {--}}
+                    {{--    obj.text = obj.name;--}}
+                    {{--    return obj;--}}
+                    {{--});--}}
+                    {{--$("#department_type_search").prepend('<option value="" selected></option>').select2({--}}
+                    {{--    data: department_name_data,--}}
+                    {{--    placeholder: "Select Department Type",--}}
+                    {{--    width: '100%',--}}
+                    {{--    containerCssClass: 'select-xs',--}}
+                    {{--    dropdownCssClass: 'form-control-sm p-0'--}}
+                    {{--});--}}
 
                     this.api().table().columns.adjust();
                 }
@@ -1021,8 +1099,8 @@
                 if(check_bit != null)
                 {
                     var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;
-                    $('#main_category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
-                    $('#category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
+                    // $('#main_category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
+                    // $('#category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
                     $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
                     route_id = table.row($(elm).parents('tr')).data().route_id;
                     var ccd = table.row($(elm).parents('tr')).data().ccd;
@@ -1538,6 +1616,66 @@
                     }
                 });
             });
+
+
+            $('body').on('click', '.convert_rider_to_staff', function (e) {
+                var id = $(this).data('target-id');
+                var employee_type = table.row($(this).parents('tr')).data().employee_type_id;
+                if(employee_type == 2) {
+                    $("#convertRiderForm #employee_id").val(id);
+                    $("#convertRiderModal").modal('show');
+                }
+            });
+
+            $('body').on('hidden.bs.modal', '#convertRiderModal', function () {
+                $('#convertRiderForm #employee_id').val('');
+                $('#convertRiderForm #department').val('').trigger('change');
+                $('#convertRiderForm #designation').val('').trigger('change');
+            });
+
+            $("#convertRiderForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes To Make Rider An Employee!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Converting Rider To Staff!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            form.submit();
+                        }
+                    });
+                }
+            });
+
 
 
         });

@@ -52,6 +52,15 @@
                         </fieldset>
                     </div>
                     <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_zone" id="search_zone" class="form-control select2">
+                                @foreach($zones as $zone)
+                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -194,6 +203,11 @@
                 placeholder: 'Select Destination',
                 allowClear:true
             });
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Zone',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -303,6 +317,7 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.zone = $('#search_zone').val();
                     }
                 },
                 order: [[5, 'desc']],
