@@ -91,6 +91,12 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
+                                                <label>Emergency Contact Person<span class="text-danger">*</span></label>
+                                                <input type="text" id="emergency_contact_person" data-rule-required="true"  data-msg-required="Emergency Contact Person is required" class="form-control" value="{{$employee->emergency_contact_person}}" name="emergency_contact_person">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
                                                 <label>Emergency Contact<span class="text-danger">*</span></label>
                                                 <input type="text" id="emergency_contact" data-rule-required="true"  data-msg-required="Emergency Contact is required" class="form-control" value="{{$employee->emergency_contact}}" name="emergency_contact">
                                             </div>

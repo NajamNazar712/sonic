@@ -279,7 +279,7 @@
                                 'bag_type': bag_type,
                                 '_token': '{{ csrf_token() }}'
                             },
-                            timeout: 5000,
+                            timeout: 30000,
                             error: function (data) {
                                 $('#add_shipment_form button.add').prop('disabled', false);
                                 UnblockPagePermanently();
@@ -403,7 +403,7 @@
                         'bag_type': bag_type,
                         '_token': '{{ csrf_token() }}'
                     },
-                    timeout: 5000,
+                    timeout: 30000,
                     error: function (data) {
                         $('#cargo_consignment').modal('hide');
 
@@ -593,7 +593,7 @@
                                 'piece_id': item,
                                 '_token': '{{ csrf_token() }}'
                             },
-                            timeout: 5000,
+                            timeout: 30000,
                             error: function (data) {
                                 toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             },
