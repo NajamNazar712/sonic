@@ -385,6 +385,14 @@ class ShipperDashboardController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
+            })
+            ->addColumn('pod_image',function ($shipments) {
+                $dropdown = '
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                return $dropdown;
             });
             if ($tracking_numbers = $request->get('tracking_numbers')) {
                 $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));

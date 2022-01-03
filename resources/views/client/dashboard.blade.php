@@ -927,7 +927,7 @@
                         name: 'shipments.payment_mode_id',
                         class: 'align-middle payment_module'
                     },
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                    {data: 'pod_image', name: 'pod_imag', class: 'text-center align-middle action p-1'},
                     {
                         data: 'action',
                         name: 'action',
