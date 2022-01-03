@@ -333,7 +333,7 @@ class AdminShipmentPieceController extends Controller
         }
         if (count($invalid_shipment) > 0) {
             $invalid_shipments = implode(", ", $invalid_shipment);
-            return redirect()->back()->with(['error' => "Selected Shipment have different status: " . $invalid_shipments]); 
+            return redirect()->back()->with(['error' => "Selected Shipment have different status.<br>" . $invalid_shipments]); 
         }
         $rider = $request->rider_select;
         if(!$rider){
@@ -919,7 +919,7 @@ class AdminShipmentPieceController extends Controller
            return '';  
          }
     }
-public function single_piece_bulk(Request $request){
+    public function single_piece_bulk(Request $request){
         
         $shipment_ids = $request->shipment_ids;
         $invalid_shipment = array();
@@ -938,7 +938,7 @@ public function single_piece_bulk(Request $request){
         }
         if (count($invalid_shipment) > 0) {
             $invalid_shipments = implode(", ", $invalid_shipment);
-            return response()->json(['status' => 1,'error' => 'Selected Shipments has Resolved status: '. $invalid_shipments ]); 
+            return response()->json(['status' => 1,'error' => 'Selected Shipments had Already been Resolved.<br>' .$invalid_shipments ]); 
         }
         foreach ($shipment_ids as $shipment_id){
             if($shipment_id){
@@ -986,7 +986,7 @@ public function single_piece_bulk(Request $request){
         }
         if (count($invalid_shipment) > 0) {
             $invalid_shipments = implode(", ", $invalid_shipment);
-            return response()->json(['status' => 1,'error' => 'Selected Shipments has Resolved status: '. $invalid_shipments ]); 
+            return response()->json(['status' => 1,'error' => 'Selected Shipments had Already been Resolved.<br>'. $invalid_shipments ]); 
         }
         foreach ($shipment_ids as $shipment_id){
             if($shipment_id){
@@ -1028,7 +1028,7 @@ public function single_piece_bulk(Request $request){
         }
         if (count($invalid_shipment) > 0) {
             $invalid_shipments = implode(", ", $invalid_shipment);
-            return response()->json(['status' => 1,'error' => 'Selected Shipments has Resolved status: '. $invalid_shipments ]); 
+            return response()->json(['status' => 1,'error' => 'Selected Shipments had Already been Resolved.<br>'. $invalid_shipments ]); 
         }
         foreach ($shipment_ids as $shipment_id){
             if($shipment_id){

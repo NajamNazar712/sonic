@@ -99,7 +99,7 @@
 									</div>
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="trax_id" class="form-control" placeholder="Trax Id" value="{{ $user->trax_id }}">
+											<input type="text" name="trax_id" readonly class="form-control" placeholder="Trax Id" value="{{ $user->trax_id }}">
 										</div>
 									</div>
 
