@@ -2945,7 +2945,7 @@ class V2AdminPickupsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 10);
         // $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
         if (session('role_id') != 1) {
-            $users = User::join('cities as c','c.id','=','users.city_id')->whereIn('c.hub_id',session('hubs'))->select(['users.id', 'users.name'])->get();
+            $users = User::join('cities as c','c.id','=','users.city_id')->where('users.status',3)->whereIn('c.hub_id',session('hubs'))->select(['users.id', 'users.name'])->get();
         }
         else{
             $users = User::select(['id', 'name'])->get();
