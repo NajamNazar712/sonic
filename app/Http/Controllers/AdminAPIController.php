@@ -45,6 +45,7 @@ use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
+use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeLeave;
@@ -5689,7 +5690,8 @@ class AdminAPIController extends Controller
         $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
             ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
             ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
-            ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name')
+            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+            ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
             ->where('admins.id', $admin_id);
         if ($admin_profile->exists()) {
         $admin_profile = $admin_profile->get();
@@ -5713,6 +5715,124 @@ class AdminAPIController extends Controller
             }
         } else {
             return response()->json(['status' => 1, 'message' => "Employee Not Found"]);
+        }
+    }
+
+    public function trax_directory(Request $request)
+    {
+        $rules = [
+            'search_param' => ['required'],
+            'search_with' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            if ($request->search_with == 1) {
+
+                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                    ->join('cities as c', 'c.id', '=', 'e.city_id')
+                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city')
+                    ->where('e.name', $request->search_param)
+                    ->where('admins.status', 1);
+
+            } elseif ($request->search_with == 2) {
+                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                    ->join('cities as c', 'c.id', '=', 'e.city_id')
+                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city')
+                    ->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
+                    ->where('admins.status', 1);
+            } elseif ($request->search_with == 3) {
+                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                    ->join('cities as c', 'c.id', '=', 'e.city_id')
+                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city')
+                    ->where('e.trax_id', $request->search_param)
+                    ->where('admins.status', 1);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Provide atleast one parameter']);
+            }
+            if ($admin_profile->exists()) {
+                $admin_profile = $admin_profile->get();
+                return response()->json(['status' => 0, 'data' => $admin_profile]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'No User found!']);
+            }
+        }
+    }
+
+    public function check_profile(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
+            ->select('e.id as employee_id', 'e.blood_group as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
+            ->where('admins.id', $admin_id);
+        if ($admin_profile->exists()) {
+            $admin_profile = $admin_profile->first();
+            if(!$admin_profile->blood_group_id || !$admin_profile->emergency_contact_no || !$admin_profile->emergency_contact_person){
+                return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
+            }else{
+                return response()->json(['status' => 1, 'message' => "Profile already updated"]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+    }
+
+    public function get_profile(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $blood_group_list = EmployeeBloodGroup::all();
+        $admin_profile = Admin::join('employees as e','admins.trax_id', '=', 'e.trax_id')
+            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+            ->select('e.id as employee_id', 'bg.name as blood_group_name', 'bg.id as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
+            ->where('admins.id', $admin_id);
+        if ($admin_profile->exists()) {
+            $admin_profile = $admin_profile->first();
+            return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'blood_group_id' => $admin_profile->blood_group_id, 'blood_group_name' => $admin_profile->blood_group_name, 'employee_id' => $admin_profile->employee_id, 'emergency_contact_no' => $admin_profile->emergency_contact_no, 'emergency_contact_person' => $admin_profile->emergency_contact_person]);
+        } else {
+            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+    }
+
+    public function update_profile(Request $request)
+    {
+        $rules = [
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+            'emergency_contact_no' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'emergency_contact_person' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee = Employee::find($request->employee_id);
+            if ($employee) {
+                $employee->blood_group = $request->blood_group_id;
+                $employee->emergency_contact = $request->emergency_contact_no;
+                $employee->emergency_contact_person = $request->emergency_contact_person;
+                $employee->save();
+                return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'User not found!']);
+            }
         }
     }
 

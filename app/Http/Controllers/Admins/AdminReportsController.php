@@ -7227,8 +7227,9 @@ class AdminReportsController extends Controller
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $destinations = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->select('id','name')->get();
+        $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->where('business_category_id', 1)->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-        return view('admin.reports.fake_statuses_shipments_report')->with(['riders' => $riders, 'hubs' => $hubs, 'destinations' => $destinations, 'shipping_modes' => $shipping_modes]);
+        return view('admin.reports.fake_statuses_shipments_report')->with(['riders' => $riders, 'hubs' => $hubs, 'destinations' => $destinations, 'shipping_modes' => $shipping_modes, 'zones' => $zones]);
     }
 
     public function fake_status_shipments_list(request $request){
@@ -7247,6 +7248,7 @@ class AdminReportsController extends Controller
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
+            ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
             ->leftjoin('admins as a', 'a.id', '=', 'sj.admin_id')
             ->leftjoin('admin_roles as ar', 'ar.id', '=', 'admin.role_id')
@@ -7279,6 +7281,9 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatables->whereBetween('delivery_note_shipments.fake_status_updated_at', [$from, $to]);
+        }
+        if ($zone = $request->get('zone')) {
+            $datatables->where('z.id', '=', $zone);
         }
         return $datatables->make(true);
     }
