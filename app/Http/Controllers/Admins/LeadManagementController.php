@@ -209,12 +209,7 @@ class LeadManagementController extends Controller
                     return $days;
                 }
             })
-            ->addColumn('lead_id_link',function ($lead){
-                $route = route('admin.leads.view_remarks', ['id' => $lead->lead_id]);
-                return "<u><a href='{$route}\' class='leads' target='_blank'>". str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT)."</a></u>";
-                //return $lead->lead_id;
-            })
-->editColumn('reason_id',function ($lead){
+            ->editColumn('reason_id',function ($lead){
                 if($lead->reason_id)
                 {
                     if ($lead->reason_id == 10){
@@ -245,6 +240,11 @@ class LeadManagementController extends Controller
                 else{
                     return "-";
                 }
+            })
+            ->editColumn('lead_id',function ($lead){
+                $route = route('admin.leads.view_remarks', ['id' => $lead->lead_id]);
+                return "<u><a href='{$route}\' class='leads' target='_blank'>". str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT)."</a></u>";
+                //return $lead->lead_id;
             })
             ->addColumn('action', function($lead){
                 $dropdown = '

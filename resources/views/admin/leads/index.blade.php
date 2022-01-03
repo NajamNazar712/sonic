@@ -753,15 +753,9 @@
                 rowId: 'leadid',
                 order: [[14, 'desc']],
                 columns: [
-<<<<<<< HEAD
                     {data: 'lead_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'lead_id', name: 'lead_id', class: 'align-middle lead_id'},
-=======
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'lead_id_link', name: 'leads.id', class: 'align-middle lead_id'},
->>>>>>> sprint_84
                     {data: 'contact_person', name: 'leads.contact_person', class: 'align-middle contact_person'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},
