@@ -4279,7 +4279,9 @@ class RiderAPIController extends Controller
         $rider_profile = Rider::join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
             ->join('cities as c', 'c.id', '=', 'riders.city_id')
             ->join('cities as h', 'h.id', '=', 'c.hub_id')
-            ->select('riders.trax_id as trax_id', 'c.name as city_name', 'h.name as hub', 'riders.name as rider_name', 'riders.phone as phone', 'riders.cnic as cnic', 'riders.address as address', 'rc.name as category')
+            ->leftjoin('employees as e', 'e.trax_id', '=', 'riders.trax_id')
+            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+            ->select('riders.trax_id as trax_id', 'c.name as city_name', 'h.name as hub', 'riders.name as rider_name', 'riders.phone as phone', 'riders.cnic as cnic', 'riders.address as address', 'rc.name as category', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
             ->where('riders.id', $rider_id);
         if ($rider_profile->exists()) {
             $rider_profile = $rider_profile->get();
@@ -10735,6 +10737,69 @@ class RiderAPIController extends Controller
             }
         } else {
             return response()->json(['status' => 1, 'message' => "Rider Not Found"]);
+        }
+    }
+
+    public function check_profile(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $rider_profile = Rider::join('employees as e','riders.trax_id', '=', 'e.trax_id')
+            ->select('e.id as employee_id', 'e.blood_group as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
+            ->where('riders.id', $rider_id);
+        if ($rider_profile->exists()) {
+            $rider_profile = $rider_profile->first();
+            if(!$rider_profile->blood_group_id || !$rider_profile->emergency_contact_no || !$rider_profile->emergency_contact_person){
+                return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
+            }else{
+                return response()->json(['status' => 1, 'message' => "Profile already updated"]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
+        }
+    }
+
+    public function get_profile(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $blood_group_list = EmployeeBloodGroup::all();
+        $rider_profile = Rider::join('employees as e','riders.trax_id', '=', 'e.trax_id')
+            ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+            ->select('e.id as employee_id', 'bg.name as blood_group_name', 'bg.id as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
+            ->where('riders.id', $rider_id);
+        if ($rider_profile->exists()) {
+            $rider_profile = $rider_profile->first();
+            return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'blood_group_id' => $rider_profile->blood_group_id, 'blood_group_name' => $rider_profile->blood_group_name, 'employee_id' => $rider_profile->employee_id, 'emergency_contact_no' => $rider_profile->emergency_contact_no, 'emergency_contact_person' => $rider_profile->emergency_contact_person]);
+        } else {
+            return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
+        }
+    }
+
+    public function update_profile(Request $request)
+    {
+        $rules = [
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+            'emergency_contact_no' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'emergency_contact_person' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee = Employee::find($request->employee_id);
+            if ($employee) {
+                $employee->blood_group = $request->blood_group_id;
+                $employee->emergency_contact = $request->emergency_contact_no;
+                $employee->emergency_contact_person = $request->emergency_contact_person;
+                $employee->save();
+                return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'User not found!']);
+            }
         }
     }
 

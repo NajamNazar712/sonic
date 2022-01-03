@@ -505,6 +505,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('outgoing_weight_range_list','Admins\AdminDashboardController@outgoing_weight_range_list')->name('outgoing_weight_range_list');
         Route::get('operation_forecast_search','Admins\AdminDashboardController@operation_forecast_search')->name('operation_forecast_search');
         Route::get('admin_profile', 'Admins\AdminDashboardController@admin_profile')->name('admin_profile');
+        Route::get('edit_profile', 'Admins\AdminDashboardController@edit_profile')->name('edit_profile');
         //Search Sonic
 //        Route::get('search_sonic', 'Admins\AdminDashboardController@search_sonic')->name('search_sonic');
         
@@ -557,6 +558,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('update/profile/password','Admins\AdminDashboardController@update_profile_password')->name('update.profile.password');
     Route::post('update/profile/password/submit','Admins\AdminDashboardController@update_profile_password_submit')->name('update.profile.password.submit');
+    Route::post('update/profile/submit','Admins\AdminDashboardController@edit_profile_submit')->name('update.profile.submit');
 
 
 
@@ -3581,7 +3583,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
     });
 
-
+    Route::prefix('qa_evaluation')->name('qa_evaluation.')->group(function (){
+        Route::get('/add','Admins\QAEvaluationController@add')->name('add');
+        Route::post('/handlings','Admins\QAEvaluationController@handlings')->name('handlings');
+        Route::post('/submit','Admins\QAEvaluationController@submit')->name('submit');
+        Route::get('','Admins\QAEvaluationController@index')->name('index');
+        Route::get('list','Admins\QAEvaluationController@list')->name('list');
+        Route::get('edit/{id}','Admins\QAEvaluationController@edit')->name('edit');
+        Route::get('view/{id}','Admins\QAEvaluationController@view')->name('view');
+        Route::get('edit_activities','Admins\QAEvaluationController@edit_activities')->name('edit_activities');
+        Route::post('/handlings_edit','Admins\QAEvaluationController@handlings_edit')->name('handlings_edit');
+        Route::post('/update','Admins\QAEvaluationController@update')->name('update');
+        Route::post('/actvities_data','Admins\QAEvaluationController@actvities_data')->name('actvities_data');
+        Route::post('update_activities','Admins\QAEvaluationController@update_activities')->name('update_activities');
+        
+        
+        
+    });
 });
 
 Route::prefix('retail')->name('retail.')->group(function () {
