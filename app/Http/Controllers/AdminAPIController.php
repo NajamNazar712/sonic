@@ -53,6 +53,7 @@ use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PayslipPdf;
+use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\Product;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ReceivingSheetReceived;
@@ -4867,12 +4868,13 @@ class AdminAPIController extends Controller
                                 }
                             }
                         } else {
-                            $rates =  RateStatus::whereIn('user_id',$shipment->user_id);
-                            if($rates->exists()){
-                                foreach ($rates->get() as $value) {
-                                    DwsWeightChargesController::add($value->user_id, $value->shipping_mode_id, 1,174);
-                                }
-                            }
+                                // PendingDwsWeightCharges::where('user_id',$user_id)->where('shipping_mode_id',$shipping_mode_id)->delete();
+                            DwsWeightCharges::create([
+                                'user_id' => $shipment->user_id,
+                                'shipping_mode_id' => $shipment->shipping_mode_id,
+                                'dws_weight_status' => 1,
+                                'admin_id' => 174
+                            ]);
                             if ($dense_weight < $volume_weight) {
                                 $actual_weight = $volume_weight;
                                 $shipment->length = $request->dimension_l;
@@ -4882,6 +4884,23 @@ class AdminAPIController extends Controller
                                 $actual_weight = $dense_weight;
                             }
                             $dws_charges_status = 1; 
+
+                                // $dws_charges = DwsWeightCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+
+                            // $rates =  RateStatus::whereIn('user_id',$shipment->user_id);
+                            // if($rates->exists()){
+                            //     foreach ($rates->get() as $value) {
+                            //         DwsWeightChargesController::add($value->user_id, $value->shipping_mode_id, 1,174);
+                            //     }
+                            // }
+                            // if ($dense_weight < $volume_weight) {
+                            //     $actual_weight = $volume_weight;
+                            //     $shipment->length = $request->dimension_l;
+                            //     $shipment->breadth = $request->dimension_w;
+                            //     $shipment->height = $request->dimension_h;
+                            // } else {
+                            //     $actual_weight = $dense_weight;
+                            // }
                             // return response()->json(false);
                         }
 
