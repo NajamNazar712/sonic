@@ -12831,8 +12831,8 @@ class AdminFinanceController extends Controller
         }
     }
     public function retail_done_payments_generate_report_to_email(){
-        $date = Carbon::today()->format('Y-m-d');
-        $response = AdminReportsEmailController::retail_done_payment($date . ' 00:00:00');
+        $date = Carbon::today()->toDateString();
+        $response = AdminReportsEmailController::retail_done_payment($date);
         return ['status' => 1, 'success' => ' Retail Done Payment(s) Report Generated'];
     }
 }
