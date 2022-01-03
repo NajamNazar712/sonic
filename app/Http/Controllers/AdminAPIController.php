@@ -4853,7 +4853,7 @@ class AdminAPIController extends Controller
                                 } else {
                                     $actual_weight = $dense_weight;
                                 }
-                                if ($dws_charges_status == 0) {
+                                if ($dws_charges_status == 2) {
                                       $dws_charges->dws_weight_status = 1;
                                       $dws_charges->admin_id = 174;
                                       $dws_charges->save();
