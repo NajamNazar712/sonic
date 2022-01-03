@@ -12,7 +12,7 @@ class UpdateModulePermissionForRetailDonePayment extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 657, 'name' => 'Retail Done Payments Email Generate - View', 'module_id' => 26),
+            array('id' => 657, 'name' => 'Retail Done Payments Email Generate - Manual', 'module_id' => 26),
         ));
     }
 }
