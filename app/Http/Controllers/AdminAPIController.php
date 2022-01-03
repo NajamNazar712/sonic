@@ -40,6 +40,7 @@ use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\DwsDetail;
 use App\Http\Models\DwsWeightCharges;
+use App\Http\Models\DwsWeightChargesHistory;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeShift;
@@ -4875,8 +4876,19 @@ class AdminAPIController extends Controller
                                 'dws_weight_status' => 1,
                                 'admin_id' => 174
                             ]);
-                            DwsWeightChargesController::add($shipment->user_id, $shipment->shipping_mode_id, 1,174);
-                           
+                            DwsWeightChargesHistory::create([
+                                'user_id' => $shipment->user_id,
+                                'shipping_mode_id' => $shipment->shipping_mode_id,
+                                'dws_weight_status' => 1,
+                                'admin_id' => 174
+                            ]);
+                            PendingDwsWeightCharges::create([
+                                'user_id' => $shipment->user_id,
+                                'shipping_mode_id' => $shipment->shipping_mode_id,
+                                'dws_weight_status' => 1,
+                                'admin_id' => 174
+                            ]);
+                            
                             if ($dense_weight < $volume_weight) {
                                 $actual_weight = $volume_weight;
                                 $shipment->length = $request->dimension_l;
