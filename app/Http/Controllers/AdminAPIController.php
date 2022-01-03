@@ -52,6 +52,7 @@ use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PayslipPdf;
+use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\Product;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\ReportingLocation;
@@ -4858,6 +4859,11 @@ class AdminAPIController extends Controller
                                       $dws_charges->admin_id = 174;
                                       $dws_charges->save();
                                       $dws_charges_status = 1;
+
+                                      PendingDwsWeightCharges::where('user_id',$shipment->user_id)->update([
+                                        'dws_weight_status' => 1,
+                                        'admin_id' => 174
+                                        ]);
                                 }
                             // if ($dws_charges_status == 1) {
                             // } else {
