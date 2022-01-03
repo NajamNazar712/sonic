@@ -2,7 +2,7 @@
     @csrf
     <div class="form-body">
         <div class="form-group col">
-            <label>Blood Group</label>
+            <label>Blood Group<span class="text-danger">*</span></label>
             <select name="blood_group" id="blood_group" class="select2 form-control" data-rule-required="true" data-msg-required="This field is required" style="width: 100%" >
                 @foreach($blood_groups as $blood_group)
                     <option value="{{$blood_group->id}}">{{$blood_group->name}}</option>
