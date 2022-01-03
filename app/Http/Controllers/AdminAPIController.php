@@ -4868,6 +4868,7 @@ class AdminAPIController extends Controller
                                 }
                             }
                         } else {
+                            // insert High status
                             DwsWeightCharges::create([
                                 'user_id' => $shipment->user_id,
                                 'shipping_mode_id' => $shipment->shipping_mode_id,
@@ -4887,6 +4888,7 @@ class AdminAPIController extends Controller
                             }
                             $dws_charges_status = 1; 
 
+                            // insert High status end
                            
                         }
 
