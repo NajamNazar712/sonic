@@ -4875,6 +4875,8 @@ class AdminAPIController extends Controller
                                 'dws_weight_status' => 1,
                                 'admin_id' => 174
                             ]);
+                            DwsWeightChargesController::add($shipment->user_id, $shipment->shipping_mode_id, 1,174);
+                           
                             if ($dense_weight < $volume_weight) {
                                 $actual_weight = $volume_weight;
                                 $shipment->length = $request->dimension_l;
