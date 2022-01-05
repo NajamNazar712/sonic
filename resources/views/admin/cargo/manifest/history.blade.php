@@ -219,7 +219,7 @@
                                 row.push(values.transport_mode);
                                 row.push(values.vendor);
                                 row.push(values.driver_name);
-                                row.push(values.vehicle);
+                                row.push(values.vehicles);
                                 row.push(values.phone_number);
                                 row.push(values.transit_at);
                                 row.push(values.transitted_by);
