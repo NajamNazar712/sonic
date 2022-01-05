@@ -274,7 +274,7 @@
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'vendor', name: 'cargo_manifests.vendor_name', class: 'align-middle vendor'},
                     {data: 'driver_name', name: 'cargo_manifests.driver_name', class: 'align-middle driver_name'},
-                    {data: 'vehicle', name: 'f.reg_number', class: 'align-middle vehicle'},
+                    {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles'},
                     {data: 'phone_number', name: 'cargo_manifests.phone_number', class: 'align-middle phone_number'},
                     {data: 'transit_at', name: 'cargo_manifests.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
