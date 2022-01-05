@@ -48,6 +48,7 @@ use App\Http\Models\Runner;
 use App\Http\Models\RunnerDetail;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentOtp;
 use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
@@ -8740,6 +8741,27 @@ class NotificationsController extends Controller
                                 $to = $admin_email->email;
                                 self::email($subject, $body_updated, $to);
                             }
+                        }
+                    }
+                }
+                else if ($id == 165) {
+                    $shipment = Shipment::find($reference_1_id);
+                    $shipment_otp = ShipmentOtp::find($reference_2_id);
+                    if ($shipment && $shipment_otp) {
+                        if (strpos($body, '[consignee]') !== FALSE) {
+                            $body = str_replace('[consignee]', $shipment->consignee_name, $body);
+                        }
+                        if (strpos($body, '[tracking_no]') !== FALSE) {
+                            $body = str_replace('[tracking_no]', $shipment->tracking_no, $body);
+                        }
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $shipment_otp->otp, $body);
+                        }
+                        $to = $shipment->consignee_phone_number_1;
+                        self::sms_otp($body, $to, $shipment->consignee_name, $shipment_otp->otp, 1);
+                        if ($shipment->consignee_phone_number_2 != NULL) {
+                            $to = $shipment->consignee_phone_number_2;
+                            self::sms_otp($body, $to, $shipment->consignee_name, $shipment_otp->otp, 1);
                         }
                     }
                 }

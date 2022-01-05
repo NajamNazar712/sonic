@@ -62,6 +62,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentOtp;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -860,6 +861,17 @@ class DeliveryController extends Controller
 
                     if($notifications[$index]) {
                         $shipment_obj = Shipment::find($shipment);
+                        $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
+                        if($shipment_otp->exists()){
+                            $shipment_otp = $shipment_otp->first();
+                        }else{
+                            $shipment_otp = new ShipmentOtp();
+                            $shipment_otp->shipment_id = $shipment;
+                        }
+                        $otp = mt_rand(100000, 999999);
+                        $shipment_otp->otp = $otp;
+                        $shipment_otp->save();
+                        NotificationsController::send(165, $shipment, $shipment_otp->id);
                         if($shipment_obj->amount == 0){
                             //English
                             NotificationsController::send(132, $note->id, $shipment);
