@@ -8743,6 +8743,172 @@ class NotificationsController extends Controller
                         }
                     }
                 }
+                else if ($id == 166) {
+                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
+
+                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount'];
+
+                    $present_fields = array();
+
+                    $first_field = NULL;
+
+                    $position = NULL;
+
+                    foreach ($possible_fields as $field) {
+                        $new_position = strpos($body, '[' . $field . ']');
+
+                        if ($new_position !== FALSE) {
+                            if ($position == NULL) {
+                                $present_fields[] = $field;
+
+                                $first_field = $field;
+                            } else if ($new_position > $position) {
+                                $present_fields[] = $field;
+                            } else {
+                                array_unshift($present_fields, $field);
+                            }
+
+                            $position = $new_position;
+                        }
+                    }
+
+                    $today = Carbon::now()->toDateTimeString();
+
+                    $user_wise_shipments = array();
+
+                    $origin_hub_ids = array();
+
+                    foreach ($reference_1_id as $shipment_id) {
+                        $shipment = Shipment::find($shipment_id);
+
+                        $origin_hub_id = $shipment->pickup_address->city->hub_id;
+
+                        if (!in_array($origin_hub_id, $origin_hub_ids)) {
+                            $origin_hub_ids[] = $origin_hub_id;
+                        }
+
+                        $details = array();
+
+                        $details['pickup_city'] = $shipment->pickup_address->city->name;
+                        $details['consignee_name'] = $shipment->consignee_name;
+                        $details['consignee_city'] = $shipment->consignee_city->name;
+                        $details['order_id'] = $shipment->order_id;
+                        $details['weight'] = $shipment->actual_weight;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['amount'] = $shipment->amount;
+
+                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
+                            foreach ($shipment->items as $item) {
+                                if ($item->type == 0) {
+                                    $details['item_product_type'] = $item->product->product_name;
+                                    $details['item_description'] = $item->description;
+                                    $details['item_quantity'] = $item->quantity;
+                                }
+                            }
+                        } else {
+                            $details['item_product_type'] = '';
+                            $details['item_description'] = '';
+                            $details['item_quantity'] = '';
+                        }
+
+                        $user_wise_shipments[$shipment->user_id][] = $details;
+                    }
+
+                    $original_subject = $subject;
+                    $original_body = $body;
+
+                    foreach ($user_wise_shipments as $user_id => $shipments) {
+                        $shipper = User::find($user_id);
+
+                        if (strpos($subject, '[company_name]') !== FALSE) {
+                            $subject = str_replace('[company_name]', $shipper->name, $subject);
+                        }
+
+                        if (strpos($body, '[company_name]') !== FALSE) {
+                            $body = str_replace('[company_name]', $shipper->name, $body);
+                        }
+
+                        if (strpos($subject, '[arrival_at]') !== FALSE) {
+                            $subject = str_replace('[arrival_at]', $today, $subject);
+                        }
+
+                        if (strpos($body, '[arrival_at]') !== FALSE) {
+                            $body = str_replace('[arrival_at]', $today, $body);
+                        }
+
+//              $to = $shipper->email;
+                        if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
+                            $to = ShipperNotificationEmail::where('user_id', $shipper->id)->pluck('email')->toArray();
+                        } else {
+                            $to = $shipper->email;
+                        }
+                        $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+
+                        $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
+
+                        foreach ($present_fields as $field) {
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">' . $field_names[$field] . '</td>';
+                        }
+
+                        $shipment_details .= '</tr>';
+
+                        $serial_number = 1;
+
+                        foreach ($shipments as $shipment) {
+                            $shipment_details .= '<tr>';
+
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial_number . '</td>';
+
+                            foreach ($present_fields as $field) {
+                                if (!empty($shipment[$field])) {
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment[$field] . '</td>';
+                                } else {
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                                }
+                            }
+
+                            $shipment_details .= '</tr>';
+
+                            $serial_number++;
+                        }
+
+                        $shipment_details .= '</tbody></table>';
+
+                        foreach ($present_fields as $field) {
+                            if ($field != $first_field) {
+                                $body = str_replace('[' . $field . ']', '', $body);
+                            }
+                        }
+
+                        $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
+
+                        $bcc = array();
+
+//              $general_admins = Admin::whereIn('role_id', [6])->where('status', 1);
+//
+//              if ($general_admins->exists()) {
+//                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
+//              }
+
+                        $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->where('id', '!=', 276)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
+                            $query->whereIn('hub_id', $origin_hub_ids);
+                        });
+
+                        if ($related_admins->exists()) {
+                            $bcc = array_merge($bcc, $related_admins->pluck('email')->toArray());
+                        }
+
+                        if (empty($bcc)) {
+                            $bcc = NULL;
+                        }
+
+                        self::email($subject, $body, $to, NULL, $bcc);
+
+                        $subject = $original_subject;
+                        $body = $original_body;
+                    }
+                }
+                
             }
         }
     }
