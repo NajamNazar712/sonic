@@ -481,6 +481,18 @@ class LastMileDebriefingController extends Controller
                 if (!$shipment_details) {
                     return redirect()->back()->with('error', 'Shipment not found!');
                 }
+
+                $restrict_statuses = array(5, 7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56);
+                if(!in_array($shipment_details->shipper_status_id, $restrict_statuses)){
+                    $agent_call = AgentCallMonitoring::where(['shipment_id' => $shipment, 'delivery_note_id' => $delivery_note_id, 'completed' => 0])->first();
+                    if($agent_call){
+                        $agent_call->completed = 1;
+                        $agent_call->save();
+                    }
+
+                    return redirect()->back()->with('error', 'Shipment already updated!');
+                }
+
                 $in_new_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '>', $delivery_note_id)->where('shipment_id', $shipment)->exists();
 
                 $shipper_status_id = NULL;
@@ -665,6 +677,15 @@ class LastMileDebriefingController extends Controller
             if(count($delivery_note_shipments) > 0){
                 foreach ($delivery_note_shipments as $delivery_note_shipment){
                     $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                    $restrict_statuses = array(5, 7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56);
+                    if(!in_array($shipment->shipper_status_id, $restrict_statuses)){
+                        $agent_call = AgentCallMonitoring::where(['shipment_id' => $shipment, 'delivery_note_id' => $delivery_note_id, 'completed' => 0])->first();
+                        if($agent_call){
+                            $agent_call->completed = 1;
+                            $agent_call->save();
+                        }
+                        continue;
+                    }
                     $shipments_data[$shipment->id]['tracking_number'] = $shipment->tracking_number;
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('reference_1_id', $delivery_note_id)->latest()->first();
                     $reattempt = 0;
