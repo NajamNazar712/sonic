@@ -4917,12 +4917,11 @@ class AdminAPIController extends Controller
                         }
                     }
 
-                    $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
+                    $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC');
                     $pickup_request_id = NULL;
-                    if ($pickup_request_shipment) {
-                        $pickup_request = V2PickupRequest::where('id', $pickup_request_shipment->pickup_request_id);
-                        if($pickup_request->exists()){
-                            $pickup_request->get()->first();
+                    if ($pickup_request_shipment->exists()) {
+                        $pickup_request_shipment = $pickup_request_shipment->first();
+                        $pickup_request = V2PickupRequest::where('id', $pickup_request_shipment->pickup_request_id)->first();
                         
                         $reference_1_id = $pickup_request_shipment->pickup_request_id;
                         $rider_id = $pickup_request->current_rider_id;
@@ -4931,7 +4930,7 @@ class AdminAPIController extends Controller
                         // $pickup_request_ids[] = $pickup_request_shipment->pickup_request_id;
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
                         // }
-                        }
+
                     } else {
                         $reference_1_id = null;
                     }
