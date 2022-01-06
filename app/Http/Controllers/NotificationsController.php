@@ -8752,18 +8752,16 @@ class NotificationsController extends Controller
                             $body = str_replace('[consignee]', $shipment->consignee_name, $body);
                         }
                         if (strpos($body, '[tracking_no]') !== FALSE) {
-                            $body = str_replace('[tracking_no]', $shipment->tracking_no, $body);
+                            $body = str_replace('[tracking_no]', $shipment->tracking_number, $body);
                         }
                         if (strpos($body, '[otp]') !== FALSE) {
                             $body = str_replace('[otp]', $shipment_otp->otp, $body);
                         }
                         $to = $shipment->consignee_phone_number_1;
-                        self::sms($body, $to);
-//                        self::sms_otp($body, $to, $shipment->consignee_name, $shipment_otp->otp, 1);
+                        self::sms_otp($body, $to, $shipment->consignee_name, $shipment_otp->otp, 1);
                         if ($shipment->consignee_phone_number_2 != NULL) {
                             $to = $shipment->consignee_phone_number_2;
-                            self::sms($body, $to);
-//                            self::sms_otp($body, $to, $shipment->consignee_name, $shipment_otp->otp, 1);
+                            self::sms_otp($body, $to, $shipment->consignee_name, $shipment_otp->otp, 1);
                         }
                     }
                 }
