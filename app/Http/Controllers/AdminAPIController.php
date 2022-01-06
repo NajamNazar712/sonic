@@ -5099,7 +5099,7 @@ class AdminAPIController extends Controller
                         $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->latest()->first();
                         if ($pickup_note_request) {
                             $pickup_note_id = $pickup_note_request->pickup_note_id;
-                            $pickup_note = $pickup_note_request->pickup_note;
+                            $pickup_note = V2PickupNote::find($pickup_note_id);
                             $pickup_rider_id = $pickup_note->rider_id;
                         }
                         $pickup_request_received_shipment->pickup_note_id = $pickup_note_id;
