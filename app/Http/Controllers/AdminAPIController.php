@@ -4919,6 +4919,7 @@ class AdminAPIController extends Controller
 
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0);
                     $pickup_request_id = NULL;
+                    $pickup_request = NULL;
                     if ($pickup_request_shipment->exists()) {
                         $pickup_request_shipment = $pickup_request_shipment->orderBy('id', 'DESC')->first();
 
