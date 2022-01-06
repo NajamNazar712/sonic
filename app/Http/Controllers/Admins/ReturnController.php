@@ -4475,7 +4475,7 @@ class ReturnController extends Controller
                 }else{
                     $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
                     ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-                    ->whereIn('rasl.status',[1,2,3,7])
+                    ->whereIn('rasl.status',[1,2,3,4,7])
                     ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
                   
                 }
