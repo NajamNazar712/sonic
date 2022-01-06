@@ -288,7 +288,7 @@
                 buttons: [
                     @if (session('role_id') == 1 || in_array(649, session('permissions')))
                     {
-                        text: 'Wait for Remaining piece',
+                        text: 'Wait For Remaining Piece(s)',
                         className: 'btn btn-primary remaining_piece',
                         enabled: false,
                         action: function (e, dt, node, config) {
@@ -366,7 +366,7 @@
                     @endif
                     @if (session('role_id') == 1 || in_array(650, session('permissions')))
                     {
-                        text: 'Return back to shipper',
+                        text: 'Return Back To Shipper',
                         className: 'btn btn-primary return_back_shipper',
                         enabled: false,
                         action: function (e, dt, node, config) {
@@ -444,7 +444,7 @@
                     @endif
                     @if (session('role_id') == 1 || in_array(651, session('permissions')))
                     {
-                        text: 'Switch to Single piece',
+                        text: 'Switch To Single Piece',
                         className: 'btn btn-primary single_piece',
                         enabled: false,
                         action: function (e, dt, node, config) {

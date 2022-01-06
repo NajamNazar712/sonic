@@ -305,6 +305,26 @@
     </div>
 </div>
 <!--Route Add Model end-->
+
+<!--Profile Edit Model -->
+<div class="modal fade text-left" id="editprofile" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="editprofile"
+     aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="edit_profile_heading">Edit Profile<span></span></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editProfileDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--Profile Edit Model End -->
+
 <!--Route Edit Model -->
 <div class="modal fade text-left" id="editRider" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editRider"
      aria-hidden="true">
@@ -596,7 +616,7 @@
 </div>
 <div class="modal fade text-left" id="adminprofile" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="adminprofile"
          aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="admin_profile_heading">User Profile<span></span></h4>
@@ -614,6 +634,9 @@
                         <th><strong>Contact</strong></th>
                         <th><strong>Department</strong></th>
                         <th><strong>Designation</strong></th>
+                        <th><strong>Blood Group</strong></th>
+                        <th><strong>Emergency Contact Person</strong></th>
+                        <th><strong>Emergency Contact Number</strong></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -624,6 +647,9 @@
                             <td id = "contact"></td>
                             <td id = "department"></td>
                             <td id = "designation"></td>
+                            <td id = "blood_group"></td>
+                            <td id = "emergency_contact_person"></td>
+                            <td id = "emergency_contact_no"></td>
                         </tr>
                     </tbody>
                 </table>

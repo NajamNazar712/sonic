@@ -509,9 +509,35 @@
 			var table = $('#datatable').DataTable({
 				scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				@if (session('role_id') == 1 || count(array_intersect([457, 458], session('permissions'))) !== 0)
+				@if (session('role_id') == 1 || count(array_intersect([457, 458,657], session('permissions'))) !== 0)
 
 					buttons: [
+						@if (session('role_id') == 1 || in_array(657, session('permissions')))
+					{
+						text: 'Generate Report',
+						className: 'btn btn-primary',
+						enabled: true,
+						action: function (e, dt, node, config) {
+							$.ajax({
+								url: '{!! route('admin.finance.retail.done_payments.retail_generate_report_to_email') !!}',
+								method: 'GET',
+							})
+							.done(function(data) {
+								if (data.status) {
+									toastr.success(data.success, 'Success!', {
+										positionClass: 'toast-bottom-center',
+										containerId: 'toast-bottom-center'
+									});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
+
+							});
+
+						}
+					},
+						@endif
 						@if (session('role_id') == 1 || in_array(457, session('permissions')))
 							{
 							text: 'Paid',

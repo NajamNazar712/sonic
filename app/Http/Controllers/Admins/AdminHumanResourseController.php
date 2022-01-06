@@ -1048,6 +1048,7 @@ class AdminHumanResourseController extends Controller
         $employee->rider_sub_category = $request->rider_sub_category;
         $employee->rider_main_category = $request->rider_main_category;
         $employee->joining_date = $request->joining_date_formatted;
+        $employee->emergency_contact_person = $request->emergency_contact_person;
         $employee->update();
 
         if($employee->employee_type_id == 1)
