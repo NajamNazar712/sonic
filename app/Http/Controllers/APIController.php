@@ -985,7 +985,7 @@ class APIController extends Controller
             //substitute_user_email
             if($request->has('substitute_user_email')){
                 if($request->substitute_user_email != null){
-                    $sub_user = SubstituteUser::where(['user_id' => $user_id, 'email' => $request->substitute_user_email]);
+                    $sub_user = SubstituteUser::where(['user_id' => $user_id, 'email' => $request->substitute_user_email, 'status' => 1]);
                     if($sub_user->exists()){
                         $sub_user = $sub_user->first();
                         $sub_user_id = $sub_user->id;
