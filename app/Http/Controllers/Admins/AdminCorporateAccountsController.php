@@ -6,6 +6,8 @@ use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\CorporateRateTypeHistory;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CorporateRateType;
+use App\Http\Models\Admin\CorporateUserPackagingInvoice;
+use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardBookingTypeCharge;
 use App\Http\Models\Admin\StandardCashHandlingCharge;
@@ -737,6 +739,19 @@ class AdminCorporateAccountsController extends Controller
 //            }
 //
 //        }
+
+        if ($request->has('packaging_invoice') && $request->packaging_invoice == 'on') {
+
+            $packaging = new CorporateUserPackagingInvoice();
+            $packaging->user_id = $id;
+            $packaging->admin_id = Auth::id();
+            $packaging->status = 1;
+            $packaging->time = Carbon::now();
+            $packaging->rate_type_id = 1;
+            $packaging->save();
+
+            CorporateUserPackagingInvoiceLog::create(['packaging_invoice_id'=>$packaging->id,'user_id'=> $id,'admin_id' => Auth::id(),'status' => 1,'rate_type_id' => 1]);
+        }
 
         if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             if ($request->has('on_default') && $request->on_default == 'on') {
@@ -11515,7 +11530,7 @@ class AdminCorporateAccountsController extends Controller
 
     public function add_rates_zone_wise_submit(Request $request, $id)
     {     
-
+        //dd($request);
         $messages = [
             'on_door_mcw_charges.required' => 'The overnight doorstep minimum chargeable weight field is required.',
             'on_door_mcw_charges.numeric' => 'The overnight doorstep minimum chargeable weight field must be numeric or decimal.',
@@ -11926,6 +11941,20 @@ class AdminCorporateAccountsController extends Controller
             }
 
         }*/
+
+
+        if ($request->has('packaging_invoice') && $request->packaging_invoice == 'on') {
+
+            $packaging = new CorporateUserPackagingInvoice();
+            $packaging->user_id = $id;
+            $packaging->admin_id = Auth::id();
+            $packaging->status = 1;
+            $packaging->time = Carbon::now();
+            $packaging->rate_type_id = 2;
+            $packaging->save();
+
+            CorporateUserPackagingInvoiceLog::create(['packaging_invoice_id'=>$packaging->id,'user_id'=> $id,'admin_id' => Auth::id(),'status' => 1,'rate_type_id' => 2]);
+        }
 
         if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             if ($request->has('on_default') && $request->on_default == 'on') {
@@ -21878,6 +21907,19 @@ class AdminCorporateAccountsController extends Controller
             return redirect()->back()
                 ->withErrors($validate)
                 ->withInput();
+        }
+
+        if ($request->has('packaging_invoice') && $request->packaging_invoice == 'on') {
+
+            $packaging = new CorporateUserPackagingInvoice();
+            $packaging->user_id = $id;
+            $packaging->admin_id = Auth::id();
+            $packaging->status = 1;
+            $packaging->time = Carbon::now();
+            $packaging->rate_type_id = 3;
+            $packaging->save();
+
+            CorporateUserPackagingInvoiceLog::create(['packaging_invoice_id'=>$packaging->id,'user_id'=> $id,'admin_id' => Auth::id(),'status' => 1,'rate_type_id' => 3]);
         }
 
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
