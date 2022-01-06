@@ -11468,7 +11468,7 @@ class AdminDashboardController extends Controller
         $user = Employee::leftjoin('employee_designations as d', 'd.id', '=', 'employees.designation_id')
             ->leftjoin('admin_departments as ad', 'd.department_id', '=', 'ad.id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'employees.blood_group')
-            ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.personal_email as email', 'employees.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'employees.emergency_contact as emergency_contact_no', 'employees.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id')
+            ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.official_email as email', 'employees.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'employees.emergency_contact as emergency_contact_no', 'employees.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id')
             ->where('employees.trax_id', Auth::user()->trax_id);
         if($user->exists()){
             $user = $user->first();
