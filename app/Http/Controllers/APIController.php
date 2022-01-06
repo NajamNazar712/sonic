@@ -993,6 +993,10 @@ class APIController extends Controller
                         $substitute_user_shipment->substitute_user_id = $sub_user_id;
                         $substitute_user_shipment->shipment_id = $shipment_id;
                         $substitute_user_shipment->save();
+
+                        $shipment = Shipment::find($shipment_id);
+                        $shipment->booked_by = 2;
+                        $shipment->save();
                     }
                 }
             }
