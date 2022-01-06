@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
+use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
@@ -53,7 +54,9 @@ use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PayslipPdf;
+use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\Product;
+use App\Http\Models\RateStatus;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
@@ -4866,7 +4869,28 @@ class AdminAPIController extends Controller
                                 }
                             }
                         } else {
-                            return response()->json(false);
+                            // insert High status
+                            DwsWeightCharges::create([
+                                'user_id' => $shipment->user_id,
+                                'shipping_mode_id' => $shipment->shipping_mode_id,
+                                'dws_weight_status' => 1,
+                                'admin_id' => 174
+                            ]);
+                            
+                            DwsWeightChargesController::add($shipment->user_id, $shipment->shipping_mode_id, 1, 174);
+                           
+                            if ($dense_weight < $volume_weight) {
+                                $actual_weight = $volume_weight;
+                                $shipment->length = $request->dimension_l;
+                                $shipment->breadth = $request->dimension_w;
+                                $shipment->height = $request->dimension_h;
+                            } else {
+                                $actual_weight = $dense_weight;
+                            }
+                            $dws_charges_status = 1; 
+
+                            // insert High status end
+                           
                         }
 
                     }

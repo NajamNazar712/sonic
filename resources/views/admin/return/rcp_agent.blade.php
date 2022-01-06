@@ -12,9 +12,9 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
-                    <div class="col-12 ">
+                    <div class="col-12">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                            <div class="col-3">
+                            <div class="col-4">
                                 <fieldset class="form-group pb-1">
                                     <select name="search_agent[]" id="search_agent" class="form-control select2"   multiple="multiple" requireddata-rule-required="true" data-msg-required="This field is required">
                                         @foreach($agents as $agent)
@@ -23,7 +23,7 @@
                                     </select>
                                 </fieldset>
                             </div>
-                            <div class="col-3">
+                            <div class="col-4">
                                 <fieldset class="form-group pb-1">
                                     <select name="search_hub" id="search_hub" class="form-control select2" requireddata-rule-required="true" data-msg-required="This field is required">
                                         @foreach($hubs as $hub)
@@ -32,8 +32,17 @@
                                     </select>
                                 </fieldset>
                             </div>
-                            <div class="col-3">
-                                <div class="form-group input-group">
+                            <div class="col-4">
+                                <fieldset class="form-group pb-1">
+                                    <select name="search_shipper" id="search_shipper" class="form-control select2" requireddata-rule-required="true" data-msg-required="Shipper is required">
+                                        @foreach($shippers as $shipper)
+                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-group input-group  pb-1">
                                     <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -42,8 +51,8 @@
                                     <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value="{{$today}}">
                                 </div>
                             </div>
-                            <div class="col-3">
-                                <div class="form-group input-group">
+                            <div class="col-4">
+                                <div class="form-group input-group pb-1">
                                     <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -53,8 +62,8 @@
                                 </div>
                             </div>
                             
-                            <div class="col-2">
-                                <div class="form-group">
+                            <div class="col-4">
+                                <div class="form-group pb-1">
                                     <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
                             </div>
@@ -147,7 +156,7 @@
                         <th class="border-primary border-darken-1">Return</th>
                         <th class="border-primary border-darken-1">Intercept</th>
                         <th class="border-primary border-darken-1">Pending</th>
-                        <th class="border-primary border-darken-1">Un-Assigned</th>
+                        <th class="border-primary border-darken-1">On Hold For Self Collection</th>
                         <th class="border-primary border-darken-1">Productivity(%)</th>
                     </tr>
                     </thead>
@@ -239,7 +248,11 @@
                 placeholder:"Select Hub",
                 allowClear:true,
             });
-            
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Shipper*',
+                allowClear:true,
+            });
             var today = '{{ $today }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
@@ -304,7 +317,7 @@
                             head.push('Return');
                             head.push('Intercept');
                             head.push('Pending');
-                            head.push('Un-Assigned');
+                            head.push('On Hold for Self Collection');
                             
                             head.push('Productivity(%)');
 
@@ -323,7 +336,7 @@
                                 row.push(values.return);
                                 row.push(values.intercept);
                                 row.push(values.pending);
-                                row.push(values.un_assigned);
+                                row.push(values.on_hold_for_sc);
                                 
                                 row.push(values.productivity);
 
@@ -366,7 +379,7 @@
                     data: function (d) {
                         d.agent = $('#search_agent').val();
                         d.hub = $('#search_hub').val();
-
+                        d.shipper = $('#search_shipper').val();
                         d.from_date = $('#search_form input[name="from_date_formatted"]').val();
                         d.to_date = $('#search_form input[name="to_date_formatted"]').val();
                     }
@@ -383,7 +396,7 @@
                     {data: 'return', orderable: false, searchable: false, name: 'return', class: 'align-middle return'},
                     {data: 'intercept', orderable: false, searchable: false, name: 'shipments.intercept', class: 'align-middle intercept'},
                     {data: 'pending', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
-                    {data: 'un_assigned', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
+                    {data: 'on_hold_for_sc', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
                     {data: 'productivity', orderable: false, searchable: false, name: 'productivity', class: 'align-middle productivity'},
 
                 ],

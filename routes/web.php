@@ -1957,6 +1957,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::put('update_details', 'Admins\AdminFinanceController@retail_done_payments_update_details')->name('update_details');
                 Route::get('export_to_excel', 'Admins\AdminFinanceController@retail_done_payments_export_to_excel')->name('export_to_excel');
                 Route::post('excel_store', 'Admins\AdminFinanceController@retail_done_payments_excel_store')->name('excel_store');
+                Route::get('retail_generate_report_to_email', 'Admins\AdminFinanceController@retail_done_payments_generate_report_to_email')->name('retail_generate_report_to_email');
             });
 
         });

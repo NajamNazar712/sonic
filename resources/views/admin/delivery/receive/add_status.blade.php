@@ -468,6 +468,15 @@
                                     <label class="custom-control-label" for="customRadio14">Refused After Opening The Shipment</label>
                                 </div>
                             </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input cr_radio" name="customRadio" id="customRadio15">
+                                    <label class="custom-control-label" for="customRadio15">Other</label>
+                                </div>
+                            </fieldset>
+                            <fieldset class="d-none">
+                                <textarea name="other_description" class="form-control" id="cr_other_description" cols="30" rows="10"></textarea>
+                            </fieldset>
                         </div>
 
                     </div>
@@ -984,9 +993,15 @@
             $('.cr_radio').on('click', function () {
                 var id = $(this).attr('id');
                 var status = $(this).attr('status');
-                $('#iad_status').val(status);
-                $('#CRUpdate').attr('disabled', false);
+                if(id == 'customRadio15'){
+                    $('#cr_other_description').parent('fieldset').removeClass('d-none');
+                    $('#CRUpdate').attr('disabled', true);
 
+                }else{
+                    $('#cr_other_description').parent('fieldset').addClass('d-none');
+                    $('#iad_status').val(status);
+                    $('#CRUpdate').attr('disabled', false);
+                }
             });
 
 
@@ -1002,6 +1017,18 @@
                    $('#AICUpdate').attr('disabled', true);
                    $('#iad_status').val('');
                }
+            });
+
+            $('#cr_other_description').on('input', function () {
+                var description = $.trim($(this).val());
+                if(description != ''){
+                    $('#CRUpdate').attr('disabled', false);
+                    $('#iad_status').val(description);
+                }
+                if(description == ''){
+                    $('#CRUpdate').attr('disabled', true);
+                    $('#iad_status').val('');
+                }
             });
             var receiving_date_picker;
             $('body').on('select2:select','.reasonSelect .reasonDrop',function (e) {
