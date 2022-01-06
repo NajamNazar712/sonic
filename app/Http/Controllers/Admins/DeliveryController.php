@@ -865,12 +865,12 @@ class DeliveryController extends Controller
                         if($shipment_otp->exists()){
                             $shipment_otp = $shipment_otp->first();
                         }else{
+                            $otp = mt_rand(100000, 999999);
                             $shipment_otp = new ShipmentOtp();
                             $shipment_otp->shipment_id = $shipment;
+                            $shipment_otp->otp = $otp;
+                            $shipment_otp->save();
                         }
-                        $otp = mt_rand(100000, 999999);
-                        $shipment_otp->otp = $otp;
-                        $shipment_otp->save();
                         NotificationsController::send(165, $shipment, $shipment_otp->id);
                         if($shipment_obj->amount == 0){
                             //English
