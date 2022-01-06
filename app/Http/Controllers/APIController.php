@@ -51,6 +51,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
@@ -515,7 +516,7 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190'],
                 'open_shipment' => ['nullable', 'boolean'],
-
+                'substitute_user_email' => ['nullable', 'filled', 'email']
             ];
             $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
             if ($ccd_booking->exists()) {
@@ -587,6 +588,7 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190'],
                 'open_shipment' => ['nullable', 'boolean'],
+                'substitute_user_email' => ['nullable', 'filled', 'email']
 
             ];
 
@@ -972,13 +974,29 @@ class APIController extends Controller
                 }
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
             }
-           
+
 
             if ($shipment_pre_book) {
                 $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
             } else {
                 $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
             }
+
+            //substitute_user_email
+            if($request->has('substitute_user_email')){
+                if($request->substitute_user_email != null){
+                    $sub_user = SubstituteUser::where(['user_id' => $user_id, 'email' => $request->substitute_user_email]);
+                    if($sub_user->exists()){
+                        $sub_user = $sub_user->first();
+                        $sub_user_id = $sub_user->id;
+                        $substitute_user_shipment = new SubstituteUserShipment();
+                        $substitute_user_shipment->substitute_user_id = $sub_user_id;
+                        $substitute_user_shipment->shipment_id = $shipment_id;
+                        $substitute_user_shipment->save();
+                    }
+                }
+            }
+
             if ($request->has('order_date')) {
                 if ($request->order_date != null) {
                     $order_date = new ShipmentOrderDate();
