@@ -8758,10 +8758,12 @@ class NotificationsController extends Controller
                             $body = str_replace('[otp]', $shipment_otp->otp, $body);
                         }
                         $to = $shipment->consignee_phone_number_1;
-                        self::sms_otp($body, $to, $shipment->consignee_name, $shipment_otp->otp, 1);
+                        self::sms($body, $to);
+//                        self::sms_otp($body, $to, $shipment->consignee_name, $shipment_otp->otp, 1);
                         if ($shipment->consignee_phone_number_2 != NULL) {
                             $to = $shipment->consignee_phone_number_2;
-                            self::sms_otp($body, $to, $shipment->consignee_name, $shipment_otp->otp, 1);
+                            self::sms($body, $to);
+//                            self::sms_otp($body, $to, $shipment->consignee_name, $shipment_otp->otp, 1);
                         }
                     }
                 }
