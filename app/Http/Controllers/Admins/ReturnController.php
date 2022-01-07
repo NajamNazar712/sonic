@@ -4438,7 +4438,7 @@ class ReturnController extends Controller
         ->leftJoin('return_assigned_shipments as ras', function ($join) {
             $join->on('ras.admin_id', '=', 'agent_return_confirmations.admin_id')
                 ->where('ras.id', '=',
-                    DB::raw('(select max(id) from return_assigned_shipments where return_assigned_shipments.admin_id = agent_return_confirmations.admin_id and return_assigned_shipments.created_at = agent_return_confirmations.current_date)'));
+                    DB::raw('(select max(id) from return_assigned_shipments where return_assigned_shipments.admin_id = agent_return_confirmations.admin_id )'));
         })
                     // ->join('return_assigned_shipments as ras','agent_return_confirmations.admin_id','=','ras.admin_id')
                     ->select('a.name as agent_name','a.id as agent_id','agent_return_confirmations.login_time as start_time','agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id');
