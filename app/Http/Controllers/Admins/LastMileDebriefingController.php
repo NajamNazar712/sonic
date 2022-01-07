@@ -74,6 +74,7 @@ class LastMileDebriefingController extends Controller
 
     public function supervisor_agents(Request $request){
         $admin_ids = AdminHub::where('hub_id',$request->hub_id)->pluck('admin_id')->toArray();
+       
         $delivery_note_id = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
         ->join('shipments as s','s.id','=','dns.shipment_id')
         ->where('delivery_notes.id',$request->delivery_id)

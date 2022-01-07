@@ -194,6 +194,7 @@
                         <th class="border-primary border-darken-1">Sale Person Tagged At</th>
                         <th class="border-primary border-darken-1">Reference Person</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
+                        <th class="border-primary border-darken-1">Lead Reason</th>
                         <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated AT</th>
@@ -324,6 +325,28 @@
                                 @foreach($lead_statuses as $lead_status)
                                     <option value="{{ $lead_status->id }}" > {{ $lead_status->name }} </option>
                                 @endforeach
+                            </select>
+                        </div>
+                        <div id="div_lead_status_rejected" class="form-group d-none">
+                            <select name="lead_status_rejected" id="lead_status_rejected" class="form-control select2">
+                                    <option value="1" > Prohibited Items </option>
+                                    <option value="2" > Wrong Contact Details </option>
+                                    <option value="3" > Duplicate </option>
+                                    <option value="10" > Others </option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_notinterested" class="form-group d-none">
+                            <select name="lead_status_notinterested" id="lead_status_notinterested" class="form-control select2">
+                                    <option value="4" > A/C Query Call </option>
+                                    <option value="10" > Others </option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_irrelevant" class="form-group d-none">
+                            <select name="lead_status_irrelevant" id="lead_status_irrelevant" class="form-control select2">
+                                <option value="5" > Operational Query </option>
+                                <option value="6" > HR Query </option>
+                                <option value="7" > Sales Person Already Assigned </option>
+                                <option value="10" > Others </option>
                             </select>
                         </div>
                         <div class="form-group ml-1">
@@ -582,6 +605,7 @@
                             head.push('Sale Person Tagged At');
                             head.push('Reference Person');
                             head.push('Lead Status');
+                            head.push('Reason');
                             head.push('Aging');
                             head.push('Updated By');
                             head.push('Updated At');
@@ -608,6 +632,7 @@
                                 row.push(values.sale_person_updated_at);
                                 row.push(values.reference_person);
                                 row.push(values.status);
+                                row.push(values.reason_id);
                                 row.push(values.aging);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
@@ -725,12 +750,12 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                rowId: 'lead_id',
+                rowId: 'leadid',
                 order: [[14, 'desc']],
                 columns: [
-                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'lead_id_link', name: 'leads.id', class: 'align-middle lead_id'},
+                    {data: 'lead_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {data: 'lead_id', name: 'lead_id', class: 'align-middle lead_id'},
                     {data: 'contact_person', name: 'leads.contact_person', class: 'align-middle contact_person'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},
@@ -747,6 +772,7 @@
                     {data: 'sale_person_updated_at', name:'leads.sale_person_updated_at', class: 'align-middle sale_person_updated_at'},
                     {data: 'reference_person', name:'rp.name', class: 'align-middle sale_person'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'reason_id', name: 'leads.reason', class: 'align-middle reason_id'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
@@ -773,8 +799,8 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging')) {
-                            $(td).appendTo($(search));
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.aging') || $(header).is('.reason_id')) {
+                            $(td).appendTo($(search) || $(header).is('.serial_number'));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
                                 .on( 'change', function () {
@@ -1008,8 +1034,47 @@
                 placeholder: "Select Status",
                 width:'100%',
                 dropdownParent:$('#add_status_modal')
+            }).bind('change', function() {
+                $(this).valid();
+                $('#lead_status_rejected').val('').trigger('change');
+                $('#lead_status_notinterested').val('').trigger('change');
+                $('#lead_status_irrelevant').val('').trigger('change');
+                if (this.value == 10) {
+                    $('#div_lead_status_rejected').removeClass('d-none');
+                    $('#div_lead_status_notinterested').addClass('d-none');
+                    $('#div_lead_status_irrelevant').addClass('d-none');
+                }
+                else if (this.value == 4) {
+                    $('#div_lead_status_rejected').addClass('d-none');
+                    $('#div_lead_status_notinterested').removeClass('d-none');
+                    $('#div_lead_status_irrelevant').addClass('d-none');
+                }
+                else if (this.value == 3) {
+                    $('#div_lead_status_rejected').addClass('d-none');
+                    $('#div_lead_status_notinterested').addClass('d-none');
+                    $('#div_lead_status_irrelevant').removeClass('d-none');
+                }
+                else {
+                    $('#div_lead_status_rejected').addClass('d-none');
+                    $('#div_lead_status_notinterested').addClass('d-none');
+                    $('#div_lead_status_irrelevant').addClass('d-none');
+                }
             });
-
+            $("#lead_status_rejected").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Rejected Reason",
+                width:'100%',
+                dropdownParent:$('#add_status_modal')
+            });
+            $("#lead_status_notinterested").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Not Interested Reason",
+                width:'100%',
+                dropdownParent:$('#add_status_modal')
+            });
+            $("#lead_status_irrelevant").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Irrelevant Reason",
+                width:'100%',
+                dropdownParent:$('#add_status_modal')
+            });
             $('body').on('click','#datatable .update',function(){
                 status_lead_id = parseInt($(this).parents('tr').attr('id'));
                 $('#add_status_modal').modal('show');
@@ -1027,7 +1092,26 @@
                 },
                 submitHandler: function(form) {
                     var new_status = $('#update_lead_status').val();
-                    if(new_status){
+                    var lead_status_rejected = $('#lead_status_rejected').val();
+                    var lead_status_notinterested = $('#lead_status_notinterested').val();
+                    var lead_status_irrelevant = $('#lead_status_irrelevant').val();
+                    var check = 1;
+                    if((lead_status_rejected == "" && new_status == 10) || (lead_status_notinterested == "" && new_status == 4) || (lead_status_irrelevant == "" && new_status == 3)){
+                        check = 0;
+                        var error = 'Reason  not Selected!';
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    if(new_status && check == 1){
+                        var reason;
+                        if(lead_status_rejected)
+                        reason = lead_status_rejected;
+                        
+                        else if(lead_status_notinterested)
+                        reason = lead_status_notinterested;
+                        
+                        else if(lead_status_irrelevant)
+                        reason = lead_status_irrelevant;
+
                         blockPagePermanently();
                         $.ajax({
                             url:"{{route('admin.leads.add_status')}}",
@@ -1035,6 +1119,7 @@
                             data:{
                                 'lead_id':status_lead_id,
                                 'status':new_status,
+                                'reason':reason,
                                 '_token':'{{ csrf_token() }}'
                             }
                         }).done(function (data) {
@@ -1051,14 +1136,20 @@
                         });
                     }
                     else{
+                        if(check == 0){}
+                        else{
                         var error = 'Status not Selected!';
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
                     }
                 }
             });
 
             $('#add_status_modal').on('hide.bs.modal', function () {
                 $('#update_lead_status').val('').trigger('change');
+                $('#lead_status_rejected').val('').trigger('change');
+                $('#lead_status_notinterested').val('').trigger('change');
+                $('#lead_status_irrelevant').val('').trigger('change');
             });
 
             $('body').on('click','#datatable .add_remarks',function(){
