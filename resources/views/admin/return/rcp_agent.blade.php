@@ -155,8 +155,8 @@
                         <th class="border-primary border-darken-1">Reattempt</th>
                         <th class="border-primary border-darken-1">Return</th>
                         <th class="border-primary border-darken-1">Intercept</th>
-                        <th class="border-primary border-darken-1">Pending</th>
                         <th class="border-primary border-darken-1">On Hold For Self Collection</th>
+                        <th class="border-primary border-darken-1">Pending</th>
                         <th class="border-primary border-darken-1">Productivity(%)</th>
                     </tr>
                     </thead>
@@ -316,8 +316,8 @@
                             head.push('Reattempt');
                             head.push('Return');
                             head.push('Intercept');
-                            head.push('Pending');
                             head.push('On Hold for Self Collection');
+                            head.push('Pending');
                             
                             head.push('Productivity(%)');
 
@@ -335,8 +335,8 @@
                                 row.push(values.reattempt);
                                 row.push(values.return);
                                 row.push(values.intercept);
-                                row.push(values.pending);
                                 row.push(values.on_hold_for_sc);
+                                row.push(values.pending);
                                 
                                 row.push(values.productivity);
 
@@ -395,8 +395,8 @@
                     {data: 'reattempt', orderable: false, searchable: false, name: 'reattempt', class: 'align-middle reattempt'},
                     {data: 'return', orderable: false, searchable: false, name: 'return', class: 'align-middle return'},
                     {data: 'intercept', orderable: false, searchable: false, name: 'shipments.intercept', class: 'align-middle intercept'},
-                    {data: 'pending', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
                     {data: 'on_hold_for_sc', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
+                    {data: 'pending', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
                     {data: 'productivity', orderable: false, searchable: false, name: 'productivity', class: 'align-middle productivity'},
 
                 ],
