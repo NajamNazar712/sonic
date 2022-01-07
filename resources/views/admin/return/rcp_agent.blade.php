@@ -32,7 +32,7 @@
                                     </select>
                                 </fieldset>
                             </div>
-                            <div class="col-4">
+                            {{-- <div class="col-4">
                                 <fieldset class="form-group pb-1">
                                     <select name="search_shipper" id="search_shipper" class="form-control select2" requireddata-rule-required="true" data-msg-required="Shipper is required">
                                         @foreach($shippers as $shipper)
@@ -40,7 +40,7 @@
                                         @endforeach
                                     </select>
                                 </fieldset>
-                            </div>
+                            </div> --}}
                             <div class="col-4">
                                 <div class="form-group input-group  pb-1">
                                     <div class="input-group-prepend">
@@ -248,11 +248,11 @@
                 placeholder:"Select Hub",
                 allowClear:true,
             });
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Select Shipper*',
-                allowClear:true,
-            });
+            // $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+            //     width: '100%',
+            //     placeholder: 'Select Shipper*',
+            //     allowClear:true,
+            // });
             var today = '{{ $today }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
@@ -379,7 +379,7 @@
                     data: function (d) {
                         d.agent = $('#search_agent').val();
                         d.hub = $('#search_hub').val();
-                        d.shipper = $('#search_shipper').val();
+                        // d.shipper = $('#search_shipper').val();
                         d.from_date = $('#search_form input[name="from_date_formatted"]').val();
                         d.to_date = $('#search_form input[name="to_date_formatted"]').val();
                     }
