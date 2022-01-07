@@ -8340,6 +8340,20 @@ class RiderAPIController extends Controller
                         }
 
                         if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
+                            if($shipment->shipper_status_id == 20){
+                                $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 20)->latest()->first();
+                                if ($journey) {
+                                    $return_reattempt = new ReturnReattemptRatio();
+                                    $return_reattempt->shipment_id = $shipment->id;
+                                    $return_reattempt->return_confirm_date = $journey->created_at;
+                                    $return_reattempt->save();
+                                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
+                                    if($shipment->shipment_type == 1){
+                                        AdminFinanceController::return_confirmed_revert($shipment->id, 1);
+                                    }
+                                }
+                            }
+
                             if ($shipment->booking_type_id == 2) {
                                 $shipment->shipper_status_id = 30;
                                 $shipment->consignee_status_id = 30;
