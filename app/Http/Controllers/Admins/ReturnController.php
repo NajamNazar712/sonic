@@ -4440,6 +4440,7 @@ class ReturnController extends Controller
                 ->where('ras.id', '=',
                     DB::raw('(select max(id) from return_assigned_shipments where return_assigned_shipments.admin_id = agent_return_confirmations.admin_id )'));
         })
+        ->whereDate('agent_return_confirmations.current_date','ras.created_at')
                     // ->join('return_assigned_shipments as ras','agent_return_confirmations.admin_id','=','ras.admin_id')
                     ->select('a.name as agent_name','a.id as agent_id','agent_return_confirmations.login_time as start_time','agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id');
         $datatable = Datatables::of($agent_productivity)
