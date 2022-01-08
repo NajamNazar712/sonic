@@ -4917,17 +4917,22 @@ class AdminAPIController extends Controller
                         }
                     }
 
-                    $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
+                    $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0);
                     $pickup_request_id = NULL;
-                    if ($pickup_request_shipment) {
-                        $pickup_request = V2PickupRequest::where('id', $pickup_request_shipment->pickup_request_id)->first();
-                        $reference_1_id = $pickup_request_shipment->pickup_request_id;
+                    $pickup_request = NULL;
+                    if ($pickup_request_shipment->exists()) {
+                        $pickup_request_shipment = $pickup_request_shipment->orderBy('id', 'DESC')->first();
+
+                        $pickup_request_id = $pickup_request_shipment->pickup_request_id;
+                        $pickup_request = V2PickupRequest::where('id', $pickup_request_id)->first();
+                        $reference_1_id = $pickup_request_id;
                         $rider_id = $pickup_request->current_rider_id;
 
                         // if (!in_array($pickup_request_shipment->pickup_request_id, $pickup_request_ids)) {
                         // $pickup_request_ids[] = $pickup_request_shipment->pickup_request_id;
-                        $pickup_request_id = $pickup_request_shipment->pickup_request_id;
+
                         // }
+
                     } else {
                         $reference_1_id = null;
                     }
@@ -5090,11 +5095,11 @@ class AdminAPIController extends Controller
                         $pickup_request_received_shipment->pickup_request_id = $pickup_request_id;
                         $pickup_request_received_shipment->shipment_id = $shipment->id;
                         $pickup_note_id = NULL;
-                        $pickup_rider_id = NULL;
+
                         $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->latest()->first();
                         if ($pickup_note_request) {
                             $pickup_note_id = $pickup_note_request->pickup_note_id;
-                            $pickup_note = $pickup_note_request->pickup_note;
+                            $pickup_note = V2PickupNote::find($pickup_note_id);
                             $pickup_rider_id = $pickup_note->rider_id;
                         }
                         $pickup_request_received_shipment->pickup_note_id = $pickup_note_id;
