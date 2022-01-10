@@ -22,7 +22,7 @@
                                 <h2 class="font-large-1">{{$shipper->name}} </h2>
                             </div>
                             <div class="col-4 text-right mt-1">
-                                <input type="checkbox" id="packaging_invoice_toggle" class="switchery packaging_invoice_toggle" data-size="xs" data-switchery="true" @if($packaging_invoice->status == 1) checked @endif>
+                                <input type="checkbox" id="packaging_invoice_toggle" class="switchery packaging_invoice_toggle" data-size="xs" data-switchery="true" @if(isset($packaging_invoice->status) && $packaging_invoice->status == 1) checked @endif>
                                 <label class="display-inline ml-1 font-medium-1">Generate Packaging Invoice</label>
                             </div>
                             <div class="col-4">
