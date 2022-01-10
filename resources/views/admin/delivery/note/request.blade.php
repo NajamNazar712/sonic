@@ -33,6 +33,8 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Rider ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
+                                    <th class="border-primary border-darken-1">Hub</th>
+                                    <th class="border-primary border-darken-1">Delivery Note</th>
                                     <th class="border-primary border-darken-1">Pending DNCC</th>
                                     <th class="border-primary border-darken-1">Amount</th>
                                     <th class="border-primary border-darken-1">Reason</th>
@@ -81,6 +83,7 @@
                                 <div class="form-group">
                                     <label><strong>Pending DNCC</strong></label>
                                     <input type="text" name="dncc" id="dncc" class="form-control" {{--placeholder="Pending DNCC"--}} readonly>
+                                    <input type="hidden" name="dnid" id="dnid" class="form-control">
                                 </div>
                             </div>
 
@@ -212,12 +215,14 @@
 
                     if (data.status == 1) {
                         var value ='';
+                        var delivery_note = data.note.id;
                         if(data.note.received_cod_amount == null){
                             value = 0;  
                         }
                       else{
                          value = data.note.received_cod_amount
                       }
+                      $('#dnid').val(delivery_note);
                       $('#dncc').val(value);
                       $('#amount').val(data.note.total_cod_amount);
                       $('#form_btn').attr('disabled' , false);
@@ -324,7 +329,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[6, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {
                         orderable: false,
@@ -338,7 +343,9 @@
                     },
                     {data: 'rider_id', name: 'r.id', class: 'align-middle rider_id'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
-                    {data: 'delivery_note', name: 'delivery_note_requests.delivery_note_id', class: 'align-middle delivery_note'},
+                    {data: 'hub', name: 'c.name', class: 'align-middle hub'},
+                    {data: 'delivery_note', name: 'delivery_note_requests.delivery_note', class: 'align-middle delivery_note'},
+                    {data: 'dn_received_amount', name: 'delivery_note_requests.dn_received_amount', class: 'align-middle dn_received_amount'},
                     {data: 'amount', name: 'delivery_note_requests.amount', class: 'align-middle amount'},
                     {data: 'reason', name: 'delivery_note_requests.reason', class: 'align-middle reason'},
                     {data: 'requested_at', name: 'delivery_note_requests.requested_at', class: 'align-middle requested_at'},
