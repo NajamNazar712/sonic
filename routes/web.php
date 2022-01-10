@@ -602,6 +602,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('kam_poc_ref_tag/remove','Admins\AdminDashboardController@kam_poc_ref_tag_remove')->name('kam_poc_ref_tag.remove');
         Route::post('restrict_order_id/info','Admins\AdminDashboardController@restrict_order_id_info')->name('restrict_order_id.info');
         Route::post('restrict_order_id/submit','Admins\AdminDashboardController@restrict_order_id_submit')->name('restrict_order_id.submit');
+        Route::post('/add_retag_territory', 'Admins\AdminDashboardController@add_retag_territory')->name('add_retag_territory');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){

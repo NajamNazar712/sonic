@@ -273,6 +273,38 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="TerritoryReTag" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TerritoryReTagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Re-Tag Territory</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <form id="set_retag_territory" action="{{route('admin.accounts.add_retag_territory')}}" method="post">
+                            @csrf
+                            @method('post')
+                            <div class="form-group text-center">
+                                <input type="text" hidden name="user_ids" class="user_ids">
+                                <select name="territory" id="retagterritory" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                                    @foreach($territories as $territory)
+                                        <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mt-2" style="text-align: center">
+                                <button type="submit" class="btn btn-success" id="territoryReTagSubmit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade text-left" id="RemoveSalesTierTaggingModal" data-backdrop="static" role="dialog" aria-labelledby="RemoveSalesTierTaggingModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -399,7 +431,11 @@
             width:'100%',
             dropdownParent:$('#TerritoryTag')
         });
-
+        $("#retagterritory").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Territory For Retagging",
+            width:'100%',
+            dropdownParent:$('#TerritoryReTag')
+        });
         $("#bulk_sub_segment1").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sub Segment",
             width:'100%',
@@ -877,6 +913,23 @@
                     }
                 },
                 @endif
+                @if (session('role_id') == 1 || in_array(658, session('permissions')))
+                {
+                    text: 'Re-Tag Territory',
+                    className: 'btn btn-primary territory_retag',
+                    enabled:false,
+                    action: function (e, dt, node, config) {
+                        if(selected_rows != ''){
+                            $('.user_ids').val(selected_rows);
+                            $('#TerritoryReTag').modal('show');
+
+                        }else{
+                            var error = "Atleast Select One Shipper";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    }
+                },
+                @endif
                     {
                         extend: 'selectAll',
                         text: 'Select All',
@@ -916,6 +969,7 @@
                                         table.button('.bulk_segment_tagging').enable();
                                         
                                         table.button('.territory_tag').enable();
+                                        table.button('.territory_retag').enable();
                                         table.button('.tag').enable();
 
                                     }
@@ -949,6 +1003,7 @@
                                         
                                         table.button('.tag').disable();
                                         table.button('.territory_tag').disable();
+                                        table.button('.territory_retag').disable();
 
                                         hub_ids.splice(index, 1);
                                     }
@@ -1483,6 +1538,7 @@
                     table.button('.bulk_segment_tagging').enable();
                     
                     table.button('.territory_tag').enable();
+                    table.button('.territory_retag').enable();
                     table.button('.tag').enable();
                 }
                 else {
@@ -1490,6 +1546,7 @@
                     table.button('.bulk_segment_tagging').disable();
                     
                     table.button('.territory_tag').disable();
+                    table.button('.territory_retag').disable();
                     table.button('.tag').disable();
                 }
         });
@@ -1560,7 +1617,20 @@
 
             }
         });
+        $( "#set_retag_territory" ).validate({
+            errorClass:"danger",
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100','text-center').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
 
+                form.submit();
+
+            }
+        });
         $( "#set_segments" ).validate({
             errorClass:"danger",
             normalizer: function(value) {

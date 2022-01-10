@@ -11349,6 +11349,11 @@ class AdminDashboardController extends Controller
             $user_ids = explode(',', $user_ids);
             foreach($user_ids as $id){
                 $user = User::find($id);
+                if($user->territory_id)
+                return redirect()->back()->with('error', 'Territory not added as '.$user->name.' is tagged previously');
+            }
+            foreach($user_ids as $id){
+                $user = User::find($id);
                 $user->territory_id = $territory;
                 $user->save();
 
@@ -11508,6 +11513,33 @@ class AdminDashboardController extends Controller
         }
 
    }
+
+   public function add_retag_territory(Request $request){
+    $territory = $request->territory;
+    $user_ids = $request->user_ids;
+    if($user_ids){
+        $user_ids = explode(',', $user_ids);
+        foreach($user_ids as $id){
+            $user = User::find($id);
+            if(!$user->territory_id)
+            return redirect()->back()->with('error', 'Retagging not done as '.$user->name.' is not tagged previously');
+        }
+        foreach($user_ids as $id){
+            $user = User::find($id);
+            $user->territory_id = $territory;
+            $user->save();
+
+            $history = new TerritoryTagHistory();
+            $history->user_id = $id;
+            $history->admin_id = Auth::id();
+            $history->save();
+        }
+        return redirect()->back()->with('success', 'Territory is added.');
+        }
+    else{
+        return redirect()->back()->with('error', 'Territory not added.');
+    }
+}
 
 }
 
