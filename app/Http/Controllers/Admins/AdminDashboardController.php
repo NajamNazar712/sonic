@@ -8400,7 +8400,7 @@ class AdminDashboardController extends Controller
             $users = $users->where('users.cnic', $search_cnic);
         }
         if($search_shipper = $request->get('search_shipper')){
-            $users = $users->whereIn('users.id', $search_shipper);
+            $users = $users->where('users.id', $search_shipper);
         }
 
         if($search_iban = $request->get('search_iban')){
