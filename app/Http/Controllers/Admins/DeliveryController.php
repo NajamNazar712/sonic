@@ -1915,12 +1915,12 @@ class DeliveryController extends Controller
                 $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
             }
             else{
-                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4,6])->orderBy('name')->get();
+                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereIn('id', [7,8,12,19,27,34,35,40])->orderBy('name')->get();
             }
         }
 
         if (!$statuses->isEmpty()) {
-            return response()->json(['status' => 0, 'reasons' => $statuses]);
+        return response()->json(['status' => 0, 'reasons' => $statuses]);
         } else {
             return ['status' => 1, 'error' => 'No reasons are defined for this status!'];
         }
