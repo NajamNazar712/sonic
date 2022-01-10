@@ -17,7 +17,7 @@
                             <div id="search_form" class="row p-1 mb-2">
                                 <div class="col-4">
                                     <fieldset class="form-group">
-                                        <select name="search_admins[]" id="search_admins" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                        <select name="search_admins" id="search_admins" class="form-control select2" required data-rule-required="true" data-msg-required="This field is required">
                                             @foreach($sale_name as $admin)
                                                 <option value="{{$admin->id}}">{{$admin->name}}</option>
                                             @endforeach
@@ -602,12 +602,12 @@
             dropdownParent:$('#TerritoryTag')
         });
 
-        $('#search_admins').select2({
+        $('#search_admins').prepend('<option value="" selected></option>').select2({
             width:'100%',
             placeholder:"Select Sale Persons",
             allowClear:true,
         });
-        $('#search_shipper').select2({
+        $('#search_shipper').prepend('<option value="" selected></option>').select2({
             width:'100%',
             placeholder:"Select Shipper",
             allowClear:true,

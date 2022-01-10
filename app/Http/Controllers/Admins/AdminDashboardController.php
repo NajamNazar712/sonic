@@ -8393,7 +8393,7 @@ class AdminDashboardController extends Controller
         }
 
         if($sale_persons = $request->get('sale_persons')){
-            $users = $users->whereIn('ad.id', $sale_persons);
+            $users = $users->where('ad.id', $sale_persons);
         }
 
         if($search_cnic = $request->get('search_cnic')){
