@@ -3496,7 +3496,8 @@ class RiderAPIController extends Controller
             'remarks' => ['nullable', 'string', 'max:255'],
             'picture' => ['required', 'image'],
             'open_box' => ['required', 'integer'],
-            'audio' => ['nullable', 'file']
+            'audio' => ['nullable', 'file'],
+            'otp_entered' => ['nullable', 'integer'],
         ];
         $message = '';
 
@@ -3573,6 +3574,9 @@ class RiderAPIController extends Controller
                                     $rider_delivery->current_location_longitude = $coordinates->long;
                                     $rider_delivery->distance_from_current_to_actual = 0;
                                 }
+                            }
+                            if($request->has('otp_entered')){
+                                $rider_delivery->otp_entered = $request->otp_entered;
                             }
                             $rider_delivery->save();
 
