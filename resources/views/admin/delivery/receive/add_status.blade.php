@@ -1865,8 +1865,9 @@
                                             'password': password,
                                         }
                                     }).done(function (data) {
-                                        console.log(data);
+                                        console.log(data.status);
                                         if (data.status === 1) {
+                                            var flag = false;
                                             UnblockPagePermanently();
                                             if(data.first_attempt_shipments) {
                                                 $.each(data.first_attempt_shipments, function (index, tracking_number) {
@@ -1876,30 +1877,32 @@
                                                 html += tracking_numbers;
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
+                                                 flag = true;
                                             }
-                                            swal({
-                                                title: 'RCP First Attempt',
-                                                content: content,
-                                                icon: 'warning',
-                                                buttons: {
-                                                    confirm: {
-                                                        text: 'OK',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
+                                            if(flag) {
+                                                swal({
+                                                    title: 'RCP First Attempt',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        confirm: {
+                                                            text: 'OK',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        }
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                }).then(function (confirm) {
+                                                    if (confirm) {
+                                                        location.reload();
+                                                    } else {
+                                                        location.reload();
                                                     }
-                                                },
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false,
-                                                dangerMode: true
-                                            }).then(function(confirm) {
-                                                if (confirm) {
-                                                    location.reload();
-                                                }
-                                                else{
-                                                    location.reload();
-                                                }
-                                            });
+                                                });
+                                            }
                                             toastr.success(data.success, 'Success!', {
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'

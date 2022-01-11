@@ -1991,9 +1991,17 @@ class DeliveryController extends Controller
                     }
                 }
                 elseif(ShipmentsJourney::where('shipment_id',$shipment)->where('shipper_status_id',5)->count() == 1){
+
                     if(!in_array($selected_reason,$reason_for_first_attempt)){
-                        if(!in_array($shipment_details->tracking_number,$first_attempt_shipments)){
-                            array_push($first_attempt_shipments,$shipment_details->tracking_number);
+                        if(!in_array($selected_reason,[3, 4, 12, 34, 50])){
+                            if(!in_array($shipment_details->tracking_number,$first_attempt_shipments)){
+                                array_push($first_attempt_shipments,$shipment_details->tracking_number);
+                            }
+                        }
+                    }
+                    else{
+                        if(!in_array($shipment,$received_shipments)){
+                            array_push($received_shipments,$shipment);
                         }
                     }
                 }
@@ -2004,7 +2012,7 @@ class DeliveryController extends Controller
                 }
             }
 
-            //dd($received_shipments,$first_attempt_shipments,$restrict_status_shipments);
+            //dd($received_shipments,$first_attempt_shipments,$restrict_status_shipments,$selected_reason);
             foreach ($received_shipments as $shipment) {
                 $shipment_details = Shipment::find($shipment);
 
