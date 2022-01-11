@@ -1999,6 +1999,7 @@ class DeliveryController extends Controller
                             }
                         }
                     }
+                    
                     else{
                         if(!in_array($shipment,$received_shipments)){
                             array_push($received_shipments,$shipment);

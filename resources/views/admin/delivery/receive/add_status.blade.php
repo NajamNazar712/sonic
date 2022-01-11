@@ -1869,7 +1869,7 @@
                                         if (data.status === 1) {
                                             var flag = false;
                                             UnblockPagePermanently();
-                                            if(data.first_attempt_shipments) {
+                                            if(data.first_attempt_shipments.length > 0) {
                                                 $.each(data.first_attempt_shipments, function (index, tracking_number) {
                                                     tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                                 });
@@ -1914,7 +1914,7 @@
                                             var tracking_numbers = '';
                                             var html = '';
                                             var route = '{!! route('admin.tracking.index') !!}';
-                                            if(data.invalid_shipments){
+                                            if(data.invalid_shipments.length > 0){
                                                 $.each(data.invalid_shipments, function(index, tracking_number) {
                                                     tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                                 });
@@ -1924,7 +1924,7 @@
                                                 content.innerHTML = html;
                                                 invalid_shipmet_flag = true;
                                             }
-                                            if(data.first_attempt_shipments) {
+                                            if(data.first_attempt_shipments.length > 0) {
                                                 $.each(data.first_attempt_shipments, function (index, tracking_number) {
                                                     tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                                 });
