@@ -1016,11 +1016,13 @@
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
                                 $.each(details.tracking_history, function (index, history) {
-                                    if(history.shipper_status_id == 8){
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.date_time + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
-                                        shipment += '<td>' + history.image_audio_location + '</td>';
+                                        if(history.image_audio_location == undefined) {                                        
+                                            shipment += '<td>-</td>';}
+                                        else
+                                            shipment += '<td>' + history.image_audio_location + '</td>';
                                         shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
                                         shipment += '<td>' + history.remarks + '</td>';
                                         shipment += '<td>' + history.user + '</td>';
@@ -1029,21 +1031,6 @@
                                         shipment += '<td>' + history.ip + '</td>';
                                         shipment += '<td>' + history.rider + '</td>';
                                         shipment += '</tr>';
-                                    }
-                                    else{
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.status + '</td>';
-                                        shipment += '<td></td>';
-                                        shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
-                                        shipment += '<td>' + history.remarks + '</td>';
-                                        shipment += '<td>' + history.user + '</td>';
-                                        shipment += '<td>' + history.city + '</td>';
-                                        shipment += '<td>' + history.received_or_refused_by + '</td>';
-                                        shipment += '<td>' + history.ip + '</td>';
-                                        shipment += '<td>' + history.rider + '</td>';
-                                        shipment += '</tr>';
-                                    }
                                 });
 
                                 shipment += '</tbody>';

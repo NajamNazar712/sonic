@@ -981,28 +981,56 @@ class AdminTrackingController extends Controller
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
                             $journey_details['shipper_status_id'] = $journey->shipment_status_shipper->id;
-                            $rider_delivery = RiderDelivery::where('shipment_id',$shipment->id);
-                            if($rider_delivery->exists()){
-                                $rider_delivery = $rider_delivery->get()->first();
-                                if($rider_delivery->picture_path != null){
-                                    $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
-                                    if($exists){
-                                        $journey_details['image_audio_location'] ='<button type="button" class="btn btn-sm btn-outline-info align-middle picture" data-link="' . asset(Storage::url($rider_delivery->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
+                            
+                            if(in_array($journey->shipment_status_shipper->id, [7,8,9,12,15,18,14,30,37])){
+                                $rider_delivery = RiderDelivery::where('shipment_id',$shipment->id);
+                                if($rider_delivery->exists()){
+                                    $rider_delivery = $rider_delivery->get()->first();
+                                    if($rider_delivery->picture_path != null){
+                                        $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                        if($exists){
+                                            $journey_details['image_audio_location'] ='<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                        }
                                     }
-                                }
-                                if($rider_delivery->audio_path != null){
-                                    $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
-                                    if($exists){
-                                        $journey_details['image_audio_location'] .='| <button type="button" class="btn btn-sm btn-outline-info align-middle picture" data-link="' . asset(Storage::url($rider_delivery->audio_path)) . '"><i class="la la-file-sound-o"></i></button>';
+                                    if($rider_delivery->audio_path != null){
+                                        $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                        if($exists){
+                                            $journey_details['image_audio_location'] .='| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->audio_path)) . '"><i class="la la-file-sound-o"></i></button>';
+                                        }
                                     }
-                                }
-                                if($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null){
-                                    $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
-                                    if($exists){
-                                        $journey_details['image_audio_location'] .='| <a type="button" class="btn btn-sm btn-outline-info align-middle location" href="https://www.google.com/maps/search/?api=1&query=' . $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude . '" target="_blank"><i class="la la-map-marker"></i></a></div>';
+                                    if($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null){
+                                        $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                        if($exists){
+                                            $journey_details['image_audio_location'] .='| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="https://www.google.com/maps/search/?api=1&query=' . $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude . '" target="_blank"><i class="la la-map-marker"></i></a></div>';
+                                        }
                                     }
                                 }
                             }
+                            else if(in_array($journey->shipment_status_shipper->id, [47,24,48,60,25,31,38])){
+                                $rider_return_deliveries = RiderReturnDelivery::where('shipment_id', $shipment->id);
+                                if($rider_return_deliveries->exists()){
+                                    $rider_return_deliveries = $rider_return_deliveries->get()->first();
+                                    if($rider_return_deliveries->pod_image != null){
+                                        $exists = Storage::disk('public')->exists($rider_return_deliveries->pod_image);
+                                        if($exists){
+                                            $journey_details['image_audio_location'] ='<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_return_deliveries->pod_image)) . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                        }
+                                    }
+                                    if($rider_return_deliveries->audio_path != null){
+                                        $exists = Storage::disk('public')->exists($rider_return_deliveries->audio_path);
+                                        if($exists){
+                                            $journey_details['image_audio_location'] .='| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_return_deliveries->audio_path)) . '"><i class="la la-file-sound-o"></i></button>';
+                                        }
+                                    }
+                                    if($rider_return_deliveries->actual_location_latitude != null && $rider_return_deliveries->actual_location_longitude != null){
+
+                                        $journey_details['image_audio_location'] .='| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="https://www.google.com/maps/search/?api=1&query=' . $rider_return_deliveries->actual_location_latitude . ',' . $rider_return_deliveries->actual_location_longitude . '" target="_blank"><i class="la la-map-marker"></i></a></div>';
+                                    }
+                                }
+                            }
+                            else
+                            {$journey_details['image_audio_location'] = '-';}
+
                             $journey_details['status_id'] = $journey->shipper_status_id;
                             if(in_array($journey->shipper_status_id, [1])){
                                 if($shipment->booked_by == 1){
