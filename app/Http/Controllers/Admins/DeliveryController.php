@@ -7514,6 +7514,14 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                    return 'Approved';
                }
             })
+            ->editColumn('delivery_note', function ($result) {
+                if($result->delivery_note){
+                    return $result->delivery_note;
+                }
+                else{
+                    return '-';
+                }
+             })
             ->addColumn("action", function ($result) {
                 if ((session('role_id') == 1 || count(array_intersect([533], session('permissions'))) !== 0) && $result->status == 1 ) {
                     $dropdown = '

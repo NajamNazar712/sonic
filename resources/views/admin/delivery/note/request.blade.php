@@ -253,6 +253,8 @@
                             head.push('S.No');
                             head.push('Rider ID');
                             head.push('Rider');
+                            head.push('Hub');
+                            head.push('Delivery Note');
                             head.push('Pending DNCC');
                             head.push('Amount');
                             head.push('Reason');
@@ -268,7 +270,9 @@
                                 row.push(index + 1);
                                 row.push(values.rider_id);
                                 row.push(values.rider);
+                                row.push(values.hub);
                                 row.push(values.delivery_note);
+                                row.push(values.dn_received_amount);
                                 row.push(values.amount);
                                 row.push(values.reason);
                                 row.push(values.requested_at);
