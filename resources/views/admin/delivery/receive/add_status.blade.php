@@ -1867,7 +1867,6 @@
                                     }).done(function (data) {
                                         console.log(data.status);
                                         if (data.status === 1) {
-                                            var flag = false;
                                             var tracking_numbers = '';
                                             var route = '{!! route('admin.tracking.index') !!}';
                                             UnblockPagePermanently();
@@ -1879,37 +1878,38 @@
                                                 html += tracking_numbers;
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
-                                                 flag = true;
-                                            }
-                                            if(flag) {
-                                                swal({
-                                                    title: 'RCP First Attempt',
-                                                    content: content,
-                                                    icon: 'warning',
-                                                    buttons: {
-                                                        confirm: {
-                                                            text: 'OK',
-                                                            value: null,
-                                                            visible: true,
-                                                            closeModal: true,
+                                                    swal({
+                                                        title: 'RCP First Attempt',
+                                                        content: content,
+                                                        icon: 'warning',
+                                                        buttons: {
+                                                            confirm: {
+                                                                text: 'OK',
+                                                                value: null,
+                                                                visible: true,
+                                                                closeModal: true,
+                                                            }
+                                                        },
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false,
+                                                        dangerMode: true
+                                                    }).then(function (confirm) {
+                                                        if (confirm) {
+                                                            location.reload();
+                                                        } else {
+                                                            location.reload();
                                                         }
-                                                    },
-                                                    closeOnClickOutside: false,
-                                                    closeOnEsc: false,
-                                                    dangerMode: true
-                                                }).then(function (confirm) {
-                                                    if (confirm) {
-                                                        location.reload();
-                                                    } else {
-                                                        location.reload();
-                                                    }
-                                                });
+                                                    });
+
                                             }
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                            location.reload();
+                                            else{
+                                                 toastr.success(data.success, 'Success!', {
+                                                     positionClass: 'toast-bottom-center',
+                                                     containerId: 'toast-bottom-center'
+                                                 });
+                                                 location.reload();
+                                            }
+
                                         }
                                         else if(data.status === 2){
                                             var invalid_shipmet_flag = false;
