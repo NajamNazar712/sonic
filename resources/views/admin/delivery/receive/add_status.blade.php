@@ -1868,6 +1868,8 @@
                                         console.log(data.status);
                                         if (data.status === 1) {
                                             var flag = false;
+                                            var tracking_numbers = '';
+                                            var route = '{!! route('admin.tracking.index') !!}';
                                             UnblockPagePermanently();
                                             if(data.first_attempt_shipments.length > 0) {
                                                 $.each(data.first_attempt_shipments, function (index, tracking_number) {
