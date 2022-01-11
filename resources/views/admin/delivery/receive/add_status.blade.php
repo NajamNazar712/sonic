@@ -1872,13 +1872,13 @@
                                                 $.each(data.first_attempt_shipments, function (index, tracking_number) {
                                                     tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                                 });
-                                                var html = '<p>Cannot update status for first attempt for rcp:</p><br>';
+                                                var html = '<p>Return Confirmation Pending Cannot be mark on the following shipments due to First Delivery Attempt</p><br>';
                                                 html += tracking_numbers;
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
                                             }
                                             swal({
-                                                title: 'Cannot update status for first attempt for rcp.',
+                                                title: 'RCP First Attempt',
                                                 content: content,
                                                 icon: 'warning',
                                                 buttons: {
@@ -1915,7 +1915,7 @@
                                                 $.each(data.invalid_shipments, function(index, tracking_number) {
                                                     tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                                 });
-                                                 html = '<p>Same consignee details found which are already marked as delivered of following Shipment(s):</p><br>';
+                                                 html += '<p>Same consignee details found which are already marked as delivered of following Shipment(s):</p><br>';
                                                 html += tracking_numbers;
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
@@ -1925,7 +1925,7 @@
                                                 $.each(data.first_attempt_shipments, function (index, tracking_number) {
                                                     tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                                 });
-                                                 html = '<p>Cannot update status for first attempt for rcp:</p><br>';
+                                                 html += '<p>Return Confirmation Pending Cannot be mark on the following shipments due to First Delivery Attempt</p><br>';
                                                 html += tracking_numbers;
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
@@ -1933,7 +1933,7 @@
                                             }
                                             if(invalid_shipmet_flag) {
                                                 swal({
-                                                    title: 'First Attempt/Same Consinee Info',
+                                                    title: 'RCP First Attempt/Same Consignee Info',
                                                     content: content,
                                                     icon: 'warning',
                                                     buttons: {
