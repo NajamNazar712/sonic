@@ -66,6 +66,7 @@ use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\ShipmentDistributionProduct;
+use App\Http\Models\ShipmentOtp;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
@@ -3495,7 +3496,8 @@ class RiderAPIController extends Controller
             'remarks' => ['nullable', 'string', 'max:255'],
             'picture' => ['required', 'image'],
             'open_box' => ['required', 'integer'],
-            'audio' => ['nullable', 'file']
+            'audio' => ['nullable', 'file'],
+            'otp_entered' => ['nullable', 'integer'],
         ];
         $message = '';
 
@@ -3573,6 +3575,9 @@ class RiderAPIController extends Controller
                                     $rider_delivery->distance_from_current_to_actual = 0;
                                 }
                             }
+                            if($request->has('otp_entered') && $request->status_reason_id == 8){
+                                $rider_delivery->otp_entered = $request->otp_entered;
+                            }
                             $rider_delivery->save();
 
                             $time = Carbon::now()->toDateString();
@@ -3645,7 +3650,7 @@ class RiderAPIController extends Controller
                         }
                     }
                 } else {
-                    $message = 'Shipment is already marked as Delivered';
+                    $message = 'Shipment Status is already marked';
                 }
             } else {
                 $message = 'Shipment is already marked as Delivered';
@@ -8605,6 +8610,12 @@ class RiderAPIController extends Controller
 
                     $shipment_data = $delivery_note_shipment->shipment;
                     $shipment_id = $shipment_data->id;
+                    $refusal_otp = null;
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
+                    if($shipment_otp->exists()){
+                        $shipment_otp = $shipment_otp->first();
+                        $refusal_otp = $shipment_otp->otp;
+                    }
                     $payment_mode = $shipment_data->payment_mode_id;
                     $tracking_number = $shipment_data->tracking_number;
                     $consignee_name = $shipment_data->consignee_name;
@@ -8682,6 +8693,7 @@ class RiderAPIController extends Controller
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
                     $deliveries['shipper'] = $shipper_name;
+                    $deliveries['refusal_otp'] = $refusal_otp;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
