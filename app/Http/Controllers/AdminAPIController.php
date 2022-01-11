@@ -4832,6 +4832,11 @@ class AdminAPIController extends Controller
                             return response()->json(false);
     
                     }
+                    $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
+                    if($retail_shipment->exists()){
+                        return response()->json(false);
+
+                    }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
 
