@@ -3575,7 +3575,7 @@ class RiderAPIController extends Controller
                                     $rider_delivery->distance_from_current_to_actual = 0;
                                 }
                             }
-                            if($request->has('otp_entered')){
+                            if($request->has('otp_entered') && $request->status_reason_id == 8){
                                 $rider_delivery->otp_entered = $request->otp_entered;
                             }
                             $rider_delivery->save();
