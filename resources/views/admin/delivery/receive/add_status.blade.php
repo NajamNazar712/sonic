@@ -1909,7 +1909,7 @@
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'
                                             });
-                                            //location.reload();
+                                            location.reload();
                                         }
                                         else if(data.status === 2){
                                             var invalid_shipmet_flag = false;

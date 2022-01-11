@@ -1993,11 +1993,11 @@ class DeliveryController extends Controller
                 elseif(ShipmentsJourney::where('shipment_id',$shipment)->where('shipper_status_id',5)->count() == 1){
 
                     if(!in_array($selected_reason,$reason_for_first_attempt)){
-                        if(!in_array($selected_reason,[3, 4, 12, 34, 50])){
-                            if(!in_array($shipment_details->tracking_number,$first_attempt_shipments)){
-                                array_push($first_attempt_shipments,$shipment_details->tracking_number);
-                            }
+
+                        if(!in_array($shipment_details->tracking_number,$first_attempt_shipments)){
+                            array_push($first_attempt_shipments,$shipment_details->tracking_number);
                         }
+
                     }
                     
                     else{
@@ -2035,6 +2035,13 @@ class DeliveryController extends Controller
                             ->where('shipper_status_id', DB::raw(14));
                         if ($previous_delivered_shipments->exists()) {
                             $invalid_reason_shipments[] = $shipment_details->tracking_number;
+
+                            if(in_array($shipment_details->tracking_number,$first_attempt_shipments)){
+                                $index = array_search($shipment_details->tracking_number, $first_attempt_shipments);
+                                if($index !== false){
+                                    unset($first_attempt_shipments[$index]);
+                                }
+                            }
 //                            continue;
                         }
                     }
