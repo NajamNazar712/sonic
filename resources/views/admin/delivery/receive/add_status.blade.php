@@ -1865,8 +1865,41 @@
                                             'password': password,
                                         }
                                     }).done(function (data) {
+                                        console.log(data);
                                         if (data.status === 1) {
                                             UnblockPagePermanently();
+                                            if(data.first_attempt_shipments) {
+                                                $.each(data.first_attempt_shipments, function (index, tracking_number) {
+                                                    tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
+                                                });
+                                                var html = '<p>Cannot update status for first attempt for rcp:</p><br>';
+                                                html += tracking_numbers;
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                            }
+                                            swal({
+                                                title: 'Cannot update status for first attempt for rcp.',
+                                                content: content,
+                                                icon: 'warning',
+                                                buttons: {
+                                                    confirm: {
+                                                        text: 'OK',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    }
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            }).then(function(confirm) {
+                                                if (confirm) {
+                                                    location.reload();
+                                                }
+                                                else{
+                                                    location.reload();
+                                                }
+                                            });
                                             toastr.success(data.success, 'Success!', {
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'
@@ -1874,18 +1907,33 @@
                                             location.reload();
                                         }
                                         else if(data.status === 2){
+                                            var invalid_shipmet_flag = false;
                                             var tracking_numbers = '';
+                                            var html = '';
                                             var route = '{!! route('admin.tracking.index') !!}';
                                             if(data.invalid_shipments){
                                                 $.each(data.invalid_shipments, function(index, tracking_number) {
                                                     tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                                 });
-                                                var html = '<p>Same consignee details found which are already marked as delivered of following Shipment(s):</p><br>';
+                                                 html = '<p>Same consignee details found which are already marked as delivered of following Shipment(s):</p><br>';
                                                 html += tracking_numbers;
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
+                                                invalid_shipmet_flag = true;
+                                            }
+                                            if(data.first_attempt_shipments) {
+                                                $.each(data.first_attempt_shipments, function (index, tracking_number) {
+                                                    tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
+                                                });
+                                                 html = '<p>Cannot update status for first attempt for rcp:</p><br>';
+                                                html += tracking_numbers;
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                invalid_shipmet_flag = true;
+                                            }
+                                            if(invalid_shipmet_flag) {
                                                 swal({
-                                                    title: 'Delivered shipment(s) found on same consignee details before.',
+                                                    title: 'First Attempt/Same Consinee Info',
                                                     content: content,
                                                     icon: 'warning',
                                                     buttons: {
@@ -1899,11 +1947,10 @@
                                                     closeOnClickOutside: false,
                                                     closeOnEsc: false,
                                                     dangerMode: true
-                                                }).then(function(confirm) {
+                                                }).then(function (confirm) {
                                                     if (confirm) {
                                                         location.reload();
-                                                    }
-                                                    else{
+                                                    } else {
                                                         location.reload();
                                                     }
                                                 });

@@ -1954,6 +1954,10 @@ class DeliveryController extends Controller
 
     public function receive_delivery_status_submit_all(Request $request){
         $open_box_ids = array();
+        $received_shipments = array();
+        $first_attempt_shipments = array();
+        $restrict_status_shipments = array();
+
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
         if($request->has('open_box_ids')){
@@ -1962,6 +1966,7 @@ class DeliveryController extends Controller
         $selected_status = $request->selected_status;
         $password = $request->password;
         $invalid_reason_shipments = array();
+
         $delivery_password = DeliveryNote::where('id', $delivery_note_id)->where('password', $password);
         if(!$delivery_password->exists()){
             return response()->json(['status' => 0, 'error' => 'Wrong Password']);
@@ -1973,26 +1978,44 @@ class DeliveryController extends Controller
             return response()->json(['status' => 0, 'error' => 'Delivery note already updated']);
         }
         $selected_reason = $request->selected_reason;
+        $reason_for_first_attempt = array(7,8,35,19,34,12,27,40);
+
 
         if($delivery_note_id != ''){
             $restrict_statuses = array(5, 7, 8, 9, 12, 14, 15, 18, 30, 36, 37, 56);
             foreach ($shipment_ids as $index => $shipment){
                 $shipment_details = Shipment::find($shipment);
                 if(!in_array($shipment_details->shipper_status_id, $restrict_statuses)){
-                    unset($shipment_ids[$index]);
+                    if(!in_array($shipment,$restrict_status_shipments)) {
+                        array_push($restrict_status_shipments, $shipment);
+                    }
+                }
+                elseif(ShipmentsJourney::where('shipment_id',$shipment)->where('shipper_status_id',5)->count() == 1){
+                    if(!in_array($selected_reason,$reason_for_first_attempt)){
+                        if(!in_array($shipment_details->tracking_number,$first_attempt_shipments)){
+                            array_push($first_attempt_shipments,$shipment_details->tracking_number);
+                        }
+                    }
+                }
+                else{
+                    if(!in_array($shipment,$received_shipments)){
+                        array_push($received_shipments,$shipment);
+                    }
                 }
             }
-            foreach ($shipment_ids as $shipment) {
+
+            //dd($received_shipments,$first_attempt_shipments,$restrict_status_shipments);
+            foreach ($received_shipments as $shipment) {
                 $shipment_details = Shipment::find($shipment);
 
                 if ($shipment_details->booking_type_id == 5 && $selected_status == 12) {
                     continue;
                 }
 
-                if(ShipmentsJourney::where('shipment_id',$shipment)->where('shipper_status_id',5)->count() == 0){
+               /* if(ShipmentsJourney::where('shipment_id',$shipment)->where('shipper_status_id',5)->count() == 0){
                     continue;
-                }
-
+                }*/
+                
                 if ($selected_status != 14) {
                     if (in_array($selected_reason, [3, 4, 12, 34, 50])) {
                         $phone_number = $shipment_details->consignee_phone_number_1;
@@ -2174,9 +2197,9 @@ class DeliveryController extends Controller
                 $delivery_note_data->save();
 
                 if (count($invalid_reason_shipments) > 0) {
-                    return response()->json(['status' => 2, 'success' => 'Statuses updated successfully!', 'invalid_shipments' => $invalid_reason_shipments]);
+                    return response()->json(['status' => 2, 'success' => 'Statuses updated successfully!', 'invalid_shipments' => $invalid_reason_shipments,'first_attempt_shipments' => $first_attempt_shipments]);
                 } else {
-                    return response()->json(['status' => 1, 'success' => 'Statuses updated successfully!']);
+                    return response()->json(['status' => 1, 'success' => 'Statuses updated successfully!','first_attempt_shipments' => $first_attempt_shipments]);
                 }
 
         } else {
