@@ -1909,14 +1909,14 @@
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'
                                             });
-                                            location.reload();
+                                            //location.reload();
                                         }
                                         else if(data.status === 2){
                                             var invalid_shipmet_flag = false;
                                             var tracking_numbers = '';
                                             var html = '';
                                             var route = '{!! route('admin.tracking.index') !!}';
-                                            if(data.invalid_shipments.length > 0){
+                                            if(data.invalid_shipments){
                                                 $.each(data.invalid_shipments, function(index, tracking_number) {
                                                     tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                                                 });
@@ -1926,7 +1926,7 @@
                                                 content.innerHTML = html;
                                                 invalid_shipmet_flag = true;
                                             }
-                                            if(data.first_attempt_shipments.length > 0) {
+                                            if(data.first_attempt_shipments) {
                                                 $.each(data.first_attempt_shipments, function (index, tracking_number) {
                                                     tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                                 });
