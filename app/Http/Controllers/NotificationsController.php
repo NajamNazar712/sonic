@@ -8890,19 +8890,20 @@ class NotificationsController extends Controller
 //                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
 //              }
 
-                        $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->where('id', '!=', 276)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
-                            $query->whereIn('hub_id', $origin_hub_ids);
-                        });
+                        // $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->where('id', '!=', 276)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
+                        //     $query->whereIn('hub_id', $origin_hub_ids);
+                        // });
 
-                        if ($related_admins->exists()) {
-                            $bcc = array_merge($bcc, $related_admins->pluck('email')->toArray());
-                        }
+                        // if ($related_admins->exists()) {
+                        //     $bcc = array_merge($bcc, $related_admins->pluck('email')->toArray());
+                        // }
 
-                        if (empty($bcc)) {
-                            $bcc = NULL;
-                        }
+                        // if (empty($bcc)) {
+                        //     $bcc = NULL;
+                        // }
 
-                        self::email($subject, $body, $to, NULL, $bcc);
+                        // self::email($subject, $body, $to, NULL, $bcc);
+                        self::email($subject, $body, $to, NULL, NULL);
 
                         $subject = $original_subject;
                         $body = $original_body;
