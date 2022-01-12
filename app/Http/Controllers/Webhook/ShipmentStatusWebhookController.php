@@ -82,6 +82,7 @@ class ShipmentStatusWebhookController extends Controller
                     NotificationsController::send(167, $notification_data);
                     break;
                 }
+                continue;
             }
             catch(RequestException $e){
                 $status_code = 400;
