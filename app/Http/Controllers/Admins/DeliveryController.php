@@ -1999,18 +1999,17 @@ class DeliveryController extends Controller
                     }
                     else{
                         if(!in_array($shipment,$received_shipments)){
-                            array_push($received_shipments,$shipment);
+                            array_push($received_shipments,intval($shipment));
                         }
                     }
                 }
                 else{
                     if(!in_array($shipment,$received_shipments)){
-                        array_push($received_shipments,$shipment);
+                        array_push($received_shipments,intval($shipment));
                     }
                 }
             }
 
-            //dd($received_shipments,$first_attempt_shipments,$restrict_status_shipments,$selected_reason);
             foreach ($received_shipments as $shipment) {
                 $shipment_details = Shipment::find($shipment);
 
@@ -2036,12 +2035,13 @@ class DeliveryController extends Controller
                             if(in_array($shipment_details->tracking_number,$first_attempt_shipments)){
                                 $index = array_search($shipment_details->tracking_number, $first_attempt_shipments);
                                 if($index !== false){
+                                    dd(1);
                                     unset($first_attempt_shipments[$index]);
                                 }
                             }
 //                            continue;
                         }
-                        //dd($invalid_reason_shipments,$first_attempt_shipments);
+
                     }
                 }
 
