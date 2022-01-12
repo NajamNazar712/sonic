@@ -63,28 +63,10 @@ class ShipmentStatusWebhookController extends Controller
                 ]);
                 $status_code = $response->getStatusCode();
 
-                if (!in_array($status_code, [200, 201, 202, 204])) {
-
-                    $res = NULL;
-
-                    $body = $response->getBody();
-
-                    $result = json_decode($body);
-
-                    if (json_last_error() === 0 || is_object($result)) {
-                        $res = $body;
-                    }
-                    WebhookLogController::shipment_status_log($user_id, $status_code, $res);
-
-                    if($i == 4){
-                        $notification_data['status_code'] = $status_code;
-                        ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
-                        NotificationsController::send(167, $notification_data);
-                        break;
-                    }
-                    continue;
+                if (in_array($status_code, [200, 201, 202, 204])) {
+                    break;
                 }
-                break;
+
             }
             catch (\GuzzleHttp\Exception\ConnectException $e) {
                 // log the error here
@@ -92,6 +74,7 @@ class ShipmentStatusWebhookController extends Controller
                 $res = $e->getMessage();
                 $status_code = 404;
                 $notification_data['status_code'] = $status_code;
+                $notification_data['message'] = $res;
                 WebhookLogController::shipment_status_log($user_id, $status_code, $res);
 
                 if($i == 4){
@@ -102,15 +85,12 @@ class ShipmentStatusWebhookController extends Controller
             }
             catch(RequestException $e){
                 $status_code = 400;
+                $res = $e->getMessage();
 
                 $notification_data['status_code'] = $status_code;
-                if ($e->hasResponse()) {
+                $notification_data['message'] = $res;
+                WebhookLogController::shipment_status_log($user_id, $status_code, $res);
 
-                    $res = $e->getMessage();
-
-
-                    WebhookLogController::shipment_status_log($user_id, $status_code, $res);
-                }
                 if($i == 4){
                     ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
                     NotificationsController::send(167, $notification_data);

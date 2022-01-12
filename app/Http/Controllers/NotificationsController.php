@@ -8747,12 +8747,16 @@ class NotificationsController extends Controller
                     $user_id = $reference_1_id['user_id'];
                     $status_code = $reference_1_id['status_code'];
                     $link = $reference_1_id['url'];
+                    $message = $reference_1_id['message'];
 
                     if (strpos($body, '[status_code]') !== FALSE) {
                         $body = str_replace('[status_code]', $status_code, $body);
                     }
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
+                    }
+                    if (strpos($body, '[message]') !== FALSE) {
+                        $body = str_replace('[message]', $message, $body);
                     }
                     $to = array();
                     $cc = array();
