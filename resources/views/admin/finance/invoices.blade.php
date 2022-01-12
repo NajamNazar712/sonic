@@ -34,6 +34,7 @@
 							<th class="border-primary border-darken-1">Received Amount</th>
 							<th class="border-primary border-darken-1">Tax Amount</th>
 							<th class="border-primary border-darken-1">Deposit Date</th>--}}
+							<th class="border-primary border-darken-1">Invocie Type</th>
 							<th class="border-primary border-darken-1">Status</th>
 							<th class="border-primary border-darken-1">Deposit Slip</th>
 							<th class="border-primary border-darken-1"></th>
@@ -257,6 +258,7 @@
                             head.push('Received Amount');
                             head.push('Tax Amount');
                             head.push('Deposit Date');*/
+                            head.push('Invoice Type');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -280,6 +282,7 @@
                                 row.push(values.received_amount);
                                 row.push(values.tax_amount);
                                 row.push(values.deposit_date);*/
+                                row.push(values.invoice_type);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -462,6 +465,7 @@
 					{data:'received_amount', name: 'invoices.received_amount', class: 'align-middle text-center received_amount'},
 					{data:'tax_amount', name: 'invoices.tax_amount', class: 'align-middle text-center tax_amount'},
 					{data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},*/
+					{data:'invoice_type', name: 'invoices.invoice_type', class: 'align-middle text-center invoice_type'},
 					{data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},
 					{data:'upload_slip', name: '', class: 'align-middle text-center upload_slip',orderable:false,searchable:false},
 					{data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

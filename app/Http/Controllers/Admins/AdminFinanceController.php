@@ -9118,7 +9118,7 @@ class AdminFinanceController extends Controller
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
-            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle')->whereIn('is.id',[1,2])->where('ubi.default_bank',1);
+            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle','invoices.invoice_type')->whereIn('is.id',[1,2])->where('ubi.default_bank',1);
             if(session('department_id') == 7){
                 $invoices->whereIn('invoices.user_id', session('tagged_shippers'));
             }
@@ -9201,6 +9201,14 @@ class AdminFinanceController extends Controller
                 else {
                     return '-';
                 }
+            })
+            ->editColumn('invoice_type',function($invoice){
+               if($invoice->invoice_type == 1){
+                   return 'Courier Invoice';
+               }
+               else{
+                   return 'Packaging Invoice';
+               }
             })
             ->addColumn('action', function($invoice) {
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
