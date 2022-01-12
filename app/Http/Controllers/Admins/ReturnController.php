@@ -285,7 +285,7 @@ class ReturnController extends Controller
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
                         return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
                     } else {
-                        return $shipments->status_date;
+                        return Carbon::parse($shipments->status_date)->toDateString();
                     }
                 }else{
                     return " - ";
@@ -293,7 +293,7 @@ class ReturnController extends Controller
             })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
-                    return $shipments->arrival;
+                    return Carbon::parse($shipments->arrival)->toDateString();
                 }else{
                     return " - ";
                 }
