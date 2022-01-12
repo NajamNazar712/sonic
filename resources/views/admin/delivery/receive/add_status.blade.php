@@ -1907,7 +1907,7 @@
                                                      positionClass: 'toast-bottom-center',
                                                      containerId: 'toast-bottom-center'
                                                  });
-                                                 //location.reload();
+                                                 location.reload();
                                             }
 
                                         }
