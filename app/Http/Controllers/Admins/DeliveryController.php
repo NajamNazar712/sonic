@@ -2035,7 +2035,6 @@ class DeliveryController extends Controller
                             if(in_array($shipment_details->tracking_number,$first_attempt_shipments)){
                                 $index = array_search($shipment_details->tracking_number, $first_attempt_shipments);
                                 if($index !== false){
-                                    dd(1);
                                     unset($first_attempt_shipments[$index]);
                                 }
                             }
