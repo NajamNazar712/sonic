@@ -8743,6 +8743,31 @@ class NotificationsController extends Controller
                         }
                     }
                 }
+                else if ($id == 167){
+                    $user_id = $reference_1_id['user_id'];
+                    $status_code = $reference_1_id['status_code'];
+                    $link = $reference_1_id['url'];
+
+                    if (strpos($body, '[status_code]') !== FALSE) {
+                        $body = str_replace('[status_code]', $status_code, $body);
+                    }
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    $to = array();
+                    $cc = array();
+                    $shipper = User::find($user_id);
+                    $sales_person = SalePersonTag::where('user_id', $user_id)->where('status', 0)->first();
+
+                    $cc[] = Admin::find($sales_person->admin_id)->email;
+
+                    if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
+                        $to = ShipperNotificationEmail::where('user_id', $shipper->id)->pluck('email')->toArray();
+                    } else {
+                        $to = $shipper->email;
+                    }
+                    self::email($subject, $body, $to, $cc);
+                }
             }
         }
     }
