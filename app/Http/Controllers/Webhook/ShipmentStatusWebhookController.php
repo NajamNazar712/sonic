@@ -62,6 +62,7 @@ class ShipmentStatusWebhookController extends Controller
                     ]
                 ]);
                 $status_code = $response->getStatusCode();
+                $notification_data['status_code'] = $status_code;
                 if (!in_array($status_code, [200, 201, 202, 204])) {
 
                     $res = NULL;
@@ -76,7 +77,7 @@ class ShipmentStatusWebhookController extends Controller
                     WebhookLogController::shipment_status_log($user_id, $status_code, $res);
 
                     if($i == 4){
-                        $notification_data['status_code'] = $status_code;
+
                         ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
                         NotificationsController::send(167, $notification_data);
                         break;
