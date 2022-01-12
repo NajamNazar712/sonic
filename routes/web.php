@@ -838,7 +838,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('tag', 'Admins\AdminTerritoryController@area_tag')->name('tag');
 
         });
+        
+        Route::post('/city/osa_list', 'Admins\AdminDashboardController@osa_list')->name('city.osa_list');
 
+        
 
     });
     Route::prefix('pickups')->name('pickups.')->group(function () {

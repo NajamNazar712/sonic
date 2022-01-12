@@ -187,7 +187,48 @@
         </div>
 
     </div>
-
+    <div class="row">
+        <div class="col-12">
+            <h2 class="card-title"><U>OSA</U></h2>
+        </div>
+        <div class="col-12" id="osa_list">
+            @if ($osa_list->count()>0)
+            @php
+                $counter = 1;
+            @endphp
+                @foreach ($osa_list as $item)
+                <div class="row">
+                    <div class="col-5">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="osa_name[{{$counter}}]" value="{{$item->osa_name}}" class="osa" required data-rule-required="true" data-msg-required="This field is required" placeholder="Enter Name">
+                            </div>
+                    </div>
+                    <div class="col-5">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="osa_rate[{{$counter}}]" value="{{$item->osa_rate}}" id="osa_rate['+counter+']" class="osa" required data-rule-required="true" data-msg-required="This field is required" placeholder="Enter Rate">
+                                </div>
+                    </div>
+                    <div class="col-2">
+                                    <a href="javascript:void(0);" class="btn btn-icon btn-danger remove_list" ><i class="la la-close"></i></a>
+                    </div>
+                </div>
+                                    @php
+                                        $counter++;
+                                    @endphp
+                @endforeach
+                
+            @endif
+        </div>
+        <div class="col-12">
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group">
+                        <a class="btn btn-success" id="add_osa"><i class="fa fa-plus-circle"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Update City</button>
         <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">Cancel</button>
@@ -415,7 +456,28 @@
 
             }
         });
+        $('#add_osa').click(function() {
+            var counter = document.getElementById('osa_list').childElementCount;
+            var html='<div class="row">';
+                html += '<div class="col-5">';
+                    html += '<div class="form-group">';
+                        html += '<input type="text" class="form-control" name="osa_name['+counter+']" class="osa" required data-rule-required="true" data-msg-required="This field is required" placeholder="Enter Name">';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '<div class="col-5">';
+                            html += '<div class="form-group">';
+                                html += '<input type="text" class="form-control" name="osa_rate['+counter+']" id="osa_rate['+counter+']" class="osa" required data-rule-required="true" data-msg-required="This field is required" placeholder="Enter Rate">';
+                                html += '</div>';
+                                html += '</div>';
+                                html += '<div class="col-2">';
+                                html += '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove_list" ><i class="la la-close"></i></a>';
+                                html += '</div>';
+                                $('#osa_list').append(html);
+        });
 
+        $(document.body).on('click', '.remove_list' ,function(){
+            $(this).parent().parent().remove();
+        });
 
     });
 </script>
