@@ -62,7 +62,7 @@ class ShipmentStatusWebhookController extends Controller
                     ]
                 ]);
                 $status_code = $response->getStatusCode();
-                $notification_data['status_code'] = $status_code;
+
                 if (!in_array($status_code, [200, 201, 202, 204])) {
 
                     $res = NULL;
@@ -77,7 +77,7 @@ class ShipmentStatusWebhookController extends Controller
                     WebhookLogController::shipment_status_log($user_id, $status_code, $res);
 
                     if($i == 4){
-
+                        $notification_data['status_code'] = $status_code;
                         ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
                         NotificationsController::send(167, $notification_data);
                         break;
@@ -86,18 +86,29 @@ class ShipmentStatusWebhookController extends Controller
                 }
                 break;
             }
-            catch(RequestException $e){
-                if ($e->hasResponse()) {
-                    $res = NULL;
-                    $response = $e->getResponse();
-                    $status_code = $response->getStatusCode();
-                    $body = $response->getBody();
-                    $notification_data['status_code'] = $status_code;
-                    $result = json_decode($body);
+            catch (\GuzzleHttp\Exception\ConnectException $e) {
+                // log the error here
 
-                    if (json_last_error() === 0 || is_object($result)) {
-                        $res = $body;
-                    }
+                $res = $e->getMessage();
+                $status_code = 404;
+                $notification_data['status_code'] = $status_code;
+                WebhookLogController::shipment_status_log($user_id, $status_code, $res);
+
+                if($i == 4){
+                    ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
+                    NotificationsController::send(167, $notification_data);
+                    break;
+                }
+            }
+            catch(RequestException $e){
+                $status_code = 400;
+
+                $notification_data['status_code'] = $status_code;
+                if ($e->hasResponse()) {
+
+                    $res = $e->getMessage();
+
+
                     WebhookLogController::shipment_status_log($user_id, $status_code, $res);
                 }
                 if($i == 4){
