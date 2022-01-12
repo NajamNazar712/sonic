@@ -11,6 +11,7 @@ use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
 use Carbon\Carbon;
@@ -20,6 +21,8 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Component\VarDumper\Cloner\Data;
 use Yajra\Datatables\Datatables;
 
@@ -652,6 +655,302 @@ class AdminAttendanceController extends Controller
                 }
             });
         return $datatable->make(true);
+    }
+
+    public function attendance_excel_upload(Request $request)
+    {
+        Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
+
+            if ($value) {
+                $result = false;
+                if (Admin::where('trax_id', $value)->exists()) {
+                    $result = true;
+                } else {
+                    if (Rider::where('trax_id', $value)->exists()) {
+                        $result = true;
+                    }
+                }
+                if ($result) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+        $names = [
+            'trax_id' => 'Employee ID',
+            'name' => 'Employee Name',
+            'designation' => 'Designation',
+            'department' => 'Department',
+            'hub' => 'Hub',
+            'zone' => 'Zone',
+            'joining_date' => 'Date of Joining',
+            'cnic' => 'Cnic',
+            'employee_status' => 'Employee Status',
+            'payroll_days' => 'Payroll Days',
+            'present_days' => 'Present Days',
+            'pay_cut_days' => 'Pay Cut Days',
+            'absent_days' => 'Absent Days',
+            'extra_paid_days' => 'Extra Paid Days',
+            'fuel_days' => 'Fuel Days',
+            'basic_salary' => 'Basic Salary',
+            'house_rent' => 'House Rent',
+            'medical' => 'Medical',
+            'gross_salary' => 'Gross Salary',
+            'mobile_allowance' => 'Mobile Allowance',
+            'vehicle_allowance' => 'Vehicle Allowance',
+            'fuel_allowance' => 'Fuel Allowance',
+            'conveyance_allowance' => 'Conveyance Allowance',
+            'vehicle_maintenance' => 'Vehicle Maintenance',
+            'fixed_incentive' => 'Fixed Incentive',
+            'holiday_allowance' => 'Sunday / Holiday Allowance',
+            'overtime' => 'Overtime',
+            'bonus' => 'Bonus',
+            'arrears' => 'Arrears',
+            'pickup_incentive' => 'Pickup Incentive',
+            'delivery_incentive' => 'Delivery Incentive',
+            'operation_incentive' => 'Operations Incentive',
+            'extra_duty_allowance' => 'Extra Duty Allowance',
+            'others_addition' => 'Others Addition',
+            'total_salary' => 'Total Salary',
+            'paycut' => 'Pay Cut',
+            'absent' => 'Absent',
+            'late_deduction' => 'Late Deduction',
+            'income_tax' => 'Income Tax',
+            'eobi' => 'EOBI',
+            'advance_salary' => 'Advance Salary',
+            'month_closing' => 'Month Closing',
+            'loan' => 'Loan',
+            'fuel_card' => 'Fuel Card',
+            'open_parcel' => 'Open Parcel',
+            'phone_call' => 'Phone Call',
+            'recovery' => 'Recovery',
+            'auction_sale' => 'Auction Sale',
+            'penalty' => 'Penalty',
+            'others_deduction' => 'Others Deduction',
+            'van_deduction' => 'Van Deduction',
+            'medical_insurance' => 'Medical Insurance',
+            'total_deduction' => 'Total Deduction',
+            'net_salary' => 'Net Salary',
+            'iban' => 'IBAN',
+            'employee_type' => 'Employee Type',
+            'confirmation_date' => 'Confirmation Date'
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'exists' => 'Given :attribute is Invalid.',
+            'check_trax_id' => 'Employee id not found!',
+
+        ];
+        $rules = [
+            'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
+            'name' => ['required', 'between:1,100'],
+            'designation' => ['required', 'between:1,100'],
+            'department' => ['required', 'between:1,100'],
+            'hub' => ['required', 'between:1,100'],
+            'zone' => ['nullable', 'between:1,100'],
+            'joining_date' => ['required', 'date_format:Y-m-d'],
+            'confirmation_date' => ['nullable', 'date_format:Y-m-d'],
+            'cnic' => ['required', 'between:1,100'],
+            'employee_status' => ['nullable', 'string', 'between:1,100'],
+            'employee_type' => ['nullable', 'string', 'between:1,100'],
+            'payroll_days' => ['nullable', 'integer'],
+            'present_days' => ['nullable', 'integer'],
+            'pay_cut_days' => ['nullable', 'integer'],
+            'absent_days' => ['nullable', 'integer'],
+            'extra_paid_days' => ['nullable', 'integer'],
+            'fuel_days' => ['nullable', 'integer'],
+            'basic_salary' => ['required', 'integer'],
+            'house_rent' => ['nullable', 'integer'],
+            'medical' => ['nullable', 'integer'],
+            'gross_salary' => ['nullable', 'integer'],
+            'mobile_allowance' => ['nullable', 'integer'],
+            'vehicle_allowance' => ['nullable', 'integer'],
+            'fuel_allowance' => ['nullable', 'integer'],
+            'conveyance_allowance' => ['nullable', 'integer'],
+            'vehicle_maintenance' => ['nullable', 'integer'],
+            'fixed_incentive' => ['nullable', 'integer'],
+            'holiday_allowance' => ['nullable', 'integer'],
+            'overtime' => ['nullable', 'integer'],
+            'bonus' => ['nullable', 'integer'],
+            'arrears' => ['nullable', 'integer'],
+            'pickup_incentive' => ['nullable', 'integer'],
+            'delivery_incentive' => ['nullable', 'integer'],
+            'operation_incentive' => ['nullable', 'integer'],
+            'extra_duty_allowance' => ['nullable', 'integer'],
+            'others_addition' => ['nullable', 'integer'],
+            'total_salary' => ['required', 'integer'],
+            'paycut' => ['nullable', 'integer'],
+            'absent' => ['nullable', 'integer'],
+            'late_deduction' => ['nullable', 'integer'],
+            'income_tax' => ['nullable', 'integer'],
+            'eobi' => ['nullable', 'integer'],
+            'advance_salary' => ['nullable', 'integer'],
+            'month_closing' => ['nullable', 'integer'],
+            'loan' => ['nullable', 'integer'],
+            'fuel_card' => ['nullable', 'integer'],
+            'open_parcel' => ['nullable', 'integer'],
+            'phone_call' => ['nullable', 'integer'],
+            'recovery' => ['nullable', 'integer'],
+            'auction_sale' => ['nullable', 'integer'],
+            'penalty' => ['nullable', 'integer'],
+            'others_deduction' => ['nullable', 'integer'],
+            'van_deduction' => ['nullable', 'integer'],
+            'medical_insurance' => ['nullable', 'integer'],
+            'total_deduction' => ['nullable', 'integer'],
+            'net_salary' => ['nullable', 'integer'],
+            'iban' => ['nullable', 'string'],
+
+        ];
+
+
+        $fields = [0 => 'trax_id', 1 => 'attendance_date', 2 => 'clock_in_datetime', 3 => 'clock_out_datetime'];
+        if ($file = $request->file('attendance')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Employee ID', 'Attendance Date(yyyy-mm-dd)', 'Clock-in DateTime(yyyy-mm-dd hh:mm:ss)', 'Clock-out DateTime(yyyy-mm-dd hh:mm:ss)'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = true;
+
+                foreach ($spreadsheet[0] as $index => $header_value) {
+                    if ($index == 3) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = false;
+                        break;
+                    }
+                }
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+                $errors = array();
+
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+
+                    $validate = Validator::make($row, $rules, $messages);
+
+                    $validate->setAttributeNames($names);
+
+                    if ($validate->fails()) {
+                        $errors['Row #' . $row_id] = $validate->errors()->all();
+                    }
+                }
+                if (empty($errors)) {
+                    $updated = 0;
+                    $not_updated = 0;
+
+                    foreach ($rows as $key => $row) {
+                        $employee = Employee::where('trax_id', $row['trax_id']);
+                        if($employee->exists()){
+                            $employee = $employee->first();
+                        }
+                        $payslip = new EmployeePayslip();
+                        $payslip->payroll_month = $payroll_month;
+                        $payslip->payroll_cut_off_date = $payroll_cut_off_date;
+                        $payslip->trax_id = trim($row['trax_id']);
+                        $payslip->name = trim($row['name']);
+                        $payslip->designation = trim($row['designation']);
+                        $payslip->department = trim($row['department']);
+                        $payslip->hub = trim($row['hub']);
+                        $payslip->zone = trim($row['zone']);
+                        $payslip->joining_date = trim($row['joining_date']);
+                        $payslip->confirmation_date = trim($row['confirmation_date']);
+                        $payslip->cnic = trim($row['cnic']);
+                        $payslip->employee_status = trim($row['employee_status']);
+                        $payslip->employee_type = trim($row['employee_type']);
+                        $payslip->payroll_days = trim($row['payroll_days']);
+                        $payslip->present_days = trim($row['present_days']);
+                        $payslip->pay_cut_days = trim($row['pay_cut_days']);
+                        $payslip->absent_days = trim($row['absent_days']);
+                        $payslip->extra_paid_days = trim($row['extra_paid_days']);
+                        $payslip->fuel_days = trim($row['fuel_days']);
+                        $payslip->basic_salary = trim($row['basic_salary']);
+                        $payslip->house_rent = trim($row['house_rent']);
+                        $payslip->medical = trim($row['medical']);
+                        $payslip->gross_salary = trim($row['gross_salary']);
+                        $payslip->mobile_allowance = trim($row['mobile_allowance']);
+                        $payslip->vehicle_allowance = trim($row['vehicle_allowance']);
+                        $payslip->fuel_allowance = trim($row['fuel_allowance']);
+                        $payslip->conveyance_allowance = trim($row['conveyance_allowance']);
+                        $payslip->vehicle_maintenance = trim($row['vehicle_maintenance']);
+                        $payslip->fixed_incentive = trim($row['fixed_incentive']);
+                        $payslip->holiday_allowance = trim($row['holiday_allowance']);
+                        $payslip->overtime = trim($row['overtime']);
+                        $payslip->bonus = trim($row['bonus']);
+                        $payslip->arrears = trim($row['arrears']);
+                        $payslip->pickup_incentive = trim($row['pickup_incentive']);
+                        $payslip->delivery_incentive = trim($row['delivery_incentive']);
+                        $payslip->operation_incentive = trim($row['operation_incentive']);
+                        $payslip->extra_duty_allowance = trim($row['extra_duty_allowance']);
+                        $payslip->others_addition = trim($row['others_addition']);
+                        $payslip->total_salary = trim($row['total_salary']);
+                        $payslip->paycut = trim($row['paycut']);
+                        $payslip->absent = trim($row['absent']);
+                        $payslip->late_deduction = trim($row['late_deduction']);
+                        $payslip->income_tax = trim($row['income_tax']);
+                        $payslip->eobi = trim($row['eobi']);
+                        $payslip->advance_salary = trim($row['advance_salary']);
+                        $payslip->month_closing = trim($row['month_closing']);
+                        $payslip->loan = trim($row['loan']);
+                        $payslip->fuel_card = trim($row['fuel_card']);
+                        $payslip->open_parcel = trim($row['open_parcel']);
+                        $payslip->phone_call = trim($row['phone_call']);
+                        $payslip->recovery = trim($row['recovery']);
+                        $payslip->auction_sale = trim($row['auction_sale']);
+                        $payslip->penalty = trim($row['penalty']);
+                        $payslip->others_deduction = trim($row['others_deduction']);
+                        $payslip->van_deduction = trim($row['van_deduction']);
+                        $payslip->medical_insurance = trim($row['medical_insurance']);
+                        $payslip->total_deduction = trim($row['total_deduction']);
+                        $payslip->net_salary = trim($row['net_salary']);
+                        $payslip->iban = trim($row['iban']);
+                        $payslip->added_by = Auth::id();
+                        $payslip->save();
+                        $updated++;
+                    }
+                    $error_msg = '';
+                    if ($not_updated > 1) {
+                        $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
+                    }
+
+                    return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
+                } else {
+                    $errors = array_map(function ($row, $errors) {
+                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                    }, array_keys($errors), $errors);
+
+                    return redirect()->back()->withErrors($errors);
+                }
+
+            } else {
+                return redirect()->back()->with('error', 'No Records in File');
+            }
+
+
+        }
+
     }
 
 
