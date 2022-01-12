@@ -7500,7 +7500,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select(['delivery_note_requests.id as id','r.name as rider', 'delivery_note_requests.delivery_note_id as delivery_note','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by','delivery_note_requests.status as status', 'r.id as rider_id']);
+            ->select(['delivery_note_requests.id as id','r.name as rider', 'delivery_note_requests.dn_received_amount as dn_received_amount','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by','delivery_note_requests.status as status', 'r.id as rider_id','delivery_note_requests.delivery_note as delivery_note','c.name as hub']);
             if ($requests->search_hub) {
                 $request = $request->where('c.hub_id', $requests->search_hub);
             }
@@ -7514,6 +7514,14 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                    return 'Approved';
                }
             })
+            ->editColumn('delivery_note', function ($result) {
+                if($result->delivery_note){
+                    return $result->delivery_note;
+                }
+                else{
+                    return '-';
+                }
+             })
             ->addColumn("action", function ($result) {
                 if ((session('role_id') == 1 || count(array_intersect([533], session('permissions'))) !== 0) && $result->status == 1 ) {
                     $dropdown = '
@@ -7553,16 +7561,16 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
     }
 
     public function request_submit(Request $request){
-
         if(DeliveryNoteRequests::where('rider_id',$request->rider_id)->where('status',1)->exists()){
             return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Request Already Present']);
         }
         else{
             $note = new DeliveryNoteRequests();
             $note->rider_id = $request->rider_id;
-            $note->delivery_note_id = $request->dncc;
+            $note->dn_received_amount = $request->dncc;
             $note->amount = $request->amount;
             $note->reason = $request->reason;
+            $note->delivery_note = $request->dnid;
             $note->requested_at = Carbon::now();
             $note->requested_by = Auth::id();
             $note->status = 1;
