@@ -223,7 +223,7 @@
             <div class="row">
                 <div class="col-6">
                     <div class="form-group">
-                        <a class="btn btn-success" id="add_osa"><i class="fa fa-plus-circle"></a>
+                        <a class="btn btn-success text-white" id="add_osa"><i class="la la-plus"></i></a>
                     </div>
                 </div>
             </div>
