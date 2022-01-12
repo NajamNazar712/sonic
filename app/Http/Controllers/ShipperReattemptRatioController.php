@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use DB;
@@ -14,42 +15,43 @@ class ShipperReattemptRatioController extends Controller
         $settings = GlobalSettings::where('type', 'reattempt_percentage');
         
         if ($settings->exists()) {
-            /*$settings = $settings->first();
-            $percentage = $settings->setting_value;*/
 
-            $users = User::where('status', 3)->pluck('id')->toArray();
+            $users = User::where('status', 3)->whereNotIn('id', [1690, 8761, 9358])->pluck('id')->toArray();
 
             if(count($users) > 0){
 
-                $user_counts = array();
                 foreach ($users as $user_id){
 
+                    $delivered_shipments_count = DB::connection('reports')->table('shipments')->where('packaging_material_request', '=', 0)->where('user_id', $user_id)->whereIn('shipper_status_id', [14, 30, 36, 37])->count('id');
 
-                        $total_count = DB::connection('reports')->table('shipments')->where('user_id', $user_id)->where('packaging_material_request', '=', 0)->whereNotIn('user_id', [1690, 8761, 9358])->whereNotIn('shipper_status_id', [1, 17])->count();
-
-                        $reattempt_count = DB::connection('reports')->table('shipments')->where('user_id', $user_id)
-                            ->whereExists(function ($query) {
-                                $query->from('shipments_journey')
-                                    ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
-                                    ->where('shipper_status_id', 12)
-                                    ->where('verification', 1);
-                            })->where('shipments.packaging_material_request', '=', 0)->whereNotIn('shipments.user_id', [1690, 8761, 9358])->whereNotIn('shipments.shipper_status_id', [1, 17])->count();
+                    $reattempt_count = DB::connection('reports')->table('shipments')->where('user_id', $user_id)
+                        ->whereExists(function ($query) {
+                            $query->from('shipments_journey')
+                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                                ->where('shipper_status_id', 12)
+                                ->where('verification', 1);
+                        })->where('shipments.packaging_material_request', '=', 0)->whereIn('shipments.shipper_status_id', [14, 30, 36, 37])->count();
 
 
-                    if(($total_count > 0) && ($reattempt_count > 0)){
-                        $user_percentage = ($reattempt_count / $total_count) * 100;
-                        $user_counts = round($user_percentage,2);
+                    if(($delivered_shipments_count > 0) && ($reattempt_count > 0)){
+                        $user_percentage = ($reattempt_count / $delivered_shipments_count) * 100;
+                        $user_percentage = round($user_percentage,2);
 
-                        $
+                        $reattempt_percentage_shippers = ReattemptPercentageForShipper::where('user_id', $user_id);
+                        if($reattempt_percentage_shippers->exists()){
+                            $reattempt_percentage_shippers = $reattempt_percentage_shippers->first();
+                            $reattempt_percentage_shippers->percentage = $user_percentage;
+                            $reattempt_percentage_shippers->save();
 
-                        $user_counts[$user_id]['total'] = $total_count;
-                        $user_counts[$user_id]['reattempt'] = $reattempt_count;
-                        $user_counts[$user_id]['percentage'] = round($user_percentage,2);
+                        }
+                        else{
+                            $reattempt_percentage_for_shippers = new ReattemptPercentageForShipper();
+                            $reattempt_percentage_for_shippers->user_id = $user_id;
+                            $reattempt_percentage_for_shippers->percentage = $user_percentage;
+                            $reattempt_percentage_for_shippers->save();
+                        }
                     }
-
                 }
-                return $user_counts;
-
             }
         }
     }

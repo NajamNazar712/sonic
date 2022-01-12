@@ -38,7 +38,6 @@ class ReattemptRatioCalculate extends Command
      */
     public function handle()
     {
-        $res = ShipperReattemptRatioController::reattempt_ratio_calculate();
-        dd($res);
+        ShipperReattemptRatioController::reattempt_ratio_calculate();
     }
 }
