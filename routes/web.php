@@ -3054,6 +3054,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@international_automation_user_store')->name('store');
         });
 
+        Route::prefix('reattempt_percentage')->name('reattempt_percentage.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@reattempt_percentage_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@reattempt_percentage_store')->name('store');
+        });
     });
 
 
