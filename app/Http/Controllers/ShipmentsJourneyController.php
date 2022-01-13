@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Automation\ReattemptShipmentStatusController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
@@ -152,6 +153,10 @@ class ShipmentsJourneyController extends Controller
 
         if (in_array($shipper_status_id, [14, 8, 20]) && $verification == 1) {
             ShipperShipmentsSubscription::where('shipment_id', $shipment_id)->delete();
+        }
+
+        if($shipper_status_id == 52){
+            ReattemptShipmentStatusController::auto_reattempt_status_for_max_delivery_ratio($shipment_id);
         }
     }
 }
