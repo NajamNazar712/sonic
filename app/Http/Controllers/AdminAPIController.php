@@ -11,6 +11,7 @@ use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminAppSlider;
 use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
@@ -3018,6 +3019,10 @@ class AdminAPIController extends Controller
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
         $bag_ids = explode(',', $request->bags);
+        $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
+        if($admin->default_hub_id){
+            array_push($admin_hubs,$admin->default_hub_id);
+        }
         $bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
             ->join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
@@ -3040,10 +3045,10 @@ class AdminAPIController extends Controller
                 $datum["origin"] = $bag->origin;
                 $junctions = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id);
                 $datum["misroute"] = 1;
-                if ($bag->dest_id == $admin->default_hub_id) {
+                if (in_array($bag->dest_id, $admin_hubs)) {
                     $datum["misroute"] = 0;
                 }
-                if ($bag->j_dest_id == $admin->default_hub_id) {
+                if (in_array($bag->j_dest_id, $admin_hubs)) {
                     $datum["misroute"] = 0;
                 }
                 if ($junctions->exists()) {
@@ -3063,6 +3068,10 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
+        $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
+        if($admin->default_hub_id){
+            array_push($admin_hubs,$admin->default_hub_id);
+        }
         if ($request->has('bags')) {
             $bag_details = json_decode($request->bags, true);
             $bag_numbers = array();
@@ -3090,7 +3099,7 @@ class AdminAPIController extends Controller
                             }
                         }
                     } else {
-                        if ($destination_id == $admin->default_hub_id) {
+                        if (in_array($destination_id, $admin_hubs)) {
                             $cargo_manifest_bags->status_id = 7;
                             $cargo_manifest_bags->save();
                         } else {
@@ -5311,7 +5320,7 @@ class AdminAPIController extends Controller
                     $information['name'] = $user->name;
                     $information['phone'] = $user->phone_number;
                     $information['cnic'] = $user->cnic;
-                    $information['cargo_user'] = ($user->role_id == 11) ? 1 : 0;
+                    $information['cargo_user'] = (in_array($user->role_id,[11,10, 15, 55, 23, 33, 46])) ? 1 : 0;
                     if ($employee->exists()) {
                         $employee = $employee->first();
                         $information['address'] = ($employee->address) ? $employee->address : "" ;
