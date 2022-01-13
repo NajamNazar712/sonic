@@ -490,6 +490,11 @@
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var company_bank_select = '<select name="company_bank_select" id="company_bank_select" class="select2 form-control"></select>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+					var invoice_type_select = '<select name="invoice_type_select" id="invoice_type_select" class="select2 form-control">' +
+							'<option value="1">Courier Invoice</option>' +
+							'<option value="2">Packaging Invoice</option>' +
+							'</select>';
+
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
@@ -510,6 +515,12 @@
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td);
                         }
+						else if($(header).is('.invoice_type')){
+							$(invoice_type_select).appendTo($(search))
+									.on( 'change', function () {
+										column.search($(this).val(), false, false, true).draw();
+									} ).wrap(td);
+						}
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -535,6 +546,13 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+					$("#invoice_type_select").prepend('<option value="" selected></option>').select2({
+						placeholder: "Select Invoice Type",
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
 
                     var statuses = $.map({!! $invoice_statuses !!}, function (obj) {
                         obj.id = obj.id;

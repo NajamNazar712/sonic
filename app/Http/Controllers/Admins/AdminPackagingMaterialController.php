@@ -654,7 +654,7 @@ class AdminPackagingMaterialController extends Controller
                         }
                     }
                 }
-
+                //dd($invalid_product_ids);
                 if(count($invalid_product_ids) > 0){
                     return response()->json(['status' => 0, 'error'=> $invalid_products. ' does\'nt exists in requested hub!']);
                 }

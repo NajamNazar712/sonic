@@ -8,6 +8,7 @@ use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\AdjustmentType;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
+use App\Http\Models\Admin\CorporateUserPackagingInvoice;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\ResolvedOutstandingShipment;use App\Http\Models\Admin\RevertStatusRequest;
@@ -6168,6 +6169,8 @@ class AdminFinanceController extends Controller
                         $query->where('user_id', $user_id);
                     });
 
+
+
                     if ($pending_invoice_shipments->exists()) {
                         $invoice = new Invoice();
 
@@ -6177,6 +6180,7 @@ class AdminFinanceController extends Controller
                         $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
                         $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
                         $invoice->status_id = 1;
+                        $invoice->invoice_type = 1;
 
                         $invoice->save();
 
@@ -6247,6 +6251,7 @@ class AdminFinanceController extends Controller
                         NotificationsController::send(27, $invoice_id);
                     }
                 }
+
                 /*if ($generate) {
                     if ($user->invoice_group_by == 0) {
                         $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
@@ -6270,6 +6275,72 @@ class AdminFinanceController extends Controller
                         }
                     }
                 }*/
+
+                $packaging_invoice_toggle_on = CorporateUserPackagingInvoice::where('user_id',$user_id)->where('status',1)->first();
+                if($packaging_invoice_toggle_on){
+                    $packaging_material_requests = PackagingMaterialRequest::where('user_id',$user_id)->whereDate('updated_at', '<', $current_date_string)->where('status_id',4)->whereNotNull('shipment_id');
+
+                    if($packaging_material_requests->exists()){
+                        $invoice = new Invoice();
+
+                        $invoice->user_id = $user_id;
+                        $invoice->invoicing_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+                        $invoice->billing_period_from_date = $billing_period_from_date;
+                        $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+                        $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
+                        $invoice->status_id = 1;
+                        $invoice->invoice_type = 2;
+
+                        $invoice->save();
+
+                        $invoice_id = $invoice->id;
+
+                        $invoice_number = $user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
+
+                        $total_shipments = 0;
+                        $total_delivered_shipments = 0;
+                        $total_returned_shipments = 0;
+                        $total_adjusted_shipments = 0;
+                        $total_charges = 0;
+                        $total_gst = 0;
+                        $total_invoice_amount = 0;
+
+                        foreach ($packaging_material_requests->get() as $packaging_material_request) {
+                            $invoice_shipment = new InvoiceShipment();
+
+                            $invoice_shipment->created_at = $packaging_material_request->upadated_at;
+                            $invoice_shipment->invoice_id = $invoice_id;
+                            $invoice_shipment->shipment_id = $packaging_material_request->shipment_id;
+                            $invoice_shipment->type = $pending_invoice_shipment->type;
+                            $invoice_shipment->charges = $packaging_material_request->amount;
+                            $invoice_shipment->gst = $pending_invoice_shipment->gst;
+                            $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
+
+                            $invoice_shipment->save();
+
+                            $total_shipments++;
+
+                            if ($pending_invoice_shipment->type == 0) {
+                                $total_delivered_shipments++;
+                            }
+                            else if ($pending_invoice_shipment->type == 1) {
+                                $total_returned_shipments++;
+                            }
+                            else {
+                                $total_adjusted_shipments++;
+                            }
+
+                            self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
+
+                            $total_charges = $total_charges + $pending_invoice_shipment->charges;
+                            $total_gst = $total_gst + $pending_invoice_shipment->gst;
+                            $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
+
+                            $pending_invoice_shipment->delete();
+                        }
+
+                    }
+                }
             }
         }
     }
@@ -9209,6 +9280,17 @@ class AdminFinanceController extends Controller
                else{
                    return 'Packaging Invoice';
                }
+            })
+            ->filterColumn('invoice_type', function($query, $keyword) {
+                if ($keyword == 1) {
+                    $query->where('invoices.invoice_type', 1);
+                }
+                else if($keyword == 2){
+                    $query->where('invoices.invoice_type', 2);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->addColumn('action', function($invoice) {
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
