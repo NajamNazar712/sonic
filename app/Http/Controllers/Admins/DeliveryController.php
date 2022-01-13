@@ -871,7 +871,6 @@ class DeliveryController extends Controller
                             $shipment_otp->otp = $otp;
                             $shipment_otp->save();
                         }
-                        NotificationsController::send(165, $shipment, $shipment_otp->id);
                         if($shipment_obj->amount == 0){
                             //English
                             NotificationsController::send(132, $note->id, $shipment);
@@ -7342,6 +7341,24 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $shipment->consignee_status_id = 5;
                     $shipment->save();
                     ShipmentsJourneyController::add($shipment->id, 5, 5, NULL, NULL, NULL, Auth::id(), $delivery_note_id, $delivery_note->rider_id);
+
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
+                    if(!$shipment_otp->exists()){
+                        $otp = mt_rand(100000, 999999);
+                        $shipment_otp = new ShipmentOtp();
+                        $shipment_otp->shipment_id = $shipment->id;
+                        $shipment_otp->otp = $otp;
+                        $shipment_otp->save();
+                    }
+                    if($shipment->amount == 0){
+                        //English
+                        NotificationsController::send(132, $delivery_note_id, $shipment->id);
+                        //Urdu
+                        NotificationsController::send(135, $delivery_note_id, $shipment->id);
+                    }else{
+                        NotificationsController::send(12, $delivery_note_id, $shipment->id);
+                    }
+
                     return response()->json(['status' => 0, 'success' => 'Shipments Added']);
                 }
         }
