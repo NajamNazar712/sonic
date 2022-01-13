@@ -28,7 +28,7 @@ class QAEvaluationController extends Controller
     public function add(){
         $max_date = Carbon::tomorrow();
         $min_date = Carbon::now()->subYear(1);
-        $agents = Admin::whereIn('role_id', [50,49,37.29,28,26,21,74])->where('status', 1)->get(); // 74,50,49,37.29,28,26,21,74
+        $agents = Admin::whereIn('role_id', [50,49,37.29,28,26,21,74,13,37])->where('status', 1)->get(); // 74,50,49,37.29,28,26,21,74
         $campaigns = EvaluationCampaign::all();
         $evaluated_by = Admin::all();
         $natures = EvaluationNature::all();
@@ -184,7 +184,7 @@ class QAEvaluationController extends Controller
 
     public function edit($id){
         $qa_evaluations = QAEvaluation::find($id);
-        $agents = Admin::whereIn('role_id', [50,49,37.29,28,26,21,74])->where('status', 1)->get(); // 74,50,49,37.29,28,26,21,74
+        $agents = Admin::whereIn('role_id', [50,49,37.29,28,26,21,74,13,37])->where('status', 1)->get(); // 74,50,49,37.29,28,26,21,74
         $campaigns = EvaluationCampaign::all();
         $evaluated_by = Admin::all();
         $natures = EvaluationNature::all();
