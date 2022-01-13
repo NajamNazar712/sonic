@@ -896,6 +896,7 @@ class NotificationsController extends Controller
                     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)->where('shipment_id', $reference_2_id)->first();
 
                     $shipment = Shipment::find($reference_2_id);
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
 
                     $shipper = $shipment->user;
 
@@ -951,7 +952,11 @@ class NotificationsController extends Controller
                     if (strpos($body, '[payment_mode]') !== FALSE) {
                         $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
                     }
-
+                    if($shipment_otp->exists()){
+                        if (strpos($body, '[refusal_otp]') !== FALSE) {
+                            $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
+                        }
+                    }
                     self::sms($body, $to);
                 } else if ($id == 13) {
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
@@ -7566,6 +7571,7 @@ class NotificationsController extends Controller
                     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)->where('shipment_id', $reference_2_id)->first();
 
                     $shipment = Shipment::find($reference_2_id);
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
 
                     $shipper = $shipment->user;
 
@@ -7622,6 +7628,11 @@ class NotificationsController extends Controller
                         $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
                     }
 
+                    if($shipment_otp->exists()){
+                        if (strpos($body, '[refusal_otp]') !== FALSE) {
+                            $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
+                        }
+                    }
                     self::sms($body, $to);
                 } else if ($id == 134) {
                     $user = User::find($reference_1_id);
@@ -7727,7 +7738,7 @@ class NotificationsController extends Controller
                     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)->where('shipment_id', $reference_2_id)->first();
 
                     $shipment = Shipment::find($reference_2_id);
-
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
                     $shipper = $shipment->user;
 
                     $to = $shipment->consignee_phone_number_1;
@@ -7782,7 +7793,11 @@ class NotificationsController extends Controller
                     if (strpos($body, '[payment_mode]') !== FALSE) {
                         $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
                     }
-
+                    if($shipment_otp->exists()){
+                        if (strpos($body, '[refusal_otp]') !== FALSE) {
+                            $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
+                        }
+                    }
                     self::sms($body, $to);
                 } else if ($id == 137) {
                     $rider_id = $reference_1_id;
