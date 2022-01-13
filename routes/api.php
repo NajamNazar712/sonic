@@ -64,6 +64,7 @@ Route::name('api.')->group(function () {
 			Route::get('view', 'APIController@receiving_sheet_view')->name('view');
             Route::post('add', 'APIController@receiving_sheet_add')->name('add');
             Route::post('remove', 'APIController@receiving_sheet_void')->name('remove');
+            Route::post('cancel', 'APIController@receiving_sheet_cancel')->name('cancel');
 		});
 
 		Route::get('cities', 'APIController@cities')->name('cities');
