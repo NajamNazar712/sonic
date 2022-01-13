@@ -26,7 +26,6 @@ class ShipmentStatusWebhookController extends Controller
         if($subscriber->exists()){
             $subscriber = $subscriber->first();
             $data = array();
-
             $data['user_id'] = $user_id;
             $data['tracking_number'] = $shipment->tracking_number;
             $status = ShipmentStatusesForShipperWebhook::where('user_id',$user_id)->where('status_id',$shipper_status_id);
@@ -63,6 +62,17 @@ class ShipmentStatusWebhookController extends Controller
                 if ($status_code != 200) {
                     if($i == 4){
                         ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
+
+                        $res = NULL;
+
+                        $body = $response->getBody();
+
+                        $result = json_decode($body);
+
+                        if (json_last_error() === 0 || is_object($result)) {
+                            $res = $body;
+                        }
+                        WebhookLogController::log($user_id, $status_code, $res);
                         break;
                     }
                     continue;
@@ -72,6 +82,20 @@ class ShipmentStatusWebhookController extends Controller
             catch(RequestException $e){
                 if($i == 4){
                     ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
+
+                    if ($e->hasResponse()) {
+                        $res = NULL;
+                        $response = $e->getResponse();
+                        $status_code = $$response->getStatusCode();
+                        $body = $response->getBody();
+
+                        $result = json_decode($body);
+
+                        if (json_last_error() === 0 || is_object($result)) {
+                            $res = $body;
+                        }
+                        WebhookLogController::log($user_id, $status_code, $res);
+                    }
                     break;
                 }
                 continue;

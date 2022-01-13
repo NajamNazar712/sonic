@@ -2079,7 +2079,7 @@ class AdminCargoManifestController extends Controller
             ->filterColumn('vehicles',function ($query,$keyword){
                 $fleet = Fleet::where('reg_number',$keyword)->first();
                 if($fleet){
-                    $query->where('cm.vehicle_id', 'like', '%' . $fleet->id . '%');
+                    $query->where('cm.vehicle_id', $fleet->id);
                 }
                 else{
                     $query->where('cm.vehicle_number', 'like', '%' . $keyword . '%');
@@ -2657,6 +2657,21 @@ class AdminCargoManifestController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('vehicles', function ($bag) {
+                $vehicle_data = '';
+                $manifest = CargoManifest::find($bag->manifest_id);
+                if($manifest){
+                    if($manifest->vehicle_id != null){
+                        $fleet = Fleet::find($manifest->vehicle_id);
+                        $vehicle_data =  $fleet->reg_number ;
+                    }
+                    else{
+                        $vehicle_data = $manifest->vehicle_number ;
+                    }
+                }
+                return $vehicle_data;
+            })
+
             ->addColumn('shipments', function ($master_cargo) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->shipments . '</button>';
             })
@@ -2670,6 +2685,15 @@ class AdminCargoManifestController extends Controller
                 }
                 else {
                     $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('vehicles',function ($query,$keyword){
+                $fleet = Fleet::where('reg_number',$keyword)->first();
+                if($fleet){
+                    $query->where('cargo_manifests.vehicle_id', $fleet->id);
+                }
+                else{
+                    $query->where('cargo_manifests.vehicle_number', 'like', '%' . $keyword . '%');
                 }
             });
 
