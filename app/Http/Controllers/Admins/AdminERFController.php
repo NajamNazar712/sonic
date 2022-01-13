@@ -141,7 +141,7 @@ class AdminERFController extends Controller
             $departments = AdminDepartment::where('id', '=', session('department_id'))->select('id', 'name')->get();
         }
         $designations = EmployeeDesignation::where('status',1)->select('id','name')->get();
-        $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58])->where('status', 1)->select('id','name')->get();
+        $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58,70])->where('status', 1)->select('id','name')->get();
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
         $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',2)->get();
