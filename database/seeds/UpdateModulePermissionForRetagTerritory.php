@@ -12,7 +12,7 @@ class UpdateModulePermissionForRetagTerritory extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 658, 'name' => 'Re-Tag Territory - View', 'module_id' => 2),
+            array('id' => 658, 'name' => 'Re-Tag Territory', 'module_id' => 2),
         ));
     }
 }
