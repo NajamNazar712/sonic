@@ -4449,11 +4449,11 @@ class APIController extends Controller
                     $receiving_sheet->save();
                 }
 
-                return ['status' => 0, 'message' => 'Shipment has been Cancelled'];
+                return ['status' => 0, 'message' => 'Receiving Sheet has been Cancelled'];
             }
             else
             {
-                return ['status' => 1, 'message' => 'Shipment has had been Cancelled or Removed'];
+                return ['status' => 1, 'message' => 'Receiving Sheet has been Cancelled or Removed'];
             }
         }
     }
