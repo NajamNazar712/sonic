@@ -6311,16 +6311,16 @@ class AdminFinanceController extends Controller
                             $invoice_shipment->created_at = $packaging_material_request->upadated_at;
                             $invoice_shipment->invoice_id = $invoice_id;
                             $invoice_shipment->shipment_id = $packaging_material_request->shipment_id;
-                            $invoice_shipment->type = $pending_invoice_shipment->type;
+                            $invoice_shipment->type = 0;
                             $invoice_shipment->charges = $packaging_material_request->amount;
-                            $invoice_shipment->gst = $pending_invoice_shipment->gst;
-                            $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
+                            $invoice_shipment->gst = 1;
+                            $invoice_shipment->invoice_amount = $packaging_material_request->invoice_amount;
 
                             $invoice_shipment->save();
 
                             $total_shipments++;
 
-                            if ($pending_invoice_shipment->type == 0) {
+                          /*  if ($pending_invoice_shipment->type == 0) {
                                 $total_delivered_shipments++;
                             }
                             else if ($pending_invoice_shipment->type == 1) {
@@ -6328,15 +6328,15 @@ class AdminFinanceController extends Controller
                             }
                             else {
                                 $total_adjusted_shipments++;
-                            }
+                            }*/
 
-                            self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
+                            //self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
 
                             $total_charges = $total_charges + $pending_invoice_shipment->charges;
-                            $total_gst = $total_gst + $pending_invoice_shipment->gst;
+                            $total_gst = $total_gst + 1;
                             $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
 
-                            $pending_invoice_shipment->delete();
+                            //$pending_invoice_shipment->delete();
                         }
 
                     }
@@ -7450,35 +7450,35 @@ class AdminFinanceController extends Controller
         $total_gst = array();
         $total_invoice_amount = array();
 
-        foreach ($invoice->invoice_shipments as $invoice_shipment) {
-            $shipment = $invoice_shipment->shipment;
+        if($invoice->invoice_type == 1) {
+            foreach ($invoice->invoice_shipments as $invoice_shipment) {
+                $shipment = $invoice_shipment->shipment;
 
-            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
-            if ($shipment_journey->exists()) {
-                $date = $shipment_journey->first()->created_at;
-            }
-            else {
-                $date = $shipment->created_at;
-            }
+                if ($shipment_journey->exists()) {
+                    $date = $shipment_journey->first()->created_at;
+                } else {
+                    $date = $shipment->created_at;
+                }
 
-            $date = Carbon::parse($date)->format('Y-m-d');
+                $date = Carbon::parse($date)->format('Y-m-d');
 
-            $origin = $shipment->pickup_address->city->name;
+                $origin = $shipment->pickup_address->city->name;
 
-            if (!in_array($origin, $origins)) {
-                $origins[] = $origin;
-            }
+                if (!in_array($origin, $origins)) {
+                    $origins[] = $origin;
+                }
 
-            if (!isset($shipment_details[$origin])) {
-                $shipment_details[$origin] = '';
-            }
+                if (!isset($shipment_details[$origin])) {
+                    $shipment_details[$origin] = '';
+                }
 
-            if (!isset($serial_number[$origin])) {
-                $serial_number[$origin] = 1;
-            }
+                if (!isset($serial_number[$origin])) {
+                    $serial_number[$origin] = 1;
+                }
 
-            $shipment_details[$origin] .= '
+                $shipment_details[$origin] .= '
                         <tr>
                           <td>' . $serial_number[$origin] . '</td>
                           <td>' . $shipment->tracking_number . '</td>
@@ -7498,93 +7498,97 @@ class AdminFinanceController extends Controller
                         </tr>
             ';
 
-            $serial_number[$origin]++;
+                $serial_number[$origin]++;
 
-            if (!isset($total_weight_charges[$origin])) {
-                $total_weight_charges[$origin] = 0;
-            }
-
-            if (!isset($total_cash_handling_charges[$origin])) {
-                $total_cash_handling_charges[$origin] = 0;
-            }
-
-            if (!isset($total_insurance_charges[$origin])) {
-                $total_insurance_charges[$origin] = 0;
-            }
-
-            if (!isset($total_return_charges[$origin])) {
-                $total_return_charges[$origin] = 0;
-            }
-
-            if (!isset($total_fuel_surcharge[$origin])) {
-                $total_fuel_surcharge[$origin] = 0;
-            }
-
-            if (!isset($total_replacement_charges[$origin])) {
-                $total_replacement_charges[$origin] = 0;
-            }
-
-             if (!isset($total_try_and_buy_charges[$origin])) {
-                 $total_try_and_buy_charges[$origin] = 0;
-             }
-
-            if (!isset($total_packaging_material_charges[$origin])) {
-                $total_packaging_material_charges[$origin] = 0;
-            }
-
-            if (!isset($total_intercept_charges[$origin])) {
-                $total_intercept_charges[$origin] = 0;
-            }
-
-            if (!isset($total_nsa_osa_charges[$origin])) {
-                $total_nsa_osa_charges[$origin] = 0;
-            }
-
-            if (!isset($total_adjustment_charges[$origin])) {
-                $total_adjustment_charges[$origin] = 0;
-            }
-
-            if (!isset($total_charges[$origin])) {
-                $total_charges[$origin] = 0;
-            }
-
-            if (!isset($total_gst[$origin])) {
-                $total_gst[$origin] = 0;
-            }
-
-            if (!isset($total_invoice_amount[$origin])) {
-                $total_invoice_amount[$origin] = 0;
-            }
-
-            if ($invoice_shipment->type != 2) {
-                if ($invoice_shipment->type == 0) {
-                    $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
-                    $total_replacement_charges[$origin] += $shipment->replacement_charges;
-                    $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
-                }
-                else {
-                    $total_return_charges[$origin] += $shipment->return_charges;
+                if (!isset($total_weight_charges[$origin])) {
+                    $total_weight_charges[$origin] = 0;
                 }
 
-                $total_weight_charges[$origin] += $shipment->weight_charges;
-
-                if ($shipment->packaging_material_request) {
-                    $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                if (!isset($total_cash_handling_charges[$origin])) {
+                    $total_cash_handling_charges[$origin] = 0;
                 }
 
-                $total_insurance_charges[$origin] += $shipment->insurance_charges;
-                $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
-                $total_intercept_charges[$origin] += $shipment->intercept_charges;
-                $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
-            }
-            else {
-                $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
-            }
+                if (!isset($total_insurance_charges[$origin])) {
+                    $total_insurance_charges[$origin] = 0;
+                }
 
-            $total_charges[$origin] += $invoice_shipment->charges;
-            $total_gst[$origin] += $invoice_shipment->gst;
-            $total_invoice_amount[$origin] += $invoice_shipment->invoice_amount;
+                if (!isset($total_return_charges[$origin])) {
+                    $total_return_charges[$origin] = 0;
+                }
+
+                if (!isset($total_fuel_surcharge[$origin])) {
+                    $total_fuel_surcharge[$origin] = 0;
+                }
+
+                if (!isset($total_replacement_charges[$origin])) {
+                    $total_replacement_charges[$origin] = 0;
+                }
+
+                if (!isset($total_try_and_buy_charges[$origin])) {
+                    $total_try_and_buy_charges[$origin] = 0;
+                }
+
+                if (!isset($total_packaging_material_charges[$origin])) {
+                    $total_packaging_material_charges[$origin] = 0;
+                }
+
+                if (!isset($total_intercept_charges[$origin])) {
+                    $total_intercept_charges[$origin] = 0;
+                }
+
+                if (!isset($total_nsa_osa_charges[$origin])) {
+                    $total_nsa_osa_charges[$origin] = 0;
+                }
+
+                if (!isset($total_adjustment_charges[$origin])) {
+                    $total_adjustment_charges[$origin] = 0;
+                }
+
+                if (!isset($total_charges[$origin])) {
+                    $total_charges[$origin] = 0;
+                }
+
+                if (!isset($total_gst[$origin])) {
+                    $total_gst[$origin] = 0;
+                }
+
+                if (!isset($total_invoice_amount[$origin])) {
+                    $total_invoice_amount[$origin] = 0;
+                }
+
+                if ($invoice_shipment->type != 2) {
+                    if ($invoice_shipment->type == 0) {
+                        $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
+                        $total_replacement_charges[$origin] += $shipment->replacement_charges;
+                        $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
+                    } else {
+                        $total_return_charges[$origin] += $shipment->return_charges;
+                    }
+
+                    $total_weight_charges[$origin] += $shipment->weight_charges;
+
+                    if ($shipment->packaging_material_request) {
+                        $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                    }
+
+                    $total_insurance_charges[$origin] += $shipment->insurance_charges;
+                    $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    $total_intercept_charges[$origin] += $shipment->intercept_charges;
+                    $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                } else {
+                    $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
+                }
+
+                $total_charges[$origin] += $invoice_shipment->charges;
+                $total_gst[$origin] += $invoice_shipment->gst;
+                $total_invoice_amount[$origin] += $invoice_shipment->invoice_amount;
+            }
         }
+        else{
+            $packaging_material = PackagingMaterialRequest::join('packaging_material_requests_')
+        }
+
+
 
         $invoice_number_serial_number = 1;
 
@@ -7627,19 +7631,23 @@ class AdminFinanceController extends Controller
                                 <tr>
                                   <td class="color secondary"><strong>NTN</strong></td>
                                   <td>' . $shipper->ntn_no . '</td>
-                                </tr>
-                                <tr>
+                                </tr>  ';
+                                if($invoice->invoice_type == 1) {
+                                    $html .= '<tr>
                                   <td class="color secondary"><strong>STRN</strong></td>
                                   <td>' . $shipper->strn_no . '</td>
-                                </tr>
-                               </tbody>
+                                </tr>';
+                                }
+                                
+                               $html .= '</tbody>
                             </table>
                         </div>
 
                         <div class="col-4">
                             <table class="table table-sm table-bordered border">
-                              <tbody>
-                                <tr>
+                              <tbody> ';
+            if($invoice->invoice_type == 1) {
+                               $html .=  '<tr>
                                     <td class="color primary"><strong>NTN</strong></td>
                                     <td>7930679-5</td>
                                 </tr>
@@ -7650,8 +7658,11 @@ class AdminFinanceController extends Controller
                                 <tr>
                                     <td class="color primary"><strong>PNTN</strong></td>
                                     <td>P-7930679-5</td>
-                                </tr>
-                                <tr>
+                                </tr>';
+
+                                }
+                                
+                                $html .= '<tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
                                     <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
                                 </tr>
@@ -7659,11 +7670,15 @@ class AdminFinanceController extends Controller
                                     <td class="color primary"><strong>Invoice No.</strong></td>
                                     <td>' . $invoice->invoice_number . ' - ' . $invoice_number_serial_number . '</td>
                                 </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Invoice Date</strong></td>
+                                <tr> ';
+            if($invoice->invoice_type == 1) {
+                                $html .=  '<td class="color primary"><strong>Invoice Date</strong></td>
                                     <td>' . Carbon::parse($invoice->invoicing_date)->format('Y-m-d') . '</td>
-                                </tr>
-                                <tr>
+                                </tr>';
+
+                                }
+            
+                               $html .= '<tr>
                                     <td class="color primary"><strong>Due Date</strong></td>
                                     <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
                                 </tr>
@@ -7672,8 +7687,8 @@ class AdminFinanceController extends Controller
                         </div>
                     </div>
             ';
-
-            $html .= '
+            if($invoice->invoice_type == 1) {
+                $html .= '
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
@@ -7696,7 +7711,7 @@ class AdminFinanceController extends Controller
                       <tbody>
             ';
 
-            $html .= '
+                $html .= '
                         <tr>
                             <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
                             <td>' . number_format($total_cash_handling_charges[$origin], 2) . '</td>
@@ -7711,6 +7726,8 @@ class AdminFinanceController extends Controller
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
                         </tr>
             ';
+
+            }
 
             $html .= '
                       </tbody>
@@ -7762,18 +7779,30 @@ class AdminFinanceController extends Controller
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
                           <td>0102951143</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
-                        </tr>
-                      </tbody>
+                        </tr>';
+                         if($invoice->invoice_type == 2) {
+                            $html .= '  <tr>
+                                      <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                                      <td>PK02MEZN0099120104111731</td>
+                                    </tr>
+                                    <tr>
+                                      <td class="color secondary" style="width: 150px;"><strong>Branch Name.</strong></td>
+                                      <td>Liaquat Market Malir Branch</td>
+                                    </tr>
+                                    ';
+                        }
+
+                    $html .=  ' <tr>
+                                      <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
+                                      <td>9912</td>
+                                    </tr>
+                                    </tbody>
                     </table>
 
                     <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
             ';
-
-            $html .= '
+            if($invoice->invoice_type == 1) {
+                $html .= '
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
@@ -7800,8 +7829,8 @@ class AdminFinanceController extends Controller
                     <tbody>
             ';
 
-            $html .= $shipment_details[$origin];
-
+                $html .= $shipment_details[$origin];
+            }
             $html .= '
                       </tbody>
                     </table>
