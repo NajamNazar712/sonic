@@ -4401,6 +4401,11 @@ class APIController extends Controller
 
                     $receiving_sheet->save();
                 }
+                if (ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->exists()) {
+                    $receiving_sheet->booked = $receiving_sheet->booked - 1;
+
+                    $receiving_sheet->save();
+                }
 
                 return ['status' => 0, 'message' => 'Shipment has been Voided'];
             }
@@ -4433,8 +4438,13 @@ class APIController extends Controller
                 $receiving_sheet_shipment->delete();
 
                 if (!ReceivingSheetShipment::where('receiving_sheet_id', $request->input('receiving_sheet_id'))->exists()) {
-                    $receiving_sheet->booked = $receiving_sheet->booked - 1;
+                    $receiving_sheet->booked = 0;
                     $receiving_sheet->status = 2;
+
+                    $receiving_sheet->save();
+                }
+                if (ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->exists()) {
+                    $receiving_sheet->booked = 0;
 
                     $receiving_sheet->save();
                 }
