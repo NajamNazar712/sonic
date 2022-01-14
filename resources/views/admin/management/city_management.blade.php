@@ -456,7 +456,7 @@
                     if (data) {
 
                         var html = '<table class="table">';
-                            html += '<thead><tr><th>#</th><th>Name</th><th>Rate</th></tr></thead><tbody>';
+                            html += '<thead><tr><th>S.No</th><th>OSA Area</th><th>OSA Charges</th></tr></thead><tbody>';
                             var counter = 1;
                             $.each(data.osa_list, function(index, osa) {
                               

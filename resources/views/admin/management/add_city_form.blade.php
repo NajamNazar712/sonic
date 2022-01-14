@@ -169,7 +169,7 @@
     </div>
     <div class="row">
         <div class="col-12">
-            <h2 class="card-title"><U>OSA</U></h2>
+            <h2 class="card-title"><U>OSA List</U></h2>
         </div>
         <div class="col-12" id="osa_list">
             
@@ -395,23 +395,30 @@
             var html='<div class="row">';
                 html += '<div class="col-5">';
                     html += '<div class="form-group">';
-                        html += '<input type="text" class="form-control" name="osa_name['+counter+']" class="osa" required data-rule-required="true" data-msg-required="This field is required" placeholder="Enter Name">';
+                        html += '<input type="text" class="form-control" name="osa_name['+counter+']" class="osa" required data-rule-required="true" data-msg-required="This field is required" placeholder="Enter OSA Area">';
                         html += '</div>';
                         html += '</div>';
                         html += '<div class="col-5">';
                             html += '<div class="form-group">';
-                                html += '<input type="text" class="form-control" name="osa_rate['+counter+']" id="osa_rate['+counter+']" class="osa" required data-rule-required="true" data-msg-required="This field is required" placeholder="Enter Rate">';
+                                html += '<input type="text" class="form-control text-left osa_charges" name="osa_rate['+counter+']" id="osa_rate['+counter+']" required data-rule-required="true" data-msg-required="This field is required" placeholder="OSA Charges">';
                                 html += '</div>';
                                 html += '</div>';
                                 html += '<div class="col-2">';
                                 html += '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove_list" ><i class="la la-close"></i></a>';
                                 html += '</div>';
                                 $('#osa_list').append(html);
+
+                                $('#osa_list input.osa_charges').inputmask({
+                                    'alias': 'integer',
+                                    'allowMinus': false,
+                                    'allowPlus': false
+                                });
         });
 
         $(document.body).on('click', '.remove_list' ,function(){
             $(this).parent().parent().remove();
         });
+        
     });
 
 </script>
