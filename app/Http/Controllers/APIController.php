@@ -4385,8 +4385,8 @@ class APIController extends Controller
             $tracking_number = $request->tracking_number;
             $shipmentid = $shipment->id;
 
-            $receiving_sheet_shipment = ReceivingSheetShipment::find($shipmentid);
-            if(!$receiving_sheet_shipment)
+            $receiving_sheet_shipment = ReceivingSheetShipment::where('shipment_id',$shipmentid)->where('receiving_sheet_id',$receiving_sheet_id);
+            if(!$receiving_sheet_shipment->exists())
             {
                 return ['status' => 1, 'message' => 'Shipment not found or Voided previously'];
             }
