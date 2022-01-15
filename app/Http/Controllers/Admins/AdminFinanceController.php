@@ -7449,6 +7449,7 @@ class AdminFinanceController extends Controller
         $total_charges = array();
         $total_gst = array();
         $total_invoice_amount = array();
+        //dd();
 
         if($invoice->invoice_type == 1) {
             foreach ($invoice->invoice_shipments as $invoice_shipment) {
@@ -7585,7 +7586,20 @@ class AdminFinanceController extends Controller
             }
         }
         else{
-            $packaging_material = PackagingMaterialRequest::join('packaging_material_requests_')
+            $shipment_ids = $invoice->invoice_shipments->pluck('shipment_id')->toArray();
+
+            $packaging_material = PackagingMaterialRequest::join('packaging_material_request_details as pmrd','pmrd.packaging_material_request_id','=','packaging_material_requests.id')
+                ->join('cities as c','c.id','=','packaging_material_requests.city_id')
+                ->join('packaging_material_types as pmt','pmt.id','=','pmrd.type_id')
+                ->join('packaging_material_type_sizes as pmts','pmts.id','=','pmrd.type_size_id')
+                ->select('c.name as origin','pmt.type as type_name','pmts.size a size_name','pmts.standard_charges as rates','pmrd.quantity as quantity')
+                ->where('packaging_material_requests.statud_id',4)
+                ->whereIn('packaging_material_requests.shipment_id',$shipment_ids)
+                ->where('packaging_material_requests.user_id',$shipper->id);
+
+            if($packaging_material->exists()){
+                $origins = $packaging_material->get();
+            }
         }
 
 
@@ -7646,7 +7660,7 @@ class AdminFinanceController extends Controller
                         <div class="col-4">
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
-            if($invoice->invoice_type == 1) {
+                     if($invoice->invoice_type == 1) {
                                $html .=  '<tr>
                                     <td class="color primary"><strong>NTN</strong></td>
                                     <td>7930679-5</td>
@@ -7727,6 +7741,44 @@ class AdminFinanceController extends Controller
                         </tr>
             ';
 
+            }
+            else{
+                $html .= '
+                    <table class="table table-sm table-bordered border">
+                      <thead>
+                        <tr>
+                            <th colspan="12" class="color primary text-center">Invoice Summary - ' . $origin . '</th>
+                        </tr>
+                        <tr>
+                            <th class="color secondary">Origin</th>
+                            <th class="color secondary">Description</th>
+                            <th class="color secondary">Rates</th>
+                            <th class="color secondary">Quantity</th>
+                            <th class="color secondary">Total Charges Without GST</th>
+                            <th class="color secondary">SST %</th>
+                            <th class="color secondary">SST Amount</th>
+                            <th class="color secondary">Total Amount with SST</th>
+                          
+                        </tr>
+                      </thead>
+                      <tbody>
+            ';
+
+                $html .= '
+                        <tr>
+                            <td>' . . '</td>
+                            <td>' .  . '</td>
+                            <td>' .  . '</td>
+                            <td>' .. '</td>
+                            <td>' .. '</td>
+                            <td>' . . '</td>
+                            <td>' . . '</td>
+                            <td>' . . '</td>
+                            <td>' .. '</td>
+                            <td>' .. '</td>
+                            <td>' . . '</td>
+                        </tr>
+            ';
             }
 
             $html .= '
