@@ -5474,6 +5474,7 @@ class AdminAPIController extends Controller
                 'personal_email' => ['nullable', 'email'],
                 'address' => ['required'],
                 'emergency_contact' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'emergency_contact_person' => ['nullable'],
                 'designation_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_designations,id'],
                 'department_id' => ['required', 'integer', 'digits_between:1,10', 'exists:admin_departments,id'],
                 'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
@@ -5564,6 +5565,7 @@ class AdminAPIController extends Controller
                         $employee_request->personal_email = $request->personal_email;
                         $employee_request->address = $request->address;
                         $employee_request->emergency_contact = $request->emergency_contact;
+                        $employee_request->emergency_contact_person = $request->emergency_contact_person;
                         $employee_request->designation_id = $request->designation_id;
                         $employee_request->department_id = $request->department_id;
                         $employee_request->zone_id = $request->zone_id;

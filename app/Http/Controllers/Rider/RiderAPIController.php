@@ -10258,6 +10258,7 @@ class RiderAPIController extends Controller
                 'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
                 'address' => ['required'],
                 'emergency_contact' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'emergency_contact_person' => ['nullable'],
                 'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
                 'date_of_birth' => ['required'],
                 'pin' => ['required', 'integer', 'digits:4'],
@@ -10331,15 +10332,6 @@ class RiderAPIController extends Controller
 
                     } else {
                         try {
-                            $rider_request = new RiderRequest();
-                            $rider_request->name = $request->name;
-                            $rider_request->cnic = $request->cnic_no;
-                            $rider_request->phone_no = $request->phone_number;
-                            $rider_request->pin = $request->pin;
-                            $rider_request->city_id = $request->city_id;
-                            $rider_request->rider_type_id = $request->rider_type_id;
-                            $rider_request->save();
-
                             $employee_request = new Employee();
                             $employee_request->name = $request->name;
                             $employee_request->employee_gender_id = $request->employee_gender_id;
@@ -10357,6 +10349,7 @@ class RiderAPIController extends Controller
                             $employee_request->blood_group = $request->blood_group_id;
                             $employee_request->address = $request->address;
                             $employee_request->emergency_contact = $request->emergency_contact;
+                            $employee_request->emergency_contact_person = $request->emergency_contact_person;
                             $employee_request->zone_id = $request->zone_id;
                             $employee_request->shift_id = $request->shift_id;
                             $employee_request->date_of_birth = $request->date_of_birth;
