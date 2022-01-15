@@ -2,6 +2,7 @@
 
 namespace App\Http\Models\HR;
 
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,11 @@ class Employee extends Model
     public function rider()
     {
         return $this->belongsTo(Rider::class,'trax_id','trax_id');
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(Admin::class,'trax_id','trax_id');
     }
 
 }
