@@ -6278,7 +6278,7 @@ class AdminFinanceController extends Controller
 
                 $packaging_invoice_toggle_on = CorporateUserPackagingInvoice::where('user_id',$user_id)->where('status',1)->first();
                 if($packaging_invoice_toggle_on){
-                    $packaging_material_requests = PackagingMaterialRequest::where('user_id',$user_id)->whereDate('updated_at', '<', $current_date_string)->where('status_id',4)->whereNotNull('shipment_id');
+                    $packaging_material_requests = PackagingMaterialRequest::where('user_id',$user_id)->whereBetween('updated_at', [$billing_period_from_date,$current_date_string])->where('status_id',2)->whereNotNull('shipment_id');
 
                     if($packaging_material_requests->exists()){
                         $invoice = new Invoice();
@@ -6306,6 +6306,9 @@ class AdminFinanceController extends Controller
                         $total_invoice_amount = 0;
 
                         foreach ($packaging_material_requests->get() as $packaging_material_request) {
+
+                            $gst = $packaging_material_request->city->zone->gst;
+
                             $invoice_shipment = new InvoiceShipment();
 
                             $invoice_shipment->created_at = $packaging_material_request->upadated_at;
@@ -6313,31 +6316,43 @@ class AdminFinanceController extends Controller
                             $invoice_shipment->shipment_id = $packaging_material_request->shipment_id;
                             $invoice_shipment->type = 0;
                             $invoice_shipment->charges = $packaging_material_request->amount;
-                            $invoice_shipment->gst = 1;
-                            $invoice_shipment->invoice_amount = $packaging_material_request->invoice_amount;
+                            $invoice_shipment->gst = $gst;
+                            $invoice_amount = $packaging_material_request->amount + $gst;
+                            $invoice_shipment->invoice_amount = $invoice_amount;
 
                             $invoice_shipment->save();
 
                             $total_shipments++;
 
-                          /*  if ($pending_invoice_shipment->type == 0) {
+                            if ($invoice_shipment->type == 0) {
                                 $total_delivered_shipments++;
                             }
-                            else if ($pending_invoice_shipment->type == 1) {
+                            else if ($invoice_shipment->type == 1) {
                                 $total_returned_shipments++;
                             }
                             else {
                                 $total_adjusted_shipments++;
-                            }*/
+                            }
 
                             //self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
 
-                            $total_charges = $total_charges + $pending_invoice_shipment->charges;
-                            $total_gst = $total_gst + 1;
-                            $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->invoice_amount;
+                            $total_charges = $total_charges + $packaging_material_request->amount;
+                            $total_gst = $total_gst + $gst;
+                            $total_invoice_amount = $total_invoice_amount + $invoice_amount;
 
                             //$pending_invoice_shipment->delete();
                         }
+
+                        $invoice->invoice_number = $invoice_number;
+                        $invoice->total_shipments = $total_shipments;
+                        $invoice->total_delivered_shipments = $total_delivered_shipments;
+                        $invoice->total_returned_shipments = $total_returned_shipments;
+                        $invoice->total_adjusted_shipments = $total_adjusted_shipments;
+                        $invoice->total_charges = $total_charges;
+                        $invoice->total_gst = $total_gst;
+                        $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
+
+                        $invoice->save();
 
                     }
                 }
@@ -7586,14 +7601,16 @@ class AdminFinanceController extends Controller
             }
         }
         else{
+
             $shipment_ids = $invoice->invoice_shipments->pluck('shipment_id')->toArray();
 
             $packaging_material = PackagingMaterialRequest::join('packaging_material_request_details as pmrd','pmrd.packaging_material_request_id','=','packaging_material_requests.id')
                 ->join('cities as c','c.id','=','packaging_material_requests.city_id')
                 ->join('packaging_material_types as pmt','pmt.id','=','pmrd.type_id')
                 ->join('packaging_material_type_sizes as pmts','pmts.id','=','pmrd.type_size_id')
-                ->select('c.name as origin','pmt.type as type_name','pmts.size a size_name','pmts.standard_charges as rates','pmrd.quantity as quantity')
-                ->where('packaging_material_requests.statud_id',4)
+                ->join('zones as z','z.id','=','c.zone_id')
+                ->select('c.name as origin','pmt.type as type_name','pmts.size as size_name','pmts.standard_charges as rates','pmrd.quantity as quantity','z.gst as gst')
+                ->where('packaging_material_requests.status_id',2)
                 ->whereIn('packaging_material_requests.shipment_id',$shipment_ids)
                 ->where('packaging_material_requests.user_id',$shipper->id);
 
@@ -7747,7 +7764,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="12" class="color primary text-center">Invoice Summary - ' . $origin . '</th>
+                            <th colspan="12" class="color primary text-center">Invoice Summary - ' . $origin->origin . '</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -7763,25 +7780,26 @@ class AdminFinanceController extends Controller
                       </thead>
                       <tbody>
             ';
+                $amount_without_gst = $origin->amount * $origin->quantity;
+                $sst_amount = $amount_without_gst * $origin->gst;
+                $total_amount_with_sst = $amount_without_gst + $sst_amount;
 
                 $html .= '
                         <tr>
-                            <td>' . . '</td>
-                            <td>' .  . '</td>
-                            <td>' .  . '</td>
-                            <td>' .. '</td>
-                            <td>' .. '</td>
-                            <td>' . . '</td>
-                            <td>' . . '</td>
-                            <td>' . . '</td>
-                            <td>' .. '</td>
-                            <td>' .. '</td>
-                            <td>' . . '</td>
+                            <td>' . $origin->origin . '</td>
+                            <td>' . $origin->type_name .' - ' . $origin->size_name . '</td>
+                            <td>' . $origin->rates . '</td>
+                            <td>' . $origin->quantity. '</td>
+                            <td>' . $amount_without_gst . '</td>
+                            <td>' . $origin->gst * 100 . '%'  . '</td>
+                            <td>' . $sst_amount . '</td>
+                            <td>' . number_format($total_amount_with_sst) . '</td>
+                          
                         </tr>
             ';
             }
-
-            $html .= '
+            if($invoice->invoice_type == 1 ) {
+                $html .= '
                       </tbody>
                     </table>
 
@@ -7804,13 +7822,21 @@ class AdminFinanceController extends Controller
                               </tbody>
                             </table>
                         </div>
-                    </div>
+                    </div>';
 
-                    <table class="table table-sm table-bordered border">
+            }
+            $amount_in_words = '';
+            if($invoice->invoice_type == 1){
+                $amount_in_words = self::amount_to_words($total_invoice_amount[$origin]);
+            }
+            else{
+                $amount_in_words =  self::amount_to_words($total_amount_with_sst);
+            }
+                   $html .=  '<table class="table table-sm table-bordered border">
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount[$origin]) . ' Only</td>
+                          <td class="color secondary">' . $amount_in_words . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
