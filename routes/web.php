@@ -2740,6 +2740,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
         });
+        Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@cancelled_shipments_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@cancelled_shipments_store')->name('store');
+        });
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::prefix('incentive')->name('incentive.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@sales_incentive')->name('index');
