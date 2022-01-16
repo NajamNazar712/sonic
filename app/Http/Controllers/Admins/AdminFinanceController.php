@@ -30,6 +30,7 @@ use App\Http\Models\InternationalUserRate;
 use App\Http\Models\InternationalUsersCreditLimit;
 use App\Http\Models\InvoiceUploadSlip;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Models\PickupAddressIbanMapping;
@@ -7046,20 +7047,42 @@ class AdminFinanceController extends Controller
         else {
             $shipment_ids = $invoice->invoice_shipments->pluck('shipment_id')->toArray();
 
-            $packaging_material = PackagingMaterialRequest::join('packaging_material_request_details as pmrd', 'pmrd.packaging_material_request_id', '=', 'packaging_material_requests.id')
-                ->join('cities as c', 'c.id', '=', 'packaging_material_requests.city_id')
-                ->join('packaging_material_types as pmt', 'pmt.id', '=', 'pmrd.type_id')
-                ->join('packaging_material_type_sizes as pmts', 'pmts.id', '=', 'pmrd.type_size_id')
-                ->join('zones as z', 'z.id', '=', 'c.zone_id')
-                ->select('c.name as origin', 'pmt.type as type_name', 'pmts.size as size_name', 'pmts.standard_charges as rates', 'pmrd.quantity as quantity', 'z.gst as gst')
-                ->where('packaging_material_requests.status_id', 2)
-                ->whereIn('packaging_material_requests.shipment_id', $shipment_ids)
-                ->where('packaging_material_requests.user_id', $shipper->id);
+            $size_array = array();
+            $packaging_details = array();
 
-            if ($packaging_material->exists()) {
-                $packaging_materials = $packaging_material->get();
+             if(count($shipment_ids) > 0) {
 
-                $html .= '<table class="table table-sm table-bordered border">
+                 $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id',$shipment_ids)->where('packaging_material_requests.status_id', 2)
+                     ->where('packaging_material_requests.user_id', $shipper->id);
+
+                 if($packaging_materials->exists()) {
+                     $packaging_materials = $packaging_materials->get();
+                     foreach ($packaging_materials as $packaging_material) {
+                             foreach($packaging_material->items as $details){
+                                  if(!in_array($details->packaging_type_size->id,$size_array)) {
+                                      $zone = Zone::find($packaging_material->city->zone_id);
+                                      $packaging_details[$details->packaging_type_size->id]['quantity'] = 1;
+                                      array_push($size_array, $details->packaging_type_size->id);
+                                      $packaging_details[$details->packaging_type_size->id]['origin'] = $packaging_material->city->name;
+                                      $packaging_details[$details->packaging_type_size->id]['rates'] = $details->packaging_type_size->standard_charges;
+                                      $packaging_details[$details->packaging_type_size->id]['description'] = $details->packaging_type_size->type->type . '-' . $details->packaging_type_size->size;
+                                      $packaging_details[$details->packaging_type_size->id]['quantity'] = $details->quantity;
+                                      $packaging_details[$details->packaging_type_size->id]['gst'] = $zone->gst;
+
+                                  }
+                                  else{
+                                      $packaging_details[$details->packaging_type_size->id]['quantity'] +=   $details->quantity;
+                                  }
+                           }
+
+                      }
+                 }
+
+             }
+
+             if (count($packaging_details) > 0) {
+
+                 $html .= '<table class="table table-sm table-bordered border">
           <thead>
             <tr>
                 <th colspan="12" class="color primary text-center">Invoice Summary</th>
@@ -7078,49 +7101,49 @@ class AdminFinanceController extends Controller
           </thead>
           <tbody>
 ';
-                $rates_total = 0;
-                $quantity_total = 0;
-                $total_amount_without_gst = 0;
-                $total_sst_amount = 0;
-                $overall_amount = 0;
+                 $rates_total = 0;
+                 $quantity_total = 0;
+                 $total_amount_without_gst = 0;
+                 $total_sst_amount = 0;
+                 $overall_amount = 0;
 
-                foreach ($packaging_materials as $packaging_material) {
-                    $amount_without_gst = $packaging_material->rates * $packaging_material->quantity;
-                    $sst_amount = round($amount_without_gst * $packaging_material->gst);
-                    $total_amount_with_sst = round($amount_without_gst + $sst_amount);
+                 foreach ($packaging_details as $packaging_material) {
+                     $amount_without_gst = $packaging_material['rates'] * $packaging_material['quantity'];
+                     $sst_amount = round($amount_without_gst * $packaging_material['gst']);
+                     $total_amount_with_sst = round($amount_without_gst + $sst_amount);
 
-                    $rates_total = $rates_total + $packaging_material->rates;
-                    $quantity_total = $quantity_total + $packaging_material->quantity;
-                    $total_amount_without_gst = $total_amount_without_gst + $amount_without_gst;
-                    $total_sst_amount = $total_sst_amount + $sst_amount;
-                    $overall_amount = $overall_amount + $total_amount_with_sst;
-                    $html .= '
+                     $rates_total = $rates_total + $packaging_material['rates'];
+                     $quantity_total = $quantity_total + $packaging_material['quantity'];
+                     $total_amount_without_gst = $total_amount_without_gst + $amount_without_gst;
+                     $total_sst_amount = $total_sst_amount + $sst_amount;
+                     $overall_amount = $overall_amount + $total_amount_with_sst;
+                     $html .= '
             <tr>
-                <td>' . $packaging_material->origin . '</td>
-                <td>' . $packaging_material->type_name . ' - ' . $packaging_material->size_name . '</td>
-                <td>' . $packaging_material->rates . '</td>
-                <td>' . $packaging_material->quantity . '</td>
+                <td>' . $packaging_material['origin'] . '</td>
+                <td>' . $packaging_material['description'] . '</td>
+                <td>' . $packaging_material['rates'] . '</td>
+                <td>' . $packaging_material['quantity'] . '</td>
                 <td>' . $amount_without_gst . '</td>
-                <td>' . $packaging_material->gst * 100 . '%' . '</td>
+                <td>' . $packaging_material['gst'] * 100 . '%' . '</td>
                 <td>' . round($sst_amount) . '</td>
                 <td>' . number_format($total_amount_with_sst) . '</td>
               
             </tr>';
-                    $html .= $packaging_material[$packaging_material->origin];
-                }
-                $html .= '<tr>
+                     $html .= $packaging_material['origin'];
+                 }
+                 $html .= '<tr>
                 <td colspan="3" class="text-center">Total Amount</td>
             
-                <td>'.$quantity_total.'</td>
-                <td>'.$total_amount_without_gst.'</td>
+                <td>' . $quantity_total . '</td>
+                <td>' . $total_amount_without_gst . '</td>
                 <td></td>
-                <td>'.number_format($total_sst_amount).'</td>
-                <td>'.number_format($overall_amount).'</td>
+                <td>' . number_format($total_sst_amount) . '</td>
+                <td>' . number_format($overall_amount) . '</td>
             </tr>';
-                $amount_in_words = '';
-                $amount_in_words = self::amount_to_words($overall_amount);
+                 $amount_in_words = '';
+                 $amount_in_words = self::amount_to_words($overall_amount);
 
-                $html .= '<table class="table table-sm table-bordered border">
+                 $html .= '<table class="table table-sm table-bordered border">
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
@@ -7155,7 +7178,7 @@ class AdminFinanceController extends Controller
                           <td>Liaquat Market Malir Branch</td>
                         </tr>';
 
-                $html .= ' <tr>
+                 $html .= ' <tr>
                                       <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
                                       <td>9912</td>
                                     </tr>
@@ -7164,17 +7187,16 @@ class AdminFinanceController extends Controller
 
                     <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
             ';
+             }
 
 
-                $html .= '
+                 $html .= '
                       </tbody>
                     </table>
             ';
 
-                $invoice_number_serial_number++;
-            }
-
-        }
+                 $invoice_number_serial_number++;
+             }
 
         $html .= '
                   </div>
