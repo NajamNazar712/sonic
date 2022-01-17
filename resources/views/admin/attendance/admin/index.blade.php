@@ -14,7 +14,7 @@
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
 
-                            <form id="payslip_upload_form" class="form-horizontal" method="POST" action="{{ route('admin.attendance.excel') }}" novalidate="novalidate" enctype="multipart/form-data">
+                            <form id="attendance_upload_form" class="form-horizontal" method="POST" action="{{ route('admin.attendance.excel') }}" novalidate="novalidate" enctype="multipart/form-data">
                                 {{ csrf_field() }}
 
                                 <div class="row align-items-center justify-content-center">
@@ -31,6 +31,7 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
+                                            <a href="#" class="btn btn-primary generate_pdf"><i class="la la-download"></i> Generate PDF</a>
                                             <a href="{{ asset('file/Employee Attendance Template.xlsx') }}?v=14_09_2021" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                         </div>
                                     </div>
@@ -133,6 +134,66 @@
                                 </div>
                             </div>
 
+                            <div class="modal fade text-left" id="generateAttendancePdf" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="generateAttendancePdf"
+                                 aria-hidden="true">
+                                <div class="modal-dialog modal-sm" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="generate_pdf_heading">Select Details<span></span></h4>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body col-12" id="generatePdfDiv">
+                                            <form id="generate_pdf_form" class="form-horizontal" method="POST" action="{{ route('admin.attendance.print') }}" novalidate="novalidate">
+                                                {{ csrf_field() }}
+
+                                                <div class="col mt-1">
+                                                    <fieldset class="form-group">
+                                                        <select name="pdf_trax_id" id="pdf_trax_id" class="form-control select2">
+                                                            @foreach($trax_ids as $trax_id)
+                                                                <option value="{{$trax_id}}">{{$trax_id}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </fieldset>
+                                                </div>
+                                                <div class="col mt-1">
+                                                    <div class="form-group input-group ">
+                                                        <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o"></span>
+                                                </span>
+                                                        </div>
+                                                        <input type="text" name="pdf_date_from"
+                                                               class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                               id="pdf_date_from" placeholder="Attandance Date (From)" data-value="{{ Carbon\Carbon::today() }}">
+                                                    </div>
+                                                </div>
+                                                <div class="col mt-1">
+                                                    <div class="form-group input-group">
+                                                        <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o"></span>
+                                                </span>
+                                                        </div>
+                                                        <input type="text" name="pdf_date_to"
+                                                               class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                               id="pdf_date_to" placeholder="Attandance Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <fieldset class="form-actions center">
+                                                        <button type="submit" class="btn btn-primary">
+                                                            Download
+                                                        </button>
+                                                    </fieldset>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
@@ -214,6 +275,12 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#pdf_trax_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Employee ID',
+                width:'100%',
+                allowClear:true,
+                dropdownParent: $("#generate_pdf_form")
+            });
             $('#search_cnic').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search CNIC',
                 width:'100%',
@@ -242,6 +309,33 @@
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var pdf_date_from = $('#generate_pdf_form #pdf_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#generate_pdf_form #pdf_date_to').pickadate('picker').set('min', $('#generate_pdf_form #pdf_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var pdf_date_to = $('#generate_pdf_form #pdf_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#generate_pdf_form #pdf_date_from').pickadate('picker').set('max', $('#generate_pdf_form #pdf_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
@@ -397,6 +491,9 @@
                 } else {
                     table.button('.sms').disable();
                 }
+            });
+            $('body').on('click','.generate_pdf',function(){
+                $('#generateAttendancePdf').modal('show');
             });
         });
     </script>

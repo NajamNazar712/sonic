@@ -14,6 +14,7 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Cassandra\Session;
 use Illuminate\Http\Request;
@@ -820,6 +821,159 @@ class AdminAttendanceController extends Controller
                 return redirect()->back()->with('error', 'No Records in File');
             }
         }
+
+    }
+
+    public function attendance_print(Request $request)
+    {
+        $trax_id = $request->pdf_trax_id;
+        $date_from = $request->pdf_date_from;
+        $date_to = $request->pdf_date_to;
+
+        $employee = Employee::where('trax_id', $trax_id);
+
+        if (!$employee->exists()) {
+            return response()->json(['status' => 0, 'error' => 'Employee not found!']);
+        }
+        $employee = $employee->first();
+        if (Admin::where('trax_id', $employee->trax_id)->exists()) {
+            $user = Admin::where('trax_id', $employee->trax_id)->first();
+            $personal_contact = $user->phone_number;
+        } else {
+            $rider = Rider::where('trax_id', $employee->trax_id);
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                $personal_contact = $rider->phone;
+            }
+        }
+
+
+        $html = '<!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Attendance</title>
+
+                     <style>
+                     @page {
+                        size: A4 portrait;
+                      }
+                      body {
+                        font-size: 0.95rem !important;
+                        
+                      }
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+                      .border.twice {
+                        border-width: 1px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 1px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 1px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 1px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 1px !important;
+                      }
+
+                      .font-small {
+                        font-size: 0.65rem !important;
+                      }
+                      
+                      .table-borderless td, .table th {
+                        border: none;
+                     }
+                     td{
+                        color: #000;
+                     }
+                    </style>';
+
+        $html .= '</head>
+                  <body>
+                   
+                      <div class="table-responsive">
+                          <table class="table table-borderless mb-0">
+                          
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class=""></td>
+                             </tr>
+                             <tr>
+                                <td class="text-center align-middle"><h2>Trax Online (Pvt.) Ltd</h2></td>
+                             </tr>
+                             <tr>
+                                <td class="text-center align-middle">Monthly Employee Time Sheet PDF</td>
+                             </tr>
+                             <tr>
+                                <td class="text-center align-middle"></td>
+                             </tr>
+                             </tbody>
+                         </table>';
+
+        $html .= '<table class="table border table-sm">
+                    
+                    <tbody>
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="8"><b>Employee Information</b></td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Employee ID</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->trax_id . '</td>
+                            <td colspan="2" class="border twice-right">Location</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->city->name . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Employee Name</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->name . '</td>
+                            <td colspan="2" class="border twice-right">Department</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->department->name . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Designation</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->designation->name . '</td>
+                            <td colspan="2"  class="border twice-right">Employee Type</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->employee_type_id . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Shift</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->shift_id . '</td>
+                        </tr>
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="8"><b>Salary Breakup</b></td>
+                        </tr>
+                   </tbody>
+                         </table>';
+
+
+        $html .= ' 
+                      </div>
+                      </body>
+                      </html>';
+
+        $pdf = SnappyPDF::loadHTML($html);
+
+        $filename = 'payslip_' . $trax_id . '.pdf';
+
+        $result = $pdf->download($filename);
+        $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
+        return array('status' => 1, 'image' => $pdf_file);
 
     }
 
