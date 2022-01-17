@@ -829,6 +829,8 @@ class AdminAttendanceController extends Controller
         $trax_id = $request->pdf_trax_id;
         $date_from = $request->pdf_date_from;
         $date_to = $request->pdf_date_to;
+        $to = Carbon::parse($request->pdf_date_to_formatted)->format('Y-m-d 23:59:59');
+        $from = Carbon::parse($request->pdf_date_from_formatted)->format('Y-m-d 00:00:00');
 
         $employee = Employee::where('trax_id', $trax_id);
 
@@ -836,18 +838,17 @@ class AdminAttendanceController extends Controller
             return response()->json(['status' => 0, 'error' => 'Employee not found!']);
         }
         $employee = $employee->first();
-        if (Admin::where('trax_id', $employee->trax_id)->exists()) {
-            $user = Admin::where('trax_id', $employee->trax_id)->first();
-            $personal_contact = $user->phone_number;
+        $type = $employee->employee_type_id;
+        if ($type == 1) {
+            $employee_id = $employee->admin->id;
         } else {
-            $rider = Rider::where('trax_id', $employee->trax_id);
-            if ($rider->exists()) {
-                $rider = $rider->first();
-                $personal_contact = $rider->phone;
-            }
+            $employee_id = $employee->rider->id;
         }
-
-
+        $employee_attendance = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->whereBetween('attendance_date', [$from, $to]);
+        if(!$employee_attendance->exists()){
+            return response()->json(['status' => 0, 'error' => 'Attendance not found!']);
+        }
+        $employee_attendances = $employee_attendance->get();
         $html = '<!doctype html>
                 <html lang="en">
                   <head>
@@ -931,7 +932,7 @@ class AdminAttendanceController extends Controller
                     
                     <tbody>
                         <tr class="text-center">
-                            <td class="color primary border twice" colspan="8"><b>Employee Information</b></td>
+                            <td class="color primary border twice" colspan="9"><b>Employee Information</b></td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Employee ID</td>
@@ -956,7 +957,7 @@ class AdminAttendanceController extends Controller
                             <td colspan="2"  class="border twice-right">' . $employee->shift_id . '</td>
                         </tr>
                         <tr class="text-center">
-                            <td class="color primary border twice" colspan="8"><b>Attandence Details</b></td>
+                            <td class="color primary border twice" colspan="9"><b>Attandence Details</b></td>
                         </tr>
                         <tr>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date In</th>;
@@ -971,7 +972,6 @@ class AdminAttendanceController extends Controller
                         </tr>
                    ';
 
-
         $html .= '    
                       </tbody>
                       </table>
@@ -980,12 +980,8 @@ class AdminAttendanceController extends Controller
                       </html>';
 
         $pdf = SnappyPDF::loadHTML($html);
-
-        $filename = 'payslip_' . $trax_id . '.pdf';
-
-        return $pdf->download($filename);/*
-        $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
-        return array('status' => 1, 'image' => $pdf_file);*/
+        $filename = 'Attendance_' . $trax_id . '.pdf';
+        return $pdf->download($filename);
 
     }
 
