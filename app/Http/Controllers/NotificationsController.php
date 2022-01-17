@@ -953,6 +953,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
                     }
                     if($shipment_otp->exists()){
+                        $shipment_otp = $shipment_otp->first();
                         if (strpos($body, '[refusal_otp]') !== FALSE) {
                             $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
                         }
@@ -7629,6 +7630,7 @@ class NotificationsController extends Controller
                     }
 
                     if($shipment_otp->exists()){
+                        $shipment_otp = $shipment_otp->first();
                         if (strpos($body, '[refusal_otp]') !== FALSE) {
                             $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
                         }
@@ -7794,6 +7796,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
                     }
                     if($shipment_otp->exists()){
+                        $shipment_otp = $shipment_otp->first();
                         if (strpos($body, '[refusal_otp]') !== FALSE) {
                             $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
                         }
