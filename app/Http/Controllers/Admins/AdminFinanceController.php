@@ -6317,7 +6317,7 @@ class AdminFinanceController extends Controller
                             $invoice_shipment->shipment_id = $packaging_material_request->shipment_id;
                             $invoice_shipment->type = 0;
                             $invoice_shipment->charges = $packaging_material_request->amount;
-                            $invoice_shipment->gst = $gst;
+                            $invoice_shipment->gst = $packaging_material_request->amount * $gst;
                             $invoice_amount = $packaging_material_request->amount + $gst;
                             $invoice_shipment->invoice_amount = $invoice_amount;
 
@@ -6338,7 +6338,7 @@ class AdminFinanceController extends Controller
                             //self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
 
                             $total_charges = $total_charges + $packaging_material_request->amount;
-                            $total_gst = $total_gst + $gst;
+                            $total_gst = $total_gst + ($packaging_material_request->amount * $gst);
                             $total_invoice_amount = $total_invoice_amount + $invoice_amount;
 
                             //$pending_invoice_shipment->delete();
@@ -6349,8 +6349,8 @@ class AdminFinanceController extends Controller
                         $invoice->total_delivered_shipments = $total_delivered_shipments;
                         $invoice->total_returned_shipments = $total_returned_shipments;
                         $invoice->total_adjusted_shipments = $total_adjusted_shipments;
-                        $invoice->total_charges = $total_charges;
-                        $invoice->total_gst = $total_gst;
+                        $invoice->total_charges = round($total_charges);
+                        $invoice->total_gst = round($total_gst);
                         $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
 
                         $invoice->save();
@@ -7043,6 +7043,7 @@ class AdminFinanceController extends Controller
                     </table>
             ';
             }
+
         }
         else {
             $shipment_ids = $invoice->invoice_shipments->pluck('shipment_id')->toArray();
@@ -7129,7 +7130,7 @@ class AdminFinanceController extends Controller
                 <td>' . number_format($total_amount_with_sst) . '</td>
               
             </tr>';
-                     $html .= $packaging_material['origin'];
+                    /* $html .= $packaging_material['origin'];*/
                  }
                  $html .= '<tr>
                 <td colspan="3" class="text-center">Total Amount</td>
@@ -8175,7 +8176,7 @@ class AdminFinanceController extends Controller
                 <td>' . number_format($total_amount_with_sst) . '</td>
               
             </tr>';
-                $html .= $packaging_material['origin'];
+              /*  $html .= $packaging_material['origin'];*/
             }
 
             $html .= '<tr>
