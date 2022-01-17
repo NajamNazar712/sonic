@@ -10339,7 +10339,7 @@ class RiderAPIController extends Controller
                             $employee_request->cnic = $request->cnic_no;
                             $employee_request->phone_number = $request->phone_number;
                             $employee_request->employee_type_id = 2;
-                            $employee_request->rider_request_id = $rider_request->id;
+//                            $employee_request->rider_request_id = $rider_request->id;
                             $employee_request->status_id = 2;
                             $employee_request->guardian_name = $request->guardian_name;
                             $employee_request->religion_id = $request->religion_id;
