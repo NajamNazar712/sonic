@@ -829,8 +829,8 @@ class AdminAttendanceController extends Controller
         $trax_id = $request->pdf_trax_id;
         $date_from = $request->pdf_date_from;
         $date_to = $request->pdf_date_to;
-        $to = Carbon::parse($request->pdf_date_to_formatted)->format('Y-m-d 23:59:59');
         $from = Carbon::parse($request->pdf_date_from_formatted)->format('Y-m-d 00:00:00');
+        $to = Carbon::parse($request->pdf_date_to_formatted)->format('Y-m-d 23:59:59');
 
         $employee = Employee::where('trax_id', $trax_id);
 
@@ -844,11 +844,11 @@ class AdminAttendanceController extends Controller
         } else {
             $employee_id = $employee->rider->id;
         }
-        $employee_attendance = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->whereBetween('attendance_date', [$from, $to]);
-        if(!$employee_attendance->exists()){
+        $employee_attendances = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->whereBetween('attendance_date', [$from, $to]);
+        if(!$employee_attendances->exists()){
             return response()->json(['status' => 0, 'error' => 'Attendance not found!']);
         }
-        $employee_attendances = $employee_attendance->get();
+        $employee_attendances = $employee_attendances->get();
         $html = '<!doctype html>
                 <html lang="en">
                   <head>
@@ -923,7 +923,7 @@ class AdminAttendanceController extends Controller
                                 <td class="text-center align-middle">Monthly Employee Time Sheet PDF</td>
                              </tr>
                              <tr>
-                                <td class="text-center align-middle"></td>
+                                <td class="text-center align-middle">'.$date_from.' TO '.$date_to.'</td>
                              </tr>
                              </tbody>
                          </table>';
@@ -950,18 +950,18 @@ class AdminAttendanceController extends Controller
                             <td colspan="2" class="border twice-right">Designation</td>
                             <td colspan="2"  class="border twice-right">' . $employee->designation->name . '</td>
                             <td colspan="2"  class="border twice-right">Employee Type</td>
-                            <td colspan="2"  class="border twice-right">' . $employee->employee_type_id . '</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->employee_type->name . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Shift</td>
-                            <td colspan="2"  class="border twice-right">' . $employee->shift_id . '</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->shift->name . '</td>
                         </tr>
                         <tr class="text-center">
                             <td class="color primary border twice" colspan="9"><b>Attandence Details</b></td>
                         </tr>
                         <tr>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date In</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Time In</th>\';
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Time In</th>;
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date Out</th>;
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Time Out</th>;
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Work Hours</th>;
@@ -971,7 +971,26 @@ class AdminAttendanceController extends Controller
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Remarks</th>;
                         </tr>
                    ';
+        $leave = 0;
+        $absent = 0;
+        foreach ($employee_attendances as $employee_attendance){
+            $remarks = '';
+            if(!$employee_attendance->clock_in_datetime){
+                if($employee_attendance->leave_status){
+                    $remarks = "Leave";
+                    $leave++;
+                }elseif (Carbon::parse($employee_attendance->attendance_date)->format("l") == "SUNDAY"){
+                    $remarks = "Sunday";
+                }else{
+                    $remarks = "Absent";
+                    $absent++;
+                }
+            }else{
 
+            }
+            $html .= '<tr>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employee_attendance->trax_id . '</td>';
+        }
         $html .= '    
                       </tbody>
                       </table>
