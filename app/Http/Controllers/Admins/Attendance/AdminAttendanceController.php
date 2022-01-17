@@ -938,19 +938,19 @@ class AdminAttendanceController extends Controller
                             <td colspan="2" class="border twice-right">Employee ID</td>
                             <td colspan="2"  class="border twice-right">' . $employee->trax_id . '</td>
                             <td colspan="2" class="border twice-right">Location</td>
-                            <td colspan="2"  class="border twice-right">' . $employee->city->name . '</td>
+                            <td colspan="3"  class="border twice-right">' . $employee->city->name . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Employee Name</td>
                             <td colspan="2"  class="border twice-right">' . $employee->name . '</td>
                             <td colspan="2" class="border twice-right">Department</td>
-                            <td colspan="2"  class="border twice-right">' . $employee->department->name . '</td>
+                            <td colspan="3"  class="border twice-right">' . $employee->department->name . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Designation</td>
                             <td colspan="2"  class="border twice-right">' . $employee->designation->name . '</td>
                             <td colspan="2"  class="border twice-right">Employee Type</td>
-                            <td colspan="2"  class="border twice-right">' . $employee->employee_type->name . '</td>
+                            <td colspan="3"  class="border twice-right">' . $employee->employee_type->name . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Shift</td>
@@ -989,7 +989,7 @@ class AdminAttendanceController extends Controller
 
             }
             $html .= '<tr>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employee_attendance->trax_id . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employee_attendance->attendance_date . '</td>';
         }
         $html .= '    
                       </tbody>
