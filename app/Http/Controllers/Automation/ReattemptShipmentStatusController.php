@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Automation;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
@@ -25,7 +26,14 @@ class ReattemptShipmentStatusController extends Controller
             if($reattempt_percentage->exists()){
                 $reattempt_percentage = $reattempt_percentage->first();
                 $percentage = $reattempt_percentage->percentage;
-                if($percentage < 60){
+
+                $settings = GlobalSettings::where('type', 'reattempt_percentage');
+                $percentage_limit = 60;
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $percentage_limit = $settings->setting_value;
+                }
+                if($percentage < $percentage_limit){
                     return true;
                 }
                 $shipment->shipper_status_id = 13;
