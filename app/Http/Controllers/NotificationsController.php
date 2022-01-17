@@ -94,6 +94,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\Notifications;
+use App\Jobs\ProcessOTPSMSForBotSMS;
 
 use App\Jobs\ProcessSMS;
 use Maatwebsite\Excel\Excel;
@@ -154,6 +155,17 @@ class NotificationsController extends Controller
       $sms->save();
 
       dispatch(new ProcessDeliveryNoteOtpSms($sms));
+    }
+
+    static private function bot_sms($body, $to) {
+        $sms = new SMS();
+  
+        $sms->to = str_replace('-', '', $to);
+        $sms->body = $body;
+  
+        $sms->save();
+  
+        dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
     static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL) {
@@ -8158,7 +8170,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
                     $to = $shipment->consignee_phone_number_1;
-                    self::sms($body, $to);
+                    self::bot_sms($body, $to);
                 } else if ($id == 146) {
 
                     $fnf_id = $reference_1_id;
