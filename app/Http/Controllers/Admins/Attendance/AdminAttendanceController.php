@@ -956,13 +956,25 @@ class AdminAttendanceController extends Controller
                             <td colspan="2"  class="border twice-right">' . $employee->shift_id . '</td>
                         </tr>
                         <tr class="text-center">
-                            <td class="color primary border twice" colspan="8"><b>Salary Breakup</b></td>
+                            <td class="color primary border twice" colspan="8"><b>Attandence Details</b></td>
                         </tr>
-                   </tbody>
-                         </table>';
+                        <tr>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date In</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Time In</th>\';
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date Out</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Time Out</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Work Hours</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Late Arrival</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Early Departure</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">OverTime</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Remarks</th>;
+                        </tr>
+                   ';
 
 
-        $html .= ' 
+        $html .= '    
+                      </tbody>
+                      </table>
                       </div>
                       </body>
                       </html>';
@@ -971,9 +983,9 @@ class AdminAttendanceController extends Controller
 
         $filename = 'payslip_' . $trax_id . '.pdf';
 
-        $result = $pdf->download($filename);
+        return $pdf->download($filename);/*
         $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
-        return array('status' => 1, 'image' => $pdf_file);
+        return array('status' => 1, 'image' => $pdf_file);*/
 
     }
 
