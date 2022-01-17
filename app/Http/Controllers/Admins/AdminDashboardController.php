@@ -8253,7 +8253,7 @@ class AdminDashboardController extends Controller
 
         if($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0){
             DwsWeightChargesController::approve($id);
-            User::where('id',$id)->update(['rate_status'=>0,'status' => 2,'rates_authorized_by'=> 32,'rates_approved_at'=>Carbon::now()]);
+            User::where('id',$id)->update(['rate_status'=> 0,'status' => 2,'rates_authorized_by'=> 32, 'rates_approved_at'=> Carbon::now()]);
         }
         
 
