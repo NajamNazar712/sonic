@@ -869,7 +869,7 @@ class AdminAttendanceController extends Controller
         } else {
             $employee_id = $employee->rider->id;
         }
-        $employee_attendances = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->whereBetween('attendance_date', [$from, $to]);
+        $employee_attendances = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->whereBetween('attendance_date', [$from, $to])->orderBy('attendance_date', 'ASC');
         if(!$employee_attendances->exists()){
             return redirect()->back()->with(['status' => 0, 'error' => 'Attendance not found!']);
         }
