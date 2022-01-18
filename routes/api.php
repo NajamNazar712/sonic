@@ -50,7 +50,6 @@ Route::name('api.')->group(function () {
 
 			Route::post('eta', 'APIController@shipment_status_eta')->name('eta');
 
-
 		});
 		Route::prefix('request')->name('request.')->group(function() {
 			Route::post('crm', 'APIController@crm_request_create')->name('crm');
@@ -63,6 +62,9 @@ Route::name('api.')->group(function () {
 		Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function() {
 			Route::post('create', 'APIController@receiving_sheet_create')->name('create');
 			Route::get('view', 'APIController@receiving_sheet_view')->name('view');
+            Route::post('add', 'APIController@receiving_sheet_add')->name('add');
+            Route::post('remove', 'APIController@receiving_sheet_void')->name('remove');
+            Route::post('cancel', 'APIController@receiving_sheet_cancel')->name('cancel');
 		});
 
 		Route::get('cities', 'APIController@cities')->name('cities');

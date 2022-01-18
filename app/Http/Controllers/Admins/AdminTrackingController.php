@@ -48,7 +48,9 @@ use Auth;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\DwsDetail;
+use App\Http\Models\ShipmentDetail;use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
 class AdminTrackingController extends Controller
@@ -187,6 +189,7 @@ class AdminTrackingController extends Controller
                     $details['order_information']['instructions'] = $shipment->special_instructions;
                     $details['order_information']['business_category'] = $shipment->business_category->name;
 
+                    
                     foreach ($shipment->shipment_journey as $journey) {
                         $journey_details = array();
 
@@ -254,6 +257,7 @@ class AdminTrackingController extends Controller
                         }else if($journey->user_id){
                             $user = $journey->user->name;
                         }
+                        
 
                         $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                         $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
@@ -974,6 +978,13 @@ class AdminTrackingController extends Controller
                         $details['order_information']['pieces'] = $shipment->pieces;
                         $details['order_information']['business_category'] = $shipment->business_category->name;
                         $manifest_bag_seal_number = 0;
+                        $dws_details = DwsDetail::where('shipment_id',$shipment->id);
+                        if($dws_details->exists()){
+                            $dws_details = $dws_details->get()->first();
+                                $machine_name = ' ('.$dws_details->dws_machine.') ';
+                        }else{
+                            $machine_name = '';
+                        }
                         foreach ($shipment->shipment_journey as $journey) {
                             $journey_details = array();
 
@@ -1158,6 +1169,10 @@ class AdminTrackingController extends Controller
                                 $user = $journey->admin->name;
                             }else if($journey->user_id){
                                 $user = $journey->user->name;
+                            }
+                            if($journey->shipper_status_id == 2){
+                                $user = $user.$machine_name;
+
                             }
 
                             $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
@@ -1555,6 +1570,7 @@ class AdminTrackingController extends Controller
                                 $details['dws_image'] = $shipment->shipment_detail->dws_image;
                             }
                         }
+                        
 
 
                         $tracking['shipments'][] = $details;

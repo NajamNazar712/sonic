@@ -51,6 +51,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
@@ -64,7 +65,9 @@ use phpDocumentor\Reflection\Types\Null_;
 use SnappyImage;
 use SnappyPDF;
 use Validator;
-
+use App\Http\Models\ReceivingSheet;
+use App\Http\Models\ReceivingSheetShipment;
+use App\Jobs\ProcessGulAhmedShipmentConfirmation;
 
 class APIController extends Controller
 {
@@ -515,7 +518,7 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190'],
                 'open_shipment' => ['nullable', 'boolean'],
-
+                'substitute_user_email' => ['nullable', 'filled', 'email']
             ];
             $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
             if ($ccd_booking->exists()) {
@@ -587,6 +590,7 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190'],
                 'open_shipment' => ['nullable', 'boolean'],
+                'substitute_user_email' => ['nullable', 'filled', 'email']
 
             ];
 
@@ -972,13 +976,33 @@ class APIController extends Controller
                 }
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
             }
-           
+
 
             if ($shipment_pre_book) {
                 $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);
             } else {
                 $tracking_number = ShipperShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
             }
+
+            //substitute_user_email
+            if($request->has('substitute_user_email')){
+                if($request->substitute_user_email != null){
+                    $sub_user = SubstituteUser::where(['user_id' => $user_id, 'email' => $request->substitute_user_email, 'status' => 1]);
+                    if($sub_user->exists()){
+                        $sub_user = $sub_user->first();
+                        $sub_user_id = $sub_user->id;
+                        $substitute_user_shipment = new SubstituteUserShipment();
+                        $substitute_user_shipment->substitute_user_id = $sub_user_id;
+                        $substitute_user_shipment->shipment_id = $shipment_id;
+                        $substitute_user_shipment->save();
+
+                        $shipment = Shipment::find($shipment_id);
+                        $shipment->booked_by = 2;
+                        $shipment->save();
+                    }
+                }
+            }
+
             if ($request->has('order_date')) {
                 if ($request->order_date != null) {
                     $order_date = new ShipmentOrderDate();
@@ -4245,6 +4269,213 @@ class APIController extends Controller
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
+            }
+        }
+    }
+    public function receiving_sheet_add(Request $request)
+    {
+        $user_id = $request->user_id;
+        $rules = [
+            'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $shipment = Shipment::where('user_id', $user_id)->where('tracking_number', $request->tracking_number)->first();
+            if ($shipment->shipper_status_id != 1) {
+                return ['status' => 1, 'message' => $shipment->tracking_number . ' can no longer be added to a Receiving Sheet'];
+            }
+            $receiving_sheet_id = $request->receiving_sheet_id;
+            $tracking_number = $request->tracking_number;
+            $shipmentid = $shipment->id;
+
+            $receiving_sheet = ReceivingSheet::find($receiving_sheet_id);
+            $receiving_sheet_shipment = ReceivingSheetShipment::find($shipmentid);
+            if($receiving_sheet_shipment)
+            {
+                return ['status' => 1, 'message' => 'Shipment was added in Receiving Sheet: '.$receiving_sheet_shipment->receiving_sheet_id];
+            }
+            if ($receiving_sheet->status == 0) {
+                $first_receiving_sheet_shipment = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->first();
+
+                if ($first_receiving_sheet_shipment) {
+                    $first_shipment = Shipment::find($first_receiving_sheet_shipment->shipment_id);
+
+                    if ($shipment->pickup_address_id == $first_shipment->pickup_address_id) {
+                        $receiving_sheet_shipment = new ReceivingSheetShipment();
+
+                        $receiving_sheet_shipment->shipment_id = $shipmentid;
+                        $receiving_sheet_shipment->receiving_sheet_id = $receiving_sheet_id;
+
+                        $receiving_sheet_shipment->save();
+
+                        $receiving_sheet->booked = $receiving_sheet->booked + 1;
+
+                        $receiving_sheet->save();
+
+                        if ($shipment->user_id == 7828) {
+                            $confirmation_datetime = Carbon::now()->toDateTimeString();
+
+                            $confirmation_shipments = array();
+
+                            $confirmation_shipment = array();
+
+                            $confirmation_shipment['CNN'] = $shipment->tracking_number;
+                            $confirmation_shipment['reference_number'] = $shipment->order_id;
+                            $confirmation_shipment['ConfirmationDateTime'] = $confirmation_datetime;
+
+                            $confirmation_shipments[] = $confirmation_shipment;
+
+                            dispatch(new ProcessGulAhmedShipmentConfirmation($confirmation_shipments));
+                        }
+
+                        return ['status' => 0, 'message' => 'Shipment has been Added to the Receiving Sheet'];
+                    }
+                    else {
+                        return ['status' => 1, 'message' => 'Given Shipment\'s Pickup Address is different from the other Shipments of the selected Receiving Sheet'];
+                    }
+                }
+                else {
+                    $receiving_sheet_shipment = new ReceivingSheetShipment();
+
+                    $receiving_sheet_shipment->shipment_id = $shipmentid;
+                    $receiving_sheet_shipment->receiving_sheet_id = $receiving_sheet_id;
+
+                    $receiving_sheet_shipment->save();
+
+                    $receiving_sheet->booked = $receiving_sheet->booked + 1;
+
+                    $receiving_sheet->save();
+
+                    if ($shipment->user_id == 7828) {
+                        $confirmation_datetime = Carbon::now()->toDateTimeString();
+
+                        $confirmation_shipments = array();
+
+                        $confirmation_shipment = array();
+
+                        $confirmation_shipment['CNN'] = $shipment->tracking_number;
+                        $confirmation_shipment['reference_number'] = $shipment->order_id;
+                        $confirmation_shipment['ConfirmationDateTime'] = $confirmation_datetime;
+
+                        $confirmation_shipments[] = $confirmation_shipment;
+
+                        dispatch(new ProcessGulAhmedShipmentConfirmation($confirmation_shipments));
+                    }
+
+                    return ['status' => 0, 'message' => 'Shipment has been Added to the Receiving Sheet'];
+                    
+                }
+            }
+            else {
+                return ['status' => 1, 'message' => 'Shipment w.r.t. Receiving Sheet ID not found'];
+            }
+        }
+    }
+    public function receiving_sheet_void(Request $request)
+    {
+        $user_id = $request->user_id;
+        $rules = [
+            'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $shipment = Shipment::where('user_id', $user_id)->where('tracking_number', $request->tracking_number)->first();
+
+            $receiving_sheet_id = $request->receiving_sheet_id;
+            $tracking_number = $request->tracking_number;
+            $shipmentid = $shipment->id;
+
+            $receiving_sheet_shipment = ReceivingSheetShipment::where('shipment_id',$shipmentid)->where('receiving_sheet_id',$receiving_sheet_id);
+            if(!$receiving_sheet_shipment->exists())
+            {
+                return ['status' => 1, 'message' => 'Shipment not found or Voided previously'];
+            }
+            $receiving_sheet = ReceivingSheet::find($receiving_sheet_id);
+
+            if ($receiving_sheet->status == 0) {
+                $receiving_sheet_shipment->delete();
+
+                if (!ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->exists()) {
+                    $receiving_sheet->booked = $receiving_sheet->booked - 1;
+                    $receiving_sheet->status = 2;
+
+                    $receiving_sheet->save();
+                }
+                if (ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->exists()) {
+                    $receiving_sheet->booked = $receiving_sheet->booked - 1;
+
+                    $receiving_sheet->save();
+                }
+
+                return ['status' => 0, 'message' => 'Shipment has been Voided'];
+            }
+            else {
+                return ['status' => 1, 'message' => 'Shipment w.r.t. Receiving Sheet ID not found'];
+            }
+
+        }
+    }
+    public function receiving_sheet_cancel(Request $request)
+    {
+        $user_id = $request->user_id;
+        $rules = [
+            'receiving_sheet_id' => ['required', 'integer', Rule::exists('receiving_sheets', 'id')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $receiving_sheet_id = $request->receiving_sheet_id;
+            $receiving_sheet = ReceivingSheet::find($receiving_sheet_id);
+            $receiving_sheet_shipment = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet->id);
+            if ($receiving_sheet->status == 0) {
+                $receiving_sheet_shipment->delete();
+
+                if (!ReceivingSheetShipment::where('receiving_sheet_id', $request->input('receiving_sheet_id'))->exists()) {
+                    $receiving_sheet->booked = 0;
+                    $receiving_sheet->status = 2;
+
+                    $receiving_sheet->save();
+                }
+                if (ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->exists()) {
+                    $receiving_sheet->booked = 0;
+
+                    $receiving_sheet->save();
+                }
+
+                return ['status' => 0, 'message' => 'Receiving Sheet has been Cancelled'];
+            }
+            else
+            {
+                return ['status' => 1, 'message' => 'Receiving Sheet has been Cancelled or Removed'];
             }
         }
     }
