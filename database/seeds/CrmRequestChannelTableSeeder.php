@@ -20,6 +20,7 @@ class CrmRequestChannelTableSeeder extends Seeder
             array('id' => 4, 'channel' => 'Call'),
             array('id' => 5, 'channel' => 'WhatsApp'),
             array('id' => 6, 'channel' => 'Facebook'),
+            array('id' => 7, 'channel' => 'Self'),
         ));
     }
 }

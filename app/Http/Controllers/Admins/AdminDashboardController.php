@@ -8253,7 +8253,7 @@ class AdminDashboardController extends Controller
 
         if($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0){
             DwsWeightChargesController::approve($id);
-            User::where('id',$id)->update(['rate_status'=>0,'status' => 2,'rates_authorized_by'=> 32,'rates_approved_at'=>Carbon::now()]);
+            User::where('id',$id)->update(['rate_status'=> 0,'status' => 2,'rates_authorized_by'=> 32, 'rates_approved_at'=> Carbon::now()]);
         }
         
 
@@ -8393,14 +8393,14 @@ class AdminDashboardController extends Controller
         }
 
         if($sale_persons = $request->get('sale_persons')){
-            $users = $users->whereIn('ad.id', $sale_persons);
+            $users = $users->where('ad.id', $sale_persons);
         }
 
         if($search_cnic = $request->get('search_cnic')){
             $users = $users->where('users.cnic', $search_cnic);
         }
         if($search_shipper = $request->get('search_shipper')){
-            $users = $users->whereIn('users.id', $search_shipper);
+            $users = $users->where('users.id', $search_shipper);
         }
 
         if($search_iban = $request->get('search_iban')){
@@ -11349,6 +11349,11 @@ class AdminDashboardController extends Controller
             $user_ids = explode(',', $user_ids);
             foreach($user_ids as $id){
                 $user = User::find($id);
+                if($user->territory_id)
+                return redirect()->back()->with('error', 'Territory not added as '.$user->name.' is tagged previously');
+            }
+            foreach($user_ids as $id){
+                $user = User::find($id);
                 $user->territory_id = $territory;
                 $user->save();
 
@@ -11468,7 +11473,7 @@ class AdminDashboardController extends Controller
         $user = Employee::leftjoin('employee_designations as d', 'd.id', '=', 'employees.designation_id')
             ->leftjoin('admin_departments as ad', 'd.department_id', '=', 'ad.id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'employees.blood_group')
-            ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.personal_email as email', 'employees.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'employees.emergency_contact as emergency_contact_no', 'employees.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id')
+            ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.official_email as email', 'employees.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'employees.emergency_contact as emergency_contact_no', 'employees.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id')
             ->where('employees.trax_id', Auth::user()->trax_id);
         if($user->exists()){
             $user = $user->first();
@@ -11508,6 +11513,33 @@ class AdminDashboardController extends Controller
         }
 
    }
+
+   public function add_retag_territory(Request $request){
+    $territory = $request->territory;
+    $user_ids = $request->user_ids;
+    if($user_ids){
+        $user_ids = explode(',', $user_ids);
+        foreach($user_ids as $id){
+            $user = User::find($id);
+            if(!$user->territory_id)
+            return redirect()->back()->with('error', 'Retagging not done as '.$user->name.' is not tagged previously');
+        }
+        foreach($user_ids as $id){
+            $user = User::find($id);
+            $user->territory_id = $territory;
+            $user->save();
+
+            $history = new TerritoryTagHistory();
+            $history->user_id = $id;
+            $history->admin_id = Auth::id();
+            $history->save();
+        }
+        return redirect()->back()->with('success', 'Territory is added.');
+        }
+    else{
+        return redirect()->back()->with('error', 'Territory not added.');
+    }
+}
 
 }
 
