@@ -48,7 +48,7 @@ class AdminShipmentCancelController extends Controller
     }
 
     static public function cancel() {
-        $active_users = User::where('status', 3)->whereNotIn('id', [3324, 7762, 5982, 10104, 14110])->get();
+        $active_users = User::where('status', 3)->get();
         if(count($active_users)){
             $modifiedsettings = GlobalSettings::where('type', 'cancelled_shipments')->first();
             foreach ($active_users as $user){
