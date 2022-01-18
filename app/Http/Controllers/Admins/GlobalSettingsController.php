@@ -5456,9 +5456,9 @@ public function sales_incentive()
 
     public function cancelled_shipments_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 412);//need to change
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 488);
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
-        $settings = GlobalSettings::where('type', 'cancelled_shipments');//need to change UpdateGlobalSettingsForAutoCancelledShipments
+        $settings = GlobalSettings::where('type', 'cancelled_shipments');
         $cancelled_shipments = array();
         if ($settings->exists()) {
             $settings = $settings->first();
