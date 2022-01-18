@@ -1021,24 +1021,20 @@ class AdminAttendanceController extends Controller
                     }
                     if($employee_attendance->clock_out_datetime){
                         $clock_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
-                        $out_interval = Carbon::parse($shift->end_time)->diffInMinutes(Carbon::parse($clock_out), false);
-                        dd($out_interval);
-                        $time_diff_out = $out_interval->invert;
+                        $time_diff_out = Carbon::parse($shift->end_time)->diffInMinutes(Carbon::parse($clock_out), false);
                         $working_hours = Carbon::parse($employee_attendance->clock_out_datetime)->diff(Carbon::parse($employee_attendance->clock_in_datetime))->format('%H:%I:%S');
                         $time_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
                         $date_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("Y-m-d");
-                        if($out_interval == 0){
+                        if($time_diff_out < 0){
+                            $remarks = 'Early Out';
+                            $earlyout++;
+                            $early_departure = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
+                        } elseif ($time_diff_out > 0){
+                            $remarks = 'Over-Time';
+                            $overtime++;
+                            $over_time = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
+                        } else {
                             $remarks = 'On-Time';
-                        }else{
-                            if($time_diff_out == 0){
-                                $remarks = 'Early Out';
-                                $earlyout++;
-                                $early_departure = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
-                            } elseif ($time_diff_out == 1){
-                                $remarks = 'Over-Time';
-                                $overtime++;
-                                $over_time = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
-                            }
                         }
                     }
                 }
