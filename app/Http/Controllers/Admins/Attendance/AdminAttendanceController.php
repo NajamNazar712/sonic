@@ -1006,7 +1006,6 @@ class AdminAttendanceController extends Controller
                 $shift = EmployeeShift::find($employee->shift_id);
                 $shift_exists = 0;
                 if ($shift) {
-                    $shift = $shift->first();
                     $shift_exists = 1;
                 }
                 if($shift_exists == 1){
