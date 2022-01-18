@@ -852,7 +852,7 @@ class AdminAttendanceController extends Controller
         $employee = Employee::where('trax_id', $trax_id);
 
         if (!$employee->exists()) {
-            return response()->json(['status' => 0, 'error' => 'Employee not found!']);
+            return redirect()->back()->with(['status' => 0, 'error' => 'Employee not found!']);
         }
         $employee = $employee->first();
         $type = $employee->employee_type_id;
@@ -863,7 +863,7 @@ class AdminAttendanceController extends Controller
         }
         $employee_attendances = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->whereBetween('attendance_date', [$from, $to]);
         if(!$employee_attendances->exists()){
-            return response()->json(['status' => 0, 'error' => 'Attendance not found!']);
+            return redirect()->back()->with(['status' => 0, 'error' => 'Attendance not found!']);
         }
         $employee_attendances = $employee_attendances->get();
         $html = '<!doctype html>
