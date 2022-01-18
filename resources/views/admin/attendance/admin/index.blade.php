@@ -311,6 +311,9 @@
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
                     form.submit();
+                    form.reset();
+                    $(form).find('button[type=submit]').attr('disabled', '');
+                    $('#generateAttendancePdf').modal('hide');
                 }
             });
             $('#attendance_upload_form').validate({
