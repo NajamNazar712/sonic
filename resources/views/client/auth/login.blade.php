@@ -106,7 +106,7 @@
                                     <span>New To Trax?</span>
                                 </p>
                                 <div class="card-body">
-                                    <a href="{{route('cod.register')}}" class="btn btn-outline-danger btn-block"><i class="ft-user"></i>Register</a>
+                                    <a href="{{route('cod.getstarted')}}" class="btn btn-outline-danger btn-block"><i class="ft-user"></i>Get Stated</a>
                                 </div>
                             </div>
                         </div>

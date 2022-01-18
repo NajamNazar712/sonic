@@ -38,13 +38,17 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
-    Route::get('/register/{lead_id?}','Auth\RegisterController@showRegistrationForm')->name('register');
+    Route::get('/register/','Auth\GetStartedController@index')->name('register');
+    Route::get('/get-started', 'Auth\GetStartedController@index')->name('getstarted');
+    Route::post('/get-started','Auth\GetStartedController@getstarted_submit')->name('getstarted');
+    Route::get('/register/{lead_id}','Auth\RegisterController@showRegistrationForm')->name('register');
     Route::post('/register','Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
     Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
     Route::post('/territory', 'Auth\RegisterController@territory')->name('territory');
+    Route::post('/area', 'Auth\RegisterController@area')->name('area');
     Route::post('update/agreement_status','Shippers\ShipperDashboardController@agreement_status')->name('update.agreement_status');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
