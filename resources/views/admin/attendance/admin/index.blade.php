@@ -321,6 +321,7 @@
                     });
 
                     form.submit();
+                    swal.close();
                 }
             });
             var search_date_to = $('#search_form #search_date_to').pickadate({
