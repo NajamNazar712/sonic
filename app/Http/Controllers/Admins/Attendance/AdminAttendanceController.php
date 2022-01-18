@@ -838,6 +838,7 @@ class AdminAttendanceController extends Controller
         $earlyout = 0;
         $overtime = 0;
         $ontime = 0;
+        $total = 0;
 
         $date_in = '';
         $time_in = '';
@@ -988,6 +989,7 @@ class AdminAttendanceController extends Controller
                         </tr>
                    ';
         foreach ($employee_attendances as $employee_attendance){
+            $total++;
             $remarks = '';
             if($employee_attendance->leave_status){
                 $remarks = "Leave";
@@ -1050,6 +1052,20 @@ class AdminAttendanceController extends Controller
             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $over_time . '</td>';
             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td>';
         }
+        $html.='<tr class="text-center">
+                            <td class="color primary border twice" colspan="9"><b>Attendance Summary</b></td>
+                        </tr>
+                        <tr class="text-left">
+                            <td class="border twice-right">Total : '.$total.'</td>
+                            <td class="border twice-right">Absent : '.$absent.'</td>
+                            <td class="border twice-right">On-Time : '.$ontime.'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td class="border twice-right">Late : '.$late.'</td>
+                            <td class="border twice-right">Early Departure : '.$earlyout.'</td>
+                            <td class="border twice-right">Leave : '.$leave.'</td>
+                        </tr>
+                        ';
         $html .= '    
                       </tbody>
                       </table>
