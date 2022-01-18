@@ -312,6 +312,7 @@
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
                     form.submit();
                     form.reset();
+                    $('#pdf_trax_id').trigger('change');
                     $(form).find('button[type=submit]').attr('disabled', '');
                     $('#generateAttendancePdf').modal('hide');
                 }
