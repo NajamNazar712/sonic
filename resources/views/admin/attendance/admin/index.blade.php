@@ -316,8 +316,6 @@
                         text: 'Pdf is being downloading',
                         icon: 'info',
                         buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
                     });
 
                     form.submit();
