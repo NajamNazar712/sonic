@@ -4827,10 +4827,15 @@ class AdminAPIController extends Controller
                 //     return response()->json(['status' => 1, 'message' => 'weight not found']);
                 // }
 
-                if (($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 ) && ($shipment->booking_type_id != 3 && $shipment->pieces == 1)) {
+                if (($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 63) && ($shipment->booking_type_id != 3 && $shipment->pieces == 1)) {
                     if($request->dimension_l < 0 || $request->dimension_w < 0 || $request->dimension_h < 0){
                             return response()->json(false);
     
+                    }
+                    $retail_shipment = RetailShipment::where('shipment_id',$shipment->id);
+                    if($retail_shipment->exists()){
+                        return response()->json(false);
+
                     }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
                     $dense_weight = $request->weight;
@@ -4917,23 +4922,26 @@ class AdminAPIController extends Controller
                         }
                     }
 
-                    $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0)->orderBy('id', 'DESC')->first();
-                    //region Taha
-                    $pickup_request = V2PickupRequest::where('id', $pickup_request_shipment->pickup_request_id)->first();
-                    //endregion
+                    $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0);
+                    $pickup_request_id = NULL;
+                    $pickup_request = NULL;
+                     if ($pickup_request_shipment->exists()) {
+                        $pickup_request_shipment = $pickup_request_shipment->orderBy('id', 'DESC')->first();
 
-                    if ($pickup_request_shipment) {
-                        $reference_1_id = $pickup_request_shipment->pickup_request_id;
+                        $pickup_request_id = $pickup_request_shipment->pickup_request_id;
+                        $pickup_request = V2PickupRequest::where('id', $pickup_request_id)->first();
+                        $reference_1_id = $pickup_request_id;
                         $rider_id = $pickup_request->current_rider_id;
 
                         // if (!in_array($pickup_request_shipment->pickup_request_id, $pickup_request_ids)) {
                         // $pickup_request_ids[] = $pickup_request_shipment->pickup_request_id;
-                        $pickup_request_id = $pickup_request_shipment->pickup_request_id;
+
                         // }
+
                     } else {
                         $reference_1_id = null;
                     }
-                    if ($pickup_request->current_rider_id == null) {
+                    if ($pickup_request && $pickup_request->current_rider_id == null) {
                         $rider_id = $pickup_rider_id;
                     }
                     if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
@@ -4975,7 +4983,7 @@ class AdminAPIController extends Controller
 
                     $shipment->save();
                     $reference_2_id = null;
-                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, $piece_request_remarks, null, $request->admin_id, $reference_1_id, $reference_2_id, 1, null, $rider_id);
+                    ShipmentsJourneyController::add($shipment_id, 2, 2, null, 'DWS Arrival', null, $request->admin_id, $reference_1_id, $reference_2_id, 1, null, $rider_id);
 
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if ($self_collection_shipment->exists()) {
@@ -5092,14 +5100,18 @@ class AdminAPIController extends Controller
                         $pickup_request_received_shipment->pickup_request_id = $pickup_request_id;
                         $pickup_request_received_shipment->shipment_id = $shipment->id;
                         $pickup_note_id = NULL;
+                        
                         $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_id)->latest()->first();
                         if ($pickup_note_request) {
                             $pickup_note_id = $pickup_note_request->pickup_note_id;
+                            $pickup_note = V2PickupNote::find($pickup_note_id);
+                            $pickup_rider_id = $pickup_note->rider_id;
                         }
                         $pickup_request_received_shipment->pickup_note_id = $pickup_note_id;
+                        $pickup_request_received_shipment->rider_id = $pickup_rider_id;
                         $pickup_request_received_shipment->save();
                         $pickup_request = $pickup_request_shipment->pickup_request;
-                        ShipmentsPickupJourneyController::add($shipment_id, 2, $request->admin_id, $pickup_request->id);
+                        ShipmentsPickupJourneyController::add($shipment_id, 2, $request->admin_id, $pickup_request_id);
 
                         $pickup_request->received = $pickup_request->received + 1;
                         $pickup_request->status_id = 2;
@@ -5715,7 +5727,7 @@ class AdminAPIController extends Controller
             ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
             ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-            ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
+            ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
             ->where('admins.id', $admin_id);
         if ($admin_profile->exists()) {
         $admin_profile = $admin_profile->get();
@@ -5763,7 +5775,7 @@ class AdminAPIController extends Controller
                     ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
                     ->join('cities as c', 'c.id', '=', 'e.city_id')
                     ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.personal_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city')
                     ->where('e.name', $request->search_param)
                     ->where('admins.status', 1);
 

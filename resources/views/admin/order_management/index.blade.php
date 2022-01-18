@@ -74,8 +74,8 @@
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         {{--<th class="border-primary border-darken-1">Consignee Contact</th>--}}
-                        <th class="border-primary border-darken-1">Consignee Address</th>
-                        <th class="border-primary border-darken-1">Collection Amount</th>
+{{--                        <th class="border-primary border-darken-1">Consignee Address</th>--}}
+{{--                        <th class="border-primary border-darken-1">Collection Amount</th>--}}
                         <th class="border-primary border-darken-1">Booking Date</th>
                         <th class="border-primary border-darken-1">Payment Mode</th>
                         <th class="border-primary border-darken-1"></th>
@@ -912,7 +912,7 @@
                 },
                 deferLoading: 0,
                 rowId: 'shipment_id',
-                order: [[14, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
@@ -927,8 +927,8 @@
                     {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     // {data: 'phone', name: 'phone', class: 'align-middle phone'},
-                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                    // {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    // {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'payment_mode', name: 'pm.mode', class: 'align-middle payment_mode'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

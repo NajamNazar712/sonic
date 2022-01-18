@@ -602,6 +602,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('kam_poc_ref_tag/remove','Admins\AdminDashboardController@kam_poc_ref_tag_remove')->name('kam_poc_ref_tag.remove');
         Route::post('restrict_order_id/info','Admins\AdminDashboardController@restrict_order_id_info')->name('restrict_order_id.info');
         Route::post('restrict_order_id/submit','Admins\AdminDashboardController@restrict_order_id_submit')->name('restrict_order_id.submit');
+        Route::post('/add_retag_territory', 'Admins\AdminDashboardController@add_retag_territory')->name('add_retag_territory');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
@@ -838,7 +839,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('tag', 'Admins\AdminTerritoryController@area_tag')->name('tag');
 
         });
+        
+        Route::post('/city/osa_list', 'Admins\AdminDashboardController@osa_list')->name('city.osa_list');
 
+        
 
     });
     Route::prefix('pickups')->name('pickups.')->group(function () {
@@ -2740,6 +2744,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
         });
+        Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@cancelled_shipments_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@cancelled_shipments_store')->name('store');
+        });
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::prefix('incentive')->name('incentive.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@sales_incentive')->name('index');
@@ -3054,6 +3062,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@international_automation_user_store')->name('store');
         });
 
+        Route::prefix('reattempt_percentage')->name('reattempt_percentage.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@reattempt_percentage_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@reattempt_percentage_store')->name('store');
+        });
     });
 
 
