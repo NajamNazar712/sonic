@@ -980,7 +980,7 @@ class AdminTrackingController extends Controller
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
                             $journey_details['shipper_status_id'] = $journey->shipment_status_shipper->id;
-                            if ($journey->verification == 0 && in_array($journey->shipment_status_shipper->id, [7, 8, 9, 12, 15, 18, 14, 30, 37])) {
+                            if (in_array($journey->shipment_status_shipper->id, [7, 8, 9, 12, 15, 18, 14, 30, 37])) {
                                 $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->where('delivery_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id);
                                 if ($rider_delivery->exists()) {
                                     $rider_delivery = $rider_delivery->get()->first();
@@ -1003,6 +1003,9 @@ class AdminTrackingController extends Controller
                                         }
                                     }
                                 }
+                                else {
+                                    $journey_details['image_audio_location'] = '-';
+                                }
                             }
                             else if (in_array($journey->shipment_status_shipper->id, [47, 24, 48, 60, 25, 31, 38])) {
                                 $rider_return_deliveries = RiderReturnDelivery::where('shipment_id', $shipment->id)->where('return_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id);
@@ -1024,6 +1027,9 @@ class AdminTrackingController extends Controller
 
                                         $journey_details['image_audio_location'] .= '| <a type="button" class="btn btn-sm btn-outline-info align-middle location p-0" href="https://www.google.com/maps/search/?api=1&query=' . $rider_return_deliveries->actual_location_latitude . ',' . $rider_return_deliveries->actual_location_longitude . '" target="_blank"><i class="la la-map-marker"></i></a></div>';
                                     }
+                                }
+                                else {
+                                    $journey_details['image_audio_location'] = '-';
                                 }
                             }
                             else {
