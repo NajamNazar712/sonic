@@ -22,6 +22,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\Fuel\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Lead\LeadTagging;
 use App\Http\Models\Admin\MonthClosingStatus;
 use App\Http\Models\Admin\MonthClosingType;
 use App\Http\Models\Admin\NonServiceArea;
@@ -5481,4 +5482,113 @@ public function sales_incentive()
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    public function lead_tagging_index(){
+        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
+        $cities = City::where('status',1)->get();
+        return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities]);
+    }
+
+    public function lead_tagging_list(){
+        $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
+                 ->join('cities as c','c.id','lead_taggings.city_id')   
+                 ->join('zones as z','z.id','lead_taggings.zone_id')   
+                 ->join('service_list as s','s.id','lead_taggings.service_id')   
+        ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 'z.name as zone', 's.name as service','lead_taggings.status');
+        
+    $datatables = Datatables::of($roles)
+        ->addColumn('action', function($roles) {
+            if (session('role_id') == 1 || in_array(640, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    ';
+                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    if($roles->status == 1 ){
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }else{
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+          return $dropdown;
+               
+            }
+            else {
+                return '';
+            }
+        })->editColumn('status', function($roles) {
+            if($roles->status == 1){
+                return 'Active';
+            }else{
+                return 'In-Active';
+            }
+            
+        });
+
+    return $datatables->make(true);
+    }
+
+    public function lead_tagging_submit(Request $request){
+        $crm_agent = CrmAutoTagUser::where('city_id',$request->city_id);
+        if(!$crm_agent->exists()){
+            CrmAutoTagUser::create($request->all());
+            return redirect()->back()->with('success', 'Agent Added!');
+        }else{
+            return redirect()->back()->with('error', 'Location already exist, Please edit the Tagged user');
+
+        }
+
+
+    }
+
+    public function lead_tagging_data(Request $request){
+        $crm_agent_data = CrmAutoTagUser::find($request->id);
+
+        $agent_id = $crm_agent_data->admin_id;
+        $city_id = $crm_agent_data->city_id;
+        $crm_agent_id = $crm_agent_data->id;
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'crm_agent_id'=> $crm_agent_id]);
+
+    }
+
+    public function lead_tagging_delete(Request $request){
+        CrmAutoTagUser::find($request->id)->delete();
+        return response()->json(['status' => 1, 'success' => 'Tagged Agent Deleted']);
+
+    }
+
+
+    public function lead_tagging_update(Request $request){
+        $crm_agent_data = CrmAutoTagUser::find($request->crm_agent_id);
+
+        $crm_agent_data->admin_id = $request->admin_id;
+        $crm_agent_data->city_id = $request->city_id;
+        $crm_agent_data->save();
+        return redirect()->back()->with('success', 'Agent Updated!');
+
+    }
+
+    public function lead_tagging_enable_disable(Request $request){
+        $crm_agent = CrmAutoTagUser::find($request->id);
+        if($crm_agent->status == 1){
+            $crm_agent->status = 0;
+            $crm_agent->save();
+        return redirect()->back()->with('success', 'Agent Disabled!');
+
+        }else{
+            $crm_agent->status = 1;
+            $crm_agent->save();
+        return redirect()->back()->with('success', 'Agent Enabled!');
+
+        }
+    }
+
 }

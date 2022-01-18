@@ -3062,6 +3062,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@reattempt_percentage_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@reattempt_percentage_store')->name('store');
         });
+
+        Route::prefix('lead_tagging')->name('lead_tagging.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@lead_tagging_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@lead_tagging_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@lead_tagging_submit')->name('submit');
+            Route::post('data', 'Admins\GlobalSettingsController@lead_tagging_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@lead_tagging_update')->name('update');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_tagging_enable_disable')->name('enable_disable');
+            
+        });
     });
 
 
