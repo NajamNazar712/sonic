@@ -1016,7 +1016,7 @@ class AdminAttendanceController extends Controller
                         $remarks = 'Late';
                         $late++;
                         $late_arrival = Carbon::parse($clock_in)->diff(Carbon::parse($shift->start_time))->format('%H:%I:%S');
-//                        $late_arrival = gmdate('H:i:s', $late_duration);
+                        dd($clock_in.' '.$shift->start_time. ' ',$late_arrival);
                     }else{
                         $remarks = 'OnTime';
                         $ontime++;
