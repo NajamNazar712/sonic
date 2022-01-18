@@ -1130,6 +1130,7 @@ class Permission
             'settings.international_automation_user.index' => 582,
 
             'settings.ccd_booking.index' => 558,
+            'settings.cancelled_shipments.index' => 660,
             'settings.omni.index' => 644,
             
             'return.rcp_agent.index' => 600,
@@ -1142,6 +1143,8 @@ class Permission
 
             'settings.auto_assigning.index' => 616,
             'settings.auto_assigning.list' => 616,
+
+            'settings.reattempt_percentage.index' => 659,
 
             'settings.auto_tagging.index' => 639,
             'settings.auto_tagging.list' => 639,

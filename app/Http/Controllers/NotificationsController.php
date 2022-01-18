@@ -48,6 +48,7 @@ use App\Http\Models\Runner;
 use App\Http\Models\RunnerDetail;
 use App\Http\Models\SaleTierTag;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentOtp;
 use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
@@ -94,6 +95,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\Notifications;
+use App\Jobs\ProcessOTPSMSForBotSMS;
 
 use App\Jobs\ProcessSMS;
 use Maatwebsite\Excel\Excel;
@@ -154,6 +156,17 @@ class NotificationsController extends Controller
       $sms->save();
 
       dispatch(new ProcessDeliveryNoteOtpSms($sms));
+    }
+
+    static private function bot_sms($body, $to) {
+        $sms = new SMS();
+  
+        $sms->to = str_replace('-', '', $to);
+        $sms->body = $body;
+  
+        $sms->save();
+  
+        dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
     static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL) {
@@ -895,6 +908,7 @@ class NotificationsController extends Controller
                     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)->where('shipment_id', $reference_2_id)->first();
 
                     $shipment = Shipment::find($reference_2_id);
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
 
                     $shipper = $shipment->user;
 
@@ -950,7 +964,12 @@ class NotificationsController extends Controller
                     if (strpos($body, '[payment_mode]') !== FALSE) {
                         $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
                     }
-
+                    if ($shipment_otp->exists()) {
+                        $shipment_otp = $shipment_otp->first();
+                        if (strpos($body, '[refusal_otp]') !== FALSE) {
+                            $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
+                        }
+                    }
                     self::sms($body, $to);
                 } else if ($id == 13) {
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
@@ -1923,7 +1942,7 @@ class NotificationsController extends Controller
                         $to = array_merge($to, $general_admins->pluck('email')->toArray());
                     }
                     $reference_2_id_email = Admin::find($reference_2_id)->email;
-                    if($reference_2_id_email != null){
+                    if ($reference_2_id_email != null) {
                         $to[] = $reference_2_id_email;
                     }
 
@@ -3696,8 +3715,7 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.yousuf@trax.pk'];
 
                     self::email($subject, $body, $to, $cc, $bcc);
-                }
-                else if ($id == 47) {
+                } else if ($id == 47) {
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
                     }
@@ -3839,8 +3857,7 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.waqas@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
-                }
-                else if ($id == 48) {
+                } else if ($id == 48) {
 
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
@@ -3934,8 +3951,7 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $email);
                     }
 
-                }
-                else if ($id == 49) {
+                } else if ($id == 49) {
                     $reference_1_id = Carbon::parse($reference_1_id)->subDay()->toDateString();
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
@@ -4045,8 +4061,7 @@ class NotificationsController extends Controller
 //                 }
 //
 //                 self::email($subject, $body, $to);
-                }
-                else if ($id == 50) {
+                } else if ($id == 50) {
                     $done = "Done";
                     $not_done = "Not Done";
                     // $pickup_note = PickupNote::find($reference_1_id);
@@ -7092,8 +7107,7 @@ class NotificationsController extends Controller
                         $sale_person = $person['new_sale_person']->name;
                         self::sms($body, $to);
                     }
-                }
-                else if ($id == 120) {
+                } else if ($id == 120) {
                     $date = Carbon::yesterday()->format('Y-m-d');
 
                     if (strpos($subject, '[date]') !== FALSE) {
@@ -7123,8 +7137,7 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $sale_person_email);
                     }
 
-                }
-                else if ($id == 121) {
+                } else if ($id == 121) {
                     $date = Carbon::yesterday()->format('Y-m-d');
 
                     if (strpos($subject, '[date]') !== FALSE) {
@@ -7479,8 +7492,7 @@ class NotificationsController extends Controller
                     }
                     $to = $retail_user->phone_no;
                     self::sms($body, $to, 1);
-                }
-                else if ($id == 130) {
+                } else if ($id == 130) {
                     $now = Carbon::now();
                     $month = $now->subMonth()->format('F');
 
@@ -7502,8 +7514,7 @@ class NotificationsController extends Controller
                     $to = ['mohsin.qamar@trax.pk', 'shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     self::email($subject, $body, $to);
-                }
-                else if ($id == 133) {
+                } else if ($id == 133) {
 
                     $data = $reference_1_id;
                     $erf = EmployeeRequisition::find($data['id']);
@@ -7565,6 +7576,7 @@ class NotificationsController extends Controller
                     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)->where('shipment_id', $reference_2_id)->first();
 
                     $shipment = Shipment::find($reference_2_id);
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
 
                     $shipper = $shipment->user;
 
@@ -7621,6 +7633,12 @@ class NotificationsController extends Controller
                         $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
                     }
 
+                    if ($shipment_otp->exists()) {
+                        $shipment_otp = $shipment_otp->first();
+                        if (strpos($body, '[refusal_otp]') !== FALSE) {
+                            $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
+                        }
+                    }
                     self::sms($body, $to);
                 } else if ($id == 134) {
                     $user = User::find($reference_1_id);
@@ -7726,7 +7744,7 @@ class NotificationsController extends Controller
                     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)->where('shipment_id', $reference_2_id)->first();
 
                     $shipment = Shipment::find($reference_2_id);
-
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
                     $shipper = $shipment->user;
 
                     $to = $shipment->consignee_phone_number_1;
@@ -7781,7 +7799,12 @@ class NotificationsController extends Controller
                     if (strpos($body, '[payment_mode]') !== FALSE) {
                         $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
                     }
-
+                    if ($shipment_otp->exists()) {
+                        $shipment_otp = $shipment_otp->first();
+                        if (strpos($body, '[refusal_otp]') !== FALSE) {
+                            $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
+                        }
+                    }
                     self::sms($body, $to);
                 } else if ($id == 137) {
                     $rider_id = $reference_1_id;
@@ -8158,7 +8181,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
                     $to = $shipment->consignee_phone_number_1;
-                    self::sms($body, $to);
+                    self::bot_sms($body, $to);
                 } else if ($id == 146) {
 
                     $fnf_id = $reference_1_id;
@@ -8173,19 +8196,19 @@ class NotificationsController extends Controller
                         if ($admin->exists()) {
                             $admin = $admin->first();
                             if ($admin->trax_id == 'Trax01099') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/it_support';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/it_support';
                             } else if ($admin->trax_id == 'Trax04484') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/finance';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/finance';
                             } else if ($admin->trax_id == 'Trax00043') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/cs';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/cs';
                             } else if ($admin->trax_id === 'Trax02533') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/hr';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/hr';
                             } else if ($admin->trax_id === 'Trax03840') {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/administration';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/administration';
                             } else if ($admin->trax_id === $fnf->reporting_manager->trax_id) {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/rm';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/rm';
                             } else if ($admin->trax_id === $fnf->department_head->trax_id) {
-                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/hod_approval';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/' . $fnf_id . '/hod_approval';
                             }
 
                             $link = '<a href=' . $route . '>' . $route . '</a>';
@@ -8239,11 +8262,10 @@ class NotificationsController extends Controller
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
                     }
-                    if(!empty($to)){
+                    if (!empty($to)) {
                         self::email($subject, $body, $to);
                     }
-                }
-				else if($id == 148){
+                } else if ($id == 148) {
                     $hub = City::find($reference_1_id);
                     $date = Carbon::now()->toDateString();
                     $subject = $notification->subject;
@@ -8279,9 +8301,7 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to);
-                }
-            
-                else if ($id == 149){
+                } else if ($id == 149) {
                     $user_id = $reference_1_id;
 
                     $user = User::find($user_id);
@@ -8354,42 +8374,38 @@ class NotificationsController extends Controller
                     $to = array();
 
                     $sales_person = $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
-                    if($sales_person){
+                    if ($sales_person) {
                         $to[] = Admin::find($sales_person->admin_id)->email;
                     }
 
                     $kam = SaleTierTag::where('user_id', $shipper_id);
                     if ($kam->exists()) {
                         $kam = $kam->first();
-                        if($kam){
+                        if ($kam) {
                             $to[] = Admin::find($kam->kam)->email;
                         }
                     }
-                    if(count($to) > 0){
+                    if (count($to) > 0) {
                         self::email($subject, $body, $to);
                     }
 
-                }
-                else if ($id == 152)
-                {                    
+                } else if ($id == 152) {
                     $shipment = Shipment::find($reference_1_id);
 
                     $shipper = $shipment->user;
-                    
+
                     $to = $shipper->phone;
 
                     if (strpos($body, '[shipper_name]') !== FALSE) {
                         $body = str_replace('[shipper_name]', $shipper->name, $body);
                     }
-                    
+
                     self::sms($body, $to);
-                } 
-                else if ($id == 153)
-                {                    
+                } else if ($id == 153) {
                     $shipment = Shipment::find($reference_1_id);
 
                     $shipper = $shipment->user;
-                    
+
                     $to = $shipper->email;
 
                     if (strpos($body, '[shipper_name]') !== FALSE) {
@@ -8398,14 +8414,14 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
 
-                } else if ($id == 154){
+                } else if ($id == 154) {
                     $shipment = Shipment::find($reference_1_id);
-                    
+
                     $shipper = $shipment->user;
-                   
+
                     $sales_person_data = array();
                     $sales_person_tag = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
-                    if($sales_person_tag){
+                    if ($sales_person_tag) {
                         $sales_person_tag = Admin::find($sales_person_tag->admin_id);
                         $sales_person_data['name'] = $sales_person_tag->name;
                         $to = $sales_person_tag->email;
@@ -8424,11 +8440,10 @@ class NotificationsController extends Controller
 
                         self::email($subject, $body, $to);
                     }
-                }
-                else if ($id == 155) {
+                } else if ($id == 155) {
                     $getdata = $reference_1_id;
 
-                    $datas = Rider::wherein("id",$getdata)->get();
+                    $datas = Rider::wherein("id", $getdata)->get();
 
                     $html = '<p>Dear (HR / It support),
                     The Rider(s)  have been deactivated from system,
@@ -8441,17 +8456,16 @@ class NotificationsController extends Controller
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">CNIC Number</th>';
                     $html .= '</tr></thead><tbody>';
 
-                    foreach($datas as $data){
+                    foreach ($datas as $data) {
                         $data_set = Rider::find($data->id);
 
                         $data_set->status = 0;
                         $data_set->save();
-                                $html .= '<tr>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->name . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->phone . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cnic . '</td>';
-
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->name . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->phone . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cnic . '</td>';
 
 
                     }
@@ -8461,8 +8475,7 @@ class NotificationsController extends Controller
                     $subject = ' Rider deactivation';
                     $to = ['Hasnain.saleem@trax.pk', 'Adnan.ahmed@trax.pk', 'rameel.khan@trax.pk', 'abdul.ahad@trax.pk', 'fabiha.shahid@trax.pk'];
                     self::email($subject, $body_updated, $to);
-                }
-                else if ($id == 156) {
+                } else if ($id == 156) {
                     $now = Carbon::now();
                     $month = $now->subMonth()->format('F');
 
@@ -8484,8 +8497,7 @@ class NotificationsController extends Controller
                     $to = ['mohsin.qamar@trax.pk', 'shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     self::email($subject, $body, $to);
-                }
-				else if ($id == 157) {
+                } else if ($id == 157) {
                     $date = Carbon::yesterday()->format('Y-m-d');
 
                     if (strpos($subject, '[date]') !== FALSE) {
@@ -8515,9 +8527,9 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $sale_person_email);
                     }
 
-                }				else if ($id == 158){
+                } else if ($id == 158) {
                     $rider = Rider::find($reference_1_id);
-                    if($rider){
+                    if ($rider) {
                         if (strpos($body, '[rider_name]') !== FALSE) {
                             $body = str_replace('[rider_name]', $rider->name, $body);
                         }
@@ -8527,14 +8539,13 @@ class NotificationsController extends Controller
                         $to = $rider->phone;
                         self::sms($body, $to, 1);
                     }
-                }
-                else if ($id == 159){
+                } else if ($id == 159) {
                     $admin = Admin::find($reference_1_id);
-                    if($admin){
+                    if ($admin) {
                         $to = $admin->email;
-                        self::email($subject,$body, $to);
+                        self::email($subject, $body, $to);
                     }
-                }				else if ($id == 160) {
+                } else if ($id == 160) {
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
                     }
@@ -8643,8 +8654,7 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.waqas@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
-                }
-                else if ($id == 162) {
+                } else if ($id == 162) {
                     $admin = Admin::find($reference_1_id);
                     if ($admin) {
                         if (strpos($body, '[user_name]') !== FALSE) {
@@ -8656,13 +8666,12 @@ class NotificationsController extends Controller
                         $to = $reference_2_id;
                         self::sms_otp($body, $to, $admin->name, $admin->reset_pin_otp, 1);
                     }
-                }
-                else if ($id == 163){
+                } else if ($id == 163) {
                     $shipment = Shipment::find($reference_1_id);
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $reference_1_id)
                         ->where('reference_1_id', $reference_2_id)
                         ->orderBy('id', 'DESC');
-                    if($shipment && $shipment_journey->exists()){
+                    if ($shipment && $shipment_journey->exists()) {
                         $shipment_journey = $shipment_journey->first();
                         if (strpos($body, '[tracking_no]') !== FALSE) {
                             $body = str_replace('[tracking_no]', $shipment->tracking_number, $body);
@@ -8676,8 +8685,7 @@ class NotificationsController extends Controller
                         $to = $shipment->consignee_phone_number_1;
                         self::sms($body, $to);
                     }
-                }
-                else if ($id == 164) {
+                } else if ($id == 164) {
                     $getdata = $reference_1_id;
 
                     $data = Employee::leftjoin('employee_designations as d', 'd.id', '=', 'employees.designation_id')
@@ -8742,14 +8750,229 @@ class NotificationsController extends Controller
                             }
                         }
                     }
+                } else if ($id == 165) {
+                    $shipment = Shipment::find($reference_1_id);
+                    $shipment_otp = ShipmentOtp::find($reference_2_id);
+                    if ($shipment && $shipment_otp) {
+                        if (strpos($body, '[consignee]') !== FALSE) {
+                            $body = str_replace('[consignee]', $shipment->consignee_name, $body);
+                        }
+                        if (strpos($body, '[tracking_no]') !== FALSE) {
+                            $body = str_replace('[tracking_no]', $shipment->tracking_number, $body);
+                        }
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $shipment_otp->otp, $body);
+                        }
+                        $to = $shipment->consignee_phone_number_1;
+                        self::sms($body, $to);
+                        if ($shipment->consignee_phone_number_2 != NULL) {
+                            $to = $shipment->consignee_phone_number_2;
+                            self::sms($body, $to);
+                        }
+                    }
+                }
+                else if ($id == 166) {
+                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
+
+                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount'];
+
+                    $present_fields = array();
+
+                    $first_field = NULL;
+
+                    $position = NULL;
+
+                    foreach ($possible_fields as $field) {
+                        $new_position = strpos($body, '[' . $field . ']');
+
+                        if ($new_position !== FALSE) {
+                            if ($position == NULL) {
+                                $present_fields[] = $field;
+
+                                $first_field = $field;
+                            } else if ($new_position > $position) {
+                                $present_fields[] = $field;
+                            } else {
+                                array_unshift($present_fields, $field);
+                            }
+
+                            $position = $new_position;
+                        }
+                    }
+
+                    $today = Carbon::now()->toDateTimeString();
+
+                    $user_wise_shipments = array();
+
+                    $origin_hub_ids = array();
+
+                    foreach ($reference_1_id as $shipment_id) {
+                        $shipment = Shipment::find($shipment_id);
+
+                        $origin_hub_id = $shipment->pickup_address->city->hub_id;
+
+                        if (!in_array($origin_hub_id, $origin_hub_ids)) {
+                            $origin_hub_ids[] = $origin_hub_id;
+                        }
+
+                        $details = array();
+
+                        $details['pickup_city'] = $shipment->pickup_address->city->name;
+                        $details['consignee_name'] = $shipment->consignee_name;
+                        $details['consignee_city'] = $shipment->consignee_city->name;
+                        $details['order_id'] = $shipment->order_id;
+                        $details['weight'] = $shipment->actual_weight;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['amount'] = $shipment->amount;
+
+                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
+                            foreach ($shipment->items as $item) {
+                                if ($item->type == 0) {
+                                    $details['item_product_type'] = $item->product->product_name;
+                                    $details['item_description'] = $item->description;
+                                    $details['item_quantity'] = $item->quantity;
+                                }
+                            }
+                        } else {
+                            $details['item_product_type'] = '';
+                            $details['item_description'] = '';
+                            $details['item_quantity'] = '';
+                        }
+
+                        $user_wise_shipments[$shipment->user_id][] = $details;
+                    }
+
+                    $original_subject = $subject;
+                    $original_body = $body;
+
+                    foreach ($user_wise_shipments as $user_id => $shipments) {
+                        $shipper = User::find($user_id);
+
+                        if (strpos($subject, '[company_name]') !== FALSE) {
+                            $subject = str_replace('[company_name]', $shipper->name, $subject);
+                        }
+
+                        if (strpos($body, '[company_name]') !== FALSE) {
+                            $body = str_replace('[company_name]', $shipper->name, $body);
+                        }
+
+                        if (strpos($subject, '[arrival_at]') !== FALSE) {
+                            $subject = str_replace('[arrival_at]', $today, $subject);
+                        }
+
+                        if (strpos($body, '[arrival_at]') !== FALSE) {
+                            $body = str_replace('[arrival_at]', $today, $body);
+                        }
+
+//              $to = $shipper->email;
+                        if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
+                            $to = ShipperNotificationEmail::where('user_id', $shipper->id)->pluck('email')->toArray();
+                        } else {
+                            $to = $shipper->email;
+                        }
+                        $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+
+                        $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
+
+                        foreach ($present_fields as $field) {
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">' . $field_names[$field] . '</td>';
+                        }
+
+                        $shipment_details .= '</tr>';
+
+                        $serial_number = 1;
+
+                        foreach ($shipments as $shipment) {
+                            $shipment_details .= '<tr>';
+
+                            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial_number . '</td>';
+
+                            foreach ($present_fields as $field) {
+                                if (!empty($shipment[$field])) {
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment[$field] . '</td>';
+                                } else {
+                                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                                }
+                            }
+
+                            $shipment_details .= '</tr>';
+
+                            $serial_number++;
+                        }
+
+                        $shipment_details .= '</tbody></table>';
+
+                        foreach ($present_fields as $field) {
+                            if ($field != $first_field) {
+                                $body = str_replace('[' . $field . ']', '', $body);
+                            }
+                        }
+
+                        $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
+
+                        $bcc = array();
+
+//              $general_admins = Admin::whereIn('role_id', [6])->where('status', 1);
+//
+//              if ($general_admins->exists()) {
+//                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
+//              }
+
+                        // $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->where('id', '!=', 276)->whereHas('hubs', function ($query) use ($origin_hub_ids) {
+                        //     $query->whereIn('hub_id', $origin_hub_ids);
+                        // });
+
+                        // if ($related_admins->exists()) {
+                        //     $bcc = array_merge($bcc, $related_admins->pluck('email')->toArray());
+                        // }
+
+                        // if (empty($bcc)) {
+                        //     $bcc = NULL;
+                        // }
+
+                        // self::email($subject, $body, $to, NULL, $bcc);
+                        self::email($subject, $body, $to, NULL, NULL);
+
+                        $subject = $original_subject;
+                        $body = $original_body;
+                    }
+                }
+                else if ($id == 167) {
+                    $user_id = $reference_1_id['user_id'];
+                    $status_code = $reference_1_id['status_code'];
+                    $link = $reference_1_id['url'];
+                    $message = $reference_1_id['message'];
+
+                    if (strpos($body, '[status_code]') !== FALSE) {
+                        $body = str_replace('[status_code]', $status_code, $body);
+                    }
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    if (strpos($body, '[message]') !== FALSE) {
+                        $body = str_replace('[message]', $message, $body);
+                    }
+                    $to = array();
+                    $cc = array();
+                    $shipper = User::find($user_id);
+                    $sales_person = SalePersonTag::where('user_id', $user_id)->where('status', 0)->first();
+
+                    $cc[] = Admin::find($sales_person->admin_id)->email;
+
+                    if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
+                        $to = ShipperNotificationEmail::where('user_id', $shipper->id)->pluck('email')->toArray();
+                    } else {
+                        $to = $shipper->email;
+                    }
+                    self::email($subject, $body, $to, $cc);
                 }
             }
         }
     }
     static public function custom($type, $subject, $body, $to) {
-      if ($type == 1) {
-        self::email($subject, $body, $to);
-      }
+        if ($type == 1) {
+            self::email($subject, $body, $to);
+        }
     }
     static public function custom_sms($body, $to){
         self::sms($body, $to);
