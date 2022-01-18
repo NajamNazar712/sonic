@@ -5495,4 +5495,32 @@ public function sales_incentive()
 
     }
 
+	public function reattempt_percentage_index()
+    {
+        $settings = GlobalSettings::where('type', 'reattempt_percentage');
+        $percentage = '';
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $percentage = $settings->setting_value;
+        }
+
+        return view('admin.settings.return.reattempt_percentage')->with(['percentage' => $percentage]);
+    }
+
+    public function reattempt_percentage_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'reattempt_percentage');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+            $settings->type = 'reattempt_percentage';
+        }
+        $settings->setting_value = $request->reattempt_percentage;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
 }

@@ -709,7 +709,6 @@
                                 @if (session('role_id') == 1 || in_array(245, session('permissions')))
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' + id + ' data-tracking=' + details.tracking_history[0].status_id + '>Intercept</button>';
                                 @endif
-                                console.log(details.dws_image);
                                 if(details.dws_image != null){
                                     shipment += '<a class="btn btn-secondary d-sm-inline-block file mr-1" href="' + details.dws_image + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> DWS File</a>';
                                 }
@@ -1015,7 +1014,7 @@
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
-
+console.log(details.tracking_history);
                                 $.each(details.tracking_history, function (index, history) {
                                     shipment += '<tr>';
                                     shipment += '<td>' + history.date_time + '</td>';

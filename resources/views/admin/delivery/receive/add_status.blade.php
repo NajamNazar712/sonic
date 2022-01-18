@@ -468,6 +468,15 @@
                                     <label class="custom-control-label" for="customRadio14">Refused After Opening The Shipment</label>
                                 </div>
                             </fieldset>
+                            <fieldset>
+                                <div class="custom-control custom-radio">
+                                    <input type="radio" class="custom-control-input cr_radio" name="customRadio" id="customRadio15">
+                                    <label class="custom-control-label" for="customRadio15">Other</label>
+                                </div>
+                            </fieldset>
+                            <fieldset class="d-none">
+                                <textarea name="other_description" class="form-control" id="cr_other_description" cols="30" rows="10"></textarea>
+                            </fieldset>
                         </div>
 
                     </div>
@@ -984,9 +993,15 @@
             $('.cr_radio').on('click', function () {
                 var id = $(this).attr('id');
                 var status = $(this).attr('status');
-                $('#iad_status').val(status);
-                $('#CRUpdate').attr('disabled', false);
+                if(id == 'customRadio15'){
+                    $('#cr_other_description').parent('fieldset').removeClass('d-none');
+                    $('#CRUpdate').attr('disabled', true);
 
+                }else{
+                    $('#cr_other_description').parent('fieldset').addClass('d-none');
+                    $('#iad_status').val(status);
+                    $('#CRUpdate').attr('disabled', false);
+                }
             });
 
 
@@ -1002,6 +1017,18 @@
                    $('#AICUpdate').attr('disabled', true);
                    $('#iad_status').val('');
                }
+            });
+
+            $('#cr_other_description').on('input', function () {
+                var description = $.trim($(this).val());
+                if(description != ''){
+                    $('#CRUpdate').attr('disabled', false);
+                    $('#iad_status').val(description);
+                }
+                if(description == ''){
+                    $('#CRUpdate').attr('disabled', true);
+                    $('#iad_status').val('');
+                }
             });
             var receiving_date_picker;
             $('body').on('select2:select','.reasonSelect .reasonDrop',function (e) {
@@ -1838,27 +1865,81 @@
                                             'password': password,
                                         }
                                     }).done(function (data) {
+                                        console.log(data.status);
                                         if (data.status === 1) {
-                                            UnblockPagePermanently();
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                            location.reload();
-                                        }
-                                        else if(data.status === 2){
                                             var tracking_numbers = '';
                                             var route = '{!! route('admin.tracking.index') !!}';
-                                            if(data.invalid_shipments){
-                                                $.each(data.invalid_shipments, function(index, tracking_number) {
-                                                    tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                            UnblockPagePermanently();
+                                            if(data.first_attempt_shipments.length > 0) {
+                                                $.each(data.first_attempt_shipments, function (index, tracking_number) {
+                                                    tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                                 });
-                                                var html = '<p>Same consignee details found which are already marked as delivered of following Shipment(s):</p><br>';
+                                                var html = '<p>Return Confirmation Pending Cannot be mark on the following shipments due to First Delivery Attempt</p><br>';
                                                 html += tracking_numbers;
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
+                                                    swal({
+                                                        title: 'RCP First Attempt',
+                                                        content: content,
+                                                        icon: 'warning',
+                                                        buttons: {
+                                                            confirm: {
+                                                                text: 'OK',
+                                                                value: null,
+                                                                visible: true,
+                                                                closeModal: true,
+                                                            }
+                                                        },
+                                                        closeOnClickOutside: false,
+                                                        closeOnEsc: false,
+                                                        dangerMode: true
+                                                    }).then(function (confirm) {
+                                                        if (confirm) {
+                                                            location.reload();
+                                                        } else {
+                                                            location.reload();
+                                                        }
+                                                    });
+
+                                            }
+                                            else{
+                                                 toastr.success(data.success, 'Success!', {
+                                                     positionClass: 'toast-bottom-center',
+                                                     containerId: 'toast-bottom-center'
+                                                 });
+                                                 location.reload();
+                                            }
+
+                                        }
+                                        else if(data.status === 2){
+                                            var invalid_shipmet_flag = false;
+                                            var html = '';
+                                            var route = '{!! route('admin.tracking.index') !!}';
+                                            if(data.invalid_shipments){
+                                                var tracking_numbers = '';
+                                                $.each(data.invalid_shipments, function(index, tracking_number) {
+                                                    tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                                });
+                                                 html += '<p>Same consignee details found which are already marked as delivered of following Shipment(s):</p><br>';
+                                                html += tracking_numbers;
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                invalid_shipmet_flag = true;
+                                            }
+                                            if(data.first_attempt_shipments.length > 0) {
+                                                var  fa_tracking_number = '';
+                                                $.each(data.first_attempt_shipments, function (index, tracking_number) {
+                                                    fa_tracking_number += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
+                                                });
+                                                 html += '<p>Return Confirmation Pending Cannot be mark on the following shipments due to First Delivery Attempt</p><br>';
+                                                html += fa_tracking_number;
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                invalid_shipmet_flag = true;
+                                            }
+                                            if(invalid_shipmet_flag) {
                                                 swal({
-                                                    title: 'Delivered shipment(s) found on same consignee details before.',
+                                                    title: 'RCP First Attempt/Same Consignee Info',
                                                     content: content,
                                                     icon: 'warning',
                                                     buttons: {
@@ -1872,11 +1953,10 @@
                                                     closeOnClickOutside: false,
                                                     closeOnEsc: false,
                                                     dangerMode: true
-                                                }).then(function(confirm) {
+                                                }).then(function (confirm) {
                                                     if (confirm) {
                                                         location.reload();
-                                                    }
-                                                    else{
+                                                    } else {
                                                         location.reload();
                                                     }
                                                 });
