@@ -316,9 +316,11 @@
                         text: 'Pdf is being downloading',
                         icon: 'info',
                         buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
                     });
-                    swal.close();
                     form.submit();
+                    location.reload();
                 }
             });
             $('#attendance_upload_form').validate({
@@ -338,8 +340,9 @@
                         text: 'Pdf is being downloading',
                         icon: 'info',
                         buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
                     });
-
                     form.submit();
                 }
             });
