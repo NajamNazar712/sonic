@@ -317,9 +317,30 @@
                         icon: 'info',
                         buttons: false,
                     });
+                    swal.close();
+                    form.submit();
+                }
+            });
+            $('#attendance_upload_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Pdf is being downloading',
+                        icon: 'info',
+                        buttons: false,
+                    });
 
                     form.submit();
-                    swal.close();
                 }
             });
             var search_date_to = $('#search_form #search_date_to').pickadate({
