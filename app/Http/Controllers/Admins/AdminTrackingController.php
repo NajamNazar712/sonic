@@ -50,7 +50,7 @@ use DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\DwsDetail;
-use App\Http\Models\ShipmentDetail;use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
 class AdminTrackingController extends Controller
