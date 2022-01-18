@@ -996,7 +996,7 @@ class AdminAttendanceController extends Controller
                 $leave++;
             }
             if(!$employee_attendance->clock_in_datetime){
-                if (Carbon::parse($employee_attendance->attendance_date)->format("l") == "SUNDAY"){
+                if (Carbon::parse($employee_attendance->attendance_date)->format("l") == "Sunday"){
                     $remarks = "Sunday";
                 }else{
                     $remarks = "Absent";
@@ -1005,12 +1005,12 @@ class AdminAttendanceController extends Controller
             }else{
                 $date_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("Y-m-d");
                 $time_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
-                $shift = EmployeeShift::find($employee->shift_id);
-                $shift_exists = 0;
-                if ($shift) {
-                    $shift_exists = 1;
+                if($employee_attendance->clock_out_datetime){
+                    $time_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
+                    $date_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("Y-m-d");
                 }
-                if($shift_exists == 1){
+                $shift = EmployeeShift::find($employee->shift_id);
+                if ($shift){
                     $clock_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
                     $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
                     if ($time_diff > $shift->grace_time) {
@@ -1056,14 +1056,14 @@ class AdminAttendanceController extends Controller
                             <td class="color primary border twice" colspan="9"><b>Attendance Summary</b></td>
                         </tr>
                         <tr class="text-left">
-                            <td class="border twice-right">Total : '.$total.'</td>
-                            <td class="border twice-right">Absent : '.$absent.'</td>
-                            <td class="border twice-right">On-Time : '.$ontime.'</td>
+                            <td colspan="3" class="border twice-right">Total : '.$total.'</td>
+                            <td colspan="3" class="border twice-right">Absent : '.$absent.'</td>
+                            <td colspan="3" class="border twice-right">On-Time : '.$ontime.'</td>
                         </tr>
                         <tr class="text-left">
-                            <td class="border twice-right">Late : '.$late.'</td>
-                            <td class="border twice-right">Early Departure : '.$earlyout.'</td>
-                            <td class="border twice-right">Leave : '.$leave.'</td>
+                            <td colspan="3" class="border twice-right">Late : '.$late.'</td>
+                            <td colspan="3" class="border twice-right">Early Departure : '.$earlyout.'</td>
+                            <td colspan="3" class="border twice-right">Leave : '.$leave.'</td>
                         </tr>
                         ';
         $html .= '    
