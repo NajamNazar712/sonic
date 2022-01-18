@@ -31,7 +31,7 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
-                                            <a href="#" class="btn btn-primary generate_pdf"><i class="la la-download"></i> Generate PDF</a>
+                                            <a href="javascript:void()" class="btn btn-primary generate_pdf"><i class="la la-download"></i> Generate PDF</a>
                                             <a href="{{ asset('file/Employee Attendance Template.xlsx') }}?v=14_09_2021" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                         </div>
                                     </div>
@@ -337,7 +337,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Pdf is being downloading',
+                        text: 'File is being Upload!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

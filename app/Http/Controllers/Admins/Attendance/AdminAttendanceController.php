@@ -660,165 +660,173 @@ class AdminAttendanceController extends Controller
 
     public function attendance_excel_upload(Request $request)
     {
-        Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
-
-            if ($value) {
-                $result = false;
-                if (Admin::where('trax_id', $value)->exists()) {
-                    $result = true;
-                } else {
-                    if (Rider::where('trax_id', $value)->exists()) {
-                        $result = true;
-                    }
-                }
-                if ($result) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
-        $names = [
-            'trax_id' => 'Employee ID',
-            'attendance_date' => 'Attendance Date',
-            'clock_in_datetime' => 'Clock In Datetime',
-            'clock_out_datetime' => 'Clock Out Datetime'
-        ];
-
-        $messages = [
-            'required' => ':attribute is Required.',
-            'integer' => ':attribute must be an Integer.',
-            'exists' => 'Given :attribute is Invalid.',
-            'check_trax_id' => 'Employee id not found!',
-
-        ];
         $rules = [
-            'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
-            'attendance_date' => ['required', 'date_format:Y-m-d'],
-            'clock_in_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
-            'clock_out_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+            'attendance' => ['required', 'mimes:xlx,xlsx'],
         ];
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return back()->with(['error' => "Invalid File Format"]);
+        } else {
+            Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
 
-
-        $fields = [0 => 'trax_id', 1 => 'attendance_date', 2 => 'clock_in_datetime', 3 => 'clock_out_datetime'];
-        if ($file = $request->file('attendance')) {
-            $spreadsheet = IOFactory::createReaderForFile($file);
-            $spreadsheet->setReadDataOnly(true);
-            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-
-            $header = ['Employee ID', 'Attendance Date(yyyy-mm-dd)', 'Clock-in DateTime(yyyy-mm-dd hh:mm:ss)', 'Clock-out DateTime(yyyy-mm-dd hh:mm:ss)'];
-
-            if (isset($spreadsheet)) {
-                $header_correct = true;
-
-                foreach ($spreadsheet[0] as $index => $header_value) {
-                    if ($index == 3) {
-                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
-                        $header_correct = false;
-                        break;
-                    }
-                }
-                if (!$header_correct) {
-                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
-                } else {
-                    unset($spreadsheet[0]);
-                }
-            }
-
-            if (!empty($spreadsheet) || !isset($spreadsheet)) {
-                $rows = array();
-                foreach ($spreadsheet as $spreadsheet_row) {
-                    $row = array();
-
-                    foreach ($spreadsheet_row as $key => $value) {
-                        $row[$fields[$key]] = $value;
-                    }
-
-                    $rows[] = $row;
-                }
-
-                unset($spreadsheet);
-                $errors = array();
-
-                foreach ($rows as $key => $row) {
-                    $row_id = $key + 2;
-
-                    $validate = Validator::make($row, $rules, $messages);
-
-                    $validate->setAttributeNames($names);
-
-                    if ($validate->fails()) {
-                        $errors['Row #' . $row_id] = $validate->errors()->all();
-                    }
-                }
-                if (empty($errors)) {
-                    $updated = 0;
-                    $not_updated = 0;
-                    $latitude = '24.857788594719032';
-                    $longitude = '67.12465366441765';
-                    foreach ($rows as $key => $row) {
-                        $employee = Employee::where('trax_id', $row['trax_id']);
-                        if ($employee->exists()) {
-                            $employee = $employee->first();
-                            $type = $employee->employee_type_id;
-                            if ($type == 1) {
-                                $employee_id = $employee->admin->id;
-                            } else {
-                                $employee_id = $employee->rider->id;
-                            }
-                            $employee_attendance = new EmployeeAttendance();
-                            $employee_attendance->employee_id = $employee_id;
-                            $employee_attendance->employee_type = $type;
-                            $employee_attendance->attendance_date = trim($row['attendance_date']);
-                            $employee_attendance->clock_in_datetime = trim($row['clock_in_datetime']);
-                            $employee_attendance->clock_out_datetime = trim($row['clock_out_datetime']);
-                            $employee_attendance->clock_in_latitude = $latitude;
-                            $employee_attendance->clock_in_longitude = $longitude;
-                            $employee_attendance->clock_out_latitude = $latitude;
-                            $employee_attendance->clock_out_longitude = $longitude;
-                            $employee_attendance->clock_in_location = 2;
-                            $employee_attendance->clock_out_location = 2;
-                            $employee_attendance->save();
-
-                            $clock_in_action = new EmployeeAttendanceActionLog();
-                            $clock_in_action->employee_id = $employee_attendance->employee_id;
-                            $clock_in_action->employee_type = $employee_attendance->employee_type;
-                            $clock_in_action->action_id = 1;
-                            $clock_in_action->action_date = $employee_attendance->clock_in_datetime;
-                            $clock_in_action->attendance_date = $employee_attendance->attendance_date;
-                            $clock_in_action->latitude = $latitude;
-                            $clock_in_action->longitude = $longitude;
-                            $clock_in_action->location_status = 2;
-                            $clock_in_action->save();
-
-                            $clock_out_action = new EmployeeAttendanceActionLog();
-                            $clock_out_action->employee_id = $employee_attendance->employee_id;
-                            $clock_out_action->employee_type = $employee_attendance->employee_type;
-                            $clock_out_action->action_id = 2;
-                            $clock_out_action->action_date = $employee_attendance->clock_out_datetime;
-                            $clock_out_action->attendance_date = $employee_attendance->attendance_date;
-                            $clock_out_action->latitude = $latitude;
-                            $clock_out_action->longitude = $longitude;
-                            $clock_out_action->location_status = 2;
-                            $clock_out_action->save();
-
-                            $updated++;
+                if ($value) {
+                    $result = false;
+                    if (Admin::where('trax_id', $value)->exists()) {
+                        $result = true;
+                    } else {
+                        if (Rider::where('trax_id', $value)->exists()) {
+                            $result = true;
                         }
                     }
-                    $error_msg = '';
-                    if ($not_updated > 1) {
-                        $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
+                    if ($result) {
+                        return true;
+                    } else {
+                        return false;
                     }
-                    return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
-                } else {
-                    $errors = array_map(function ($row, $errors) {
-                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
-                    }, array_keys($errors), $errors);
-                    return redirect()->back()->withErrors($errors);
+                }
+            });
+            $names = [
+                'trax_id' => 'Employee ID',
+                'attendance_date' => 'Attendance Date',
+                'clock_in_datetime' => 'Clock In Datetime',
+                'clock_out_datetime' => 'Clock Out Datetime'
+            ];
+
+            $messages = [
+                'required' => ':attribute is Required.',
+                'integer' => ':attribute must be an Integer.',
+                'exists' => 'Given :attribute is Invalid.',
+                'check_trax_id' => 'Employee id not found!',
+
+            ];
+            $rules = [
+                'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
+                'attendance_date' => ['required', 'date_format:Y-m-d'],
+                'clock_in_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+                'clock_out_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+            ];
+
+
+            $fields = [0 => 'trax_id', 1 => 'attendance_date', 2 => 'clock_in_datetime', 3 => 'clock_out_datetime'];
+            if ($file = $request->file('attendance')) {
+                $spreadsheet = IOFactory::createReaderForFile($file);
+                $spreadsheet->setReadDataOnly(true);
+                $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+                $header = ['Employee ID', 'Attendance Date(yyyy-mm-dd)', 'Clock-in DateTime(yyyy-mm-dd hh:mm:ss)', 'Clock-out DateTime(yyyy-mm-dd hh:mm:ss)'];
+
+                if (isset($spreadsheet)) {
+                    $header_correct = true;
+
+                    foreach ($spreadsheet[0] as $index => $header_value) {
+                        if ($index == 3) {
+                        } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                            $header_correct = false;
+                            break;
+                        }
+                    }
+                    if (!$header_correct) {
+                        return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                    } else {
+                        unset($spreadsheet[0]);
+                    }
                 }
 
-            } else {
-                return redirect()->back()->with('error', 'No Records in File');
+                if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                    $rows = array();
+                    foreach ($spreadsheet as $spreadsheet_row) {
+                        $row = array();
+
+                        foreach ($spreadsheet_row as $key => $value) {
+                            $row[$fields[$key]] = $value;
+                        }
+
+                        $rows[] = $row;
+                    }
+
+                    unset($spreadsheet);
+                    $errors = array();
+
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+
+                        $validate = Validator::make($row, $rules, $messages);
+
+                        $validate->setAttributeNames($names);
+
+                        if ($validate->fails()) {
+                            $errors['Row #' . $row_id] = $validate->errors()->all();
+                        }
+                    }
+                    if (empty($errors)) {
+                        $updated = 0;
+                        $not_updated = 0;
+                        $latitude = '24.857788594719032';
+                        $longitude = '67.12465366441765';
+                        foreach ($rows as $key => $row) {
+                            $employee = Employee::where('trax_id', $row['trax_id']);
+                            if ($employee->exists()) {
+                                $employee = $employee->first();
+                                $type = $employee->employee_type_id;
+                                if ($type == 1) {
+                                    $employee_id = $employee->admin->id;
+                                } else {
+                                    $employee_id = $employee->rider->id;
+                                }
+                                $employee_attendance = new EmployeeAttendance();
+                                $employee_attendance->employee_id = $employee_id;
+                                $employee_attendance->employee_type = $type;
+                                $employee_attendance->attendance_date = trim($row['attendance_date']);
+                                $employee_attendance->clock_in_datetime = trim($row['clock_in_datetime']);
+                                $employee_attendance->clock_out_datetime = trim($row['clock_out_datetime']);
+                                $employee_attendance->clock_in_latitude = $latitude;
+                                $employee_attendance->clock_in_longitude = $longitude;
+                                $employee_attendance->clock_out_latitude = $latitude;
+                                $employee_attendance->clock_out_longitude = $longitude;
+                                $employee_attendance->clock_in_location = 2;
+                                $employee_attendance->clock_out_location = 2;
+                                $employee_attendance->save();
+
+                                $clock_in_action = new EmployeeAttendanceActionLog();
+                                $clock_in_action->employee_id = $employee_attendance->employee_id;
+                                $clock_in_action->employee_type = $employee_attendance->employee_type;
+                                $clock_in_action->action_id = 1;
+                                $clock_in_action->action_date = $employee_attendance->clock_in_datetime;
+                                $clock_in_action->attendance_date = $employee_attendance->attendance_date;
+                                $clock_in_action->latitude = $latitude;
+                                $clock_in_action->longitude = $longitude;
+                                $clock_in_action->location_status = 2;
+                                $clock_in_action->save();
+
+                                $clock_out_action = new EmployeeAttendanceActionLog();
+                                $clock_out_action->employee_id = $employee_attendance->employee_id;
+                                $clock_out_action->employee_type = $employee_attendance->employee_type;
+                                $clock_out_action->action_id = 2;
+                                $clock_out_action->action_date = $employee_attendance->clock_out_datetime;
+                                $clock_out_action->attendance_date = $employee_attendance->attendance_date;
+                                $clock_out_action->latitude = $latitude;
+                                $clock_out_action->longitude = $longitude;
+                                $clock_out_action->location_status = 2;
+                                $clock_out_action->save();
+
+                                $updated++;
+                            }
+                        }
+                        $error_msg = '';
+                        if ($not_updated > 1) {
+                            $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
+                        }
+                        return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
+                    } else {
+                        $errors = array_map(function ($row, $errors) {
+                            return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                        }, array_keys($errors), $errors);
+                        return redirect()->back()->withErrors($errors);
+                    }
+
+                } else {
+                    return redirect()->back()->with('error', 'No Records in File');
+                }
             }
         }
 
