@@ -311,7 +311,7 @@
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                    swal({
+                    let swalAlert = swal({
                         title: 'Please Wait!',
                         text: 'Pdf is being downloading',
                         icon: 'info',
@@ -320,7 +320,7 @@
                         closeOnEsc: false
                     });
                     form.submit();
-                    location.reload();
+                    swalAlert.close();
                 }
             });
             $('#attendance_upload_form').validate({
