@@ -987,7 +987,7 @@ class AdminTrackingController extends Controller
                         }
                         foreach ($shipment->shipment_journey as $journey) {
                             $journey_details = array();
-
+                            $journey_details['image_audio_location'] = '';
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             $journey_details['status'] = $journey->shipment_status_shipper->name;
                             $journey_details['shipper_status_id'] = $journey->shipment_status_shipper->id;
