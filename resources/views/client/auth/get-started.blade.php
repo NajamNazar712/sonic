@@ -188,6 +188,8 @@
 <script src="{{asset('app-assets/js/core/app-menu.js')}}" ></script>
 <script src="{{asset('app-assets/js/core/app.js')}}" ></script>
 <!-- END MODERN JS-->
+<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+
 <!-- BEGIN PAGE LEVEL JS-->
 <script src="{{asset('app-assets/js/scripts/forms/form-login-register.js')}}" ></script>
 <!-- END PAGE LEVEL JS-->
@@ -197,7 +199,7 @@
 <script type="text/javascript">
 
     $(document).ready(function (){
-
+        $("input[name='phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $('#city').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder:'Select City',
