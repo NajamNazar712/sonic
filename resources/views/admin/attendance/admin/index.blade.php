@@ -353,7 +353,7 @@
             var pdf_date_from = $('#generate_pdf_form #pdf_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: "{{Carbon::now()}}",
+                max: "{{ Carbon\Carbon::today() }}",
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
@@ -368,7 +368,7 @@
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
-                max: "{{Carbon::now()}}",
+                max: "{{ Carbon\Carbon::today() }}",
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
