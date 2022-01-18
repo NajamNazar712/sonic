@@ -313,7 +313,7 @@
                     form.submit();
                     form.reset();
                     $('#pdf_trax_id').trigger('change');
-                    $(form).find('button[type=submit]').attr('disabled', '');
+                    $(form).find('button[type=submit]').attr('disabled', false);
                     $('#generateAttendancePdf').modal('hide');
                 }
             });
