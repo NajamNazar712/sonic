@@ -1022,10 +1022,10 @@ class AdminTrackingController extends Controller
                                 $rider_return_deliveries = RiderReturnDelivery::where('shipment_id', $shipment->id)->where('return_note_id', $journey->reference_1_id)->where('rider_status_id', $journey->shipper_status_id)->where('rider_status_reason_id', $journey->status_reason_id);
                                 if ($rider_return_deliveries->exists()) {
                                     $rider_return_deliveries = $rider_return_deliveries->get()->first();
-                                    if ($rider_return_deliveries->pod_image != null) {
-                                        $exists = Storage::disk('public')->exists($rider_return_deliveries->pod_image);
+                                    if ($rider_return_deliveries->picture_path != null) {
+                                        $exists = Storage::disk('public')->exists($rider_return_deliveries->picture_path);
                                         if ($exists) {
-                                            $journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_return_deliveries->pod_image)) . '"><i class=><i class="la la-lg la-image"></i></button>';
+                                            $journey_details['image_audio_location'] = '<button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_return_deliveries->picture_path)) . '"><i class=><i class="la la-lg la-image"></i></button>';
                                         }
                                     }
                                     if ($rider_return_deliveries->audio_path != null) {
