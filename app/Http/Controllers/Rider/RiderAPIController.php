@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\AdminAPIController;
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Models\Admin\Admin;
@@ -23,6 +24,7 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\AppNotification;
 use App\Http\Models\BanksList;
@@ -3511,7 +3513,7 @@ class RiderAPIController extends Controller
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
             if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
-                if (!Shipment::where('id', $request->shipment_id)->whereIn('shipper_status_id', [14, 30, 36, 37])->exists()) {
+                if (!Shipment::where('id', $request->shipment_id)->whereIn('shipper_status_id', [14, 30, 36, 37, 20, 52, 13])->exists()) {
                     if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
                         $shipments = ShipmentsJourney::select('shipper_status_id', 'status_reason_id')
                             ->where('reference_1_id', $request->delivery_note_id)
@@ -3645,7 +3647,7 @@ class RiderAPIController extends Controller
                         }
                     }
                 } else {
-                    $message = 'Shipment is already marked as Delivered';
+                    $message = 'Shipment status is already marked';
                 }
             } else {
                 $message = 'Shipment is already marked as Delivered';
@@ -8338,6 +8340,8 @@ class RiderAPIController extends Controller
                         }
 
                         if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
+                            
+
                             if ($shipment->booking_type_id == 2) {
                                 $shipment->shipper_status_id = 30;
                                 $shipment->consignee_status_id = 30;
@@ -8888,6 +8892,8 @@ class RiderAPIController extends Controller
                         }
 
                         if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
+
+                            
                             if ($request->distribution == 1) {
                                 if ($request->has('distribution_items_list')) {
                                     $distribution_items = json_decode($request->distribution_items_list, true);
