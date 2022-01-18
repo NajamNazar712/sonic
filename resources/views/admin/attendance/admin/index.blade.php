@@ -310,9 +310,9 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    let swalAlert = SweetAlert.swal;
 
-                    let swalAlert = swal({
-                        title: 'Please Wait!',
+                    swalAlert({
                         text: 'Pdf is being downloading',
                         icon: 'info',
                         buttons: false,
