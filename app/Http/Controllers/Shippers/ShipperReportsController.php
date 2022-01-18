@@ -38,11 +38,11 @@ class ShipperReportsController extends Controller
     }
     public function sales_list(Request $request)
     {
-        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110])) {
+        // if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110])) {
             $connection = 'reports';
-        } else {
-            $connection = 'mysql';
-        }
+        // } else {
+        //     $connection = 'mysql';
+        // }
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
@@ -87,6 +87,16 @@ class ShipperReportsController extends Controller
                         DB::connection($connection)->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
             })
             ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
+            ->leftJoin('pending_invoice_shipments as pis', function ($join) use ($connection) {
+                $join->on('pis.shipment_id', '=', 'shipments.id')
+                    ->where('pis.id','=',
+                        DB::connection($connection)->raw('(select max(id) from pending_invoice_shipments where pending_invoice_shipments.shipment_id = shipments.id and pending_invoice_shipments.type != 2)'));
+            })
+            ->leftJoin('invoice_shipments as is', function ($join) use ($connection) {
+                $join->on('is.shipment_id', '=', 'shipments.id')
+                    ->where('is.id','=',
+                        DB::connection($connection)->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id and invoice_shipments.type != 2)'));
+            })
             ->leftJoin('shipment_order_dates as sod', 'shipments.id', '=', 'sod.shipment_id')
             ->leftJoin('shipment_shipper_references as ssr', 'shipments.id', '=', 'ssr.shipment_id');
 
@@ -109,7 +119,7 @@ class ShipperReportsController extends Controller
             });
         }
 
-        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name', 'si.description as description', 'shipments.tracking_number', 'shipments.order_id as order_id', 'u.id as account_no', 'u.name as shipper', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'dps.amount as d_collection_amount', 'sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status')
+        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name', 'si.description as description', 'shipments.tracking_number', 'shipments.order_id as order_id', 'u.id as account_no', 'u.name as shipper', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.charges as p_total_charges','pps.amount as p_total_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'dps.amount as d_collection_amount', 'sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status', 'shipments.chargeable_weight', 'shipments.insurance_charges', 'shipments.packaging_material_charges', 'shipments.fuel_surcharge', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.nsa_osa_charges', 'shipments.gst', 'shipments.intercept_charges', 'shipments.packaging_charges', 'pps.payable as p_net_payable', 'dps.charges as d_total_charges','dps.payable as d_net_payable', 'pps.gst as p_gst', 'dps.gst as d_gst','u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst')
             ->whereNotIn('shipments.shipper_status_id', [1, 17]);
 
         if (session('user_type') == 2) {
@@ -131,12 +141,11 @@ class ShipperReportsController extends Controller
             ->editColumn('s_collection_amount', function ($shipment) {
                 return number_format($shipment->s_collection_amount);
             })
-
-            ->editColumn('d_collection_amount', function ($shipment) {
-                return number_format($shipment->d_collection_amount);
-            })
             ->editColumn('weight_charges', function ($shipment) {
                 return number_format($shipment->weight_charges, 2);
+            })
+            ->editColumn('insurance_charges', function($shipment){
+                return number_format($shipment->insurance_charges, 2);
             })
             ->editColumn('cash_handling_charges', function ($shipment) {
                 if ($shipment->dr_status_id == 20) {
@@ -149,16 +158,82 @@ class ShipperReportsController extends Controller
                     }
                 }
             })
-            ->editColumn('p_collection_amount', function ($sale) {
-                $amount = '';
-                if ($sale->p_collection_amount != null) {
-                    $amount = $sale->p_collection_amount;
-                } else if ($sale->d_collection_amount != null) {
-                    $amount = $sale->d_collection_amount;
-                } else {
-                    $amount = $sale->s_collection_amount;
+            ->editColumn('return_charges', function($shipment){
+                if ($shipment->dr_status_id != 20) {
+                    return "-";
                 }
-                return number_format($amount);
+                else {
+                    return number_format($shipment->return_charges, 2);
+                }
+            })
+            ->editColumn('replacement_charges', function($shipment){
+                if ($shipment->dr_status_id == 20) {
+                    return "-";
+                }
+                else {
+                    return number_format($shipment->replacement_charges, 2);
+                }
+            })
+            ->editColumn('try_and_buy_charges', function($shipment){
+                if ($shipment->dr_status_id == 20) {
+                    return "-";
+                }
+                else {
+                    return number_format($shipment->try_and_buy_charges, 2);
+                }
+            })
+            ->editColumn('nsa_osa_charges', function($shipment){
+                return number_format($shipment->nsa_osa_charges, 2);
+            })
+            ->editColumn('packaging_material_charges', function($shipment){
+                return number_format($shipment->packaging_material_charges, 2);
+            })
+            ->editColumn('packaging_charges', function($shipment){
+                return number_format($shipment->packaging_charges, 2);
+            })
+            ->editColumn('intercept_charges', function($shipment){
+                return number_format($shipment->intercept_charges, 2);
+            })
+            ->editColumn('p_total_charges',function($sale){
+                $total = '';
+                if($sale->p_total_charges != null){
+                    $total = $sale->p_total_charges;
+                }else if($sale->d_total_charges != null){
+                    $total = $sale->d_total_charges;
+                }
+                return number_format((float)$total, 2);
+            })
+            ->addColumn('estimated_charges',function($sale){
+                $estimated = '';
+                $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0) + (($sale->intercept_charges != null)? $sale->intercept_charges:0);
+                return number_format((float)$estimated, 2);
+            })
+            ->editColumn('p_net_payable',function($sale){
+                $payable = '';
+                if($sale->p_net_payable != null){
+                    $payable = $sale->p_net_payable;
+                }else if($sale->d_net_payable != null){
+                    $payable = $sale->d_net_payable;
+                }
+                return number_format((float)$payable, 2);
+            })
+            ->editColumn('p_gst',function($sale){
+                $gst = '';
+                if($sale->account_type_id == 1){
+                    if($sale->p_gst != null){
+                        $gst = $sale->p_gst;
+                    }else if($sale->d_gst != null){
+                        $gst = $sale->d_gst;
+                    }
+                }
+                else{
+                    if($sale->pis_gst != null){
+                        $gst = $sale->pis_gst;
+                    }else if($sale->is_gst != null){
+                        $gst = $sale->is_gst;
+                    }
+                }
+                return number_format((float)$gst, 2);
             })
             ->editColumn('delivered_or_returned', function ($sale) {
                 if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {

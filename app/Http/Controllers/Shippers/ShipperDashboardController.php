@@ -208,12 +208,12 @@ class ShipperDashboardController extends Controller
       return view('client.dashboard')->with(['cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories , 'payment_module' => $payment_module]);
     }
     public function orders_list(Request $request) {
-        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110])) {
+        // if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110])) {
             $connection = 'reports';
-        }
-        else {
-            $connection = 'mysql';
-        }
+        // }
+        // else {
+        //     $connection = 'mysql';
+        // }
 
         $count = DB::connection($connection)->table('shipments')->where(function ($query) {
             $query->where('shipments.user_id', session('user_id'))
@@ -237,7 +237,7 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftJoin('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
-            ->select(['u.id as user_id', 'u.name as user_name', 'shipments_journey.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments_journey.shipper_status_id as status_id', 'shipments.booked_by as booked_by', 'bc.name as business_category' ,'pm.mode as payment_module','shipments.tracking_number as tracking']);
+            ->select(['u.id as user_id', 'u.name as user_name', 'shipments_journey.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments_journey.shipper_status_id as status_id', 'shipments.booked_by as booked_by', 'bc.name as business_category' ,'pm.mode as payment_module','shipments.tracking_number as tracking','shipments_journey.reference_1_id as deliverynote']);
 //            ->where('shipments.user_id', session('user_id'))
 //            ->orwhereIn('shipments.user_id', session('sister_users'))
 //            ->groupBy('shipments.id');
@@ -424,7 +424,7 @@ class ShipperDashboardController extends Controller
                     }
                     else
                     {
-                        $images = RiderDelivery::where('shipment_id', $shipments->shipment_id);
+                        $images = RiderDelivery::where('shipment_id', $shipments->shipment_id)->where('delivery_note_id', $shipments->deliverynote)->orderBy('id','desc');
                         if($images->exists()){
                             $images = $images->get()->first();
                             if($images->picture_path != null){
@@ -1565,12 +1565,12 @@ class ShipperDashboardController extends Controller
     }
 
     public function quick_search_list(Request $request) {
-        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110])) {
+        // if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110])) {
             $connection = 'reports';
-        }
-        else {
-            $connection = 'mysql';
-        }
+        // }
+        // else {
+        //     $connection = 'mysql';
+        // }
 
         $date = Carbon::now()->subMonths(6)->startOfDay()->toDateTimeString();
 

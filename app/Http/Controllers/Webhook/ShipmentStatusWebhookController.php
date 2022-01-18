@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Webhook;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
@@ -26,7 +27,6 @@ class ShipmentStatusWebhookController extends Controller
         if($subscriber->exists()){
             $subscriber = $subscriber->first();
             $data = array();
-
             $data['user_id'] = $user_id;
             $data['tracking_number'] = $shipment->tracking_number;
             $status = ShipmentStatusesForShipperWebhook::where('user_id',$user_id)->where('status_id',$shipper_status_id);
@@ -49,6 +49,8 @@ class ShipmentStatusWebhookController extends Controller
     static public function webhook_dispatch($url, $user_id, $tracking_number, $status, $date){
         $attempts = 5;
         $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 3, 'timeout' => 3]);
+
+        $notification_data = ['user_id' => $user_id, 'url' => $url];
         for($i = 0; $i < $attempts; $i++){
             try{
 
@@ -60,18 +62,39 @@ class ShipmentStatusWebhookController extends Controller
                     ]
                 ]);
                 $status_code = $response->getStatusCode();
-                if ($status_code != 200) {
-                    if($i == 4){
-                        ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
-                        break;
-                    }
-                    continue;
+
+                if (in_array($status_code, [200, 201, 202, 204])) {
+                    break;
                 }
-                break;
+
             }
-            catch(RequestException $e){
+            catch (\GuzzleHttp\Exception\ConnectException $e) {
+                // log the error here
+
+                $res = $e->getMessage();
+                $status_code = 404;
+                $notification_data['status_code'] = $status_code;
+                $notification_data['message'] = $res;
+                WebhookLogController::shipment_status_log($user_id, $status_code, $res);
+
                 if($i == 4){
                     ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
+                    NotificationsController::send(167, $notification_data);
+                    break;
+                }
+                continue;
+            }
+            catch(RequestException $e){
+                $status_code = 400;
+                $res = $e->getMessage();
+
+                $notification_data['status_code'] = $status_code;
+                $notification_data['message'] = $res;
+                WebhookLogController::shipment_status_log($user_id, $status_code, $res);
+
+                if($i == 4){
+                    ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
+                    NotificationsController::send(167, $notification_data);
                     break;
                 }
                 continue;

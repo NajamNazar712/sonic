@@ -31,6 +31,7 @@
                                     <th class="border-primary border-darken-1" >Updated At</th>
                                     <th class="border-primary border-darken-1" >Location</th>
                                     <th class="border-primary border-darken-1" >Hub Location</th>
+                                    <th class="border-primary border-darken-1" >OSA</th>
                                     <th class="border-primary border-darken-1" >Address</th>
                                     <th class="border-primary border-darken-1" ></th>
                                 </tr>
@@ -67,6 +68,24 @@
                             <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Yes</button>
                             <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">Cancel</button>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="osa_modal" data-backdrop="static" role="dialog" aria-labelledby="osa_modal" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="osa_modal_title">OSA List</h4>
+
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -225,6 +244,7 @@
                     {data: 'updated_at', name: 'ch.created_at', class: 'align-middle updated_at'},
                     {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
                     {data: 'hub_location', name: 'hub_location', class: 'align-middle hub_location', orderable: false, searchable: false},
+                    {data: 'osa_list', name: 'osa_list', class: 'align-middle osa_list', orderable: false, searchable: false},
                     {data: 'address', name: 'cities.address', class: 'align-middle address'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
@@ -418,7 +438,41 @@
                 });
             }
         });
+        $('body').on('click','#datatable tbody tr td.osa_list button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#osa_modal .modal-body').html('');
+                $('#osa_modal').modal('show');
 
+                $.ajax({
+                    url: '{!! route('admin.management.city.osa_list') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'city_id': id
+                    }
+                })
+                .done(function(data) {
+                    console.log(data);
+                    if (data) {
+
+                        var html = '<table class="table">';
+                            html += '<thead><tr><th>S.No</th><th>OSA Area</th><th>OSA Charges</th></tr></thead><tbody>';
+                            var counter = 1;
+                            $.each(data.osa_list, function(index, osa) {
+                              
+    
+                                html += '<tr>';
+                                html += '<td>'+ counter +'</td>';
+                                html += '<td>'+osa.osa_name+'</td>';
+                                html += '<td>'+osa.osa_rate+'</td>';
+                                html += '</tr>';
+                                counter++;
+                            });
+                            html += '</tbody></table>';
+                        $('#osa_modal .modal-body').html(html);
+                    }
+                });
+            });
         $('body').on('click','.deactivate',function (e) {
             var id = $(this).data('target-id');
             var rel = $(this).attr('rel');
