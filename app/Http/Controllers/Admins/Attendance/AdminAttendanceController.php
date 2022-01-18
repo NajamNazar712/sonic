@@ -832,6 +832,22 @@ class AdminAttendanceController extends Controller
         $from = Carbon::parse($request->pdf_date_from_formatted)->format('Y-m-d 00:00:00');
         $to = Carbon::parse($request->pdf_date_to_formatted)->format('Y-m-d 23:59:59');
 
+        $leave = 0;
+        $absent = 0;
+        $late = 0;
+        $earlyout = 0;
+        $overtime = 0;
+        $ontime = 0;
+
+        $date_in = '';
+        $time_in = '';
+        $time_out = '';
+        $date_out = '';
+        $working_hours = '';
+        $early_departure = '';
+        $late_arrival = '';
+        $over_time = '';
+
         $employee = Employee::where('trax_id', $trax_id);
 
         if (!$employee->exists()) {
@@ -971,25 +987,69 @@ class AdminAttendanceController extends Controller
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Remarks</th>;
                         </tr>
                    ';
-        $leave = 0;
-        $absent = 0;
         foreach ($employee_attendances as $employee_attendance){
             $remarks = '';
+            if($employee_attendance->leave_status){
+                $remarks = "Leave";
+                $leave++;
+            }
             if(!$employee_attendance->clock_in_datetime){
-                if($employee_attendance->leave_status){
-                    $remarks = "Leave";
-                    $leave++;
-                }elseif (Carbon::parse($employee_attendance->attendance_date)->format("l") == "SUNDAY"){
+                if (Carbon::parse($employee_attendance->attendance_date)->format("l") == "SUNDAY"){
                     $remarks = "Sunday";
                 }else{
                     $remarks = "Absent";
                     $absent++;
                 }
             }else{
-
+                $date_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("Y-m-d");
+                $time_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
+                $shift = EmployeeShift::find($employee->shift_id);
+                $shift_exists = 0;
+                if ($shift) {
+                    $shift = $shift->first();
+                    $shift_exists = 1;
+                }
+                if($shift_exists == 1){
+                    $clock_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
+                    $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                    if ($time_diff > $shift->grace_time) {
+                        $remarks = 'Late';
+                        $late++;
+                        $late_arrival = Carbon::parse($clock_in)->diff(Carbon::parse($shift->start_time));
+                    }else{
+                        $remarks = 'OnTime';
+                        $ontime++;
+                    }
+                    if($employee_attendance->clock_out_datetime){
+                        $clock_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
+                        $time_diff_out = Carbon::parse($clock_out)->diffInMinutes(Carbon::parse($shift->end_time));
+                        $working_hours = Carbon::parse($employee_attendance->clock_out_datetime)->diff(Carbon::parse($employee_attendance->clock_in_datetime));
+                        $time_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
+                        $date_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("Y-m-d");
+                        if($time_diff_out < 0){
+                            $remarks = 'Early Out';
+                            $earlyout++;
+                            $early_departure = $time_out->diff(Carbon::parse($shift->end_time));
+                        } elseif ($time_diff_out > 0){
+                            $remarks = 'Over-Time';
+                            $overtime++;
+                            $over_time = $time_out->diff(Carbon::parse($shift->end_time));
+                        }else{
+                            $remarks = 'Over-Time';
+                        }
+                    }
+                }
             }
             $html .= '<tr>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employee_attendance->attendance_date . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $date_in . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $time_in . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $date_out . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $time_out . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $working_hours . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $late_arrival . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $early_departure . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $over_time . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td>';
         }
         $html .= '    
                       </tbody>
@@ -1001,7 +1061,6 @@ class AdminAttendanceController extends Controller
         $pdf = SnappyPDF::loadHTML($html);
         $filename = 'Attendance_' . $trax_id . '.pdf';
         return $pdf->download($filename);
-
     }
 
 
