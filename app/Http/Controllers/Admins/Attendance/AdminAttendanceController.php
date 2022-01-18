@@ -1022,7 +1022,7 @@ class AdminAttendanceController extends Controller
                     if($employee_attendance->clock_out_datetime){
                         $clock_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
                         $out_interval = Carbon::parse($clock_out)->diff(Carbon::parse($shift->end_time));
-                        $time_diff_out = $out_interval->format('%r%a');
+                        $time_diff_out = (int)$out_interval->format('%r%a');
                         $working_hours = Carbon::parse($employee_attendance->clock_out_datetime)->diff(Carbon::parse($employee_attendance->clock_in_datetime))->format('%H:%I:%S');
                         $time_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
                         $date_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("Y-m-d");
