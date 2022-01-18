@@ -62,6 +62,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentOtp;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -860,6 +861,16 @@ class DeliveryController extends Controller
 
                     if($notifications[$index]) {
                         $shipment_obj = Shipment::find($shipment);
+                        $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
+                        if($shipment_otp->exists()){
+                            $shipment_otp = $shipment_otp->first();
+                        }else{
+                            $otp = mt_rand(100000, 999999);
+                            $shipment_otp = new ShipmentOtp();
+                            $shipment_otp->shipment_id = $shipment;
+                            $shipment_otp->otp = $otp;
+                            $shipment_otp->save();
+                        }
                         if($shipment_obj->amount == 0){
                             //English
                             NotificationsController::send(132, $note->id, $shipment);
@@ -2678,7 +2689,7 @@ class DeliveryController extends Controller
             ->leftjoin('consignee_locations as pcls', 'pcls.id', '=', 'csl.previous_location_id')
             ->leftjoin('consignee_locations as ccls', 'ccls.id', '=', 'csl.current_location_id')
             ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->select(['riders.name as rider_name','delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong', 'rds.ccd_image as ccd_image'])
+            ->select(['riders.name as rider_name','delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong', 'rds.ccd_image as ccd_image', 'rds.otp_entered as otp_entered'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -2916,6 +2927,13 @@ class DeliveryController extends Controller
                     return '-';
                 }
 
+            })
+            ->addColumn('otp_entered', function ($deliveries) {
+                if ($deliveries->otp_entered != null) {
+                    return ($deliveries->otp_entered == 1) ? "Yes" : "No";
+                } else {
+                    return '-';
+                }
             })
             ->make(true);
     }
@@ -7364,6 +7382,24 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $shipment->consignee_status_id = 5;
                     $shipment->save();
                     ShipmentsJourneyController::add($shipment->id, 5, 5, NULL, NULL, NULL, Auth::id(), $delivery_note_id, $delivery_note->rider_id);
+
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
+                    if(!$shipment_otp->exists()){
+                        $otp = mt_rand(100000, 999999);
+                        $shipment_otp = new ShipmentOtp();
+                        $shipment_otp->shipment_id = $shipment->id;
+                        $shipment_otp->otp = $otp;
+                        $shipment_otp->save();
+                    }
+                    if($shipment->amount == 0){
+                        //English
+                        NotificationsController::send(132, $delivery_note_id, $shipment->id);
+                        //Urdu
+                        NotificationsController::send(135, $delivery_note_id, $shipment->id);
+                    }else{
+                        NotificationsController::send(12, $delivery_note_id, $shipment->id);
+                    }
+
                     return response()->json(['status' => 0, 'success' => 'Shipments Added']);
                 }
         }

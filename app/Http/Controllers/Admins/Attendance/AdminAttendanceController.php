@@ -11,8 +11,10 @@ use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Cassandra\Session;
 use Illuminate\Http\Request;
@@ -20,6 +22,8 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Component\VarDumper\Cloner\Data;
 use Yajra\Datatables\Datatables;
 
@@ -652,6 +656,426 @@ class AdminAttendanceController extends Controller
                 }
             });
         return $datatable->make(true);
+    }
+
+    public function attendance_excel_upload(Request $request)
+    {
+        Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
+
+            if ($value) {
+                $result = false;
+                if (Admin::where('trax_id', $value)->exists()) {
+                    $result = true;
+                } else {
+                    if (Rider::where('trax_id', $value)->exists()) {
+                        $result = true;
+                    }
+                }
+                if ($result) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+        $names = [
+            'trax_id' => 'Employee ID',
+            'attendance_date' => 'Attendance Date',
+            'clock_in_datetime' => 'Clock In Datetime',
+            'clock_out_datetime' => 'Clock Out Datetime'
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'exists' => 'Given :attribute is Invalid.',
+            'check_trax_id' => 'Employee id not found!',
+
+        ];
+        $rules = [
+            'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
+            'attendance_date' => ['required', 'date_format:Y-m-d'],
+            'clock_in_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+            'clock_out_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+        ];
+
+
+        $fields = [0 => 'trax_id', 1 => 'attendance_date', 2 => 'clock_in_datetime', 3 => 'clock_out_datetime'];
+        if ($file = $request->file('attendance')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Employee ID', 'Attendance Date(yyyy-mm-dd)', 'Clock-in DateTime(yyyy-mm-dd hh:mm:ss)', 'Clock-out DateTime(yyyy-mm-dd hh:mm:ss)'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = true;
+
+                foreach ($spreadsheet[0] as $index => $header_value) {
+                    if ($index == 3) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = false;
+                        break;
+                    }
+                }
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+                $errors = array();
+
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+
+                    $validate = Validator::make($row, $rules, $messages);
+
+                    $validate->setAttributeNames($names);
+
+                    if ($validate->fails()) {
+                        $errors['Row #' . $row_id] = $validate->errors()->all();
+                    }
+                }
+                if (empty($errors)) {
+                    $updated = 0;
+                    $not_updated = 0;
+                    $latitude = '24.857788594719032';
+                    $longitude = '67.12465366441765';
+                    foreach ($rows as $key => $row) {
+                        $employee = Employee::where('trax_id', $row['trax_id']);
+                        if ($employee->exists()) {
+                            $employee = $employee->first();
+                            $type = $employee->employee_type_id;
+                            if ($type == 1) {
+                                $employee_id = $employee->admin->id;
+                            } else {
+                                $employee_id = $employee->rider->id;
+                            }
+                            $employee_attendance = new EmployeeAttendance();
+                            $employee_attendance->employee_id = $employee_id;
+                            $employee_attendance->employee_type = $type;
+                            $employee_attendance->attendance_date = trim($row['attendance_date']);
+                            $employee_attendance->clock_in_datetime = trim($row['clock_in_datetime']);
+                            $employee_attendance->clock_out_datetime = trim($row['clock_out_datetime']);
+                            $employee_attendance->clock_in_latitude = $latitude;
+                            $employee_attendance->clock_in_longitude = $longitude;
+                            $employee_attendance->clock_out_latitude = $latitude;
+                            $employee_attendance->clock_out_longitude = $longitude;
+                            $employee_attendance->clock_in_location = 2;
+                            $employee_attendance->clock_out_location = 2;
+                            $employee_attendance->save();
+
+                            $clock_in_action = new EmployeeAttendanceActionLog();
+                            $clock_in_action->employee_id = $employee_attendance->employee_id;
+                            $clock_in_action->employee_type = $employee_attendance->employee_type;
+                            $clock_in_action->action_id = 1;
+                            $clock_in_action->action_date = $employee_attendance->clock_in_datetime;
+                            $clock_in_action->attendance_date = $employee_attendance->attendance_date;
+                            $clock_in_action->latitude = $latitude;
+                            $clock_in_action->longitude = $longitude;
+                            $clock_in_action->location_status = 2;
+                            $clock_in_action->save();
+
+                            $clock_out_action = new EmployeeAttendanceActionLog();
+                            $clock_out_action->employee_id = $employee_attendance->employee_id;
+                            $clock_out_action->employee_type = $employee_attendance->employee_type;
+                            $clock_out_action->action_id = 2;
+                            $clock_out_action->action_date = $employee_attendance->clock_out_datetime;
+                            $clock_out_action->attendance_date = $employee_attendance->attendance_date;
+                            $clock_out_action->latitude = $latitude;
+                            $clock_out_action->longitude = $longitude;
+                            $clock_out_action->location_status = 2;
+                            $clock_out_action->save();
+
+                            $updated++;
+                        }
+                    }
+                    $error_msg = '';
+                    if ($not_updated > 1) {
+                        $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
+                    }
+                    return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
+                } else {
+                    $errors = array_map(function ($row, $errors) {
+                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                    }, array_keys($errors), $errors);
+                    return redirect()->back()->withErrors($errors);
+                }
+
+            } else {
+                return redirect()->back()->with('error', 'No Records in File');
+            }
+        }
+
+    }
+
+    public function attendance_print(Request $request)
+    {
+        $trax_id = $request->pdf_trax_id;
+        $date_from = $request->pdf_date_from;
+        $date_to = $request->pdf_date_to;
+        $from = Carbon::parse($request->pdf_date_from_formatted)->format('Y-m-d 00:00:00');
+        $to = Carbon::parse($request->pdf_date_to_formatted)->format('Y-m-d 23:59:59');
+
+        $leave = 0;
+        $absent = 0;
+        $late = 0;
+        $earlyout = 0;
+        $overtime = 0;
+        $ontime = 0;
+        $total = 0;
+
+        $date_in = '';
+        $time_in = '';
+        $time_out = '';
+        $date_out = '';
+        $working_hours = '';
+        $early_departure = '';
+        $late_arrival = '';
+        $over_time = '';
+
+        $employee = Employee::where('trax_id', $trax_id);
+
+        if (!$employee->exists()) {
+            return redirect()->back()->with(['status' => 0, 'error' => 'Employee not found!']);
+        }
+        $employee = $employee->first();
+        $type = $employee->employee_type_id;
+        if ($type == 1) {
+            $employee_id = $employee->admin->id;
+        } else {
+            $employee_id = $employee->rider->id;
+        }
+        $employee_attendances = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->whereBetween('attendance_date', [$from, $to]);
+        if(!$employee_attendances->exists()){
+            return redirect()->back()->with(['status' => 0, 'error' => 'Attendance not found!']);
+        }
+        $employee_attendances = $employee_attendances->get();
+        $html = '<!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Attendance</title>
+
+                     <style>
+                     @page {
+                        size: A4 portrait;
+                      }
+                      body {
+                        font-size: 0.95rem !important;
+                        
+                      }
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+                      .border.twice {
+                        border-width: 1px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 1px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 1px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 1px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 1px !important;
+                      }
+
+                      .font-small {
+                        font-size: 0.65rem !important;
+                      }
+                      
+                      .table-borderless td, .table th {
+                        border: none;
+                     }
+                     td{
+                        color: #000;
+                     }
+                    </style>';
+
+        $html .= '</head>
+                  <body>
+                   
+                      <div class="table-responsive">
+                          <table class="table table-borderless mb-0">
+                          
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class=""></td>
+                             </tr>
+                             <tr>
+                                <td class="text-center align-middle"><h2>Trax Online (Pvt.) Ltd</h2></td>
+                             </tr>
+                             <tr>
+                                <td class="text-center align-middle">Monthly Employee Time Sheet PDF</td>
+                             </tr>
+                             <tr>
+                                <td class="text-center align-middle">'.$date_from.' TO '.$date_to.'</td>
+                             </tr>
+                             </tbody>
+                         </table>';
+
+        $html .= '<table class="table border table-sm">
+                    
+                    <tbody>
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="9"><b>Employee Information</b></td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Employee ID</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->trax_id . '</td>
+                            <td colspan="2" class="border twice-right">Location</td>
+                            <td colspan="3"  class="border twice-right">' . $employee->city->name . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Employee Name</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->name . '</td>
+                            <td colspan="2" class="border twice-right">Department</td>
+                            <td colspan="3"  class="border twice-right">' . $employee->department->name . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Designation</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->designation->name . '</td>
+                            <td colspan="2"  class="border twice-right">Employee Type</td>
+                            <td colspan="3"  class="border twice-right">' . $employee->employee_type->name . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Shift</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->shift->name . '</td>
+                        </tr>
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="9"><b>Attandence Details</b></td>
+                        </tr>
+                        <tr>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date In</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Time In</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date Out</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Time Out</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Work Hours</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Late Arrival</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Early Departure</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">OverTime</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Remarks</th>;
+                        </tr>
+                   ';
+        foreach ($employee_attendances as $employee_attendance){
+            $total++;
+            $remarks = '';
+            if($employee_attendance->leave_status){
+                $remarks = "Leave";
+                $leave++;
+            }
+            if(!$employee_attendance->clock_in_datetime){
+                if (Carbon::parse($employee_attendance->attendance_date)->format("l") == "Sunday"){
+                    $remarks = "Sunday";
+                }else{
+                    $remarks = "Absent";
+                    $absent++;
+                }
+            }else{
+                $date_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("Y-m-d");
+                $time_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
+                if($employee_attendance->clock_out_datetime){
+                    $time_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
+                    $date_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("Y-m-d");
+                }
+                $shift = EmployeeShift::find($employee->shift_id);
+                if ($shift){
+                    $clock_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
+                    $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                    if ($time_diff > $shift->grace_time) {
+                        $remarks = 'Late';
+                        $late++;
+                        $late_arrival = Carbon::parse($clock_in)->diff(Carbon::parse($shift->start_time))->format('%H:%I:%S');
+                    }else{
+                        $remarks = 'OnTime';
+                        $ontime++;
+                    }
+                    if($employee_attendance->clock_out_datetime){
+                        $clock_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
+                        $time_diff_out = Carbon::parse($shift->end_time)->diffInMinutes(Carbon::parse($clock_out), false);
+                        $working_hours = Carbon::parse($employee_attendance->clock_out_datetime)->diff(Carbon::parse($employee_attendance->clock_in_datetime))->format('%H:%I:%S');
+                        $time_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
+                        $date_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("Y-m-d");
+                        if($time_diff_out < 0){
+                            $remarks .= ' - Early Out';
+                            $earlyout++;
+                            $early_departure = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
+                        } elseif ($time_diff_out > 0){
+                            $remarks .= ' - Over-Time';
+                            $overtime++;
+                            $over_time = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
+                        } else {
+                            $remarks .= ' - On-Time';
+                        }
+                    }
+                }
+            }
+            $html .= '<tr>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $date_in . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $time_in . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $date_out . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $time_out . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $working_hours . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $late_arrival . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $early_departure . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $over_time . '</td>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td>';
+        }
+        $html.='<tr class="text-center">
+                            <td class="color primary border twice" colspan="9"><b>Attendance Summary</b></td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="3" class="border twice-right">Total : '.$total.'</td>
+                            <td colspan="3" class="border twice-right">Absent : '.$absent.'</td>
+                            <td colspan="3" class="border twice-right">On-Time : '.$ontime.'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="3" class="border twice-right">Late : '.$late.'</td>
+                            <td colspan="3" class="border twice-right">Early Departure : '.$earlyout.'</td>
+                            <td colspan="3" class="border twice-right">Leave : '.$leave.'</td>
+                        </tr>
+                        ';
+        $html .= '    
+                      </tbody>
+                      </table>
+                      </div>
+                      </body>
+                      </html>';
+
+        $pdf = SnappyPDF::loadHTML($html);
+        $filename = 'Attendance_' . $trax_id . '.pdf';
+        return $pdf->download($filename);
     }
 
 
