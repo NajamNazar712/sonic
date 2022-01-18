@@ -6779,7 +6779,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[sales_person_contact]', $sales_person->phone_number, $body);
                         }
 
-                        $link = '<div style="margin-top: 20px"><a href="' . $route . '" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Continue to Registation</a></div>';
+                        $link = '<div style="margin-top: 20px"><a href="' . $route . '" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Click To Register</a></div>';
 
                         if (strpos($body, '[link]') !== FALSE) {
                             $body = str_replace('[link]', $link, $body);
@@ -6788,7 +6788,7 @@ class NotificationsController extends Controller
 
                         $html .= $body . '</p>
                     </div>
-                        <p style="margin-top: 0px; margin-bottom: 0px; vertical-align: middle;">Copyright © ' . now()->year . ' By Trax Logistics, All Rights Reserved.</p>
+                        <p style="margin-top: 0px; margin-bottom: 0px; vertical-align: middle;">Copyright © ' . now()->year . ' By TRAX, All Rights Reserved.</p>
                     </div>';
                         $to = $lead->email_address;
                         self::email($subject, $html, $to);
