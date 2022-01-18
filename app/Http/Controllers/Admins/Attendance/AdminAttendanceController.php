@@ -1028,15 +1028,15 @@ class AdminAttendanceController extends Controller
                         $time_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
                         $date_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("Y-m-d");
                         if($time_diff_out < 0){
-                            $remarks = 'Early Out';
+                            $remarks .= '- Early Out';
                             $earlyout++;
                             $early_departure = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
                         } elseif ($time_diff_out > 0){
-                            $remarks = 'Over-Time';
+                            $remarks .= '- Over-Time';
                             $overtime++;
                             $over_time = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
                         } else {
-                            $remarks = 'On-Time';
+                            $remarks .= '- On-Time';
                         }
                     }
                 }

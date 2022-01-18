@@ -150,7 +150,7 @@
 
                                                 <div class="col mt-1">
                                                     <fieldset class="form-group">
-                                                        <select name="pdf_trax_id" id="pdf_trax_id" class="form-control select2">
+                                                        <select name="pdf_trax_id" id="pdf_trax_id" class="form-control select2" data-rule-required="true" data-msg-required="Select Employee ID">
                                                             @foreach($trax_ids as $trax_id)
                                                                 <option value="{{$trax_id}}">{{$trax_id}}</option>
                                                             @endforeach
@@ -165,7 +165,7 @@
                                                 </span>
                                                         </div>
                                                         <input type="text" name="pdf_date_from"
-                                                               class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                               class="form-control pickadate bg-primary border-primary white rounded-right" data-rule-required="true" data-msg-required="This Field is required"
                                                                id="pdf_date_from" placeholder="Attandance Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                                                     </div>
                                                 </div>
@@ -177,7 +177,7 @@
                                                 </span>
                                                         </div>
                                                         <input type="text" name="pdf_date_to"
-                                                               class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                               class="form-control pickadate bg-primary border-primary white rounded-right" data-rule-required="true" data-msg-required="This Field is required"
                                                                id="pdf_date_to" placeholder="Attandance Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                                                     </div>
                                                 </div>
