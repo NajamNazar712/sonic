@@ -9261,18 +9261,7 @@ class AdminFinanceController extends Controller
                         <div class="col-4">
                             <table class="table table-sm table-bordered border">
                               <tbody>
-                                <tr>
-                                    <td class="color primary"><strong>NTN</strong></td>
-                                    <td>7930679-5</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>SNTN</strong></td>
-                                    <td>S-7930679-5</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>PNTN</strong></td>
-                                    <td>P-7930679-5</td>
-                                </tr>
+                             
                                 <tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
                                     <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
@@ -9281,10 +9270,7 @@ class AdminFinanceController extends Controller
                                     <td class="color primary"><strong>Invoice No.</strong></td>
                                     <td>' . $invoice->invoice_number . ' - ' . $invoice_number_serial_number . '</td>
                                 </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Invoice Date</strong></td>
-                                    <td>' . Carbon::parse($invoice->invoicing_date)->format('Y-m-d') . '</td>
-                                </tr>
+                               
                                 <tr>
                                     <td class="color primary"><strong>Due Date</strong></td>
                                     <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
