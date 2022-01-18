@@ -1015,7 +1015,7 @@ class AdminAttendanceController extends Controller
                     if ($time_diff > $shift->grace_time) {
                         $remarks = 'Late';
                         $late++;
-                        $late_arrival = Carbon::parse($clock_in)->diff(Carbon::parse($shift->start_time))->format("H:i:s");
+                        $late_arrival = Carbon::parse($clock_in)->diff(Carbon::parse($shift->start_time));
                     }else{
                         $remarks = 'OnTime';
                         $ontime++;
@@ -1029,11 +1029,11 @@ class AdminAttendanceController extends Controller
                         if($time_diff_out < 0){
                             $remarks = 'Early Out';
                             $earlyout++;
-                            $early_departure = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format("H:i:s");
+                            $early_departure = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time));
                         } elseif ($time_diff_out > 0){
                             $remarks = 'Over-Time';
                             $overtime++;
-                            $over_time = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format("H:i:s");
+                            $over_time = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time));
                         }else{
                             $remarks = 'On-Time';
                         }
