@@ -310,17 +310,7 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    let swalAlert = SweetAlert.swal;
-
-                    swalAlert({
-                        text: 'Pdf is being downloading',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
                     form.submit();
-                    swalAlert.close();
                 }
             });
             $('#attendance_upload_form').validate({
@@ -363,6 +353,7 @@
             var pdf_date_from = $('#generate_pdf_form #pdf_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: "{{Carbon::now()}}",
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
@@ -377,6 +368,7 @@
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
+                max: "{{Carbon::now()}}",
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
