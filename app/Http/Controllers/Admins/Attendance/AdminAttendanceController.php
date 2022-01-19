@@ -848,15 +848,6 @@ class AdminAttendanceController extends Controller
         $ontime = 0;
         $total = 0;
 
-        $date_in = '';
-        $time_in = '';
-        $time_out = '';
-        $date_out = '';
-        $working_hours = '';
-        $early_departure = '';
-        $late_arrival = '';
-        $over_time = '';
-
         $employee = Employee::where('trax_id', $trax_id);
 
         if (!$employee->exists()) {
@@ -997,6 +988,16 @@ class AdminAttendanceController extends Controller
                         </tr>
                    ';
         foreach ($employee_attendances as $employee_attendance){
+
+            $date_in = '';
+            $time_in = '';
+            $time_out = '';
+            $date_out = '';
+            $working_hours = '';
+            $early_departure = '';
+            $late_arrival = '';
+            $over_time = '';
+
             $total++;
             $remarks = '';
             if($employee_attendance->leave_status){
@@ -1030,11 +1031,12 @@ class AdminAttendanceController extends Controller
                         $ontime++;
                     }
                     if($employee_attendance->clock_out_datetime){
+                        $shift_minutes = Carbon::parse($shift->end_time)->diffInMinutes(Carbon::parse($shift->start_time));
+                        $expected_clockout = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->start_time)->addMinutes($shift_minutes);
+                        dd($expected_clockout);
                         $clock_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
                         $time_diff_out = Carbon::parse($shift->end_time)->diffInMinutes(Carbon::parse($clock_out), false);
                         $working_hours = Carbon::parse($employee_attendance->clock_out_datetime)->diff(Carbon::parse($employee_attendance->clock_in_datetime))->format('%H:%I:%S');
-                        $time_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
-                        $date_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("Y-m-d");
                         if($time_diff_out < 0){
                             $remarks .= ' - Early Out';
                             $earlyout++;
