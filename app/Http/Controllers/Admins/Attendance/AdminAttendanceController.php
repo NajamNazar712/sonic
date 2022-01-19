@@ -1032,8 +1032,8 @@ class AdminAttendanceController extends Controller
                     }
                     if($employee_attendance->clock_out_datetime){
                         $shift_minutes = Carbon::parse($shift->end_time)->diffInMinutes(Carbon::parse($shift->start_time));
-                        $expected_clockout = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->start_time)->addMinutes(1020);
-                        dd($expected_clockout);
+                        $expected_clockout = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->start_time)->addMinutes($shift_minutes);
+                        dd($expected_clockout.' '.$shift_minutes );
                         $time_diff_out = $expected_clockout->diffInMinutes(Carbon::parse($employee_attendance->clock_in_datetime), false);
                         $working_hours = Carbon::parse($employee_attendance->clock_out_datetime)->diff(Carbon::parse($employee_attendance->clock_in_datetime))->format('%H:%I:%S');
                         if($time_diff_out < 0){
