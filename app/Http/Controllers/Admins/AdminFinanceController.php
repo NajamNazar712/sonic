@@ -7048,9 +7048,9 @@ class AdminFinanceController extends Controller
         else {
             $shipment_ids = $invoice->invoice_shipments->pluck('shipment_id')->toArray();
 
-            $size_array = array();
-            $packaging_details = array();
 
+            $packaging_details = array();
+            $origin_arrays = array();
              if(count($shipment_ids) > 0) {
 
                  $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id',$shipment_ids)->where('packaging_material_requests.status_id', 2)
@@ -7059,21 +7059,26 @@ class AdminFinanceController extends Controller
                  if($packaging_materials->exists()) {
                      $packaging_materials = $packaging_materials->get();
                      foreach ($packaging_materials as $packaging_material) {
+                             if(!in_array($packaging_material->city_id,$origin_arrays)){
+                                 array_push($origin_arrays,$packaging_material->city_id);
+                                 $size_array = array();
+                             }
                              foreach($packaging_material->items as $details){
-                                  if(!in_array($details->packaging_type_size->id,$size_array)) {
-                                      $zone = Zone::find($packaging_material->city->zone_id);
-                                      $packaging_details[$details->packaging_type_size->id]['quantity'] = 1;
-                                      array_push($size_array, $details->packaging_type_size->id);
-                                      $packaging_details[$details->packaging_type_size->id]['origin'] = $packaging_material->city->name;
-                                      $packaging_details[$details->packaging_type_size->id]['rates'] = $details->packaging_type_size->standard_charges;
-                                      $packaging_details[$details->packaging_type_size->id]['description'] = $details->packaging_type_size->type->type . '-' . $details->packaging_type_size->size;
-                                      $packaging_details[$details->packaging_type_size->id]['quantity'] = $details->quantity;
-                                      $packaging_details[$details->packaging_type_size->id]['gst'] = $zone->gst;
+                                 if(in_array($packaging_material->city_id,$origin_arrays)) {
+                                     if (!in_array($details->packaging_type_size->id, $size_array)) {
+                                         $zone = Zone::find($packaging_material->city->zone_id);
+                                         $packaging_details[$details->packaging_type_size->id]['quantity'] = 1;
+                                         array_push($size_array, $details->packaging_type_size->id);
+                                         $packaging_details[$details->packaging_type_size->id]['origin'] = $packaging_material->city->name;
+                                         $packaging_details[$details->packaging_type_size->id]['rates'] = $details->packaging_type_size->standard_charges;
+                                         $packaging_details[$details->packaging_type_size->id]['description'] = $details->packaging_type_size->type->type . '-' . $details->packaging_type_size->size;
+                                         $packaging_details[$details->packaging_type_size->id]['quantity'] = $details->quantity;
+                                         $packaging_details[$details->packaging_type_size->id]['gst'] = $zone->gst;
 
-                                  }
-                                  else{
-                                      $packaging_details[$details->packaging_type_size->id]['quantity'] +=   $details->quantity;
-                                  }
+                                     } else {
+                                         $packaging_details[$details->packaging_type_size->id]['quantity'] += $details->quantity;
+                                     }
+                                 }
                            }
 
                       }
