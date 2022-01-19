@@ -1035,10 +1035,9 @@ class AdminAttendanceController extends Controller
                         if($shift_minutes < 0){
                             $expected_clockout = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->end_time)->addDay();
                         }else{
-                            $expected_clockout = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->start_time)->addMinutes($shift_minutes);
+                            $expected_clockout = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->end_time);
                         }
                         $time_diff_out = $expected_clockout->diffInMinutes(Carbon::parse($employee_attendance->clock_in_datetime), false);
-                        dd($time_diff_out);
                         $working_hours = Carbon::parse($employee_attendance->clock_out_datetime)->diff(Carbon::parse($employee_attendance->clock_in_datetime))->format('%H:%I:%S');
                         if($time_diff_out < 0){
                             $remarks .= ' - Early Out';
@@ -1087,7 +1086,7 @@ class AdminAttendanceController extends Controller
                       </html>';
 
         $pdf = SnappyPDF::loadHTML($html);
-        $filename = 'Attendance_' . $trax_id . '.pdf';
+        $filename = 'Attendance' . $trax_id . '.pdf';
         return $pdf->download($filename);
     }
 
