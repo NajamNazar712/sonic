@@ -1075,8 +1075,8 @@ class AdminAttendanceController extends Controller
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Total : '.$total.'</td>
-                            <td colspan="3" class="border twice-right">Total Present : '.$total_presents.'</td>
-                            <td colspan="2" class="border twice-right">Absent : '.$absent.'</td>
+                            <td colspan="2" class="border twice-right">Total Present : '.$total_presents.'</td>
+                            <td colspan="3" class="border twice-right">Absent : '.$absent.'</td>
                             <td colspan="3" class="border twice-right">On Time : '.$ontime.'</td>
                         </tr>
                         <tr class="text-left">
