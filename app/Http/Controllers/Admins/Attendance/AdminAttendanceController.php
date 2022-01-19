@@ -953,19 +953,19 @@ class AdminAttendanceController extends Controller
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Employee ID</td>
                             <td colspan="2"  class="border twice-right">' . $employee->trax_id . '</td>
-                            <td colspan="2" class="border twice-right">Location</td>
+                            <td colspan="3" class="border twice-right">Location</td>
                             <td colspan="3"  class="border twice-right">' . $employee->city->name . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Employee Name</td>
                             <td colspan="2"  class="border twice-right">' . $employee->name . '</td>
-                            <td colspan="2" class="border twice-right">Department</td>
+                            <td colspan="3" class="border twice-right">Department</td>
                             <td colspan="3"  class="border twice-right">' . $employee->department->name . '</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Designation</td>
                             <td colspan="2"  class="border twice-right">' . $employee->designation->name . '</td>
-                            <td colspan="2"  class="border twice-right">Employee Type</td>
+                            <td colspan="3"  class="border twice-right">Employee Type</td>
                             <td colspan="3"  class="border twice-right">' . $employee->employee_type->name . '</td>
                         </tr>
                         <tr class="text-left">
@@ -973,9 +973,10 @@ class AdminAttendanceController extends Controller
                             <td colspan="2"  class="border twice-right">' . $employee->shift->name . '</td>
                         </tr>
                         <tr class="text-center">
-                            <td class="color primary border twice" colspan="9"><b>Attandence Details</b></td>
+                            <td class="color primary border twice" colspan="10"><b>Attandence Details</b></td>
                         </tr>
                         <tr>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Day</th>;
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date In</th>;
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Time In</th>;
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date Out</th>;
@@ -990,6 +991,7 @@ class AdminAttendanceController extends Controller
         foreach ($employee_attendances as $employee_attendance){
 
             $date_in = Carbon::parse($employee_attendance->attendance_date)->format("Y-m-d");
+            $day = Carbon::parse($employee_attendance->attendance_date)->format("l");
             $time_in = '';
             $time_out = '';
             $date_out = '';
@@ -1037,7 +1039,7 @@ class AdminAttendanceController extends Controller
                             }else{
                                 $expected_clockout = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->end_time);
                             }
-                            $time_diff_out = $expected_clockout->diffInSeconds(Carbon::parse($employee_attendance->clock_in_datetime), false);
+                            $time_diff_out = $expected_clockout->diffInMinutes(Carbon::parse($employee_attendance->clock_in_datetime), false);
                             $working_hours = Carbon::parse($employee_attendance->clock_out_datetime)->diff(Carbon::parse($employee_attendance->clock_in_datetime))->format('%H:%I:%S');
                             if($time_diff_out < 0){
                                 $remarks .= ' - Early Out';
@@ -1055,6 +1057,7 @@ class AdminAttendanceController extends Controller
                 }
             }
             $html .= '<tr>';
+            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $day . '</td>';
             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $date_in . '</td>';
             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $time_in . '</td>';
             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $date_out . '</td>';
@@ -1066,17 +1069,17 @@ class AdminAttendanceController extends Controller
             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td>';
         }
         $html.='<tr class="text-center">
-                            <td class="color primary border twice" colspan="9"><b>Attendance Summary</b></td>
+                            <td class="color primary border twice" colspan="10"><b>Attendance Summary</b></td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="3" class="border twice-right">Total : '.$total.'</td>
                             <td colspan="3" class="border twice-right">Absent : '.$absent.'</td>
-                            <td colspan="3" class="border twice-right">On-Time : '.$ontime.'</td>
+                            <td colspan="4" class="border twice-right">On-Time : '.$ontime.'</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="3" class="border twice-right">Late : '.$late.'</td>
                             <td colspan="3" class="border twice-right">Early Departure : '.$earlyout.'</td>
-                            <td colspan="3" class="border twice-right">Leave : '.$leave.'</td>
+                            <td colspan="4" class="border twice-right">Leave : '.$leave.'</td>
                         </tr>
                         ';
         $html .= '    
