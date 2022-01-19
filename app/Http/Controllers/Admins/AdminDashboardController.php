@@ -8619,6 +8619,11 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item change_rate_type" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Change Rate Type</div></button>';
                         }
                     }
+                    if ((session('role_id') == 1 || session('department_id') == 4)) {
+                        if (CorporateUserPackagingInvoiceLog::where('user_id', $result->id)->exists()) {
+                            $dropdown .= '<button type="button" class="dropdown-item view_invoice_log" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">View Packaging Invoice Log</div></button>';
+                        }
+                    }
                     
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
