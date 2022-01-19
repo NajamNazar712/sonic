@@ -8231,8 +8231,8 @@ class AdminFinanceController extends Controller
 
             foreach ($packaging_details as $packaging_material) {
                 $amount_without_gst = $packaging_material['rates'] * $packaging_material['quantity'];
-                $sst_amount = $amount_without_gst * $packaging_material['gst'];
-                $total_amount_with_sst = $amount_without_gst + $sst_amount;
+                $sst_amount = round($amount_without_gst * $packaging_material['gst']);
+                $total_amount_with_sst = round($amount_without_gst + $sst_amount);
 
                 $rates_total = $rates_total + $packaging_material['rates'];
                 $quantity_total = $quantity_total + $packaging_material['quantity'];
@@ -8260,7 +8260,7 @@ class AdminFinanceController extends Controller
                 <td>'.$quantity_total.'</td>
                 <td>'.$total_amount_without_gst.'</td>
                 <td></td>
-                <td>'.$total_sst_amount.'</td>
+                <td>'.number_format($total_sst_amount).'</td>
                 <td>'.number_format($overall_amount).'</td>
             </tr>';
                 $amount_in_words = '';
@@ -9336,8 +9336,8 @@ class AdminFinanceController extends Controller
                             foreach ($packaging_details as $packaging_material) {
 
                                 $amount_without_gst = $packaging_material['rates'] * $packaging_material['quantity'];
-                                $sst_amount = $amount_without_gst * $packaging_material['gst'];
-                                $total_amount_with_sst = $amount_without_gst + $sst_amount;
+                                $sst_amount = round($amount_without_gst * $packaging_material['gst']);
+                                $total_amount_with_sst = round($amount_without_gst + $sst_amount);
 
                                 $rates_total = $rates_total + $packaging_material['rates'];
                                 $quantity_total = $quantity_total + $packaging_material['quantity'];
@@ -9366,7 +9366,7 @@ class AdminFinanceController extends Controller
                                             <td>' . $quantity_total . '</td>
                                             <td>' . $total_amount_without_gst . '</td>
                                             <td></td>
-                                            <td>' . $total_sst_amount . '</td>
+                                            <td>' . number_format($total_sst_amount) . '</td>
                                             <td>' . number_format($overall_amount) . '</td>
                                         </tr>';
                             $amount_in_words = '';
