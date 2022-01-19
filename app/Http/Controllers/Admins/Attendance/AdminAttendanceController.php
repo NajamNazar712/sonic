@@ -948,7 +948,7 @@ class AdminAttendanceController extends Controller
                     
                     <tbody>
                         <tr class="text-center">
-                            <td class="color primary border twice" colspan="9"><b>Employee Information</b></td>
+                            <td class="color primary border twice" colspan="10"><b>Employee Information</b></td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Employee ID</td>
