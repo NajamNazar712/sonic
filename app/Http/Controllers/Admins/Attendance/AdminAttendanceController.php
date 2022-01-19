@@ -844,7 +844,7 @@ class AdminAttendanceController extends Controller
         $absent = 0;
         $late = 0;
         $earlyout = 0;
-        $overtime = 0;
+        $total_presents = 0;
         $ontime = 0;
         $total = 0;
         $sunday = 0;
@@ -985,7 +985,7 @@ class AdminAttendanceController extends Controller
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Work Hours</th>;
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Late Arrival</th>;
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Early Departure</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">OverTime</th>;
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Overtime</th>;
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Remarks</th>;
                         </tr>
                    ';
@@ -1017,6 +1017,7 @@ class AdminAttendanceController extends Controller
                     }
                 }
                 else{
+                    $total_presents++;
                     $time_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
                     if($employee_attendance->clock_out_datetime){
                         $time_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
@@ -1031,7 +1032,7 @@ class AdminAttendanceController extends Controller
                             $late++;
                             $late_arrival = Carbon::parse($clock_in)->diff(Carbon::parse($shift->start_time))->format('%H:%I:%S');
                         }else{
-                            $remarks = 'OnTime';
+                            $remarks = 'On Time';
                             $ontime++;
                         }
                         if($employee_attendance->clock_out_datetime){
@@ -1048,11 +1049,10 @@ class AdminAttendanceController extends Controller
                                 $earlyout++;
                                 $early_departure = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
                             } elseif ($time_diff_out > 0){
-                                $remarks .= ' - Over-Time';
-                                $overtime++;
+                                $remarks .= ' - Overtime';
                                 $over_time = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
                             } else {
-                                $remarks .= ' - On-Time';
+                                $remarks .= ' - On Time';
                             }
                         }
                     }
@@ -1075,9 +1075,9 @@ class AdminAttendanceController extends Controller
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Total : '.$total.'</td>
+                            <td colspan="3" class="border twice-right">Total Present : '.$total_presents.'</td>
                             <td colspan="2" class="border twice-right">Absent : '.$absent.'</td>
-                            <td colspan="3" class="border twice-right">On-Time : '.$ontime.'</td>
-                            <td colspan="3" class="border twice-right">Over-Time : '.$overtime.'</td>
+                            <td colspan="3" class="border twice-right">On Time : '.$ontime.'</td>
                         </tr>
                         <tr class="text-left">
                             <td colspan="2" class="border twice-right">Late : '.$late.'</td>
