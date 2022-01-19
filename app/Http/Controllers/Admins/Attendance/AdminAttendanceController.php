@@ -847,6 +847,7 @@ class AdminAttendanceController extends Controller
         $overtime = 0;
         $ontime = 0;
         $total = 0;
+        $sunday = 0;
 
         $employee = Employee::where('trax_id', $trax_id);
 
@@ -1009,6 +1010,7 @@ class AdminAttendanceController extends Controller
                 if(!$employee_attendance->clock_in_datetime){
                     if (Carbon::parse($employee_attendance->attendance_date)->format("l") == "Sunday"){
                         $remarks = "Sunday";
+                        $sunday++;
                     }else{
                         $remarks = "Absent";
                         $absent++;
@@ -1072,14 +1074,16 @@ class AdminAttendanceController extends Controller
                             <td class="color primary border twice" colspan="10"><b>Attendance Summary</b></td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="3" class="border twice-right">Total : '.$total.'</td>
-                            <td colspan="3" class="border twice-right">Absent : '.$absent.'</td>
-                            <td colspan="4" class="border twice-right">On-Time : '.$ontime.'</td>
+                            <td colspan="2" class="border twice-right">Total : '.$total.'</td>
+                            <td colspan="2" class="border twice-right">Absent : '.$absent.'</td>
+                            <td colspan="3" class="border twice-right">On-Time : '.$ontime.'</td>
+                            <td colspan="3" class="border twice-right">Over-Time : '.$overtime.'</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="3" class="border twice-right">Late : '.$late.'</td>
-                            <td colspan="3" class="border twice-right">Early Departure : '.$earlyout.'</td>
-                            <td colspan="4" class="border twice-right">Leave : '.$leave.'</td>
+                            <td colspan="2" class="border twice-right">Late : '.$late.'</td>
+                            <td colspan="2" class="border twice-right">Early Departure : '.$earlyout.'</td>
+                            <td colspan="3" class="border twice-right">Offdays : '.$sunday.'</td>
+                            <td colspan="3" class="border twice-right">Leave : '.$leave.'</td>
                         </tr>
                         ';
         $html .= '    
