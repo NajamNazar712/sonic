@@ -39,6 +39,10 @@ class GetStartedController extends Controller
         $new_lead->reference_id = $request->reference;
         $new_lead->service_id = $request->service;
         $new_lead->save();
-        return redirect()->back()->with('success', 'Thank you for Contacting Us!');
+        return redirect()->route('cod.getstarted.success');
+    }
+
+    public function getstarted_success(){
+        return view('client.get_started_success');
     }
 }
