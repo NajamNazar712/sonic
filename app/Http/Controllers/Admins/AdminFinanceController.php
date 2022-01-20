@@ -9306,8 +9306,13 @@ class AdminFinanceController extends Controller
               
             </tr>
           </thead><tbody>';
-                    $warehouse = Warehouse::where('hub_id',$origins)->first();
-                    $hubs = $warehouse->associated_hubs->pluck('hub_id')->toArray();
+                    $warehouses = Warehouse::whereIn('hub_id',$origins)->get();
+                    $hubs = array();
+                    foreach($warehouse as $warehouse){
+                        //$hubs = $warehouse->associated_hubs->pluck('hub_id')->toArray();
+                        array_push($hubs,$warehouse->associated_hubs->pluck('hub_id')->toArray());
+                    }
+
 
                     $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id', $shipment_ids)->where('packaging_material_requests.status_id', 2)
                         ->whereIn('city_id', $hubs)
