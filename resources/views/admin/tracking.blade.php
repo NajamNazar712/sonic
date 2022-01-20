@@ -709,7 +709,6 @@
                                 @if (session('role_id') == 1 || in_array(245, session('permissions')))
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' + id + ' data-tracking=' + details.tracking_history[0].status_id + '>Intercept</button>';
                                 @endif
-                                console.log(details.dws_image);
                                 if(details.dws_image != null){
                                     shipment += '<a class="btn btn-secondary d-sm-inline-block file mr-1" href="' + details.dws_image + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> DWS File</a>';
                                 }
@@ -999,12 +998,12 @@
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Tracking History</u></h4>';
                                 shipment += '<div class="border table-responsive">';
-
                                 shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
                                 shipment += '<tr role="row">';
                                 shipment += '<th><strong>Date / Time</strong></th>';
                                 shipment += '<th><strong>Status</strong></th>';
+                                shipment += '<th><strong>Details</strong></th>';
                                 shipment += '<th><strong>Reason</strong></th>';
                                 shipment += '<th><strong>Remarks</strong></th>';
                                 shipment += '<th><strong>User</strong></th>';
@@ -1015,19 +1014,22 @@
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
-
                                 $.each(details.tracking_history, function (index, history) {
-                                    shipment += '<tr>';
-                                    shipment += '<td>' + history.date_time + '</td>';
-                                    shipment += '<td>' + history.status + '</td>';
-                                    shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
-                                    shipment += '<td>' + history.remarks + '</td>';
-                                    shipment += '<td>' + history.user + '</td>';
-                                    shipment += '<td>' + history.city + '</td>';
-                                    shipment += '<td>' + history.received_or_refused_by + '</td>';
-                                    shipment += '<td>' + history.ip + '</td>';
-                                    shipment += '<td>' + history.rider + '</td>';
-                                    shipment += '</tr>';
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.status + '</td>';
+                                        if(history.image_audio_location == undefined) {                                        
+                                            shipment += '<td>-</td>';}
+                                        else
+                                            shipment += '<td>' + history.image_audio_location + '</td>';
+                                        shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
+                                        shipment += '<td>' + history.remarks + '</td>';
+                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '<td>' + history.city + '</td>';
+                                        shipment += '<td>' + history.received_or_refused_by + '</td>';
+                                        shipment += '<td>' + history.ip + '</td>';
+                                        shipment += '<td>' + history.rider + '</td>';
+                                        shipment += '</tr>';
                                 });
 
                                 shipment += '</tbody>';
@@ -1366,6 +1368,7 @@
                                 columns: [
                                     {name: 'date_time', class: 'align-middle date_time'},
                                     {name: 'status', class: 'align-middle status'},
+                                    {name: 'image_audio_location', class: 'align-middle image_audio_location'},
                                     {name: 'reason', class: 'align-middle reason'},
                                     {name: 'remarks', class: 'align-middle remarks'},
                                     {name: 'user', class: 'align-middle user'},
@@ -1453,6 +1456,10 @@
                 if(id){
                     pieces_print(id);
                 }
+            });
+            $('#tracking').on('click', '.picture', function () {
+                var pod_image = $(this).data('link');
+                window.open(pod_image, "_blank")
             });
             function pieces_print(id) {
 

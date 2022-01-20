@@ -30,7 +30,7 @@ class LeadManagementController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),4);
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $statuses = LeadStatus::all();
-        $lead_statuses = LeadStatus::where('id', '!=', 1)->get();
+        $lead_statuses = LeadStatus::whereNotIn('id', [1,12])->get();
         $services = DB::table('service_list')->get();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
