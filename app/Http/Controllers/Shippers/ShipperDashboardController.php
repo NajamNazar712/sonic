@@ -410,10 +410,9 @@ class ShipperDashboardController extends Controller
 
                     $international_shipment = InternationalShipment::where('shipment_id', $shipments->shipment_id);
                     if($international_shipment->exists()){
-                        $international_shipment = $international_shipment->get()->first();
                         $images = PODImage::where('shipment_id', $shipments->shipment_id);
                         if($images->exists()){
-                            $images = $images->get()->first();
+                            $images = $images->first();
                             if($images->pod_file != null){
                                 $exists = asset('uploads/pod_images/' . $images->pod_file);
                                 if($exists){
@@ -426,7 +425,7 @@ class ShipperDashboardController extends Controller
                     {
                         $images = RiderDelivery::where('shipment_id', $shipments->shipment_id)->where('delivery_note_id', $shipments->deliverynote)->orderBy('id','desc');
                         if($images->exists()){
-                            $images = $images->get()->first();
+                            $images = $images->first();
                             if($images->picture_path != null){
                                 $exists = Storage::disk('public')->exists($images->picture_path);
                                 if($exists){
