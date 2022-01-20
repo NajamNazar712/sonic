@@ -594,7 +594,7 @@ class AdminPackagingMaterialController extends Controller
                 $hub_id = $city_hub->hub_id;
 
                 $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id);
-
+              
                 if (!$fulfilment_hub->exists()) {
                     return response()->json(['status' => 0, 'error'=>'Warehouse does\'nt exists for requested hub!']);
                 } else {
@@ -628,7 +628,7 @@ class AdminPackagingMaterialController extends Controller
                 foreach ($request_details->items as $item){
                     $product_ids[] = $item->wms_product_id;
                     $total_quantity = $total_quantity + $item->quantity;
-
+                   
                     $check_current_stock = WmsCurrentStock::where('product_id', $item->wms_product_id)->where('warehouse_pickup_address_id', $trax_address->id)->where('user_id', $wms_user_id);
                     if($check_current_stock->exists()){
                         $check_current_stock = $check_current_stock->first();
