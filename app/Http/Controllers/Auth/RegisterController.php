@@ -76,6 +76,10 @@ class RegisterController extends Controller
             return redirect()->route('cod.getstarted');
         }
         if($lead_id != NULL){
+            $shipper = User::where('lead_id', $lead_id);
+            if($shipper->exists()){
+                return redirect()->route('getstarted.success');
+            }
             $lead = Lead::find($lead_id);
         }
         else{
