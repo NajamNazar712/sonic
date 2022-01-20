@@ -6254,7 +6254,7 @@ class AdminFinanceController extends Controller
                         NotificationsController::send(27, $invoice_id);
                     }
                 }
-
+               
                 /*if ($generate) {
                     if ($user->invoice_group_by == 0) {
                         $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
@@ -6321,8 +6321,8 @@ class AdminFinanceController extends Controller
                             $invoice_shipment->shipment_id = $packaging_material_request->shipment_id;
                             $invoice_shipment->type = 0;
                             $invoice_shipment->charges = $packaging_material_request->amount;
-                            $invoice_shipment->gst = $packaging_material_request->amount * $gst;
-                            $invoice_amount = $packaging_material_request->amount + $gst;
+                            $invoice_shipment->gst = round($packaging_material_request->amount * $gst);
+                            $invoice_amount = $packaging_material_request->amount + round($packaging_material_request->amount * $gst);
                             $invoice_shipment->invoice_amount = $invoice_amount;
 
                             $invoice_shipment->save();
@@ -6342,7 +6342,7 @@ class AdminFinanceController extends Controller
                             //self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
 
                             $total_charges = $total_charges + $packaging_material_request->amount;
-                            $total_gst = $total_gst + ($packaging_material_request->amount * $gst);
+                            $total_gst = $total_gst + round($packaging_material_request->amount * $gst);
                             $total_invoice_amount = $total_invoice_amount + $invoice_amount;
 
                             //$pending_invoice_shipment->delete();
