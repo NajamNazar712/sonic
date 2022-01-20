@@ -391,52 +391,6 @@ class ShipperDashboardController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
-            ->addColumn('pod_image',function ($shipments) {
-                $image = '';
-                if($shipments->status_id == 25){
-                    $rider_return_deliveries = RiderReturnDelivery::where('shipment_id', $shipments->shipment_id);
-                    if($rider_return_deliveries->exists()){
-                        $rider_return_deliveries = $rider_return_deliveries->get()->first();
-                        if($rider_return_deliveries->pod_image != null){
-                            $exists = Storage::disk('public')->exists($rider_return_deliveries->pod_image);
-                            if($exists){
-                                $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($rider_return_deliveries->pod_image)) . '"><i class="la la-image"></i> View</button></div>';
-                            }
-                        }
-                    }
-                }
-                else if($shipments->status_id == 14){
-
-                    $international_shipment = InternationalShipment::where('shipment_id', $shipments->shipment_id);
-                    if($international_shipment->exists()){
-                        $images = PODImage::where('shipment_id', $shipments->shipment_id);
-                        if($images->exists()){
-                            $images = $images->first();
-                            if($images->pod_file != null){
-                                $exists = asset('uploads/pod_images/' . $images->pod_file);
-                                if($exists){
-                                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . $exists . '"><i class="la la-image"></i> View</button></div>';
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        $images = RiderDelivery::where('shipment_id', $shipments->shipment_id)->where('delivery_note_id', $shipments->deliverynote)->orderBy('id','desc');
-                        if($images->exists()){
-                            $images = $images->first();
-                            if($images->picture_path != null){
-                                $exists = Storage::disk('public')->exists($images->picture_path);
-                                if($exists){
-                                    $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($images->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
-                                }
-                            }
-                        }
-                    }
-                }
-                else $image = '-';
-                return $image;
             });
             if ($tracking_numbers = $request->get('tracking_numbers')) {
                 $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));

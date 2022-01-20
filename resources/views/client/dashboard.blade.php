@@ -70,7 +70,6 @@
                                         <th class="border-primary border-darken-1">Instructions</th>
                                         <th class="border-primary border-darken-1">Cancellation Remarks</th>
                                         <th class="border-primary border-darken-1">Payment Mode</th>
-                                        <th class="border-primary border-darken-1">POD Image</th>
 {{--                                        <th class="border-primary border-darken-1">Payment Mode</th>--}}
                                         <th class="border-primary border-darken-1"></th>
                                     </tr>
@@ -998,7 +997,6 @@
                         name: 'shipments.payment_mode_id',
                         class: 'align-middle payment_module'
                     },
-                    {data: 'pod_image', name: 'pod_image', class: 'text-center align-middle action p-1', orderable: false, searchable: false},
                     {
                         data: 'action',
                         name: 'action',
@@ -1261,10 +1259,7 @@
                     $('#CancelReasonModal').modal('show');
                 }
             });
-            table.on('click', '.picture', function () {
-                var pod_image = $(this).data('link');
-                window.open(pod_image, "_blank")
-            });
+
             $('#CancelReasonSubmit').on('click',function () {
                 var reason = $('#cancel_reason').val();
                 var id = parseInt($('#cancel_shipment_id').val());
