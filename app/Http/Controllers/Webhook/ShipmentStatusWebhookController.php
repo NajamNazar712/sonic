@@ -79,6 +79,7 @@ class ShipmentStatusWebhookController extends Controller
 
                 if($i == 4){
                     ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
+                    WebhookLogController::shipper_webhook_log($user_id, 'Disabled by Webhook');
                     NotificationsController::send(167, $notification_data);
                     break;
                 }
@@ -94,6 +95,7 @@ class ShipmentStatusWebhookController extends Controller
 
                 if($i == 4){
                     ShipmentStatusSubscription::where('user_id', $user_id)->update(['status' => 0]);
+                    WebhookLogController::shipper_webhook_log($user_id, 'Disabled by Webhook');
                     NotificationsController::send(167, $notification_data);
                     break;
                 }
