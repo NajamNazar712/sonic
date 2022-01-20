@@ -208,12 +208,12 @@ class ShipperDashboardController extends Controller
       return view('client.dashboard')->with(['cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories , 'payment_module' => $payment_module]);
     }
     public function orders_list(Request $request) {
-        // if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110])) {
+         if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
             $connection = 'reports';
-        // }
-        // else {
-        //     $connection = 'mysql';
-        // }
+         }
+         else {
+             $connection = 'mysql';
+         }
 
         $count = DB::connection($connection)->table('shipments')->where(function ($query) {
             $query->where('shipments.user_id', session('user_id'))
@@ -1518,12 +1518,12 @@ class ShipperDashboardController extends Controller
     }
 
     public function quick_search_list(Request $request) {
-        // if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110])) {
+         if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
             $connection = 'reports';
-        // }
-        // else {
-        //     $connection = 'mysql';
-        // }
+         }
+         else {
+             $connection = 'mysql';
+         }
 
         $date = Carbon::now()->subMonths(6)->startOfDay()->toDateTimeString();
 
