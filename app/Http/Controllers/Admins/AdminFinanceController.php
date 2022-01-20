@@ -9308,7 +9308,7 @@ class AdminFinanceController extends Controller
           </thead><tbody>';
                     $warehouses = Warehouse::whereIn('hub_id',$origins)->get();
                     $hubs = array();
-                    foreach($warehouse as $warehouse){
+                    foreach($warehouses as $warehouse){
                         //$hubs = $warehouse->associated_hubs->pluck('hub_id')->toArray();
                         array_push($hubs,$warehouse->associated_hubs->pluck('hub_id')->toArray());
                     }
