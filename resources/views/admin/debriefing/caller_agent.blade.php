@@ -243,10 +243,10 @@
                                                                         <td>'No'</td>
                                                                     @endif
                                                                 @else
-                                                                    <td></td>
+                                                                    <td>'-'</td>
                                                                 @endif
                                                             @else
-                                                                <td></td>
+                                                                <td>'-'</td>
                                                             @endif
 
                                                             <td><strong>Remarks :</strong></td>
