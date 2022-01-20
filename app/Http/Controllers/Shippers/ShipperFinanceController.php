@@ -2041,26 +2041,23 @@ class ShipperFinanceController extends Controller
             $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id',$shipment_ids)->where('packaging_material_requests.status_id', 2)
                 ->where('packaging_material_requests.user_id', $shipper->id);
 
-            if($packaging_materials->exists()) {
-                $packaging_materials = $packaging_materials->get();
+            if ($packaging_materials->exists()) {
+                $packaging_materials = $packaging_materials->orderBy('city_id', 'asc')->get();
                 foreach ($packaging_materials as $packaging_material) {
-                    foreach($packaging_material->items as $details){
-                        if(!in_array($details->packaging_type_size->id,$size_array)) {
+                    foreach ($packaging_material->items as $details) {
+                        if (!isset($packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'])) {
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'] = 1;
                             $zone = Zone::find($packaging_material->city->zone_id);
-                            $packaging_details[$details->packaging_type_size->id]['quantity'] = 1;
-                            array_push($size_array, $details->packaging_type_size->id);
-                            $packaging_details[$details->packaging_type_size->id]['origin'] = $packaging_material->city->name;
-                            $packaging_details[$details->packaging_type_size->id]['rates'] = $details->packaging_type_size->standard_charges;
-                            $packaging_details[$details->packaging_type_size->id]['description'] = $details->packaging_type_size->type->type . '-' . $details->packaging_type_size->size;
-                            $packaging_details[$details->packaging_type_size->id]['quantity'] = $details->quantity;
-                            $packaging_details[$details->packaging_type_size->id]['gst'] = $zone->gst;
-
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['origin'] = $packaging_material->city->name;
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['rates'] = $details->packaging_type_size->standard_charges;
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['description'] = $details->packaging_type_size->type->type . '-' . $details->packaging_type_size->size;
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'] = $details->quantity;
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['gst'] = $zone->gst;
                         }
-                        else{
-                            $packaging_details[$details->packaging_type_size->id]['quantity'] +=   $details->quantity;
+                        else {
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity']++;
                         }
                     }
-
                 }
             }
 
@@ -2093,30 +2090,33 @@ class ShipperFinanceController extends Controller
             $total_sst_amount = 0;
             $overall_amount = 0;
 
-            foreach ($packaging_details as $packaging_material) {
-                $amount_without_gst = $packaging_material['rates'] * $packaging_material['quantity'];
-                $sst_amount = round($amount_without_gst * $packaging_material['gst']);
-                $total_amount_with_sst = round($amount_without_gst + $sst_amount);
+            foreach ($packaging_details as $cities) {
+                foreach ($cities as $packaging_material) {
+                    $amount_without_gst = $packaging_material['rates'] * $packaging_material['quantity'];
+                    $sst_amount = round($amount_without_gst * $packaging_material['gst']);
+                    $total_amount_with_sst = round($amount_without_gst + $sst_amount);
 
-                $rates_total = $rates_total + $packaging_material['rates'];
-                $quantity_total = $quantity_total + $packaging_material['quantity'];
-                $total_amount_without_gst = $total_amount_without_gst + $amount_without_gst;
-                $total_sst_amount = $total_sst_amount + $sst_amount;
-                $overall_amount = $overall_amount + $total_amount_with_sst;
-                $html .= '
-            <tr>
-                <td>' . $packaging_material['origin'] . '</td>
-                <td>' . $packaging_material['description'] . '</td>
-                <td>' . $packaging_material['rates'] . '</td>
-                <td>' . $packaging_material['quantity'] . '</td>
-                <td>' . $amount_without_gst . '</td>
-                <td>' . $packaging_material['gst'] * 100 . '%' . '</td>
-                <td>' . round($sst_amount) . '</td>
-                <td>' . number_format($total_amount_with_sst) . '</td>
-              
-            </tr>';
-                /* $html .= $packaging_material['origin'];*/
+                    $rates_total = $rates_total + $packaging_material['rates'];
+                    $quantity_total = $quantity_total + $packaging_material['quantity'];
+                    $total_amount_without_gst = $total_amount_without_gst + $amount_without_gst;
+                    $total_sst_amount = $total_sst_amount + $sst_amount;
+                    $overall_amount = $overall_amount + $total_amount_with_sst;
+                    $html .= '
+                        <tr>
+                            <td>' . $packaging_material['origin'] . '</td>
+                            <td>' . $packaging_material['description'] . '</td>
+                            <td>' . $packaging_material['rates'] . '</td>
+                            <td>' . $packaging_material['quantity'] . '</td>
+                            <td>' . $amount_without_gst . '</td>
+                            <td>' . $packaging_material['gst'] * 100 . '%' . '</td>
+                            <td>' . round($sst_amount) . '</td>
+                            <td>' . number_format($total_amount_with_sst) . '</td>
+                          
+                        </tr>';
+                    /* $html .= $packaging_material['origin'];*/
+                }
             }
+
             $html .= '<tr>
                 <td colspan="3" class="text-center">Total Amount</td>
             
@@ -2961,29 +2961,25 @@ class ShipperFinanceController extends Controller
             $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id',$shipment_ids)->where('packaging_material_requests.status_id', 2)
                 ->where('packaging_material_requests.user_id', $shipper->id);
 
-            if($packaging_materials->exists()) {
-                $packaging_materials = $packaging_materials->get();
+            if ($packaging_materials->exists()) {
+                $packaging_materials = $packaging_materials->orderBy('city_id', 'asc')->get();
                 foreach ($packaging_materials as $packaging_material) {
-                    foreach($packaging_material->items as $details){
-                        if(!in_array($details->packaging_type_size->id,$size_array)) {
+                    foreach ($packaging_material->items as $details) {
+                        if (!isset($packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'])) {
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'] = 1;
                             $zone = Zone::find($packaging_material->city->zone_id);
-                            $packaging_details[$details->packaging_type_size->id]['quantity'] = 1;
-                            array_push($size_array, $details->packaging_type_size->id);
-                            $packaging_details[$details->packaging_type_size->id]['origin'] = $packaging_material->city->name;
-                            $packaging_details[$details->packaging_type_size->id]['rates'] = $details->packaging_type_size->standard_charges;
-                            $packaging_details[$details->packaging_type_size->id]['description'] = $details->packaging_type_size->type->type . '-' . $details->packaging_type_size->size;
-                            $packaging_details[$details->packaging_type_size->id]['quantity'] = $details->quantity;
-                            $packaging_details[$details->packaging_type_size->id]['gst'] = $zone->gst;
-
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['origin'] = $packaging_material->city->name;
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['rates'] = $details->packaging_type_size->standard_charges;
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['description'] = $details->packaging_type_size->type->type . '-' . $details->packaging_type_size->size;
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'] = $details->quantity;
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['gst'] = $zone->gst;
                         }
-                        else{
-                            $packaging_details[$details->packaging_type_size->id]['quantity'] +=   $details->quantity;
+                        else {
+                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity']++;
                         }
                     }
-
                 }
             }
-
         }
 
     }
@@ -3330,30 +3326,33 @@ class ShipperFinanceController extends Controller
         $total_sst_amount = 0;
         $overall_amount = 0;
 
-        foreach ($packaging_details as $packaging_material) {
-            $amount_without_gst = $packaging_material['rates'] * $packaging_material['quantity'];
-            $sst_amount = round($amount_without_gst * $packaging_material['gst']);
-            $total_amount_with_sst = round($amount_without_gst + $sst_amount);
+        foreach ($packaging_details as $cities) {
+            foreach ($cities as $packaging_material) {
+                $amount_without_gst = $packaging_material['rates'] * $packaging_material['quantity'];
+                $sst_amount = round($amount_without_gst * $packaging_material['gst']);
+                $total_amount_with_sst = round($amount_without_gst + $sst_amount);
 
-            $rates_total = $rates_total + $packaging_material['rates'];
-            $quantity_total = $quantity_total + $packaging_material['quantity'];
-            $total_amount_without_gst = $total_amount_without_gst + $amount_without_gst;
-            $total_sst_amount = $total_sst_amount + $sst_amount;
-            $overall_amount = $overall_amount + $total_amount_with_sst;
-            $html .= '
-            <tr>
-                <td>' . $packaging_material['origin'] . '</td>
-                <td>' . $packaging_material['description'] . '</td>
-                <td>' . $packaging_material['rates'] . '</td>
-                <td>' . $packaging_material['quantity'] . '</td>
-                <td>' . $amount_without_gst . '</td>
-                <td>' . $packaging_material['gst'] * 100 . '%' . '</td>
-                <td>' . round($sst_amount) . '</td>
-                <td>' . number_format($total_amount_with_sst) . '</td>
-              
-            </tr>';
-            /*  $html .= $packaging_material['origin'];*/
+                $rates_total = $rates_total + $packaging_material['rates'];
+                $quantity_total = $quantity_total + $packaging_material['quantity'];
+                $total_amount_without_gst = $total_amount_without_gst + $amount_without_gst;
+                $total_sst_amount = $total_sst_amount + $sst_amount;
+                $overall_amount = $overall_amount + $total_amount_with_sst;
+                $html .= '
+                    <tr>
+                        <td>' . $packaging_material['origin'] . '</td>
+                        <td>' . $packaging_material['description'] . '</td>
+                        <td>' . $packaging_material['rates'] . '</td>
+                        <td>' . $packaging_material['quantity'] . '</td>
+                        <td>' . $amount_without_gst . '</td>
+                        <td>' . $packaging_material['gst'] * 100 . '%' . '</td>
+                        <td>' . round($sst_amount) . '</td>
+                        <td>' . number_format($total_amount_with_sst) . '</td>
+                      
+                    </tr>';
+                /* $html .= $packaging_material['origin'];*/
+            }
         }
+
 
         $html .= '<tr>
                 <td colspan="3" class="text-center">Total Amount</td>
