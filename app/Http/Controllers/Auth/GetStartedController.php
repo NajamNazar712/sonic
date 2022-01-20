@@ -27,7 +27,10 @@ class GetStartedController extends Controller
 
         $email = $request->email;
         $phone = $request->phone;
-        if(Lead::where(['phone_number' => $phone, 'email_address' => $email])->exists()){
+        if(Lead::where('phone_number', $phone)->exists()){
+            return redirect()->back()->with('error', 'Duplicate entry - You have already provided this Number or Email previously. Kindly fill new details. Thanks');
+        }
+        if(Lead::where('email_address', $email)->exists()){
             return redirect()->back()->with('error', 'Duplicate entry - You have already provided this Number or Email previously. Kindly fill new details. Thanks');
         }
 
