@@ -6119,6 +6119,7 @@ class AdminFinanceController extends Controller
         foreach ($users as $user) {
             $generate = FALSE;
 
+
             $user_id = $user->id;
 
             $user_banking_information = UserBankInfo::where('user_id', $user_id)->where('default_bank', 1);
@@ -6280,7 +6281,7 @@ class AdminFinanceController extends Controller
                 }*/
 
                 $packaging_invoice_toggle_on = CorporateUserPackagingInvoice::where('user_id',$user_id)->where('status',1)->first();
-                if($packaging_invoice_toggle_on){
+                if($packaging_invoice_toggle_on && $generate){
 
                     $packaging_material_requests = PackagingMaterialRequest::where('user_id',$user_id)->whereBetween('updated_at', [$billing_period_from_date,$current_date_string])->where('status_id',2)->whereNotNull('shipment_id');
 
