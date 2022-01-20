@@ -22,6 +22,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\Fuel\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Lead\LeadNotification;
 use App\Http\Models\Admin\Lead\LeadTagging;
 use App\Http\Models\Admin\Lead\LeadZone;
 use App\Http\Models\Admin\MonthClosingStatus;
@@ -5489,7 +5490,10 @@ public function sales_incentive()
         $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
         $services = DB::table('service_list')->where('status',1)->get();
         $cities = City::where('status',1)->get();
-        $zones = Zone::where('status',1)->where('business_category_id',1)->get();
+        $zones = Zone::join('lead_zones as lz','lz.zone_id','=','zones.id')
+                ->where('zones.status',1)->where('zones.business_category_id',1)->where('lz.admin_id',Auth::id())
+                ->select('zones.id as id','zones.name as name')->get();
+
         return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities , 'services' => $services , 'zones' => $zones]);
     }
 
@@ -5709,6 +5713,114 @@ public function sales_incentive()
     }
 
     public function lead_zones_enable_disable(Request $request){
+        $lead_zone = LeadZone::find($request->id);
+        if($lead_zone->status == 1){
+            $lead_zone->status = 0;
+            $lead_zone->save();
+        return redirect()->back()->with('success', 'Agent Zone Disabled!');
+
+        }else{
+            $lead_zone->status = 1;
+            $lead_zone->save();
+        return redirect()->back()->with('success', 'Agent Zone Enabled!');
+
+        }
+    }
+
+
+
+    
+    public function leads_notification_index(){
+        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        return view('admin.settings.lead_management.notification');
+    }
+
+    public function leads_notification_list(){
+        $notifications = LeadNotification::join('admins as a', 'lead_notifications.updated_by', '=', 'a.id')
+        ->select('lead_notifications.id', 'lead_notifications.name', 'lead_notifications.type_id as type', 'lead_notifications.updated_at', 'a.name as updated_by', 'lead_notifications.status');
+
+        $datatables = Datatables::of($notifications)
+        ->setRowAttr([
+            'data-type' => function($notification) {
+                return $notification->type_id;
+            },
+        ])
+        ->editColumn('status', function ($notification) {
+            return (($notification->status) ? 'Enabled' : 'Disabled');
+        })
+        
+        ->editColumn('type', function ($notification) {
+            if($notification->type == 1){
+                return 'Email';
+            }else{
+                return 'SMS';
+            }
+        })
+        ->addColumn('action', function($notification) {
+            $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+            $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+            $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+            $dropdown = '
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+            if (session('role_id') == 1 || in_array(101, session('permissions'))) {
+                $dropdown .= $edit_button;
+            }
+
+            if (session('role_id') == 1 || in_array(102, session('permissions'))) {
+                if ($notification->status) {
+                    $dropdown .= $disable_button;
+                }
+                else {
+                    $dropdown .= $enable_button;
+                }
+            }
+
+            $dropdown .= '
+                  </div>
+                </div>
+            ';
+
+            return $dropdown;
+        });
+
+        return $datatables->make(true);
+    }
+
+
+    public function leads_notification_data(Request $request){
+        $lead_zone = LeadZone::find($request->id);
+
+        $admin_id = $lead_zone->admin_id;
+        $zone_id = $lead_zone->zone_id;
+        $lead_zone_id = $lead_zone->id;
+
+        return response()->json(['status' => 1, 'admin_id' => $admin_id,'zone_id'=> $zone_id ,'lead_zone_id'=> $lead_zone_id]);
+
+    }
+
+
+    public function leads_notification_update(Request $request){
+        $check_leads = LeadZone::where('zone_id',$request->zone_id)->where('admin_id',$request->agent_id);
+
+        if(!$check_leads->exists()){
+            $lead_zone = LeadZone::find($request->lead_zone_id);
+            $lead_zone->admin_id = $request->agent_id;
+            $lead_zone->zone_id = $request->zone_id;
+            $lead_zone->save();
+            return redirect()->back()->with('success', 'Agent Zone Updated!');
+        }else{
+            return redirect()->back()->with('error', 'Agent Zone already exist');
+
+        }
+
+    }
+
+    public function leads_notification_enable_disable(Request $request){
         $lead_zone = LeadZone::find($request->id);
         if($lead_zone->status == 1){
             $lead_zone->status = 0;

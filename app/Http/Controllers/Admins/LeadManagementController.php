@@ -13,6 +13,7 @@ use App\Http\Models\City;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\LeadTagging;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
@@ -527,6 +528,16 @@ class LeadManagementController extends Controller
         if($leads->exists()){
             $leads = $leads->get();
             foreach ($leads as $lead){
+                //autotagging
+                $lead_tagging = LeadTagging::where('sale_person_id',$lead->sale_person_id);
+                if($lead_tagging->exists()){
+                    $lead_tagging = $lead_tagging->get()->first();
+                    if($lead_tagging->count > 0){
+
+                        $lead_tagging->count = $lead_tagging->count - 1; 
+                    }
+                }
+                //autotagging end
                 $lead->sale_person_id = $sale_person;
                 if($request->has('reference_person')){
                     $lead->reference_person_id = $reference_person;
