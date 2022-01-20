@@ -587,6 +587,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
         Route::get('active', 'Admins\AdminDashboardController@activeAccountsList')->name('active');
         Route::post('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
+        Route::post('cancelation-days', 'Admins\AdminDashboardController@auto_cancelation_days')->name('auto_cancelation_days');
         Route::get('block', 'Admins\AdminDashboardController@blockAccountsList')->name('block');
         Route::get('block/ajax', 'Admins\AdminDashboardController@blockAccountListAjax')->name('block.ajax');
         Route::post('status/block','Admins\AdminDashboardController@UserStatusBlock')->name('status.block');
@@ -2749,10 +2750,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
         });
-        Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function () {
-            Route::get('', 'Admins\GlobalSettingsController@cancelled_shipments_index')->name('index');
-            Route::post('', 'Admins\GlobalSettingsController@cancelled_shipments_store')->name('store');
-        });
+
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::prefix('incentive')->name('incentive.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@sales_incentive')->name('index');

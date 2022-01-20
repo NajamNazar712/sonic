@@ -11,8 +11,8 @@ class UpdateModulePermissionForAutoCancelledShipments extends Seeder
      */
     public function run()
     {
-        DB::table('module_permissions')->insert(array(
-            array('id' => 660, 'name' => 'Auto Shipment Cancellation Settings', 'module_id' => 14)
-        ));
+        $module = \App\Http\Models\Admin\ModulePermission::where('id',660)->first();
+        $module->module_id = 14;
+        $module->update();
     }
 }

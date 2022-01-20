@@ -5454,47 +5454,6 @@ public function sales_incentive()
 
     }
 
-    public function cancelled_shipments_index()
-    {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 488);
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
-        $settings = GlobalSettings::where('type', 'cancelled_shipments');
-        $cancelled_shipments = array();
-        if ($settings->exists()) {
-            $settings = $settings->first();
-            $cancelled_shipments = array_map('intval', explode(',', $settings->text));
-        }
-        return view('admin.settings.cancelled_shipments')->with(['shippers' => $shippers, 'cancelled_shipments' => $cancelled_shipments,'settings' => $settings]);
-    }
-
-    public function cancelled_shipments_store(Request $request)
-    {
-        if ($request->has('shippers')) {
-            if (count($request->shippers) > 0) {
-                $shippers = implode(',', $request->shippers);
-                $settings = GlobalSettings::where('type', 'cancelled_shipments');
-
-                if ($settings->exists()) {
-                    $settings = $settings->first();
-                } else {
-                    $settings = new GlobalSettings();
-
-                    $settings->type = 'cancelled_shipments';
-                    $settings->setting_value = 0;
-
-                }
-                $settings->text = $shippers;
-                $settings->setting_value = $request->shipment_cancellation;
-                $settings->save();
-            }
-            return redirect()->back()->with('success', 'Settings Updated!');
-
-        } else {
-            return redirect()->back()->with('error', 'No shippers selected!');
-        }
-
-    }
-
 	public function reattempt_percentage_index()
     {
         $settings = GlobalSettings::where('type', 'reattempt_percentage');
