@@ -45,6 +45,8 @@ class GetStartedController extends Controller
         $new_lead->phone_number = $phone;
         $new_lead->email_address = $email;
         $new_lead->requested_date = Carbon::now();
+        $new_lead->brand = $request->brand_name;
+        $new_lead->company = $request->company_name;
         $new_lead->message = $request->message;
         $new_lead->reference_id = $request->reference;
         $new_lead->service_id = $request->service;
