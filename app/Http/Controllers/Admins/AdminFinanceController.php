@@ -50,6 +50,7 @@ use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsPaymentJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\Warehouse\Warehouse;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\ZoneClassCity;
 use Illuminate\Http\Request;
@@ -6281,7 +6282,7 @@ class AdminFinanceController extends Controller
                 }*/
 
                 $packaging_invoice_toggle_on = CorporateUserPackagingInvoice::where('user_id',$user_id)->where('status',1)->first();
-                if($packaging_invoice_toggle_on && $generate){
+                if($packaging_invoice_toggle_on && A){
 
                     $packaging_material_requests = PackagingMaterialRequest::where('user_id',$user_id)->whereBetween('updated_at', [$billing_period_from_date,$current_date_string])->where('status_id',2)->whereNotNull('shipment_id');
 
@@ -9305,9 +9306,11 @@ class AdminFinanceController extends Controller
               
             </tr>
           </thead><tbody>';
+                    $warehouse = Warehouse::where('hub_id',$origins)->first();
+                    $hubs = $warehouse->associated_hubs->pluck('hub_id')->toArray();
 
                     $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id', $shipment_ids)->where('packaging_material_requests.status_id', 2)
-                        ->where('city_id', $origins)
+                        ->whereIn('city_id', $hubs)
                         ->where('packaging_material_requests.user_id', $shipper->id);
 
                     if ($packaging_materials->exists()) {
