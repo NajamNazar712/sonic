@@ -239,8 +239,10 @@
                                                                 @if($rider_delivery->otp_entered != NULL)
                                                                     @if($rider_delivery->otp_entered == 1)
                                                                         <td>'Yes'</td>
-                                                                    @else
+                                                                    @elseif($rider_delivery->otp_entered == 0)
                                                                         <td>'No'</td>
+                                                                    @else
+                                                                        <td>'-'</td>
                                                                     @endif
                                                                 @else
                                                                     <td>'-'</td>

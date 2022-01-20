@@ -977,16 +977,16 @@ class AdminAttendanceController extends Controller
                             <td class="color primary border twice" colspan="10"><b>Attandence Details</b></td>
                         </tr>
                         <tr>
-                            <td class="color primary border twice">Day</td>
-                            <td class="color primary border twice">Date In</td>
-                            <td class="color primary border twice">Time In</td>
-                            <td class="color primary border twice">Date Out</td>
-                            <td class="color primary border twice">Time Out</td>
-                            <td class="color primary border twice">Work Hours</td>
-                            <td class="color primary border twice">Late Arrival</td>
-                            <td class="color primary border twice">Early Departure</td>
-                            <td class="color primary border twice">Overtime</td>
-                            <td class="color primary border twice">Remarks</td>
+                            <td class="color primary border twice"><b>Day</b></td>
+                            <td class="color primary border twice"><b>Date In</b></td>
+                            <td class="color primary border twice"><b>Time In</b></td>
+                            <td class="color primary border twice"><b>Date Out</b></td>
+                            <td class="color primary border twice"><b>Time Out</b></td>
+                            <td class="color primary border twice"><b>Work Hours</b></td>
+                            <td class="color primary border twice"><b>Late Arrival</b></td>
+                            <td class="color primary border twice"><b>Early Departure</b></td>
+                            <td class="color primary border twice"><b>Overtime</b></td>
+                            <td class="color primary border twice"><b>Remarks</b></td>
                         </tr>
                    ';
         foreach ($employee_attendances as $employee_attendance){
