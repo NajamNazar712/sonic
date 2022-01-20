@@ -9311,10 +9311,9 @@ class AdminFinanceController extends Controller
 
                     $hubs = array();
                     foreach($warehouses as $warehouse){
-                        array_push($hubs,$warehouse->associated_hubs->pluck('hub_id')->toArray());
+                        $hubs =  array_merge($warehouse->associated_hubs->pluck('hub_id')->toArray(),$hubs);
                     }
-
-
+                    
                     $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id', $shipment_ids)->where('packaging_material_requests.status_id', 2)
                         ->whereIn('city_id', $hubs)
                         ->where('packaging_material_requests.user_id', $shipper->id);
