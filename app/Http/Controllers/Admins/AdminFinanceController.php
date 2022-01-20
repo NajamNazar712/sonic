@@ -8861,9 +8861,9 @@ class AdminFinanceController extends Controller
                     $origin_city_ids[] = $origin_city_id;
 
                     if (!isset($origins_gst_wise_city_ids[$gst])) {
-                        $origins_gst_wise_city_ids[$gst][] = array();
+                        $origins_gst_wise_city_ids[$gst] = array();
                     }
-                    $origins_gst_wise_city_ids[$gst] = $origin_city_id;
+                    $origins_gst_wise_city_ids[$gst][] = $origin_city_id;
                 }
 
                 if (!isset($shipment_details[$origin])) {
@@ -9216,6 +9216,7 @@ class AdminFinanceController extends Controller
             }
         }
         else{
+
             foreach ($origins_gst_wise_city_ids as $gst => $origins) {
 
                 $size_array = array();
@@ -9307,9 +9308,9 @@ class AdminFinanceController extends Controller
             </tr>
           </thead><tbody>';
                     $warehouses = Warehouse::whereIn('hub_id',$origins)->get();
+
                     $hubs = array();
                     foreach($warehouses as $warehouse){
-                        //$hubs = $warehouse->associated_hubs->pluck('hub_id')->toArray();
                         array_push($hubs,$warehouse->associated_hubs->pluck('hub_id')->toArray());
                     }
 
