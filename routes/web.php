@@ -3072,6 +3072,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_tagging_enable_disable')->name('enable_disable');
             
         });
+
+        Route::prefix('lead_zones')->name('lead_zones.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@lead_zones_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@lead_zones_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@lead_zones_submit')->name('submit');
+            Route::post('data', 'Admins\GlobalSettingsController@lead_zones_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@lead_zones_update')->name('update');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_zones_enable_disable')->name('enable_disable');
+            
+        });
     });
 
 

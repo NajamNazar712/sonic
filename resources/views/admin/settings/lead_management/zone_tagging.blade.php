@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Auto Tagging')
+@section('title', 'Zone Tagging')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Auto Tagging 
+                    Zone Tagging 
                 </h1>
 
                 <div class="card">
@@ -21,10 +21,8 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Admin</th>
                                     <th class="border-primary border-darken-1">Zone</th>
-                                    <th class="border-primary border-darken-1">City</th>
-                                    <th class="border-primary border-darken-1">Service</th>
-                                    <th class="border-primary border-darken-1">Tagged Salesperson</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -40,9 +38,9 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Tag User</h4>
+                    <h4 class="modal-title" id="">Tag Zone</h4>
                 </div>
-                <form method="post" id="agent_assign" action="{{route('admin.settings.lead_tagging.submit')}}">
+                <form method="post" id="agent_assign" action="{{route('admin.settings.lead_zones.submit')}}">
                     @csrf
 
                 <div class="modal-body">
@@ -53,21 +51,10 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group" id="city_select">
-                        <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
-                        </select>
-                    </div>
-                    <div class="form-group" id="service_select">
-                        <select name="service_id" id="service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required">
-                            @foreach($services as $service)
-                                <option value="{{ $service->id }}" > {{ $service->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
                     <div class="form-group" id="agent_select">
                         <select name="agent_id" id="agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
+                            @foreach($admins as $admin)
+                                <option value="{{ $admin->id }}" > {{ $admin->name }} </option>
                             @endforeach
                         </select>
                     </div>
@@ -90,11 +77,11 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Edit Tagged User</h4>
                 </div>
-                <form method="post" id="agent_edit" action="{{route('admin.settings.lead_tagging.update')}}" novalidate="novalidate">
+                <form method="post" id="agent_edit" action="{{route('admin.settings.lead_zones.update')}}" novalidate="novalidate">
                     @csrf
 
                 <div class="modal-body">
-                    <input type="hidden" name="lead_tagging_id" id="lead_tagging_id">
+                    <input type="hidden" name="lead_zone_id" id="lead_zone_id">
                     
                     <div class="form-group">
                         <select name="zone_id" id="edit_zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
@@ -105,25 +92,9 @@
                     </div>
 
                     <div class="form-group">
-                        <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <select name="service_id" id="edit_service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required">
-                            @foreach($services as $service)
-                                <option value="{{ $service->id }}" > {{ $service->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
                         <select name="agent_id" id="edit_agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
+                            @foreach($admins as $admin)
+                                <option value="{{ $admin->id }}" > {{ $admin->name }} </option>
                             @endforeach
                         </select>
                     </div>
@@ -165,8 +136,6 @@
                 
                 $("agent_id").select2('val', '')
                 $('#zone_id').val('').trigger('change.select2');
-                $('#city_id').val('').trigger('change.select2');
-                $('#service_id').val('').trigger('change.select2');
                 
             });
            
@@ -176,64 +145,18 @@
                 allowClear:true,
                 dropdownParent:$('#agent_assign')
             });
-            $('#service_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select Service",
-                allowClear:true,
-                dropdownParent:$('#agent_assign')
-            });
-            $('#service_select').css('display','none');
-            $('#city_select').css('display','none');
-            $('#agent_select').css('display','none');
+           
 
             $('#zone_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Zone",
                 allowClear:true,
                 dropdownParent:$('#agent_assign')
-            }).bind('change', function() {
-                $('#service_select').css('display','block');
-                $('#city_select').css('display','block');
-                $('#agent_select').css('display','block');
-
-                $('#city_id').children().remove()
-
-                var id = parseInt($(this).val());
-                    var city_obj = [];
-                    city_obj.length = 0
-
-                $.map({!! $cities !!}, function (obj) {
-                        if(id == obj.zone_id){
-                            city_obj.push({id: obj.id, text: obj.name});
-                        }
-                });
-
-                $('#city_id').prepend('<option selected></option>').select2({
-                        width:'100%',
-                        placeholder:"Select City",
-                        allowClear:true,
-                        dropdownParent:$('#agent_assign'),
-                        data:city_obj
-                    });
             });    
 
 
-            $('#edit_agent_id').prepend('<option selected></option>').select2({
+            $('#edit_agent_id').select2({
                 width:'100%',
-                placeholder:"Select Agent",
-                allowClear:true,
-                dropdownParent:$('#agent_edit')
-            });
-            $('#edit_service_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select Service",
-                allowClear:true,
-                dropdownParent:$('#agent_edit')
-            });
-
-            $('#edit_city_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select City",
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
@@ -242,32 +165,7 @@
                 width:'100%',
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
-            }).bind('change', function() {
-                
-                $("#edit_agent_id").select2('val', '');
-                $("#edit_service_id").select2('val', '');
-
-                $('#edit_city_id').children().remove();
-                $('#edit_city_id').select2('destroy');
-
-                var id = parseInt($(this).val());
-                    var city_obj = [];
-                    city_obj.length = 0
-
-                $.map({!! $cities !!}, function (obj) {
-                        if(id == obj.zone_id){
-                            city_obj.push({id: obj.id, text: obj.name});
-                        }
-                });
-
-                $('#edit_city_id').prepend('<option selected></option>').select2({
-                        width:'100%',
-                        placeholder:"Select City",
-                        allowClear:true,
-                        dropdownParent:$('#agent_edit'),
-                        data:city_obj
-                    });
-            }); 
+            });  
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -294,16 +192,14 @@
                 language: {
                     processing: data_table_loader
                 },
-                ajax: '{{ route('admin.settings.lead_tagging.list') }}',
+                ajax: '{{ route('admin.settings.lead_zones.list') }}',
                 rowId: 'id',
                 order: [[3, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
-                    {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
-                    {data: 'service', name: 's.name', class: 'align-middle service'},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
-                    {data: 'status', name: 'lead_taggings.status', class: 'align-middle status'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
+                    {data: 'status', name: 'lead_zones.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -330,12 +226,6 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        }
-                        else if($(header).is('.department')){
-                            $(departments_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }else if ($(header).is('.status')) {
                             $(status).appendTo($(search))
                                 .on('change', function () {
@@ -370,7 +260,7 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $.ajax({
-                    url:'{!! route("admin.settings.lead_tagging.data") !!}',
+                    url:'{!! route("admin.settings.lead_zones.data") !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -378,14 +268,10 @@
                     }
                 }).done(function (data) {
                     console.log(data.city_id);
-                    $('#edit_agent_id').val(data.agent_id).change();
-                    $('#edit_city_id').val(data.city_id).change();
+                    $('#edit_agent_id').val(data.agent_id);
                     $('#edit_zone_id').val(data.zone_id);
-                    $('#edit_service_id').val(data.service_id).change();
-                    $('#lead_tagging_id').val(data.lead_tagging_id).change();
-                    
+                    $('#lead_zone_id').val(data.lead_zone_id).change();
                     $('#EditAgentModal').modal('show');
-
                 })
                 
             });
@@ -434,7 +320,7 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                                          $.ajax({
-                                            url:'{!! route("admin.settings.lead_tagging.enable_disable") !!}',
+                                            url:'{!! route("admin.settings.lead_zones.enable_disable") !!}',
                                             method: 'POST',
                                             data: {
                                                 'id': id,

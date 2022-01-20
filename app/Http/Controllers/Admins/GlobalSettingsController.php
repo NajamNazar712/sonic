@@ -23,6 +23,7 @@ use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\Fuel\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Lead\LeadTagging;
+use App\Http\Models\Admin\Lead\LeadZone;
 use App\Http\Models\Admin\MonthClosingStatus;
 use App\Http\Models\Admin\MonthClosingType;
 use App\Http\Models\Admin\NonServiceArea;
@@ -5486,8 +5487,10 @@ public function sales_incentive()
     public function lead_tagging_index(){
         // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
         $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
+        $services = DB::table('service_list')->where('status',1)->get();
         $cities = City::where('status',1)->get();
-        return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities]);
+        $zones = Zone::where('status',1)->where('business_category_id',1)->get();
+        return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities , 'services' => $services , 'zones' => $zones]);
     }
 
     public function lead_tagging_list(){
@@ -5526,9 +5529,9 @@ public function sales_incentive()
             }
         })->editColumn('status', function($roles) {
             if($roles->status == 1){
-                return 'Active';
+                return 'Enable';
             }else{
-                return 'In-Active';
+                return 'Disable';
             }
             
         });
@@ -5537,56 +5540,185 @@ public function sales_incentive()
     }
 
     public function lead_tagging_submit(Request $request){
-        $crm_agent = CrmAutoTagUser::where('city_id',$request->city_id);
-        if(!$crm_agent->exists()){
-            CrmAutoTagUser::create($request->all());
-            return redirect()->back()->with('success', 'Agent Added!');
+
+        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
+
+        if(!$check_leads->exists()){
+            $lead_tagging = new LeadTagging;
+            $lead_tagging->sale_person_id = $request->agent_id;
+            $lead_tagging->zone_id = $request->zone_id;
+            $lead_tagging->city_id = $request->city_id;
+            $lead_tagging->service_id = $request->service_id;
+            $lead_tagging->save();
+
+            return redirect()->back()->with('success', 'Lead Agent Added!');
+
         }else{
-            return redirect()->back()->with('error', 'Location already exist, Please edit the Tagged user');
-
+            return redirect()->back()->with('error', 'Lead Agent already exist');
         }
-
-
     }
 
     public function lead_tagging_data(Request $request){
-        $crm_agent_data = CrmAutoTagUser::find($request->id);
+        $lead_tagging = LeadTagging::find($request->id);
 
-        $agent_id = $crm_agent_data->admin_id;
-        $city_id = $crm_agent_data->city_id;
-        $crm_agent_id = $crm_agent_data->id;
-        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'crm_agent_id'=> $crm_agent_id]);
-
-    }
-
-    public function lead_tagging_delete(Request $request){
-        CrmAutoTagUser::find($request->id)->delete();
-        return response()->json(['status' => 1, 'success' => 'Tagged Agent Deleted']);
+        $agent_id = $lead_tagging->sale_person_id;
+        $city_id = $lead_tagging->city_id;
+        $zone_id = $lead_tagging->zone_id;
+        $service_id = $lead_tagging->service_id;
+        $lead_tagging_id = $lead_tagging->id;
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'zone_id'=> $zone_id ,'service_id'=> $service_id ,'lead_tagging_id'=> $lead_tagging_id]);
 
     }
+
+    // public function lead_tagging_delete(Request $request){
+    //     CrmAutoTagUser::find($request->id)->delete();
+    //     return response()->json(['status' => 1, 'success' => 'Tagged Agent Deleted']);
+
+    // }
 
 
     public function lead_tagging_update(Request $request){
-        $crm_agent_data = CrmAutoTagUser::find($request->crm_agent_id);
+        // dd($request->all());
+        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
 
-        $crm_agent_data->admin_id = $request->admin_id;
-        $crm_agent_data->city_id = $request->city_id;
-        $crm_agent_data->save();
-        return redirect()->back()->with('success', 'Agent Updated!');
+        if(!$check_leads->exists()){
+            $lead_tagging = LeadTagging::find($request->lead_tagging_id);
+            $lead_tagging->sale_person_id = $request->agent_id;
+            $lead_tagging->zone_id = $request->zone_id;
+            $lead_tagging->city_id = $request->city_id;
+            $lead_tagging->service_id = $request->service_id;
+            $lead_tagging->save();
+            return redirect()->back()->with('success', 'Lead Agent Updated!');
+        }else{
+            return redirect()->back()->with('error', 'Lead Agent already exist');
+
+        }
 
     }
 
     public function lead_tagging_enable_disable(Request $request){
-        $crm_agent = CrmAutoTagUser::find($request->id);
-        if($crm_agent->status == 1){
-            $crm_agent->status = 0;
-            $crm_agent->save();
-        return redirect()->back()->with('success', 'Agent Disabled!');
+        $lead_tagging = LeadTagging::find($request->id);
+        if($lead_tagging->status == 1){
+            $lead_tagging->status = 0;
+            $lead_tagging->save();
+        return redirect()->back()->with('success', 'Lead Agent Disabled!');
 
         }else{
-            $crm_agent->status = 1;
-            $crm_agent->save();
-        return redirect()->back()->with('success', 'Agent Enabled!');
+            $lead_tagging->status = 1;
+            $lead_tagging->save();
+        return redirect()->back()->with('success', 'Lead Agent Enabled!');
+
+        }
+    }
+
+
+    public function lead_zones_index(){
+        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        $admins = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
+        $zones = Zone::where('status',1)->where('business_category_id',1)->get();
+        return view('admin.settings.lead_management.zone_tagging')->with(['admins' => $admins , 'zones' => $zones]);
+    }
+
+    public function lead_zones_list(){
+        $roles = LeadZone::join('admins as ad', 'ad.id', '=', 'lead_zones.admin_id')
+                 ->join('zones as z','z.id','lead_zones.zone_id')   
+        ->select('lead_zones.id', 'ad.name as agent_name', 'z.name as zone','lead_zones.status');
+        
+    $datatables = Datatables::of($roles)
+        ->addColumn('action', function($roles) {
+            if (session('role_id') == 1 || in_array(640, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    ';
+                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    if($roles->status == 1 ){
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }else{
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+          return $dropdown;
+               
+            }
+            else {
+                return '';
+            }
+        })->editColumn('status', function($roles) {
+            if($roles->status == 1){
+                return 'Enable';
+            }else{
+                return 'Disable';
+            }
+            
+        });
+
+    return $datatables->make(true);
+    }
+
+    public function lead_zones_submit(Request $request){
+
+        $check_leads = LeadZone::where('zone_id',$request->zone_id)->where('admin_id',$request->agent_id);
+
+        if(!$check_leads->exists()){
+            $lead_zone = new LeadZone;
+            $lead_zone->admin_id = $request->agent_id;
+            $lead_zone->zone_id = $request->zone_id;
+            $lead_zone->save();
+
+            return redirect()->back()->with('success', 'Agent Zone Added!');
+
+        }else{
+            return redirect()->back()->with('error', 'Agent Zone already exist');
+        }
+    }
+
+    public function lead_zones_data(Request $request){
+        $lead_zone = LeadZone::find($request->id);
+
+        $admin_id = $lead_zone->admin_id;
+        $zone_id = $lead_zone->zone_id;
+        $lead_zone_id = $lead_zone->id;
+
+        return response()->json(['status' => 1, 'admin_id' => $admin_id,'zone_id'=> $zone_id ,'lead_zone_id'=> $lead_zone_id]);
+
+    }
+
+
+    public function lead_zones_update(Request $request){
+        $check_leads = LeadZone::where('zone_id',$request->zone_id)->where('admin_id',$request->agent_id);
+
+        if(!$check_leads->exists()){
+            $lead_zone = LeadZone::find($request->lead_zone_id);
+            $lead_zone->admin_id = $request->agent_id;
+            $lead_zone->zone_id = $request->zone_id;
+            $lead_zone->save();
+            return redirect()->back()->with('success', 'Agent Zone Updated!');
+        }else{
+            return redirect()->back()->with('error', 'Agent Zone already exist');
+
+        }
+
+    }
+
+    public function lead_zones_enable_disable(Request $request){
+        $lead_zone = LeadZone::find($request->id);
+        if($lead_zone->status == 1){
+            $lead_zone->status = 0;
+            $lead_zone->save();
+        return redirect()->back()->with('success', 'Agent Zone Disabled!');
+
+        }else{
+            $lead_zone->status = 1;
+            $lead_zone->save();
+        return redirect()->back()->with('success', 'Agent Zone Enabled!');
 
         }
     }
