@@ -937,7 +937,7 @@ class AdminAttendanceController extends Controller
                                 <td class="text-center align-middle"><h2>Trax Online (Pvt.) Ltd</h2></td>
                              </tr>
                              <tr>
-                                <td class="text-center align-middle">Monthly Employee Time Sheet PDF</td>
+                                <td class="text-center align-middle">Employee Time Sheet PDF</td>
                              </tr>
                              <tr>
                                 <td class="text-center align-middle">'.$date_from.' TO '.$date_to.'</td>
@@ -977,16 +977,16 @@ class AdminAttendanceController extends Controller
                             <td class="color primary border twice" colspan="10"><b>Attandence Details</b></td>
                         </tr>
                         <tr>
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Day</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date In</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Time In</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date Out</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Time Out</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Work Hours</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Late Arrival</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Early Departure</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Overtime</th>;
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Remarks</th>;
+                            <th class="color primary border twice">Day</th>
+                            <th class="color primary border twice">Date In</th>
+                            <th class="color primary border twice">Time In</th>
+                            <th class="color primary border twice">Date Out</th>
+                            <th class="color primary border twice">Time Out</th>
+                            <th class="color primary border twice">Work Hours</th>
+                            <th class="color primary border twice">Late Arrival</th>
+                            <th class="color primary border twice">Early Departure</th>
+                            <th class="color primary border twice">Overtime</th>
+                            <th class="color primary border twice">Remarks</th>
                         </tr>
                    ';
         foreach ($employee_attendances as $employee_attendance){
@@ -1059,18 +1059,23 @@ class AdminAttendanceController extends Controller
                 }
             }
             $html .= '<tr>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $day . '</td>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $date_in . '</td>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $time_in . '</td>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $date_out . '</td>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $time_out . '</td>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $working_hours . '</td>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $late_arrival . '</td>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $early_departure . '</td>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $over_time . '</td>';
-            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $remarks . '</td>';
+            $html .= '<td>' . $day . '</td>';
+            $html .= '<td>' . $date_in . '</td>';
+            $html .= '<td>' . $time_in . '</td>';
+            $html .= '<td>' . $date_out . '</td>';
+            $html .= '<td>' . $time_out . '</td>';
+            $html .= '<td>' . $working_hours . '</td>';
+            $html .= '<td>' . $late_arrival . '</td>';
+            $html .= '<td>' . $early_departure . '</td>';
+            $html .= '<td>' . $over_time . '</td>';
+            $html .= '<td>' . $remarks . '</td>';
         }
-        $html.='<tr class="text-center">
+        $html .= '    </tbody>
+                      </table>';
+
+        $html.='<table class="table border table-sm">
+                    <tbody>
+                        <tr class="text-center">
                             <td class="color primary border twice" colspan="10"><b>Attendance Summary</b></td>
                         </tr>
                         <tr class="text-left">
@@ -1085,10 +1090,10 @@ class AdminAttendanceController extends Controller
                             <td colspan="3" class="border twice-right">Offdays : '.$sunday.'</td>
                             <td colspan="3" class="border twice-right">Leave : '.$leave.'</td>
                         </tr>
-                        ';
-        $html .= '    
-                      </tbody>
+                        </tbody>
                       </table>
+                        ';
+        $html .= ' 
                       </div>
                       </body>
                       </html>';
