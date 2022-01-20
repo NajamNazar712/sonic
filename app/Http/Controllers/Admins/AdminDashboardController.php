@@ -144,6 +144,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\PickupType;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\BookingTypeCharges;
+use App\Http\Models\CityOsaRate;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\DiscountCharge;
 use App\Http\Models\PendingDwsWeightCharges;
@@ -162,7 +163,7 @@ use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\HR\EmployeeDesignation;
-
+use CreateCityOsaRatesTable;
 
 class AdminDashboardController extends Controller
 {
@@ -8253,7 +8254,7 @@ class AdminDashboardController extends Controller
 
         if($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0){
             DwsWeightChargesController::approve($id);
-            User::where('id',$id)->update(['rate_status'=>0,'status' => 2,'rates_authorized_by'=> 32,'rates_approved_at'=>Carbon::now()]);
+            User::where('id',$id)->update(['rate_status'=> 0,'status' => 2,'rates_authorized_by'=> 32, 'rates_approved_at'=> Carbon::now()]);
         }
         
 
@@ -8393,14 +8394,14 @@ class AdminDashboardController extends Controller
         }
 
         if($sale_persons = $request->get('sale_persons')){
-            $users = $users->whereIn('ad.id', $sale_persons);
+            $users = $users->where('ad.id', $sale_persons);
         }
 
         if($search_cnic = $request->get('search_cnic')){
             $users = $users->where('users.cnic', $search_cnic);
         }
         if($search_shipper = $request->get('search_shipper')){
-            $users = $users->whereIn('users.id', $search_shipper);
+            $users = $users->where('users.id', $search_shipper);
         }
 
         if($search_iban = $request->get('search_iban')){
@@ -9409,6 +9410,17 @@ class AdminDashboardController extends Controller
                     return '';
                 }
             })
+            ->addColumn('osa_list', function ($result){
+                $osa_count = CityOsaRate::where('city_id',$result->city_id);
+                if($osa_count->exists()){
+                    $btn = '<div class="text-center">';
+                    $btn .= '<button type="button" class="btn btn-primary btn-sm">'.$osa_count->count().'</button>';
+                    $btn .= '</div>';
+                    return $btn;
+                }else{
+                    return '-';
+                }
+            })
             ->make(true);
     }
 
@@ -9442,15 +9454,18 @@ class AdminDashboardController extends Controller
         $booking = BookingType::where('id','!=',4)->get();
         $walk_in_city = WalkInCities::where('city_id',$city['id'])->get();
         $walk_in_delivery = array();
+        $osa_list = CityOsaRate::where('city_id',$city->id)->get();
+
         foreach ($walk_in_city as $walk_in_detail){
             $walk_in_delivery[$walk_in_detail['delivery']] = $walk_in_detail['delivery'];
         }
-        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs, 'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub, 'walk_in_city' => $walk_in_delivery]);
+        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs, 'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list]);
 
     }
 
     public function updateCity(Request $request,$id){
-       
+        CityOsaRate::where('city_id',$id)->delete();
+
         $city_id = City::where('id',$id)->first();
         if($city_id){
             if($request->has('updatedelivery') && count($request->updatedelivery) > 0){
@@ -9508,7 +9523,18 @@ class AdminDashboardController extends Controller
                             ]);
                         }
                     }
+                    if($request->osa_name != null){
 
+                        foreach ($request->osa_name as $key => $value) {
+    
+                            $osa_charges = new CityOsaRate();
+                            $osa_charges->city_id = $id;
+                            $osa_charges->osa_name = $value;
+                            $osa_charges->osa_rate = $request->osa_rate[$key];
+                            $osa_charges->admin_id = Auth::id();
+                            $osa_charges->save();
+                        }
+                    }
                     return redirect()->back()->with('success','City updated successfully');
                 }
                 elseif($request->postType == 'hub'){
@@ -9565,7 +9591,18 @@ class AdminDashboardController extends Controller
                             ]);
                         }
                     }
-
+                    if($request->osa_name != null){
+                    
+                        foreach ($request->osa_name as $key => $value) {
+    
+                            $osa_charges = new CityOsaRate();
+                            $osa_charges->city_id = $id;
+                            $osa_charges->osa_name = $value;
+                            $osa_charges->osa_rate = $request->osa_rate[$key];
+                            $osa_charges->admin_id = Auth::id();
+                            $osa_charges->save();
+                        }
+                    }
                     return redirect()->back()->with('success','Hub/city updated successfully');
                 }
             }
@@ -9655,6 +9692,18 @@ class AdminDashboardController extends Controller
 
                 $zone_class_city->save();
             }
+            if($request->osa_name != null){
+            
+                foreach ($request->osa_name as $key => $value) {
+    
+                    $osa_charges = new CityOsaRate();
+                    $osa_charges->city_id = $city->id;
+                    $osa_charges->osa_name = $value;
+                    $osa_charges->osa_rate = $request->osa_rate[$key];
+                    $osa_charges->admin_id = Auth::id();
+                    $osa_charges->save();
+                }
+            }
 
             return redirect()->back()->with('success','City added successfully');
         }elseif($request->postType == 'hub'){
@@ -9731,6 +9780,18 @@ class AdminDashboardController extends Controller
                 $zone_class_city->zone_classification_id = 2;
 
                 $zone_class_city->save();
+            }
+            if($request->osa_name != null){
+            
+                foreach ($request->osa_name as $key => $value) {
+    
+                    $osa_charges = new CityOsaRate();
+                    $osa_charges->city_id = $city->id;
+                    $osa_charges->osa_name = $value;
+                    $osa_charges->osa_rate = $request->osa_rate[$key];
+                    $osa_charges->admin_id = Auth::id();
+                    $osa_charges->save();
+                }
             }
             return redirect()->back()->with('success','Hub city added successfully');
         }
@@ -11349,6 +11410,11 @@ class AdminDashboardController extends Controller
             $user_ids = explode(',', $user_ids);
             foreach($user_ids as $id){
                 $user = User::find($id);
+                if($user->territory_id)
+                return redirect()->back()->with('error', 'Territory not added as '.$user->name.' is tagged previously');
+            }
+            foreach($user_ids as $id){
+                $user = User::find($id);
                 $user->territory_id = $territory;
                 $user->save();
 
@@ -11508,6 +11574,40 @@ class AdminDashboardController extends Controller
         }
 
    }
+
+   public function add_retag_territory(Request $request){
+    $territory = $request->territory;
+    $user_ids = $request->user_ids;
+        if($user_ids){
+            $user_ids = explode(',', $user_ids);
+            foreach($user_ids as $id){
+                $user = User::find($id);
+                if(!$user->territory_id)
+                return redirect()->back()->with('error', 'Retagging not done as '.$user->name.' is not tagged previously');
+            }
+            foreach($user_ids as $id){
+                $user = User::find($id);
+                $user->territory_id = $territory;
+                $user->save();
+
+                $history = new TerritoryTagHistory();
+                $history->user_id = $id;
+                $history->admin_id = Auth::id();
+                $history->save();
+            }
+            return redirect()->back()->with('success', 'Territory is added.');
+            }
+        else{
+            return redirect()->back()->with('error', 'Territory not added.');
+        }
+    }
+    public function osa_list(Request $request){
+        $city = City::find($request->city_id);
+
+        $osa_list = CityOsaRate::where('city_id',$city->id)->get();
+        return response()->json(['status'=>1,'osa_list'=>$osa_list]);
+
+    }
 
 }
 

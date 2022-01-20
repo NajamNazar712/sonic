@@ -696,6 +696,10 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['consignee','tracking_no', 'otp'];
         }
+        else if ($id == 167)
+        {
+            $details['fields'] = ['status_code','link'];
+        }
 		return $details;
     }
 
