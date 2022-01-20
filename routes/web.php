@@ -38,13 +38,18 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
-    Route::get('/register/{lead_id?}','Auth\RegisterController@showRegistrationForm')->name('register');
+    Route::get('/register/','Auth\GetStartedController@index')->name('register');
+    Route::get('/get-started', 'Auth\GetStartedController@index')->name('getstarted');
+    Route::post('/get-started','Auth\GetStartedController@getstarted_submit')->name('getstarted');
+    Route::get('/get-started-success','Auth\GetStartedController@getstarted_success')->name('getstarted.success');
+    Route::get('/register/{lead_id}','Auth\RegisterController@showRegistrationForm')->name('register');
     Route::post('/register','Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
     Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
     Route::post('/territory', 'Auth\RegisterController@territory')->name('territory');
+    Route::post('/area', 'Auth\RegisterController@area')->name('area');
     Route::post('update/agreement_status','Shippers\ShipperDashboardController@agreement_status')->name('update.agreement_status');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
@@ -602,6 +607,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('kam_poc_ref_tag/remove','Admins\AdminDashboardController@kam_poc_ref_tag_remove')->name('kam_poc_ref_tag.remove');
         Route::post('restrict_order_id/info','Admins\AdminDashboardController@restrict_order_id_info')->name('restrict_order_id.info');
         Route::post('restrict_order_id/submit','Admins\AdminDashboardController@restrict_order_id_submit')->name('restrict_order_id.submit');
+        Route::post('/add_retag_territory', 'Admins\AdminDashboardController@add_retag_territory')->name('add_retag_territory');
 
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
@@ -838,7 +844,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('tag', 'Admins\AdminTerritoryController@area_tag')->name('tag');
 
         });
+        
+        Route::post('/city/osa_list', 'Admins\AdminDashboardController@osa_list')->name('city.osa_list');
 
+        
 
     });
     Route::prefix('pickups')->name('pickups.')->group(function () {
@@ -2740,6 +2749,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
         });
+        Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@cancelled_shipments_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@cancelled_shipments_store')->name('store');
+        });
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::prefix('incentive')->name('incentive.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@sales_incentive')->name('index');
@@ -3054,6 +3067,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@international_automation_user_store')->name('store');
         });
 
+        Route::prefix('reattempt_percentage')->name('reattempt_percentage.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@reattempt_percentage_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@reattempt_percentage_store')->name('store');
+        });
     });
 
 
@@ -3546,6 +3563,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_index')->name('index');
         Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
+        Route::post('excel', 'Admins\Attendance\AdminAttendanceController@attendance_excel_upload')->name('excel');
+        Route::post('print', 'Admins\Attendance\AdminAttendanceController@attendance_print')->name('print');
         Route::get('/mark', 'Admins\Attendance\AdminAttendanceController@mark_attendance_index')->name('mark');
         Route::post('/mark/submit', 'Admins\Attendance\AdminAttendanceController@mark_attendance_submit')->name('mark.submit');
         Route::get('/mark/list', 'Admins\Attendance\AdminAttendanceController@mark_attendance_list')->name('mark.list');
