@@ -6284,7 +6284,7 @@ class AdminFinanceController extends Controller
                 $packaging_invoice_toggle_on = CorporateUserPackagingInvoice::where('user_id',$user_id)->where('status',1)->first();
                 if($packaging_invoice_toggle_on && $generate){
 
-                    $packaging_material_requests = PackagingMaterialRequest::where('user_id',$user_id)->whereBetween('updated_at', [$billing_period_from_date,$current_date_string])->where('status_id',2)->whereNotNull('shipment_id');
+                    $packaging_material_requests = PackagingMaterialRequest::where('user_id',$user_id)->whereBetween('updated_at', [$billing_period_from_date,$current_date_string])->where('status_id',4)->whereNotNull('shipment_id');
 
                     if($packaging_material_requests->exists()){
                       
@@ -7060,7 +7060,7 @@ class AdminFinanceController extends Controller
 
             if (count($shipment_ids) > 0) {
 
-                $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id', $shipment_ids)->where('packaging_material_requests.status_id', 2)
+                $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id', $shipment_ids)->where('packaging_material_requests.status_id', 4)
                     ->where('packaging_material_requests.user_id', $shipper->id);
 
                 if ($packaging_materials->exists()) {
@@ -7864,7 +7864,7 @@ class AdminFinanceController extends Controller
 
             if(count($shipment_ids) > 0) {
 
-                $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id',$shipment_ids)->where('packaging_material_requests.status_id', 2)
+                $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id',$shipment_ids)->where('packaging_material_requests.status_id', 4)
                     ->where('packaging_material_requests.user_id', $shipper->id);
 
                 if ($packaging_materials->exists()) {
@@ -9314,7 +9314,7 @@ class AdminFinanceController extends Controller
                         $hubs =  array_merge($warehouse->associated_hubs->pluck('hub_id')->toArray(),$hubs);
                     }
                     
-                    $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id', $shipment_ids)->where('packaging_material_requests.status_id', 2)
+                    $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id', $shipment_ids)->where('packaging_material_requests.status_id', 4)
                         ->whereIn('city_id', $hubs)
                         ->where('packaging_material_requests.user_id', $shipper->id);
 
