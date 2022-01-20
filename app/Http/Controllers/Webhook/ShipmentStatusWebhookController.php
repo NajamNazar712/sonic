@@ -48,7 +48,7 @@ class ShipmentStatusWebhookController extends Controller
 
     static public function webhook_dispatch($url, $user_id, $tracking_number, $status, $date){
         $attempts = 5;
-        $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 3, 'timeout' => 3]);
+        $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 30, 'timeout' => 30]);
 
         $notification_data = ['user_id' => $user_id, 'url' => $url];
         for($i = 0; $i < $attempts; $i++){
