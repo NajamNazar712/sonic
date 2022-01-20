@@ -977,16 +977,16 @@ class AdminAttendanceController extends Controller
                             <td class="color primary border twice" colspan="10"><b>Attandence Details</b></td>
                         </tr>
                         <tr>
-                            <th class="color primary border twice">Day</th>
-                            <th class="color primary border twice">Date In</th>
-                            <th class="color primary border twice">Time In</th>
-                            <th class="color primary border twice">Date Out</th>
-                            <th class="color primary border twice">Time Out</th>
-                            <th class="color primary border twice">Work Hours</th>
-                            <th class="color primary border twice">Late Arrival</th>
-                            <th class="color primary border twice">Early Departure</th>
-                            <th class="color primary border twice">Overtime</th>
-                            <th class="color primary border twice">Remarks</th>
+                            <td class="color primary border twice">Day</td>
+                            <td class="color primary border twice">Date In</td>
+                            <td class="color primary border twice">Time In</td>
+                            <td class="color primary border twice">Date Out</td>
+                            <td class="color primary border twice">Time Out</td>
+                            <td class="color primary border twice">Work Hours</td>
+                            <td class="color primary border twice">Late Arrival</td>
+                            <td class="color primary border twice">Early Departure</td>
+                            <td class="color primary border twice">Overtime</td>
+                            <td class="color primary border twice">Remarks</td>
                         </tr>
                    ';
         foreach ($employee_attendances as $employee_attendance){
@@ -1059,16 +1059,16 @@ class AdminAttendanceController extends Controller
                 }
             }
             $html .= '<tr>';
-            $html .= '<td>' . $day . '</td>';
-            $html .= '<td>' . $date_in . '</td>';
-            $html .= '<td>' . $time_in . '</td>';
-            $html .= '<td>' . $date_out . '</td>';
-            $html .= '<td>' . $time_out . '</td>';
-            $html .= '<td>' . $working_hours . '</td>';
-            $html .= '<td>' . $late_arrival . '</td>';
-            $html .= '<td>' . $early_departure . '</td>';
-            $html .= '<td>' . $over_time . '</td>';
-            $html .= '<td>' . $remarks . '</td>';
+            $html .= '<td class="border twice-right">' . $day . '</td>';
+            $html .= '<td class="border twice-right">' . $date_in . '</td>';
+            $html .= '<td class="border twice-right">' . $time_in . '</td>';
+            $html .= '<td class="border twice-right">' . $date_out . '</td>';
+            $html .= '<td class="border twice-right">' . $time_out . '</td>';
+            $html .= '<td class="border twice-right">' . $working_hours . '</td>';
+            $html .= '<td class="border twice-right">' . $late_arrival . '</td>';
+            $html .= '<td class="border twice-right">' . $early_departure . '</td>';
+            $html .= '<td class="border twice-right">' . $over_time . '</td>';
+            $html .= '<td class="border twice-right">' . $remarks . '</td>';
         }
         $html .= '    </tbody>
                       </table>';
