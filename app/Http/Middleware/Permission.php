@@ -898,6 +898,9 @@ class Permission
             'settings.shipment_status_eta.list' => 534,
 
 
+            'settings.shippers_origin_change.index' => 667,
+
+
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,

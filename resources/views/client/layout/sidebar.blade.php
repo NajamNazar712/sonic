@@ -46,6 +46,8 @@
                         @endif
 
                         <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
+
+                        <li><a class="menu-item" href="{{ route('cod.shipment.origin.index') }}">Cancelled</a></li>
 {{--						<li><a class="menu-item" href="{{ route('cod.consolidation.history.index') }}">Consolidation History</a></li>--}}
                     </ul>
                 </li>

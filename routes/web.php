@@ -161,6 +161,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('', 'Shippers\ShipperShipmentBookController@shipments_verify_index')->name('index');
             Route::post('', 'Shippers\ShipperShipmentBookController@shipments_verify_store')->name('store');
         });
+
+        Route::prefix('origin')->name('origin.')->group(function(){
+            Route::get('', 'Shippers\ShipmentOriginChangeController@shipments_origin_index')->name('index');
+            Route::post('', 'Shippers\ShipperShipmentBookController@shipments_origin_store')->name('store');
+        });
     });
 
     Route::prefix('dispute')->name('dispute.')->group(function (){
@@ -3074,6 +3079,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('reattempt_percentage')->name('reattempt_percentage.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@reattempt_percentage_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@reattempt_percentage_store')->name('store');
+        });
+
+        Route::prefix('shippers_origin_change')->name('shippers_origin_change.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipper_origin_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@shipper_origin_store')->name('store');
         });
     });
 
