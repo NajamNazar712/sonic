@@ -24,6 +24,16 @@ class GetStartedController extends Controller
     }
 
     public function getstarted_submit(Request $request){
+
+        $email = $request->email;
+        $phone = $request->phone;
+        if(Lead::where('phone_number', $phone)->exists()){
+            return redirect()->back()->with('error', 'Duplicate entry - You have already provided this Number or Email previously. Kindly fill new details. Thanks');
+        }
+        if(Lead::where('email_address', $email)->exists()){
+            return redirect()->back()->with('error', 'Duplicate entry - You have already provided this Number or Email previously. Kindly fill new details. Thanks');
+        }
+
         $max_lead_id = Lead::max('lead_id');
         $max_lead_id = $max_lead_id + 1;
         $new_lead = new Lead();
@@ -32,9 +42,11 @@ class GetStartedController extends Controller
         $new_lead->city_id = $request->city;
         $new_lead->territory_id = $request->territory;
         $new_lead->territory_area_id = $request->area;
-        $new_lead->phone_number = $request->phone;
-        $new_lead->email_address = $request->email;
+        $new_lead->phone_number = $phone;
+        $new_lead->email_address = $email;
         $new_lead->requested_date = Carbon::now();
+        $new_lead->brand = $request->brand_name;
+        $new_lead->company = $request->company_name;
         $new_lead->message = $request->message;
         $new_lead->reference_id = $request->reference;
         $new_lead->service_id = $request->service;

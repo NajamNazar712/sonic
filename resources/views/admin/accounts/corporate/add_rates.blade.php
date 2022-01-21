@@ -11,9 +11,18 @@
                 <div class="card">
 
                     <div class="card-header">
-                        <h2 class="font-large-1">{{$shipper->name}}
-                            <div class="badge badge-success pull-right">Corporate Invoicing Account</div>
-                        </h2>
+                        <div class="row">
+                            <div class="col-4">
+                                <h2 class="font-large-1">{{$shipper->name}} </h2>
+                            </div>
+                             <div class="col-4 text-right mt-1">
+                                 <input type="checkbox" id="packaging_invoice_toggle" class="switchery packaging_invoice_toggle" data-size="xs" data-switchery="true">
+                                 <label class="display-inline ml-1 font-medium-1">Generate Packaging Invoice</label>
+                             </div>
+                            <div class="col-4">
+                                <div class="badge badge-success pull-right"><h2 class="text-white">Corporate Invoicing Account</h2></div>
+                            </div>
+                        </div>
                         @include('admin.inc.messages')
                     </div>
 
@@ -24,6 +33,7 @@
                             <div class="card">
 
                                 <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}" name="corporate_rate_type_id">
+                                <input type="hidden" id="packaging_invoice" name="packaging_invoice">
 
                             </div>
                             <div id="" class="card-header border-success">
@@ -2585,7 +2595,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var rate_type = $('#corporate_type_id').val();
-            console.log(rate_type);
+
 
             $('body').on('change', '#rate_remarks', function () {
                 $(this).val($(this).val().trim());
@@ -2866,13 +2876,13 @@
             var rate_type = @json($corporate_rate_type_id);
 
             if(rate_type != null &&  rate_type != ''){
-                console.log(1);
+
                 var route = '{!! route('admin.corporate.default.change_rate_type', ':id') !!}';
                 route = route.replace(':id', shipper);
                 $("#ratesAdditionForm").attr('action', route);
             }
             else{
-                console.log(2);
+
                 var route = '{!! route('admin.corporate.add.rates', ':id') !!}';
                 route = route.replace(':id', shipper);
                 $("#ratesAdditionForm").attr('action', route);
@@ -4291,6 +4301,14 @@
                     });
 
                 }
+            }
+        });
+        
+        $("#packaging_invoice_toggle").on('change', function(){
+            if($("#packaging_invoice_toggle").is(":checked")){
+                $('#packaging_invoice').val('on');
+            }else{
+                $('#packaging_invoice').val('off');
             }
         });
 

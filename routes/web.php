@@ -653,6 +653,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('active','Admins\AdminDashboardController@warehousing_active')->name('active');
             Route::post('inactive','Admins\AdminDashboardController@warehousing_inactive')->name('inactive');
         });
+
+        Route::prefix('packaging')->name('packaging.')->group(function(){
+            Route::post('invoice_log','Admins\AdminDashboardController@packaging_invoice_log')->name('invoice.log');
+        });
     });
 
     Route::prefix('daily_visit')->name('daily_visit.')->group(function () {

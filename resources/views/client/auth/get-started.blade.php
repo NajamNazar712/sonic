@@ -138,6 +138,29 @@
                                                     </select>
                                                 </fieldset>
                                             </div>
+                                            <div class="col-12 d-none" id="brand_div">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <fieldset class="form-group position-relative has-icon-left">
+                                                            <input type="text" name="company_name" class="form-control" id="company_name" placeholder="Company Name" data-rule-required="true" data-msg-required="Company Name is required">
+                                                            <div class="form-control-position">
+                                                                <i class="ft-user"></i>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <fieldset class="form-group position-relative has-icon-left">
+                                                            <input type="text" name="brand_name" class="form-control" id="brand_name" placeholder="Brand Name" data-rule-required="true" data-msg-required="Brand Name is required">
+                                                            <div class="form-control-position">
+                                                                <i class="ft-user"></i>
+                                                            </div>
+                                                        </fieldset>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+
                                             <div class="col-12">
                                                 <fieldset class="form-group position-relative">
                                                     <textarea name="message" class="form-control" placeholder="Write Your Message" id="message" cols="30" rows="5" data-rule-required="true" data-msg-required="Message is required"></textarea>
@@ -285,6 +308,19 @@
                         });
                     }
                 });
+            }
+        });
+
+        $('#service').change(function () {
+
+            if($('#service').val() == 4 || $('#service').val() == 5){
+                $('#company_name').val('');
+                $('#brand_name').val('');
+                $('#brand_div').removeClass('d-none');
+            }
+            else {
+                $('#brand_div').addClass('d-none');
+
             }
         });
 
