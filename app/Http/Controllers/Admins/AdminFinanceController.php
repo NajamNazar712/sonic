@@ -2101,8 +2101,8 @@ class AdminFinanceController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
             $retail_shipment =  RetailShipment::where('shipment_id', $shipment->id)->where('shipping_mode', 3);
-            if($retail_shipment->exists()){
-                return ['status' => 1, 'error' => 'Retail COD Shipment amount can\'t be changed!'];
+            if(!$retail_shipment->exists()){
+                return ['status' => 1, 'error' => 'Retail Shipment amount can\'t be changed!'];
             }
 
             if($shipment->booking_type_id == 3){
