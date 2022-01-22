@@ -668,7 +668,7 @@ class AdminAttendanceController extends Controller
             return back()->with(['error' => "Invalid File Format"]);
         } else {
             Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
-
+                $value = 'Trax'.$value;
                 if ($value) {
                     $result = false;
                     if (Admin::where('trax_id', $value)->exists()) {
@@ -686,10 +686,8 @@ class AdminAttendanceController extends Controller
                 }
             });
             $names = [
-                'trax_id' => 'Employee ID',
-                'attendance_date' => 'Attendance Date',
-                'clock_in_datetime' => 'Clock In Datetime',
-                'clock_out_datetime' => 'Clock Out Datetime'
+                'trax_id' => 'User ID',
+                'attendance_datetime' => 'Attendance DateTime',
             ];
 
             $messages = [
@@ -701,19 +699,17 @@ class AdminAttendanceController extends Controller
             ];
             $rules = [
                 'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
-                'attendance_date' => ['required', 'date_format:Y-m-d'],
-                'clock_in_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
-                'clock_out_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+                'attendance_datetime' => ['required', 'date_format:d-m-Y  G:i:s'],
             ];
 
 
-            $fields = [0 => 'trax_id', 1 => 'attendance_date', 2 => 'clock_in_datetime', 3 => 'clock_out_datetime'];
+            $fields = [0 => 'trax_id', 1 => '', 2 => '', 3 => 'attendance_datetime'];
             if ($file = $request->file('attendance')) {
                 $spreadsheet = IOFactory::createReaderForFile($file);
                 $spreadsheet->setReadDataOnly(true);
                 $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-                $header = ['Employee ID', 'Attendance Date(yyyy-mm-dd)', 'Clock-in DateTime(yyyy-mm-dd hh:mm:ss)', 'Clock-out DateTime(yyyy-mm-dd hh:mm:ss)'];
+                $header = ['User ID', 'Verify Mode', 'IO Mode', 'IO Time'];
 
                 if (isset($spreadsheet)) {
                     $header_correct = true;
@@ -763,7 +759,60 @@ class AdminAttendanceController extends Controller
                         $not_updated = 0;
                         $latitude = '24.857788594719032';
                         $longitude = '67.12465366441765';
+                        $attendance_data = array();
                         foreach ($rows as $key => $row) {
+                            dd($row['attendance_datetime']);
+                            $attendance_data[] = trim($row['trax_id']);
+                            /*$employee = Employee::where('trax_id', trim($row['trax_id']));
+                            if ($employee->exists()) {
+                                $employee = $employee->first();
+                                $type = $employee->employee_type_id;
+                                if ($type == 1) {
+                                    $employee_id = $employee->admin->id;
+                                } else {
+                                    $employee_id = $employee->rider->id;
+                                }
+                                $employee_attendance = new EmployeeAttendance();
+                                $employee_attendance->employee_id = $employee_id;
+                                $employee_attendance->employee_type = $type;
+                                $employee_attendance->attendance_date = trim($row['attendance_date']);
+                                $employee_attendance->clock_in_datetime = trim($row['clock_in_datetime']);
+                                $employee_attendance->clock_out_datetime = trim($row['clock_out_datetime']);
+                                $employee_attendance->clock_in_latitude = $latitude;
+                                $employee_attendance->clock_in_longitude = $longitude;
+                                $employee_attendance->clock_out_latitude = $latitude;
+                                $employee_attendance->clock_out_longitude = $longitude;
+                                $employee_attendance->clock_in_location = 2;
+                                $employee_attendance->clock_out_location = 2;
+                                $employee_attendance->save();
+
+                                $clock_in_action = new EmployeeAttendanceActionLog();
+                                $clock_in_action->employee_id = $employee_attendance->employee_id;
+                                $clock_in_action->employee_type = $employee_attendance->employee_type;
+                                $clock_in_action->action_id = 1;
+                                $clock_in_action->action_date = $employee_attendance->clock_in_datetime;
+                                $clock_in_action->attendance_date = $employee_attendance->attendance_date;
+                                $clock_in_action->latitude = $latitude;
+                                $clock_in_action->longitude = $longitude;
+                                $clock_in_action->location_status = 2;
+                                $clock_in_action->save();
+
+                                $clock_out_action = new EmployeeAttendanceActionLog();
+                                $clock_out_action->employee_id = $employee_attendance->employee_id;
+                                $clock_out_action->employee_type = $employee_attendance->employee_type;
+                                $clock_out_action->action_id = 2;
+                                $clock_out_action->action_date = $employee_attendance->clock_out_datetime;
+                                $clock_out_action->attendance_date = $employee_attendance->attendance_date;
+                                $clock_out_action->latitude = $latitude;
+                                $clock_out_action->longitude = $longitude;
+                                $clock_out_action->location_status = 2;
+                                $clock_out_action->save();
+
+                                $updated++;
+                            }*/
+                        }
+                        dd($attendance_data);
+                        /*foreach ($rows as $key => $row) {
                             $employee = Employee::where('trax_id', $row['trax_id']);
                             if ($employee->exists()) {
                                 $employee = $employee->first();
@@ -811,7 +860,7 @@ class AdminAttendanceController extends Controller
 
                                 $updated++;
                             }
-                        }
+                        }*/
                         $error_msg = '';
                         if ($not_updated > 1) {
                             $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
