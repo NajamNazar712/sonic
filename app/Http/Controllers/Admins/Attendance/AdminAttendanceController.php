@@ -1026,7 +1026,7 @@ class AdminAttendanceController extends Controller
                     $shift = EmployeeShift::find($employee->shift_id);
                     if ($shift){
                         $clock_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
-                        $time_diff = Carbon::parse($shift->start_time)->diffInMinutes(Carbon::parse($clock_in), false);
+                        $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time), false);
                         if ($time_diff > $shift->grace_time) {
                             $remarks = 'Late';
                             $late++;
