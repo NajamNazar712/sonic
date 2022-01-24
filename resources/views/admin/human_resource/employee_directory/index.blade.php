@@ -1121,12 +1121,13 @@
                 var shift_id = table.row($(elm).parents('tr')).data().shift_id;
                 var check_bit = table.row($(elm).parents('tr')).data().check_if_rider_present_bit;
                 var sub_category = table.row($(elm).parents('tr')).data().rider_sub_category;
-                var main_category = table.row($(elm).parents('tr')).data().rider_main_category;
+                var main_category = table.row($(elm).parents('tr')).data().rider_main_category_id;
+                var rider_type = table.row($(elm).parents('tr')).data().rider_type_id;
                 $('#city_list').val(city_id).trigger('change');
                 $('#shift_list').val(shift_id).trigger('change');
                 if(check_bit != null)
                 {
-                    var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;
+                    // var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;
                     // $('#main_category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
                     // $('#category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
                     $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
@@ -1134,7 +1135,7 @@
                     var ccd = table.row($(elm).parents('tr')).data().ccd;
                 }
                 else{
-                    var rider_type = table.row($(elm).parents('tr')).data().inactive_rider_type_id;
+                    // var rider_type = table.row($(elm).parents('tr')).data().inactive_rider_type_id;
                     var ccd = false;
                     route_id = null;
                 }
