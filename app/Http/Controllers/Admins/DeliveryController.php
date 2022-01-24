@@ -1331,6 +1331,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Tracking No.</strong></td>
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
+                            <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Item Qty</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
@@ -1368,12 +1369,19 @@ class DeliveryController extends Controller
                 else{
                     $tracking_number = $shipment->tracking_number;
                 }
+                $consignee_address = '';
+                if($shipment->consignee_address != null){
+                    $consignee_address = $shipment->consignee_address;
+                }
+
                 $shipment_details_row_start = '
                           <tr>
                             <td class="'.$class.'">' . $total_shipments . '</td>
                             <td class="'.$class.'">' . $tracking_number  . '</td>
                             <td class="'.$class .'">' . $user_details . '</td>
                             <td class="'.$class.' ' . $details_change_class .'">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                             <td class="'.$class.'">' . $consignee_address  . '</td>
+                           
                 ';
 
                 if ($shipment->booking_type_id == 1) {
