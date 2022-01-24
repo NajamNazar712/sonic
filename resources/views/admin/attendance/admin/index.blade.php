@@ -31,7 +31,7 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
-                                            <a href="#" class="btn btn-primary generate_pdf"><i class="la la-download"></i> Generate PDF</a>
+                                            <a href="javascript:void()" class="btn btn-primary generate_pdf"><i class="la la-download"></i> Generate PDF</a>
                                             <a href="{{ asset('file/Employee Attendance Template.xlsx') }}?v=14_09_2021" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                         </div>
                                     </div>
@@ -310,18 +310,34 @@
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    form.submit();
+                    form.reset();
+                    $('#pdf_trax_id').trigger('change');
+                    $(form).find('button[type=submit]').attr('disabled', false);
+                    $('#generateAttendancePdf').modal('hide');
+                }
+            });
+            $('#attendance_upload_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Pdf is being downloading',
+                        text: 'File is being Upload!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
                         closeOnEsc: false
                     });
-
                     form.submit();
-                    swal.close();
                 }
             });
             var search_date_to = $('#search_form #search_date_to').pickadate({
@@ -341,6 +357,7 @@
             var pdf_date_from = $('#generate_pdf_form #pdf_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: "{{ Carbon\Carbon::today() }}",
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
@@ -355,6 +372,7 @@
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
+                max: "{{ Carbon\Carbon::today() }}",
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',

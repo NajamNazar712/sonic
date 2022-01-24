@@ -46,6 +46,7 @@
                                     <th class="border-primary border-darken-1">Service Type</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Origin</th>
+                                    <th class="border-primary border-darken-1">Origin Hub</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Amount</th>
@@ -94,6 +95,7 @@
                             head.push('Service Type');
                             head.push('Status');
                             head.push('Origin');
+                            head.push('Origin Hub');
                             head.push('Destination');
                             head.push('Shipper');
                             head.push('Amount');
@@ -112,6 +114,7 @@
                                 row.push(values.service_type);
                                 row.push(values.status);
                                 row.push(values.origin);
+                                row.push(values.origin_hub);
                                 row.push(values.destination);
                                 row.push(values.shipper);
                                 row.push(values.amount);
@@ -166,6 +169,7 @@
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
+                    {data: 'origin_hub', name: 'ohc.name', class: 'align-middle origin_hub'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},

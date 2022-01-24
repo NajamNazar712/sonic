@@ -14,9 +14,21 @@
                         <div class="card">
 
                             <div class="card-header">
-                                <h2 class="font-large-1">{{$shipper->name}}
+                               {{-- <h2 class="font-large-1">{{$shipper->name}}
                                     <div class="badge badge-success pull-right">Corporate Invoicing Account</div>
-                                </h2>
+                                </h2>--}}
+                                <div class="row">
+                                    <div class="col-4">
+                                        <h2 class="font-large-1">{{$shipper->name}} </h2>
+                                    </div>
+                                    <div class="col-4 text-right mt-1">
+                                        <input type="checkbox" id="packaging_invoice_toggle" class="switchery packaging_invoice_toggle" data-size="xs" data-switchery="true" @if(isset($packaging_invoice->status) && $packaging_invoice->status == 1) checked @endif disabled>
+                                        <label class="display-inline ml-1 font-medium-1">Generate Packaging Invoice</label>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="badge badge-success pull-right"><h2 class="text-white">Corporate Invoicing Account</h2></div>
+                                    </div>
+                                </div>
                                 @include('admin.inc.messages')
                             </div>
 
@@ -25,6 +37,8 @@
                                 <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate="novalidate">
                                     @csrf
                                     @method('PUT')
+
+                                    <input type="hidden" id="packaging_invoice" name="packaging_invoice">
 
                                     <div class="card">
 
@@ -3915,6 +3929,13 @@
 
         });
 
+        $("#packaging_invoice_toggle").on('change', function(){
+            if($("#packaging_invoice_toggle").is(":checked")){
+                $('#packaging_invoice').val('on');
+            }else{
+                $('#packaging_invoice').val('off');
+            }
+        });
 
     </script>
 @endsection

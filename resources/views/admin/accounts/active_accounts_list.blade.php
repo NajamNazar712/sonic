@@ -543,6 +543,23 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="CorporateInvoiceLogModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CorporateInvoiceLogModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Packaging Invoice Toggle Log</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -2386,6 +2403,59 @@
                             }
                         });
                     }
+                });
+            }
+        });
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+
+            var user_id = table.row( $(this).parents('tr') ).data().id;
+
+            if ($(this).hasClass('view_invoice_log')) {
+
+                $.ajax({
+                    url: '{!! route('admin.accounts.packaging.invoice.log') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id,
+                    }
+                }).done(function(data){
+
+                    if (data.status == 0) {
+
+
+                        var html = '<table class="table table-bordered">' +
+                                    '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
+
+                        $.each(data.details, function (index,value) {
+                            console.log(value,value.admin);
+                                var serial = index + 1;
+                                var status = '';
+                                if(value['status'] == 1){
+                                    status = 'On';
+                                }
+                                else{
+                                    status = 'Off';
+                                }
+
+                                html += '<tr><td>'+serial +'</td><td>' + value['admin'] + '</td>' +
+                                         '<td>'+ status + '</td>' +
+                                    '<td>' + value['time']+ '</td></tr>';
+                            serial++;
+                        });
+
+                         html +=  '</tbody></table>';
+
+                        $('#CorporateInvoiceLogModal .modal-body').html(html);
+
+                        $('#CorporateInvoiceLogModal').modal('show');
+
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+
                 });
             }
         });

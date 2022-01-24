@@ -11,16 +11,29 @@
                 <div class="card">
 
                     <div class="card-header">
-                        <h2 class="font-large-1">{{$shipper->name}}
+                       {{-- <h2 class="font-large-1">{{$shipper->name}}
                             <div class="badge badge-success pull-right">Corporate Account Default</div>
                         </h2>
-                        @include('admin.inc.messages')
+                        @include('admin.inc.messages')--}}
+                        <div class="row">
+                            <div class="col-4">
+                                <h2 class="font-large-1">{{$shipper->name}} </h2>
+                            </div>
+                            <div class="col-4 text-right mt-1">
+                                <input type="checkbox" id="packaging_invoice_toggle" class="switchery packaging_invoice_toggle" data-size="xs" data-switchery="true">
+                                <label class="display-inline ml-1 font-medium-1">Generate Packaging Invoice</label>
+                            </div>
+                            <div class="col-4">
+                                <div class="badge badge-success pull-right"><h2 class="text-white">Corporate Invoicing Account</h2></div>
+                            </div>
+                        </div>
                     </div>
 
                     <form id="ratesAdditionForm" class="card-body card-dashboard" action="#" method="post" novalidate="novalidate">
                         @csrf
                         <div class="card-content">
                             <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}" name="corporate_rate_type_id">
+                            <input type="hidden" id="packaging_invoice" name="packaging_invoice">
 
                             <div id="" class="card-header border-success">
                                 <div class="row">
@@ -4018,6 +4031,14 @@
                     });
 
                 }
+            }
+        });
+
+        $("#packaging_invoice_toggle").on('change', function(){
+            if($("#packaging_invoice_toggle").is(":checked")){
+                $('#packaging_invoice').val('on');
+            }else{
+                $('#packaging_invoice').val('off');
             }
         });
 

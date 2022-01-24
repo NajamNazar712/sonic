@@ -248,8 +248,10 @@
                             <th class="border-primary border-darken-1">Payment Status</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Arrival Date</th>
+                            <th class="border-primary border-darken-1">Last Status Date</th>
                             <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Consignee Name</th>
                             <th class="border-primary border-darken-1">Consignee Contact</th>
                             <th class="border-primary border-darken-1">Consignee Address</th>
@@ -456,8 +458,10 @@
                             head.push('Payment Status');
                             head.push('Service Type');
                             head.push('Arrival Date');
+                            head.push('Last Status Date');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Hub');
                             head.push('Consignee Name');
                             head.push('Consignee Contact');
                             head.push('Consignee Address');
@@ -481,8 +485,10 @@
                                 row.push(values.payment_status);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
+                                row.push(values.last_status_date);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.hub);
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone);
                                 row.push(values.consignee_address);
@@ -530,7 +536,7 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[8, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -544,8 +550,10 @@
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
+                    { data:'last_status_date' ,name: 'sju.created_at', class: 'align-middle last_status_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
+                    { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
                     { data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data: 'phone', name: 'phone', class: 'align-middle phone'},
                     { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},

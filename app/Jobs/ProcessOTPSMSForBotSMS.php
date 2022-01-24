@@ -28,7 +28,7 @@ class ProcessOTPSMSForBotSMS implements ShouldQueue
      */
     public function __construct(SMS $sms)
     {
-        $this->queue = 'sms_otp';
+        $this->queue = 'sms_bot_otp';
         $this->sms = $sms;
     }
 
