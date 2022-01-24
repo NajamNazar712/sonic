@@ -5452,6 +5452,8 @@ class AdminAPIController extends Controller
                         $employee->pin = $request->pin;
                         $employee->update();
                     }
+                    $admin->reset_pin_status = 1;
+                    $admin->save();
                     return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
                 }else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
@@ -5881,6 +5883,32 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'User not found!']);
             }
         }
+    }
+
+    public function check_pin(Request $request){
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            if($admin->reset_pin_status == 1){
+                return response()->json(['status' => 0, 'pin_status' => 1]);
+            }
+            return response()->json(['status' => 0, 'pin_status' => 0]);
+        }
+        return response()->json(['status' => 0, 'pin_status' => 0]);
+    }
+
+    public function logout(Request $request){
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            if($admin->reset_pin_status == 1){
+                $admin->reset_pin_status = 0;
+                $admin->save();
+                return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
+            }
+            return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
+        }
+        return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
     }
 
 }

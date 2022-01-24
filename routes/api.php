@@ -107,6 +107,8 @@ Route::name('api.')->group(function () {
         Route::get('shipment_settings', 'Rider\RiderAPIController@shipment_attempt_settings')->name('shipment_settings');
         Route::post('forget_pin', 'Rider\RiderAPIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'Rider\RiderAPIController@reset_pin')->name('reset_pin');
+        Route::get('check_pin', 'Rider\RiderAPIController@check_pin')->name('check_pin');
+        Route::get('logout', 'Rider\RiderAPIController@logout')->name('logout');
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
@@ -249,6 +251,8 @@ Route::name('api.')->group(function () {
         Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');        Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
         Route::post('forget_pin', 'AdminAPIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'AdminAPIController@reset_pin')->name('reset_pin');
+        Route::get('check_pin', 'AdminAPIController@check_pin')->name('check_pin');
+        Route::get('logout', 'AdminAPIController@logout')->name('logout');
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'AdminAPIController@validate_cnic_phone_number')->name('validate_data');
