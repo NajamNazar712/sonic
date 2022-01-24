@@ -164,7 +164,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
         Route::prefix('origin')->name('origin.')->group(function(){
             Route::get('', 'Shippers\ShipmentOriginChangeController@shipments_origin_index')->name('index');
-            Route::post('', 'Shippers\ShipperShipmentBookController@shipments_origin_store')->name('store');
+            Route::post('store', 'Shippers\ShipmentOriginChangeController@shipments_origin_store')->name('store');
         });
     });
 

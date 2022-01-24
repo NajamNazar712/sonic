@@ -46,8 +46,9 @@
                         @endif
 
                         <li><a class="menu-item" href="{{ route('cod.cancelled_shipments.index') }}">Cancelled</a></li>
-
-                        <li><a class="menu-item" href="{{ route('cod.shipment.origin.index') }}">Cancelled</a></li>
+                        @if(session('shipper_origin_change') == 1)
+                            <li><a class="menu-item" href="{{ route('cod.shipment.origin.index') }}">Origin Change</a></li>
+                        @endif
 {{--						<li><a class="menu-item" href="{{ route('cod.consolidation.history.index') }}">Consolidation History</a></li>--}}
                     </ul>
                 </li>

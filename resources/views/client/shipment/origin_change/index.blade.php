@@ -17,7 +17,7 @@
                         <div class="card-body">
                             @include('client.inc.messages')
 
-                            <form id="tracking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipments.origin.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                            <form id="tracking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.origin.store') }}" novalidate="novalidate" enctype="multipart/form-data">
                                 {{ csrf_field() }}
 
                                 <div class="row align-items-center justify-content-center">

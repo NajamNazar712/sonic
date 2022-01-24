@@ -261,9 +261,15 @@ class LoginController extends Controller
             if(in_array($shipper_user_id, $foc_account_tags)){
                 session(['foc_account' => TRUE]);
             }
-//            else{
-//                session(['foc_account' => FALSE]);
-//            }
+        }
+        $settings = GlobalSettings::where('type', 'shipper_origin_change');
+        if($settings->exists()){
+            $settings = $settings->first();
+            $origin_shippers = array();
+            $origin_shippers = array_map('intval', explode(',' , $settings->text));
+            if(in_array($shipper_user_id, $origin_shippers)){
+                session(['shipper_origin_change' => TRUE]);
+            }
         }
         return redirect()->route('cod.welcome');
     }
