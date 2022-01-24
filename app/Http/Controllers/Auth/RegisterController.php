@@ -70,12 +70,16 @@ class RegisterController extends Controller
         $this->middleware('guest');
     }
 
-    public function showRegistrationForm($lead_id)
+    public function showRegistrationForm($lead_id = NULL)
     {
-        if($lead_id == NULL){
+        /*if($lead_id == NULL){
             return redirect()->route('cod.getstarted');
-        }
+        }*/
         if($lead_id != NULL){
+            $shipper = User::where('lead_id', $lead_id);
+            if($shipper->exists()){
+                return redirect()->route('cod.getstarted.success');
+            }
             $lead = Lead::find($lead_id);
         }
         else{

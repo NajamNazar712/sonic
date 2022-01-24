@@ -410,7 +410,7 @@ class AdminAttendanceController extends Controller
             $attendances->whereBetween('employee_attendances.attendance_date', [$from, $to]);
         }
 
-        $attendances->groupBy('employee_attendances.employee_id');
+        $attendances->groupBy('employee_attendances.employee_id','employee_attendances.employee_type');
 
         $periods =  $this->admin_attendance_horizontal_table($request,true);
         $today = Carbon::now();
@@ -453,6 +453,7 @@ class AdminAttendanceController extends Controller
                 $datatable->addColumn($period, function ($employee) use ($key, $periods,$today) {
                     $data = EmployeeAttendance::where('employee_id',$employee->employee_id)
                         ->where('attendance_date',$periods['search'][$key])
+                        ->where('employee_type',$employee->employee_type)
                         ->where(function ($query){
                             $query->where('clock_in_datetime','!=',null)
                                 ->orWhere('clock_in','!=',null);

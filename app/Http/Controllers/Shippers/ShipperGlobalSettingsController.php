@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\Webhook\WebhookLogController;
 use App\Http\Models\PickupAddressIbanMapping;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\Shipper\User;
@@ -216,6 +217,7 @@ class ShipperGlobalSettingsController extends Controller
             if($sub_user){
                 $sub_user->status = 0;
                 $sub_user->save();
+                WebhookLogController::shipper_webhook_log($user_id, 'Disabled by Shipper');
             }
             return redirect()->back()->with('success', 'Setting Updated Successfully!');
 
