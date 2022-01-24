@@ -39,45 +39,66 @@
 
     <div class="modal fade text-left" id="EditAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Edit Notification</h4>
                 </div>
-                <form method="post" id="agent_edit" action="{{route('admin.settings.leads_notification.update')}}" novalidate="novalidate">
+                <form method="post" id="agent_edit" action="{{route('admin.settings.lead_notification.update')}}" novalidate="novalidate" enctype="multipart/form-data">
                     @csrf
 
                 <div class="modal-body">
-                    <input type="hidden" name="lead_tagging_id" id="lead_tagging_id">
-                    
-                    <div class="form-group">
-                        <select name="zone_id" id="edit_zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
-                            
-                        </select>
-                    </div>
+                    <input type="hidden" name="selected_ids" id="selected_ids"/>
+                    <input type="hidden" name="lead_notification_id" id="lead_notification_id">
+                    <div class="modal-body">
+                        <div class="form-group email">
+                            <label>Subject</label>
+                            <input type="text" name="subject" class="form-control subject" placeholder="Subject*" data-rule-required="true" data-msg-required="Subject is required" data-rule-field="true">
+                        </div>
 
-                    <div class="form-group">
-                        <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
-                           
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label>Body</label>
+                            <textarea type="text" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required" data-rule-field="true"></textarea>
+                        </div>
 
-                    <div class="form-group">
-                        <select name="service_id" id="edit_service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required">
-                            
-                        </select>
+                        <div class="form-group">
+                            <label>Fields</label>
+                            <div class="fields">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group d-none" id="attachment">
+                            <label>Attachments</label>
+                            <div class="attachments">
+                                <table class="table table-bordered" id="crm_image_view_table" style="z-index: 3;">
+                                    <thead>
+                                    <tr role="row" class="bg-primary white">
+            
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Date Added</th>
+                                        <th class="border-primary border-darken-1">Image</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+
+                                <table class="table table-bordered datatable" id="image_upload_table" style="z-index: 3;">
+                                    <thead>
+                                    <tr role="row" class="bg-primary white">
+        
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Image</th>
+                                        <th class="border-primary border-darken-1"></th>
+        
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <select name="agent_id" id="edit_agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
-                            
-                        </select>
-                    </div>
-                    
-                    
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="edit_agentSubmit">Tag</button>
+                    <button type="submit" class="btn btn-success" id="edit_agentSubmit">Update</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                 </div>
             </form>
@@ -106,6 +127,7 @@
 
     <script>
         $(document).ready(function() {
+            var selected_rows = [];
 
             $('#edit_agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
@@ -167,7 +189,7 @@
                 language: {
                     processing: data_table_loader
                 },
-                ajax: '{{ route('admin.settings.leads_notification.list') }}',
+                ajax: '{{ route('admin.settings.lead_notification.list') }}',
                 rowId: 'id',
                 order: [[3, 'desc']],
                 columns: [
@@ -196,6 +218,11 @@
                         status +='<option value="1">Enable</option>';
                         status +='<option value="0">Disable</option>';
                         status +='</select>';
+
+                    var type_select = '<select name="status" id="type_select" class="select2 form-control">';
+                        type_select +='<option value="1">Email</option>';
+                        type_select +='<option value="2">SMS</option>';
+                        type_select +='</select>';
                    
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -211,6 +238,11 @@
                                 } ).wrap(td);
                         }else if ($(header).is('.status')) {
                             $(status).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }else if ($(header).is('.type')) {
+                            $(type_select).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -233,6 +265,12 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+                    $('#type_select').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 
                     this.api().table().columns.adjust();
                 }
@@ -242,21 +280,180 @@
             
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
+                var notification_type = parseInt($(this).parents('tr').attr('data-type'));
+
                 $.ajax({
-                    url:'{!! route("admin.settings.lead_tagging.data") !!}',
+                    url:'{!! route("admin.settings.lead_notification.data") !!}',
                     method: 'POST',
                     data: {
                         'id': id,
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
-                    console.log(data.city_id);
-                    $('#edit_agent_id').val(data.agent_id).change();
-                    $('#edit_city_id').val(data.city_id).change();
-                    $('#edit_zone_id').val(data.zone_id);
-                    $('#edit_service_id').val(data.service_id).change();
-                    $('#lead_tagging_id').val(data.lead_tagging_id).change();
-                    
+                    console.log(data);
+							$('#EditAgentModal #lead_notification_id').val(id);
+
+                    // $('#edit_agent_id').val(data.agent_id).change();
+                    // $('#edit_city_id').val(data.city_id).change();
+                    // $('#edit_zone_id').val(data.zone_id);
+                    // $('#edit_service_id').val(data.service_id).change();
+                    // $('#lead_tagging_id').val(data.lead_tagging_id).change();
+                    if (notification_type == 1) {
+								$('#EditAgentModal .email').removeClass('d-none');
+
+								$('#EditAgentModal .subject').val(data.subject);
+							}
+							else {
+								$('#EditAgentModal .email').addClass('d-none');
+
+								$('#EditAgentModal .subject').val('');
+							}
+
+							$('#EditAgentModal .body').val(data.body);
+
+							$('#EditAgentModal .fields').html('');
+
+							valid_fields = [];
+
+							$.each(data.fields, function(index, field) {
+								$('#EditAgentModal .fields').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white">[' + field + ']</span>');
+
+								valid_fields.push(field);
+							});
+                            if(id == 1){
+                                $('#attachment').removeClass('d-none');
+                                var images_count = 0;
+                                var rows_count = 0;
+                                var crm_image_table;
+                                var image_html = '';
+                                
+                                $.each(data.attachments, function (index, attachment) {
+                                    index++;
+                                    var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + attachment.attachment + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                                
+                                    image_html += '<tr id="' + attachment.id + '"><td>' + index + '</td><td>' + attachment.created_at + '</td><td>' + img + '</td></tr>';
+                                });
+                                $('#crm_image_view_table tbody').append(image_html);
+                                
+                                function add_row() {
+                                    var tr_id = $('#image_upload_table tbody tr').attr('id');
+                                    if (typeof tr_id !== typeof undefined && tr_id !== false) {
+                                        var new_img_rows = $('#image_upload_table tbody tr').length;
+                                        new_img_rows = images_count + new_img_rows;
+                                        if(new_img_rows >= 3){
+                                            $('#image_upload_table .img_add_btn').attr('disabled', true);
+                                            return false;
+                                        }
+                                    }
+
+                                    rows_count++;
+
+                                    var crm_image = '<input class="form-control form-control-sm" type="file" name="notification_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                                    if(rows_count == 1){
+                                        var remove = '';
+                                    }else{
+                                        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                                    }
+                                    crm_image_table.row.add([0, crm_image,remove]).node().id = rows_count;
+                                    crm_image_table.draw(true);
+                                    $('#CRMImageSubmitButton').attr('disabled', false);
+                                    selected_rows.push(rows_count);
+                                }
+                                crm_image_table = $('#image_upload_table').DataTable({
+                                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                                    buttons:[{
+                                        title: 'Add Row',
+                                        className: 'btn btn-primary img_add_btn',
+                                        text: '<i class="la la-plus"></i> Add Row',
+                                        action:function (e) {
+                                            if(images_count < 2){
+                                                add_row();
+                                            }
+                                        }
+                                    }],
+                                    ordering:false,
+                                    paging:false,
+                                    columns: [
+                                        {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                        {name: 'image', class: 'align-middle image form-group'},
+                                        {name: 'action', class: 'align-middle action'},
+                                    ],
+
+                                    rowCallback: function(row, data, index) {
+                                        var info = crm_image_table.page.info();
+
+                                        $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                                    },
+                                    initComplete: function() {
+
+                                        // this.api().table().columns.adjust();
+                                    }
+                                });
+                                $('#crm_image_view_table').on('click','a.remove_row', function () {
+                                    var row_id = $(this).parents('tr').attr('id');
+                                    var crm_request_id = $('#image_crm_request_id').val();
+                                    var current = $(this);
+                                    if(row_id){
+                                        swal({
+                                            title: 'Are You Sure?',
+                                            text: 'Select Yes if you want to delete this image!',
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'No',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                                confirm: {
+                                                    text: 'Yes',
+                                                    value: true,
+                                                    visible: true,
+                                                    closeModal: true
+                                                }
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        }).then(function (confirm) {
+                                            if (confirm) {
+                                                $.ajax({
+                                                    url: '{!! route('admin.crm.request.image_delete') !!}',
+                                                    method: 'POST',
+                                                    data: {
+                                                        'crm_image_id': row_id,
+                                                        'crm_request_id':crm_request_id,
+                                                        '_token': '{{ csrf_token() }}'
+                                                    }
+                                                }).done(function (data) {
+                                                    if(data.status == 0){
+                                                        images_count = images_count - 1;
+                                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                        current.parents('tr').remove();
+                                                    }else{
+                                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+
+                                $('body').on('click', 'a.remove_row',function () {
+                                    var rid = parseInt($(this).parents('tr').attr('id'));
+                                    var index = $.inArray(rid, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+                                    crm_image_table.row( $(this).parents('tr') ).remove().draw();
+                                });
+                            }else{
+                                $('#attachment').addClass('d-none');
+
+                            }
                     $('#EditAgentModal').modal('show');
 
                 })
@@ -307,7 +504,7 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                                          $.ajax({
-                                            url:'{!! route("admin.settings.lead_tagging.enable_disable") !!}',
+                                            url:'{!! route("admin.settings.lead_notification.enable_disable") !!}',
                                             method: 'POST',
                                             data: {
                                                 'id': id,
@@ -342,6 +539,8 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
+                    $('#selected_ids').val(selected_rows);
+
                     form.submit();    
                 }
                 

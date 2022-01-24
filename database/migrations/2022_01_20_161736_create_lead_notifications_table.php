@@ -21,7 +21,7 @@ class CreateLeadNotificationsTable extends Migration
             $table->text('subject')->nullable();
             $table->text('body');
             $table->integer('updated_by')->index();
-            $table->boolean('status')->default(1);
+            $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });
     }

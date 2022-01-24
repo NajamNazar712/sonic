@@ -17,6 +17,7 @@ class CreateLeadNotificationAttachmentsTable extends Migration
             $table->increments('id');
             $table->integer('notification_id')->index();
             $table->string('attachment');
+            $table->integer('added_by')->index();
             $table->timestamps();
         });
     }

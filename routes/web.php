@@ -3083,12 +3083,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
         });
         
-        Route::prefix('leads_notification')->name('leads_notification.')->group(function () {
-            Route::get('', 'Admins\GlobalSettingsController@leads_notification_index')->name('index');
-            Route::get('list', 'Admins\GlobalSettingsController@leads_notification_list')->name('list');
-            Route::post('data', 'Admins\GlobalSettingsController@leads_notification_data')->name('data');
-            Route::post('update', 'Admins\GlobalSettingsController@leads_notification_update')->name('update');
-            Route::post('enable_disable', 'Admins\GlobalSettingsController@leads_notification_enable_disable')->name('enable_disable');
+        Route::prefix('lead_notification')->name('lead_notification.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@lead_notification_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@lead_notification_list')->name('list');
+            Route::post('data', 'Admins\GlobalSettingsController@lead_notification_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@lead_notification_update')->name('update');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_notification_enable_disable')->name('enable_disable');
             
         });
     });
