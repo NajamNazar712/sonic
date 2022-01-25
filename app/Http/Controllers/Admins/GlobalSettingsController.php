@@ -5859,6 +5859,7 @@ public function sales_incentive()
             $notification_image->attachment = $generated_image_name;
             $notification_image->save();
         }
+        return redirect()->back()->with('success', 'Notification Updated!');
        
 
     }

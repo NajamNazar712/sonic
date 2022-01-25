@@ -1750,6 +1750,9 @@
                                 @if (session('role_id') == 1 || in_array(664, session('permissions')))
                                     <li><a class="menu-item" href="{{route('admin.settings.lead_zones.index')}}">Zone Tagging</a></li>
                                 @endif
+                                @if (session('role_id') == 1 || in_array(664, session('permissions')))
+                                    <li><a class="menu-item" href="{{route('admin.settings.lead_notification.index')}}">Notifications</a></li>
+                                @endif
                             </ul>
                         </li>
                         @endif
