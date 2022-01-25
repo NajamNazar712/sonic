@@ -13,8 +13,6 @@ class UpdateGlobalSettingsForAutoCancelledShipments extends Seeder
     {
         $timestamp = \Carbon\Carbon::now();
 
-        DB::table('global_settings')->insert(array(
-            array('type' => 'cancelled_shipments', 'setting_value' => 60, 'created_at' => $timestamp, 'updated_at' => $timestamp)
-        ));
+        DB::table('global_settings')->where('type','cancelled_shipments')->delete();
     }
 }
