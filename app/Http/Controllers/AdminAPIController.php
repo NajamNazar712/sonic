@@ -23,6 +23,7 @@ use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Lead\LeadRemark;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -5915,7 +5916,7 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
     }
 
-    public function  leads_list(Request $request){
+    public function leads_list(Request $request){
         $admin_id = $request->admin_id;
         $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
@@ -5930,5 +5931,24 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => "No data found!"]);
         }
     }
+
+    public function add_remarks(Request $request){
+        $lead_id = $request->lead_id;
+        $admin_id = $request->admin_id;
+        $lead = Lead::find($lead_id);
+        $remarks = $request->remarks;
+        if($remarks != NULL){
+            $lead_remarks = new LeadRemark();
+            $lead_remarks->lead_id = $lead->id;
+            $lead_remarks->remarks = $remarks;
+            $lead_remarks->updated_by = $admin_id;
+            $lead_remarks->save();
+            return response()->json(['status' => 0, 'message' => 'Remarks added Successfully!']);
+        }
+        else{
+            return response()->json(['status' => 1, 'message' => 'Invalid Remarks!']);
+        }
+    }
+
 
 }
