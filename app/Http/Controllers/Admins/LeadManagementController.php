@@ -13,6 +13,7 @@ use App\Http\Models\City;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\LeadNotification;
 use App\Http\Models\Admin\Lead\LeadTagging;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -427,6 +428,9 @@ class LeadManagementController extends Controller
 
                     if($status == 9){
                         NotificationsController::send(113, $lead);
+                    }
+                    elseif ($status == 2) {
+                        LeadTaggingController::notification_unresponsive($lead->id);
                     }
 
                     return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
