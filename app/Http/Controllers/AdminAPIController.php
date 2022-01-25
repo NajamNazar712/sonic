@@ -22,6 +22,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -5910,6 +5911,22 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
         }
         return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
+    }
+
+    public function  leads_list(Request $request){
+        $admin_id = $request->admin_id;
+        $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
+            ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
+            ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
+            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand');
+            /*->where('leads.sale_person_id', $admin_id)
+            ->wherenotin('leads.status_id', [3, 11, 12]);*/
+        if($leads->exists()){
+            $leads = $leads->get();
+            return response()->json(['status' => 0, 'data' => $leads]);
+        }else{
+            return response()->json(['status' => 1, 'message' => "No data found!"]);
+        }
     }
 
 }

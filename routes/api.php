@@ -326,6 +326,10 @@ Route::name('api.')->group(function () {
             Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
             Route::post('trax_directory', 'AdminAPIController@trax_directory')->name('trax_directory');
 
+            Route::prefix('leads')->name('leads.')->group(function () {
+                Route::get('list', 'AdminAPIController@leads_list')->name('list');
+            });
+
         });
 
     });
