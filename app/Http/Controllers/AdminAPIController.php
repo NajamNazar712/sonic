@@ -5967,8 +5967,6 @@ class AdminAPIController extends Controller
         $rules = [
             'lead_id' => ['required', 'integer', 'digits_between:1,10', 'exists:leads,id'],
         ];
-
-        $admin_id = $request->admin_id;
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -5977,19 +5975,14 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $lead_id = $request->lead_id;
-            $lead = Lead::find($lead_id);
-            $remarks = $request->remarks;
-            if($remarks != NULL){
-                $lead_remarks = new LeadRemark();
-                $lead_remarks->lead_id = $lead->id;
-                $lead_remarks->remarks = $remarks;
-                $lead_remarks->updated_by = $admin_id;
-                $lead_remarks->save();
-                return response()->json(['status' => 0, 'message' => 'Remarks added Successfully!']);
+            $lead_remarks = LeadRemark::join('admins as a', 'a.id', '=', 'lead_remarks.updated_by')
+                ->select('lead_remarks.id as id', 'lead_remarks.remarks as remarks', 'lead_remarks.created_at as created_at', 'a.name as updated_by')
+                ->where('lead_id', $lead_id);
+            if($lead_remarks->exists()){
+                $lead_remarks = $lead_remarks->get();
+                return response()->json(['status' => 0, 'data' => $lead_remarks]);
             }
-            else{
-                return response()->json(['status' => 1, 'message' => 'Invalid Remarks!']);
-            }
+            return response()->json(['status' => 1, 'message' => 'No Remarks Found!']);
         }
     }
 
