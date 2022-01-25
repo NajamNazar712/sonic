@@ -5488,7 +5488,8 @@ public function sales_incentive()
 
     public function lead_tagging_index(){
         // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
-        $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
+        $agents = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
+        // $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
         $services = DB::table('service_list')->where('status',1)->get();
         $cities = City::where('status',1)->get();
         $zones = Zone::join('lead_zones as lz','lz.zone_id','=','zones.id')
@@ -5619,7 +5620,9 @@ public function sales_incentive()
 
     public function lead_zones_index(){
         // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
-        $admins = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
+        $admins = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
+
+        // $admins = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
         $zones = Zone::where('status',1)->where('business_category_id',1)->get();
         return view('admin.settings.lead_management.zone_tagging')->with(['admins' => $admins , 'zones' => $zones]);
     }
