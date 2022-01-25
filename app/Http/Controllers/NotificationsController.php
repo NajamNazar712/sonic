@@ -9171,7 +9171,7 @@ class NotificationsController extends Controller
                             }
                         }
                     }
-                }else if ($id == 13) {
+                } else if ($id == 13) {
                     $leave = EmployeeLeave::find($reference1_id);
                     if($leave){
                         if($leave->employee_type_id == 1){
@@ -9196,6 +9196,32 @@ class NotificationsController extends Controller
                             if (strpos($body, '[to]') !== FALSE) {
                                 $body = str_replace('[to]', $leave->from, $body);
                             }
+                        }
+                    }
+                } else if ($id == 14) {
+                    $lead = Lead::find($reference1_id);
+                    $user = Admin::find($employee_id);
+                    if (strpos($title, '[date]') !== FALSE) {
+                        $date = Carbon::now()->format("Y-m-d");
+                        $body = str_replace('[date]', $date, $body);
+                    }
+                    if($lead && $user){
+                        if (strpos($body, '[sale_person]') !== FALSE) {
+                            $body = str_replace('[sale_person]', $user->name, $body);
+                        }
+                        if (strpos($body, '[lead_id]') !== FALSE) {
+                            $body = str_replace('[lead_id]', $lead->id, $body);
+                        }
+                    }
+                } else if ($id == 15) {
+                    $lead = Lead::find($reference1_id);
+                    $user = Admin::find($employee_id);
+                    if($lead && $user){
+                        if (strpos($body, '[sale_person]') !== FALSE) {
+                            $body = str_replace('[sale_person]', $user->name, $body);
+                        }
+                        if (strpos($body, '[lead_id]') !== FALSE) {
+                            $body = str_replace('[lead_id]', $lead->id, $body);
                         }
                     }
                 }
