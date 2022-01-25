@@ -330,10 +330,10 @@
                                 
                                 $.each(data.attachments, function (index, attachment) {
                                     index++;
-                                    var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + attachment.attachment + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                                    var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + attachment.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
 
-                                    image_html += '<tr id="' + attachment.id + '"><td>' + index + '</td><td>' + attachment.created_at + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
+                                    image_html += '<tr id="' + attachment.id + '"><td>' + index + '</td><td>' + attachment.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
                                 });
                                 $('#image_view_table tbody').append(image_html);
                                 

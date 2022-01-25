@@ -5507,7 +5507,7 @@ public function sales_incentive()
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
-            if (session('role_id') == 1 || in_array(640, session('permissions'))) {
+            if (session('role_id') == 1 || in_array(663, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
@@ -5631,7 +5631,7 @@ public function sales_incentive()
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
-            if (session('role_id') == 1 || in_array(640, session('permissions'))) {
+            if (session('role_id') == 1 || in_array(666, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
@@ -5807,7 +5807,12 @@ public function sales_incentive()
 
         if ($id == 1) {
             $details['fields'] = ['shipper_name', 'tagged_salesperson_name', 'tagged_salesperson_number', 'tagged_salesperson_email'];
-            $details['attachments'] =  LeadNotificationAttachment::where('notification_id',$id)->get();
+            $attachments =  LeadNotificationAttachment::where('notification_id',$id)->get();
+            foreach ($attachments as $image) {
+                $img_url = asset('uploads/notification_images/'.$image->attachment);
+                $attachments_details[] = array('id' => $image->id,'date' => Carbon::parse($image->created_at)->toDateTimeString(),'image'=> $img_url);
+            }
+            $details['attachments'] = $attachments_details;
         }
         else if ($id == 2) {
             $details['fields'] = ['shipper_name', 'tagged_salesperson_name', 'tagged_salesperson_number', 'tagged_salesperson_email'];
@@ -5851,18 +5856,7 @@ public function sales_incentive()
             $notification_image->attachment = $generated_image_name;
             $notification_image->save();
         }
-        // $check_leads = LeadZone::where('zone_id',$request->zone_id)->where('admin_id',$request->agent_id);
-
-        // if(!$check_leads->exists()){
-        //     $lead_zone = LeadZone::find($request->lead_zone_id);
-        //     $lead_zone->admin_id = $request->agent_id;
-        //     $lead_zone->zone_id = $request->zone_id;
-        //     $lead_zone->save();
-        //     return redirect()->back()->with('success', 'Agent Zone Updated!');
-        // }else{
-        //     return redirect()->back()->with('error', 'Agent Zone already exist');
-
-        // }
+       
 
     }
 
