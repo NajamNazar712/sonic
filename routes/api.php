@@ -329,6 +329,7 @@ Route::name('api.')->group(function () {
             Route::prefix('leads')->name('leads.')->group(function () {
                 Route::get('list', 'AdminAPIController@leads_list')->name('list');
                 Route::post('add_remarks', 'AdminAPIController@add_remarks')->name('add_remarks');
+                Route::post('view_remarks', 'AdminAPIController@view_remarks')->name('view_remarks');
             });
 
         });
