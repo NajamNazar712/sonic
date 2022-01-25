@@ -28,6 +28,7 @@
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">Rider Main Category</th>
+                                    <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
@@ -502,6 +503,7 @@
                             head.push('Phone No.');
                             head.push('Employee Type');
                             head.push('Rider Main Category');
+                            head.push('Designation');
                             head.push('Department Name');
                             head.push('Request/Document Status');
                             head.push('Employee Status');
@@ -520,6 +522,7 @@
                                 row.push(values.phone_number);
                                 row.push(values.employee_type);
                                 row.push(values.rider_main_category);
+                                row.push(values.employee_designation);
                                 row.push(values.department_name);
                                 row.push(values.request_status);
                                 row.push(values.status);
@@ -752,7 +755,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[14, 'desc']],
+                order: [[15, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -767,6 +770,7 @@
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
                     {data: 'rider_main_category', name: 'rmc.name', class: 'align-middle rider_main_category'},
+                    {data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
