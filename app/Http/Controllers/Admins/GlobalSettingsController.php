@@ -5880,5 +5880,15 @@ public function sales_incentive()
 
         }
     }
+    public function lead_notification_delete_image(Request $request){
+        $lead_notification_attachment = LeadNotificationAttachment::where('id',$request->image_id)->where('notification_id',$request->notification_id);
+        if($lead_notification_attachment->exists()){
+            $lead_notification_attachment = $lead_notification_attachment->get()->first();
+            $lead_notification_attachment->delete();
+            return response()->json(['status' => 0, 'success' => 'Image Deleted!']);
+        } else {
+            return response()->json(['status' => 1, 'error' => 'Image Not Found']);
+        }
+    }
 
 }

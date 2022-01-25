@@ -70,13 +70,14 @@
                         <div class="form-group d-none" id="attachment">
                             <label>Attachments</label>
                             <div class="attachments">
-                                <table class="table table-bordered" id="crm_image_view_table" style="z-index: 3;">
+                                <table class="table table-bordered" id="image_view_table" style="z-index: 3;">
                                     <thead>
                                     <tr role="row" class="bg-primary white">
             
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Date Added</th>
                                         <th class="border-primary border-darken-1">Image</th>
+                                        <th class="border-primary border-darken-1">Remove</th>
                                     </tr>
                                     </thead>
                                     <tbody></tbody>
@@ -330,10 +331,11 @@
                                 $.each(data.attachments, function (index, attachment) {
                                     index++;
                                     var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + attachment.attachment + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-                                
-                                    image_html += '<tr id="' + attachment.id + '"><td>' + index + '</td><td>' + attachment.created_at + '</td><td>' + img + '</td></tr>';
+                                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                                    image_html += '<tr id="' + attachment.id + '"><td>' + index + '</td><td>' + attachment.created_at + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
                                 });
-                                $('#crm_image_view_table tbody').append(image_html);
+                                $('#image_view_table tbody').append(image_html);
                                 
                                 function add_row() {
                                     var tr_id = $('#image_upload_table tbody tr').attr('id');
@@ -391,9 +393,9 @@
                                         // this.api().table().columns.adjust();
                                     }
                                 });
-                                $('#crm_image_view_table').on('click','a.remove_row', function () {
+                                $('#image_view_table').on('click','a.remove_row', function () {
                                     var row_id = $(this).parents('tr').attr('id');
-                                    var crm_request_id = $('#image_crm_request_id').val();
+                                    var notification_id = $('#lead_notification_id').val();
                                     var current = $(this);
                                     if(row_id){
                                         swal({
@@ -420,14 +422,15 @@
                                         }).then(function (confirm) {
                                             if (confirm) {
                                                 $.ajax({
-                                                    url: '{!! route('admin.crm.request.image_delete') !!}',
+                                                    url: '{!! route('admin.settings.lead_notification.delete_image') !!}',
                                                     method: 'POST',
                                                     data: {
-                                                        'crm_image_id': row_id,
-                                                        'crm_request_id':crm_request_id,
+                                                        'image_id': row_id,
+                                                        'notification_id':notification_id,
                                                         '_token': '{{ csrf_token() }}'
                                                     }
                                                 }).done(function (data) {
+                                                    console.log(data);
                                                     if(data.status == 0){
                                                         images_count = images_count - 1;
                                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
