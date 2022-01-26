@@ -56,11 +56,11 @@ class WebsitePAMLead extends Command
         ]);
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
-        return $response;
         if($response->status == 0){
             $leads = $response->leads;
             foreach ($leads as $lead) {
                 $new_lead = new PamLead();
+                $new_lead->lead_id = "PM".str_pad($lead->id,5,0,STR_PAD_LEFT);
                 $new_lead->name = $lead->name;
                 $new_lead->phone = $lead->phone;
                 $new_lead->video_link = $lead->video_link;
@@ -71,7 +71,7 @@ class WebsitePAMLead extends Command
                 $new_lead->case_type = $lead->case_type;
                 $new_lead->save();
 
-                foreach ($lead['item_details'] as $item) {
+                foreach ($lead->item_details as $item) {
                     $lead_log = new PamLeadItem();
                     $lead_log->lead_id = $new_lead->id;
                     $lead_log->item = $item->item;
