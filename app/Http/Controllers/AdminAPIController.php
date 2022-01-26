@@ -5333,7 +5333,11 @@ class AdminAPIController extends Controller
                     $information['phone'] = $user->phone_number;
                     $information['cnic'] = $user->cnic;
                     $information['cargo_user'] = (in_array($user->role_id,[11,10, 15, 55, 23, 33, 46])) ? 1 : 0;
-                    $user_department = $user->Edesignation->department_id;
+                    if($user->designation_id){
+                        $user_department = $user->Edesignation->department_id;
+                    }else{
+                        $user_department = $user->role->department_id;
+                    }
                     $information['sales_person'] = ($user_department == 7) ? 1 : 0;
                     if ($employee->exists()) {
                         $employee = $employee->first();
