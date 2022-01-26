@@ -899,6 +899,7 @@ class Permission
 
 
             'settings.shippers_origin_change.index' => 667,
+            'settings.shippers_return_address.index' => 668,
 
 
 

@@ -5561,4 +5561,45 @@ public function sales_incentive()
         }
 
     }
+
+    public function shippers_return_address_index()
+    {
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'shipper_return_address');
+        $shipper_return_address = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $shipper_return_address = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.shipper.shipper_return_address')->with(['shippers' => $shippers, 'shipper_return_address' => $shipper_return_address]);
+    }
+
+    public function shippers_return_address_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'shipper_return_address');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'shipper_return_address';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
+    }
+
+
 }
