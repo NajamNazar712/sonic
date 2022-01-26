@@ -251,7 +251,7 @@
                 rowId:'bag_id',
                 columns: [
                     {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data:'seal_number', name: 'cargo_manifest_draft_bags.seal_number', class: 'align-middle seal_number'},
+                    {data:'bag_number', name: 'cargo_manifest_draft_bags.seal_number', class: 'align-middle bag_number'},
                     {data:'shipments_count', name: 'cargo_manifest_draft_bags.shipments_count', class: 'align-middle shipments_count'},
                     {data:'origin', name: 'c.name', class: 'align-middle origin'},
                     {data:'destination', name: 'd.name', class: 'align-middle destination'},
@@ -268,6 +268,20 @@
                 }
             });
 
+            var rows_count = 0;
+            function rowsCount(){
+                var draft_bags = @json($draft_bags);
+                if(draft_bags.length > 0) {
+                    $.each(draft_bags, function (index, value) {
+                        bag_ids.push(value);
+                        rows_count++;
+                    });
+                    if (bag_ids.length > 0) {
+                        $('#master_cargo_consignment_confirm').prop('disabled', false);
+                    }
+                }
+            }
+            rowsCount();
 
 
             var cargo_table = $('#cargo_datatable').DataTable({
@@ -341,9 +355,11 @@
                                     var index = $.inArray(id, bag_ids);
 
                                     if (index === -1) {
-                                        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a>';
-                                        var rowNo = table.rows().count();
+                                        console.log(data.details);
+                                        var remove = '<td><a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a></td>';
+                                        var rowNo = rows_count;
                                         table.row.add([rowNo+1, data.details.bag_number, data.details.shipments, data.details.origin, data.details.destination,remove]).node().id = data.details.id;
+
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         bag_ids.push(data.details.id);
@@ -563,21 +579,37 @@
             $('body').on('click','.bag_remove',function () {
                 var bag_id = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(bag_id, bag_ids);
+
                 if(index !== -1){
-                    bag_ids.splice(index,1);
-                    table.row( $(this).parents('tr') ).remove().draw();
-                    if(bag_ids.length == 0){
-                        $('#add_bag_form button.add').prop('disabled', false);
+                    $.ajax({
+                        url: '{!! route('admin.cargo_manifest.draft.delete') !!}',
+                        method: 'POST',
+                        data: {
+                            'bag_id': bag_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                    .done(function(data) {
+                        console.log(data.status)
+                        if (data.status == 1 || data.status == 0) {
+                            console.log(index,bag_id,bag_ids, table.row( $(this).parents('tr') ));
+                            bag_ids.splice(index,1);
+                            table.row( $(this).parents('tr') ).remove().draw();
+                        }
 
-                        $('#master_cargo_confirm').prop('disabled', false);
+                        if(bag_ids.length == 0){
+                            $('#add_bag_form button.add').prop('disabled', false);
 
-                        $("#master_cargo_consignment_confirm").prop('disabled',true);
+                            $('#master_cargo_confirm').prop('disabled', false);
 
-                    }
+                            $("#master_cargo_consignment_confirm").prop('disabled',true);
+
+                        }
+
+                    });
                 }
-
-
             });
+
         });
 
         function camera_scan_detected(bag_number) {

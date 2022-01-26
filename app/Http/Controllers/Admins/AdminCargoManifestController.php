@@ -1338,7 +1338,7 @@ class AdminCargoManifestController extends Controller
             return back()->with(['error'=>'Default Hub not set for this admin.']);
         }
         $shipping_modes = ShippingMode::all();
-        $draft_bags = CargoManifestDraftBags::all()->where('added_by',Auth::id());
+        $draft_bags = CargoManifestDraftBags::where('added_by',Auth::id())->pluck('bag_id')->toArray();
         return view('admin.cargo.manifest.create',compact('shipping_modes','draft_bags'));
     }
 
@@ -3099,11 +3099,28 @@ class AdminCargoManifestController extends Controller
     public function manifest_draft(){
       $draft = CargoManifestDraftBags::join('cities as c','c.id','=','cargo_manifest_draft_bags.origin_id')
           ->join('cities as d','d.id','=','cargo_manifest_draft_bags.destination_id')
-          ->select('cargo_manifest_draft_bags.bag_id as bag_id','cargo_manifest_draft_bags.seal_number as seal_number','cargo_manifest_draft_bags.shipments_count','d.name as destination','c.name as origin')
+          ->select('cargo_manifest_draft_bags.bag_id as bag_id','cargo_manifest_draft_bags.seal_number as bag_number','cargo_manifest_draft_bags.shipments_count','d.name as destination','c.name as origin')
           ->where('cargo_manifest_draft_bags.added_by',Auth::id());
 
         return Datatables::of($draft)
+            ->addColumn('action',function ($shipments){
+                $dropdown = '<a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a>';
+                return $dropdown;
+
+            })
             ->make(true);
+    }
+
+    public function manifest_draft_delete(Request $request){
+       $bag_id = $request->bag_id;
+       $draft = CargoManifestDraftBags::where('bag_id',$bag_id)->where('added_by',Auth::id())->first();
+       if($draft){
+           $draft->delete();
+           return response()->json(['status' => 1]);
+       }
+       else{
+           return response()->json(['status' => 0]);
+       }
     }
 
 }

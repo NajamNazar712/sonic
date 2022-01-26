@@ -1689,6 +1689,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('draft')->name('draft.')->group(function () {
             Route::get('/list', 'Admins\AdminCargoManifestController@manifest_draft')->name('list');
+            Route::post('/delete', 'Admins\AdminCargoManifestController@manifest_draft_delete')->name('delete');
 
         });
 
