@@ -64,7 +64,7 @@ class ShipmentOriginChangeController extends Controller
 
     public function shipments_origin_store(Request $request){
         $user_id = session('user_id');
-//        return $request;
+
 
         Validator::extend('phone_number', function($attribute, $value, $parameters) {
             if ($value) {
@@ -164,7 +164,6 @@ class ShipmentOriginChangeController extends Controller
                     break;
                 }
             }
-
             if (!$header_correct) {
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
@@ -200,7 +199,7 @@ class ShipmentOriginChangeController extends Controller
                 }
 
             }
-            if(isset($errors)){
+            if(!empty($errors)){
                 $errors = array_map(function ($row, $errors) {
                     return $row . ':' . PHP_EOL . implode(' | ', $errors);
                 }, array_keys($errors), $errors);
@@ -225,13 +224,12 @@ class ShipmentOriginChangeController extends Controller
                     $shipment->save();
                     AdminPickupsController::generate($shipment->id);
 
-                    $tracking_numbers['Row #' . $row_id] = $shipment->tracking_number;
-
+                    $tracking_numbers[] = $shipment->tracking_number;
                 }
 
 
                 $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                    return $row . ': ' . $tracking_number;
+                    return $tracking_number;
                 }, array_keys($tracking_numbers), $tracking_numbers));
 
 
