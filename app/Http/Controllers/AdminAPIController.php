@@ -5981,7 +5981,7 @@ class AdminAPIController extends Controller
             $lead_remarks = LeadRemark::join('admins as a', 'a.id', '=', 'lead_remarks.updated_by')
                 ->select('lead_remarks.id as id', 'lead_remarks.remarks as remarks', 'lead_remarks.created_at as created_at', 'a.name as updated_by')
                 ->where('lead_id', $lead_id)
-                ->order_by('lead_remarks.created_at', 'ASC');
+                ->orderBy('lead_remarks.created_at', 'ASC');
             if($lead_remarks->exists()){
                 $lead_remarks = $lead_remarks->get();
                 return response()->json(['status' => 0, 'data' => $lead_remarks]);
