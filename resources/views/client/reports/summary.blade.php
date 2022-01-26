@@ -534,6 +534,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 ajax:{
                     url: '{{ route('cod.reports.summary.list') }}',
                     data: function (d) {
