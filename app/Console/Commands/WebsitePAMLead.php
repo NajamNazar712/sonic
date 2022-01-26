@@ -56,7 +56,7 @@ class WebsitePAMLead extends Command
         ]);
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
-        $new_leads = array();
+        return $response;
         if($response->status == 0){
             $leads = $response->leads;
             foreach ($leads as $lead) {
