@@ -5801,7 +5801,7 @@ public function sales_incentive()
         $lead_notification = LeadNotification::find($id);
 
         $details = array();
-
+        $attachments_details = array();
         if ($lead_notification->type_id == 1) {
             $details['subject'] = $lead_notification->subject;
         }
@@ -5812,7 +5812,7 @@ public function sales_incentive()
             $details['fields'] = ['shipper_name', 'tagged_salesperson_name', 'tagged_salesperson_number', 'tagged_salesperson_email'];
             $attachments =  LeadNotificationAttachment::where('notification_id',$id)->get();
             foreach ($attachments as $image) {
-                $img_url = asset('uploads/notification_images/'.$image->attachment);
+                $img_url = asset('uploads/notification_attachments/'.$image->attachment);
                 $attachments_details[] = array('id' => $image->id,'date' => Carbon::parse($image->created_at)->toDateTimeString(),'image'=> $img_url);
             }
             $details['attachments'] = $attachments_details;
@@ -5852,7 +5852,7 @@ public function sales_incentive()
             $now = Carbon::now();
             $time = $now->year . '_' . $now->month;
             $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-            $image->move(public_path('uploads/notification_images'), $generated_image_name);
+            $image->move(public_path('uploads/notification_attachments'), $generated_image_name);
             $notification_image = new LeadNotificationAttachment();
             $notification_image->notification_id = $lead_notification->id;
             $notification_image->added_by = Auth::id();

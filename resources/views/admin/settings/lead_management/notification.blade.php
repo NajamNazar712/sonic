@@ -350,7 +350,7 @@
 
                                     rows_count++;
 
-                                    var crm_image = '<input class="form-control form-control-sm" type="file" name="notification_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                                    var crm_image = '<input class="form-control form-control-sm" type="file" name="notification_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png|pdf|doc" data-msg-extension="Only file with extension jpeg, jpg, png, doc or pdf allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
                                     if(rows_count == 1){
                                         var remove = '';
                                     }else{
