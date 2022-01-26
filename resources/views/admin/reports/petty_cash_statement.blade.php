@@ -144,7 +144,7 @@
                         <th class="border-primary border-darken-1">Employee Designation</th>
                         <th class="border-primary border-darken-1">SDN No.</th>
                         <th class="border-primary border-darken-1">DNCC/PNCC Count</th>
-                        <th class="border-primary border-darken-1">Delivery Note #</th>
+                        <th class="border-primary border-darken-1">Delivery Note No</th>
                         <th class="border-primary border-darken-1">Delivered Shipments</th>
                         <th class="border-primary border-darken-1">Delivery Note Amount</th>
                     </tr>
@@ -391,7 +391,7 @@
                             head.push('Employee Designation');
                             head.push('SDN No.');
                             head.push('DNCC/PNCC Count');
-                            head.push('Delivery Note #');
+                            head.push('Delivery Note No');
                             head.push('Delivered Shipments');
                             head.push('Delivery Note Amount');
 
