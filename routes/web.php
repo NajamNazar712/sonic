@@ -1686,6 +1686,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('history/bags','Admins\AdminCargoManifestController@manifest_bags')->name('history.bags');
         Route::post('history/short_received_bags','Admins\AdminCargoManifestController@cargo_short_received_bags')->name('history.short_received_bags');
         Route::post('history/shipments','Admins\AdminCargoManifestController@cargo_bag_shipments')->name('history.shipments');
+
+        Route::prefix('draft')->name('draft.')->group(function () {
+            Route::get('/list', 'Admins\AdminCargoManifestController@manifest_draft')->name('list');
+
+        });
+
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
         Route::get('','Admins\DisputeController@dispute_index')->name('index');

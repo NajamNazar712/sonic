@@ -213,7 +213,7 @@
             @endif
             var bag_ids = [];
 
-            var table = $('#datatable').DataTable({
+          /*  var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: true,
                 autoWidth : false,
@@ -224,7 +224,7 @@
                     {name: 'shipments', class: 'align-middle shipments', orderable: false},
                     {name: 'origin', class: 'align-middle origin', orderable: false},
                     {name: 'destination', class: 'align-middle destination', orderable: false},
-                  /*  {name: 'bag_weight', class: 'align-middle bag_weight', orderable: false},*/
+                  /!*  {name: 'bag_weight', class: 'align-middle bag_weight', orderable: false},*!/
                     {name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -235,7 +235,40 @@
                 initComplete: function() {
                     this.api().table().columns.adjust();
                 }
+            });*/
+
+            var table = $('#datatable').DataTable({
+                dom: 'ltipr',
+                scrollX: true,
+                "autoWidth": false,
+                paging:false,
+                ajax: '{{ route('admin.cargo_manifest.draft.list') }}',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                serverSide: false,
+                rowId:'bag_id',
+                columns: [
+                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data:'seal_number', name: 'cargo_manifest_draft_bags.seal_number', class: 'align-middle seal_number'},
+                    {data:'shipments_count', name: 'cargo_manifest_draft_bags.shipments_count', class: 'align-middle shipments_count'},
+                    {data:'origin', name: 'c.name', class: 'align-middle origin'},
+                    {data:'destination', name: 'd.name', class: 'align-middle destination'},
+                    {data:'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
             });
+
+
 
             var cargo_table = $('#cargo_datatable').DataTable({
                 dom: 'ltipr',
@@ -266,6 +299,7 @@
                 'allowMinus': false,
                 'allowPlus': false
             });*/
+
             manifest_bag_weight = [];
             $('#add_bag_form').validate({
                 errorClass: 'danger',

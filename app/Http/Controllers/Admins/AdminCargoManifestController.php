@@ -9,6 +9,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagStatus;
+use App\Http\Models\Admin\CargoManifest\CargoManifestDraftBags;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2JunctionMapping;
 use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
@@ -1337,7 +1338,8 @@ class AdminCargoManifestController extends Controller
             return back()->with(['error'=>'Default Hub not set for this admin.']);
         }
         $shipping_modes = ShippingMode::all();
-        return view('admin.cargo.manifest.create',compact('shipping_modes'));
+        $draft_bags = CargoManifestDraftBags::all()->where('added_by',Auth::id());
+        return view('admin.cargo.manifest.create',compact('shipping_modes','draft_bags'));
     }
 
     public function bag_details(Request $request) {
@@ -1377,6 +1379,10 @@ class AdminCargoManifestController extends Controller
                         $details['destination'] = $destination->name;
                         $details['bag_weight'] = $bag->shipments_weight;
 
+                        if(!CargoManifestDraftBags::where('bag_id',$bag->id)->exists()){
+                            CargoManifestDraftBags::create(['bag_id'=> $bag->id,'seal_number' => $bag->seal_number,'shipments_count' => $bag->shipments , 'origin_id' => $origin->id,'destination_id' => $destination->id ,'added_by' => Auth::id()]);
+                        }
+                        
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                 }
                 else {
@@ -3088,6 +3094,16 @@ class AdminCargoManifestController extends Controller
          }
          return $tracking_numbers;
      }
+    }
+
+    public function manifest_draft(){
+      $draft = CargoManifestDraftBags::join('cities as c','c.id','=','cargo_manifest_draft_bags.origin_id')
+          ->join('cities as d','d.id','=','cargo_manifest_draft_bags.destination_id')
+          ->select('cargo_manifest_draft_bags.bag_id as bag_id','cargo_manifest_draft_bags.seal_number as seal_number','cargo_manifest_draft_bags.shipments_count','d.name as destination','c.name as origin')
+          ->where('cargo_manifest_draft_bags.added_by',Auth::id());
+
+        return Datatables::of($draft)
+            ->make(true);
     }
 
 }
