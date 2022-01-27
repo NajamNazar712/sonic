@@ -24,6 +24,7 @@ use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadRemark;
+use App\Http\Models\Admin\Lead\LeadStatus;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -5748,7 +5749,7 @@ class AdminAPIController extends Controller
             ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
             ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-            ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
+            ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'e.official_phone_number as official_phone_number', 'e.personal_email as personal_email')
             ->where('admins.id', $admin_id);
         if ($admin_profile->exists()) {
         $admin_profile = $admin_profile->get();
@@ -5919,6 +5920,12 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
     }
 
+    public function leads_index(Request $request){
+        $lead_statuses = LeadStatus::whereNotIn('id', [3, 11, 12])->select('id', 'name')->get();
+        $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        return response()->json(['status' => 0, 'cities' => $cities, 'lead_status' => $lead_statuses]);
+    }
+
     public function leads_list(Request $request){
         $admin_id = $request->admin_id;
         $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
@@ -5927,6 +5934,23 @@ class AdminAPIController extends Controller
             ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand')
             ->where('leads.sale_person_id', $admin_id)
             ->wherenotin('leads.status_id', [3, 11, 12]);
+
+        if($request->city_id){
+            $leads = $leads->where('leads.city_id', $request->city_id);
+        }
+        if($request->status_id){
+            $leads = $leads->where('leads.status_id', $request->status_id);
+        }
+        if($request->date_from){
+            if($request->date_to){
+                $from = $request->date_from.' 00:00:00';
+                $to = $request->date_to.' 23:59:59';
+                $leads = $leads->whereBetween('leads.requested_date', [$from, $to]);
+            }
+            else{
+                $leads = $leads->whereDate('leads.requested_date', $request->date_from);
+            }
+        }
         if($leads->exists()){
             $leads = $leads->get();
             return response()->json(['status' => 0, 'data' => $leads]);

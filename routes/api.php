@@ -328,7 +328,8 @@ Route::name('api.')->group(function () {
             Route::post('trax_directory_v2', 'AdminAPIController@trax_directory_v2')->name('trax_directory_v2');
 
             Route::prefix('leads')->name('leads.')->group(function () {
-                Route::get('list', 'AdminAPIController@leads_list')->name('list');
+                Route::get('index', 'AdminAPIController@leads_index')->name('index');
+                Route::post('list', 'AdminAPIController@leads_list')->name('list');
                 Route::post('add_remarks', 'AdminAPIController@add_remarks')->name('add_remarks');
                 Route::post('view_remarks', 'AdminAPIController@view_remarks')->name('view_remarks');
             });
