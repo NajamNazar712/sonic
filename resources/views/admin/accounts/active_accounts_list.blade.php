@@ -544,7 +544,35 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="CorporateInvoiceLogModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CorporateInvoiceLogModal"
+    <div class="modal fade text-left" id="AutoCancelationDaysModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AutoCancelationDaysModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Auto Cancelation Days</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <form id="auto_cancelation_days_form" action="{{route('admin.accounts.auto_cancelation_days')}}" method="post">
+                            @csrf
+                            @method('post')
+                            <input type="text" hidden name="user_id" id="user_id">
+
+                            <div class="form-group text-center">
+                                <input type="text" class="form-control" placeholder="Auto Cancelation Days" name="cancelation_days" id="cancelation_days" data-rule-required="true" data-msg-required="Cancelation Day is Required">
+                            </div>
+                            <div class="mt-2" style="text-align: center">
+                                <button type="submit" class="btn btn-success" id="AutoCancelationDaysSubmit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade text-left" id="CorporateInvoiceLogModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CorporateInvoiceLogModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
@@ -1683,6 +1711,7 @@
             var shipper_id = $invoker.data('target-id');
             $('#shipper_id').val(shipper_id);
         });
+
         $('#salesTagSubmit').on('click',function () {
             var shipper = $('#shipper_id').val();
             var tag = parseInt($('#saletag').val());
@@ -2225,6 +2254,15 @@
                         });
                 }
             }
+
+            if($(this).hasClass('auto_cancel_days_setting')){
+                if(id){
+                    let auto_shipment_cancellation_days = table.row( $(this).parents('tr') ).data().auto_shipment_cancellation_days;
+                    $("#auto_cancelation_days_form #cancelation_days").val(auto_shipment_cancellation_days);
+                    $("#auto_cancelation_days_form #user_id").val(id);
+                    $("#AutoCancelationDaysModal").modal('show');
+                }
+            }
         });
 
         $('#restrict_order_id_form').validate({
@@ -2249,6 +2287,35 @@
             }
         });
 
+        $("#auto_cancelation_days_form #cancelation_days").inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 5,
+            'max': 60
+        });
+        $('#auto_cancelation_days_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Auto Cancelation Days being updated!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
+                form.submit();
+            }
+        });
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
             var id = $(this).parents('tr').attr('id');
             if($(this).hasClass('remove_sales_tier')){
