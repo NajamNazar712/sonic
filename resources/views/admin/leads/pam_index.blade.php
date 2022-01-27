@@ -278,12 +278,13 @@
                     if(data.status == 1)
                     {
                         $.each(data.items,function (i,item){
+                            let item_name;
                             if(item.item_id == 0)
                             {
-                                let item_name = "Other";
+                                item_name = "Other";
                             }
                             else{
-                                let item_name = item.item_name;
+                                item_name = item.item_name;
                             }
                             items_table.row.add([0,item_name,item.quantity,item.length,item.width,item.height,item.weight]);
                         });
