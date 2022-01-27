@@ -325,6 +325,7 @@ Route::name('api.')->group(function () {
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
             Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
             Route::post('trax_directory', 'AdminAPIController@trax_directory')->name('trax_directory');
+            Route::post('trax_directory_v2', 'AdminAPIController@trax_directory_v2')->name('trax_directory_v2');
 
             Route::prefix('leads')->name('leads.')->group(function () {
                 Route::get('list', 'AdminAPIController@leads_list')->name('list');

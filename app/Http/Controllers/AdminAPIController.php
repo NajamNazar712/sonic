@@ -5990,5 +5990,60 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function trax_directory_v2(Request $request)
+    {
+        $rules = [
+            'search_param' => ['required', 'min:3'],
+            'search_with' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            if ($request->search_with == 1) {
+
+                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                    ->join('cities as c', 'c.id', '=', 'e.city_id')
+                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
+                    ->where('e.name', 'like','%' . $request->search_param . '%')
+                    ->where('admins.status', 1);
+
+            } elseif ($request->search_with == 2) {
+                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                    ->join('cities as c', 'c.id', '=', 'e.city_id')
+                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
+                    ->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
+                    ->where('admins.status', 1);
+            } elseif ($request->search_with == 3) {
+                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                    ->join('cities as c', 'c.id', '=', 'e.city_id')
+                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
+                    ->where('e.trax_id', $request->search_param)
+                    ->where('admins.status', 1);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Provide atleast one parameter']);
+            }
+            if ($admin_profile->exists()) {
+                $admin_profile = $admin_profile->get();
+                return response()->json(['status' => 0, 'data' => $admin_profile]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'No User found!']);
+            }
+        }
+    }
+
 
 }
