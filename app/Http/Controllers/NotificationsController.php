@@ -9044,6 +9044,7 @@ class NotificationsController extends Controller
             if ($push_notification->status) {
                 $title = $push_notification->title;
                 $body = $push_notification->body;
+                $data = array();
                 if ($id == 1) {
                     $rider = Rider::find($reference1_id);
                     $shipper = User::find($reference2_id);
