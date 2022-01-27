@@ -16,7 +16,7 @@ class CreatePamLeadItemsTable extends Migration
         Schema::create('pam_lead_items', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('lead_id')->index();
-            $table->string('item');
+            $table->integer('item_id')->index();
             $table->integer('quantity');
             $table->float('length');
             $table->float('width');

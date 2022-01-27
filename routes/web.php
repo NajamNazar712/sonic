@@ -3389,6 +3389,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('view_attachment/{id}', 'Admins\LeadManagementController@view_attachment')->name('view_attachment');
     });
 
+    Route::prefix('pam_leads')->name('pam_leads.')->group(function(){
+        Route::get('', 'Admins\LeadManagementController@pam_index')->name('index');
+        Route::get('list', 'Admins\LeadManagementController@pam_list')->name('list');
+        Route::post('items', 'Admins\LeadManagementController@pam_items')->name('items');
+    });
+
 	Route::prefix('retail')->name('retail.')->group(function(){
         Route::prefix('franchise')->name('franchise.')->group(function(){
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@franchise_index')->name('index');

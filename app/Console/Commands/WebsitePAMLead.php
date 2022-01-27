@@ -74,7 +74,7 @@ class WebsitePAMLead extends Command
                 foreach ($lead->item_details as $item) {
                     $lead_log = new PamLeadItem();
                     $lead_log->lead_id = $new_lead->id;
-                    $lead_log->item = $item->item;
+                    $lead_log->item_id = $item->item_id;
                     $lead_log->quantity = $item->quantity;
                     $lead_log->length = $item->length;
                     $lead_log->width = $item->width;
