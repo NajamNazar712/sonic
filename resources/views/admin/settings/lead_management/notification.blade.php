@@ -76,7 +76,7 @@
             
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Date Added</th>
-                                        <th class="border-primary border-darken-1">Image</th>
+                                        <th class="border-primary border-darken-1">Attachment</th>
                                         <th class="border-primary border-darken-1">Remove</th>
                                     </tr>
                                     </thead>
@@ -88,7 +88,7 @@
                                     <tr role="row" class="bg-primary white">
         
                                         <th class="border-primary border-darken-1">S. No.</th>
-                                        <th class="border-primary border-darken-1">Image</th>
+                                        <th class="border-primary border-darken-1">Attachment</th>
                                         <th class="border-primary border-darken-1"></th>
         
                                     </tr>
@@ -149,6 +149,7 @@
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
+            var crm_image_table;
 
             // $('#edit_zone_id').select2({
             //     width:'100%',
@@ -325,12 +326,11 @@
                                 $('#attachment').removeClass('d-none');
                                 var images_count = 0;
                                 var rows_count = 0;
-                                var crm_image_table;
                                 var image_html = '';
                                 
                                 $.each(data.attachments, function (index, attachment) {
                                     index++;
-                                    var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + attachment.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                                    var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + attachment.image + '" target="_blank"><i class="la la-lg la-file align-middle"></i> <span class="align-middle">View</span></a>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
 
                                     image_html += '<tr id="' + attachment.id + '"><td>' + index + '</td><td>' + attachment.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
@@ -350,7 +350,7 @@
 
                                     rows_count++;
 
-                                    var crm_image = '<input class="form-control form-control-sm" type="file" name="notification_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png|pdf|doc" data-msg-extension="Only file with extension jpeg, jpg, png, doc or pdf allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                                    var crm_image = '<input class="form-control form-control-sm" type="file" name="notification_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png|pdf|doc" data-msg-extension="Only file with extension jpeg, jpg, png, doc or pdf allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Attachment is required">';
                                     if(rows_count == 1){
                                         var remove = '';
                                     }else{
@@ -400,7 +400,7 @@
                                     if(row_id){
                                         swal({
                                             title: 'Are You Sure?',
-                                            text: 'Select Yes if you want to delete this image!',
+                                            text: 'Select Yes if you want to delete this attachment!',
                                             icon: 'warning',
                                             buttons: {
                                                 cancel: {
@@ -459,7 +459,7 @@
                             }
                     $('#EditAgentModal').modal('show');
 
-                })
+                });
                 
             });
 
@@ -547,6 +547,20 @@
                     form.submit();    
                 }
                 
+                });
+
+                $('#EditAgentModal').on('hidden.bs.modal', function () {
+                    $('#lead_notification_id').val('');
+                    console.log(crm_image_table);
+                    crm_image_table.clear();
+                    crm_image_table.draw();
+                    selected_rows = [];
+                    rows_count = 0;
+                //     $("#image_upload_table").dataTable().clear();
+                // $("#image_upload_table").dataTable().draw();
+                // $('#image_upload_table tbody').html('');
+                $("#image_upload_table").dataTable().fnDestroy();
+                    $('#image_view_table tbody').html('');
                 });
         });
     </script>

@@ -45,14 +45,14 @@
 
                 <div class="modal-body">
                     <div class="form-group">
-                        <select name="zone_id" id="zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                        <select name="zone_id[]" id="zone_id" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Zone is required">
                             @foreach($zones as $zone)
                                 <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group" id="agent_select">
-                        <select name="agent_id" id="agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
+                        <select name="agent_id[]" id="agent_id" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Agent is required">
                             @foreach($admins as $admin)
                                 <option value="{{ $admin->id }}" > {{ $admin->name }} </option>
                             @endforeach
@@ -116,6 +116,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
 
 @endsection
@@ -127,6 +128,7 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
 
     <script>
@@ -139,7 +141,7 @@
                 
             });
            
-            $('#agent_id').prepend('<option selected></option>').select2({
+            $('#agent_id').select2({
                 width:'100%',
                 placeholder:"Select Sales Person",
                 allowClear:true,
@@ -147,7 +149,7 @@
             });
            
 
-            $('#zone_id').prepend('<option selected></option>').select2({
+            $('#zone_id').select2({
                 width:'100%',
                 placeholder:"Select Zone",
                 allowClear:true,

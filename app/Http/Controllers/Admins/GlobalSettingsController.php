@@ -5672,20 +5672,21 @@ public function sales_incentive()
     }
 
     public function lead_zones_submit(Request $request){
-
-        $check_leads = LeadZone::where('zone_id',$request->zone_id)->where('admin_id',$request->agent_id);
-
-        if(!$check_leads->exists()){
-            $lead_zone = new LeadZone;
-            $lead_zone->admin_id = $request->agent_id;
-            $lead_zone->zone_id = $request->zone_id;
-            $lead_zone->save();
-
-            return redirect()->back()->with('success', 'Agent Zone Added!');
-
-        }else{
-            return redirect()->back()->with('error', 'Agent Zone already exist');
+        foreach ($request->zone_id as $zone) {
+            foreach ($request->agent_id as $agent) {
+                $check_leads = LeadZone::where('zone_id',$zone)->where('admin_id',$agent);
+        
+                if(!$check_leads->exists()){
+                    $lead_zone = new LeadZone;
+                    $lead_zone->admin_id = $agent;
+                    $lead_zone->zone_id = $zone;
+                    $lead_zone->save();
+        
+                    
+                }
+            }
         }
+        return redirect()->back()->with('success', 'Agent Zone Added!');
     }
 
     public function lead_zones_data(Request $request){
