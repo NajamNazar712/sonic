@@ -9202,7 +9202,7 @@ class NotificationsController extends Controller
                     $lead = Lead::find($reference1_id);
                     $user = Admin::find($employee_id);
                     if (strpos($title, '[date]') !== FALSE) {
-                        $date = Carbon::now()->format("Y-m-d");
+                        $date = Carbon::now()->format('Y-m-d');
                         $body = str_replace('[date]', $date, $body);
                     }
                     if($lead && $user){

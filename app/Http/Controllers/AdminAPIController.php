@@ -5952,6 +5952,7 @@ class AdminAPIController extends Controller
             }
         }
         if($leads->exists()){
+            $leads->orderBy('leads.requested_date', "DESC");
             $leads = $leads->get();
             return response()->json(['status' => 0, 'data' => $leads]);
         }else{
