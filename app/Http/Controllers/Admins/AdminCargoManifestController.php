@@ -1484,6 +1484,7 @@ class AdminCargoManifestController extends Controller
 
     public function store_manifest(Request $request)
     {
+        dd($request);
         $error_hubs = array();
         $success_cargo_ids = array();
         foreach ($request->bag_ids as $hub_id => $bag_ids_array)

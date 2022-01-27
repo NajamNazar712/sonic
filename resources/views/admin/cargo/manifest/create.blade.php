@@ -325,12 +325,7 @@
                                     var index = $.inArray(id, bag_ids);
                                     if (index === -1) {
 
-                                        //rows_count++;
-
-                                     /*   var data_row = '<tr id="'+data.details.id+'" role="row" class="even"><td class="align-middle serial_number sorting_1">'+rows_count+'</td><td class=" align-middle tracking_number">'+data.details.bag_number+'</td><td class=" align-middle order_id">'+data.details.shipments+'</td><td class=" align-middle service_type">'+ data.details.origin+'</td><td class=" align-middle destination">'+data.details.destination+'</td><td><a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a></td></tr>';
-                                        $('#datatable tbody').append(data_row);*/
-                                      
-                                        table.draw(true);
+                                        $('#datatable').DataTable().ajax.reload();
                                        // $('#datatable').DataTable().draw();
                                         bag_ids.push(data.details.id);
                                         manifest_bag_weight.push(data.details.bag_weight);
