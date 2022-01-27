@@ -5920,14 +5920,12 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
     }
 
-    public function leads_index(Request $request){
-        $lead_statuses = LeadStatus::whereNotIn('id', [3, 11, 12])->select('id', 'name')->get();
-        $cities = City::where('business_category_id', 1)->where('status', 1)->get();
-        return response()->json(['status' => 0, 'cities' => $cities, 'lead_status' => $lead_statuses]);
-    }
-
     public function leads_list(Request $request){
         $admin_id = $request->admin_id;
+
+        $lead_statuses = LeadStatus::whereNotIn('id', [3, 11, 12])->select('id', 'name')->get();
+        $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+
         $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
@@ -5954,9 +5952,9 @@ class AdminAPIController extends Controller
         if($leads->exists()){
             $leads->orderBy('leads.requested_date', "DESC");
             $leads = $leads->get();
-            return response()->json(['status' => 0, 'data' => $leads]);
+            return response()->json(['status' => 0, 'data' => $leads, 'cities' => $cities, 'lead_status' => $lead_statuses]);
         }else{
-            return response()->json(['status' => 1, 'message' => "No data found!"]);
+            return response()->json(['status' => 0, 'message' => "No data found!", 'cities' => $cities, 'lead_status' => $lead_statuses]);
         }
     }
 
