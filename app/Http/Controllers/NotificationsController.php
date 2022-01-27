@@ -9238,6 +9238,8 @@ class NotificationsController extends Controller
                             $body = str_replace('[lead_id]', $lead->id, $body);
                         }
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 } else if ($id == 15) {
                     $lead = Lead::find($reference1_id);
                     $user = Admin::find($employee_id);
