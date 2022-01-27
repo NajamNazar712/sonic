@@ -237,36 +237,6 @@
                 }
             });*/
 
-            var table = $('#datatable').DataTable({
-                dom: 'ltipr',
-                scrollX: true,
-                "autoWidth": false,
-                paging:false,
-                ajax: '{{ route('admin.cargo_manifest.draft.list') }}',
-                processing: true,
-                language: {
-                    processing: data_table_loader
-                },
-                serverSide: false,
-                rowId:'bag_id',
-                columns: [
-                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data:'bag_number', name: 'cargo_manifest_draft_bags.seal_number', class: 'align-middle bag_number'},
-                    {data:'shipments_count', name: 'cargo_manifest_draft_bags.shipments_count', class: 'align-middle shipments_count'},
-                    {data:'origin', name: 'c.name', class: 'align-middle origin'},
-                    {data:'destination', name: 'd.name', class: 'align-middle destination'},
-                    {data:'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
-                ],
-                rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
-                },
-                initComplete: function() {
-                    this.api().table().columns.adjust();
-                }
-            });
 
             var rows_count = 0;
             function rowsCount(){
@@ -353,15 +323,15 @@
                                     id = data.details.id;
 
                                     var index = $.inArray(id, bag_ids);
-
                                     if (index === -1) {
-                                        console.log(data.details);
-                                        var remove = '<td><a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a></td>';
-                                        var rowNo = rows_count;
-                                        table.row.add([rowNo+1, data.details.bag_number, data.details.shipments, data.details.origin, data.details.destination,remove]).node().id = data.details.id;
 
-                                        table.draw(false);
-                                        table.order([0, 'desc']).draw();
+                                        //rows_count++;
+
+                                     /*   var data_row = '<tr id="'+data.details.id+'" role="row" class="even"><td class="align-middle serial_number sorting_1">'+rows_count+'</td><td class=" align-middle tracking_number">'+data.details.bag_number+'</td><td class=" align-middle order_id">'+data.details.shipments+'</td><td class=" align-middle service_type">'+ data.details.origin+'</td><td class=" align-middle destination">'+data.details.destination+'</td><td><a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a></td></tr>';
+                                        $('#datatable tbody').append(data_row);*/
+                                      
+                                        table.draw(true);
+                                       // $('#datatable').DataTable().draw();
                                         bag_ids.push(data.details.id);
                                         manifest_bag_weight.push(data.details.bag_weight);
                                         scan_sound(1);
@@ -371,6 +341,13 @@
                                         $('#master_cargo_consignment_confirm').prop('disabled', false);
                                         UnblockPagePermanently();
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    else{
+                                        $('#add_bag_form button.add').prop('disabled', false);
+                                        UnblockPagePermanently();
+                                        scan_sound(2);
+                                        var error = "Bag Already Exists";
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                     }
                                 }
                                 else {
@@ -391,6 +368,41 @@
                     return false;
                 }
             });
+
+            var table = $('#datatable').DataTable({
+                dom: 'ltipr',
+                scrollX: true,
+                "autoWidth": false,
+                paging:false,
+                ajax: '{{ route('admin.cargo_manifest.draft.list') }}',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                serverSide: false,
+                rowId:'bag_id',
+                columns: [
+                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data:'bag_number', name: 'cargo_manifest_draft_bags.seal_number', class: 'align-middle bag_number'},
+                    {data:'shipments_count', name: 'cargo_manifest_draft_bags.shipments_count', class: 'align-middle shipments_count'},
+                    {data:'origin', name: 'c.name', class: 'align-middle origin'},
+                    {data:'destination', name: 'd.name', class: 'align-middle destination'},
+                    {data:'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+
+
+
+
             $('#master_cargo_consignment_confirm').bind('click', function() {
 
                 let total_weight = 0;
@@ -578,6 +590,7 @@
 
             $('body').on('click','.bag_remove',function () {
                 var bag_id = parseInt($(this).parents('tr').attr('id'));
+                var obj = $(this);
                 var index = $.inArray(bag_id, bag_ids);
 
                 if(index !== -1){
@@ -590,23 +603,24 @@
                         }
                     })
                     .done(function(data) {
-                        console.log(data.status)
+
                         if (data.status == 1 || data.status == 0) {
-                            console.log(index,bag_id,bag_ids, table.row( $(this).parents('tr') ));
+
+                            $(obj).closest("tr").remove();
                             bag_ids.splice(index,1);
-                            table.row( $(this).parents('tr') ).remove().draw();
                         }
 
                         if(bag_ids.length == 0){
+
                             $('#add_bag_form button.add').prop('disabled', false);
 
                             $('#master_cargo_confirm').prop('disabled', false);
 
                             $("#master_cargo_consignment_confirm").prop('disabled',true);
-
+                            $('#datatable').DataTable().clear().draw();
                         }
-
                     });
+
                 }
             });
 

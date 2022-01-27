@@ -1365,6 +1365,7 @@ class AdminCargoManifestController extends Controller
                 }
 
                 if ($allowed) {
+                    if(!CargoManifestDraftBags::where('bag_id',$bag->id)->exists()){
                         $bag->actual_weight = $bag->shipments_weight ;
                         $bag->update();
                         $details = array();
@@ -1379,11 +1380,13 @@ class AdminCargoManifestController extends Controller
                         $details['destination'] = $destination->name;
                         $details['bag_weight'] = $bag->shipments_weight;
 
-                        if(!CargoManifestDraftBags::where('bag_id',$bag->id)->exists()){
+
                             CargoManifestDraftBags::create(['bag_id'=> $bag->id,'seal_number' => $bag->seal_number,'shipments_count' => $bag->shipments , 'origin_id' => $origin->id,'destination_id' => $destination->id ,'added_by' => Auth::id()]);
-                        }
-                        
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
+                        }
+                    else{
+                        return ['status' => 1, 'error' => 'Bag Number\'s has been added in draft by some user'];
+                    }
                 }
                 else {
                     return ['status' => 1, 'error' => 'Given Bag Number\'s does not have any mapping'];
