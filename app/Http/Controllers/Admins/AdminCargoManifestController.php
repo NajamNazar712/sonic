@@ -1338,7 +1338,8 @@ class AdminCargoManifestController extends Controller
             return back()->with(['error'=>'Default Hub not set for this admin.']);
         }
         $shipping_modes = ShippingMode::all();
-        $draft_bags = CargoManifestDraftBags::where('added_by',Auth::id())->pluck('bag_id')->toArray();
+        //$draft_bags = CargoManifestDraftBags::where('added_by',Auth::id())->pluck('bag_id','weight')->toArray();
+        $draft_bags = CargoManifestDraftBags::where('added_by',Auth::id())->get();
         return view('admin.cargo.manifest.create',compact('shipping_modes','draft_bags'));
     }
 
@@ -1380,8 +1381,8 @@ class AdminCargoManifestController extends Controller
                         $details['destination'] = $destination->name;
                         $details['bag_weight'] = $bag->shipments_weight;
 
+                        CargoManifestDraftBags::create(['bag_id'=> $bag->id,'seal_number' => $bag->seal_number,'shipments_count' => $bag->shipments , 'origin_id' => $origin->id,'destination_id' => $destination->id ,'added_by' => Auth::id(),'weight' => $bag->shipments_weight]);
 
-                            CargoManifestDraftBags::create(['bag_id'=> $bag->id,'seal_number' => $bag->seal_number,'shipments_count' => $bag->shipments , 'origin_id' => $origin->id,'destination_id' => $destination->id ,'added_by' => Auth::id()]);
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                         }
                     else{
@@ -1484,7 +1485,6 @@ class AdminCargoManifestController extends Controller
 
     public function store_manifest(Request $request)
     {
-        dd($request);
         $error_hubs = array();
         $success_cargo_ids = array();
         foreach ($request->bag_ids as $hub_id => $bag_ids_array)
@@ -1656,6 +1656,8 @@ class AdminCargoManifestController extends Controller
         else {
             $print = FALSE;
         }
+
+        CargoManifestDraftBags::where('added_by',Auth::id())->delete();
 
         return redirect()->route('admin.cargo_manifest.create')->with(['success_html'=>$success,'error_html'=>$error,'print'=>$print]);
     }

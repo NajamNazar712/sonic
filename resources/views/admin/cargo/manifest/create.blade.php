@@ -212,46 +212,23 @@
                 });
             @endif
             var bag_ids = [];
+            manifest_bag_weight = [];
 
-          /*  var table = $('#datatable').DataTable({
-                dom: 'ltipr',
-                scrollX: true,
-                autoWidth : false,
-                paging:false,
-                columns: [
-                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
-                    {name: 'bag_number', class: 'align-middle bag_number', orderable: false},
-                    {name: 'shipments', class: 'align-middle shipments', orderable: false},
-                    {name: 'origin', class: 'align-middle origin', orderable: false},
-                    {name: 'destination', class: 'align-middle destination', orderable: false},
-                  /!*  {name: 'bag_weight', class: 'align-middle bag_weight', orderable: false},*!/
-                    {name: 'action', class: 'align-middle action',orderable: false, searchable: false}
-                ],
-                rowCallback: function(row, data, index) {
-                    // var info = table.page.info();
-                    //
-                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
-                initComplete: function() {
-                    this.api().table().columns.adjust();
-                }
-            });*/
-
-
-            var rows_count = 0;
-            function rowsCount(){
+            function add_draft_bags_count(){
                 var draft_bags = @json($draft_bags);
+
                 if(draft_bags.length > 0) {
                     $.each(draft_bags, function (index, value) {
-                        bag_ids.push(value);
-                        rows_count++;
+                        bag_ids.push(value.bag_id);
+                        manifest_bag_weight.push(value.weight);
+
                     });
                     if (bag_ids.length > 0) {
                         $('#master_cargo_consignment_confirm').prop('disabled', false);
                     }
                 }
             }
-            rowsCount();
+            add_draft_bags_count();
 
 
             var cargo_table = $('#cargo_datatable').DataTable({
@@ -284,7 +261,7 @@
                 'allowPlus': false
             });*/
 
-            manifest_bag_weight = [];
+
             $('#add_bag_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',

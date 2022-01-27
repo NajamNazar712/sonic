@@ -21,6 +21,7 @@ class CreateCargoManifestDraftBagsTable extends Migration
             $table->integer('origin_id')->index();
             $table->integer('destination_id')->index();
             $table->integer('added_by')->index();
+            $table->integer('weight');
             $table->timestamps();
         });
     }

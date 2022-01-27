@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CargoManifestDraftBags extends Model
 {
-    protected $fillable = ['bag_id','seal_number','shipments_count','origin_id','destination_id','added_by'];
+    protected $fillable = ['bag_id','seal_number','shipments_count','origin_id','destination_id','added_by','weight'];
 
     public function origin() {
         return $this->belongsTo('App\Http\Models\City', 'origin_id', 'id');
