@@ -18,6 +18,8 @@ class UpdateModulePermissionForLeadTagging extends Seeder
             array('id' => 664, 'name' => 'Lead Management - Zone Tagging', 'module_id' => 14),
             array('id' => 665, 'name' => 'Lead Management - Zone Tagging - Add', 'module_id' => 14),
             array('id' => 666, 'name' => 'Lead Management - Zone Tagging - Edit', 'module_id' => 14),
+            array('id' => 671, 'name' => 'Lead Management - Notifications', 'module_id' => 14),
+            array('id' => 672, 'name' => 'Lead Management - Notifications - Edit', 'module_id' => 14),
         ));
     }
 }

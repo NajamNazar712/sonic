@@ -1160,6 +1160,8 @@ class Permission
             'settings.lead_tagging.list' => 661,
             'settings.lead_zones.index' => 664,
             'settings.lead_zones.list' => 664,
+            'settings.lead_notification.index' => 671,
+            'settings.lead_notification.list' => 671,
         ],
 
         'shipper' => [
