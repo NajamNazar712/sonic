@@ -3,28 +3,23 @@
 namespace App\Http\Controllers\Admins\Attendance;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
-use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
-use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use Auth;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
-use Cassandra\Session;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Auth;
 use DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Symfony\Component\VarDumper\Cloner\Data;
 use Yajra\Datatables\Datatables;
 
 class AdminAttendanceController extends Controller
@@ -668,7 +663,6 @@ class AdminAttendanceController extends Controller
             return back()->with(['error' => "Invalid File Format"]);
         } else {
             Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
-                $value = 'Trax'.$value;
                 if ($value) {
                     $result = false;
                     if (Admin::where('trax_id', $value)->exists()) {
@@ -699,7 +693,7 @@ class AdminAttendanceController extends Controller
             ];
             $rules = [
                 'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
-                'attendance_datetime' => ['required', 'date_format:d-m-Y  G:i:s'],
+                'attendance_datetime' => ['required', 'date_format:j-n-Y  G:i:s'],
             ];
 
 
@@ -743,7 +737,18 @@ class AdminAttendanceController extends Controller
                     unset($spreadsheet);
                     $errors = array();
 
+                    $attendance_data = array();
                     foreach ($rows as $key => $row) {
+                        $date_string = explode(":", trim($row['attendance_datetime']));
+                        if (count($date_string) == 3) {
+                            $date_string[2] = str_pad($date_string[2], 2, 0, STR_PAD_LEFT);
+                            $date_string[1] = str_pad($date_string[1], 2, 0, STR_PAD_LEFT);
+                            $rows[$key]['attendance_datetime'] = implode(':', $date_string);
+                            $row['attendance_datetime'] = implode(':', $date_string);
+                        }
+                        $rows[$key]['trax_id'] = "Trax" . trim($row['trax_id']);
+                        $row['trax_id'] = "Trax" . trim($row['trax_id']);
+
                         $row_id = $key + 2;
 
                         $validate = Validator::make($row, $rules, $messages);
@@ -753,114 +758,81 @@ class AdminAttendanceController extends Controller
                         if ($validate->fails()) {
                             $errors['Row #' . $row_id] = $validate->errors()->all();
                         }
+                        $attendance_data[trim($row['trax_id'])][Carbon::parse($row['attendance_datetime'])->format("Y-m-d")][] = Carbon::parse($row['attendance_datetime'])->format("G:i:s");
                     }
                     if (empty($errors)) {
                         $updated = 0;
                         $not_updated = 0;
                         $latitude = '24.857788594719032';
                         $longitude = '67.12465366441765';
-                        $attendance_data = array();
-                        foreach ($rows as $key => $row) {
-                            dd($row['attendance_datetime']);
-                            $attendance_data[] = trim($row['trax_id']);
-                            /*$employee = Employee::where('trax_id', trim($row['trax_id']));
-                            if ($employee->exists()) {
-                                $employee = $employee->first();
-                                $type = $employee->employee_type_id;
-                                if ($type == 1) {
-                                    $employee_id = $employee->admin->id;
-                                } else {
-                                    $employee_id = $employee->rider->id;
+
+                        foreach ($attendance_data as $user_id => $attendance) {
+                            foreach ($attendance as $date => $time) {
+                                $employee = Employee::where('trax_id', $user_id);
+                                if ($employee->exists()) {
+                                    $employee = $employee->first();
+                                    $type = $employee->employee_type_id;
+                                    if ($type == 1) {
+                                        $employee_id = $employee->admin->id;
+                                    } else {
+                                        $employee_id = $employee->rider->id;
+                                    };
+                                    $min = min($time);
+                                    $max = max($time);
+                                    $clock_out_flag = true;
+                                    $clock_in = Carbon::parse($date . ' ' . $min)->format("Y-m-d H:i:s");
+                                    if ($min == $max) {
+                                        $clock_out = null;
+                                        $clock_out_flag = false;
+                                    } else {
+                                        $clock_out = Carbon::parse($date . ' ' . $max)->format("Y-m-d H:i:s");
+                                    }
+                                    
+                                    $employee_attendance = new EmployeeAttendance();
+                                    $employee_attendance->employee_id = $employee_id;
+                                    $employee_attendance->employee_type = $type;
+                                    $employee_attendance->attendance_date = Carbon::parse($date)->format("Y-m-d");
+                                    $employee_attendance->clock_in_datetime = $clock_in;
+                                    $employee_attendance->clock_out_datetime = $clock_out;
+                                    $employee_attendance->clock_in_latitude = $latitude;
+                                    $employee_attendance->clock_in_longitude = $longitude;
+                                    $employee_attendance->clock_in_location = 2;
+                                    $employee_attendance->save();
+
+                                    $clock_in_action = new EmployeeAttendanceActionLog();
+                                    $clock_in_action->employee_id = $employee_attendance->employee_id;
+                                    $clock_in_action->employee_type = $employee_attendance->employee_type;
+                                    $clock_in_action->action_id = 1;
+                                    $clock_in_action->action_date = $employee_attendance->clock_in_datetime;
+                                    $clock_in_action->attendance_date = $employee_attendance->attendance_date;
+                                    $clock_in_action->latitude = $latitude;
+                                    $clock_in_action->longitude = $longitude;
+                                    $clock_in_action->location_status = 2;
+                                    $clock_in_action->save();
+
+                                    if ($clock_out_flag) {
+
+                                        $employee_attendance->clock_out_location = 2;
+                                        $employee_attendance->clock_out_latitude = $latitude;
+                                        $employee_attendance->clock_out_longitude = $longitude;
+                                        $employee_attendance->save();
+
+                                        $clock_out_action = new EmployeeAttendanceActionLog();
+                                        $clock_out_action->employee_id = $employee_attendance->employee_id;
+                                        $clock_out_action->employee_type = $employee_attendance->employee_type;
+                                        $clock_out_action->action_id = 2;
+                                        $clock_out_action->action_date = $employee_attendance->clock_out_datetime;
+                                        $clock_out_action->attendance_date = $employee_attendance->attendance_date;
+                                        $clock_out_action->latitude = $latitude;
+                                        $clock_out_action->longitude = $longitude;
+                                        $clock_out_action->location_status = 2;
+                                        $clock_out_action->save();
+                                    }
+                                    $updated++;
                                 }
-                                $employee_attendance = new EmployeeAttendance();
-                                $employee_attendance->employee_id = $employee_id;
-                                $employee_attendance->employee_type = $type;
-                                $employee_attendance->attendance_date = trim($row['attendance_date']);
-                                $employee_attendance->clock_in_datetime = trim($row['clock_in_datetime']);
-                                $employee_attendance->clock_out_datetime = trim($row['clock_out_datetime']);
-                                $employee_attendance->clock_in_latitude = $latitude;
-                                $employee_attendance->clock_in_longitude = $longitude;
-                                $employee_attendance->clock_out_latitude = $latitude;
-                                $employee_attendance->clock_out_longitude = $longitude;
-                                $employee_attendance->clock_in_location = 2;
-                                $employee_attendance->clock_out_location = 2;
-                                $employee_attendance->save();
-
-                                $clock_in_action = new EmployeeAttendanceActionLog();
-                                $clock_in_action->employee_id = $employee_attendance->employee_id;
-                                $clock_in_action->employee_type = $employee_attendance->employee_type;
-                                $clock_in_action->action_id = 1;
-                                $clock_in_action->action_date = $employee_attendance->clock_in_datetime;
-                                $clock_in_action->attendance_date = $employee_attendance->attendance_date;
-                                $clock_in_action->latitude = $latitude;
-                                $clock_in_action->longitude = $longitude;
-                                $clock_in_action->location_status = 2;
-                                $clock_in_action->save();
-
-                                $clock_out_action = new EmployeeAttendanceActionLog();
-                                $clock_out_action->employee_id = $employee_attendance->employee_id;
-                                $clock_out_action->employee_type = $employee_attendance->employee_type;
-                                $clock_out_action->action_id = 2;
-                                $clock_out_action->action_date = $employee_attendance->clock_out_datetime;
-                                $clock_out_action->attendance_date = $employee_attendance->attendance_date;
-                                $clock_out_action->latitude = $latitude;
-                                $clock_out_action->longitude = $longitude;
-                                $clock_out_action->location_status = 2;
-                                $clock_out_action->save();
-
-                                $updated++;
-                            }*/
-                        }
-                        dd($attendance_data);
-                        /*foreach ($rows as $key => $row) {
-                            $employee = Employee::where('trax_id', $row['trax_id']);
-                            if ($employee->exists()) {
-                                $employee = $employee->first();
-                                $type = $employee->employee_type_id;
-                                if ($type == 1) {
-                                    $employee_id = $employee->admin->id;
-                                } else {
-                                    $employee_id = $employee->rider->id;
-                                }
-                                $employee_attendance = new EmployeeAttendance();
-                                $employee_attendance->employee_id = $employee_id;
-                                $employee_attendance->employee_type = $type;
-                                $employee_attendance->attendance_date = trim($row['attendance_date']);
-                                $employee_attendance->clock_in_datetime = trim($row['clock_in_datetime']);
-                                $employee_attendance->clock_out_datetime = trim($row['clock_out_datetime']);
-                                $employee_attendance->clock_in_latitude = $latitude;
-                                $employee_attendance->clock_in_longitude = $longitude;
-                                $employee_attendance->clock_out_latitude = $latitude;
-                                $employee_attendance->clock_out_longitude = $longitude;
-                                $employee_attendance->clock_in_location = 2;
-                                $employee_attendance->clock_out_location = 2;
-                                $employee_attendance->save();
-
-                                $clock_in_action = new EmployeeAttendanceActionLog();
-                                $clock_in_action->employee_id = $employee_attendance->employee_id;
-                                $clock_in_action->employee_type = $employee_attendance->employee_type;
-                                $clock_in_action->action_id = 1;
-                                $clock_in_action->action_date = $employee_attendance->clock_in_datetime;
-                                $clock_in_action->attendance_date = $employee_attendance->attendance_date;
-                                $clock_in_action->latitude = $latitude;
-                                $clock_in_action->longitude = $longitude;
-                                $clock_in_action->location_status = 2;
-                                $clock_in_action->save();
-
-                                $clock_out_action = new EmployeeAttendanceActionLog();
-                                $clock_out_action->employee_id = $employee_attendance->employee_id;
-                                $clock_out_action->employee_type = $employee_attendance->employee_type;
-                                $clock_out_action->action_id = 2;
-                                $clock_out_action->action_date = $employee_attendance->clock_out_datetime;
-                                $clock_out_action->attendance_date = $employee_attendance->attendance_date;
-                                $clock_out_action->latitude = $latitude;
-                                $clock_out_action->longitude = $longitude;
-                                $clock_out_action->location_status = 2;
-                                $clock_out_action->save();
-
-                                $updated++;
                             }
-                        }*/
+                        }
+
                         $error_msg = '';
                         if ($not_updated > 1) {
                             $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
