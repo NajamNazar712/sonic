@@ -285,11 +285,19 @@ class ShipperReportsController extends Controller
             $to = $request->get('search_date_to');
             $datatable->whereBetween('sj.created_at', [$from, $to]);
 
-            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from)->first()->id;
-            $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->first()->id;
+            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
 
-            $datatable->where('sj.id', '>=', $from_id)
-            ->where('sj.id', '<=', $to_id);
+                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $datatable->where('sj.id', '>=', $from_id)
+                    ->where('sj.id', '<=', $to_id);
+                }
+            }
         }
 
         return $datatable->make(true);
