@@ -14,7 +14,7 @@
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            {!! Form::model($data,['method' => 'POST', 'route' => 'cod.shipment.book.corporate_excel_store']) !!}
+                            {!! Form::model($data,['method' => 'POST', 'route' => 'cod.shipment.book.return_address.excel.store']) !!}
                             {!! Form::hidden('service_type_check_id', $service_type_check_id) !!}
 
                             <div class="table-responsive">
