@@ -3359,9 +3359,6 @@ class AdminReportsController extends Controller
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to = str_replace('00:00:00', $arrival_to, $to);
 
-        $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from)->first()->id;
-        $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->first()->id;
-
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
         ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
         ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
@@ -3433,9 +3430,22 @@ class AdminReportsController extends Controller
         ->select('invoices.invoice_number','r.name as ridername','ssr.name as reason','sjr.remarks as remark','p.product_name as category','si.description as description','shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions','shipments.intercept_charges','bc.name as business_shipment_type','ibs.international_tracking_number','usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type','rc.name as return_city',DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'))
         ->whereNotIn('shipments.shipper_status_id',[1,17])
         ->whereNotIn('u.id', [8761, 9358])
-        ->whereBetween('sj.created_at', [$from,$to])
-        ->where('sj.id', '>=', $from_id)
-        ->where('sj.id', '<=', $to_id);
+        ->whereBetween('sj.created_at', [$from,$to]);
+
+        $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+        if ($from_id->exists()) {
+            $from_id = $from_id->first()->id;
+
+            $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+            if ($to_id->exists()) {
+                $to_id = $to_id->first()->id;
+
+                $sales->where('sj.id', '>=', $from_id)
+                ->where('sj.id', '<=', $to_id);
+            }
+        }
+
 //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
 //            $now = Carbon::now();
 //            $yesterday = Carbon::now()->subDays(3);
@@ -6789,11 +6799,19 @@ class AdminReportsController extends Controller
             $to = $request->get('search_date_to');
             $shipments = $shipments->whereBetween('shipments.created_at', [$from,$to]);
 
-            $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from)->first()->id;
-            $to_id = DB::connection('reports')->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->first()->id;
+            $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
 
-            $shipments->where('shipments.id', '>=', $from_id)
-            ->where('shipments.id', '<=', $to_id);
+                $to_id = DB::connection('reports')->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $shipments->where('shipments.id', '>=', $from_id)
+                    ->where('shipments.id', '<=', $to_id);
+                }
+            }
         }
 
         $datatable = Datatables::of($shipments)

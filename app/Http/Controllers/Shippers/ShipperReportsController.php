@@ -110,19 +110,41 @@ class ShipperReportsController extends Controller
             $from = $request->get('dr_search_date_from');
             $to = $request->get('dr_search_date_to');
 
-            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from)->whereIn('shipper_status_id', [14, 25, 30, 36, 37])->where('verification', 1)->first()->id;
-            $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->whereIn('shipper_status_id', [14, 25, 30, 36, 37])->where('verification', 1)->first()->id;
+            $ids = FALSE;
 
-            $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to, $from_id, $to_id) {
-                $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->where('dr.id', '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '" and shipments_journey.id >= ' . $from_id . ' and shipments_journey.id <= ' . $to_id . ')'));
-            });
+            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from)->whereIn('shipper_status_id', [14, 25, 30, 36, 37])->where('verification', 1);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
 
-            $sales->whereBetween('dr.created_at', [$from, $to]);
+                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->whereIn('shipper_status_id', [14, 25, 30, 36, 37])->where('verification', 1);
 
-            $sales->where('dr.id', '>=', $from_id)
-            ->where('dr.id', '<=', $to_id);
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $ids = TRUE;
+                }
+            }
+            if ($ids) {
+                $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to, $from_id, $to_id) {
+                    $join->on('dr.shipment_id', '=', 'shipments.id')
+                        ->where('dr.id', '=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '" and shipments_journey.id >= ' . $from_id . ' and shipments_journey.id <= ' . $to_id . ')'));
+                });
+
+                $sales->whereBetween('dr.created_at', [$from, $to]);
+
+                $sales->where('dr.id', '>=', $from_id)
+                ->where('dr.id', '<=', $to_id);
+            }
+            else {
+                $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to) {
+                    $join->on('dr.shipment_id', '=', 'shipments.id')
+                        ->where('dr.id', '=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
+                });
+
+                $sales->whereBetween('dr.created_at', [$from, $to]);
+            }
         } else {
             $sales->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
@@ -555,11 +577,19 @@ class ShipperReportsController extends Controller
             $to = $request->get('search_date_to');
             $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
 
-            $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from)->first()->id;
-            $to_id = DB::connection('reports')->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->first()->id;
+            $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
 
-            $shipments->where('shipments.id', '>=', $from_id)
-            ->where('shipments.id', '<=', $to_id);
+                $to_id = DB::connection('reports')->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $shipments->where('shipments.id', '>=', $from_id)
+                    ->where('shipments.id', '<=', $to_id);
+                }
+            }
         }
 
         $datatable = Datatables::of($shipments)
