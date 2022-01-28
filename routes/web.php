@@ -1004,8 +1004,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_print')->name('print');
             Route::post('total_shipments', 'Admins\V2Pickup\V2AdminPickupsController@total_shipments')->name('total_shipments');
             Route::post('arrived_shipments', 'Admins\V2Pickup\V2AdminPickupsController@arrived_shipments')->name('arrived_shipments');
+            Route::prefix('dws')->name('dws.')->group(function () {
+                Route::get('', 'Admins\V2Pickup\DWSController@rider_receiving_index')->name('index');
+                Route::get('/list', 'Admins\V2Pickup\DWSController@rider_receiving_list')->name('list');
+            });
         });
         // End
+
         Route::prefix('arrival')->name('arrival.')->group(function () {
             Route::prefix('bulk')->name('bulk.')->group(function () {
                 Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_bulk_index')->name('index');

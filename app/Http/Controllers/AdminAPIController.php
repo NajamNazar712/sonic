@@ -4829,7 +4829,7 @@ class AdminAPIController extends Controller
                 }
                 $pickup_rider_id = $global_rider_id;
 
-                $shipment = $shipment->get()->first();
+                $shipment = $shipment->first();
                 $shipment_id = $shipment->id;
                 // arrive function
                 // if ($shipment->actual_weight == null) {
@@ -4934,11 +4934,13 @@ class AdminAPIController extends Controller
                     $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0);
                     $pickup_request_id = NULL;
                     $pickup_request = NULL;
+                    $pickup_note_id = NULL;
+                    $reference_2_id = null;
                      if ($pickup_request_shipment->exists()) {
                         $pickup_request_shipment = $pickup_request_shipment->orderBy('id', 'DESC')->first();
 
                         $pickup_request_id = $pickup_request_shipment->pickup_request_id;
-                        $pickup_request = V2PickupRequest::where('id', $pickup_request_id)->first();
+                        $pickup_request = V2PickupRequest::find($pickup_request_id);
                         $reference_1_id = $pickup_request_id;
                         $rider_id = $pickup_request->current_rider_id;
 
@@ -4947,6 +4949,11 @@ class AdminAPIController extends Controller
 
                         // }
 
+                         $pickup_note_request = $pickup_request->pickup_note_request;
+                         if($pickup_note_request){
+                             $pickup_note_id = $pickup_note_request->pickup_note_id;
+                             $reference_2_id = $pickup_note_id;
+                         }
                     } else {
                         $reference_1_id = null;
                     }
@@ -4991,7 +4998,7 @@ class AdminAPIController extends Controller
                     $shipment->consignee_status_id = 2;
 
                     $shipment->save();
-                    $reference_2_id = null;
+
                     ShipmentsJourneyController::add($shipment_id, 2, 2, null, 'DWS Arrival', null, $request->admin_id, $reference_1_id, $reference_2_id, 1, null, $rider_id);
 
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
@@ -5195,7 +5202,7 @@ class AdminAPIController extends Controller
 
                         $dws_detail = DwsDetail::where('shipment_id', $shipment_id);
                         if ($dws_detail->exists()) {
-                            $dws_detail = $dws_detail->get()->first();
+                            $dws_detail = $dws_detail->first();
                             $dws_detail->dws_machine = $request->machine;
                             $dws_detail->dws_package_type = $request->package_type;
                             $dws_detail->dws_is_uploaded = $request->is_uploaded;
