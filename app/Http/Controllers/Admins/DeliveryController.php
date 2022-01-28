@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
@@ -62,6 +63,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentOtp;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -860,6 +862,16 @@ class DeliveryController extends Controller
 
                     if($notifications[$index]) {
                         $shipment_obj = Shipment::find($shipment);
+                        $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
+                        if($shipment_otp->exists()){
+                            $shipment_otp = $shipment_otp->first();
+                        }else{
+                            $otp = mt_rand(100000, 999999);
+                            $shipment_otp = new ShipmentOtp();
+                            $shipment_otp->shipment_id = $shipment;
+                            $shipment_otp->otp = $otp;
+                            $shipment_otp->save();
+                        }
                         if($shipment_obj->amount == 0){
                             //English
                             NotificationsController::send(132, $note->id, $shipment);
@@ -875,54 +887,7 @@ class DeliveryController extends Controller
 
             //rider attendance
             if($request->operation_rider_type_for_attendance == 1){
-                
-                $attendance_datetime = Carbon::now()->format('Y-m-d H:i:s');
-                $attendance_date = Carbon::now()->format('Y-m-d');
-                $attendance_time = Carbon::now()->format('H:i:s');
-    
-                // $city_id_location = City::find($request->hub_id);
-    
-                $rider_attendance = EmployeeAttendance::where('employee_id', $rider->id)
-                    ->whereDate('attendance_date', $attendance_date)
-                    ->where('employee_type', 2);
-                if (!$rider_attendance->exists()) {
-                    $rider_attendance = new EmployeeAttendance();
-                    $rider_attendance->employee_id = $rider->id;
-                    $rider_attendance->employee_type = 2;
-                    $rider_attendance->attendance_date = $attendance_date;
-                    $rider_attendance->clock_in_datetime = $attendance_datetime;
-                    $rider_attendance->clock_in_latitude = '0';
-                    $rider_attendance->clock_in_longitude = '0';
-                    $rider_attendance->save();
-                    
-                    $rider_attendance_action = new EmployeeAttendanceActionLog();
-                    $rider_attendance_action->employee_id = $rider->id;
-                    $rider_attendance_action->employee_type = 2;
-                    $rider_attendance_action->action_id = 1;
-                    $rider_attendance_action->attendance_date = $attendance_date;
-                    $rider_attendance_action->action_date = $attendance_datetime;
-                    $rider_attendance_action->latitude = '0';
-                    $rider_attendance_action->longitude = '0';
-                    $rider_attendance_action->save();
-                }else{
-                    $rider_attendance = $rider_attendance->get()->first();
-                    if($rider_attendance->clock_in_datetime == NULL){
-                        $rider_attendance->clock_in_datetime = $attendance_datetime;
-                        $rider_attendance->save();
-    
-    
-                        $rider_attendance_action = new EmployeeAttendanceActionLog();
-                        $rider_attendance_action->employee_id = $rider->id;
-                        $rider_attendance_action->employee_type = 2;
-                        $rider_attendance_action->action_id = 1;
-                        $rider_attendance_action->attendance_date = $attendance_date;
-                        $rider_attendance_action->action_date = $attendance_datetime;
-                        $rider_attendance_action->latitude = '0';
-                        $rider_attendance_action->longitude = '0';
-                        $rider_attendance_action->save();
-                    }
-                  
-                }
+                EmployeeAttendanceController::riders_attendance_mark($rider->id);
             }
             //rider attendance end
             
@@ -1366,6 +1331,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Tracking No.</strong></td>
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
+                            <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Item Qty</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
@@ -1403,12 +1369,19 @@ class DeliveryController extends Controller
                 else{
                     $tracking_number = $shipment->tracking_number;
                 }
+                $consignee_address = '';
+                if($shipment->consignee_address != null){
+                    $consignee_address = $shipment->consignee_address;
+                }
+
                 $shipment_details_row_start = '
                           <tr>
                             <td class="'.$class.'">' . $total_shipments . '</td>
                             <td class="'.$class.'">' . $tracking_number  . '</td>
                             <td class="'.$class .'">' . $user_details . '</td>
                             <td class="'.$class.' ' . $details_change_class .'">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                             <td class="'.$class.'">' . $consignee_address  . '</td>
+                           
                 ';
 
                 if ($shipment->booking_type_id == 1) {
@@ -2678,7 +2651,7 @@ class DeliveryController extends Controller
             ->leftjoin('consignee_locations as pcls', 'pcls.id', '=', 'csl.previous_location_id')
             ->leftjoin('consignee_locations as ccls', 'ccls.id', '=', 'csl.current_location_id')
             ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->select(['riders.name as rider_name','delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong', 'rds.ccd_image as ccd_image'])
+            ->select(['riders.name as rider_name','delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong', 'rds.ccd_image as ccd_image', 'rds.otp_entered as otp_entered'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -2916,6 +2889,13 @@ class DeliveryController extends Controller
                     return '-';
                 }
 
+            })
+            ->addColumn('otp_entered', function ($deliveries) {
+                if ($deliveries->otp_entered != null) {
+                    return ($deliveries->otp_entered == 1) ? "Yes" : "No";
+                } else {
+                    return '-';
+                }
             })
             ->make(true);
     }
@@ -7364,6 +7344,24 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $shipment->consignee_status_id = 5;
                     $shipment->save();
                     ShipmentsJourneyController::add($shipment->id, 5, 5, NULL, NULL, NULL, Auth::id(), $delivery_note_id, $delivery_note->rider_id);
+
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
+                    if(!$shipment_otp->exists()){
+                        $otp = mt_rand(100000, 999999);
+                        $shipment_otp = new ShipmentOtp();
+                        $shipment_otp->shipment_id = $shipment->id;
+                        $shipment_otp->otp = $otp;
+                        $shipment_otp->save();
+                    }
+                    if($shipment->amount == 0){
+                        //English
+                        NotificationsController::send(132, $delivery_note_id, $shipment->id);
+                        //Urdu
+                        NotificationsController::send(135, $delivery_note_id, $shipment->id);
+                    }else{
+                        NotificationsController::send(12, $delivery_note_id, $shipment->id);
+                    }
+
                     return response()->json(['status' => 0, 'success' => 'Shipments Added']);
                 }
         }

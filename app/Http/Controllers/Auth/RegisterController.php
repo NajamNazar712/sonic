@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Models\AccountType;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AreaTerritory;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
@@ -71,7 +72,14 @@ class RegisterController extends Controller
 
     public function showRegistrationForm($lead_id = NULL)
     {
+        /*if($lead_id == NULL){
+            return redirect()->route('cod.getstarted');
+        }*/
         if($lead_id != NULL){
+            $shipper = User::where('lead_id', $lead_id);
+            if($shipper->exists()){
+                return redirect()->route('cod.getstarted.success');
+            }
             $lead = Lead::find($lead_id);
         }
         else{
@@ -667,6 +675,19 @@ class RegisterController extends Controller
             }
         } else {
             return response()->json(['status' => 1, 'error' => "No Territory found for the selected city"]);
+        }
+    }
+    public function area(Request $request)
+    {
+        $territory_id = $request->id;
+        if ($territory_id) {
+            $area_territory = AreaTerritory::where('territory_id', $territory_id);
+            if ($area_territory->exists()) {
+                $area_territory = $area_territory->get();
+                return response()->json(['status' => 0, 'area' => $area_territory]);
+            }
+        } else {
+            return response()->json(['status' => 1, 'error' => "No Area found for the selected territory"]);
         }
     }
 

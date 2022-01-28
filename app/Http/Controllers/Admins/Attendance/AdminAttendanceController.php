@@ -11,8 +11,10 @@ use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Cassandra\Session;
 use Illuminate\Http\Request;
@@ -20,6 +22,8 @@ use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Symfony\Component\VarDumper\Cloner\Data;
 use Yajra\Datatables\Datatables;
 
@@ -327,20 +331,13 @@ class AdminAttendanceController extends Controller
 
     public function admin_attendance_horizontal_table(Request $request,$array = false)
     {
-        $month = "01 ".$request->get('search_month');
-        $date = Carbon::createFromFormat('d M Y',$month);
-        $year = $date->year;
-        $month = $date->month;
-        $prev = $date->subMonth(1);
-        $prev_month = $prev->month;
-        $prev_year = $prev->year;
-        $from = new \DateTime(Carbon::createFromDate($prev_year,$prev_month,26)->toDateString());
-        $to = new \DateTime(Carbon::createFromDate($year,$month,25)->toDateString());
-        $to = $to->modify( '+1 day' );
+        $search_from = Carbon::parse($request->search_from);
+        $search_to = Carbon::parse($request->search_to);
+        $search_to = $search_to->modify('+1 day');
         $period = array();
 
         $interval = new \DateInterval('P1D');;
-        $daterange = new \DatePeriod($from, $interval ,$to);
+        $daterange = new \DatePeriod($search_from, $interval ,$search_to);
 
         foreach ($daterange as $date) {
             if($array)
@@ -363,6 +360,7 @@ class AdminAttendanceController extends Controller
 
     public function admin_attendance_horizontal_list(Request $request)
     {
+      
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),454);
@@ -393,20 +391,22 @@ class AdminAttendanceController extends Controller
         }
 
 
-        if ($request->get('search_month')) {
-            $month = "01 ".$request->get('search_month');
+        if ($request->get('search_from') && $request->get('search_to')) {
+           /* $month = "01 ".$request->get('search_month');
             $date = Carbon::createFromFormat('d M Y',$month);
             $year = $date->year;
             $month = $date->month;
             $prev = $date->subMonth(1);
             $prev_month = $prev->month;
             $prev_year = $prev->year;
-            $from = Carbon::createFromDate($prev_year,$prev_month,26)->toDateString();
-            $to = Carbon::createFromDate($year,$month,25)->toDateString();
-            $attendances->whereBetween('employee_attendances.attendance_date', [$from, $to]);
+            $from = Carbon::createFromDate($prev_year,$prev_month,26)->toDateString();*/
+            $search_from = Carbon::parse($request->search_from)->toDateString();
+            $search_to = Carbon::parse($request->search_to)->toDateString();
+           /* $to = Carbon::createFromDate($year,$month,25)->toDateString();*/
+            $attendances->whereBetween('employee_attendances.attendance_date', [$search_from, $search_to]);
         }
 
-        $attendances->groupBy('employee_attendances.employee_id');
+        $attendances->groupBy('employee_attendances.employee_id','employee_attendances.employee_type');
 
         $periods =  $this->admin_attendance_horizontal_table($request,true);
         $today = Carbon::now();
@@ -444,11 +444,13 @@ class AdminAttendanceController extends Controller
                     return $employee->department;
                 }
             });
+          
             foreach($periods['display'] as $key => $period)
             {
                 $datatable->addColumn($period, function ($employee) use ($key, $periods,$today) {
                     $data = EmployeeAttendance::where('employee_id',$employee->employee_id)
                         ->where('attendance_date',$periods['search'][$key])
+                        ->where('employee_type',$employee->employee_type)
                         ->where(function ($query){
                             $query->where('clock_in_datetime','!=',null)
                                 ->orWhere('clock_in','!=',null);
@@ -652,6 +654,451 @@ class AdminAttendanceController extends Controller
                 }
             });
         return $datatable->make(true);
+    }
+
+    public function attendance_excel_upload(Request $request)
+    {
+        $rules = [
+            'attendance' => ['required', 'mimes:xlx,xlsx'],
+        ];
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return back()->with(['error' => "Invalid File Format"]);
+        } else {
+            Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
+
+                if ($value) {
+                    $result = false;
+                    if (Admin::where('trax_id', $value)->exists()) {
+                        $result = true;
+                    } else {
+                        if (Rider::where('trax_id', $value)->exists()) {
+                            $result = true;
+                        }
+                    }
+                    if ($result) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            });
+            $names = [
+                'trax_id' => 'Employee ID',
+                'attendance_date' => 'Attendance Date',
+                'clock_in_datetime' => 'Clock In Datetime',
+                'clock_out_datetime' => 'Clock Out Datetime'
+            ];
+
+            $messages = [
+                'required' => ':attribute is Required.',
+                'integer' => ':attribute must be an Integer.',
+                'exists' => 'Given :attribute is Invalid.',
+                'check_trax_id' => 'Employee id not found!',
+
+            ];
+            $rules = [
+                'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
+                'attendance_date' => ['required', 'date_format:Y-m-d'],
+                'clock_in_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+                'clock_out_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+            ];
+
+
+            $fields = [0 => 'trax_id', 1 => 'attendance_date', 2 => 'clock_in_datetime', 3 => 'clock_out_datetime'];
+            if ($file = $request->file('attendance')) {
+                $spreadsheet = IOFactory::createReaderForFile($file);
+                $spreadsheet->setReadDataOnly(true);
+                $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+                $header = ['Employee ID', 'Attendance Date(yyyy-mm-dd)', 'Clock-in DateTime(yyyy-mm-dd hh:mm:ss)', 'Clock-out DateTime(yyyy-mm-dd hh:mm:ss)'];
+
+                if (isset($spreadsheet)) {
+                    $header_correct = true;
+
+                    foreach ($spreadsheet[0] as $index => $header_value) {
+                        if ($index == 3) {
+                        } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                            $header_correct = false;
+                            break;
+                        }
+                    }
+                    if (!$header_correct) {
+                        return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                    } else {
+                        unset($spreadsheet[0]);
+                    }
+                }
+
+                if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                    $rows = array();
+                    foreach ($spreadsheet as $spreadsheet_row) {
+                        $row = array();
+
+                        foreach ($spreadsheet_row as $key => $value) {
+                            $row[$fields[$key]] = $value;
+                        }
+
+                        $rows[] = $row;
+                    }
+
+                    unset($spreadsheet);
+                    $errors = array();
+
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+
+                        $validate = Validator::make($row, $rules, $messages);
+
+                        $validate->setAttributeNames($names);
+
+                        if ($validate->fails()) {
+                            $errors['Row #' . $row_id] = $validate->errors()->all();
+                        }
+                    }
+                    if (empty($errors)) {
+                        $updated = 0;
+                        $not_updated = 0;
+                        $latitude = '24.857788594719032';
+                        $longitude = '67.12465366441765';
+                        foreach ($rows as $key => $row) {
+                            $employee = Employee::where('trax_id', $row['trax_id']);
+                            if ($employee->exists()) {
+                                $employee = $employee->first();
+                                $type = $employee->employee_type_id;
+                                if ($type == 1) {
+                                    $employee_id = $employee->admin->id;
+                                } else {
+                                    $employee_id = $employee->rider->id;
+                                }
+                                $employee_attendance = new EmployeeAttendance();
+                                $employee_attendance->employee_id = $employee_id;
+                                $employee_attendance->employee_type = $type;
+                                $employee_attendance->attendance_date = trim($row['attendance_date']);
+                                $employee_attendance->clock_in_datetime = trim($row['clock_in_datetime']);
+                                $employee_attendance->clock_out_datetime = trim($row['clock_out_datetime']);
+                                $employee_attendance->clock_in_latitude = $latitude;
+                                $employee_attendance->clock_in_longitude = $longitude;
+                                $employee_attendance->clock_out_latitude = $latitude;
+                                $employee_attendance->clock_out_longitude = $longitude;
+                                $employee_attendance->clock_in_location = 2;
+                                $employee_attendance->clock_out_location = 2;
+                                $employee_attendance->save();
+
+                                $clock_in_action = new EmployeeAttendanceActionLog();
+                                $clock_in_action->employee_id = $employee_attendance->employee_id;
+                                $clock_in_action->employee_type = $employee_attendance->employee_type;
+                                $clock_in_action->action_id = 1;
+                                $clock_in_action->action_date = $employee_attendance->clock_in_datetime;
+                                $clock_in_action->attendance_date = $employee_attendance->attendance_date;
+                                $clock_in_action->latitude = $latitude;
+                                $clock_in_action->longitude = $longitude;
+                                $clock_in_action->location_status = 2;
+                                $clock_in_action->save();
+
+                                $clock_out_action = new EmployeeAttendanceActionLog();
+                                $clock_out_action->employee_id = $employee_attendance->employee_id;
+                                $clock_out_action->employee_type = $employee_attendance->employee_type;
+                                $clock_out_action->action_id = 2;
+                                $clock_out_action->action_date = $employee_attendance->clock_out_datetime;
+                                $clock_out_action->attendance_date = $employee_attendance->attendance_date;
+                                $clock_out_action->latitude = $latitude;
+                                $clock_out_action->longitude = $longitude;
+                                $clock_out_action->location_status = 2;
+                                $clock_out_action->save();
+
+                                $updated++;
+                            }
+                        }
+                        $error_msg = '';
+                        if ($not_updated > 1) {
+                            $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
+                        }
+                        return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
+                    } else {
+                        $errors = array_map(function ($row, $errors) {
+                            return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                        }, array_keys($errors), $errors);
+                        return redirect()->back()->withErrors($errors);
+                    }
+
+                } else {
+                    return redirect()->back()->with('error', 'No Records in File');
+                }
+            }
+        }
+
+    }
+
+    public function attendance_print(Request $request)
+    {
+        $trax_id = $request->pdf_trax_id;
+        $date_from = $request->pdf_date_from;
+        $date_to = $request->pdf_date_to;
+        $from = Carbon::parse($request->pdf_date_from_formatted)->format('Y-m-d 00:00:00');
+        $to = Carbon::parse($request->pdf_date_to_formatted)->format('Y-m-d 23:59:59');
+
+        $leave = 0;
+        $absent = 0;
+        $late = 0;
+        $earlyout = 0;
+        $total_presents = 0;
+        $ontime = 0;
+        $total = 0;
+        $sunday = 0;
+
+        $employee = Employee::where('trax_id', $trax_id);
+
+        if (!$employee->exists()) {
+            return redirect()->back()->with(['status' => 0, 'error' => 'Employee not found!']);
+        }
+        $employee = $employee->first();
+        $type = $employee->employee_type_id;
+        if ($type == 1) {
+            $employee_id = $employee->admin->id;
+        } else {
+            $employee_id = $employee->rider->id;
+        }
+        $employee_attendances = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->whereBetween('attendance_date', [$from, $to])->orderBy('attendance_date', 'ASC');
+        if(!$employee_attendances->exists()){
+            return redirect()->back()->with(['status' => 0, 'error' => 'Attendance not found!']);
+        }
+        $employee_attendances = $employee_attendances->get();
+        $html = '<!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Attendance</title>
+
+                     <style>
+                     @page {
+                        size: A4 portrait;
+                      }
+                      body {
+                        font-size: 0.95rem !important;
+                        
+                      }
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+                      .border.twice {
+                        border-width: 1px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 1px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 1px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 1px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 1px !important;
+                      }
+
+                      .font-small {
+                        font-size: 0.65rem !important;
+                      }
+                      
+                      .table-borderless td, .table th {
+                        border: none;
+                     }
+                     td{
+                        color: #000;
+                     }
+                    </style>';
+
+        $html .= '</head>
+                  <body>
+                   
+                      <div class="table-responsive">
+                          <table class="table table-borderless mb-0">
+                          
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class=""></td>
+                             </tr>
+                             <tr>
+                                <td class="text-center align-middle"><h2>Trax Online (Pvt.) Ltd</h2></td>
+                             </tr>
+                             <tr>
+                                <td class="text-center align-middle">Employee Time Sheet PDF</td>
+                             </tr>
+                             <tr>
+                                <td class="text-center align-middle">'.$date_from.' TO '.$date_to.'</td>
+                             </tr>
+                             </tbody>
+                         </table>';
+
+        $html .= '<table class="table border table-sm">
+                    
+                    <tbody>
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="10"><b>Employee Information</b></td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Employee ID</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->trax_id . '</td>
+                            <td colspan="3" class="border twice-right">Location</td>
+                            <td colspan="3"  class="border twice-right">' . $employee->city->name . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Employee Name</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->name . '</td>
+                            <td colspan="3" class="border twice-right">Department</td>
+                            <td colspan="3"  class="border twice-right">' . $employee->department->name . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Designation</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->designation->name . '</td>
+                            <td colspan="3"  class="border twice-right">Employee Type</td>
+                            <td colspan="3"  class="border twice-right">' . $employee->employee_type->name . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Shift</td>
+                            <td colspan="2"  class="border twice-right">' . $employee->shift->name . '</td>
+                        </tr>
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="10"><b>Attandence Details</b></td>
+                        </tr>
+                        <tr>
+                            <td class="color primary border twice"><b>Day</b></td>
+                            <td class="color primary border twice"><b>Date In</b></td>
+                            <td class="color primary border twice"><b>Time In</b></td>
+                            <td class="color primary border twice"><b>Date Out</b></td>
+                            <td class="color primary border twice"><b>Time Out</b></td>
+                            <td class="color primary border twice"><b>Work Hours</b></td>
+                            <td class="color primary border twice"><b>Late Arrival</b></td>
+                            <td class="color primary border twice"><b>Early Departure</b></td>
+                            <td class="color primary border twice"><b>Overtime</b></td>
+                            <td class="color primary border twice"><b>Remarks</b></td>
+                        </tr>
+                   ';
+        foreach ($employee_attendances as $employee_attendance){
+
+            $date_in = Carbon::parse($employee_attendance->attendance_date)->format("Y-m-d");
+            $day = Carbon::parse($employee_attendance->attendance_date)->format("l");
+            $time_in = '';
+            $time_out = '';
+            $date_out = '';
+            $working_hours = '';
+            $early_departure = '';
+            $late_arrival = '';
+            $over_time = '';
+
+            $total++;
+            $remarks = '';
+            if($employee_attendance->leave_status){
+                $remarks = "Leave";
+                $leave++;
+            }else{
+                if(!$employee_attendance->clock_in_datetime){
+                    if (Carbon::parse($employee_attendance->attendance_date)->format("l") == "Sunday"){
+                        $remarks = "Sunday";
+                        $sunday++;
+                    }else{
+                        $remarks = "Absent";
+                        $absent++;
+                    }
+                }
+                else{
+                    $total_presents++;
+                    $time_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
+                    if($employee_attendance->clock_out_datetime){
+                        $time_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("H:i:s");
+                        $date_out = Carbon::parse($employee_attendance->clock_out_datetime)->format("Y-m-d");
+                    }
+                    $shift = EmployeeShift::find($employee->shift_id);
+                    if ($shift){
+                        $clock_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
+                        $time_diff = Carbon::parse($shift->start_time)->diffInMinutes(Carbon::parse($clock_in), false);
+                        if ($time_diff > (int)$shift->grace_time) {
+                            $remarks = 'Late';
+                            $late++;
+                            $late_arrival = Carbon::parse($clock_in)->diff(Carbon::parse($shift->start_time))->format('%H:%I:%S');
+                        }else{
+                            $remarks = 'On Time';
+                            $ontime++;
+                        }
+                        if($employee_attendance->clock_out_datetime){
+                            $shift_minutes = Carbon::parse($shift->start_time)->diffInMinutes(Carbon::parse($shift->end_time), false);
+                            if($shift_minutes < 0){
+                                $expected_clockout = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->end_time)->addDay();
+                            }else{
+                                $expected_clockout = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->end_time);
+                            }
+                            $time_diff_out = $expected_clockout->diffInMinutes(Carbon::parse($employee_attendance->clock_in_datetime), false);
+                            $working_hours = Carbon::parse($employee_attendance->clock_out_datetime)->diff(Carbon::parse($employee_attendance->clock_in_datetime))->format('%H:%I:%S');
+                            if($time_diff_out < 0){
+                                $remarks .= ' - Early Out';
+                                $earlyout++;
+                                $early_departure = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
+                            } elseif ($time_diff_out > 0){
+                                $remarks .= ' - Overtime';
+                                $over_time = Carbon::parse($time_out)->diff(Carbon::parse($shift->end_time))->format('%H:%I:%S');
+                            } else {
+                                $remarks .= ' - On Time';
+                            }
+                        }
+                    }
+                }
+            }
+            $html .= '<tr>';
+            $html .= '<td class="border twice-right">' . $day . '</td>';
+            $html .= '<td class="border twice-right">' . $date_in . '</td>';
+            $html .= '<td class="border twice-right">' . $time_in . '</td>';
+            $html .= '<td class="border twice-right">' . $date_out . '</td>';
+            $html .= '<td class="border twice-right">' . $time_out . '</td>';
+            $html .= '<td class="border twice-right">' . $working_hours . '</td>';
+            $html .= '<td class="border twice-right">' . $late_arrival . '</td>';
+            $html .= '<td class="border twice-right">' . $early_departure . '</td>';
+            $html .= '<td class="border twice-right">' . $over_time . '</td>';
+            $html .= '<td class="border twice-right">' . $remarks . '</td>';
+        }
+        $html .= '    </tbody>
+                      </table>';
+
+        $html.='<table class="table border table-sm">
+                    <tbody>
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="10"><b>Attendance Summary</b></td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Total : '.$total.'</td>
+                            <td colspan="2" class="border twice-right">Total Present : '.$total_presents.'</td>
+                            <td colspan="3" class="border twice-right">Absent : '.$absent.'</td>
+                            <td colspan="3" class="border twice-right">On Time : '.$ontime.'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Late : '.$late.'</td>
+                            <td colspan="2" class="border twice-right">Early Departure : '.$earlyout.'</td>
+                            <td colspan="3" class="border twice-right">Offdays : '.$sunday.'</td>
+                            <td colspan="3" class="border twice-right">Leave : '.$leave.'</td>
+                        </tr>
+                        </tbody>
+                      </table>
+                        ';
+        $html .= ' 
+                      </div>
+                      </body>
+                      </html>';
+
+        $pdf = SnappyPDF::loadHTML($html);
+        $filename = 'Attendance' . $trax_id . '.pdf';
+        return $pdf->download($filename);
     }
 
 

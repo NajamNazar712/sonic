@@ -68,6 +68,7 @@ use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\ShipmentDistributionProduct;
+use App\Http\Models\ShipmentOtp;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
@@ -3497,7 +3498,8 @@ class RiderAPIController extends Controller
             'remarks' => ['nullable', 'string', 'max:255'],
             'picture' => ['required', 'image'],
             'open_box' => ['required', 'integer'],
-            'audio' => ['nullable', 'file']
+            'audio' => ['nullable', 'file'],
+            'otp_entered' => ['nullable', 'integer'],
         ];
         $message = '';
 
@@ -3574,6 +3576,9 @@ class RiderAPIController extends Controller
                                     $rider_delivery->current_location_longitude = $coordinates->long;
                                     $rider_delivery->distance_from_current_to_actual = 0;
                                 }
+                            }
+                            if($request->has('otp_entered') && $request->status_reason_id == 8){
+                                $rider_delivery->otp_entered = $request->otp_entered;
                             }
                             $rider_delivery->save();
 
@@ -8609,6 +8614,12 @@ class RiderAPIController extends Controller
 
                     $shipment_data = $delivery_note_shipment->shipment;
                     $shipment_id = $shipment_data->id;
+                    $refusal_otp = null;
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
+                    if($shipment_otp->exists()){
+                        $shipment_otp = $shipment_otp->first();
+                        $refusal_otp = $shipment_otp->otp;
+                    }
                     $payment_mode = $shipment_data->payment_mode_id;
                     $tracking_number = $shipment_data->tracking_number;
                     $consignee_name = $shipment_data->consignee_name;
@@ -8686,6 +8697,7 @@ class RiderAPIController extends Controller
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
                     $deliveries['shipper'] = $shipper_name;
+                    $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
@@ -10252,6 +10264,7 @@ class RiderAPIController extends Controller
                 'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
                 'address' => ['required'],
                 'emergency_contact' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'emergency_contact_person' => ['nullable'],
                 'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
                 'date_of_birth' => ['required'],
                 'pin' => ['required', 'integer', 'digits:4'],
@@ -10325,15 +10338,6 @@ class RiderAPIController extends Controller
 
                     } else {
                         try {
-                            $rider_request = new RiderRequest();
-                            $rider_request->name = $request->name;
-                            $rider_request->cnic = $request->cnic_no;
-                            $rider_request->phone_no = $request->phone_number;
-                            $rider_request->pin = $request->pin;
-                            $rider_request->city_id = $request->city_id;
-                            $rider_request->rider_type_id = $request->rider_type_id;
-                            $rider_request->save();
-
                             $employee_request = new Employee();
                             $employee_request->name = $request->name;
                             $employee_request->employee_gender_id = $request->employee_gender_id;
@@ -10341,7 +10345,7 @@ class RiderAPIController extends Controller
                             $employee_request->cnic = $request->cnic_no;
                             $employee_request->phone_number = $request->phone_number;
                             $employee_request->employee_type_id = 2;
-                            $employee_request->rider_request_id = $rider_request->id;
+//                            $employee_request->rider_request_id = $rider_request->id;
                             $employee_request->status_id = 2;
                             $employee_request->guardian_name = $request->guardian_name;
                             $employee_request->religion_id = $request->religion_id;
@@ -10351,6 +10355,7 @@ class RiderAPIController extends Controller
                             $employee_request->blood_group = $request->blood_group_id;
                             $employee_request->address = $request->address;
                             $employee_request->emergency_contact = $request->emergency_contact;
+                            $employee_request->emergency_contact_person = $request->emergency_contact_person;
                             $employee_request->zone_id = $request->zone_id;
                             $employee_request->shift_id = $request->shift_id;
                             $employee_request->date_of_birth = $request->date_of_birth;

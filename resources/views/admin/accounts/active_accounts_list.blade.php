@@ -543,6 +543,51 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="AutoCancelationDaysModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AutoCancelationDaysModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Auto Cancelation Days</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <form id="auto_cancelation_days_form" action="{{route('admin.accounts.auto_cancelation_days')}}" method="post">
+                            @csrf
+                            @method('post')
+                            <input type="text" hidden name="user_id" id="user_id">
+
+                            <div class="form-group text-center">
+                                <input type="text" class="form-control" placeholder="Auto Cancelation Days" name="cancelation_days" id="cancelation_days" data-rule-required="true" data-msg-required="Cancelation Day is Required">
+                            </div>
+                            <div class="mt-2" style="text-align: center">
+                                <button type="submit" class="btn btn-success" id="AutoCancelationDaysSubmit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade text-left" id="CorporateInvoiceLogModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CorporateInvoiceLogModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Packaging Invoice Toggle Log</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                   
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -1666,6 +1711,7 @@
             var shipper_id = $invoker.data('target-id');
             $('#shipper_id').val(shipper_id);
         });
+
         $('#salesTagSubmit').on('click',function () {
             var shipper = $('#shipper_id').val();
             var tag = parseInt($('#saletag').val());
@@ -2208,6 +2254,15 @@
                         });
                 }
             }
+
+            if($(this).hasClass('auto_cancel_days_setting')){
+                if(id){
+                    let auto_shipment_cancellation_days = table.row( $(this).parents('tr') ).data().auto_shipment_cancellation_days;
+                    $("#auto_cancelation_days_form #cancelation_days").val(auto_shipment_cancellation_days);
+                    $("#auto_cancelation_days_form #user_id").val(id);
+                    $("#AutoCancelationDaysModal").modal('show');
+                }
+            }
         });
 
         $('#restrict_order_id_form').validate({
@@ -2232,6 +2287,35 @@
             }
         });
 
+        $("#auto_cancelation_days_form #cancelation_days").inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 5,
+            'max': 60
+        });
+        $('#auto_cancelation_days_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Auto Cancelation Days being updated!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
+                form.submit();
+            }
+        });
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
             var id = $(this).parents('tr').attr('id');
             if($(this).hasClass('remove_sales_tier')){
@@ -2386,6 +2470,59 @@
                             }
                         });
                     }
+                });
+            }
+        });
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+
+            var user_id = table.row( $(this).parents('tr') ).data().id;
+
+            if ($(this).hasClass('view_invoice_log')) {
+
+                $.ajax({
+                    url: '{!! route('admin.accounts.packaging.invoice.log') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id,
+                    }
+                }).done(function(data){
+
+                    if (data.status == 0) {
+
+
+                        var html = '<table class="table table-bordered">' +
+                                    '<thead><tr><td><strong>S.No</strong></td><td><strong>Admin</strong></td><td><strong>Status</strong></td><td><strong>Time</strong></td></tr></thead><tbody>';
+
+                        $.each(data.details, function (index,value) {
+                            console.log(value,value.admin);
+                                var serial = index + 1;
+                                var status = '';
+                                if(value['status'] == 1){
+                                    status = 'On';
+                                }
+                                else{
+                                    status = 'Off';
+                                }
+
+                                html += '<tr><td>'+serial +'</td><td>' + value['admin'] + '</td>' +
+                                         '<td>'+ status + '</td>' +
+                                    '<td>' + value['time']+ '</td></tr>';
+                            serial++;
+                        });
+
+                         html +=  '</tbody></table>';
+
+                        $('#CorporateInvoiceLogModal .modal-body').html(html);
+
+                        $('#CorporateInvoiceLogModal').modal('show');
+
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+
                 });
             }
         });

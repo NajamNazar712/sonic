@@ -234,7 +234,23 @@
                                                             @else
                                                                 <td></td>
                                                             @endif
-                                                            
+                                                            <td><strong>OTP Entered : </strong></td>
+                                                            @if($rider_delivery != NULL)
+                                                                @if($rider_delivery->otp_entered != NULL)
+                                                                    @if($rider_delivery->otp_entered == 1)
+                                                                        <td>'Yes'</td>
+                                                                    @elseif($rider_delivery->otp_entered == 0)
+                                                                        <td>'No'</td>
+                                                                    @else
+                                                                        <td>'-'</td>
+                                                                    @endif
+                                                                @else
+                                                                    <td>'-'</td>
+                                                                @endif
+                                                            @else
+                                                                <td>'-'</td>
+                                                            @endif
+
                                                             <td><strong>Remarks :</strong></td>
                                                             @if($rider_status != NULL)
                                                             <td>{{($rider_status->remarks) ? $rider_status->remarks : '-'}}</td>

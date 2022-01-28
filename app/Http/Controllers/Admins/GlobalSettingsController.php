@@ -5458,7 +5458,7 @@ public function sales_incentive()
 
     }
 
-    public function reattempt_percentage_index()
+	public function reattempt_percentage_index()
     {
         $settings = GlobalSettings::where('type', 'reattempt_percentage');
         $percentage = '';

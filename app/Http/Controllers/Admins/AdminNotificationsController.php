@@ -235,7 +235,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'order_id', 'tracking_number'];
         }
         else if ($id == 12) {
-            $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'consignee_name', 'consignee_address', 'order_id', 'amount', 'payment_mode', 'tracking_number'];
+            $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'consignee_name', 'consignee_address', 'order_id', 'amount', 'payment_mode', 'tracking_number', 'refusal_otp'];
         }
         else if ($id == 13) {
             $details['fields'] = ['delivery_note_number', 'rider', 'company_name', 'departure_at', 'order_id', 'tracking_number', 'status'];
@@ -589,7 +589,7 @@ class AdminNotificationsController extends Controller
         }
 		else if ($id == 132)
         {
-            $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider'];
+            $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider', 'refusal_otp'];
         }
 		else if ($id == 133)
         {
@@ -601,7 +601,7 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 135)
         {
-            $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider'];
+            $details['fields'] = ['company_name', 'amount', 'tracking_number', 'rider', 'refusal_otp'];
         }
         else if ($id == 136)
         {
@@ -692,9 +692,17 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['tracking_no','status', 'reason'];
         }
+        else if ($id == 165)
+        {
+            $details['fields'] = ['consignee','tracking_no', 'otp'];
+        }
         else if ($id == 167)
         {
             $details['fields'] = ['status_code','link'];
+        }
+        else if ($id == 166)
+        {
+            $details['fields'] = ['company_name','arrival_at','tracking_number','order_id','consignee_name','consignee_city'];
         }
 		return $details;
     }

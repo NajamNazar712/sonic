@@ -14,6 +14,30 @@
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
 
+                            <form id="attendance_upload_form" class="form-horizontal" method="POST" action="{{ route('admin.attendance.excel') }}" novalidate="novalidate" enctype="multipart/form-data">
+                                {{ csrf_field() }}
+
+                                <div class="row align-items-center justify-content-center">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <input type="file" name="attendance" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group text-left">
+                                            <button type="submit" name="upload" class="btn btn-primary">Upload</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="col ml-auto">
+                                        <div class="form-group text-right">
+                                            <a href="javascript:void()" class="btn btn-primary generate_pdf"><i class="la la-download"></i> Generate PDF</a>
+                                            <a href="{{ asset('file/Employee Attendance Template.xlsx') }}?v=14_09_2021" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-12 ">
                                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
@@ -110,6 +134,66 @@
                                 </div>
                             </div>
 
+                            <div class="modal fade text-left" id="generateAttendancePdf" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="generateAttendancePdf"
+                                 aria-hidden="true">
+                                <div class="modal-dialog modal-sm" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="generate_pdf_heading">Select Details<span></span></h4>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body col-12" id="generatePdfDiv">
+                                            <form id="generate_pdf_form" class="form-horizontal" method="POST" action="{{ route('admin.attendance.print') }}" novalidate="novalidate">
+                                                {{ csrf_field() }}
+
+                                                <div class="col mt-1">
+                                                    <fieldset class="form-group">
+                                                        <select name="pdf_trax_id" id="pdf_trax_id" class="form-control select2" data-rule-required="true" data-msg-required="Select Employee ID">
+                                                            @foreach($trax_ids as $trax_id)
+                                                                <option value="{{$trax_id}}">{{$trax_id}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </fieldset>
+                                                </div>
+                                                <div class="col mt-1">
+                                                    <div class="form-group input-group ">
+                                                        <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o"></span>
+                                                </span>
+                                                        </div>
+                                                        <input type="text" name="pdf_date_from"
+                                                               class="form-control pickadate bg-primary border-primary white rounded-right" data-rule-required="true" data-msg-required="This Field is required"
+                                                               id="pdf_date_from" placeholder="Attandance Date (From)" data-value="{{ Carbon\Carbon::today() }}">
+                                                    </div>
+                                                </div>
+                                                <div class="col mt-1">
+                                                    <div class="form-group input-group">
+                                                        <div class="input-group-prepend">
+                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o"></span>
+                                                </span>
+                                                        </div>
+                                                        <input type="text" name="pdf_date_to"
+                                                               class="form-control pickadate bg-primary border-primary white rounded-right" data-rule-required="true" data-msg-required="This Field is required"
+                                                               id="pdf_date_to" placeholder="Attandance Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                                                    </div>
+                                                </div>
+                                                <div class="col">
+                                                    <fieldset class="form-actions center">
+                                                        <button type="submit" class="btn btn-primary">
+                                                            Download
+                                                        </button>
+                                                    </fieldset>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
@@ -191,6 +275,12 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#pdf_trax_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Employee ID',
+                width:'100%',
+                allowClear:true,
+                dropdownParent: $("#generate_pdf_form")
+            });
             $('#search_cnic').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search CNIC',
                 width:'100%',
@@ -209,6 +299,47 @@
                     }
                 }
             });
+            $('#generate_pdf_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    form.submit();
+                    form.reset();
+                    $('#pdf_trax_id').trigger('change');
+                    $(form).find('button[type=submit]').attr('disabled', false);
+                    $('#generateAttendancePdf').modal('hide');
+                }
+            });
+            $('#attendance_upload_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'File is being Upload!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+            });
             var search_date_to = $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -219,6 +350,35 @@
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var pdf_date_from = $('#generate_pdf_form #pdf_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: "{{ Carbon\Carbon::today() }}",
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#generate_pdf_form #pdf_date_to').pickadate('picker').set('min', $('#generate_pdf_form #pdf_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var pdf_date_to = $('#generate_pdf_form #pdf_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                max: "{{ Carbon\Carbon::today() }}",
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#generate_pdf_form #pdf_date_from').pickadate('picker').set('max', $('#generate_pdf_form #pdf_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
@@ -374,6 +534,9 @@
                 } else {
                     table.button('.sms').disable();
                 }
+            });
+            $('body').on('click','.generate_pdf',function(){
+                $('#generateAttendancePdf').modal('show');
             });
         });
     </script>
