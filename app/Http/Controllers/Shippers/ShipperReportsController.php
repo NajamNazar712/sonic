@@ -112,11 +112,11 @@ class ShipperReportsController extends Controller
 
             $ids = FALSE;
 
-            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from)->whereIn('shipper_status_id', [14, 25, 30, 36, 37])->where('verification', 1);
+            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
             if ($from_id->exists()) {
                 $from_id = $from_id->first()->id;
 
-                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to)->whereIn('shipper_status_id', [14, 25, 30, 36, 37])->where('verification', 1);
+                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
 
                 if ($to_id->exists()) {
                     $to_id = $to_id->first()->id;
