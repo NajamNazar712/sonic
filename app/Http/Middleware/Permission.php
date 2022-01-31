@@ -1134,7 +1134,7 @@ class Permission
             'settings.international_automation_user.index' => 582,
 
             'settings.ccd_booking.index' => 558,
-            'settings.cancelled_shipments.index' => 660,
+            'accounts.auto_cancelation_days' => 660,
             'settings.omni.index' => 644,
             
             'return.rcp_agent.index' => 600,

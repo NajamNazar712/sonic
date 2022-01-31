@@ -331,20 +331,13 @@ class AdminAttendanceController extends Controller
 
     public function admin_attendance_horizontal_table(Request $request,$array = false)
     {
-        $month = "01 ".$request->get('search_month');
-        $date = Carbon::createFromFormat('d M Y',$month);
-        $year = $date->year;
-        $month = $date->month;
-        $prev = $date->subMonth(1);
-        $prev_month = $prev->month;
-        $prev_year = $prev->year;
-        $from = new \DateTime(Carbon::createFromDate($prev_year,$prev_month,26)->toDateString());
-        $to = new \DateTime(Carbon::createFromDate($year,$month,25)->toDateString());
-        $to = $to->modify( '+1 day' );
+        $search_from = Carbon::parse($request->search_from);
+        $search_to = Carbon::parse($request->search_to);
+        $search_to = $search_to->modify('+1 day');
         $period = array();
 
         $interval = new \DateInterval('P1D');;
-        $daterange = new \DatePeriod($from, $interval ,$to);
+        $daterange = new \DatePeriod($search_from, $interval ,$search_to);
 
         foreach ($daterange as $date) {
             if($array)
@@ -367,6 +360,7 @@ class AdminAttendanceController extends Controller
 
     public function admin_attendance_horizontal_list(Request $request)
     {
+      
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),454);
@@ -397,20 +391,22 @@ class AdminAttendanceController extends Controller
         }
 
 
-        if ($request->get('search_month')) {
-            $month = "01 ".$request->get('search_month');
+        if ($request->get('search_from') && $request->get('search_to')) {
+           /* $month = "01 ".$request->get('search_month');
             $date = Carbon::createFromFormat('d M Y',$month);
             $year = $date->year;
             $month = $date->month;
             $prev = $date->subMonth(1);
             $prev_month = $prev->month;
             $prev_year = $prev->year;
-            $from = Carbon::createFromDate($prev_year,$prev_month,26)->toDateString();
-            $to = Carbon::createFromDate($year,$month,25)->toDateString();
-            $attendances->whereBetween('employee_attendances.attendance_date', [$from, $to]);
+            $from = Carbon::createFromDate($prev_year,$prev_month,26)->toDateString();*/
+            $search_from = Carbon::parse($request->search_from)->toDateString();
+            $search_to = Carbon::parse($request->search_to)->toDateString();
+           /* $to = Carbon::createFromDate($year,$month,25)->toDateString();*/
+            $attendances->whereBetween('employee_attendances.attendance_date', [$search_from, $search_to]);
         }
 
-        $attendances->groupBy('employee_attendances.employee_id');
+        $attendances->groupBy('employee_attendances.employee_id','employee_attendances.employee_type');
 
         $periods =  $this->admin_attendance_horizontal_table($request,true);
         $today = Carbon::now();
@@ -448,11 +444,13 @@ class AdminAttendanceController extends Controller
                     return $employee->department;
                 }
             });
+          
             foreach($periods['display'] as $key => $period)
             {
                 $datatable->addColumn($period, function ($employee) use ($key, $periods,$today) {
                     $data = EmployeeAttendance::where('employee_id',$employee->employee_id)
                         ->where('attendance_date',$periods['search'][$key])
+                        ->where('employee_type',$employee->employee_type)
                         ->where(function ($query){
                             $query->where('clock_in_datetime','!=',null)
                                 ->orWhere('clock_in','!=',null);
@@ -1026,8 +1024,8 @@ class AdminAttendanceController extends Controller
                     $shift = EmployeeShift::find($employee->shift_id);
                     if ($shift){
                         $clock_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
-                        $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
-                        if ($time_diff > $shift->grace_time) {
+                        $time_diff = Carbon::parse($shift->start_time)->diffInMinutes(Carbon::parse($clock_in), false);
+                        if ($time_diff > (int)$shift->grace_time) {
                             $remarks = 'Late';
                             $late++;
                             $late_arrival = Carbon::parse($clock_in)->diff(Carbon::parse($shift->start_time))->format('%H:%I:%S');

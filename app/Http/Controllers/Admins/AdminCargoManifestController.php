@@ -9,6 +9,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagStatus;
+use App\Http\Models\Admin\CargoManifest\CargoManifestDraftBags;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2JunctionMapping;
 use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
@@ -1337,7 +1338,9 @@ class AdminCargoManifestController extends Controller
             return back()->with(['error'=>'Default Hub not set for this admin.']);
         }
         $shipping_modes = ShippingMode::all();
-        return view('admin.cargo.manifest.create',compact('shipping_modes'));
+        //$draft_bags = CargoManifestDraftBags::where('added_by',Auth::id())->pluck('bag_id','weight')->toArray();
+        $draft_bags = CargoManifestDraftBags::where('added_by',Auth::id())->get();
+        return view('admin.cargo.manifest.create',compact('shipping_modes','draft_bags'));
     }
 
     public function bag_details(Request $request) {
@@ -1363,6 +1366,7 @@ class AdminCargoManifestController extends Controller
                 }
 
                 if ($allowed) {
+                    if(!CargoManifestDraftBags::where('bag_id',$bag->id)->exists()){
                         $bag->actual_weight = $bag->shipments_weight ;
                         $bag->update();
                         $details = array();
@@ -1377,7 +1381,13 @@ class AdminCargoManifestController extends Controller
                         $details['destination'] = $destination->name;
                         $details['bag_weight'] = $bag->shipments_weight;
 
+                        CargoManifestDraftBags::create(['bag_id'=> $bag->id,'seal_number' => $bag->seal_number,'shipments_count' => $bag->shipments , 'origin_id' => $origin->id,'destination_id' => $destination->id ,'added_by' => Auth::id(),'weight' => $bag->shipments_weight]);
+
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
+                        }
+                    else{
+                        return ['status' => 1, 'error' => 'Bag Number has already been added by other admin'];
+                    }
                 }
                 else {
                     return ['status' => 1, 'error' => 'Given Bag Number\'s does not have any mapping'];
@@ -1646,6 +1656,8 @@ class AdminCargoManifestController extends Controller
         else {
             $print = FALSE;
         }
+
+        CargoManifestDraftBags::where('added_by',Auth::id())->delete();
 
         return redirect()->route('admin.cargo_manifest.create')->with(['success_html'=>$success,'error_html'=>$error,'print'=>$print]);
     }
@@ -3088,6 +3100,33 @@ class AdminCargoManifestController extends Controller
          }
          return $tracking_numbers;
      }
+    }
+
+    public function manifest_draft(){
+      $draft = CargoManifestDraftBags::join('cities as c','c.id','=','cargo_manifest_draft_bags.origin_id')
+          ->join('cities as d','d.id','=','cargo_manifest_draft_bags.destination_id')
+          ->select('cargo_manifest_draft_bags.bag_id as bag_id','cargo_manifest_draft_bags.seal_number as bag_number','cargo_manifest_draft_bags.shipments_count','d.name as destination','c.name as origin')
+          ->where('cargo_manifest_draft_bags.added_by',Auth::id());
+
+        return Datatables::of($draft)
+            ->addColumn('action',function ($shipments){
+                $dropdown = '<a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a>';
+                return $dropdown;
+
+            })
+            ->make(true);
+    }
+
+    public function manifest_draft_delete(Request $request){
+       $bag_id = $request->bag_id;
+       $draft = CargoManifestDraftBags::where('bag_id',$bag_id)->where('added_by',Auth::id())->first();
+       if($draft){
+           $draft->delete();
+           return response()->json(['status' => 1]);
+       }
+       else{
+           return response()->json(['status' => 0]);
+       }
     }
 
 }
