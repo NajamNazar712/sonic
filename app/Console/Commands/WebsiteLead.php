@@ -92,7 +92,7 @@ class WebsiteLead extends Command
 
                 $new_leads[] = $new_lead->id;
                 //enter admin_id from global settings
-                LeadTaggingController::auto_tagging($lead->id,386);
+                LeadTaggingController::auto_tagging($new_lead->id,386);
             }
         }
 
