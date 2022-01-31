@@ -107,6 +107,8 @@ Route::name('api.')->group(function () {
         Route::get('shipment_settings', 'Rider\RiderAPIController@shipment_attempt_settings')->name('shipment_settings');
         Route::post('forget_pin', 'Rider\RiderAPIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'Rider\RiderAPIController@reset_pin')->name('reset_pin');
+        Route::get('check_pin', 'Rider\RiderAPIController@check_pin')->name('check_pin');
+        Route::get('logout', 'Rider\RiderAPIController@logout')->name('logout');
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
@@ -249,6 +251,8 @@ Route::name('api.')->group(function () {
         Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');        Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
         Route::post('forget_pin', 'AdminAPIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'AdminAPIController@reset_pin')->name('reset_pin');
+        Route::get('check_pin', 'AdminAPIController@check_pin')->name('check_pin');
+        Route::get('logout', 'AdminAPIController@logout')->name('logout');
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'AdminAPIController@validate_cnic_phone_number')->name('validate_data');
@@ -321,6 +325,13 @@ Route::name('api.')->group(function () {
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
             Route::post('dws_weight', 'AdminAPIController@dws_weight')->name('dws_weight');
             Route::post('trax_directory', 'AdminAPIController@trax_directory')->name('trax_directory');
+            Route::post('trax_directory_v2', 'AdminAPIController@trax_directory_v2')->name('trax_directory_v2');
+
+            Route::prefix('leads')->name('leads.')->group(function () {
+                Route::post('list', 'AdminAPIController@leads_list')->name('list');
+                Route::post('add_remarks', 'AdminAPIController@add_remarks')->name('add_remarks');
+                Route::post('view_remarks', 'AdminAPIController@view_remarks')->name('view_remarks');
+            });
 
         });
 

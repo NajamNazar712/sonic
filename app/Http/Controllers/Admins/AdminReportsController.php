@@ -3358,7 +3358,7 @@ class AdminReportsController extends Controller
 
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to = str_replace('00:00:00', $arrival_to, $to);
-        
+
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
         ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
         ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
@@ -3431,6 +3431,21 @@ class AdminReportsController extends Controller
         ->whereNotIn('shipments.shipper_status_id',[1,17])
         ->whereNotIn('u.id', [8761, 9358])
         ->whereBetween('sj.created_at', [$from,$to]);
+
+        $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+        if ($from_id->exists()) {
+            $from_id = $from_id->first()->id;
+
+            $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+            if ($to_id->exists()) {
+                $to_id = $to_id->first()->id;
+
+                $sales->where('sj.id', '>=', $from_id)
+                ->where('sj.id', '<=', $to_id);
+            }
+        }
+
 //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
 //            $now = Carbon::now();
 //            $yesterday = Carbon::now()->subDays(3);
@@ -4059,11 +4074,12 @@ class AdminReportsController extends Controller
             ->leftjoin('station_deposit_notes as sdn','sdn.id','=','pcs.sdn_id')
             ->join('admins as cb','cb.id','=', 'pcs.created_by')
             ->leftjoin('admins as sub', 'sub.id', '=', 'petty_cash_statement_details.updated_by')
+            ->leftjoin('delivery_notes as dn','dn.id','=','petty_cash_statement_details.dncc_id')
             ->leftjoin('petty_cash_account_heads as pch', 'pch.id','=','petty_cash_statement_details.account_head_id')
             ->leftjoin('petty_cash_account_titles as pct', 'pct.id','=','petty_cash_statement_details.account_title_id')
             ->leftjoin('shipments','shipments.id','=','pcs.shipment_id')
             ->leftjoin('admins as chb','chb.id','=', 'pcs.checked_by')
-            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pcs.date as p_entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by','employee.trax_id as employee_id','petty_cash_statement_details.employee_name','petty_cash_statement_details.employee_designation','sdn.id as sdn_id','sdn.dncc_count');
+            ->select('pcs.id as statement_id','pcs.id as statement_link','dc.name as entry_city','petty_cash_statement_details.date as entry_date','pcs.date as p_entry_date','pch.name as account_head','pct.name as account_title','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no as entry_reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.reference_no as statement_reference_no','h.name as hub_name','cb.name as created_by','pcs.created_at','petty_cash_statement_details.station_amount','petty_cash_statement_details.operation_amount','petty_cash_statement_details.finance_amount','shipments.tracking_number', 'pcs.checked_at', 'chb.name as checked_by','employee.trax_id as employee_id','petty_cash_statement_details.employee_name','petty_cash_statement_details.employee_designation','sdn.id as sdn_id','sdn.dncc_count','petty_cash_statement_details.dncc_id as delivery_note','petty_cash_statement_details.delivered_shipments as delivered_shipments','dn.received_cod_amount as delivery_note_amount');
 //            ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
@@ -6782,6 +6798,20 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $shipments = $shipments->whereBetween('shipments.created_at', [$from,$to]);
+
+            $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+
+                $to_id = DB::connection('reports')->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $shipments->where('shipments.id', '>=', $from_id)
+                    ->where('shipments.id', '<=', $to_id);
+                }
+            }
         }
 
         $datatable = Datatables::of($shipments)

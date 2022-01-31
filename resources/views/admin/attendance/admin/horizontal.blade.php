@@ -37,7 +37,7 @@
                                                     </span>
                                                 </div>
 
-                                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Ateendance (To)">
+                                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Attendance (To)">
                                             </div>
 
                                         </div>
@@ -77,40 +77,7 @@
                                                 </select>
                                             </fieldset>
                                         </div>
-                                      {{--  <div class="col-5 mt-2">
-                                           --}}{{-- <div class="form-group input-group ">
-                                                <div class="input-group-prepend">
-                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="la la-calendar-o"></span>
-                                            </span>
-                                                </div>
-                                                <input type="text" name="search_month"
-                                                       class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_month" placeholder="Attandance Month" data-value="{{ Carbon\Carbon::today() }}">
-                                            </div>--}}{{--
-                                            <div class="form-group input-group ml-1">
-                                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                                </div>
 
-                                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-5 mt-2">
-                                            <div class="form-group input-group ml-1">
-                                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                                </div>
-
-                                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
-                                            </div>
-                                        </div>
---}}
                                         <div class="col-12 mt-2">
                                             <div class="form-group justify-content-center">
                                                 <button type="button" id="search_filter_btn"
@@ -164,8 +131,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
-            var search_date_from = $('#search_form #search_date_from').pickadate({
+            
+            $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -173,24 +140,27 @@
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
+                    $('#search_date_to').pickadate('picker').clear({muted: true});
                     if (context.select) {
-                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                        var selected_date = new Date(context.select);
+                        var max_selected_date = moment(selected_date).add(31, 'days');
+                        console.log(selected_date);
+                        $('#search_date_to').attr('disabled', false);
+                        $('#search_form #search_date_to').pickadate('picker').set({'min':selected_date},{'max':max_selected_date.toDate()},{muted: true});
+                        $('#search_form #search_date_to').pickadate('picker').set({'max':max_selected_date.toDate()},{muted: true});
                     }
                 }
             });
-
-            var search_date_to = $('#search_form #search_date_to').pickadate({
+            $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                        // $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
@@ -231,6 +201,7 @@
             $('#search_filter_btn').on('click',function () {
                 var search_from = $('#search_date_from').val();
                 var search_to = $('#search_date_to').val();
+
                 if(search_from === '' || search_to === ''){
                     var error = "Date range is required";
                     toastr.error(error, 'Error!', {
@@ -324,7 +295,6 @@
                                     processing: data_table_loader
                                 },
                                 serverSide: true,
-
                                 ajax: {
                                     url: '{{ route('admin.attendance.horizontal.list') }}',
                                     method: "Post",

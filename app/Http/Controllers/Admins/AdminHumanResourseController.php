@@ -252,7 +252,7 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('rider_main_categories as rmc','rmc.id','=','employees.rider_main_category')
             ->leftjoin('employee_designations as ed','ed.id','=','employees.designation_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation'])
+            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -349,6 +349,10 @@ class AdminHumanResourseController extends Controller
                         if ($result->request_status_id == 3 && $result->employee_type_id == 1) {
                             if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) {
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
+
+                                if($result->staff_category_id == 2){
+                                    $dropdown .= '<button type="button" class="dropdown-item convert_intern_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Intern To Staff</div></button>';
+                                }
 
                             }
 
@@ -1048,7 +1052,7 @@ class AdminHumanResourseController extends Controller
         $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->shift_id = $request->shift_id;
-        $employee->staff_category_id = $request->staff_category;
+//        $employee->staff_category_id = $request->staff_category;
         $employee->rider_sub_category = $request->rider_sub_category;
         $employee->rider_main_category = $request->rider_main_category;
         $employee->joining_date = $request->joining_date_formatted;
@@ -3760,9 +3764,10 @@ class AdminHumanResourseController extends Controller
 
         $rider = $rider->first();
 
-        if(DeliveryNote::where('rider_id',$rider->id)->where(function($q){
-            $q->where('status','!=',1)
-            ->orWhere('dncc_status','!=',1);
+
+        if(DeliveryNote::where('rider_id',$rider->id)->where('status', '!=', 4)->where(function($q){
+            $q->where('status', 0)
+                ->orWhere('dncc_status', 0);
         })->exists())
         {
             return back()->with("error","Rider Has An Unfinished Delivery Note");
@@ -3776,12 +3781,12 @@ class AdminHumanResourseController extends Controller
                 ->where('delivery_note_station_deposit_notes.delivery_note_id', $DN->id)
                 ->first();
 
-            if ($sdn_note->status != 1) {
-                return back()->with("error", "Rider Has An Unfinished Delivery Note");
+            if ($sdn_note->status == 0) {
+                return back()->with("error", "Rider Has An Unresolved Station Deposit Note");
             }
         }
 
-        if(V2PickupNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
+        if(V2PickupNote::where('rider_id',$rider->id)->where('status', 0)->exists())
         {
             return back()->with("error","Rider Has An Unfinished Pickup Note");
         }
@@ -3845,5 +3850,39 @@ class AdminHumanResourseController extends Controller
         ]);
 
         return back()->with("success","Rider Converted To Staff Successfully");
+    }
+
+    public function convert_intern_to_staff(Request $request){
+        $employee = Employee::find($request->employee_id);
+        if($employee)
+        {
+            $admin = Admin::where('trax_id', $employee->trax_id);
+            if($admin->exists()){
+                $admin = $admin->first();
+                if($employee->staff_category_id == 2){
+                    $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                    $trax_id_prefix = 'Trax';
+                    if ($global_setting->exists()) {
+                        $global_setting = $global_setting->first();
+                        $trax_id = $global_setting->setting_value + 1;
+                        $global_setting->setting_value = $trax_id;
+                        $global_setting->save();
+                        $trax_id = $trax_id_prefix . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    } else {
+                        $trax_id = null;
+                    }
+                    $employee->staff_category_id = 1;
+                    $employee->trax_id = $trax_id;
+                    $employee->save();
+
+                    $admin->trax_id = $employee->trax_id;
+                    $admin->save();
+                    return response()->json(['status' => 0, 'success' => 'Intern Converted To Staff Successfully']);
+                }
+                return response()->json(['status' => 1, 'error' => 'Employee already a Staff']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
     }
 }

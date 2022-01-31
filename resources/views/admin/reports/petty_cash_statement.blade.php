@@ -144,6 +144,9 @@
                         <th class="border-primary border-darken-1">Employee Designation</th>
                         <th class="border-primary border-darken-1">SDN No.</th>
                         <th class="border-primary border-darken-1">DNCC/PNCC Count</th>
+                        <th class="border-primary border-darken-1">Delivery Note No</th>
+                        <th class="border-primary border-darken-1">Delivered Shipments</th>
+                        <th class="border-primary border-darken-1">Delivery Note Amount</th>
                     </tr>
                     </thead>
                 </table>
@@ -388,6 +391,9 @@
                             head.push('Employee Designation');
                             head.push('SDN No.');
                             head.push('DNCC/PNCC Count');
+                            head.push('Delivery Note No');
+                            head.push('Delivered Shipments');
+                            head.push('Delivery Note Amount');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -419,6 +425,9 @@
                                 row.push(values.employee_designation);
                                 row.push(values.sdn_id_padded);
                                 row.push(values.dncc_count);
+                                row.push(values.delivery_note);
+                                row.push(values.delivered_shipments);
+                                row.push(values.delivery_note_amount);
 
                                 body.push(row);
                             });
@@ -491,6 +500,9 @@
                     {data: 'employee_designation', name: 'petty_cash_statement_details.employee_designation', class: 'align-middle employee_designation'},
                     {data: 'sdn_id_link', name: 'sdn.id', class: 'align-middle text-center sdn_id_link'},
                     {data: 'dncc_link', name: 'sdn.dncc_count', class: 'align-middle text-center dncc_link'},
+                    {data: 'delivery_note', name: 'petty_cash_statement_details.dncc_id', class: 'align-middle text-center delivery_note'},
+                    {data: 'delivered_shipments', name: 'petty_cash_statement_details.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
+                    {data: 'delivery_note_amount', name: 'dn.received_cod_amount', class: 'align-middle text-center delivery_note_amount'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
