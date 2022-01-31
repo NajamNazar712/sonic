@@ -115,6 +115,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
                 });
             });
 
+
+            Route::prefix('return_address')->name('return_address.')->group(function () {
+                Route::prefix('excel')->name('excel.')->group(function () {
+                    Route::get('', 'Shippers\ShipmentReturnAddressController@excel_index')->name('index');
+                    Route::post('', 'Shippers\ShipmentReturnAddressController@excel_store')->name('store');
+                });
+            });
+
         });
 
         Route::resource('book', 'Shippers\ShipperShipmentBookController');
@@ -160,6 +168,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('verify')->name('verify.')->group(function () {
             Route::get('', 'Shippers\ShipperShipmentBookController@shipments_verify_index')->name('index');
             Route::post('', 'Shippers\ShipperShipmentBookController@shipments_verify_store')->name('store');
+        });
+
+        Route::prefix('origin')->name('origin.')->group(function(){
+            Route::get('', 'Shippers\ShipmentOriginChangeController@shipments_origin_index')->name('index');
+            Route::post('store', 'Shippers\ShipmentOriginChangeController@shipments_origin_store')->name('store');
         });
     });
 
@@ -3079,6 +3092,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('reattempt_percentage')->name('reattempt_percentage.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@reattempt_percentage_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@reattempt_percentage_store')->name('store');
+        });
+
+        Route::prefix('shippers_origin_change')->name('shippers_origin_change.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipper_origin_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@shipper_origin_store')->name('store');
+        });
+
+        Route::prefix('shippers_return_address')->name('shippers_return_address.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shippers_return_address_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@shippers_return_address_store')->name('store');
         });
     });
 
