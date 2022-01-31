@@ -1074,7 +1074,7 @@ class AdminAttendanceController extends Controller
                         $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
                         $clock_in = Carbon::parse($employee_attendance->clock_in_datetime);
                         $time_diff = $expected_clockin->diffInMinutes($clock_in, false);
-
+                        dd($time_diff);
                         if ($time_diff > 0) {
                             $remarks = 'Late';
                             $late++;
