@@ -108,7 +108,6 @@
                             head.push('Items');
                             head.push('Origin');
                             head.push('Destination');
-                            head.push('Images');
                             head.push('Include');
                             head.push('Video Link');
 
@@ -124,7 +123,6 @@
                                 row.push(values.item_count);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.images_links);
                                 row.push(values.case);
                                 row.push(values.video_link);
 
