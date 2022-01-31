@@ -212,30 +212,24 @@
                 });
             @endif
             var bag_ids = [];
+            manifest_bag_weight = [];
 
-            var table = $('#datatable').DataTable({
-                dom: 'ltipr',
-                scrollX: true,
-                autoWidth : false,
-                paging:false,
-                columns: [
-                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
-                    {name: 'bag_number', class: 'align-middle bag_number', orderable: false},
-                    {name: 'shipments', class: 'align-middle shipments', orderable: false},
-                    {name: 'origin', class: 'align-middle origin', orderable: false},
-                    {name: 'destination', class: 'align-middle destination', orderable: false},
-                  /*  {name: 'bag_weight', class: 'align-middle bag_weight', orderable: false},*/
-                    {name: 'action', class: 'align-middle action',orderable: false, searchable: false}
-                ],
-                rowCallback: function(row, data, index) {
-                    // var info = table.page.info();
-                    //
-                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
-                initComplete: function() {
-                    this.api().table().columns.adjust();
+            function add_draft_bags_count(){
+                var draft_bags = @json($draft_bags);
+
+                if(draft_bags.length > 0) {
+                    $.each(draft_bags, function (index, value) {
+                        bag_ids.push(value.bag_id);
+                        manifest_bag_weight.push(value.weight);
+
+                    });
+                    if (bag_ids.length > 0) {
+                        $('#master_cargo_consignment_confirm').prop('disabled', false);
+                    }
                 }
-            });
+            }
+            add_draft_bags_count();
+
 
             var cargo_table = $('#cargo_datatable').DataTable({
                 dom: 'ltipr',
@@ -266,7 +260,8 @@
                 'allowMinus': false,
                 'allowPlus': false
             });*/
-            manifest_bag_weight = [];
+
+
             $('#add_bag_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -305,13 +300,10 @@
                                     id = data.details.id;
 
                                     var index = $.inArray(id, bag_ids);
-
                                     if (index === -1) {
-                                        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger bag_remove"><i class="la la-close"></i></a>';
-                                        var rowNo = table.rows().count();
-                                        table.row.add([rowNo+1, data.details.bag_number, data.details.shipments, data.details.origin, data.details.destination,remove]).node().id = data.details.id;
-                                        table.draw(false);
-                                        table.order([0, 'desc']).draw();
+
+                                        $('#datatable').DataTable().ajax.reload();
+                                       // $('#datatable').DataTable().draw();
                                         bag_ids.push(data.details.id);
                                         manifest_bag_weight.push(data.details.bag_weight);
                                         scan_sound(1);
@@ -321,6 +313,13 @@
                                         $('#master_cargo_consignment_confirm').prop('disabled', false);
                                         UnblockPagePermanently();
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    else{
+                                        $('#add_bag_form button.add').prop('disabled', false);
+                                        UnblockPagePermanently();
+                                        scan_sound(2);
+                                        var error = "Bag Already Exists";
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                     }
                                 }
                                 else {
@@ -341,6 +340,41 @@
                     return false;
                 }
             });
+
+            var table = $('#datatable').DataTable({
+                dom: 'ltipr',
+                scrollX: true,
+                "autoWidth": false,
+                paging:false,
+                ajax: '{{ route('admin.cargo_manifest.draft.list') }}',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                serverSide: false,
+                rowId:'bag_id',
+                columns: [
+                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data:'bag_number', name: 'cargo_manifest_draft_bags.seal_number', class: 'align-middle bag_number'},
+                    {data:'shipments_count', name: 'cargo_manifest_draft_bags.shipments_count', class: 'align-middle shipments_count'},
+                    {data:'origin', name: 'c.name', class: 'align-middle origin'},
+                    {data:'destination', name: 'd.name', class: 'align-middle destination'},
+                    {data:'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+
+
+
+
             $('#master_cargo_consignment_confirm').bind('click', function() {
 
                 let total_weight = 0;
@@ -528,22 +562,40 @@
 
             $('body').on('click','.bag_remove',function () {
                 var bag_id = parseInt($(this).parents('tr').attr('id'));
+                var obj = $(this);
                 var index = $.inArray(bag_id, bag_ids);
+
                 if(index !== -1){
-                    bag_ids.splice(index,1);
-                    table.row( $(this).parents('tr') ).remove().draw();
-                    if(bag_ids.length == 0){
-                        $('#add_bag_form button.add').prop('disabled', false);
+                    $.ajax({
+                        url: '{!! route('admin.cargo_manifest.draft.delete') !!}',
+                        method: 'POST',
+                        data: {
+                            'bag_id': bag_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                    .done(function(data) {
 
-                        $('#master_cargo_confirm').prop('disabled', false);
+                        if (data.status == 1 || data.status == 0) {
 
-                        $("#master_cargo_consignment_confirm").prop('disabled',true);
+                            $(obj).closest("tr").remove();
+                            bag_ids.splice(index,1);
+                        }
 
-                    }
+                        if(bag_ids.length == 0){
+
+                            $('#add_bag_form button.add').prop('disabled', false);
+
+                            $('#master_cargo_confirm').prop('disabled', false);
+
+                            $("#master_cargo_consignment_confirm").prop('disabled',true);
+                            $('#datatable').DataTable().clear().draw();
+                        }
+                    });
+
                 }
-
-
             });
+
         });
 
         function camera_scan_detected(bag_number) {

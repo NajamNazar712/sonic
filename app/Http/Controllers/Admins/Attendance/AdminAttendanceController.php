@@ -3,28 +3,23 @@
 namespace App\Http\Controllers\Admins\Attendance;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
-use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
-use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use Auth;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
-use Cassandra\Session;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Auth;
 use DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use Symfony\Component\VarDumper\Cloner\Data;
 use Yajra\Datatables\Datatables;
 
 class AdminAttendanceController extends Controller
@@ -331,20 +326,13 @@ class AdminAttendanceController extends Controller
 
     public function admin_attendance_horizontal_table(Request $request,$array = false)
     {
-        $month = "01 ".$request->get('search_month');
-        $date = Carbon::createFromFormat('d M Y',$month);
-        $year = $date->year;
-        $month = $date->month;
-        $prev = $date->subMonth(1);
-        $prev_month = $prev->month;
-        $prev_year = $prev->year;
-        $from = new \DateTime(Carbon::createFromDate($prev_year,$prev_month,26)->toDateString());
-        $to = new \DateTime(Carbon::createFromDate($year,$month,25)->toDateString());
-        $to = $to->modify( '+1 day' );
+        $search_from = Carbon::createFromFormat('d F, Y',$request->search_from);
+        $search_to = Carbon::createFromFormat('d F, Y',$request->search_to);
+        $search_to = $search_to->modify('+1 day');
         $period = array();
 
         $interval = new \DateInterval('P1D');;
-        $daterange = new \DatePeriod($from, $interval ,$to);
+        $daterange = new \DatePeriod($search_from, $interval ,$search_to);
 
         foreach ($daterange as $date) {
             if($array)
@@ -367,6 +355,7 @@ class AdminAttendanceController extends Controller
 
     public function admin_attendance_horizontal_list(Request $request)
     {
+      
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),454);
@@ -397,17 +386,10 @@ class AdminAttendanceController extends Controller
         }
 
 
-        if ($request->get('search_month')) {
-            $month = "01 ".$request->get('search_month');
-            $date = Carbon::createFromFormat('d M Y',$month);
-            $year = $date->year;
-            $month = $date->month;
-            $prev = $date->subMonth(1);
-            $prev_month = $prev->month;
-            $prev_year = $prev->year;
-            $from = Carbon::createFromDate($prev_year,$prev_month,26)->toDateString();
-            $to = Carbon::createFromDate($year,$month,25)->toDateString();
-            $attendances->whereBetween('employee_attendances.attendance_date', [$from, $to]);
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $search_from = Carbon::createFromFormat('d F, Y',$request->search_from)->toDateString();
+            $search_to = Carbon::createFromFormat('d F, Y',$request->search_to)->toDateString();
+            $attendances->whereBetween('employee_attendances.attendance_date', [$search_from, $search_to]);
         }
 
         $attendances->groupBy('employee_attendances.employee_id','employee_attendances.employee_type');
@@ -448,43 +430,42 @@ class AdminAttendanceController extends Controller
                     return $employee->department;
                 }
             });
-            foreach($periods['display'] as $key => $period)
-            {
-                $datatable->addColumn($period, function ($employee) use ($key, $periods,$today) {
-                    $data = EmployeeAttendance::where('employee_id',$employee->employee_id)
-                        ->where('attendance_date',$periods['search'][$key])
-                        ->where('employee_type',$employee->employee_type)
-                        ->where(function ($query){
-                            $query->where('clock_in_datetime','!=',null)
-                                ->orWhere('clock_in','!=',null);
-                        })
-                        ->first();
+            if(count($periods) > 0) {
+                foreach ($periods['display'] as $key => $period) {
+                    $datatable->addColumn($period, function ($employee) use ($key, $periods, $today) {
+                        $data = EmployeeAttendance::where('employee_id', $employee->employee_id)
+                            ->where('attendance_date', $periods['search'][$key])
+                            ->where('employee_type', $employee->employee_type)
+                            ->where(function ($query) {
+                                $query->where('clock_in_datetime', '!=', null)
+                                    ->orWhere('clock_in', '!=', null);
+                            })
+                            ->first();
 
-                    if($data) {
-                        if ($data->clock_in_datetime) {
-                            $time = Carbon::parse($data->clock_in_datetime)->format("H:i");
+                        if ($data) {
+                            if ($data->clock_in_datetime) {
+                                $time = Carbon::parse($data->clock_in_datetime)->format("H:i");
+                            } else {
+                                $time = $data->clock_in;
+                            }
+
+                            $time .= " <br> ";
+
+                            if ($data->clock_out_datetime) {
+                                $time .= Carbon::parse($data->clock_out_datetime)->format("H:i");
+                            } else {
+                                $time .= $data->clock_out;
+                            }
+                        } else if ($periods['search'][$key] > $today) {
+                            $time = "-";
                         } else {
-                            $time = $data->clock_in;
+                            $time = "<span class='text-danger'>A</span>";
                         }
 
-                        $time .= " <br> ";
+                        return $time;
 
-                        if ($data->clock_out_datetime) {
-                            $time .= Carbon::parse($data->clock_out_datetime)->format("H:i");
-                        } else {
-                            $time .= $data->clock_out;
-                        }
-                    }
-                    else if($periods['search'][$key] > $today){
-                        $time = "-";
-                    }
-                    else{
-                        $time = "<span class='text-danger'>A</span>";
-                    }
-
-                    return $time;
-
-                });
+                    });
+                }
             }
 
         if ($search_admin = $request->get('search_admin')) {
@@ -669,7 +650,6 @@ class AdminAttendanceController extends Controller
             return back()->with(['error' => "Invalid File Format"]);
         } else {
             Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
-
                 if ($value) {
                     $result = false;
                     if (Admin::where('trax_id', $value)->exists()) {
@@ -687,10 +667,8 @@ class AdminAttendanceController extends Controller
                 }
             });
             $names = [
-                'trax_id' => 'Employee ID',
-                'attendance_date' => 'Attendance Date',
-                'clock_in_datetime' => 'Clock In Datetime',
-                'clock_out_datetime' => 'Clock Out Datetime'
+                'trax_id' => 'User ID',
+                'attendance_datetime' => 'Attendance DateTime',
             ];
 
             $messages = [
@@ -702,19 +680,17 @@ class AdminAttendanceController extends Controller
             ];
             $rules = [
                 'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
-                'attendance_date' => ['required', 'date_format:Y-m-d'],
-                'clock_in_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
-                'clock_out_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+                'attendance_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
             ];
 
 
-            $fields = [0 => 'trax_id', 1 => 'attendance_date', 2 => 'clock_in_datetime', 3 => 'clock_out_datetime'];
+            $fields = [0 => 'trax_id', 1 => '', 2 => '', 3 => 'attendance_datetime'];
             if ($file = $request->file('attendance')) {
                 $spreadsheet = IOFactory::createReaderForFile($file);
                 $spreadsheet->setReadDataOnly(true);
                 $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-                $header = ['Employee ID', 'Attendance Date(yyyy-mm-dd)', 'Clock-in DateTime(yyyy-mm-dd hh:mm:ss)', 'Clock-out DateTime(yyyy-mm-dd hh:mm:ss)'];
+                $header = ['User ID', 'Verify Mode', 'IO Mode', 'IO Time'];
 
                 if (isset($spreadsheet)) {
                     $header_correct = true;
@@ -748,7 +724,14 @@ class AdminAttendanceController extends Controller
                     unset($spreadsheet);
                     $errors = array();
 
+                    $attendance_data = array();
                     foreach ($rows as $key => $row) {
+                        $date_string = Carbon::parse(trim($row['attendance_datetime']))->format("Y-m-d H:i:s");
+                        $rows[$key]['attendance_datetime'] = $date_string;
+                        $row['attendance_datetime'] = $date_string;
+                        $rows[$key]['trax_id'] = "Trax" . trim($row['trax_id']);
+                        $row['trax_id'] = "Trax" . trim($row['trax_id']);
+
                         $row_id = $key + 2;
 
                         $validate = Validator::make($row, $rules, $messages);
@@ -758,61 +741,109 @@ class AdminAttendanceController extends Controller
                         if ($validate->fails()) {
                             $errors['Row #' . $row_id] = $validate->errors()->all();
                         }
+                        $attendance_data[trim($row['trax_id'])][Carbon::parse($row['attendance_datetime'])->format("Y-m-d")][] = Carbon::parse($row['attendance_datetime'])->format("H:i:s");
                     }
                     if (empty($errors)) {
                         $updated = 0;
                         $not_updated = 0;
                         $latitude = '24.857788594719032';
                         $longitude = '67.12465366441765';
-                        foreach ($rows as $key => $row) {
-                            $employee = Employee::where('trax_id', $row['trax_id']);
-                            if ($employee->exists()) {
-                                $employee = $employee->first();
-                                $type = $employee->employee_type_id;
-                                if ($type == 1) {
-                                    $employee_id = $employee->admin->id;
-                                } else {
-                                    $employee_id = $employee->rider->id;
+
+                        foreach ($attendance_data as $user_id => $attendance) {
+                            foreach ($attendance as $date => $time) {
+                                $employee = Employee::where('trax_id', $user_id);
+                                if ($employee->exists()) {
+                                    $employee = $employee->first();
+                                    $shift = EmployeeShift::find($employee->shift_id);
+                                    $night = false;
+                                    if ($shift) {
+                                        $shift_minutes = Carbon::parse($shift->start_time)->diffInMinutes(Carbon::parse($shift->end_time), false);
+                                        if ($shift_minutes < 0) {
+                                            $night = true;
+                                        }
+                                    }
+                                    $type = $employee->employee_type_id;
+                                    if ($type == 1) {
+                                        $employee_id = $employee->admin->id;
+                                    } else {
+                                        $employee_id = $employee->rider->id;
+                                    };
+                                    $clock_out_flag = true;
+                                    if ($night) {
+                                        $max = max($time);
+                                        $clock_in = Carbon::parse($date . ' ' . $max)->format("Y-m-d H:i:s");
+                                        $clock_out = null;
+                                        $clock_out_flag = false;
+                                    } else {
+                                        $min = min($time);
+                                        $max = max($time);
+                                        $clock_in = Carbon::parse($date . ' ' . $min)->format("Y-m-d H:i:s");
+                                        if ($min == $max) {
+                                            $clock_out = null;
+                                            $clock_out_flag = false;
+                                        } else {
+                                            $clock_out = Carbon::parse($date . ' ' . $max)->format("Y-m-d H:i:s");
+                                        }
+
+                                        $employee_attendance = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->where('attendance_date', $date);
+                                        $clock_in_flag = false;
+                                        if ($employee_attendance->exists()) {
+                                            $employee_attendance = $employee_attendance->first();
+                                            if (!$employee_attendance->clock_in_datetime) {
+                                                $clock_in_flag = true;
+                                            } else {
+                                                $clock_out = Carbon::parse($date . ' ' . $max)->format("Y-m-d H:i:s");
+                                            }
+                                        } else {
+                                            $clock_in_flag = true;
+                                            $employee_attendance = new EmployeeAttendance();
+                                            $employee_attendance->employee_id = $employee_id;
+                                            $employee_attendance->employee_type = $type;
+                                            $employee_attendance->attendance_date = Carbon::parse($date)->format("Y-m-d");
+                                            $employee_attendance->save();
+                                        }
+                                    }
+                                    if ($clock_in_flag) {
+                                        $employee_attendance->clock_in_datetime = $clock_in;
+                                        $employee_attendance->clock_in_latitude = $latitude;
+                                        $employee_attendance->clock_in_longitude = $longitude;
+                                        $employee_attendance->clock_in_location = 2;
+                                        $employee_attendance->save();
+
+                                        $clock_in_action = new EmployeeAttendanceActionLog();
+                                        $clock_in_action->employee_id = $employee_attendance->employee_id;
+                                        $clock_in_action->employee_type = $employee_attendance->employee_type;
+                                        $clock_in_action->action_id = 1;
+                                        $clock_in_action->action_date = $employee_attendance->clock_in_datetime;
+                                        $clock_in_action->attendance_date = $employee_attendance->attendance_date;
+                                        $clock_in_action->latitude = $latitude;
+                                        $clock_in_action->longitude = $longitude;
+                                        $clock_in_action->location_status = 2;
+                                        $clock_in_action->save();
+                                    }
+                                    if ($clock_out_flag) {
+                                        $employee_attendance->clock_out_datetime = $clock_out;
+                                        $employee_attendance->clock_out_location = 2;
+                                        $employee_attendance->clock_out_latitude = $latitude;
+                                        $employee_attendance->clock_out_longitude = $longitude;
+                                        $employee_attendance->save();
+
+                                        $clock_out_action = new EmployeeAttendanceActionLog();
+                                        $clock_out_action->employee_id = $employee_attendance->employee_id;
+                                        $clock_out_action->employee_type = $employee_attendance->employee_type;
+                                        $clock_out_action->action_id = 2;
+                                        $clock_out_action->action_date = $employee_attendance->clock_out_datetime;
+                                        $clock_out_action->attendance_date = $employee_attendance->attendance_date;
+                                        $clock_out_action->latitude = $latitude;
+                                        $clock_out_action->longitude = $longitude;
+                                        $clock_out_action->location_status = 2;
+                                        $clock_out_action->save();
+                                    }
+                                    $updated++;
                                 }
-                                $employee_attendance = new EmployeeAttendance();
-                                $employee_attendance->employee_id = $employee_id;
-                                $employee_attendance->employee_type = $type;
-                                $employee_attendance->attendance_date = trim($row['attendance_date']);
-                                $employee_attendance->clock_in_datetime = trim($row['clock_in_datetime']);
-                                $employee_attendance->clock_out_datetime = trim($row['clock_out_datetime']);
-                                $employee_attendance->clock_in_latitude = $latitude;
-                                $employee_attendance->clock_in_longitude = $longitude;
-                                $employee_attendance->clock_out_latitude = $latitude;
-                                $employee_attendance->clock_out_longitude = $longitude;
-                                $employee_attendance->clock_in_location = 2;
-                                $employee_attendance->clock_out_location = 2;
-                                $employee_attendance->save();
-
-                                $clock_in_action = new EmployeeAttendanceActionLog();
-                                $clock_in_action->employee_id = $employee_attendance->employee_id;
-                                $clock_in_action->employee_type = $employee_attendance->employee_type;
-                                $clock_in_action->action_id = 1;
-                                $clock_in_action->action_date = $employee_attendance->clock_in_datetime;
-                                $clock_in_action->attendance_date = $employee_attendance->attendance_date;
-                                $clock_in_action->latitude = $latitude;
-                                $clock_in_action->longitude = $longitude;
-                                $clock_in_action->location_status = 2;
-                                $clock_in_action->save();
-
-                                $clock_out_action = new EmployeeAttendanceActionLog();
-                                $clock_out_action->employee_id = $employee_attendance->employee_id;
-                                $clock_out_action->employee_type = $employee_attendance->employee_type;
-                                $clock_out_action->action_id = 2;
-                                $clock_out_action->action_date = $employee_attendance->clock_out_datetime;
-                                $clock_out_action->attendance_date = $employee_attendance->attendance_date;
-                                $clock_out_action->latitude = $latitude;
-                                $clock_out_action->longitude = $longitude;
-                                $clock_out_action->location_status = 2;
-                                $clock_out_action->save();
-
-                                $updated++;
                             }
                         }
+
                         $error_msg = '';
                         if ($not_updated > 1) {
                             $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
@@ -1026,9 +1057,10 @@ class AdminAttendanceController extends Controller
                     }
                     $shift = EmployeeShift::find($employee->shift_id);
                     if ($shift){
-                        $clock_in = Carbon::parse($employee_attendance->clock_in_datetime)->format("H:i:s");
-                        $time_diff = Carbon::parse($shift->start_time)->diffInMinutes(Carbon::parse($clock_in), false);
-                        if ($time_diff > (int)$shift->grace_time) {
+                        $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $employee_attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
+                        $clock_in = Carbon::parse($employee_attendance->clock_in_datetime);
+                        $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
+                        if ($time_diff > 0) {
                             $remarks = 'Late';
                             $late++;
                             $late_arrival = Carbon::parse($clock_in)->diff(Carbon::parse($shift->start_time))->format('%H:%I:%S');

@@ -934,6 +934,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 ajax: {
                     url: '{{ route('cod.orders.list') }}',
                     data: function (d) {

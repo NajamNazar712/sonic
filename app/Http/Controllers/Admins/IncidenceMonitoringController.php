@@ -227,17 +227,21 @@ class IncidenceMonitoringController extends Controller
         $tagged_user = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$request->request_id)->pluck('admin_id')->toArray();
             $incidence_monitoring_request = IncidenceMonitoring::find($request->request_id);
 
-        if(session('role_id') == 1 || in_array(540, session('permissions')))
+        if(session('role_id') == 1 || in_array(586, session('permissions')))
         {
-            $comment_by = 1;
-        }
-        else
-        {
-            $comment_by = 0;
+            if(session('role_id') == 8){
+                $comment_by = 1;
+            }elseif (session('role_id') == 9) {
+                $comment_by = 0;
+
+            }else{
+                $comment_by = 2;
+
+            }
         }
 
 
-        $comment = new IncidenceMonitoringComment();
+         $comment = new IncidenceMonitoringComment();
          $comment->incidence_monitoring_id = $request->request_id;
          $comment->comment_by_id = Auth::id();
          $comment->comment_by = $comment_by;

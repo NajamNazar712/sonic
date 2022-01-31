@@ -115,6 +115,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
                 });
             });
 
+
+            Route::prefix('return_address')->name('return_address.')->group(function () {
+                Route::prefix('excel')->name('excel.')->group(function () {
+                    Route::get('', 'Shippers\ShipmentReturnAddressController@excel_index')->name('index');
+                    Route::post('', 'Shippers\ShipmentReturnAddressController@excel_store')->name('store');
+                });
+            });
+
         });
 
         Route::resource('book', 'Shippers\ShipperShipmentBookController');
@@ -160,6 +168,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('verify')->name('verify.')->group(function () {
             Route::get('', 'Shippers\ShipperShipmentBookController@shipments_verify_index')->name('index');
             Route::post('', 'Shippers\ShipperShipmentBookController@shipments_verify_store')->name('store');
+        });
+
+        Route::prefix('origin')->name('origin.')->group(function(){
+            Route::get('', 'Shippers\ShipmentOriginChangeController@shipments_origin_index')->name('index');
+            Route::post('store', 'Shippers\ShipmentOriginChangeController@shipments_origin_store')->name('store');
         });
     });
 
@@ -1687,6 +1700,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('history/bags','Admins\AdminCargoManifestController@manifest_bags')->name('history.bags');
         Route::post('history/short_received_bags','Admins\AdminCargoManifestController@cargo_short_received_bags')->name('history.short_received_bags');
         Route::post('history/shipments','Admins\AdminCargoManifestController@cargo_bag_shipments')->name('history.shipments');
+
+        Route::prefix('draft')->name('draft.')->group(function () {
+            Route::get('/list', 'Admins\AdminCargoManifestController@manifest_draft')->name('list');
+            Route::post('/delete', 'Admins\AdminCargoManifestController@manifest_draft_delete')->name('delete');
+
+        });
+
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
         Route::get('','Admins\DisputeController@dispute_index')->name('index');
@@ -3073,6 +3093,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@reattempt_percentage_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@reattempt_percentage_store')->name('store');
         });
+
+        Route::prefix('shippers_origin_change')->name('shippers_origin_change.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipper_origin_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@shipper_origin_store')->name('store');
+        });
+
+        Route::prefix('shippers_return_address')->name('shippers_return_address.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shippers_return_address_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@shippers_return_address_store')->name('store');
+        });
     });
 
 
@@ -3458,6 +3488,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('staff')->name('staff.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');
+                Route::post('convert-to-staff', 'Admins\AdminHumanResourseController@convert_intern_to_staff')->name('convert');
             });
             Route::prefix('rider')->name('rider.')->group(function () {
                 Route::post('incentive', 'Admins\AdminHumanResourseController@employee_directory_make_rider_incentive')->name('incentive');

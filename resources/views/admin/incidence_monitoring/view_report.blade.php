@@ -178,7 +178,7 @@
 
                                                         @foreach($report->comments as $comment)
                                                                 <div id="chat_{{$comment->id}}"
-                                                                     class="chat {{($comment->comment_by == 1) ? 'regional_manger' : '' }} {{($comment->comment_by == 0) ? 'zonal_manager' : '' }} ">
+                                                                     class="chat {{($comment->comment_by == 1) ? 'regional_manger' : '' }} {{($comment->comment_by == 0) ? 'zonal_manager' : '' }}">
 
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-admin">

@@ -567,6 +567,7 @@ class LeadManagementController extends Controller
             $lead_remarks->remarks = $remarks;
             $lead_remarks->updated_by = Auth::id();
             $lead_remarks->save();
+            NotificationsController::app_notification(15, $lead->sale_person_id, 1, $lead_id);
             return response()->json(['status' => 1, 'success' => 'Remarks added Successfully!']);
         }
         else{
@@ -648,8 +649,7 @@ class LeadManagementController extends Controller
                 $lead->updated_by = Auth::id();
                 $lead->sale_person_updated_at = Carbon::now();
                 $lead->save();
-
-
+                NotificationsController::app_notification(14, $lead->sale_person_id, 1, $lead->id);
             }
             NotificationsController::send(204, $leads, $sale_person);
             return response()->json(['status' => 1, 'success' => 'Lead(s) Updated Successfully!']);
