@@ -108,7 +108,7 @@ class Kernel extends ConsoleKernel
 
         '\App\Console\Commands\EmployeeDocumentsUpdateNotification',
         'App\Console\Commands\AutoEmailDwsArrival',
-        '\App\Console\Commands\ReattemptRatioCalculate',
+//        '\App\Console\Commands\ReattemptRatioCalculate',
     ];
 
     /**
@@ -172,9 +172,9 @@ class Kernel extends ConsoleKernel
         }
 
         if ($daily_pickup_sales_cron_time) {
-            $schedule->command('email:dailypickupsalesreportrm')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
-            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
-            $schedule->command('email:dailypickupsalesreportindividualforkae')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+//            $schedule->command('email:dailypickupsalesreportrm')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+//            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+//            $schedule->command('email:dailypickupsalesreportindividualforkae')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
         }
 
         $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
@@ -372,7 +372,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('employee_directory:documents_update')->dailyAt('12:00')->runInBackground();
 
         $schedule->command('email:dwsarrival')->dailyAt('17:00')->runInBackground();
-        $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
+//        $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
 
     }
     /**

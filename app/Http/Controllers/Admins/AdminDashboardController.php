@@ -10,6 +10,7 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
+use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\Lead\Lead;
@@ -8382,7 +8383,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
             ->leftjoin('territories as t','t.id','=','users.territory_id')
-			->select(['rrb.name as rates_rejected_by','users.disable_at as disable_at','users.rates_added_at as rates_added_at','users.rates_approved_at as rates_approved_at','users.rates_rejected_at as rates_rejected_at','users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','dab.name as documents_approved_by','drb.name as documents_rejected_by','uda.rejected_at as documents_rejected_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address','users.email','t.name as territory','users.corporate_rate_type_id as corporate_rate_type_id','users.new_rate_type_id as new_rate_type_id','seg.name as segment','seg_sub.name as sub_segment'])->whereIn('users.status',[3,4])->where('blacklist',0);
+			->select(['users.auto_shipment_cancellation_days','rrb.name as rates_rejected_by','users.disable_at as disable_at','users.rates_added_at as rates_added_at','users.rates_approved_at as rates_approved_at','users.rates_rejected_at as rates_rejected_at','users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','dab.name as documents_approved_by','drb.name as documents_rejected_by','uda.rejected_at as documents_rejected_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address','users.email','t.name as territory','users.corporate_rate_type_id as corporate_rate_type_id','users.new_rate_type_id as new_rate_type_id','seg.name as segment','seg_sub.name as sub_segment'])->whereIn('users.status',[3,4])->where('blacklist',0);
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
@@ -8618,6 +8619,11 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item change_rate_type" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Change Rate Type</div></button>';
                         }
                     }
+                    if ((session('role_id') == 1 || session('department_id') == 4)) {
+                        if (CorporateUserPackagingInvoiceLog::where('user_id', $result->id)->exists()) {
+                            $dropdown .= '<button type="button" class="dropdown-item view_invoice_log" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">View Packaging Invoice Log</div></button>';
+                        }
+                    }
                     
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
@@ -8699,6 +8705,10 @@ class AdminDashboardController extends Controller
 
                     if (session('role_id') == 1 || in_array(619, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
+                    }
+
+                    if(session('role_id') == 1 || in_array(660, session('permissions'))){
+                        $dropdown .= '<button type="button" class="dropdown-item auto_cancel_days_setting"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Auto Cancel Days</div></button>';
                     }
 
                     $dropdown .= '
@@ -11534,11 +11544,19 @@ class AdminDashboardController extends Controller
         $user = Employee::leftjoin('employee_designations as d', 'd.id', '=', 'employees.designation_id')
             ->leftjoin('admin_departments as ad', 'd.department_id', '=', 'ad.id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'employees.blood_group')
-            ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.official_email as email', 'employees.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'employees.emergency_contact as emergency_contact_no', 'employees.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id')
+            ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.official_email as email', 'employees.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'employees.emergency_contact as emergency_contact_no', 'employees.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id','employees.personal_email as personal_email', 'employees.official_phone_number as official_phone_number')
             ->where('employees.trax_id', Auth::user()->trax_id);
         if($user->exists()){
             $user = $user->first();
-            return response()->json(['full_name' => $user->name,'department' => $user->department_name,'designation' => $user->designation,'employee_id' => $user->trax_id,'email' => $user->email,'contact' => $user->phone, 'blood_group' => $user->blood_group, 'emergency_contact_no'=> $user->emergency_contact_no, 'emergency_contact_person' => $user->emergency_contact_person]);
+            $email = $user->email;
+            if($user->personal_email){
+                $email .= " / ".$user->personal_email;
+            }
+            $phone = $user->phone;
+            if($user->official_phone_number){
+                $phone .= " / ".$user->official_phone_number;
+            }
+            return response()->json(['full_name' => $user->name,'department' => $user->department_name,'designation' => $user->designation,'employee_id' => $user->trax_id,'email' => $email,'contact' => $phone, 'blood_group' => $user->blood_group, 'emergency_contact_no'=> $user->emergency_contact_no, 'emergency_contact_person' => $user->emergency_contact_person]);
         }
         else{
             return response()->json(['error' => 'User not found!']);
@@ -11609,5 +11627,32 @@ class AdminDashboardController extends Controller
 
     }
 
-}
+	public function packaging_invoice_log(Request $request){
+	     $logs = CorporateUserPackagingInvoiceLog::join('admins as a','a.id','=','corporate_user_packaging_invoice_logs.admin_id')
+	         ->select('a.name as admin','corporate_user_packaging_invoice_logs.created_at as time','corporate_user_packaging_invoice_logs.status as status')
+	         ->where('corporate_user_packaging_invoice_logs.user_id',$request->user_id);
+	     if($logs->exists()){
+	         $logs = $logs->get();
+	         return response()->json(['status' => 0, 'details' => $logs]);
+	     }
+	     else{
+	         return response()->json(['status' => 1, 'error' => 'No Log found!']);
+	     }
+
+   }
+
+	    public function auto_cancelation_days(Request $request)
+    {
+        $user = User::find($request->user_id);
+        if(!$user)
+        {
+            return back()->with(['error'=>'Invalid Shipper']);
+        }
+
+        $user->auto_shipment_cancellation_days = $request->cancelation_days;
+        $user->update();
+
+        return back()->with(['success'=>'Auto Cancelation Days Updated Successfully']);
+
+    }}
 

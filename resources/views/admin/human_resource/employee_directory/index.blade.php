@@ -28,6 +28,7 @@
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">Rider Main Category</th>
+                                    <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
@@ -502,6 +503,7 @@
                             head.push('Phone No.');
                             head.push('Employee Type');
                             head.push('Rider Main Category');
+                            head.push('Designation');
                             head.push('Department Name');
                             head.push('Request/Document Status');
                             head.push('Employee Status');
@@ -520,6 +522,7 @@
                                 row.push(values.phone_number);
                                 row.push(values.employee_type);
                                 row.push(values.rider_main_category);
+                                row.push(values.employee_designation);
                                 row.push(values.department_name);
                                 row.push(values.request_status);
                                 row.push(values.status);
@@ -752,7 +755,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[14, 'desc']],
+                order: [[15, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -767,6 +770,7 @@
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
                     {data: 'rider_main_category', name: 'rmc.name', class: 'align-middle rider_main_category'},
+                    {data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
@@ -1121,12 +1125,13 @@
                 var shift_id = table.row($(elm).parents('tr')).data().shift_id;
                 var check_bit = table.row($(elm).parents('tr')).data().check_if_rider_present_bit;
                 var sub_category = table.row($(elm).parents('tr')).data().rider_sub_category;
-                var main_category = table.row($(elm).parents('tr')).data().rider_main_category;
+                var main_category = table.row($(elm).parents('tr')).data().rider_main_category_id;
+                var rider_type = table.row($(elm).parents('tr')).data().rider_type_id;
                 $('#city_list').val(city_id).trigger('change');
                 $('#shift_list').val(shift_id).trigger('change');
                 if(check_bit != null)
                 {
-                    var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;
+                    // var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;
                     // $('#main_category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
                     // $('#category_list').val(table.row($(elm).parents('tr')).data().category_id).trigger('change');
                     $('#category').val(table.row($(elm).parents('tr')).data().operation_id).trigger('change');
@@ -1134,7 +1139,7 @@
                     var ccd = table.row($(elm).parents('tr')).data().ccd;
                 }
                 else{
-                    var rider_type = table.row($(elm).parents('tr')).data().inactive_rider_type_id;
+                    // var rider_type = table.row($(elm).parents('tr')).data().inactive_rider_type_id;
                     var ccd = false;
                     route_id = null;
                 }
@@ -1703,6 +1708,68 @@
                     });
                 }
             });
+
+            $('body').on('click', '.convert_intern_to_staff', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes To Make Intern An Employee!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Converting Intern To Staff!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.staff.convert') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+
 
 
 

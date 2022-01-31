@@ -50,17 +50,11 @@ class AdminShipmentCancelController extends Controller
     static public function cancel() {
         $active_users = User::where('status', 3)->whereNotIn('id', [3324, 7762, 5982, 10104, 14110])->get();
         if(count($active_users)){
-            $modifiedsettings = GlobalSettings::where('type', 'cancelled_shipments')->first();
             foreach ($active_users as $user){
                 if($user->auto_shipment_cancellation_days == null){
                     $settings = GlobalSettings::where('type', 'shipment_cancellation_cut_off_days')->first();
 
-                    $user_exists = array_map('intval', explode(',', $modifiedsettings->text));
-                    
-                    if(in_array($user->id,$user_exists))
-                        $days = $modifiedsettings->setting_value;
-                    else
-                        $days = $settings->setting_value;
+                    $days = $settings->setting_value;
 
                     $date = Carbon::now()->subDays($days);
                 }

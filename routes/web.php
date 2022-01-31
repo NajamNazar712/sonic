@@ -38,11 +38,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
-    Route::get('/register/','Auth\GetStartedController@index')->name('register');
-    Route::get('/get-started', 'Auth\GetStartedController@index')->name('getstarted');
-    Route::post('/get-started','Auth\GetStartedController@getstarted_submit')->name('getstarted');
+//    Route::get('/register/','Auth\GetStartedController@index')->name('register');
+//    Route::get('/get-started', 'Auth\GetStartedController@index')->name('getstarted');
+//    Route::post('/get-started','Auth\GetStartedController@getstarted_submit')->name('getstarted');
     Route::get('/get-started-success','Auth\GetStartedController@getstarted_success')->name('getstarted.success');
-    Route::get('/register/{lead_id}','Auth\RegisterController@showRegistrationForm')->name('register');
+    Route::get('/register/{lead_id?}','Auth\RegisterController@showRegistrationForm')->name('register');
     Route::post('/register','Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
     Route::get('/new/bank','Auth\RegisterController@bankView')->name('new.bank');
@@ -587,6 +587,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
         Route::get('active', 'Admins\AdminDashboardController@activeAccountsList')->name('active');
         Route::post('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
+        Route::post('cancelation-days', 'Admins\AdminDashboardController@auto_cancelation_days')->name('auto_cancelation_days');
         Route::get('block', 'Admins\AdminDashboardController@blockAccountsList')->name('block');
         Route::get('block/ajax', 'Admins\AdminDashboardController@blockAccountListAjax')->name('block.ajax');
         Route::post('status/block','Admins\AdminDashboardController@UserStatusBlock')->name('status.block');
@@ -652,6 +653,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('warehousing')->name('warehousing.')->group(function(){
             Route::post('active','Admins\AdminDashboardController@warehousing_active')->name('active');
             Route::post('inactive','Admins\AdminDashboardController@warehousing_inactive')->name('inactive');
+        });
+
+        Route::prefix('packaging')->name('packaging.')->group(function(){
+            Route::post('invoice_log','Admins\AdminDashboardController@packaging_invoice_log')->name('invoice.log');
         });
     });
 
@@ -2749,10 +2754,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@minimum_chargeable_weight_update')->name('update');
         });
-        Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function () {
-            Route::get('', 'Admins\GlobalSettingsController@cancelled_shipments_index')->name('index');
-            Route::post('', 'Admins\GlobalSettingsController@cancelled_shipments_store')->name('store');
-        });
+
         Route::prefix('sales')->name('sales.')->group(function () {
             Route::prefix('incentive')->name('incentive.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@sales_incentive')->name('index');
@@ -3450,6 +3452,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('staff')->name('staff.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');
+                Route::post('convert-to-staff', 'Admins\AdminHumanResourseController@convert_intern_to_staff')->name('convert');
             });
             Route::prefix('rider')->name('rider.')->group(function () {
                 Route::post('incentive', 'Admins\AdminHumanResourseController@employee_directory_make_rider_incentive')->name('incentive');

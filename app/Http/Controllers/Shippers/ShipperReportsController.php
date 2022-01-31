@@ -44,6 +44,12 @@ class ShipperReportsController extends Controller
              $connection = 'mysql';
          }
 
+         if (empty($request->get('search_tracking')) && empty($request->get('search_date_from')) && empty($request->get('dr_search_date_from'))) {
+            $sales = DB::connection($connection)->table('shipments')->whereRaw('FALSE');
+            $datatable = Datatables::of($sales);
+            return $datatable->make(true);
+        }
+
         $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -104,13 +110,41 @@ class ShipperReportsController extends Controller
             $from = $request->get('dr_search_date_from');
             $to = $request->get('dr_search_date_to');
 
-            $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to) {
-                $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->where('dr.id', '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
-            });
+            $ids = FALSE;
 
-            $sales->whereBetween('dr.created_at', [$from, $to]);
+            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+
+                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $ids = TRUE;
+                }
+            }
+            if ($ids) {
+                $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to, $from_id, $to_id) {
+                    $join->on('dr.shipment_id', '=', 'shipments.id')
+                        ->where('dr.id', '=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '" and shipments_journey.id >= ' . $from_id . ' and shipments_journey.id <= ' . $to_id . ')'));
+                });
+
+                $sales->whereBetween('dr.created_at', [$from, $to]);
+
+                $sales->where('dr.id', '>=', $from_id)
+                ->where('dr.id', '<=', $to_id);
+            }
+            else {
+                $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to) {
+                    $join->on('dr.shipment_id', '=', 'shipments.id')
+                        ->where('dr.id', '=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
+                });
+
+                $sales->whereBetween('dr.created_at', [$from, $to]);
+            }
         } else {
             $sales->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
@@ -272,6 +306,20 @@ class ShipperReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatable->whereBetween('sj.created_at', [$from, $to]);
+
+            $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+
+                $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $datatable->where('sj.id', '>=', $from_id)
+                    ->where('sj.id', '<=', $to_id);
+                }
+            }
         }
 
         return $datatable->make(true);
@@ -528,6 +576,20 @@ class ShipperReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
+
+            $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+
+                $to_id = DB::connection('reports')->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $shipments->where('shipments.id', '>=', $from_id)
+                    ->where('shipments.id', '<=', $to_id);
+                }
+            }
         }
 
         $datatable = Datatables::of($shipments)

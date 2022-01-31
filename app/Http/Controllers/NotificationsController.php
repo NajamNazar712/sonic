@@ -9044,6 +9044,7 @@ class NotificationsController extends Controller
             if ($push_notification->status) {
                 $title = $push_notification->title;
                 $body = $push_notification->body;
+                $data = array();
                 if ($id == 1) {
                     $rider = Rider::find($reference1_id);
                     $shipper = User::find($reference2_id);
@@ -9053,6 +9054,8 @@ class NotificationsController extends Controller
                     if (strpos($body, '[rider]') !== FALSE) {
                         $body = str_replace('[rider]', $rider->name, $body);
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 } else if ($id == 2) {
                     $rider = Rider::find($reference1_id);
                     $shipper = User::find($reference2_id);
@@ -9062,24 +9065,34 @@ class NotificationsController extends Controller
                     if (strpos($body, '[rider]') !== FALSE) {
                         $body = str_replace('[rider]', $rider->name, $body);
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 } else if ($id == 3) {
                     $shipper = User::find($reference1_id);
                     if (strpos($body, '[shipper_name]') !== FALSE) {
                         $body = str_replace('[shipper_name]', $shipper->name, $body);
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 } else if ($id == 4) {
                     $shipper = User::find($reference1_id);
                     if (strpos($body, '[shipper_name]') !== FALSE) {
                         $body = str_replace('[shipper_name]', $shipper->name, $body);
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 } else if ($id == 5) {
                     if (strpos($body, '[note_id]') !== FALSE) {
                         $body = str_replace('[note_id]', $reference1_id, $body);
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 } else if ($id == 6) {
                     if (strpos($body, '[note_id]') !== FALSE) {
                         $body = str_replace('[note_id]', $reference1_id, $body);
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 } else if ($id == 7) {
                     $shipment = Shipment::find($reference1_id);
                     $status = ShipmentStatus::find($reference2_id);
@@ -9093,6 +9106,8 @@ class NotificationsController extends Controller
                     if (strpos($body, '[status_name]') !== FALSE) {
                         $body = str_replace('[status_name]', $status->name, $body);
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 } else if ($id == 8) {
                     $shipment = Shipment::find($reference1_id);
                     $status = ShipmentStatus::find($reference2_id);
@@ -9106,6 +9121,8 @@ class NotificationsController extends Controller
                     if (strpos($body, '[status_name]') !== FALSE) {
                         $body = str_replace('[status_name]', $status->name, $body);
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 } else if ($id == 9) {
                     $rider = Rider::find($employee_id);
                     if (strpos($body, '[rider]') !== FALSE) {
@@ -9114,6 +9131,8 @@ class NotificationsController extends Controller
                     if (strpos($body, '[otp]') !== FALSE) {
                         $body = str_replace('[otp]', $reference1_id, $body);
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 }else if ($id == 11) {
                     if($employee_type == 1){
                         $user = Admin::find($employee_id);
@@ -9144,6 +9163,8 @@ class NotificationsController extends Controller
                             $body = str_replace('[status]', $status, $body);
                         }
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 }else if ($id == 12) {
                     $leave = EmployeeLeave::find($reference1_id);
                     if($leave){
@@ -9171,7 +9192,9 @@ class NotificationsController extends Controller
                             }
                         }
                     }
-                }else if ($id == 13) {
+                    $data['title'] = $title;
+                    $data['body'] = $body;
+                } else if ($id == 13) {
                     $leave = EmployeeLeave::find($reference1_id);
                     if($leave){
                         if($leave->employee_type_id == 1){
@@ -9198,6 +9221,39 @@ class NotificationsController extends Controller
                             }
                         }
                     }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
+                } else if ($id == 14) {
+                    $lead = Lead::find($reference1_id);
+                    $user = Admin::find($employee_id);
+                    if (strpos($title, '[date]') !== FALSE) {
+                        $date = Carbon::now()->format('Y-m-d');
+                        $title = str_replace('[date]', $date, $title);
+                    }
+                    if($lead && $user){
+                        if (strpos($body, '[sale_person]') !== FALSE) {
+                            $body = str_replace('[sale_person]', $user->name, $body);
+                        }
+                        if (strpos($body, '[lead_id]') !== FALSE) {
+                            $body = str_replace('[lead_id]', $lead->id, $body);
+                        }
+                    }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
+                } else if ($id == 15) {
+                    $lead = Lead::find($reference1_id);
+                    $user = Admin::find($employee_id);
+                    if($lead && $user){
+                        if (strpos($body, '[sale_person]') !== FALSE) {
+                            $body = str_replace('[sale_person]', $user->name, $body);
+                        }
+                        if (strpos($body, '[lead_id]') !== FALSE) {
+                            $body = str_replace('[lead_id]', $lead->id, $body);
+                        }
+                    }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
+                    $data['lead_id'] = $lead->id;
                 }
                 $employee_device_token = EmployeeDeviceToken::where('employee_id', $employee_id)
                     ->where('employee_type_id', $employee_type)
@@ -9209,10 +9265,7 @@ class NotificationsController extends Controller
                     $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
 
                     $message = [
-                        'data' => [
-                            'title' => $title,
-                            'body' => $body
-                        ],
+                        'data' => $data,
                         'to' => $device_token
                     ];
 

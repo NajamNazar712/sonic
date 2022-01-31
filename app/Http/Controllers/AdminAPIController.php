@@ -22,6 +22,9 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Lead\LeadRemark;
+use App\Http\Models\Admin\Lead\LeadStatus;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
@@ -3611,22 +3614,7 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
-            $location_status = 0;
-            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                ->join('admins as a', 'e.id', 'a.employee_id')
-                ->where('a.id', $admin_id);
-            if($reporting_location->exists()){
-                $reporting_location = $reporting_location->first();
-                $reporting_location->radius;
-                $destination = $reporting_location->lat . ',' . $reporting_location->long;
-                $origin = $request->latitude . ',' . $request->longitude;
-                $distance = $this->distance($origin, $destination);
-                if ($distance > $reporting_location->radius / 1000) {
-                    $location_status = 1;
-                } else {
-                    $location_status = 2;
-                }
-            }
+            $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
             $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
             $action_date = Carbon::createFromFormat('Y-m-d H:i:s', $request->action_date);
 
@@ -5332,6 +5320,12 @@ class AdminAPIController extends Controller
                     $information['phone'] = $user->phone_number;
                     $information['cnic'] = $user->cnic;
                     $information['cargo_user'] = (in_array($user->role_id,[11,10, 15, 55, 23, 33, 46])) ? 1 : 0;
+                    if($user->designation_id){
+                        $user_department = $user->Edesignation->department_id;
+                    }else{
+                        $user_department = $user->role->department_id;
+                    }
+                    $information['sales_person'] = ($user_department == 7) ? 1 : 0;
                     if ($employee->exists()) {
                         $employee = $employee->first();
                         $information['address'] = ($employee->address) ? $employee->address : "" ;
@@ -5453,6 +5447,8 @@ class AdminAPIController extends Controller
                         $employee->pin = $request->pin;
                         $employee->update();
                     }
+                    $admin->reset_pin_status = 1;
+                    $admin->save();
                     return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
                 }else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
@@ -5739,7 +5735,7 @@ class AdminAPIController extends Controller
             ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
             ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-            ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
+            ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'e.official_phone_number as official_phone_number', 'e.personal_email as personal_email')
             ->where('admins.id', $admin_id);
         if ($admin_profile->exists()) {
         $admin_profile = $admin_profile->get();
@@ -5883,5 +5879,188 @@ class AdminAPIController extends Controller
             }
         }
     }
+
+    public function check_pin(Request $request){
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            if($admin->reset_pin_status == 1){
+                return response()->json(['status' => 0, 'pin_status' => 1]);
+            }
+            return response()->json(['status' => 0, 'pin_status' => 0]);
+        }
+        return response()->json(['status' => 0, 'pin_status' => 0]);
+    }
+
+    public function logout(Request $request){
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            if($admin->reset_pin_status == 1){
+                $admin->reset_pin_status = 0;
+                $admin->save();
+                return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
+            }
+            return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
+        }
+        return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
+    }
+
+    public function leads_list(Request $request){
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+
+        $lead_statuses = LeadStatus::whereNotIn('id', [3, 11, 12])->select('id', 'name')->get();
+        $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+
+        $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
+            ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
+            ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
+            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand');
+
+        if($admin->role_id != 4 && $admin->role_id != 44 && $admin->role_id != 60){
+            $leads = $leads->where('leads.sale_person_id', $admin_id)->wherenotin('leads.status_id', [3, 11, 12]);
+        }
+
+        if($request->city_id){
+            $leads = $leads->where('leads.city_id', $request->city_id);
+        }
+        if($request->status_id){
+            $leads = $leads->where('leads.status_id', $request->status_id);
+        }
+        if($request->date_from){
+            if($request->date_to){
+                $from = $request->date_from.' 00:00:00';
+                $to = $request->date_to.' 23:59:59';
+                $leads = $leads->whereBetween('leads.requested_date', [$from, $to]);
+            }
+            else{
+                $leads = $leads->whereDate('leads.requested_date', $request->date_from);
+            }
+        }
+        if($leads->exists()){
+            $leads->orderBy('leads.requested_date', "DESC");
+            $leads = $leads->get();
+            return response()->json(['status' => 0, 'data' => $leads, 'cities' => $cities, 'lead_status' => $lead_statuses]);
+        }else{
+            return response()->json(['status' => 0, 'message' => "No data found!", 'cities' => $cities, 'lead_status' => $lead_statuses]);
+        }
+    }
+
+    public function add_remarks(Request $request){
+        $rules = [
+            'remarks' => ['required', 'max:500'],
+            'lead_id' => ['required', 'integer', 'digits_between:1,10', 'exists:leads,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $lead_id = $request->lead_id;
+            $lead = Lead::find($lead_id);
+            $remarks = $request->remarks;
+            if($remarks != NULL){
+                $lead_remarks = new LeadRemark();
+                $lead_remarks->lead_id = $lead->id;
+                $lead_remarks->remarks = $remarks;
+                $lead_remarks->updated_by = $admin_id;
+                $lead_remarks->save();
+                if($lead->sale_person_id){
+                    if($lead->sale_person_id != $admin_id){
+                        NotificationsController::app_notification(15, $lead->sale_person_id, 1, $lead_id);
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => 'Remarks added Successfully!']);
+            }
+            else{
+                return response()->json(['status' => 1, 'message' => 'Invalid Remarks!']);
+            }
+        }
+    }
+
+    public function view_remarks(Request $request){
+        $rules = [
+            'lead_id' => ['required', 'integer', 'digits_between:1,10', 'exists:leads,id'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $lead_id = $request->lead_id;
+            $lead_remarks = LeadRemark::join('admins as a', 'a.id', '=', 'lead_remarks.updated_by')
+                ->select('lead_remarks.id as id', 'lead_remarks.remarks as remarks', 'lead_remarks.created_at as created_at', 'a.name as updated_by')
+                ->where('lead_id', $lead_id)
+                ->orderBy('lead_remarks.created_at', 'ASC');
+            if($lead_remarks->exists()){
+                $lead_remarks = $lead_remarks->get();
+                return response()->json(['status' => 0, 'data' => $lead_remarks]);
+            }
+            return response()->json(['status' => 1, 'message' => 'No Remarks Found!']);
+        }
+    }
+
+    public function trax_directory_v2(Request $request)
+    {
+        $rules = [
+            'search_param' => ['required', 'min:3'],
+            'search_with' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            if ($request->search_with == 1) {
+
+                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                    ->join('cities as c', 'c.id', '=', 'e.city_id')
+                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
+                    ->where('e.name', 'like','%' . $request->search_param . '%')
+                    ->where('admins.status', 1);
+
+            } elseif ($request->search_with == 2) {
+                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                    ->join('cities as c', 'c.id', '=', 'e.city_id')
+                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
+                    ->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
+                    ->where('admins.status', 1);
+            } elseif ($request->search_with == 3) {
+                $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+                    ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+                    ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+                    ->join('cities as c', 'c.id', '=', 'e.city_id')
+                    ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
+                    ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
+                    ->where('e.trax_id', $request->search_param)
+                    ->where('admins.status', 1);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Provide atleast one parameter']);
+            }
+            if ($admin_profile->exists()) {
+                $admin_profile = $admin_profile->get();
+                return response()->json(['status' => 0, 'data' => $admin_profile]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'No User found!']);
+            }
+        }
+    }
+
 
 }

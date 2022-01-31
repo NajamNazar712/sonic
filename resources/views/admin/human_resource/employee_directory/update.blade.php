@@ -218,7 +218,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Staff Category<span class="text-danger">*</span></label>
-                                                <select name="staff_category" id="staff_category" data-rule-required="true" data-msg-required="Staff Category is Required" class="select2 form-control " style="width: 100%">
+                                                <select name="staff_category" disabled id="staff_category" data-rule-required="true" data-msg-required="Staff Category is Required" class="select2 form-control " style="width: 100%">
                                                     @foreach($staff_categories as $staff_category)
                                                         <option value="{{$staff_category->id}}">{{$staff_category->name}}</option>
                                                     @endforeach

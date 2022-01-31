@@ -10815,6 +10815,32 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function check_pin(Request $request){
+        $rider_id = $request->rider_id;
+        $rider = Rider::find($rider_id);
+        if($rider){
+            if($rider->reset_pin_status == 1){
+                return response()->json(['status' => 0, 'pin_status' => 1]);
+            }
+            return response()->json(['status' => 0, 'pin_status' => 0]);
+        }
+        return response()->json(['status' => 0, 'pin_status' => 0]);
+    }
+
+    public function logout(Request $request){
+        $rider_id = $request->rider_id;
+        $rider = Rider::find($rider_id);
+        if($rider){
+            if($rider->reset_pin_status == 1){
+                $rider->reset_pin_status = 0;
+                $rider->save();
+                return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
+            }
+            return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
+        }
+        return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){

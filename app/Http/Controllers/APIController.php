@@ -1869,7 +1869,7 @@ class APIController extends Controller
         $cities = City::where('status', 1);
 
         if ($cities->exists()) {
-            $cities = $cities->get();
+            $cities = $cities->with(['hub_city', 'zone', 'deliveries.booking_type', 'deliveries.shipping_mode'])->get();
 
             $details = array();
 
