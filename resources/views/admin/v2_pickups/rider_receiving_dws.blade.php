@@ -28,15 +28,6 @@
                                         </fieldset>
                                     </div>
 
-                                    <div class="col-3">
-                                        <fieldset class="form-group">
-                                            <select name="search_city" id="search_city" class="form-control select2">
-                                                @foreach($cities as $city)
-                                                    <option value="{{$city->id}}">{{$city->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
-                                    </div>
 
                                     <div class="col-3">
                                         <div class="form-group input-group">
@@ -76,9 +67,7 @@
                             <th class="border-primary border-darken-1 ">Pickup Note#</th>
                             <th class="border-primary border-darken-1 ">Pickup Note Date</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
-                            <th class="border-primary border-darken-1">Total Shipment</th>
-                            <th class="border-primary border-darken-1">Rider Picked</th>
-                            <th class="border-primary border-darken-1">Arrived at Origin</th>
+                            <th class="border-primary border-darken-1">Shipments Count</th>
                         </thead>
                     </table>
                 </div>
@@ -92,24 +81,6 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="total_shipments_modal_title">Total Shipment(s)</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="total_shipments_arrived_modal" data-backdrop="static" role="dialog" aria-labelledby="total_shipments_arrived_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="total_shipments_arrived_modal_title">Arrived Shipment(s)</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -149,13 +120,13 @@
                 width: '100%',
                 allowClear: true
             });
-            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
+            /*$('#search_city').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Select City',
                 width: '100%',
                 allowClear: true
-            });
+            });*/
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            /*jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
@@ -196,7 +167,7 @@
 
                     return {body: body, header: head};
                 }
-            } );
+            } );*/
 
             var search_date_from = $('#track_form #search_date_from').pickadate({
                 firstDay: 1,
@@ -250,25 +221,22 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.v2_pickups.rider_receiving.list') }}',
+                    url: '{{ route('admin.v2_pickups.rider_receiving.dws.list') }}',
                     data: function (d) {
                         d.search_rider = $('select[name="search_rider"]').val();
-                        d.search_city = $('select[name="search_city"]').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
 
                     }
                 },
-                rowId: 'id',
+                rowId: 'pickup_note_id',
                 order: [[1, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'note_id', name: 'v2_pickup_notes.id', class: 'align-middle text_center note_id'},
-                    {data: 'date', name: 'v2_pickup_notes.created_at', class: 'align-middle text_center date'},
+                    {data: 'note_id', name: 'dws_pickup_notes.pickup_note_id', class: 'align-middle text_center note_id'},
+                    {data: 'date', name: 'dws_pickup_notes.created_at', class: 'align-middle text_center date'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text_center rider'},
-                    {data: 'total_shipment', name: 'total_shipment_count', class: 'text_center text-center total_shipment'},
-                    {data: 'rider_picked', name: 'rider_picked', class: 'align-middle rider_picked'},
-                    {data: 'total_arrived', name: 'total_arrived', class: 'text_center text-center total_arrived'},
+                    {data: 'total_shipment', name: 'dws_pickup_notes.shipments_count', class: 'text_center text-center total_shipment'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -286,7 +254,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.total_shipment') || $(header).is('.total_arrived') || $(header).is('.rider_picked')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.total_shipment')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -405,7 +373,7 @@
                 $('#total_shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.v2_pickups.rider_receiving.total_shipments') !!}',
+                    url: '{!! route('admin.v2_pickups.rider_receiving.dws.total_shipments') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
