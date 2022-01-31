@@ -350,6 +350,10 @@ class AdminHumanResourseController extends Controller
                             if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) {
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
 
+                                if($result->staff_category_id == 2){
+                                    $dropdown .= '<button type="button" class="dropdown-item convert_intern_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Intern To Staff</div></button>';
+                                }
+
                             }
 
                             if ($result->status_id == 2) {
@@ -362,9 +366,6 @@ class AdminHumanResourseController extends Controller
                                         $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Staff</div></button>';
                                     }
                                 }
-                            }
-                            if($result->staff_category_id == 2){
-                                $dropdown .= '<button type="button" class="dropdown-item convert_intern_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Intern To Staff</div></button>';
                             }
                         }
 

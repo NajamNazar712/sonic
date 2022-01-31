@@ -5907,6 +5907,7 @@ class AdminAPIController extends Controller
 
     public function leads_list(Request $request){
         $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
 
         $lead_statuses = LeadStatus::whereNotIn('id', [3, 11, 12])->select('id', 'name')->get();
         $cities = City::where('business_category_id', 1)->where('status', 1)->get();
@@ -5914,9 +5915,11 @@ class AdminAPIController extends Controller
         $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
-            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand')
-            ->where('leads.sale_person_id', $admin_id)
-            ->wherenotin('leads.status_id', [3, 11, 12]);
+            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand');
+
+        if($admin->role_id != 4 && $admin->role_id != 44 && $admin->role_id != 60){
+            $leads = $leads->where('leads.sale_person_id', $admin_id)->wherenotin('leads.status_id', [3, 11, 12]);
+        }
 
         if($request->city_id){
             $leads = $leads->where('leads.city_id', $request->city_id);
