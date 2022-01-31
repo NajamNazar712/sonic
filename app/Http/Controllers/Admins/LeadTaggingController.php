@@ -70,12 +70,16 @@ class LeadTaggingController extends Controller
                 $body_attachment_message = $body_attachment_message . $link . PHP_EOL;
             }
             $body = $body . PHP_EOL . $body_attachment_message;
+            if($lead_notification_email->status){
 
-            self::email($subject, $body, $to);
-
+                self::email($subject, $body, $to);
+            }
             $sms_to = $lead->phone_number;
+            if($lead_notification_sms->status){
 
-            self::sms($sms_body, $sms_to);
+                self::sms($sms_body, $sms_to);
+            }
+
 
             NotificationsController::app_notification(14, $lead->sale_person_id, 1, $lead->id);
         }
