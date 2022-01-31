@@ -5269,9 +5269,10 @@ class AdminAPIController extends Controller
                             $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
                             $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
                             if ($attendance_date == $clock_in_date) {
-                                $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
-                                $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
-                                if ($time_diff > $shift->grace_time) {
+                                $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
+                                $clock_in = Carbon::parse($attendance->clock_in_datetime);
+                                $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
+                                if ($time_diff > 0) {
                                     $datum["status"] = 2;//Late
                                 } else {
                                     $datum["status"] = 1;//Present
@@ -5280,16 +5281,16 @@ class AdminAPIController extends Controller
                                 $datum["status"] = 2;//Late
                             }
                         } else {
-                            $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
-                            $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
-                            if ($time_diff > $shift->grace_time) {
-                                $datum["status"] = 2;//Late
-                            } else {
-                                $datum["status"] = 1;//Present
-                            }
+                            $datum["status"] = 3;//Absent
                         }
-                    } else {
-                        $datum["status"] = 1;
+                    }
+                    else {
+                        if ($attendance->clock_in_datetime) {
+                            $datum["status"] = 1;//Present
+                        }
+                        else{
+                            $datum["status"] = 3;//Absent
+                        }
                     }
                 } else {
                     $datum["status"] = 3;//Absent

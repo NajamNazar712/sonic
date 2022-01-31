@@ -4486,7 +4486,7 @@ class RiderAPIController extends Controller
         foreach($shifts as $shift){
             $datum = array();
             $datum['id'] = $shift->id;
-            $datum['name'] = $shift->name. '( '.$shift->start_time.' - '. $shift->end_time.' )';
+            $datum['name'] = $shift->name. ' ('.$shift->start_time.' - '. $shift->end_time.') ';
             $shift_data[] = $datum;
         }
         return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category]);
@@ -10703,9 +10703,10 @@ class RiderAPIController extends Controller
                             $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
                             $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
                             if ($attendance_date == $clock_in_date) {
-                                $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
-                                $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
-                                if ($time_diff > $shift->grace_time) {
+                                $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
+                                $clock_in = Carbon::parse($attendance->clock_in_datetime);
+                                $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
+                                if ($time_diff > 0) {
                                     $datum["status"] = 2;//Late
                                 } else {
                                     $datum["status"] = 1;//Present
@@ -10714,16 +10715,16 @@ class RiderAPIController extends Controller
                                 $datum["status"] = 2;//Late
                             }
                         } else {
-                            $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
-                            $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
-                            if ($time_diff > $shift->grace_time) {
-                                $datum["status"] = 2;//Late
-                            } else {
-                                $datum["status"] = 1;//Present
-                            }
+                            $datum["status"] = 3;//Absent
                         }
-                    } else {
-                        $datum["status"] = 1;
+                    }
+                    else {
+                        if ($attendance->clock_in_datetime) {
+                            $datum["status"] = 1;//Present
+                        }
+                        else{
+                            $datum["status"] = 3;//Absent
+                        }
                     }
                 } else {
                     $datum["status"] = 3;//Absent
