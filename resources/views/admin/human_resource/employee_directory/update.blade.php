@@ -2179,7 +2179,7 @@
             $("#domicile").val("{{$employee->domicile_id ?? ''}}").trigger('change');
 
             $("#marital_status").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Maritial Status",
+                placeholder: "Select Marital Status",
                 width:'100%',
             });
             $("#marital_status").val("{{$employee->marital_status_id ?? ''}}").trigger('change');
