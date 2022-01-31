@@ -22,6 +22,10 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\Fuel\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Lead\LeadNotification;
+use App\Http\Models\Admin\Lead\LeadNotificationAttachment;
+use App\Http\Models\Admin\Lead\LeadTagging;
+use App\Http\Models\Admin\Lead\LeadZone;
 use App\Http\Models\Admin\MonthClosingStatus;
 use App\Http\Models\Admin\MonthClosingType;
 use App\Http\Models\Admin\NonServiceArea;
@@ -5482,45 +5486,451 @@ public function sales_incentive()
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function shipper_origin_index()
-    {
-        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
-        $settings = GlobalSettings::where('type', 'shipper_origin_change');
-        $shipper_origin_change = array();
-        if ($settings->exists()) {
-            $settings = $settings->first();
-            $shipper_origin_change = array_map('intval', explode(',', $settings->text));
+    public function lead_tagging_index(){
+        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        $agents = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
+        // $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
+        $services = DB::table('service_list')->where('status',1)->get();
+        $cities = City::where('status',1)->get();
+        if (session('role_id') == 1){
+            $zones = Zone::where('zones.status',1)->where('zones.business_category_id',1)->select('zones.id as id','zones.name as name')->get();
+        }else{
+            $zones = Zone::join('lead_zones as lz','lz.zone_id','=','zones.id')
+                    ->where('zones.status',1)->where('zones.business_category_id',1)->where('lz.admin_id',Auth::id())
+                    ->select('zones.id as id','zones.name as name')->get();
         }
-        return view('admin.settings.shipper.shipper_origin_change')->with(['shippers' => $shippers, 'shipper_origin_change' => $shipper_origin_change]);
+
+        return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities , 'services' => $services , 'zones' => $zones]);
     }
 
-    public function shipper_origin_store(Request $request)
-    {
-        if ($request->has('shippers')) {
-            if (count($request->shippers) > 0) {
-                $shippers = implode(',', $request->shippers);
-                $settings = GlobalSettings::where('type', 'shipper_origin_change');
+    public function lead_tagging_list(){
+        $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
+                 ->join('cities as c','c.id','lead_taggings.city_id')   
+                 ->join('zones as z','z.id','lead_taggings.zone_id')   
+                 ->join('service_list as s','s.id','lead_taggings.service_id')   
+        ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 'z.name as zone', 's.name as service','lead_taggings.status');
+        
+    $datatables = Datatables::of($roles)
+        ->addColumn('action', function($roles) {
+            if (session('role_id') == 1 || in_array(663, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    ';
+                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    if($roles->status == 1 ){
 
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }else{
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+          return $dropdown;
+               
+            }
+            else {
+                return '';
+            }
+        })->editColumn('status', function($roles) {
+            if($roles->status == 1){
+                return 'Enable';
+            }else{
+                return 'Disable';
+            }
+            
+        });
+
+    return $datatables->make(true);
+    }
+
+    public function lead_tagging_submit(Request $request){
+
+        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
+
+        if(!$check_leads->exists()){
+            $lead_tagging = new LeadTagging;
+            $lead_tagging->sale_person_id = $request->agent_id;
+            $lead_tagging->zone_id = $request->zone_id;
+            $lead_tagging->city_id = $request->city_id;
+            $lead_tagging->service_id = $request->service_id;
+            $lead_tagging->save();
+
+            return redirect()->back()->with('success', 'Lead Agent Added!');
+
+        }else{
+            return redirect()->back()->with('error', 'Lead Agent already exist');
+        }
+    }
+
+    public function lead_tagging_data(Request $request){
+        $lead_tagging = LeadTagging::find($request->id);
+
+        $agent_id = $lead_tagging->sale_person_id;
+        $city_id = $lead_tagging->city_id;
+        $zone_id = $lead_tagging->zone_id;
+        $service_id = $lead_tagging->service_id;
+        $lead_tagging_id = $lead_tagging->id;
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'zone_id'=> $zone_id ,'service_id'=> $service_id ,'lead_tagging_id'=> $lead_tagging_id]);
+
+    }
+
+    // public function lead_tagging_delete(Request $request){
+    //     CrmAutoTagUser::find($request->id)->delete();
+    //     return response()->json(['status' => 1, 'success' => 'Tagged Agent Deleted']);
+
+    // }
+
+
+    public function lead_tagging_update(Request $request){
+        // dd($request->all());
+        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
+
+        if(!$check_leads->exists()){
+            $lead_tagging = LeadTagging::find($request->lead_tagging_id);
+            $lead_tagging->sale_person_id = $request->agent_id;
+            $lead_tagging->zone_id = $request->zone_id;
+            $lead_tagging->city_id = $request->city_id;
+            $lead_tagging->service_id = $request->service_id;
+            $lead_tagging->save();
+            return redirect()->back()->with('success', 'Lead Agent Updated!');
+        }else{
+            return redirect()->back()->with('error', 'Lead Agent already exist');
+
+        }
+
+    }
+
+    public function lead_tagging_enable_disable(Request $request){
+        $lead_tagging = LeadTagging::find($request->id);
+        if($lead_tagging->status == 1){
+            $lead_tagging->status = 0;
+            $lead_tagging->save();
+        return redirect()->back()->with('success', 'Lead Agent Disabled!');
+
+        }else{
+            $lead_tagging->status = 1;
+            $lead_tagging->save();
+        return redirect()->back()->with('success', 'Lead Agent Enabled!');
+
+        }
+    }
+
+
+    public function lead_zones_index(){
+        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        $admins = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
+
+        // $admins = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
+        $zones = Zone::where('status',1)->where('business_category_id',1)->get();
+        return view('admin.settings.lead_management.zone_tagging')->with(['admins' => $admins , 'zones' => $zones]);
+    }
+
+    public function lead_zones_list(){
+        $roles = LeadZone::join('admins as ad', 'ad.id', '=', 'lead_zones.admin_id')
+                 ->join('zones as z','z.id','lead_zones.zone_id')   
+        ->select('lead_zones.id', 'ad.name as agent_name', 'z.name as zone','lead_zones.status');
+        
+    $datatables = Datatables::of($roles)
+        ->addColumn('action', function($roles) {
+            if (session('role_id') == 1 || in_array(666, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    ';
+                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    if($roles->status == 1 ){
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }else{
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+          return $dropdown;
+               
+            }
+            else {
+                return '';
+            }
+        })->editColumn('status', function($roles) {
+            if($roles->status == 1){
+                return 'Enable';
+            }else{
+                return 'Disable';
+            }
+            
+        });
+
+    return $datatables->make(true);
+    }
+
+    public function lead_zones_submit(Request $request){
+        foreach ($request->zone_id as $zone) {
+            foreach ($request->agent_id as $agent) {
+                $check_leads = LeadZone::where('zone_id',$zone)->where('admin_id',$agent);
+        
+                if(!$check_leads->exists()){
+                    $lead_zone = new LeadZone;
+                    $lead_zone->admin_id = $agent;
+                    $lead_zone->zone_id = $zone;
+                    $lead_zone->save();
+        
+                    
+                }
+            }
+        }
+        return redirect()->back()->with('success', 'Agent Zone Added!');
+    }
+
+    public function lead_zones_data(Request $request){
+        $lead_zone = LeadZone::find($request->id);
+
+        $admin_id = $lead_zone->admin_id;
+        $zone_id = $lead_zone->zone_id;
+        $lead_zone_id = $lead_zone->id;
+
+        return response()->json(['status' => 1, 'admin_id' => $admin_id,'zone_id'=> $zone_id ,'lead_zone_id'=> $lead_zone_id]);
+
+    }
+
+
+    public function lead_zones_update(Request $request){
+        $check_leads = LeadZone::where('zone_id',$request->zone_id)->where('admin_id',$request->agent_id);
+
+        if(!$check_leads->exists()){
+            $lead_zone = LeadZone::find($request->lead_zone_id);
+            $lead_zone->admin_id = $request->agent_id;
+            $lead_zone->zone_id = $request->zone_id;
+            $lead_zone->save();
+            return redirect()->back()->with('success', 'Agent Zone Updated!');
+        }else{
+            return redirect()->back()->with('error', 'Agent Zone already exist');
+            public function shipper_origin_index()
+            {
+                $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+                $settings = GlobalSettings::where('type', 'shipper_origin_change');
+                $shipper_origin_change = array();
                 if ($settings->exists()) {
                     $settings = $settings->first();
-                } else {
-                    $settings = new GlobalSettings();
-
-                    $settings->type = 'shipper_origin_change';
-                    $settings->setting_value = 0;
-
+                    $shipper_origin_change = array_map('intval', explode(',', $settings->text));
                 }
-                $settings->text = $shippers;
-                $settings->save();
+                return view('admin.settings.shipper.shipper_origin_change')->with(['shippers' => $shippers, 'shipper_origin_change' => $shipper_origin_change]);
             }
-            return redirect()->back()->with('success', 'Settings Updated!');
+        
+            public function shipper_origin_store(Request $request)
+            {
+                if ($request->has('shippers')) {
+                    if (count($request->shippers) > 0) {
+                        $shippers = implode(',', $request->shippers);
+                        $settings = GlobalSettings::where('type', 'shipper_origin_change');
+        
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                        } else {
+                            $settings = new GlobalSettings();
+        
+                            $settings->type = 'shipper_origin_change';
+                            $settings->setting_value = 0;
+        
+                        }
+                        $settings->text = $shippers;
+                        $settings->save();
+                    }
+                    return redirect()->back()->with('success', 'Settings Updated!');
+        
+                } else {
+                    return redirect()->back()->with('error', 'No shippers selected!');
 
-        } else {
-            return redirect()->back()->with('error', 'No shippers selected!');
         }
 
     }
 
+    public function lead_zones_enable_disable(Request $request){
+        $lead_zone = LeadZone::find($request->id);
+        if($lead_zone->status == 1){
+            $lead_zone->status = 0;
+            $lead_zone->save();
+        return redirect()->back()->with('success', 'Agent Zone Disabled!');
+
+        }else{
+            $lead_zone->status = 1;
+            $lead_zone->save();
+        return redirect()->back()->with('success', 'Agent Zone Enabled!');
+
+        }
+    }
+
+
+
+    
+    public function lead_notification_index(){
+        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        return view('admin.settings.lead_management.notification');
+    }
+
+    public function lead_notification_list(){
+        $notifications = LeadNotification::join('admins as a', 'lead_notifications.updated_by', '=', 'a.id')
+        ->select('lead_notifications.id', 'lead_notifications.name', 'lead_notifications.type_id as type', 'lead_notifications.updated_at', 'a.name as updated_by', 'lead_notifications.status');
+
+        $datatables = Datatables::of($notifications)
+        ->setRowAttr([
+            'data-type' => function($notification) {
+                return $notification->type;
+            },
+        ])
+        ->editColumn('status', function ($notification) {
+            return (($notification->status) ? 'Enabled' : 'Disabled');
+        })
+        
+        ->editColumn('type', function ($notification) {
+            if($notification->type == 1){
+                return 'Email';
+            }else{
+                return 'SMS';
+            }
+        })
+        ->addColumn('action', function($notification) {
+            $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+            $enable_button = '<button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+            $disable_button = '<button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+            $dropdown = '
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+            if (session('role_id') == 1 || in_array(672, session('permissions'))) {
+                $dropdown .= $edit_button;
+            }
+
+            if (session('role_id') == 1 || in_array(672, session('permissions'))) {
+                if ($notification->status) {
+                    $dropdown .= $disable_button;
+                }
+                else {
+                    $dropdown .= $enable_button;
+                }
+            }
+
+            $dropdown .= '
+                  </div>
+                </div>
+            ';
+
+            return $dropdown;
+        });
+
+        return $datatables->make(true);
+    }
+
+
+    public function lead_notification_data(Request $request){
+        $id = $request->id;
+        $lead_notification = LeadNotification::find($id);
+
+        $details = array();
+        $attachments_details = array();
+        if ($lead_notification->type_id == 1) {
+            $details['subject'] = $lead_notification->subject;
+        }
+
+        $details['body'] = $lead_notification->body;
+
+        if ($id == 1) {
+            $details['fields'] = ['shipper_name', 'tagged_salesperson_name', 'tagged_salesperson_number', 'tagged_salesperson_email'];
+            $attachments =  LeadNotificationAttachment::where('notification_id',$id)->get();
+            foreach ($attachments as $image) {
+                $img_url = asset('uploads/notification_attachments/'.$image->attachment);
+                $attachments_details[] = array('id' => $image->id,'date' => Carbon::parse($image->created_at)->toDateTimeString(),'image'=> $img_url);
+            }
+            $details['attachments'] = $attachments_details;
+        }
+        else if ($id == 2) {
+            $details['fields'] = ['shipper_name', 'tagged_salesperson_name', 'tagged_salesperson_number', 'tagged_salesperson_email'];
+        }
+        else if ($id == 3) {
+            $details['fields'] = ['shipper_name', 'tagged_salesperson_name', 'tagged_salesperson_number', 'tagged_salesperson_email'];
+        }
+        else if ($id == 4) {
+            $details['fields'] = ['shipper_name', 'tagged_salesperson_name', 'tagged_salesperson_number', 'tagged_salesperson_email'];
+        }
+		return $details;
+
+
+        return response()->json(['status' => 1, 'details' => $details]);
+
+    }
+
+
+    public function lead_notification_update(Request $request){
+        $lead_notification = LeadNotification::find($request->lead_notification_id);
+
+        $lead_notification->subject = $request->subject;
+        $lead_notification->body = $request->body;
+
+        $lead_notification->save();
+        if($request->lead_notification_id == 1){
+
+            $image_ids = explode(',', $request->selected_ids);
+            foreach ($image_ids as $id){
+    
+                $file_name = 'notification_image_'.$id;
+                $image = $request->file($file_name);
+    
+                $extension = $image->getClientOriginalExtension();
+                $random = rand(1000, 100000);
+                $now = Carbon::now();
+                $time = $now->year . '_' . $now->month;
+                $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+                $image->move(public_path('uploads/notification_attachments'), $generated_image_name);
+                $notification_image = new LeadNotificationAttachment();
+                $notification_image->notification_id = $lead_notification->id;
+                $notification_image->added_by = Auth::id();
+                $notification_image->attachment = $generated_image_name;
+                $notification_image->save();
+            }
+        }
+        return redirect()->back()->with('success', 'Notification Updated!');
+       
+
+    }
+
+    public function lead_notification_enable_disable(Request $request){
+        $lead_notification = LeadNotification::find($request->id);
+        if($lead_notification->status == 1){
+            $lead_notification->status = 0;
+            $lead_notification->save();
+        return redirect()->back()->with('success', 'Notification Disabled!');
+
+        }else{
+            $lead_notification->status = 1;
+            $lead_notification->save();
+        return redirect()->back()->with('success', 'Notification Enabled!');
+
+        }
+    }
+    public function lead_notification_delete_image(Request $request){
+        $lead_notification_attachment = LeadNotificationAttachment::where('id',$request->image_id)->where('notification_id',$request->notification_id);
+        if($lead_notification_attachment->exists()){
+            $lead_notification_attachment = $lead_notification_attachment->get()->first();
+            $lead_notification_attachment->delete();
+            return response()->json(['status' => 0, 'success' => 'Image Deleted!']);
+        } else {
+            return response()->json(['status' => 1, 'error' => 'Image Not Found']);
+        }
+    }
     public function shippers_return_address_index()
     {
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
@@ -5559,6 +5969,5 @@ public function sales_incentive()
         }
 
     }
-
 
 }

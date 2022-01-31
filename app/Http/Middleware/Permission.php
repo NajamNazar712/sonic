@@ -1164,7 +1164,12 @@ class Permission
             'qa_evaluation.edit' => 654,
             'qa_evaluation.view' => 655,
             'qa_evaluation.edit_activities' => 656,
-
+            'settings.lead_tagging.index' => 661,
+            'settings.lead_tagging.list' => 661,
+            'settings.lead_zones.index' => 664,
+            'settings.lead_zones.list' => 664,
+            'settings.lead_notification.index' => 671,
+            'settings.lead_notification.list' => 671,
         ],
 
         'shipper' => [

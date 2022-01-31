@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Admins\LeadTaggingController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
@@ -90,6 +91,8 @@ class WebsiteLead extends Command
                 $lead_log->save();
 
                 $new_leads[] = $new_lead->id;
+                //enter admin_id from global settings
+                LeadTaggingController::auto_tagging($new_lead->id,386);
             }
         }
 
