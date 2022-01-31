@@ -3760,7 +3760,12 @@ class AdminHumanResourseController extends Controller
 
         $rider = $rider->first();
 
-        if(DeliveryNote::where('rider_id', $rider->id)->where('status', 0)->orWhere('dncc_status', 0)->exists()){
+
+        if(DeliveryNote::where('rider_id',$rider->id)->where(function($q){
+            $q->where('status', 0)
+                ->orWhere('dncc_status', 0);
+        })->exists())
+        {
             return back()->with("error","Rider Has An Unfinished Delivery Note");
         }
 
@@ -3777,7 +3782,7 @@ class AdminHumanResourseController extends Controller
             }
         }
 
-        if(V2PickupNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
+        if(V2PickupNote::where('rider_id',$rider->id)->where('status', 0)->exists())
         {
             return back()->with("error","Rider Has An Unfinished Pickup Note");
         }
