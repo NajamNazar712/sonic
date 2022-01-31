@@ -739,13 +739,9 @@ class AdminAttendanceController extends Controller
 
                     $attendance_data = array();
                     foreach ($rows as $key => $row) {
-                        $date_string = explode(":", trim($row['attendance_datetime']));
-                        if (count($date_string) == 3) {
-                            $date_string[2] = str_pad($date_string[2], 2, 0, STR_PAD_LEFT);
-                            $date_string[1] = str_pad($date_string[1], 2, 0, STR_PAD_LEFT);
-                            $rows[$key]['attendance_datetime'] = implode(':', $date_string);
-                            $row['attendance_datetime'] = implode(':', $date_string);
-                        }
+                        $date_string = Carbon::parse(trim($row['attendance_datetime']))->format("Y-m-d H:i:s");
+                        $rows[$key]['attendance_datetime'] = $date_string;
+                        $row['attendance_datetime'] = $date_string;
                         $rows[$key]['trax_id'] = "Trax" . trim($row['trax_id']);
                         $row['trax_id'] = "Trax" . trim($row['trax_id']);
 
