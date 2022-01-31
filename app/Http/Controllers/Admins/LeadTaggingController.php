@@ -65,7 +65,7 @@ class LeadTaggingController extends Controller
             }
             foreach ($lead_attachments as $key => $attachment) {
                 $key = $key + 1;
-                $url = asset('uploads/notification_attachments/'.$attachment);
+                $url = asset('uploads/notification_attachments/'.$attachment->attachment);
                 $link = '<a href="' . $url . '" target="_blank"><u> Attachment ' . $key . '</u></a>';
                 $body_attachment_message = $body_attachment_message . $link . PHP_EOL;
             }
