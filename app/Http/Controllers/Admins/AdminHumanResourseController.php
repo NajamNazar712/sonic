@@ -252,7 +252,7 @@ class AdminHumanResourseController extends Controller
             ->leftjoin('rider_main_categories as rmc','rmc.id','=','employees.rider_main_category')
             ->leftjoin('employee_designations as ed','ed.id','=','employees.designation_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation'])
+            ->select(['r.name as check_if_rider_present_bit','r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'employees.status_id', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name','employees.shift_id as shift_id','employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id','er_rt.name as rider_type','est.name as staff_category','employees.staff_category_id','employees.joining_date','rmc.name as rider_main_category','employees.rider_type_id as rider_type_id', 'ed.name as designation','r.id as rider_id','staff.id as staff_id'])
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
@@ -3764,9 +3764,10 @@ class AdminHumanResourseController extends Controller
 
         $rider = $rider->first();
 
-        if(DeliveryNote::where('rider_id',$rider->id)->where(function($q){
-            $q->where('status','!=',1)
-            ->orWhere('dncc_status','!=',1);
+
+        if(DeliveryNote::where('rider_id',$rider->id)->where('status', '!=', 4)->where(function($q){
+            $q->where('status', 0)
+                ->orWhere('dncc_status', 0);
         })->exists())
         {
             return back()->with("error","Rider Has An Unfinished Delivery Note");
@@ -3780,12 +3781,12 @@ class AdminHumanResourseController extends Controller
                 ->where('delivery_note_station_deposit_notes.delivery_note_id', $DN->id)
                 ->first();
 
-            if ($sdn_note->status != 1) {
-                return back()->with("error", "Rider Has An Unfinished Delivery Note");
+            if ($sdn_note->status == 0) {
+                return back()->with("error", "Rider Has An Unresolved Station Deposit Note");
             }
         }
 
-        if(V2PickupNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
+        if(V2PickupNote::where('rider_id',$rider->id)->where('status', 0)->exists())
         {
             return back()->with("error","Rider Has An Unfinished Pickup Note");
         }

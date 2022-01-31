@@ -83,9 +83,6 @@
 										<th class="border-primary border-darken-1">Designation</th>
 										<th class="border-primary border-darken-1">Role</th>
 										<th class="border-primary border-darken-1">Default Hub</th>
-										<th class="border-primary border-darken-1">Blood Group</th>
-										<th class="border-primary border-darken-1">Emergency Contact No.</th>
-										<th class="border-primary border-darken-1">Emergency Contact Person</th>
 										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Updated by</th>
@@ -184,9 +181,6 @@
                             head.push('Designation');
                             head.push('Role');
                             head.push('Default Hub');
-                            head.push('Blood Group');
-                            head.push('Emergency Contact No.');
-                            head.push('Emergency Contact Person');
                             head.push('Updated Datetime');
                             head.push('Updated by');
                             head.push('Status');
@@ -202,9 +196,6 @@
                                 row.push(values.designation);
                                 row.push(values.role);
                                 row.push(values.default_hub);
-                                row.push(values.blood_group);
-                                row.push(values.emergency_contact_no);
-                                row.push(values.emergency_contact_person);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
                                 row.push(values.status);
@@ -340,9 +331,6 @@
 					{data: 'designation', name: 'admins.designation', class: 'align-middle designation'},
 					{data: 'role', name: 'role', class: 'align-middle role'},
 					{data: 'default_hub', name: 'h.name', class: 'align-middle default_hub'},
-					{data: 'blood_group', name: 'bg.name', class: 'align-middle blood_group'},
-					{data: 'emergency_contact_no', name: 'emp.emergency_contact', class: 'align-middle emergency_contact_no'},
-					{data: 'emergency_contact_person', name: 'emp.emergency_contact_person', class: 'align-middle emergency_contact_person'},
 					{data: 'created_at', name: 'admins.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'admins.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
@@ -371,8 +359,6 @@
                         '<option value="0">Disable</option>' +
                         '<option value="1">Enable</option>' +
                         '</select>';
-					var blood_group = '<select name="blood_group_search" id="blood_group_search" class="select2 form-control">' +
-							'</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
@@ -385,13 +371,6 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
-						else if($(header).is('.blood_group'))
-						{
-							$(blood_group).appendTo($(search))
-									.on( 'change', function () {
-										column.search($(this).val(), false, false, true).draw();
-									} ).wrap(td);
-						}
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -402,18 +381,7 @@
 							}
 						}
 					});
-
-					var blood_group_data = $.map({!! $blood_groups !!}, function (obj) {
-						obj.text = obj.name;
-						return obj;
-					});
-					$("#blood_group_search").prepend('<option value="" selected></option>').select2({
-						data: blood_group_data,
-						placeholder: "Select Blood Group",
-						width: '100%',
-						containerCssClass: 'select-xs',
-						dropdownCssClass: 'form-control-sm p-0'
-					});
+					
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
                         width:'100%',

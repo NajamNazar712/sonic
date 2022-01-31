@@ -11,6 +11,7 @@ use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\Lead\Lead;
