@@ -153,6 +153,8 @@ class LeadTaggingController extends Controller
 
             if (strpos($body, '[' . $key . ']') !== false) {
                 $body = str_replace('[' . $key . ']', $field, $body);
+            }
+            if (strpos($sms_body, '[' . $key . ']') !== false) {
                 $sms_body = str_replace('[' . $key . ']', $field, $sms_body);
             }
         }
