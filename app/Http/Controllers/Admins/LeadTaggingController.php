@@ -21,60 +21,64 @@ class LeadTaggingController extends Controller
     public static function auto_tagging($lead_id, $admin_id)
     {
         $lead = Lead::find($lead_id);
-        $sales_person = LeadTagging::where('city_id', $lead->city_id)->where('service_id', $lead->service_id)->where('status', 1)->orderBy('count', 'asc')->get()->first();
-        $lead->sale_person_id = $sales_person->sale_person_id;
-        $lead->updated_by = $admin_id;
-        $lead->sale_person_updated_at = Carbon::now();
-        $lead->save();
-        $sales_person->count += 1;
-        $sales_person->save();
+        $sales_person = LeadTagging::where('city_id', $lead->city_id)->where('service_id', $lead->service_id)->where('status', 1);
+        if($sales_person->exists()){
+            $sales_person = $sales_person->orderBy('count', 'asc')->get()->first();
+            $lead->sale_person_id = $sales_person->sale_person_id;
+            $lead->updated_by = $admin_id;
+            $lead->sale_person_updated_at = Carbon::now();
+            $lead->save();
+            $sales_person->count += 1;
+            $sales_person->save();
 
-        LeadTaggingHistory::create([
-            'sale_person_id' => $sales_person->id,
-            'lead_id' => $lead->id,
-            'status' => 1,
-        ]);
+            LeadTaggingHistory::create([
+                'sale_person_id' => $sales_person->id,
+                'lead_id' => $lead->id,
+                'status' => 1,
+            ]);
 
-        $lead_notification_email = LeadNotification::find(1);
-        $lead_notification_sms = LeadNotification::find(2);
+            $lead_notification_email = LeadNotification::find(1);
+            $lead_notification_sms = LeadNotification::find(2);
 
-        $subject = $lead_notification_email->subject;
-        $body = $lead_notification_email->body;
-        $to = $lead->email_address;
-        $body_attachment_message = PHP_EOL . 'Please Find the Attachment from the following Link(s).' . PHP_EOL;
-        $fields = ['shipper_name' => $lead->contact_person, 'tagged_salesperson_name' => $lead->sales_person->name, 'tagged_salesperson_number' => $lead->sales_person->phone_number, 'tagged_salesperson_email' => $lead->sales_person->email];
+            $subject = $lead_notification_email->subject;
+            $body = $lead_notification_email->body;
+            $to = $lead->email_address;
+            $body_attachment_message = PHP_EOL . 'Please Find the Attachment from the following Link(s).' . PHP_EOL;
+            $fields = ['shipper_name' => $lead->contact_person, 'tagged_salesperson_name' => $lead->sales_person->name, 'tagged_salesperson_number' => $lead->sales_person->phone_number, 'tagged_salesperson_email' => $lead->sales_person->email];
 
-        $sms_body = $lead_notification_sms->body;
+            $sms_body = $lead_notification_sms->body;
 
-        foreach ($fields as $key => $field) {
-            if (strpos($subject, '[' . $key . ']') !== false) {
-                $subject = str_replace('[' . $key . ']', $field, $subject);
+            foreach ($fields as $key => $field) {
+                if (strpos($subject, '[' . $key . ']') !== false) {
+                    $subject = str_replace('[' . $key . ']', $field, $subject);
+                }
+
+                if (strpos($body, '[' . $key . ']') !== false) {
+                    $body = str_replace('[' . $key . ']', $field, $body);
+                    $sms_body = str_replace('[' . $key . ']', $field, $sms_body);
+                }
             }
 
-            if (strpos($body, '[' . $key . ']') !== false) {
-                $body = str_replace('[' . $key . ']', $field, $body);
-                $sms_body = str_replace('[' . $key . ']', $field, $sms_body);
+            $lead_attachments = LeadNotificationAttachment::where('notification_id', 1);
+            if($lead_attachments->exists()){
+                $lead_attachments = $lead_attachments->get();
             }
+            foreach ($lead_attachments as $key => $attachment) {
+                $key = $key + 1;
+                $link = '<a href="' . $attachment . '" target="_blank"><u> Attachment ' . $key . '</u></a>';
+                $body_attachment_message = $body_attachment_message . $link . PHP_EOL;
+            }
+            $body = $body . PHP_EOL . $body_attachment_message;
+
+            self::email($subject, $body, $to);
+
+            $sms_to = $lead->phone_number;
+
+            self::sms($sms_body, $sms_to);
+
+            NotificationsController::app_notification(14, $lead->sale_person_id, 1, $lead->id);
         }
-
-        $lead_attachments = LeadNotificationAttachment::where('notification_id', 1);
-        if($lead_attachments->exists()){
-            $lead_attachments = $lead_attachments->get();
-        }
-        foreach ($lead_attachments as $key => $attachment) {
-            $key = $key + 1;
-            $link = '<a href="' . $attachment . '" target="_blank"><u> Attachment ' . $key . '</u></a>';
-            $body_attachment_message = $body_attachment_message . $link . PHP_EOL;
-        }
-        $body = $body . PHP_EOL . $body_attachment_message;
-
-        self::email($subject, $body, $to);
-
-        $sms_to = $lead->phone_number;
-
-        self::sms($sms_body, $sms_to);
-
-        NotificationsController::app_notification(14, $lead->sale_person_id, 1, $lead->id);
+        
 
     }
 
