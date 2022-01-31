@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Packers & Movers Lead Management')
+@section('title', 'Movit Lead Management')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Packers & Movers Lead Management
+                    Movit Lead Management
                 </h1>
 
                 <div class="card">
@@ -143,7 +143,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Packers & Movers Lead Managements',
+                        title: 'Movit Lead Managements',
                         className:'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
