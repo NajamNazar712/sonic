@@ -326,20 +326,13 @@ class AdminAttendanceController extends Controller
 
     public function admin_attendance_horizontal_table(Request $request,$array = false)
     {
-        $month = "01 ".$request->get('search_month');
-        $date = Carbon::createFromFormat('d M Y',$month);
-        $year = $date->year;
-        $month = $date->month;
-        $prev = $date->subMonth(1);
-        $prev_month = $prev->month;
-        $prev_year = $prev->year;
-        $from = new \DateTime(Carbon::createFromDate($prev_year,$prev_month,26)->toDateString());
-        $to = new \DateTime(Carbon::createFromDate($year,$month,25)->toDateString());
-        $to = $to->modify( '+1 day' );
+        $search_from = Carbon::createFromFormat('d F, Y',$request->search_from);
+        $search_to = Carbon::createFromFormat('d F, Y',$request->search_to);
+        $search_to = $search_to->modify('+1 day');
         $period = array();
 
         $interval = new \DateInterval('P1D');;
-        $daterange = new \DatePeriod($from, $interval ,$to);
+        $daterange = new \DatePeriod($search_from, $interval ,$search_to);
 
         foreach ($daterange as $date) {
             if($array)
@@ -362,6 +355,7 @@ class AdminAttendanceController extends Controller
 
     public function admin_attendance_horizontal_list(Request $request)
     {
+      
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),454);
@@ -392,17 +386,10 @@ class AdminAttendanceController extends Controller
         }
 
 
-        if ($request->get('search_month')) {
-            $month = "01 ".$request->get('search_month');
-            $date = Carbon::createFromFormat('d M Y',$month);
-            $year = $date->year;
-            $month = $date->month;
-            $prev = $date->subMonth(1);
-            $prev_month = $prev->month;
-            $prev_year = $prev->year;
-            $from = Carbon::createFromDate($prev_year,$prev_month,26)->toDateString();
-            $to = Carbon::createFromDate($year,$month,25)->toDateString();
-            $attendances->whereBetween('employee_attendances.attendance_date', [$from, $to]);
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $search_from = Carbon::createFromFormat('d F, Y',$request->search_from)->toDateString();
+            $search_to = Carbon::createFromFormat('d F, Y',$request->search_to)->toDateString();
+            $attendances->whereBetween('employee_attendances.attendance_date', [$search_from, $search_to]);
         }
 
         $attendances->groupBy('employee_attendances.employee_id','employee_attendances.employee_type');
@@ -443,43 +430,42 @@ class AdminAttendanceController extends Controller
                     return $employee->department;
                 }
             });
-            foreach($periods['display'] as $key => $period)
-            {
-                $datatable->addColumn($period, function ($employee) use ($key, $periods,$today) {
-                    $data = EmployeeAttendance::where('employee_id',$employee->employee_id)
-                        ->where('attendance_date',$periods['search'][$key])
-                        ->where('employee_type',$employee->employee_type)
-                        ->where(function ($query){
-                            $query->where('clock_in_datetime','!=',null)
-                                ->orWhere('clock_in','!=',null);
-                        })
-                        ->first();
+            if(count($periods) > 0) {
+                foreach ($periods['display'] as $key => $period) {
+                    $datatable->addColumn($period, function ($employee) use ($key, $periods, $today) {
+                        $data = EmployeeAttendance::where('employee_id', $employee->employee_id)
+                            ->where('attendance_date', $periods['search'][$key])
+                            ->where('employee_type', $employee->employee_type)
+                            ->where(function ($query) {
+                                $query->where('clock_in_datetime', '!=', null)
+                                    ->orWhere('clock_in', '!=', null);
+                            })
+                            ->first();
 
-                    if($data) {
-                        if ($data->clock_in_datetime) {
-                            $time = Carbon::parse($data->clock_in_datetime)->format("H:i");
+                        if ($data) {
+                            if ($data->clock_in_datetime) {
+                                $time = Carbon::parse($data->clock_in_datetime)->format("H:i");
+                            } else {
+                                $time = $data->clock_in;
+                            }
+
+                            $time .= " <br> ";
+
+                            if ($data->clock_out_datetime) {
+                                $time .= Carbon::parse($data->clock_out_datetime)->format("H:i");
+                            } else {
+                                $time .= $data->clock_out;
+                            }
+                        } else if ($periods['search'][$key] > $today) {
+                            $time = "-";
                         } else {
-                            $time = $data->clock_in;
+                            $time = "<span class='text-danger'>A</span>";
                         }
 
-                        $time .= " <br> ";
+                        return $time;
 
-                        if ($data->clock_out_datetime) {
-                            $time .= Carbon::parse($data->clock_out_datetime)->format("H:i");
-                        } else {
-                            $time .= $data->clock_out;
-                        }
-                    }
-                    else if($periods['search'][$key] > $today){
-                        $time = "-";
-                    }
-                    else{
-                        $time = "<span class='text-danger'>A</span>";
-                    }
-
-                    return $time;
-
-                });
+                    });
+                }
             }
 
         if ($search_admin = $request->get('search_admin')) {

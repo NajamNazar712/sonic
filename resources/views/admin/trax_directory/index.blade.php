@@ -136,7 +136,7 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_address_id', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'h.name', class: 'text-center align-middle city',},
-                    {data: 'designation', name: 'admins.designation', class: 'align-middle designation'},
+                    {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'name', name: 'admins.name', class: 'align-middle name'},
                     {data: 'email', name: 'admins.email', class: 'align-middle email'},
                     {data: 'phone', name: 'admins.phone_number', class: 'align-middle phone'},

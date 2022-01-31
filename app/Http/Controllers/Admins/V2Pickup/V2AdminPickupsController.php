@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -555,6 +556,9 @@ class V2AdminPickupsController extends Controller
 
                 }
             }
+
+            EmployeeAttendanceController::riders_attendance_mark($rider_id);
+
             return redirect()->back()->with('success', 'Pickup Request(s) has been Assigned to the Rider!');
         } else {
             return redirect()->back()->with('success', 'Pickup Request(s) rider updated / assigned!');
@@ -1275,6 +1279,7 @@ class V2AdminPickupsController extends Controller
 
             $pickup_note_request->save();
         }
+        EmployeeAttendanceController::riders_attendance_mark($rider_id);
 
         return $pickup_note_id;
     }
