@@ -3687,7 +3687,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-Route::prefix('retail')->name('retail.')->group(function () {
+    Route::prefix('retail')->name('retail.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('retail.login');
     });
@@ -3776,6 +3776,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('shipment_info', 'Retail\RetailCancelShipmentsController@get_shipment_info')->name('shipment_info');
         Route::post('store','Retail\RetailCancelShipmentsController@cancelled_shipments_store')->name('store');
     });
+
+});
 
 });
 
