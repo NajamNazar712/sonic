@@ -45,6 +45,8 @@
 
                 <div class="modal-body">
                     <div class="form-group">
+                        <label>Select Zone:</label>
+                        <span class="danger">*</span>
                         <select name="zone_id[]" id="zone_id" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Zone is required">
                             @foreach($zones as $zone)
                                 <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
@@ -52,6 +54,8 @@
                         </select>
                     </div>
                     <div class="form-group" id="agent_select">
+                        <label>Select Agent:</label>
+                        <span class="danger">*</span>
                         <select name="agent_id[]" id="agent_id" class="form-control select2" multiple="multiple" data-rule-required="true" data-msg-required="Agent is required">
                             @foreach($admins as $admin)
                                 <option value="{{ $admin->id }}" > {{ $admin->name }} </option>
