@@ -164,8 +164,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
-            var search_date_from = $('#search_form #search_date_from').pickadate({
+            
+            $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -173,24 +173,27 @@
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
+                    $('#search_date_to').pickadate('picker').clear({muted: true});
                     if (context.select) {
-                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                        var selected_date = new Date(context.select);
+                        var max_selected_date = moment(selected_date).add(31, 'days');
+                        console.log(selected_date);
+                        $('#search_date_to').attr('disabled', false);
+                        $('#search_form #search_date_to').pickadate('picker').set({'min':selected_date},{'max':max_selected_date.toDate()},{muted: true});
+                        $('#search_form #search_date_to').pickadate('picker').set({'max':max_selected_date.toDate()},{muted: true});
                     }
                 }
             });
-
-            var search_date_to = $('#search_form #search_date_to').pickadate({
+            $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                        // $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
