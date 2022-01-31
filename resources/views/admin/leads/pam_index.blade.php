@@ -63,7 +63,7 @@
                                     <th class="border-primary border-darken-1">Length (cm)</th>
                                     <th class="border-primary border-darken-1">Width (cm)</th>
                                     <th class="border-primary border-darken-1">Height (cm)</th>
-                                    <th class="border-primary border-darken-1">Weight (<k></k>g)</th>
+                                    <th class="border-primary border-darken-1">Weight (kg)</th>
                                 </tr>
                                 </thead>
                             </table>
