@@ -37,7 +37,7 @@
                                                     </span>
                                                 </div>
 
-                                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Ateendance (To)">
+                                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Attendance (To)">
                                             </div>
 
                                         </div>
@@ -77,40 +77,7 @@
                                                 </select>
                                             </fieldset>
                                         </div>
-                                      {{--  <div class="col-5 mt-2">
-                                           --}}{{-- <div class="form-group input-group ">
-                                                <div class="input-group-prepend">
-                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="la la-calendar-o"></span>
-                                            </span>
-                                                </div>
-                                                <input type="text" name="search_month"
-                                                       class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_month" placeholder="Attandance Month" data-value="{{ Carbon\Carbon::today() }}">
-                                            </div>--}}{{--
-                                            <div class="form-group input-group ml-1">
-                                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                                </div>
 
-                                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-5 mt-2">
-                                            <div class="form-group input-group ml-1">
-                                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                                </div>
-
-                                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
-                                            </div>
-                                        </div>
---}}
                                         <div class="col-12 mt-2">
                                             <div class="form-group justify-content-center">
                                                 <button type="button" id="search_filter_btn"
@@ -234,6 +201,7 @@
             $('#search_filter_btn').on('click',function () {
                 var search_from = $('#search_date_from').val();
                 var search_to = $('#search_date_to').val();
+
                 if(search_from === '' || search_to === ''){
                     var error = "Date range is required";
                     toastr.error(error, 'Error!', {
@@ -327,7 +295,6 @@
                                     processing: data_table_loader
                                 },
                                 serverSide: true,
-
                                 ajax: {
                                     url: '{{ route('admin.attendance.horizontal.list') }}',
                                     method: "Post",
