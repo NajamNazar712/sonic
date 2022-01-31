@@ -1386,7 +1386,7 @@ class AdminCargoManifestController extends Controller
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                         }
                     else{
-                        return ['status' => 1, 'error' => 'Bag Number\'s has been added in draft by some user'];
+                        return ['status' => 1, 'error' => 'Bag Number has already been added by other admin'];
                     }
                 }
                 else {
