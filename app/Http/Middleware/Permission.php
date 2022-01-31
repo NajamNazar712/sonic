@@ -1004,6 +1004,10 @@ class Permission
             'carrefour.return.submit' => 607,
 
 
+            'pam_leads.index' => 669,
+            'pam_leads.list' => 669,
+            'pam_leads.items' => 669,
+
             'leads.index' => 416,
             'leads.list' => 416,
             'leads.add_status' => 419,

@@ -299,6 +299,10 @@ class LeadManagementController extends Controller
             ->leftjoin('cities as d', 'd.id', '=', 'pam_leads.destination_id')
             ->select(['pam_leads.id as id','pam_leads.lead_id as lead_id','pam_leads.name as name','pam_leads.phone as phone','pam_leads.location_type as category','pam_leads.case_type as case','pam_leads.video_link as video_link','pam_leads.images as images','o.name as origin','d.name as destination', DB::raw('(select count(id) from pam_lead_items as pli where pli.lead_id = pam_leads.id) as item_count')]);
 
+        if (session('role_id') != 1) {
+            $leads = $leads->whereIn('o.hub_id', session('hubs'));
+        }
+
         return Datatables::of($leads)
             ->editColumn('category',function ($lead){
                 if($lead->category == 1)
