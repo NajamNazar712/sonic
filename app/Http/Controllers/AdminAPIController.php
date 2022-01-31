@@ -5969,6 +5969,11 @@ class AdminAPIController extends Controller
                 $lead_remarks->remarks = $remarks;
                 $lead_remarks->updated_by = $admin_id;
                 $lead_remarks->save();
+                if($lead->sale_person_id){
+                    if($lead->sale_person_id != $admin_id){
+                        NotificationsController::app_notification(15, $lead->sale_person_id, 1, $lead_id);
+                    }
+                }
                 return response()->json(['status' => 0, 'message' => 'Remarks added Successfully!']);
             }
             else{

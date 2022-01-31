@@ -1052,7 +1052,7 @@ class AdminHumanResourseController extends Controller
         $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->shift_id = $request->shift_id;
-        $employee->staff_category_id = $request->staff_category;
+//        $employee->staff_category_id = $request->staff_category;
         $employee->rider_sub_category = $request->rider_sub_category;
         $employee->rider_main_category = $request->rider_main_category;
         $employee->joining_date = $request->joining_date_formatted;
