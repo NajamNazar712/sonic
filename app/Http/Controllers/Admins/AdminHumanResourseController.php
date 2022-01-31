@@ -3761,7 +3761,7 @@ class AdminHumanResourseController extends Controller
         $rider = $rider->first();
 
 
-        if(DeliveryNote::where('rider_id',$rider->id)->where(function($q){
+        if(DeliveryNote::where('rider_id',$rider->id)->where('status', '!=', 4)->where(function($q){
             $q->where('status', 0)
                 ->orWhere('dncc_status', 0);
         })->exists())
