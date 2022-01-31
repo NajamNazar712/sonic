@@ -37,7 +37,7 @@
         </div>
 
 
-    <div class="modal fade text-left" id="EditAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
+    <div class="modal fade text-left" id="EditNotificationModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -131,53 +131,8 @@
         $(document).ready(function() {
             var selected_rows = [];
 
-            $('#edit_agent_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select Agent",
-                allowClear:true,
-                dropdownParent:$('#notification_edit')
-            });
-            $('#edit_service_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select Service",
-                allowClear:true,
-                dropdownParent:$('#notification_edit')
-            });
+            var notification_image_table;
 
-            $('#edit_city_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select City",
-                allowClear:true,
-                dropdownParent:$('#notification_edit')
-            });
-            var crm_image_table;
-
-            // $('#edit_zone_id').select2({
-            //     width:'100%',
-            //     allowClear:true,
-            //     dropdownParent:$('#notification_edit')
-            // }).bind('change', function() {
-                
-            //     $("#edit_agent_id").select2('val', '');
-            //     $("#edit_service_id").select2('val', '');
-
-            //     $('#edit_city_id').children().remove();
-            //     $('#edit_city_id').select2('destroy');
-
-            //     var id = parseInt($(this).val());
-            //         var city_obj = [];
-            //         city_obj.length = 0
-
-         
-
-            //     $('#edit_city_id').prepend('<option selected></option>').select2({
-            //             width:'100%',
-            //             placeholder:"Select City",
-            //             allowClear:true,
-            //             dropdownParent:$('#notification_edit'),
-            //             data:city_obj
-            //         });
-            // }); 
             var valid_fields = [];
 				autosize($('#notification_edit .body')[0]);
 
@@ -297,32 +252,29 @@
                     }
                 }).done(function (data) {
                     console.log(data);
-							$('#EditAgentModal #lead_notification_id').val(id);
+							$('#EditNotificationModal #lead_notification_id').val(id);
 
-                    // $('#edit_agent_id').val(data.agent_id).change();
-                    // $('#edit_city_id').val(data.city_id).change();
                     // $('#edit_zone_id').val(data.zone_id);
-                    // $('#edit_service_id').val(data.service_id).change();
                     // $('#lead_tagging_id').val(data.lead_tagging_id).change();
                     if (notification_type == 1) {
-								$('#EditAgentModal .email').removeClass('d-none');
+								$('#EditNotificationModal .email').removeClass('d-none');
 
-								$('#EditAgentModal .subject').val(data.subject);
+								$('#EditNotificationModal .subject').val(data.subject);
 							}
 							else {
-								$('#EditAgentModal .email').addClass('d-none');
+								$('#EditNotificationModal .email').addClass('d-none');
 
-								$('#EditAgentModal .subject').val('');
+								$('#EditNotificationModal .subject').val('');
 							}
 
-							$('#EditAgentModal .body').val(data.body);
+							$('#EditNotificationModal .body').val(data.body);
 
-							$('#EditAgentModal .fields').html('');
+							$('#EditNotificationModal .fields').html('');
 
 							valid_fields = [];
 
 							$.each(data.fields, function(index, field) {
-								$('#EditAgentModal .fields').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white">[' + field + ']</span>');
+								$('#EditNotificationModal .fields').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white">[' + field + ']</span>');
                                 console.log(field);
 								valid_fields.push(field);
 							});
@@ -361,12 +313,12 @@
                                         var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
 
                                     }
-                                    crm_image_table.row.add([0, crm_image,remove]).node().id = rows_count;
-                                    crm_image_table.draw(true);
+                                    notification_image_table.row.add([0, crm_image,remove]).node().id = rows_count;
+                                    notification_image_table.draw(true);
                                     $('#CRMImageSubmitButton').attr('disabled', false);
                                     selected_rows.push(rows_count);
                                 }
-                                crm_image_table = $('#image_upload_table').DataTable({
+                                notification_image_table = $('#image_upload_table').DataTable({
                                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
                                     buttons:[{
                                         title: 'Add Row',
@@ -387,7 +339,7 @@
                                     ],
 
                                     rowCallback: function(row, data, index) {
-                                        var info = crm_image_table.page.info();
+                                        var info = notification_image_table.page.info();
 
                                         $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
@@ -455,13 +407,13 @@
                                     if (index !== -1) {
                                         selected_rows.splice(index, 1);
                                     }
-                                    crm_image_table.row( $(this).parents('tr') ).remove().draw();
+                                    notification_image_table.row( $(this).parents('tr') ).remove().draw();
                                 });
                             }else{
                                 $('#attachment').addClass('d-none');
 
                             }
-                    $('#EditAgentModal').modal('show');
+                    $('#EditNotificationModal').modal('show');
                     
 
                     });
@@ -531,17 +483,6 @@
 
             
 
-            $( "#agent_assign" ).validate({
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    form.submit();    
-                }
-                
-                });
-                
                 $('#notification_edit').on('shown.bs.modal', function (e) {
 				    autosize.update($('#notification_edit .body')[0]);
                 })
@@ -572,11 +513,10 @@
                 
                 });
 
-                $('#EditAgentModal').on('hidden.bs.modal', function () {
+                $('#EditNotificationModal').on('hidden.bs.modal', function () {
                     $('#lead_notification_id').val('');
-                    console.log(crm_image_table);
-                    crm_image_table.clear();
-                    crm_image_table.draw();
+                    notification_image_table.clear();
+                    notification_image_table.draw();
                     selected_rows = [];
                     rows_count = 0;
                 //     $("#image_upload_table").dataTable().clear();
