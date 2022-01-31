@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeadTaggingHistory extends Model
 {
-    //
+    protected $guarded = [];
 }
