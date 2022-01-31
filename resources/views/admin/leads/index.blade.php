@@ -99,6 +99,25 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-3" id="in_process_activation_div">
+                            <div class="card bg-gradient-directional-out_for_delivery pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-clock text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white"><p id="in_process_activation" class="d-inline">{{$leads['in_process_for_activation']}}</p> (<p id="in_process_for_activation_percentage" class="d-inline">{{$leads['in_process_for_activation_percentage']}}</p>%)</h3>
+                                                <span>In Process For Activation</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 <div class="row justify-content-center">
                     <div class="col-3" id="dead_leads_div">
@@ -1223,6 +1242,7 @@
                             $('#active_ratio').text(data.leads.active_leads_ratio);
                             $('p#received_percentage').text(data.leads.received_percentage);
                             $('p#in_process_percentage').text(data.leads.in_process_percentage);
+                            $('p#in_process_for_activation_percentage').text(data.leads.in_process_for_activation_percentage);
                             $('p#dead_percentage').text(data.leads.dead_leads_percentage);
                             $('p#active_percentage').text(data.leads.accounts_activated_percentage);
                         }
@@ -1249,6 +1269,10 @@
             });
             $('#activated_leads_div').on('click', function(){
                 $('#search_statistics_div').val(5);
+                table.draw();
+            });
+            $('#in_process_activation_div').on('click', function(){
+                $('#search_statistics_div').val(6);
                 table.draw();
             });
         });

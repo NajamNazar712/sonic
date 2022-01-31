@@ -37,7 +37,8 @@ class LeadManagementController extends Controller
 
         $leads['total'] = Lead::whereBetween('requested_date',[$thirtyDays,$today]);
         $leads['received'] = Lead::whereBetween('requested_date',[$thirtyDays,$today])->where('status_id', 1);
-        $leads['in_process'] = Lead::whereIn('status_id', [2, 5, 6, 7, 8, 9])->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['in_process'] = Lead::whereIn('status_id', [2, 5, 6, 7, 8])->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['in_process_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
         $leads['dead_leads'] = Lead::whereIn('status_id', [3, 4, 10, 11, 13])->whereBetween('requested_date',[$thirtyDays,$today]);
         $leads['accounts_activated'] = Lead::where('status_id', 12)->whereBetween('requested_date',[$thirtyDays,$today]);
 
@@ -45,6 +46,7 @@ class LeadManagementController extends Controller
             $leads['total'] = $leads['total']->whereIn('city_id', session('hubs'));
             $leads['received'] = $leads['received']->whereIn('city_id', session('hubs'));
             $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
+            $leads['in_process_for_activation'] = $leads['in_process_for_activation']->whereIn('city_id', session('hubs'));
             $leads['dead_leads'] = $leads['dead_leads']->whereIn('city_id', session('hubs'));
             $leads['accounts_activated'] = $leads['accounts_activated']->whereIn('city_id', session('hubs'));
         }
@@ -53,6 +55,7 @@ class LeadManagementController extends Controller
                 $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
                 $leads['received'] = $leads['received']->where('leads.sale_person_id', Auth::id());
                 $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
+                $leads['in_process_for_activation'] = $leads['in_process_for_activation']->where('leads.sale_person_id', Auth::id());
                 $leads['dead_leads'] = $leads['dead_leads']->where('leads.sale_person_id', Auth::id());
                 $leads['accounts_activated'] = $leads['accounts_activated']->where('leads.sale_person_id', Auth::id());
             }
@@ -108,16 +111,19 @@ class LeadManagementController extends Controller
         $leads['total'] = $leads['total']->count();
         $leads['received'] = $leads['received']->count();
         $leads['in_process'] = $leads['in_process']->count();
+        $leads['in_process_for_activation'] = $leads['in_process_for_activation']->count();
         $leads['dead_leads'] = $leads['dead_leads']->count();
         $leads['accounts_activated'] = $leads['accounts_activated']->count();
 
         $leads['received_percentage'] = 0;
         $leads['in_process_percentage'] = 0;
+        $leads['in_process_for_activation_percentage'] = 0;
         $leads['dead_leads_percentage'] = 0;
         $leads['accounts_activated_percentage'] = 0;
         if($leads['total'] > 0){
             $leads['received_percentage'] = round(($leads['received'] / $leads['total']) * 100, 2);
             $leads['in_process_percentage'] = round(($leads['in_process'] / $leads['total']) * 100, 2);
+            $leads['in_process_for_activation_percentage'] = round(($leads['in_process_for_activation'] / $leads['total']) * 100, 2);
             $leads['dead_leads_percentage'] = round(($leads['dead_leads'] / $leads['total']) * 100, 2);
             $leads['accounts_activated_percentage'] = round(($leads['accounts_activated'] / $leads['total']) * 100,2);
         }
@@ -125,6 +131,7 @@ class LeadManagementController extends Controller
         $leads['total'] = number_format($leads['total']);
         $leads['received'] = number_format($leads['received']);
         $leads['in_process'] = number_format($leads['in_process']);
+        $leads['in_process_for_activation'] = number_format($leads['in_process_for_activation']);
         $leads['dead_leads'] = number_format($leads['dead_leads']);
         $leads['accounts_activated'] = number_format($leads['accounts_activated']);
 
@@ -174,13 +181,16 @@ class LeadManagementController extends Controller
                 $search_statuses = [1];
             }
             elseif($statistics == 3){
-                $search_statuses = [2, 5, 6, 7, 8, 9];
+                $search_statuses = [2, 5, 6, 7, 8];
             }
             elseif($statistics == 4){
                 $search_statuses = [3, 4, 10, 11, 13];
             }
             elseif($statistics == 5){
                 $search_statuses = [12];
+            }
+            elseif($statistics == 6){
+                $search_statuses = [9];
             }
             else{
                 $search_statuses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
