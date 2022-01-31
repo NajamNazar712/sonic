@@ -3121,15 +3121,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@lead_notification_update')->name('update');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_notification_enable_disable')->name('enable_disable');
             Route::post('delete_image', 'Admins\GlobalSettingsController@lead_notification_delete_image')->name('delete_image');
-            Route::prefix('shippers_origin_change')->name('shippers_origin_change.')->group(function () {
-                Route::get('', 'Admins\GlobalSettingsController@shipper_origin_index')->name('index');
-                Route::post('', 'Admins\GlobalSettingsController@shipper_origin_store')->name('store');
-            });
-    
-            Route::prefix('shippers_return_address')->name('shippers_return_address.')->group(function () {
-                Route::get('', 'Admins\GlobalSettingsController@shippers_return_address_index')->name('index');
-                Route::post('', 'Admins\GlobalSettingsController@shippers_return_address_store')->name('store');    
         });
+
+        Route::prefix('shippers_origin_change')->name('shippers_origin_change.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipper_origin_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@shipper_origin_store')->name('store');
+        });
+
+        Route::prefix('shippers_return_address')->name('shippers_return_address.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shippers_return_address_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@shippers_return_address_store')->name('store');
+        });
+
     });
 
 
@@ -3776,8 +3779,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('shipment_info', 'Retail\RetailCancelShipmentsController@get_shipment_info')->name('shipment_info');
         Route::post('store','Retail\RetailCancelShipmentsController@cancelled_shipments_store')->name('store');
     });
-
-});
 
 });
 
