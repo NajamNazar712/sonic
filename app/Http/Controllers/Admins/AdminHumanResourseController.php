@@ -3854,24 +3854,32 @@ class AdminHumanResourseController extends Controller
         $employee = Employee::find($request->employee_id);
         if($employee)
         {
-            if($employee->staff_category_id == 2){
-                $global_setting = GlobalSettings::where('type', 'latest_employee_id');
-                $trax_id_prefix = 'Trax';
-                if ($global_setting->exists()) {
-                    $global_setting = $global_setting->first();
-                    $trax_id = $global_setting->setting_value + 1;
-                    $global_setting->setting_value = $trax_id;
-                    $global_setting->save();
-                    $trax_id = $trax_id_prefix . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-                } else {
-                    $trax_id = null;
+            $admin = Admin::where('trax_id', $employee->trax_id);
+            if($admin->exists()){
+                $admin = $admin->first();
+                if($employee->staff_category_id == 2){
+                    $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                    $trax_id_prefix = 'Trax';
+                    if ($global_setting->exists()) {
+                        $global_setting = $global_setting->first();
+                        $trax_id = $global_setting->setting_value + 1;
+                        $global_setting->setting_value = $trax_id;
+                        $global_setting->save();
+                        $trax_id = $trax_id_prefix . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    } else {
+                        $trax_id = null;
+                    }
+                    $employee->staff_category_id = 1;
+                    $employee->trax_id = $trax_id;
+                    $employee->save();
+
+                    $admin->trax_id = $employee->trax_id;
+                    $admin->save();
+                    return response()->json(['status' => 0, 'success' => 'Intern Converted To Staff Successfully']);
                 }
-                $employee->staff_category_id = 1;
-                $employee->trax_id = $trax_id;
-                $employee->save();
-                return response()->json(['status' => 0, 'success' => 'Intern Converted To Staff Successfully']);
+                return response()->json(['status' => 1, 'error' => 'Employee already a Staff']);
             }
-            return response()->json(['status' => 1, 'error' => 'Employee already a Staff']);
+            return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
         }
         return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
     }

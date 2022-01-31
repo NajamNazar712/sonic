@@ -3614,22 +3614,7 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
 
-            $location_status = 0;
-            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                ->join('admins as a', 'e.id', 'a.employee_id')
-                ->where('a.id', $admin_id);
-            if($reporting_location->exists()){
-                $reporting_location = $reporting_location->first();
-                $reporting_location->radius;
-                $destination = $reporting_location->lat . ',' . $reporting_location->long;
-                $origin = $request->latitude . ',' . $request->longitude;
-                $distance = $this->distance($origin, $destination);
-                if ($distance > $reporting_location->radius / 1000) {
-                    $location_status = 1;
-                } else {
-                    $location_status = 2;
-                }
-            }
+            $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
             $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
             $action_date = Carbon::createFromFormat('Y-m-d H:i:s', $request->action_date);
 
