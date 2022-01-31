@@ -284,7 +284,12 @@
                             else{
                                 item_name = item.item_name;
                             }
-                            items_table.row.add([0,item_name,item.quantity,item.length,item.width,item.height,item.weight]);
+
+                            let length = item.length == 0 ? "-" : item.length;
+                            let width = item.width == 0 ? "-" : item.width;
+                            let height = item.height == 0 ? "-" : item.height;
+
+                            items_table.row.add([0,item_name,item.quantity,length,width,height,item.weight]);
                         });
                         items_table.draw(true);
                         $("#showLeadItems").modal('show');
