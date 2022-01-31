@@ -65,7 +65,8 @@ class LeadTaggingController extends Controller
             }
             foreach ($lead_attachments as $key => $attachment) {
                 $key = $key + 1;
-                $link = '<a href="' . $attachment . '" target="_blank"><u> Attachment ' . $key . '</u></a>';
+                $url = asset('uploads/notification_attachments/'.$attachment);
+                $link = '<a href="' . $url . '" target="_blank"><u> Attachment ' . $key . '</u></a>';
                 $body_attachment_message = $body_attachment_message . $link . PHP_EOL;
             }
             $body = $body . PHP_EOL . $body_attachment_message;
@@ -155,12 +156,15 @@ class LeadTaggingController extends Controller
                 $sms_body = str_replace('[' . $key . ']', $field, $sms_body);
             }
         }
-
-        self::email($subject, $body, $to);
+        if($lead_notification_email->status){
+            self::email($subject, $body, $to);
+        }
 
         $sms_to = $lead->phone_number;
+        if($lead_notification_sms->status){
+            self::sms($sms_body, $sms_to);
+        }
 
-        self::sms($sms_body, $sms_to);
 
     }
 }
