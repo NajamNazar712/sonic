@@ -134,8 +134,8 @@ class LeadTaggingController extends Controller
     public static function notification_unresponsive($lead_id)
     {
         $lead = Lead::find($lead_id);
-        $lead_notification_email = LeadNotification::find(1);
-        $lead_notification_sms = LeadNotification::find(2);
+        $lead_notification_email = LeadNotification::find(3);
+        $lead_notification_sms = LeadNotification::find(4);
 
         $subject = $lead_notification_email->subject;
         $body = $lead_notification_email->body;
