@@ -57,7 +57,10 @@ class LeadTaggingController extends Controller
             }
         }
 
-        $lead_attachments = LeadNotificationAttachment::where('notification_id', 1)->get();
+        $lead_attachments = LeadNotificationAttachment::where('notification_id', 1);
+        if($lead_attachments->exists()){
+            $lead_attachments = $lead_attachments->get();
+        }
         foreach ($lead_attachments as $key => $attachment) {
             $key = $key + 1;
             $link = '<a href="' . $attachment . '" target="_blank"><u> Attachment ' . $key . '</u></a>';

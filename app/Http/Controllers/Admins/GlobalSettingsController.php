@@ -5846,23 +5846,26 @@ public function sales_incentive()
         $lead_notification->body = $request->body;
 
         $lead_notification->save();
-        $image_ids = explode(',', $request->selected_ids);
-        foreach ($image_ids as $id){
+        if($request->lead_notification_id == 1){
 
-            $file_name = 'notification_image_'.$id;
-            $image = $request->file($file_name);
-
-            $extension = $image->getClientOriginalExtension();
-            $random = rand(1000, 100000);
-            $now = Carbon::now();
-            $time = $now->year . '_' . $now->month;
-            $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-            $image->move(public_path('uploads/notification_attachments'), $generated_image_name);
-            $notification_image = new LeadNotificationAttachment();
-            $notification_image->notification_id = $lead_notification->id;
-            $notification_image->added_by = Auth::id();
-            $notification_image->attachment = $generated_image_name;
-            $notification_image->save();
+            $image_ids = explode(',', $request->selected_ids);
+            foreach ($image_ids as $id){
+    
+                $file_name = 'notification_image_'.$id;
+                $image = $request->file($file_name);
+    
+                $extension = $image->getClientOriginalExtension();
+                $random = rand(1000, 100000);
+                $now = Carbon::now();
+                $time = $now->year . '_' . $now->month;
+                $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+                $image->move(public_path('uploads/notification_attachments'), $generated_image_name);
+                $notification_image = new LeadNotificationAttachment();
+                $notification_image->notification_id = $lead_notification->id;
+                $notification_image->added_by = Auth::id();
+                $notification_image->attachment = $generated_image_name;
+                $notification_image->save();
+            }
         }
         return redirect()->back()->with('success', 'Notification Updated!');
        

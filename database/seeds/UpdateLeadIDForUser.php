@@ -11,6 +11,10 @@ class UpdateLeadIDForUser extends Seeder
      */
     public function run()
     {
-        
+        $leads = DB::table('leads')->select('id', 'name')->where('admins.status', 1)->get();
+
+        foreach ($leads as $lead) {
+            $user = DB::table('users')::where('lead_id',$lead->lead_id)->update(['lead_id' => $lead->id]);
+        }
     }
 }

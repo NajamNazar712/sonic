@@ -44,7 +44,7 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Edit Notification</h4>
                 </div>
-                <form method="post" id="agent_edit" action="{{route('admin.settings.lead_notification.update')}}" novalidate="novalidate" enctype="multipart/form-data">
+                <form method="post" id="notification_edit" action="{{route('admin.settings.lead_notification.update')}}" novalidate="novalidate" enctype="multipart/form-data">
                     @csrf
 
                 <div class="modal-body">
@@ -118,6 +118,7 @@
 @endsection
 
 @section('js')
+<script src="{{asset('app-assets/vendors/js/forms/textarea/autosize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
@@ -134,27 +135,27 @@
                 width:'100%',
                 placeholder:"Select Agent",
                 allowClear:true,
-                dropdownParent:$('#agent_edit')
+                dropdownParent:$('#notification_edit')
             });
             $('#edit_service_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Service",
                 allowClear:true,
-                dropdownParent:$('#agent_edit')
+                dropdownParent:$('#notification_edit')
             });
 
             $('#edit_city_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select City",
                 allowClear:true,
-                dropdownParent:$('#agent_edit')
+                dropdownParent:$('#notification_edit')
             });
             var crm_image_table;
 
             // $('#edit_zone_id').select2({
             //     width:'100%',
             //     allowClear:true,
-            //     dropdownParent:$('#agent_edit')
+            //     dropdownParent:$('#notification_edit')
             // }).bind('change', function() {
                 
             //     $("#edit_agent_id").select2('val', '');
@@ -173,10 +174,13 @@
             //             width:'100%',
             //             placeholder:"Select City",
             //             allowClear:true,
-            //             dropdownParent:$('#agent_edit'),
+            //             dropdownParent:$('#notification_edit'),
             //             data:city_obj
             //         });
             // }); 
+            var valid_fields = [];
+				autosize($('#notification_edit .body')[0]);
+
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -319,7 +323,7 @@
 
 							$.each(data.fields, function(index, field) {
 								$('#EditAgentModal .fields').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white">[' + field + ']</span>');
-
+                                console.log(field);
 								valid_fields.push(field);
 							});
                             if(id == 1){
@@ -458,8 +462,9 @@
 
                             }
                     $('#EditAgentModal').modal('show');
+                    
 
-                });
+                    });
                 
             });
 
@@ -525,6 +530,7 @@
             });
 
             
+
             $( "#agent_assign" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
@@ -535,8 +541,25 @@
                 }
                 
                 });
+                
+                $('#notification_edit').on('shown.bs.modal', function (e) {
+				    autosize.update($('#notification_edit .body')[0]);
+                })
 
-                $( "#agent_edit" ).validate({
+                $.validator.addMethod('field', function(value, element) {
+                    var valid = true;
+                    var entered_fields = value.match(/[^[\]]+(?=])/g);
+                    $.each(entered_fields, function(index, field) {
+                        if ($.inArray(field, valid_fields) === -1) {
+                            valid = false;
+                            return valid;
+                        }
+                    });
+                    return valid;
+                }, 'One or more invalid Field(s) entered');
+
+                
+                $( "#notification_edit" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
