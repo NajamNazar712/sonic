@@ -1837,6 +1837,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments/delivered', 'Admins\AdminFinanceController@outstanding_sdn_shipments_delivered')->name('shipments.delivered');
             Route::get('delivery_notes_list', 'Admins\AdminFinanceController@outstanding_sdn_delivery_notes_list')->name('delivery_notes_list');
             Route::post('reconcile_delivery_notes', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes')->name('reconcile_delivery_notes');
+            Route::post('reconcile_delivery_notes_excel', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes_excel')->name('reconcile_delivery_notes_excel');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@outstanding_sdn_export_to_excel')->name('export_to_excel');
             Route::post('deposit_slip_list', 'Admins\AdminFinanceController@outstanding_sdn_edit_deposit_slip')->name('deposit_slip_list');
             Route::post('edit', 'Admins\AdminFinanceController@outstanding_sdn_edit_deposit_slip_submit')->name('edit');
@@ -3696,7 +3697,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-    Route::prefix('retail')->name('retail.')->group(function () {
+Route::prefix('retail')->name('retail.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('retail.login');
     });
