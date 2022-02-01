@@ -99,17 +99,13 @@
                                                             <input type="text" name="route_name" placeholder="Route Name*" class="form-control" data-rule-required="true" id="route_name" data-msg-required="Route Name is Required" data-rule-minlength="3" data-msg-minlength="Route Name must be atleast 3 character long">
                                                         </div>
                                                     </div>
-                                                    <div class="col-12 mb-2">
-                                                        <div class="row">
-                                                            <div class="col-4">
+                                                    <div class="col-12 mb-2 text-center">
                                                                 <label for=""><b>Vehicle Type :</b></label>
-                                                            </div>
-                                                            <div class="col-8">
+
                                                                 <label class="display-inline ml-1">Temporary</label>
                                                                 <input type="checkbox" name="vehicle_type" id="vehicle_type" class="switchery vehicle_type" data-size="xs" data-switchery="true" checked>
                                                                 <label class="display-inline ml-1">Fixed</label>
-                                                            </div>
-                                                        </div>
+
                                                     </div>
                                                 </div>
                                                 <div class="row">
