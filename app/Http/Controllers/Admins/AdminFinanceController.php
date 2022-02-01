@@ -734,7 +734,9 @@ class AdminFinanceController extends Controller
                 if (empty($errors)) {
 
                     foreach ($rows as $index => $row) {
-                        dd($row);
+                        $delivery_notes = DeliveryNoteStationDepositNote::where('station_deposit_note_id',$row['sdn_id'])->pluck('delivery_note_id')->toArray();
+                        $delivery_notes = implode(',',$delivery_notes);
+                        $this::outstanding_sdn_reconcile_delivery_notes_function($row['sdn_id'],$delivery_notes);
                     }
 
                     return redirect()->back()->with(['success' => 'SDN Reconciled Successfully']);
@@ -749,10 +751,6 @@ class AdminFinanceController extends Controller
                 return redirect()->back()->with('error', 'No Records in File');
             }
         }
-
-//        $this::outstanding_sdn_reconcile_delivery_notes_function();
-//
-//        return redirect()->back()->with('success', 'Station Deposit No.' . str_pad($request->station_deposit_note_id, 6, '0', STR_PAD_LEFT) . ' has been Reconciled');
     }
 
     public static function outstanding_sdn_reconcile_delivery_notes_function($station_deposit_note_id,$delivery_note_ids)
