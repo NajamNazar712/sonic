@@ -807,10 +807,10 @@ class AdminReportsEmailController extends Controller
             $date_to = Carbon::createFromFormat("Y-m-d H:i:s", $date_to);
             $origin_hubs = OvernightOverlandReportOriginHubs::where('origin_id', $origin->id)->where('shipping_mode_id', $shipping_mode_id)->pluck('hub_id')->toArray();
             if($shipping_mode_id == 1){
-                $shipping_mode = 'Overnight';
+                $shipping_mode = 'Rush';
             }
             else{
-                $shipping_mode = 'Overland';
+                $shipping_mode = 'SaverPlus';
             }
             if(count($origin_hubs) > 0){
                 foreach ($origin_hubs as $origin_hub){

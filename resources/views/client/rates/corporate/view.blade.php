@@ -29,7 +29,7 @@
                                     <div id="" class="card-header border-success">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h3 class="display-inline card-title lead success">Overnight</h3>
+                                                <h3 class="display-inline card-title lead success">Rush</h3>
                                             </div>
                                             <div class="col-md-6">
                                                 <a href="javascript:void(0);" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox"  class="switchery on-main-switch" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'checked' : '') }} disabled/></a>
@@ -898,7 +898,7 @@
                                     <div id="" class="card-header mt-1 border-success">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h3 class="display-inline card-title lead success">Overland</h3>
+                                                <h3 class="display-inline card-title lead success">SaverPlus</h3>
                                             </div>
                                             <div class="col-md-6">
                                                 <a id="ol_main_switch" href="javascript:void(0);" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }} disabled/></a>
@@ -1761,7 +1761,7 @@
                                     <div id="" class="card-header mt-1 border-success">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h3 class="display-inline card-title lead success">Detain</h3>
+                                                <h3 class="display-inline card-title lead success">Swift</h3>
                                             </div>
                                             <div class="col-md-6">
                                                 <a id="detain_main_switch" href="javascript:void(0);" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'checked' : '') }} disabled/></a>

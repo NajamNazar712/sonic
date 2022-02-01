@@ -1286,7 +1286,7 @@
                                         <li><a class="menu-item" href="{{ route('admin.settings.consolidation.max.index') }}">Maximum Consolidation Shipments</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(375, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.settings.restrict_cities_intercept.index')}}">Restrict Cities For Overland Shipments</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.settings.restrict_cities_intercept.index')}}">Restrict Cities For SaverPlus Shipments</a></li>
                                     @endif
                                 </ul>
                             </li>
@@ -1616,7 +1616,7 @@
                                         <li><a class="menu-item" href="{{route('admin.settings.return_delivered_to_shipper_email_cut_off_time.index')}}">Return Delivered To Shipper Email Cut-Off Time</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(311, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.settings.overnight_overland_cargo_report.index')}}">Overnight Overland Cargo Report</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.settings.overnight_overland_cargo_report.index')}}">Rush SaverPlus Cargo Report</a></li>
                                     @endif
                                      @if (session('role_id') == 1 || in_array(343, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.aging_report.index')}}">Pending Cash Collection & Completed Aging Reports</a></li>

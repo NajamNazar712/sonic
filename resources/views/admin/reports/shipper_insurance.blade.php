@@ -441,13 +441,13 @@
                             var ind = index + 1;
                             html += '<tr class=""><td>' + ind + '</td>';
                             if(value.shipping_mode_id === 1){
-                                html += '<td>Overnight</td>';
+                                html += '<td>Rush</td>';
                             }
                             else if(value.shipping_mode_id === 2){
-                                html += '<td>Overland</td>';
+                                html += '<td>SaverPlus</td>';
                             }
                             else if(value.shipping_mode_id === 3){
-                                html += '<td>Detain</td>';
+                                html += '<td>Swift</td>';
                             }
                             else{
                                 html += '<td>Same-day</td>';

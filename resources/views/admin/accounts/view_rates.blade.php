@@ -28,7 +28,7 @@
                             <div id="headingCollapse61" class="card-header border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="display-inline card-title lead success">Overnight</h3>
+                                        <h3 class="display-inline card-title lead success">Rush</h3>
                                         @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1"> Default</label>
                                             @if($shipper['default_shipping_mode'] == 1)
@@ -787,7 +787,7 @@
                             <div id="" class="card-header mt-1 border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="display-inline card-title lead success">Overland</h3>
+                                        <h3 class="display-inline card-title lead success">SaverPlus</h3>
                                         @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1"> Default</label>
                                             @if($shipper['default_shipping_mode'] == 2)
@@ -1543,7 +1543,7 @@
                             <div id="" class="card-header mt-1 border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="display-inline card-title lead success">Detain</h3>
+                                        <h3 class="display-inline card-title lead success">Swift</h3>
                                         @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1"> Default</label>
                                             @if($shipper['default_shipping_mode'] == 3)
