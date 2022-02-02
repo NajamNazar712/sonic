@@ -8969,8 +8969,8 @@ class NotificationsController extends Controller
                 else if($id == 168){
                     $from = $reference_1_id;
                     $to = $reference_2_id;
-                    $statuses = ShipmentStatus::whereIn('id',[1,2,3,4,5,6,7,8,9])->get();
-                    $shipment_counts = array();
+                    $statuses = ShipmentStatus::whereIn('id',[1,2,3,4,5,8,12,13,14,20,21,22,23,24,25,55])->orderBy('id','asc')->orderBy('name','desc')->get();
+                    $shipments_counts = array();
                     $settings = GlobalSettings::where('type', 'nsa_accounts');
                     $nsa_accounts = array();
                     if ($settings->exists()) {
@@ -8987,7 +8987,7 @@ class NotificationsController extends Controller
                         foreach($shipments_counts as $status => $count)
                         {
                             $preview .= "
-                                <div style='background-color: #11f118;flex: 0 0 16.666667%;max-width: 16.666667%;width: 100%;min-height: 200px;max-height: 200px;margin-right: 20px;position: relative;text-align:center;height:fit-content;padding:0px 20px;margin-bottom:20px;'>
+                                <div style='background-color: #11f118;flex: 0 0 16.666667%;max-width: 25%;min-width: 25%;width: 100%;min-height: 150px;max-height: 150px;margin-right: 20px;position: relative;text-align:center;height:fit-content;padding:0px 20px;margin-bottom:20px;'>
                                 
                                     <h2 style='color:#fff;padding-bottom:0px;margin-bottom:0px;'>".$count."</h2>
                                     <h4 style='color:#fff;padding-top:0px;margin-top:0px;'>".$status."</h4>    
