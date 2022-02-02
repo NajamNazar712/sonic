@@ -15,6 +15,7 @@ class AddDuplicateBitToAdminsTable extends Migration
     {
         Schema::table('admins', function (Blueprint $table) {
             $table->boolean('duplicate_user')->default(0);
+            $table->string('cnic')->nullable()->change();
         });
     }
 
@@ -27,6 +28,7 @@ class AddDuplicateBitToAdminsTable extends Migration
     {
         Schema::table('admins', function (Blueprint $table) {
             $table->dropColumn('duplicate_user');
+            $table->string('cnic')->nullable(false)->change();
         });
     }
 }
