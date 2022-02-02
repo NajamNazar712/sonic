@@ -178,6 +178,7 @@ class Kernel extends ConsoleKernel
         }
 
         $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
+        $schedule->command('telenor:shipmentStatus')->dailyAt('08:00')->runInBackground();
 
 
         $schedule->command('email:activitytraillog')->dailyAt('2:00')->runInBackground();
