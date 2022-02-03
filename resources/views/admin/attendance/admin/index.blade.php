@@ -14,7 +14,7 @@
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
 
-                            <form id="attendance_upload_form" class="form-horizontal" method="POST" action="{{ route('admin.attendance.excel') }}" novalidate="novalidate" enctype="multipart/form-data">
+                            <form id="attendance_upload_form" class="form-horizontal" method="POST" action="{{ route('admin.attendance.excel') }}" novalidate="novalidate" enctype="multipart/form-data" hidden>
                                 {{ csrf_field() }}
 
                                 <div class="row align-items-center justify-content-center">
