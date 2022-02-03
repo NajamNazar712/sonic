@@ -350,6 +350,10 @@ class AdminHumanResourseController extends Controller
                             if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) {
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
 
+                                if($result->staff_category_id == 2){
+                                    $dropdown .= '<button type="button" class="dropdown-item convert_intern_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Intern To Staff</div></button>';
+                                }
+
                             }
 
                             if ($result->status_id == 2) {
@@ -1048,7 +1052,7 @@ class AdminHumanResourseController extends Controller
         $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->shift_id = $request->shift_id;
-        $employee->staff_category_id = $request->staff_category;
+//        $employee->staff_category_id = $request->staff_category;
         $employee->rider_sub_category = $request->rider_sub_category;
         $employee->rider_main_category = $request->rider_main_category;
         $employee->joining_date = $request->joining_date_formatted;
@@ -3846,5 +3850,39 @@ class AdminHumanResourseController extends Controller
         ]);
 
         return back()->with("success","Rider Converted To Staff Successfully");
+    }
+
+    public function convert_intern_to_staff(Request $request){
+        $employee = Employee::find($request->employee_id);
+        if($employee)
+        {
+            $admin = Admin::where('trax_id', $employee->trax_id);
+            if($admin->exists()){
+                $admin = $admin->first();
+                if($employee->staff_category_id == 2){
+                    $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                    $trax_id_prefix = 'Trax';
+                    if ($global_setting->exists()) {
+                        $global_setting = $global_setting->first();
+                        $trax_id = $global_setting->setting_value + 1;
+                        $global_setting->setting_value = $trax_id;
+                        $global_setting->save();
+                        $trax_id = $trax_id_prefix . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                    } else {
+                        $trax_id = null;
+                    }
+                    $employee->staff_category_id = 1;
+                    $employee->trax_id = $trax_id;
+                    $employee->save();
+
+                    $admin->trax_id = $employee->trax_id;
+                    $admin->save();
+                    return response()->json(['status' => 0, 'success' => 'Intern Converted To Staff Successfully']);
+                }
+                return response()->json(['status' => 1, 'error' => 'Employee already a Staff']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
+        }
+        return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
     }
 }

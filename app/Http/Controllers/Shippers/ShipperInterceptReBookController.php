@@ -35,6 +35,7 @@ class ShipperInterceptReBookController extends Controller
                         ->select('c.id as id', 'c.name as name')
                         ->where('shipments.id', $shipment_id)
                         ->where('c.status', 1)
+                        ->where('cd.shipping_mode_id',2)
                         ->whereNotNull('c.zone_id')
                         ->whereNotIn('c.id', $restricted_cities);
                 }

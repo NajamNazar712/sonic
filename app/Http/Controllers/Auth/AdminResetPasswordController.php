@@ -56,6 +56,7 @@ class AdminResetPasswordController extends Controller
                     $admin->dummy_pin = $request->pin;
                     $admin->password = bcrypt($request->pin);
                     $admin->reset_pin_otp = null;
+                    $admin->reset_pin_status = 1;
                     $admin->save();
 
                     $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);

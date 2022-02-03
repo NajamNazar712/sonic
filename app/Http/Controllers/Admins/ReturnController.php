@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\EmployeeAttendanceController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\NotificationsController;
@@ -1967,6 +1968,8 @@ class ReturnController extends Controller
 
                     }
                 }
+                EmployeeAttendanceController::riders_attendance_mark($rider);
+
                 return redirect()->back()->with(['success' => "Return note has been created with Return Note Number:" . $note->id,'print'=>$note->id]);
             }
 

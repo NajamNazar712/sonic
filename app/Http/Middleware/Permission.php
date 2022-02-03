@@ -107,6 +107,8 @@ class Permission
             'v2_pickups.rider_receiving.index' => 366,
             'v2_pickups.pickup_route.index' => 406,
 
+            'v2_pickups.rider_receiving.dws.index' => 670,
+
             'v2_pickups.rider_tracking.index' => 446,
             'v2_pickups.rider_tracking.by_rider' => 446,
             'v2_pickups.rider_tracking.by_city' => 446,
@@ -898,6 +900,10 @@ class Permission
             'settings.shipment_status_eta.list' => 534,
 
 
+            'settings.shippers_origin_change.index' => 667,
+            'settings.shippers_return_address.index' => 668,
+
+
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1003,6 +1009,10 @@ class Permission
             'carrefour.return.index' => 607,
             'carrefour.return.submit' => 607,
 
+
+            'pam_leads.index' => 669,
+            'pam_leads.list' => 669,
+            'pam_leads.items' => 669,
 
             'leads.index' => 416,
             'leads.list' => 416,
@@ -1156,7 +1166,12 @@ class Permission
             'qa_evaluation.edit' => 654,
             'qa_evaluation.view' => 655,
             'qa_evaluation.edit_activities' => 656,
-
+            'settings.lead_tagging.index' => 661,
+            'settings.lead_tagging.list' => 661,
+            'settings.lead_zones.index' => 664,
+            'settings.lead_zones.list' => 664,
+            'settings.lead_notification.index' => 671,
+            'settings.lead_notification.list' => 671,
         ],
 
         'shipper' => [
