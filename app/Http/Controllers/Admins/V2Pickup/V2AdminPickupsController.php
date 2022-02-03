@@ -352,9 +352,15 @@ class V2AdminPickupsController extends Controller
                 }
 
             }
-                    return $datatables->make(true);
+//
+        if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
+            $from = $request->get('requested_from_date');
+            $to = $request->get('requested_to_date');
+            $datatables->whereBetween('v2_pickup_requests.created_at', [$from, $to]);
+        }
 
-        
+//
+                    return $datatables->make(true);
     }
 
     public function pending_assign(Request $request)
