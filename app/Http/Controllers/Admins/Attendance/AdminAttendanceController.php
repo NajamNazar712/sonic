@@ -676,6 +676,7 @@ class AdminAttendanceController extends Controller
                 'integer' => ':attribute must be an Integer.',
                 'exists' => 'Given :attribute is Invalid.',
                 'check_trax_id' => 'Employee id not found!',
+                'date_format' => 'Invalid Date Format d-m-yyyy h:m:s | NOTE : Please do not use zero(0) from 1 to 9.'
 
             ];
             $rules = [
