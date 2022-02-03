@@ -9,14 +9,19 @@ use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\Lead\LeadRemark;
 use App\Http\Models\Admin\Lead\LeadStatus;
+use App\Http\Models\Admin\Lead\PamLead;
+use App\Http\Models\Admin\Lead\PamLeadItem;
 use App\Http\Models\City;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\LeadNotification;
+use App\Http\Models\Admin\Lead\LeadTagging;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use DB;
+
 class LeadManagementController extends Controller
 {
     public function __construct()
@@ -279,6 +284,107 @@ class LeadManagementController extends Controller
             })->make(true);
     }
 
+    public function pam_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),489);
+        return view('admin.leads.pam_index');
+    }
+
+    public function pam_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),490);
+        }
+
+        $leads = PamLead::leftjoin('cities as o', 'o.id', '=', 'pam_leads.origin_id')
+            ->leftjoin('cities as d', 'd.id', '=', 'pam_leads.destination_id')
+            ->select(['pam_leads.id as id','pam_leads.lead_id as lead_id','pam_leads.name as name','pam_leads.phone as phone','pam_leads.location_type as category','pam_leads.case_type as case','pam_leads.video_link as video_link','pam_leads.images as images','o.name as origin','d.name as destination', DB::raw('(select count(id) from pam_lead_items as pli where pli.lead_id = pam_leads.id) as item_count')]);
+
+        if (session('role_id') != 1) {
+            $leads = $leads->whereIn('o.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($leads)
+            ->editColumn('category',function ($lead){
+                if($lead->category == 1)
+                {
+                    return "Home Shifting";
+                }
+
+                return "Office Shifting";
+            })
+            ->editColumn('case',function ($lead){
+                if($lead->case == 1)
+                {
+                    return "Both";
+                }
+                else if($lead->case == 2)
+                {
+                    return "Packing";
+                }
+                else{
+                    return "Unpacking";
+                }
+            })
+            ->addColumn('video_link_btn',function ($lead){
+                if($lead->video_link != null) {
+                    return '<a target="_blank" class="btn btn-sm btn-outline-info align-middle" href="' . $lead->video_link . '"><i class="la la-lg la-file-video-o align-middle"></i> <span class="align-middle">View Video</span></a>';
+                }
+
+                return "-";
+            })
+            ->addColumn('images_link_btn',function ($lead){
+                if($lead->images != null) {
+                    $images = explode('|',$lead->images);
+                    $html = "";
+                    foreach ($images as $image)
+                    {
+                        $html .= '<a target="_blank" class="btn btn-sm btn-outline-info align-middle" href="' . $image . '"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View Image</span></a><br>';
+                    }
+                    return $html;
+                }
+                return "-";
+            })
+            ->addColumn('images_links',function ($lead){
+                if($lead->images != null) {
+                    $images = explode('|',$lead->images);
+                    $html = "";
+                    foreach ($images as $image)
+                    {
+                        $html .= $image."  ";
+                    }
+                    return $html;
+                }
+                return "-";
+            })
+            ->addColumn('item_count_button',function ($lead){
+                return "<button class='btn btn-sm btn-outline-info align-middle show_lead_items'>" . $lead->item_count . "</button>";
+            })
+            ->make(true);
+    }
+
+    public function pam_items(Request $request)
+    {
+        if(!$request->has('id'))
+        {
+            return response()->json(['status'=>0,'error'=>'Lead ID is required']);
+        }
+
+        $items = PamLeadItem::where('lead_id',$request->id);
+
+        if($items->doesntExist())
+        {
+            return response()->json(['status'=>0,'error'=>'Invalid Lead ID']);
+        }
+
+        $items = $items->leftjoin('pam_items as pi','pi.id','pam_lead_items.item_id')
+            ->select(['pam_lead_items.*','pi.name as item_name'])
+            ->get();
+
+        return response()->json(['status'=>1,'items'=>$items]);
+    }
+
     public function lead_statistics(Request $request){
         $from = $request->search_date_from;
         $to = $request->search_date_to;
@@ -437,6 +543,9 @@ class LeadManagementController extends Controller
                     if($status == 9){
                         NotificationsController::send(113, $lead);
                     }
+                    elseif ($status == 2) {
+                        LeadTaggingController::notification_unresponsive($lead->id);
+                    }
 
                     return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
                 }
@@ -538,6 +647,16 @@ class LeadManagementController extends Controller
         if($leads->exists()){
             $leads = $leads->get();
             foreach ($leads as $lead){
+                //autotagging
+                $lead_tagging = LeadTagging::where('sale_person_id',$lead->sale_person_id);
+                if($lead_tagging->exists()){
+                    $lead_tagging = $lead_tagging->get()->first();
+                    if($lead_tagging->count > 0){
+
+                        $lead_tagging->count = $lead_tagging->count - 1; 
+                    }
+                }
+                //autotagging end
                 $lead->sale_person_id = $sale_person;
                 if($request->has('reference_person')){
                     $lead->reference_person_id = $reference_person;

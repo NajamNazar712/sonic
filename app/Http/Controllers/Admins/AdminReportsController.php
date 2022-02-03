@@ -9062,7 +9062,13 @@ class AdminReportsController extends Controller
                 $audio = '';
                 if($shipments->audio_path != null){
                     $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($shipments->audio_path)) . '"><i class="la la-file-sound-o"></i> Listen</button></div>';
-
+                    $exists = Storage::disk('public')->exists($shipments->audio_path);
+                    if ($exists) {
+                        $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($shipments->audio_path)) . '"><i class="la la-file-sound-o"></i> View</button></div>';
+                    } else {
+                        $sound = Storage::disk('s3')->temporaryUrl($shipments->audio_path, now()->addMinutes(5));
+                        $audio = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $sound . '" target="_blank"><i class="la la-lg la-file-sound-o align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
                     return $audio;
                 }
                 else {

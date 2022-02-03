@@ -1017,8 +1017,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@rider_receiving_print')->name('print');
             Route::post('total_shipments', 'Admins\V2Pickup\V2AdminPickupsController@total_shipments')->name('total_shipments');
             Route::post('arrived_shipments', 'Admins\V2Pickup\V2AdminPickupsController@arrived_shipments')->name('arrived_shipments');
+            Route::prefix('dws')->name('dws.')->group(function () {
+                Route::get('', 'Admins\V2Pickup\DWSController@rider_receiving_index')->name('index');
+                Route::get('/list', 'Admins\V2Pickup\DWSController@rider_receiving_list')->name('list');
+                Route::post('total_shipments', 'Admins\V2Pickup\DWSController@total_dws_shipments')->name('total_shipments');
+            });
         });
         // End
+
         Route::prefix('arrival')->name('arrival.')->group(function () {
             Route::prefix('bulk')->name('bulk.')->group(function () {
                 Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_bulk_index')->name('index');
@@ -3094,6 +3100,35 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@reattempt_percentage_store')->name('store');
         });
 
+        Route::prefix('lead_tagging')->name('lead_tagging.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@lead_tagging_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@lead_tagging_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@lead_tagging_submit')->name('submit');
+            Route::post('data', 'Admins\GlobalSettingsController@lead_tagging_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@lead_tagging_update')->name('update');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_tagging_enable_disable')->name('enable_disable');
+            
+        });
+
+        Route::prefix('lead_zones')->name('lead_zones.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@lead_zones_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@lead_zones_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@lead_zones_submit')->name('submit');
+            Route::post('data', 'Admins\GlobalSettingsController@lead_zones_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@lead_zones_update')->name('update');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_zones_enable_disable')->name('enable_disable');
+            
+        });
+        
+        Route::prefix('lead_notification')->name('lead_notification.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@lead_notification_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@lead_notification_list')->name('list');
+            Route::post('data', 'Admins\GlobalSettingsController@lead_notification_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@lead_notification_update')->name('update');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@lead_notification_enable_disable')->name('enable_disable');
+            Route::post('delete_image', 'Admins\GlobalSettingsController@lead_notification_delete_image')->name('delete_image');
+        });
+
         Route::prefix('shippers_origin_change')->name('shippers_origin_change.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shipper_origin_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@shipper_origin_store')->name('store');
@@ -3103,6 +3138,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shippers_return_address_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@shippers_return_address_store')->name('store');
         });
+
     });
 
 
@@ -3419,6 +3455,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('view_attachment/{id}', 'Admins\LeadManagementController@view_attachment')->name('view_attachment');
     });
 
+    Route::prefix('pam_leads')->name('pam_leads.')->group(function(){
+        Route::get('', 'Admins\LeadManagementController@pam_index')->name('index');
+        Route::get('list', 'Admins\LeadManagementController@pam_list')->name('list');
+        Route::post('items', 'Admins\LeadManagementController@pam_items')->name('items');
+    });
+
 	Route::prefix('retail')->name('retail.')->group(function(){
         Route::prefix('franchise')->name('franchise.')->group(function(){
             Route::get('', 'Admins\Retail\RetailAdminUserManagementController@franchise_index')->name('index');
@@ -3654,7 +3696,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-Route::prefix('retail')->name('retail.')->group(function () {
+    Route::prefix('retail')->name('retail.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('retail.login');
     });
