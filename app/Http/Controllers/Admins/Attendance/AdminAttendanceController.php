@@ -744,8 +744,9 @@ class AdminAttendanceController extends Controller
 
                         if ($validate->fails()) {
                             $errors['Row #' . $row_id] = $validate->errors()->all();
+                        }else{
+                            $attendance_data[trim($row['trax_id'])][Carbon::parse($row['attendance_datetime'])->format("Y-m-d")][] = Carbon::parse($row['attendance_datetime'])->format("G:i:s");
                         }
-                        $attendance_data[trim($row['trax_id'])][Carbon::parse($row['attendance_datetime'])->format("Y-m-d")][] = Carbon::parse($row['attendance_datetime'])->format("G:i:s");
                     }
                     if (empty($errors)) {
                         $updated = 0;
