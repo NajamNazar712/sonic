@@ -782,6 +782,7 @@ class AdminAttendanceController extends Controller
                                     } else {
                                         $min = min($time);
                                         $max = max($time);
+                                        dd($max);
                                         $clock_in = Carbon::parse($date . ' ' . $min)->format("Y-m-d H:i:s");
                                         if ($min == $max) {
                                             $clock_out = null;
