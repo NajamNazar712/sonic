@@ -30,6 +30,8 @@
                                     <th class="border-primary border-darken-1">Rider Main Category</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
+                                    <th class="border-primary border-darken-1">IBAN No.</th>
+                                    <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
@@ -505,6 +507,8 @@
                             head.push('Rider Main Category');
                             head.push('Designation');
                             head.push('Department Name');
+                            head.push('IBAN No.');
+                            head.push('Zone Name');
                             head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
@@ -524,6 +528,8 @@
                                 row.push(values.rider_main_category);
                                 row.push(values.employee_designation);
                                 row.push(values.department_name);
+                                row.push(values.iban);
+                                row.push(values.zone_name);
                                 row.push(values.request_status);
                                 row.push(values.status);
                                 row.push(values.requested_at);
@@ -755,7 +761,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[15, 'desc']],
+                order: [[17, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -772,6 +778,8 @@
                     {data: 'rider_main_category', name: 'rmc.name', class: 'align-middle rider_main_category'},
                     {data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation'},
                     {data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
+                    {data: 'iban', name: 'eb.iban', class: 'align-middle iban'},
+                    {data: 'zone_name', name: 'ez.id', class: 'align-middle zone_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
@@ -799,6 +807,10 @@
 
                     var rider_main_categories = '<select name="rider_main_categories_search" id="rider_main_categories_search" class="select2 form-control">' +
                         '</select>';
+
+                    var employee_zone = '<select name="employee_zone_search" id="employee_zone_search" class="select2 form-control">' +
+                        '</select>';
+
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
@@ -816,6 +828,13 @@
                         else if($(header).is('.status'))
                         {
                             $(employee_status).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.zone_name'))
+                        {
+                            $(employee_zone).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -845,7 +864,7 @@
                         }
                     });
 
-                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'}];
+                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'},{'id':4,'text':'Intern'}];
 
                     $("#employee_type_search").prepend('<option value="" selected></option>').select2({
                         data: data,
@@ -863,6 +882,19 @@
                     $("#employee_status_search").prepend('<option value="" selected></option>').select2({
                         data: status_data,
                         placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var zone_data = $.map({!! $employee_zones !!}, function (obj) {
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $("#employee_zone_search").prepend('<option value="" selected></option>').select2({
+                        data: zone_data,
+                        placeholder: "Select Zone",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
