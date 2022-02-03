@@ -733,8 +733,6 @@ class AdminAttendanceController extends Controller
                             $rows[$key]['attendance_datetime'] = implode(':', $date_string);
                             $row['attendance_datetime'] = implode(':', $date_string);
                         }
-                        $rows[$key]['attendance_datetime'] = $date_string;
-                        $row['attendance_datetime'] = $date_string;
                         $rows[$key]['trax_id'] = "Trax" . trim($row['trax_id']);
                         $row['trax_id'] = "Trax" . trim($row['trax_id']);
 
