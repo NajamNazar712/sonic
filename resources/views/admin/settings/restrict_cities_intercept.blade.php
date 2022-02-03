@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Restriction of Cities for SaverPlus Intercept')
+@section('title', 'Restriction of Cities for Saver Plus Intercept')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Restriction of Cities for SaverPlus Shipments
+                    Restriction of Cities for Saver Plus Shipments
                 </h1>
 
                 <div class="card">

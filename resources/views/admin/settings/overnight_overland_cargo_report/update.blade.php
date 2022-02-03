@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Rush & SaverPlus Cargo Report City Update')
+@section('title', 'Rush & Saver Plus Cargo Report City Update')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    {{$origin->name}} Rush & SaverPlus Cargo Report Setting
+                    {{$origin->name}} Rush & Saver Plus Cargo Report Setting
                 </h1>
 
                 <div class="card">

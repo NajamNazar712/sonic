@@ -444,7 +444,7 @@
                                 html += '<td>Rush</td>';
                             }
                             else if(value.shipping_mode_id === 2){
-                                html += '<td>SaverPlus</td>';
+                                html += '<td>Saver Plus</td>';
                             }
                             else if(value.shipping_mode_id === 3){
                                 html += '<td>Swift</td>';

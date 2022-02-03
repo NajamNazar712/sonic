@@ -645,7 +645,7 @@
                             <div id="" class="card-header mt-1 border-success">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <h3 class="display-inline card-title lead success">SaverPlus</h3>
+                                        <h3 class="display-inline card-title lead success">Saver Plus</h3>
                                         @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1">Make Default</label>
                                             <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" data-size="xs" data-switchery="true">

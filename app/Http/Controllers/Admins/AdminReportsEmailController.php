@@ -810,7 +810,7 @@ class AdminReportsEmailController extends Controller
                 $shipping_mode = 'Rush';
             }
             else{
-                $shipping_mode = 'SaverPlus';
+                $shipping_mode = 'Saver Plus';
             }
             if(count($origin_hubs) > 0){
                 foreach ($origin_hubs as $origin_hub){

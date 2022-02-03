@@ -24,7 +24,7 @@
                                     </div>
 
                                     <div class="form-group row">
-                                        <h4 class="text-center" style="text-align: left"><b>SaverPlus*:</b></h4>
+                                        <h4 class="text-center" style="text-align: left"><b>Saver Plus*:</b></h4>
                                         <input type="text" name="ol" class="form-control weights" placeholder="Minimum Chargeable Weight*" data-rule-required="true" data-msg-required="Minimum chargeable weight is required" value="{{ $ol}}" data-rule-min="0.01" data-msg-min="Minimum chargeable weight can not be less than 0.01">
                                     </div>
 

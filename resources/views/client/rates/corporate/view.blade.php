@@ -898,7 +898,7 @@
                                     <div id="" class="card-header mt-1 border-success">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h3 class="display-inline card-title lead success">SaverPlus</h3>
+                                                <h3 class="display-inline card-title lead success">Saver Plus</h3>
                                             </div>
                                             <div class="col-md-6">
                                                 <a id="ol_main_switch" href="javascript:void(0);" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }} disabled/></a>

@@ -18,7 +18,7 @@ class UpdateShippingModeSeeder extends Seeder
         DB::table('shipping_modes')->insert(array(
 
             array('id' => 1, 'mode' => 'Rush'),
-            array('id' => 2, 'mode' => 'SaverPlus'),
+            array('id' => 2, 'mode' => 'Saver Plus'),
             array('id' => 3, 'mode' => 'Swift'),
             array('id' => 4, 'mode' => 'Same-day'),
         

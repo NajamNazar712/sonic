@@ -78,7 +78,7 @@
 									</div>
 
 									<div class="col-12 col-lg-6 mt-2 mt-lg-0">
-										<h3 class="form-section mb-2">SaverPlus/Swift</h3>
+										<h3 class="form-section mb-2">Saver Plus/Swift</h3>
 
 										@foreach($cities as $city)
 											<div class="form-group">

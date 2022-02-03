@@ -287,7 +287,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                            <h4 class="input-group form-section mb-2 justify-content-center"><b>SaverPlus</b></h4>
+                                            <h4 class="input-group form-section mb-2 justify-content-center"><b>Saver Plus</b></h4>
                                                 <div style="width: 450px; float: left; margin-left: 20px;">
                                                     <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
                                                     <div class="row">
