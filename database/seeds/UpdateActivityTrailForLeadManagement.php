@@ -21,11 +21,11 @@ class UpdateActivityTrailForLeadManagement extends Seeder
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert( 
+        DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Leads Management > Lead Auto Tagging', 'url'=>'admin.settings.lead_tagging.index', 'permission_id' => 661),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Leads Management > Lead Zone Tagging', 'url'=>'admin.settings.lead_zones.index', 'permission_id' => 664),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Leads Management > Leads Notifications', 'url'=>'admin.settings.lead_notification.index', 'permission_id' => 671),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile > v2 Pickups > Rider Receiving DWS', 'url'=>'v2_pickups.rider_receiving.dws.index', 'permission_id' => 670)
-        );
+        ));
     }
 }
