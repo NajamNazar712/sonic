@@ -790,24 +790,23 @@ class AdminAttendanceController extends Controller
                                         } else {
                                             $clock_out = Carbon::parse($date . ' ' . $max)->format("Y-m-d H:i:s");
                                         }
-
-                                        $employee_attendance = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->where('attendance_date', $date);
-                                        $clock_in_flag = false;
-                                        if ($employee_attendance->exists()) {
-                                            $employee_attendance = $employee_attendance->first();
-                                            if (!$employee_attendance->clock_in_datetime) {
-                                                $clock_in_flag = true;
-                                            } else {
-                                                $clock_out = Carbon::parse($date . ' ' . $max)->format("Y-m-d H:i:s");
-                                            }
-                                        } else {
+                                    }
+                                    $employee_attendance = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->where('attendance_date', $date);
+                                    $clock_in_flag = false;
+                                    if ($employee_attendance->exists()) {
+                                        $employee_attendance = $employee_attendance->first();
+                                        if (!$employee_attendance->clock_in_datetime) {
                                             $clock_in_flag = true;
-                                            $employee_attendance = new EmployeeAttendance();
-                                            $employee_attendance->employee_id = $employee_id;
-                                            $employee_attendance->employee_type = $type;
-                                            $employee_attendance->attendance_date = Carbon::parse($date)->format("Y-m-d");
-                                            $employee_attendance->save();
+                                        } else {
+                                            $clock_out = Carbon::parse($date . ' ' . $max)->format("Y-m-d H:i:s");
                                         }
+                                    } else {
+                                        $clock_in_flag = true;
+                                        $employee_attendance = new EmployeeAttendance();
+                                        $employee_attendance->employee_id = $employee_id;
+                                        $employee_attendance->employee_type = $type;
+                                        $employee_attendance->attendance_date = Carbon::parse($date)->format("Y-m-d");
+                                        $employee_attendance->save();
                                     }
                                     if ($clock_in_flag) {
                                         $employee_attendance->clock_in_datetime = $clock_in;
