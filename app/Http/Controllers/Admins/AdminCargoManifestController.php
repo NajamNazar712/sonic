@@ -2539,7 +2539,7 @@ class AdminCargoManifestController extends Controller
         $bag_short_received_error = false;
         if(count($bag_not_exists) > 0)
         {
-            $bag_not_exists_error = "Following Bag(s) already received or doesn\'t exists.<br><ul>";
+            $bag_not_exists_error = "Following Bag(s) already received or doesn't exists.<br><ul>";
             foreach ($bag_not_exists as $v)
             {
                 $bag_not_exists_error .= "<li>".CargoManifestBag::find($v)->seal_number ?? $v."</li>";
@@ -2548,7 +2548,7 @@ class AdminCargoManifestController extends Controller
         }
         if(count($bag_not_exists_in_manifest) > 0)
         {
-            $bag_not_exists_in_manifest_error = "Following Bag(s) doesn\'t exists in any manifest.<br><ul>";
+            $bag_not_exists_in_manifest_error = "Following Bag(s) doesn't exists in any manifest.<br><ul>";
             foreach ($bag_not_exists_in_manifest as $v)
             {
                 $bag_not_exists_in_manifest_error .= "<li>".CargoManifestBag::find($v)->seal_number."</li>";
@@ -2557,7 +2557,7 @@ class AdminCargoManifestController extends Controller
         }
         if(count($bag_not_exists_in_mapping) > 0)
         {
-            $bag_not_exists_in_mapping_error = "Following Bag(s) doesn\'t associated with any mapping.<br><ul>";
+            $bag_not_exists_in_mapping_error = "Following Bag(s) doesn't associated with any mapping.<br><ul>";
             foreach ($bag_not_exists_in_mapping as $v)
             {
                 $bag_not_exists_in_mapping_error .= "<li>".CargoManifestBag::find($v)->seal_number."</li>";
@@ -2833,7 +2833,7 @@ class AdminCargoManifestController extends Controller
 
     public function receive_bag_shipments_store(Request $request)
     {
-        $shipment_status_array = [4,15,22,27,33];
+        $shipment_status_array = [3,21,26,32,49];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $bag_ids = array();
         $shipment_ids_array = array();
@@ -2846,7 +2846,7 @@ class AdminCargoManifestController extends Controller
                 $bag_shipment = $bag_shipment->latest()->first();
 
                 $shipment = Shipment::find($shipment_id);
-                if (!in_array($shipment->shipper_status_id,$shipment_status_array)) {
+                if (in_array($shipment->shipper_status_id,$shipment_status_array)) {
 
                     if ($bag_shipment->status == 0) {
                         $bag_shipment->status = 1;
@@ -3002,7 +3002,7 @@ class AdminCargoManifestController extends Controller
 
         if(count($shipments_already_marked_received_array) > 0)
         {
-            $already_received_shipments_html = "Following Shipments(s) are already  marked as received.<br><ul>";
+            $already_received_shipments_html = "Following Shipments(s) are already marked as received or processed .<br><ul>";
             foreach ($shipments_already_marked_received_array as $v)
             {
                 $already_received_shipments_html .= "<li>".$v."</li>";
