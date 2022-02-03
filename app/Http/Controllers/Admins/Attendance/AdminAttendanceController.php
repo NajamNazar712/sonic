@@ -680,7 +680,7 @@ class AdminAttendanceController extends Controller
             ];
             $rules = [
                 'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
-                'attendance_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+                'attendance_datetime' => ['required', 'date_format:j-n-Y  G:i:s'],
             ];
 
 
@@ -726,7 +726,13 @@ class AdminAttendanceController extends Controller
 
                     $attendance_data = array();
                     foreach ($rows as $key => $row) {
-                        $date_string = Carbon::parse(trim($row['attendance_datetime']))->format("Y-m-d H:i:s");
+                        $date_string = explode(":", trim($row['attendance_datetime']));
+                        if (count($date_string) == 3) {
+                            $date_string[2] = str_pad($date_string[2], 2, 0, STR_PAD_LEFT);
+                            $date_string[1] = str_pad($date_string[1], 2, 0, STR_PAD_LEFT);
+                            $rows[$key]['attendance_datetime'] = implode(':', $date_string);
+                            $row['attendance_datetime'] = implode(':', $date_string);
+                        }
                         $rows[$key]['attendance_datetime'] = $date_string;
                         $row['attendance_datetime'] = $date_string;
                         $rows[$key]['trax_id'] = "Trax" . trim($row['trax_id']);
@@ -741,7 +747,7 @@ class AdminAttendanceController extends Controller
                         if ($validate->fails()) {
                             $errors['Row #' . $row_id] = $validate->errors()->all();
                         }
-                        $attendance_data[trim($row['trax_id'])][Carbon::parse($row['attendance_datetime'])->format("Y-m-d")][] = Carbon::parse($row['attendance_datetime'])->format("H:i:s");
+                        $attendance_data[trim($row['trax_id'])][Carbon::parse($row['attendance_datetime'])->format("Y-m-d")][] = Carbon::parse($row['attendance_datetime'])->format("G:i:s");
                     }
                     if (empty($errors)) {
                         $updated = 0;
