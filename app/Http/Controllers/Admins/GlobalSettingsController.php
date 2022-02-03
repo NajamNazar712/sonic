@@ -5487,7 +5487,7 @@ public function sales_incentive()
     }
 
     public function lead_tagging_index(){
-        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),493);
         $agents = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         // $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
         $services = DB::table('service_list')->where('status',1)->get();
@@ -5503,7 +5503,10 @@ public function sales_incentive()
         return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities , 'services' => $services , 'zones' => $zones]);
     }
 
-    public function lead_tagging_list(){
+    public function lead_tagging_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 494);
+        }
         $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
                  ->join('cities as c','c.id','lead_taggings.city_id')   
                  ->join('zones as z','z.id','lead_taggings.zone_id')   
@@ -5580,15 +5583,8 @@ public function sales_incentive()
 
     }
 
-    // public function lead_tagging_delete(Request $request){
-    //     CrmAutoTagUser::find($request->id)->delete();
-    //     return response()->json(['status' => 1, 'success' => 'Tagged Agent Deleted']);
-
-    // }
-
 
     public function lead_tagging_update(Request $request){
-        // dd($request->all());
         $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
 
         if(!$check_leads->exists()){
@@ -5623,7 +5619,7 @@ public function sales_incentive()
 
 
     public function lead_zones_index(){
-        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),495);
         $admins = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
 
         // $admins = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
@@ -5631,7 +5627,10 @@ public function sales_incentive()
         return view('admin.settings.lead_management.zone_tagging')->with(['admins' => $admins , 'zones' => $zones]);
     }
 
-    public function lead_zones_list(){
+    public function lead_zones_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 496);
+        }
         $roles = LeadZone::join('admins as ad', 'ad.id', '=', 'lead_zones.admin_id')
                  ->join('zones as z','z.id','lead_zones.zone_id')   
         ->select('lead_zones.id', 'ad.name as agent_name', 'z.name as zone','lead_zones.status');
@@ -5738,11 +5737,14 @@ public function sales_incentive()
 
     
     public function lead_notification_index(){
-        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),497);
         return view('admin.settings.lead_management.notification');
     }
 
-    public function lead_notification_list(){
+    public function lead_notification_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 498);
+        }
         $notifications = LeadNotification::join('admins as a', 'lead_notifications.updated_by', '=', 'a.id')
         ->select('lead_notifications.id', 'lead_notifications.name', 'lead_notifications.type_id as type', 'lead_notifications.updated_at', 'a.name as updated_by', 'lead_notifications.status');
 
