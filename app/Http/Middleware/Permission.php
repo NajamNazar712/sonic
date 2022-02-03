@@ -586,6 +586,9 @@ class Permission
             
             'reports.reverse_pickup.index' => 624,
             'reports.reverse_pickup.list' => 624,
+            
+            'reports.crm_count.index' => 673,
+            'reports.crm_count.list' => 673,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

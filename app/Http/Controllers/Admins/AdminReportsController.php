@@ -9985,5 +9985,39 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
 
     }
+
+    public function crm_count_index(){
+        dd(Carbon::yesterday()->hour(17)->minute(31));
+        ActivityTrailController::createActivityTrailLog(Auth::id(),484);
+
+        return view('admin.reports.crm_count');
+
+    }
+    public function crm_count_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),485);
+        }
+        $shipments = Shipment::join('return_revert_logs as rr', 'shipments.id', '=', 'rr.shipment_id')
+        ->leftjoin('admins as a','a.id','=','rr.updated_by')
+        ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','a.name as updated_by','rr.return_note as return_note','rr.updated_at as updated_at','rr.shipper as shipper');
+
+        $datatable = Datatables::of($shipments)
+        ->editColumn('tracking_number',function ($shipments){
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        })
+        ->editColumn('return_note', function ($shipments) {
+            return str_pad($shipments->return_note, 6, '0', STR_PAD_LEFT);
+        });
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments = $shipments->whereBetween('rr.updated_at', [$from,$to]);
+        }
+        return $datatable->make(true);
+
+    }
 }
 

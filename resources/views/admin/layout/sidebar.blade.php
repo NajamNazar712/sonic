@@ -1181,7 +1181,10 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(653, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.revert.index') }}">Return Revert Log Report</a></li>
-                    @endif
+                        @endif
+                        @if (session('role_id') == 1 || in_array(673, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.crm_count.index') }}">CRM Count Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
