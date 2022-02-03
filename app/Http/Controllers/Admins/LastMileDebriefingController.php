@@ -145,9 +145,9 @@ class LastMileDebriefingController extends Controller
         }
 
         // $next_time = Carbon::today()->addHours($time);
-        $next_time = Carbon::today()->endOfDay()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateString();
           
-        $prev_time = Carbon::today()->addHours($time);
+        $prev_time = Carbon::today()->addHours($time)->toDateString();
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
