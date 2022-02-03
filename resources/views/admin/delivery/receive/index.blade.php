@@ -1,4 +1,3 @@
-
 @extends('admin.layout.master')
 @section('title','Receive Deliveries')
 
@@ -13,12 +12,12 @@
                 @include('admin.inc.messages')
 
 
-
                 <div class="row mb-2 justify-content-center">
 
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Scan Delivery Note Number" name="scan_delivery_note" id="scan_delivery_note">
+                            <input type="text" class="form-control" placeholder="Scan Delivery Note Number"
+                                   name="scan_delivery_note" id="scan_delivery_note">
                             <div class="form-control-position">
                                 <i class="ft-search"></i>
                             </div>
@@ -26,7 +25,8 @@
                     </div>
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Search By Tracking Number" name="search_tracking" id="search_tracking">
+                            <input type="text" class="form-control" placeholder="Search By Tracking Number"
+                                   name="search_tracking" id="search_tracking">
                             <div class="form-control-position">
                                 <i class="ft-search"></i>
                             </div>
@@ -44,6 +44,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Route</th>
@@ -66,7 +67,8 @@
     </div>
 
     <!--Shipments popup -->
-    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal"
+         aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -86,9 +88,10 @@
     </div>
     <!--Shipments popup -->
     <!--reassign popup -->
-    <div class="modal fade" id="reassign_modal" data-backdrop="static" role="dialog" aria-labelledby="reassign_modal" aria-hidden="true">
+    <div class="modal fade" id="reassign_modal" data-backdrop="static" role="dialog" aria-labelledby="reassign_modal"
+         aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
-            <form id="reassign_rider_form" class="form" nonvalidate="nonvalidate" >
+            <form id="reassign_rider_form" class="form" nonvalidate="nonvalidate">
                 <input type="hidden" id="delivery_note_id" value="">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -101,12 +104,15 @@
                         <div class="row justify-content-center">
                             <div class="col">
                                 <fieldset class="form-group">
-                                    <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                                    <select name="operation_rider_id" id="operation_rider_id"
+                                            class="form-control select2" required>
                                         @foreach($operation_rider_category as $category)
                                             <option value="{{$category->id}}">{{$category->name}}</option>
                                         @endforeach
                                     </select>
-                                    <div class="danger" id="operation_error" style="display:none;">This field is required</div>
+                                    <div class="danger" id="operation_error" style="display:none;">This field is
+                                        required
+                                    </div>
                                 </fieldset>
                             </div>
                             <div class="col">
@@ -114,17 +120,21 @@
                                     <select name="rider" id="riders" class="form-control select2" required>
 
                                     </select>
-                                    <div class="danger" id="rider_error" style="display:none;">This field is required</div>
+                                    <div class="danger" id="rider_error" style="display:none;">This field is required
+                                    </div>
                                 </fieldset>
                             </div>
                             <div class="col">
                                 <fieldset class="form-group">
                                     <select name="route" id="route" class="form-control select2" required>
                                         @foreach($routes as $route)
-                                            <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
+                                            <option value="{{$route->id}}">{{$route->code}} ({{$route->start}}
+                                                to {{$route->end}})
+                                            </option>
                                         @endforeach
                                     </select>
-                                    <div class="danger" id="route_error" style="display:none;">This field is required</div>
+                                    <div class="danger" id="route_error" style="display:none;">This field is required
+                                    </div>
                                 </fieldset>
                             </div>
                         </div>
@@ -140,31 +150,36 @@
     <!--reassign popup -->
 
     <!--otp popup -->
-    <div class="modal fade" id="OtpModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="OtpModal"
+    <div class="modal fade" id="OtpModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="OtpModal"
          aria-hidden="true" style="top:30%;">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content col">
                 <div class="modal-header text-center">
                     <div class="row align-items-center">
                         <div class="col sonic_logo align-middle text-left">
-                            <img src="{{asset('img/sonic_logo_new.png')}}" alt="Sonic" class="d-inline-block mx-auto w-50">
+                            <img src="{{asset('img/sonic_logo_new.png')}}" alt="Sonic"
+                                 class="d-inline-block mx-auto w-50">
                         </div>
 
                         <div class="col trax_logo align-middle text-right">
-                            <img src="{{asset('img/trax_logo_new.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
+                            <img src="{{asset('img/trax_logo_new.png')}}" alt="Trax"
+                                 class="d-inline-block mx-auto w-50">
                         </div>
                     </div>
                 </div>
                 <div class="modal-body  text-center">
                     <div class="row justify-content-center">
                         <div class="form-group form-inline">
-                            <input type="text" class="form-control otp" autofocus id="otp_input" placeholder="Enter Verification Code">
+                            <input type="text" class="form-control otp" autofocus id="otp_input"
+                                   placeholder="Enter Verification Code">
                         </div>
 
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="otp_submit" disabled>Enter</button>
+                    <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="otp_submit" disabled>Enter
+                    </button>
                 </div>
             </div>
         </div>
@@ -228,7 +243,8 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
+            type="text/javascript"></script>
 
     {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -237,20 +253,20 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $('#riders').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Rider',
-                width:'100%',
-                allowClear:true
+                placeholder: 'Select Rider',
+                width: '100%',
+                allowClear: true
             });
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                            url: '{{ route('admin.delivery.receive.list') }}',
-                            data: params,
+                        url: '{{ route('admin.delivery.receive.list') }}',
+                        data: params,
                         success: function (result) {
                             head = [];
 
@@ -269,7 +285,7 @@
                             head.push('Status');
                             head.push('Last Updated (Date)');
                             head.push('Last Updated By');
-                            $.each(result.data, function(index, values) {
+                            $.each(result.data, function (index, values) {
                                 row = [];
 
 
@@ -296,7 +312,7 @@
 
                     return {body: body, header: head};
                 }
-            } );
+            });
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -327,40 +343,74 @@
                 rowId: 'delivery_note_id',
                 order: [[1, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle delivery_note'},
-                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    { data:'business_category' ,name: 'oc.business_category_id', class: 'align-middle business_category'},
-                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    { data:'shipments_unverified_link' ,name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center',orderable: false, searchable: false},
-                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments text-center',orderable: false, searchable: false},
-                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
-                    { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
-                    { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
-                    { data:'pending_status' ,name: 'pending_status', class: 'align-middle pending_status'},
-                    { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
-                    { data:'updated_by' ,name: 'delivery_notes.updated_by', class: 'align-middle updated_by'},
-                    {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
+                    {
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 0,
+                        render: function (data, type, row) {
+                            return '';
+                        }
+                    },
+                    {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle delivery_note'},
+                    {data: 'hub', name: 'oc.name', class: 'align-middle hub'},
+                    {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
+                    {
+                        data: 'business_category',
+                        name: 'oc.business_category_id',
+                        class: 'align-middle business_category'
+                    },
+                    {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
+                    {data: 'route', name: 'route', class: 'align-middle route'},
+                    {
+                        data: 'shipments_count_link',
+                        name: 'delivery_notes.shipments_count',
+                        class: 'align-middle shipments_count_link text-center'
+                    },
+                    {
+                        data: 'shipments_unverified_link',
+                        name: 'shipments_unverified_count',
+                        class: 'align-middle shipments_unverified_link text-center',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'delivered_shipments',
+                        name: 'delivery_notes.delivered_shipments',
+                        class: 'align-middle delivered_shipments text-center',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {data: 'assignee', name: 'admins.name', class: 'align-middle assignee'},
+                    {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle created_at'},
+                    {data: 'amount', name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
+                    {data: 'pending_status', name: 'pending_status', class: 'align-middle pending_status'},
+                    {
+                        data: 'last_updated_at',
+                        name: 'delivery_notes.last_updated_at',
+                        class: 'align-middle last_updated_at'
+                    },
+                    {data: 'updated_by', name: 'delivery_notes.updated_by', class: 'align-middle updated_by'},
+                    {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
-                rowCallback: function(row, data, index) {
+                rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 drawCallback: function (settings) {
-                    var api = new $.fn.dataTable.Api( settings );
-                    var data = api.rows( {page:'current'} ).data();
+                    var api = new $.fn.dataTable.Api(settings);
+                    var data = api.rows({page: 'current'}).data();
 
-                    if($('#scan_delivery_note').val() != ''){
-                        if(data.length > 0){
+                    if ($('#scan_delivery_note').val() != '') {
+                        if (data.length > 0) {
                             scan_sound(1);
-                        }else{
+                        } else {
                             scan_sound(2);
                         }
                     }
                 },
-                initComplete: function() {
+                initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -374,25 +424,24 @@
                         '<option value="1">Domestic</option>' +
                         '<option value="2">International</option>' +
                         '</select>';
-                    this.api().columns().every(function(column_id) {
+                    this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipments_unverified_link')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.pending_status')){
+                        } else if ($(header).is('.pending_status')) {
                             $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.business_category')){
+                                }).wrap(td);
+                        } else if ($(header).is('.business_category')) {
                             $(business_drop).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
+                                }).wrap(td);
+                        } else {
+                            var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
 
@@ -403,13 +452,13 @@
                     });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     $("#business_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Category",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -429,7 +478,7 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
+            }).bind('input', function () {
                 if (this.value.length == 0 || this.value.length >= 6) {
                     table.draw();
                 }
@@ -439,7 +488,7 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
+            }).bind('input', function () {
                 table.draw();
             });
 
@@ -453,10 +502,10 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         var tab = window.open('', '_blank');
 
-                        if(!tab) {
+                        if (!tab) {
                             swal({
                                 title: 'Popup Blocker Enabled!',
                                 text: 'Please add this site to your exception list.',
@@ -464,41 +513,40 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                        }
-                        else {
+                        } else {
                             tab.document.write(data);
                             tab.document.close();
                             tab.focus();
                         }
                     });
             }
-            $('body').on('click','.printdeliverynote',function () {
+
+            $('body').on('click', '.printdeliverynote', function () {
                 var deliverynote = $(this).parents('tr').attr('id');
                 print(deliverynote);
             });
-            $('body').on('click','.printTempDNCC',function () {
+            $('body').on('click', '.printTempDNCC', function () {
                 var note_id = $(this).parents('tr').attr('id');
                 var temporary = 'temporary';
-                printTemp(note_id,temporary);
+                printTemp(note_id, temporary);
             });
-            $('body').on('click','.printUndeliveredDNCC',function () {
+            $('body').on('click', '.printUndeliveredDNCC', function () {
                 var note_id = $(this).parents('tr').attr('id');
                 printUndelivered(note_id);
             });
-            $('body').on('keyup change','#otp_input',function() {
-                if($(this).val().length === 6){
+            $('body').on('keyup change', '#otp_input', function () {
+                if ($(this).val().length === 6) {
                     $('#otp_submit').attr('disabled', false);
-                }
-                else{
+                } else {
                     $('#otp_submit').attr('disabled', true);
                 }
             });
 
             $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Category*',
+                placeholder: 'Select Category*',
                 width: '100%',
             }).bind('select2:select', function () {
-                if(this.value){
+                if (this.value) {
                     $.ajax({
                         url: '{!! route('admin.delivery.note.operation_riders') !!}',
                         method: 'POST',
@@ -506,12 +554,12 @@
                             '_token': '{{ csrf_token() }}',
                             'operation_rider_id': this.value,
                         }
-                    }).done(function(data){
+                    }).done(function (data) {
 
                         if (data.status == 1) {
                             var html = "";
-                            $.each(data.riders, function(key,value) {
-                                if(value.trax_id)
+                            $.each(data.riders, function (key, value) {
+                                if (value.trax_id)
                                     html += `<option value="${value.id}">${value.name} - ${value.trax_id}</option>`;
                                 else
                                     html += `<option value="${value.id}">${value.name}</option>`;
@@ -519,8 +567,7 @@
                             });
                             $('#riders').html(html);
                             $('#riders').val('').trigger('change');
-                        }
-                        else {
+                        } else {
                             toastr.error(data.error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
@@ -530,17 +577,17 @@
                 }
             });
             $('#route').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Route*',
+                placeholder: 'Select Route*',
                 width: '100%',
             });
             $('#riders').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Rider*',
+                placeholder: 'Select Rider*',
                 width: '100%',
             });
-            $('#riders').on('change',function () {
+            $('#riders').on('change', function () {
                 var route = $(this).find(":selected").data("id");
                 var rider_id = $(this).val();
-                if(rider_id != null){
+                if (rider_id != null) {
                     $.ajax({
                         url: '{!! route('admin.delivery.note.rider_dncc_status') !!}',
                         method: 'POST',
@@ -548,41 +595,39 @@
                             '_token': '{{ csrf_token() }}',
                             'rider_id': rider_id,
                         }
-                    }).done(function(data){
+                    }).done(function (data) {
                         if (data.status == 1) {
                             ccd_rider = parseInt(data.ccd_rider);
                             $('#route').val(route).trigger('change');
-                            $("#reassign_button").attr('disabled',false);
-                        }
-                        else {
+                            $("#reassign_button").attr('disabled', false);
+                        } else {
                             toastr.error(data.error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
-                            $("#reassign_button").attr('disabled',true);
+                            $("#reassign_button").attr('disabled', true);
                         }
                     });
-                }
-                else{
+                } else {
                     $('#route').val(route).trigger('change');
                 }
 
             });
 
-            function printTemp(id,temp = null) {
+            function printTemp(id, temp = null) {
                 $.ajax({
                     url: '{!! route('admin.delivery.receive.dncc.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
-                        'temporary':temp,
+                        'temporary': temp,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         var tab = window.open('', '_blank');
 
-                        if(!tab) {
+                        if (!tab) {
                             swal({
                                 title: 'Popup Blocker Enabled!',
                                 text: 'Please add this site to your exception list.',
@@ -590,14 +635,14 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                        }
-                        else {
+                        } else {
                             tab.document.write(data);
                             tab.document.close();
                             tab.focus();
                         }
                     });
             }
+
             function printUndelivered(id) {
                 $.ajax({
                     url: '{!! route('admin.delivery.receive.undelivered.print') !!}',
@@ -607,10 +652,10 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         var tab = window.open('', '_blank');
 
-                        if(!tab) {
+                        if (!tab) {
                             swal({
                                 title: 'Popup Blocker Enabled!',
                                 text: 'Please add this site to your exception list.',
@@ -618,8 +663,7 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                        }
-                        else {
+                        } else {
                             tab.document.write(data);
                             tab.document.close();
                             tab.focus();
@@ -629,7 +673,7 @@
 
             var route = '{!! route('admin.tracking.index') !!}';
 
-            $('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
+            $('#datatable tbody').on('click', 'tr td.shipments_count_link button', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#shipments_modal .modal-body').html('');
                 $('#shipments_modal').modal('show');
@@ -642,13 +686,13 @@
                         'delivery_note_id': id
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         if (data) {
                             var html = '';
 
                             if (data.shipments) {
-                                $.each(data.shipments, function(index, tracking_number) {
-                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                $.each(data.shipments, function (index, tracking_number) {
+                                    html += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                 });
                             }
                             $('#shipments_modal .modal-body').html(html);
@@ -658,7 +702,7 @@
             });
 
 
-            $('body').on('click','.reassign_rider',function () {
+            $('body').on('click', '.reassign_rider', function () {
                 var note_id = $(this).parents('tr').attr('id');
                 $('#delivery_note_id').val(note_id);
                 $('#reassign_modal').modal('show');
@@ -672,21 +716,21 @@
             //     }
             // });
             {{--$('#scan_tracking').on('change',function () {--}}
-                {{--var scan = $(this);--}}
-                {{--var tracking = $(this).val();--}}
-                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
-                {{--if(numberRegex.test(tracking)) {--}}
+            {{--var scan = $(this);--}}
+            {{--var tracking = $(this).val();--}}
+            {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
+            {{--if(numberRegex.test(tracking)) {--}}
 
-                    {{--var url = "{{route("admin.delivery.receive.status","id")}}";--}}
-                    {{--url = url.replace('id',tracking);--}}
+            {{--var url = "{{route("admin.delivery.receive.status","id")}}";--}}
+            {{--url = url.replace('id',tracking);--}}
 
-                    {{--window.location.href = url;--}}
-                {{--}else{--}}
-                    {{--scan.val('');--}}
-                {{--}--}}
+            {{--window.location.href = url;--}}
+            {{--}else{--}}
+            {{--scan.val('');--}}
+            {{--}--}}
             {{--});--}}
 
-            $('#reassign_button').on('click', function(){
+            $('#reassign_button').on('click', function () {
                 var operation_id = $('#operation_rider_id').val();
                 var route = $('#route').val();
                 var rider = $('#riders').val();
@@ -707,10 +751,10 @@
                     errors = 1;
                     $('#route_error').css('display', 'block');
                 }
-                if(errors == 0){
-                    if(operation_id === '2'){
+                if (errors == 0) {
+                    if (operation_id === '2') {
                         reassign_rider();
-                    }else{
+                    } else {
                         otp_generation();
                     }
                 }
@@ -721,14 +765,14 @@
             });
 
             $('#otp_input').keypress(function (event) {
-                if(event.keyCode == 13){
+                if (event.keyCode == 13) {
                     otp_verification();
                 }
             });
 
-            function reassign_rider(){
+            function reassign_rider() {
                 var rider = $('#riders').val();
-                if(rider){
+                if (rider) {
                     swal({
                         text: 'Are you sure, you want to Reassign rider?',
                         icon: 'warning',
@@ -749,7 +793,7 @@
                         closeOnClickOutside: false,
                         closeOnEsc: false,
                         dangerMode: true
-                    }).then(function(confirm) {
+                    }).then(function (confirm) {
                         if (confirm) {
                             $.ajax({
                                 url: '{!! route('admin.delivery.receive.reassign_rider') !!}',
@@ -757,33 +801,37 @@
                                 data: {
                                     '_token': '{{ csrf_token() }}',
                                     'rider': rider,
-                                    'oper_id' : $('#operation_rider_id').val(),
+                                    'oper_id': $('#operation_rider_id').val(),
                                     'delivery_note_id': $('#delivery_note_id').val()
                                 }
                             })
-                                .done(function(data) {
+                                .done(function (data) {
                                     if (data.status == 0) {
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                    else {
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
                                     }
                                     table.draw(true);
                                     $('#reassign_modal').modal('hide');
                                 });
                         }
                     });
-                }
-                else{
+                } else {
                     var error = "Rider not selected!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 
             }
 
-            function otp_generation(){
+            function otp_generation() {
                 var rider = $('#riders').val();
-                if(rider){
+                if (rider) {
                     $('#OtpModal').modal('show');
                     $.ajax({
                         url: '{!! route('admin.delivery.note.otp.generate') !!}',
@@ -795,8 +843,7 @@
                     }).done(function (data) {
                         $('#otp_input').focus();
                     });
-                }
-                else{
+                } else {
                     var error = "Rider not selected!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
@@ -805,7 +852,7 @@
             function otp_verification() {
                 var otp = $('#otp_input').val();
                 var rider = $('#riders').val();
-                if(rider){
+                if (rider) {
                     if (otp.length == 6) {
                         $.ajax({
                             url: '{!! route('admin.delivery.note.otp.verify') !!}',
@@ -829,8 +876,7 @@
                             }
                         });
                     }
-                }
-                else{
+                } else {
                     var error = "Rider not selected!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
@@ -839,7 +885,7 @@
 
             $('#reassign_modal').on('hide.bs.modal', function (e) {
                 $('#reassign_rider_form')[0].reset();
-                $("#reassign_button").attr('disabled',true);
+                $("#reassign_button").attr('disabled', true);
                 $('#riders').html("");
                 $('#operation_rider_id').val('').trigger('change');
                 $('#route').val('').trigger('change');
