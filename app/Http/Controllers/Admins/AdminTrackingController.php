@@ -1002,7 +1002,7 @@ class AdminTrackingController extends Controller
                                         }
                                     }
                                     if ($rider_delivery->audio_path != null) {
-                                        $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                        $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
                                         if ($exists) {
                                             $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->audio_path)) . '"><i class="la la-file-sound-o"></i></button>';
                                         }else {
