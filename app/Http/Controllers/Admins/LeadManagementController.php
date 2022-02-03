@@ -258,7 +258,7 @@ class LeadManagementController extends Controller
             })
             ->addColumn('lead_id_link',function ($lead){
                 $route = route('admin.leads.view_remarks', ['id' => $lead->lead_id]);
-                return "<u><a href='{$route}\' class='leads' target='_blank'>". str_pad($lead->lead_id, 3, '0', STR_PAD_LEFT)."</a></u>";
+                return "<u><a href='{$route}\' class='leads' target='_blank'>". str_pad($lead->id, 3, '0', STR_PAD_LEFT)."</a></u>";
                 //return $lead->lead_id;
             })
             ->addColumn('action', function($lead){
