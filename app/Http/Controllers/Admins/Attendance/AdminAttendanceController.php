@@ -680,7 +680,7 @@ class AdminAttendanceController extends Controller
             ];
             $rules = [
                 'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
-                'attendance_datetime' => ['required', 'date_format:j-n-Y  H:i:s'],
+                'attendance_datetime' => ['required', 'date_format:j-n-Y H:i:s'],
             ];
 
 
@@ -728,7 +728,7 @@ class AdminAttendanceController extends Controller
                     foreach ($rows as $key => $row) {
                         $date_string = explode(":", trim($row['attendance_datetime']));
                         if (count($date_string) == 3) {
-                            $date = explode(" ", trim($date_string[0]));
+                            $date = explode(" ", str_replace("  "," ", $date_string[0]));
                             $date[1] = str_pad($date[1], 2, 0, STR_PAD_LEFT);
                             $date_string[0] = implode(' ', $date);
                             $date_string[2] = str_pad($date_string[2], 2, 0, STR_PAD_LEFT);
@@ -736,7 +736,6 @@ class AdminAttendanceController extends Controller
                             $rows[$key]['attendance_datetime'] = implode(':', $date_string);
                             $row['attendance_datetime'] = implode(':', $date_string);
                         }
-                        dd($row['attendance_datetime']);
                         $rows[$key]['trax_id'] = "Trax" . trim($row['trax_id']);
                         $row['trax_id'] = "Trax" . trim($row['trax_id']);
 
@@ -749,7 +748,7 @@ class AdminAttendanceController extends Controller
                         if ($validate->fails()) {
                             $errors['Row #' . $row_id] = $validate->errors()->all();
                         }else{
-                            $attendance_data[trim($row['trax_id'])][Carbon::parse($row['attendance_datetime'])->format("Y-m-d")][] = Carbon::parse($row['attendance_datetime'])->format("G:i:s");
+                            $attendance_data[trim($row['trax_id'])][Carbon::parse($row['attendance_datetime'])->format("Y-m-d")][] = Carbon::parse($row['attendance_datetime'])->format("H:i:s");
                         }
                     }
                     if (empty($errors)) {
@@ -786,19 +785,6 @@ class AdminAttendanceController extends Controller
                                     } else {
                                         $min = min($time);
                                         $max = max($time);
-                                        dd($min,$max);
-                                        if($min < $max){
-                                            dd(1);
-                                        }
-                                        else{
-                                            dd(2);
-                                        }
-                                      /*  $max = array_filter($time, function ($t) use ($max){
-                                            $time_string = explode(":", $t);
-                                            return ($max < $time_string[0]);
-                                        });*/
-                                        $max = max($time);
-                                        dd($time);
                                         $clock_in = Carbon::parse($date . ' ' . $min)->format("Y-m-d H:i:s");
                                         if ($min == $max) {
                                             $clock_out = null;
