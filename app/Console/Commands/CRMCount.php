@@ -43,16 +43,16 @@ class CRMCount extends Command
         $to = Carbon::today()->hour(17)->minute(29)->second(59);
         $from = Carbon::yesterday()->hour(17)->minute(31);
         $new_launced = CrmRequest::join('crm_request_status_histories as crmsh','crmsh.crm_request_id','=','crm_requests.id')
-                        ->select('count(crmsh)')
                         ->where('crm_requests.case_nature_id','<>',4)
                         ->where('crmsh.status_id',1)
-                        ->whereBetween('crmsh.created_at', [$from,$to]);
+                        ->whereBetween('crmsh.created_at', [$from,$to])
+                        ->count();
 
         $closed = CrmRequest::join('crm_request_status_histories as crmsh','crmsh.crm_request_id','=','crm_requests.id')
-                        ->select('count(crmsh)')
                         ->where('crm_requests.case_nature_id','<>',4)
                         ->where('crmsh.status_id',4)
-                        ->whereBetween('crmsh.created_at', [$from,$to]);
+                        ->whereBetween('crmsh.created_at', [$from,$to])
+                        ->count();
 
         $pending = CRMCRMCount::select('pending')
                         ->whereDate('date',Carbon::yesterday()->toDateString());

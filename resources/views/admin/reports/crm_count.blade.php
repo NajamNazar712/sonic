@@ -51,9 +51,10 @@
                             <th class="border-primary border-darken-1">Total</th>
                             <th class="border-primary border-darken-1">Closure</th>
                             <th class="border-primary border-darken-1">Remaining</th>
-                            <th class="border-primary border-darken-1">Time</th>
                             <th class="border-primary border-darken-1">% Of Closure</th>
                             <th class="border-primary border-darken-1">% Of Remaining</th>
+                            <th class="border-primary border-darken-1">Weekly Remaining Avg</th>
+                            <th class="border-primary border-darken-1">Weekly Closure Avg</th>
                         </tr>
                         </thead>
                     </table>
@@ -135,7 +136,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.revert.list') }}',
+                        url: '{{ route('admin.reports.crm_count.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -145,21 +146,19 @@
                             head.push('Total');
                             head.push('Closure');
                             head.push('Remaining');
-                            head.push('Time');
                             head.push('% Of Closure');
                             head.push('% Of Remaining');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-                                row.push(index + 1);
-                                row.push(values.return_note);
-                                row.push(values.tracking);
-                                row.push(values.shipper);
-                                row.push(values.updated_by);
-                                row.push(values.updated_at);
-                                row.push(values.updated_at);
-                                row.push(values.updated_at);
-                                row.push(values.updated_at);
+                                row.push(values.date);
+                                row.push(values.pending);
+                                row.push(values.new_launched);
+                                row.push(values.total);
+                                row.push(values.closed);
+                                row.push(values.remaining);
+                                row.push(values.closure_percent);
+                                row.push(values.remaining_percent);
                                 body.push(row);
                             });
                         },
@@ -190,27 +189,30 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.reports.revert.list') }}',
+                    url: '{{ route('admin.reports.crm_count.list') }}',
                     data:function (d){
                         d.search_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[5, 'desc']],
+                order: [[0, 'desc']],
                 columns: [
-                    { data:'return_note' ,name: 'rr.return_note', class: 'align-middle return_note'},
-                    { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle tracking_number', sortable: false, orderable: false},
-                    { data:'shipper' ,name: 'rr.shipper', class: 'align-middle shipper'},
-                    { data:'updated_by' ,name: 'a.name', class: 'align-middle updated_by'},
-                    { data:'updated_at' ,name: 'rr.updated_at', class: 'align-middle updated_at'},
-                    { data:'updated_at' ,name: 'rr.updated_at', class: 'align-middle updated_at'},
-                    { data:'updated_at' ,name: 'rr.updated_at', class: 'align-middle updated_at'},
-                    { data:'updated_at' ,name: 'rr.updated_at', class: 'align-middle updated_at'},
-                    { data:'updated_at' ,name: 'rr.updated_at', class: 'align-middle updated_at'},
+                    { data:'date' ,name: 'c_r_m_counts.date', class: 'align-middle date'},
+                    { data:'pending' ,name: 'c_r_m_counts.pending', class: 'align-middle pending'},
+                    { data:'new_launched' ,name: 'c_r_m_counts.new_launched', class: 'align-middle new_launched'},
+                    { data:'total' ,name: 'c_r_m_counts.total', class: 'align-middle total'},
+                    { data:'closed' ,name: 'c_r_m_counts.closed', class: 'align-middle closed'},
+                    { data:'remaining' ,name: '', class: 'align-middle remaining'},
+                    { data:'closure_percent' ,name: '', class: 'align-middle closure_percent'},
+                    { data:'remaining_percent' ,name: '', class: 'align-middle remaining_percent'},
+                    { data:null ,name: '', class: 'align-middle weekly_remaining'},
+                    { data:null ,name: '', class: 'align-middle weekly_closure'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    // $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                                        
+                    // $('td:eq(6)', row).attr('rowspan', 3);
                 },
                 initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());

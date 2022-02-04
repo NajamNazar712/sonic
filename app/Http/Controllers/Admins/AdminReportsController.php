@@ -43,7 +43,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\OSAChargesLog;
 use App\Http\Models\Admin\ReturnRevertLog;
-
+use App\Http\Models\CRM\CRMCount;
 
 class AdminReportsController extends Controller
 {
@@ -9987,8 +9987,7 @@ class AdminReportsController extends Controller
     }
 
     public function crm_count_index(){
-        dd(Carbon::yesterday()->hour(17)->minute(31));
-        ActivityTrailController::createActivityTrailLog(Auth::id(),484);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),499);
 
         return view('admin.reports.crm_count');
 
@@ -9996,25 +9995,36 @@ class AdminReportsController extends Controller
     public function crm_count_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),485);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),500);
         }
-        $shipments = Shipment::join('return_revert_logs as rr', 'shipments.id', '=', 'rr.shipment_id')
-        ->leftjoin('admins as a','a.id','=','rr.updated_by')
-        ->select('shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','a.name as updated_by','rr.return_note as return_note','rr.updated_at as updated_at','rr.shipper as shipper');
+        $crm_count_report = CRMCount::select('pending','new_launched','closed','date');
 
-        $datatable = Datatables::of($shipments)
-        ->editColumn('tracking_number',function ($shipments){
-            $route = route('admin.tracking.index');
-            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        $datatable = Datatables::of($crm_count_report)
+        ->addColumn('remaining', function ($crm_count_report) {
+            
+            return ($crm_count_report->pending + $crm_count_report->new_launched);
+        
         })
-        ->editColumn('return_note', function ($shipments) {
-            return str_pad($shipments->return_note, 6, '0', STR_PAD_LEFT);
+        ->addColumn('total', function ($crm_count_report) {
+           
+            return (($crm_count_report->pending + $crm_count_report->new_launched) - $crm_count_report->closed);
+
+        })
+        ->addColumn('closure_percent', function ($crm_count_report) {
+           
+            return (($crm_count_report->pending + $crm_count_report->new_launched) - $crm_count_report->closed);
+
+        })
+        ->addColumn('remaining_percent', function ($crm_count_report) {
+           
+            return (($crm_count_report->pending + $crm_count_report->new_launched) - $crm_count_report->closed);
+
         });
 
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $shipments = $shipments->whereBetween('rr.updated_at', [$from,$to]);
+            $shipments = $crm_count_report->whereBetween('date', [$from,$to]);
         }
         return $datatable->make(true);
 
