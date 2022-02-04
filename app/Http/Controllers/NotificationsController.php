@@ -268,8 +268,9 @@ class NotificationsController extends Controller
                     if (strpos($body, '[city]') !== FALSE) {
                         $body = str_replace('[city]', $shipper->city->name, $body);
                     }
-
-                    self::email($subject, $body, $to, $cc);
+                    if($to){
+                        self::email($subject, $body, $to, $cc);
+                    }
                 }
                 else if ($id == 2) {
                     $fields = ['order_id' => 'order_id', 'pickup_date' => 'pickup_date', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
