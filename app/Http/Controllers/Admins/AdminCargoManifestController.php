@@ -2551,7 +2551,7 @@ class AdminCargoManifestController extends Controller
         $bag_short_received_error = false;
         if(count($bag_not_exists) > 0)
         {
-            $bag_not_exists_error = "Following Bag(s) already received or doesn\'t exists.<br><ul>";
+            $bag_not_exists_error = "Following Bag(s) already received or doesn't exists.<br><ul>";
             foreach ($bag_not_exists as $v)
             {
                 $bag_not_exists_error .= "<li>".CargoManifestBag::find($v)->seal_number ?? $v."</li>";
@@ -2560,7 +2560,7 @@ class AdminCargoManifestController extends Controller
         }
         if(count($bag_not_exists_in_manifest) > 0)
         {
-            $bag_not_exists_in_manifest_error = "Following Bag(s) doesn\'t exists in any manifest.<br><ul>";
+            $bag_not_exists_in_manifest_error = "Following Bag(s) doesn't exists in any manifest.<br><ul>";
             foreach ($bag_not_exists_in_manifest as $v)
             {
                 $bag_not_exists_in_manifest_error .= "<li>".CargoManifestBag::find($v)->seal_number."</li>";
@@ -2569,7 +2569,7 @@ class AdminCargoManifestController extends Controller
         }
         if(count($bag_not_exists_in_mapping) > 0)
         {
-            $bag_not_exists_in_mapping_error = "Following Bag(s) doesn\'t associated with any mapping.<br><ul>";
+            $bag_not_exists_in_mapping_error = "Following Bag(s) doesn't associated with any mapping.<br><ul>";
             foreach ($bag_not_exists_in_mapping as $v)
             {
                 $bag_not_exists_in_mapping_error .= "<li>".CargoManifestBag::find($v)->seal_number."</li>";
@@ -2845,79 +2845,79 @@ class AdminCargoManifestController extends Controller
 
     public function receive_bag_shipments_store(Request $request)
     {
+        $shipment_status_array = [3,21,26,32,49];
         $shipment_ids = array_unique(explode(',', $request->shipment_ids));
         $bag_ids = array();
         $shipment_ids_array = array();
         $short_received_shipments_array = array();
+        $shipments_already_marked_received_array = array();
         foreach ($shipment_ids as $shipment_id) {
             $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_id)/*->where('status', 0)*/;
 
             if ($bag_shipment->exists()) {
                 $bag_shipment = $bag_shipment->latest()->first();
 
-                if($bag_shipment->status == 0){
-                    $bag_shipment->status = 1;
-                    $bag_shipment->save();
-                }
-
-
                 $shipment = Shipment::find($shipment_id);
-                $bag = $bag_shipment->bag;
+                if (in_array($shipment->shipper_status_id,$shipment_status_array)) {
 
-                array_push($shipment_ids_array,$shipment->tracking_number);
+                    if ($bag_shipment->status == 0) {
+                        $bag_shipment->status = 1;
+                        $bag_shipment->save();
+                    }
 
-                $shipper_status_id = NULL;
-                $consignee_status_id = NULL;
+                    $bag = $bag_shipment->bag;
 
-                if ($bag->type == 1) {
-                    if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
-                        ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
-                        $shipper_status_id = 15;
-                        $consignee_status_id = 15;
-                    }
-                    else {
-                        $shipper_status_id = 4;
-                        $consignee_status_id = 4;
-                    }
-                }
-                else {
-                    if ($shipment->booking_type_id == 1) {
-                        $shipper_status_id = 22;
-                        $consignee_status_id = 22;
-                    }
-                    else if ($shipment->booking_type_id == 2) {
-                        if($shipment->shipper_status_id == 21){
+                    array_push($shipment_ids_array, $shipment->tracking_number);
+
+                    $shipper_status_id = NULL;
+                    $consignee_status_id = NULL;
+
+                    if ($bag->type == 1) {
+                        if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
+                            ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, Auth::id());
+                            $shipper_status_id = 15;
+                            $consignee_status_id = 15;
+                        } else {
+                            $shipper_status_id = 4;
+                            $consignee_status_id = 4;
+                        }
+                    } else {
+                        if ($shipment->booking_type_id == 1) {
+                            $shipper_status_id = 22;
+                            $consignee_status_id = 22;
+                        } else if ($shipment->booking_type_id == 2) {
+                            if ($shipment->shipper_status_id == 21) {
+                                $shipper_status_id = 22;
+                                $consignee_status_id = 22;
+                            } else {
+                                $shipper_status_id = 27;
+                                $consignee_status_id = 27;
+                            }
+
+                        } else if ($shipment->booking_type_id == 3) {
+                            $shipper_status_id = 33;
+                            $consignee_status_id = 33;
+                        } else if ($shipment->booking_type_id == 4) {
+                            $shipper_status_id = 22;
+                            $consignee_status_id = 22;
+                        } else {
                             $shipper_status_id = 22;
                             $consignee_status_id = 22;
                         }
-                        else{
-                            $shipper_status_id = 27;
-                            $consignee_status_id = 27;
-                        }
+                    }
 
-                    }
-                    else if ($shipment->booking_type_id == 3) {
-                        $shipper_status_id = 33;
-                        $consignee_status_id = 33;
-                    }
-                    else if ($shipment->booking_type_id == 4) {
-                        $shipper_status_id = 22;
-                        $consignee_status_id = 22;
-                    }
-                    else {
-                        $shipper_status_id = 22;
-                        $consignee_status_id = 22;
+                    $shipment->shipper_status_id = $shipper_status_id;
+                    $shipment->consignee_status_id = $consignee_status_id;
+                    $shipment->save();
+
+                    ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
+
+                    if (!in_array($bag->id, $bag_ids)) {
+                        $bag_ids[] = $bag->id;
                     }
                 }
-
-                $shipment->shipper_status_id = $shipper_status_id;
-                $shipment->consignee_status_id = $consignee_status_id;
-                $shipment->save();
-
-                ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
-
-                if(!in_array($bag->id, $bag_ids)){
-                    $bag_ids[] = $bag->id;
+                else{
+                    array_push($shipments_already_marked_received_array,$shipment->tracking_number);
                 }
             }
         }
@@ -3000,7 +3000,8 @@ class AdminCargoManifestController extends Controller
 
         $received_html = '';
         $sr_html = '';
-      
+        $already_received_shipments_html = '';
+
         if(count($short_received_shipments_array) > 0)
         {
             $sr_html = "Following Shipments(s) are marked as short received.<br><ul>";
@@ -3009,6 +3010,16 @@ class AdminCargoManifestController extends Controller
                 $sr_html .= "<li>".$v."</li>";
             }
             $sr_html .= "</ul>";
+        }
+
+        if(count($shipments_already_marked_received_array) > 0)
+        {
+            $already_received_shipments_html = "Following Shipments(s) are already marked as received or processed .<br><ul>";
+            foreach ($shipments_already_marked_received_array as $v)
+            {
+                $already_received_shipments_html .= "<li>".$v."</li>";
+            }
+            $already_received_shipments_html .= "</ul>";
         }
 
         if(count($shipment_ids_array) > 0)
@@ -3023,7 +3034,7 @@ class AdminCargoManifestController extends Controller
         
 
         //return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
-        return back()->with(['sr_html'=> $sr_html,'received_html'=>$received_html]);
+        return back()->with(['sr_html'=> $sr_html,'received_html'=>$received_html,'already_received_shipments_html' => $already_received_shipments_html]);
 
 
     }
