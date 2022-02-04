@@ -5504,10 +5504,10 @@ public function sales_incentive()
             ActivityTrailController::createActivityTrailLog(Auth::id(), 494);
         }
         $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
-                ->leftjoin('cities as c','c.id','lead_taggings.city_id')   
-                ->leftjoin('territories as t','t.id','lead_taggings.territory_id')   
-                 ->join('zones as z','z.id','lead_taggings.zone_id')   
-                 ->join('service_list as s','s.id','lead_taggings.service_id')   
+        ->leftjoin('zones as z','z.id','lead_taggings.zone_id')   
+        ->join('service_list as s','s.id','lead_taggings.service_id')   
+        ->leftjoin('territories as t','t.id','lead_taggings.territory_id')   
+        ->leftjoin('cities as c','c.id','lead_taggings.city_id')   
         ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service','lead_taggings.status');
         
     $datatables = Datatables::of($roles)
@@ -5542,6 +5542,13 @@ public function sales_incentive()
                 return 'Enable';
             }else{
                 return 'Disable';
+            }
+            
+        })->editColumn('zone', function($roles) {
+            if($roles->zone == '' || $roles->zone == null){
+                return 'All Pakistan';
+            }else{
+                return $roles->zone;
             }
             
         });
