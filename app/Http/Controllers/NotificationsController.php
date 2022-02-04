@@ -226,7 +226,10 @@ class NotificationsController extends Controller
                     $sales_person = SalePersonTag::where('user_id', $reference_1_id)->where('status', 0)->first();
                     $cc = array();
 //                    $bcc = array();
-                    $cc[] = Admin::find($sales_person->admin_id)->email;
+                    $sale_person_email = Admin::find($sales_person->admin_id)->email;
+                    if($sale_person_email){
+                        $cc[] = $sale_person_email;
+                    }
 
 
                     /*$admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->where('admin_roles.department_id', 6)->where('admin_hubs.hub_id', '=', $shipper->city_id)->where('status', 1)->where('role_id', '!=', 55);
