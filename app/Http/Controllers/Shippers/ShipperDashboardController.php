@@ -367,7 +367,7 @@ class ShipperDashboardController extends Controller
             ->filterColumn('status',function ($query,$keyword){
 
                 if ($keyword != '') {
-                    $query->where('ss.id',$keyword);
+                    $query->where('shipments_journey.shipper_status_id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -377,16 +377,7 @@ class ShipperDashboardController extends Controller
             ->filterColumn('payment_status',function ($query,$keyword){
 
                 if ($keyword != '') {
-                    $query->where('sps.id',$keyword);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->filterColumn('product_type',function ($query,$keyword){
-
-                if ($keyword != '') {
-                    $query->where('p.id',$keyword);
+                    $query->where('shipments.payment_status_id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
