@@ -5492,13 +5492,7 @@ public function sales_incentive()
         // $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
         $services = DB::table('service_list')->where('status',1)->get();
         $cities = City::where('status',1)->get();
-        if (session('role_id') == 1){
-            $zones = Zone::where('zones.status',1)->where('zones.business_category_id',1)->select('zones.id as id','zones.name as name')->get();
-        }else{
-            $zones = Zone::join('lead_zones as lz','lz.zone_id','=','zones.id')
-                    ->where('zones.status',1)->where('zones.business_category_id',1)->where('lz.admin_id',Auth::id())
-                    ->select('zones.id as id','zones.name as name')->get();
-        }
+        $zones = Zone::where('zones.status',1)->where('zones.business_category_id',1)->select('zones.id as id','zones.name as name')->get();
 
         return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities , 'services' => $services , 'zones' => $zones]);
     }
