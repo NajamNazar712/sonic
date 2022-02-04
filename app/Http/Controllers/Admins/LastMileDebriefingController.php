@@ -298,10 +298,10 @@ class LastMileDebriefingController extends Controller
         else {
             $time = 0;
         }
-        $next_time = Carbon::today()->endOfDay()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateString();
           
         // $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time);
+        $prev_time = Carbon::today()->addHours($time)->toDateString();
         $data = AgentCallMonitoring::join('admins as agent','agent.id','=','agent_call_monitorings.agent_id')
             ->leftjoin('cities as hub','hub.id','=','agent.default_hub_id')
             ->select(['agent.id as agent_id','agent.name as agent_name','hub.name as hub'])
@@ -390,10 +390,10 @@ class LastMileDebriefingController extends Controller
         //     $time->addDays(1);
         // }
 
-        $next_time = Carbon::today()->endOfDay()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateString();
           
         // $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time);
+        $prev_time = Carbon::today()->addHours($time)->toDateString();
 
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
             ->where('completed',0)->where('skip',0)->where('created_at','>=',$prev_time)
