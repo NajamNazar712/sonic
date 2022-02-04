@@ -5550,7 +5550,6 @@ public function sales_incentive()
     }
 
     public function lead_tagging_submit(Request $request){
-        dd($request->all());
         if($request->zone_id == 0){
             $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
     
