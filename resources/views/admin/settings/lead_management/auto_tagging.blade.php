@@ -23,6 +23,7 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Territory</th>
                                     <th class="border-primary border-darken-1">Service</th>
                                     <th class="border-primary border-darken-1">Tagged Salesperson</th>
                                     <th class="border-primary border-darken-1">Status</th>
@@ -48,6 +49,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <select name="zone_id" id="zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                                <option value="0" > All Pakistan </option>
                             @foreach($zones as $zone)
                                 <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
                             @endforeach
@@ -57,6 +59,11 @@
                         <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
                         </select>
                     </div>
+                    <div class="form-group" id="territory_select">
+                        <select name="territory_id" id="territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                        </select>
+                    </div>
+                    
                     <div class="form-group" id="service_select">
                         <select name="service_id" id="service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required">
                             @foreach($services as $service)
@@ -108,6 +115,13 @@
                         <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="territory_id" id="edit_territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                            @foreach($territories as $territory)
+                                <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
                             @endforeach
                         </select>
                     </div>
@@ -166,6 +180,7 @@
                 $("agent_id").select2('val', '')
                 $('#zone_id').val('').trigger('change.select2');
                 $('#city_id').val('').trigger('change.select2');
+                $('#territory_id').val('').trigger('change.select2');
                 $('#service_id').val('').trigger('change.select2');
                 
             });
@@ -184,6 +199,8 @@
             });
             $('#service_select').css('display','none');
             $('#city_select').css('display','none');
+            $('#territory_select').css('display','none');
+
             $('#agent_select').css('display','none');
 
             $('#zone_id').prepend('<option selected></option>').select2({
@@ -192,13 +209,18 @@
                 allowClear:true,
                 dropdownParent:$('#agent_assign')
             }).bind('change', function() {
-                $('#service_select').css('display','block');
-                $('#city_select').css('display','block');
-                $('#agent_select').css('display','block');
-
-                $('#city_id').children().remove()
-
+                // $('#service_select').css('display','block');
+                // $('#agent_select').css('display','block');
+                
+               
                 var id = parseInt($(this).val());
+                if(id == 0){
+                        $('#service_select').css('display','block');
+                        $('#agent_select').css('display','block');
+                }else{
+                    $('#city_select').css('display','block');
+                    $('#city_id').children().remove()
+
                     var city_obj = [];
                     city_obj.length = 0
 
@@ -214,7 +236,32 @@
                         allowClear:true,
                         dropdownParent:$('#agent_assign'),
                         data:city_obj
+                    }).bind('change', function() {
+                        $('#territory_select').css('display','block');
+                        $('#service_select').css('display','block');
+                        $('#agent_select').css('display','block');
+
+                        $('#territory_id').children().remove()
+
+                        var id = parseInt($(this).val());
+                            var territory_obj  = [];
+                            territory_obj.length = 0
+
+                        $.map({!! $territories !!}, function (obj) {
+                                if(id == obj.city_id){
+                                    territory_obj.push({id: obj.id, text: obj.name});
+                                }
+                        });
+
+                        $('#territory_id').prepend('<option selected></option>').select2({
+                                width:'100%',
+                                placeholder:"Select Territory",
+                                allowClear:true,
+                                dropdownParent:$('#agent_assign'),
+                                data:territory_obj
+                            });
                     });
+                }
             });    
 
 
@@ -237,6 +284,12 @@
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
+            $('#edit_territory_id').prepend('<option selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Territory",
+                allowClear:true,
+                dropdownParent:$('#agent_edit')
+            });
 
             $('#edit_zone_id').select2({
                 width:'100%',
@@ -244,12 +297,12 @@
                 dropdownParent:$('#agent_edit')
             }).bind('change', function() {
                 
-                $("#edit_agent_id").select2('val', '');
-                $("#edit_service_id").select2('val', '');
+                // $("#edit_agent_id").select2('val', '');
+                // $("#edit_service_id").select2('val', '');
 
                 $('#edit_city_id').children().remove();
                 $('#edit_city_id').select2('destroy');
-
+                
                 var id = parseInt($(this).val());
                     var city_obj = [];
                     city_obj.length = 0
@@ -266,6 +319,32 @@
                         allowClear:true,
                         dropdownParent:$('#agent_edit'),
                         data:city_obj
+                    }).bind('change', function() {
+                
+                        $("#edit_agent_id").select2('val', '');
+                        $("#edit_service_id").select2('val', '');
+
+                        $('#edit_territory_id').children().remove();
+                        $('#edit_territory_id').select2('destroy');
+                        
+                        
+                        var id = parseInt($(this).val());
+                            var territory_obj = [];
+                            territory_obj.length = 0
+
+                        $.map({!! $territories !!}, function (obj) {
+                                if(id == obj.city_id){
+                                    territory_obj.push({id: obj.id, text: obj.name});
+                                }
+                        });
+
+                        $('#edit_territory_id').prepend('<option selected></option>').select2({
+                                width:'100%',
+                                placeholder:"Select Territory",
+                                allowClear:true,
+                                dropdownParent:$('#agent_edit'),
+                                data:city_obj
+                            });
                     });
             }); 
 
@@ -296,11 +375,12 @@
                 },
                 ajax: '{{ route('admin.settings.lead_tagging.list') }}',
                 rowId: 'id',
-                order: [[3, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
+                    {data: 'territory_name', name: 't.name', class: 'align-middle territory_name'},
                     {data: 'service', name: 's.name', class: 'align-middle service'},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
                     {data: 'status', name: 'lead_taggings.status', class: 'align-middle status'},

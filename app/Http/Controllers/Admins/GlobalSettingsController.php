@@ -106,6 +106,7 @@ use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Admin\SalesDesignationJourney;
 use App\Http\Models\Admin\SalesDesignation;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use http\Env\Response;
@@ -5492,9 +5493,10 @@ public function sales_incentive()
         // $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
         $services = DB::table('service_list')->where('status',1)->get();
         $cities = City::where('status',1)->get();
+        $territories = Territory::all();
         $zones = Zone::where('zones.status',1)->where('zones.business_category_id',1)->select('zones.id as id','zones.name as name')->get();
 
-        return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities , 'services' => $services , 'zones' => $zones]);
+        return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities , 'services' => $services , 'zones' => $zones , 'territories' => $territories ]);
     }
 
     public function lead_tagging_list(Request $request){
@@ -5502,10 +5504,11 @@ public function sales_incentive()
             ActivityTrailController::createActivityTrailLog(Auth::id(), 494);
         }
         $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
-                 ->join('cities as c','c.id','lead_taggings.city_id')   
+                ->join('cities as c','c.id','lead_taggings.city_id')   
+                ->leftjoin('territories as t','t.id','lead_taggings.territory_id')   
                  ->join('zones as z','z.id','lead_taggings.zone_id')   
                  ->join('service_list as s','s.id','lead_taggings.service_id')   
-        ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 'z.name as zone', 's.name as service','lead_taggings.status');
+        ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service','lead_taggings.status');
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
@@ -5547,21 +5550,40 @@ public function sales_incentive()
     }
 
     public function lead_tagging_submit(Request $request){
-
-        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
-
-        if(!$check_leads->exists()){
-            $lead_tagging = new LeadTagging;
-            $lead_tagging->sale_person_id = $request->agent_id;
-            $lead_tagging->zone_id = $request->zone_id;
-            $lead_tagging->city_id = $request->city_id;
-            $lead_tagging->service_id = $request->service_id;
-            $lead_tagging->save();
-
-            return redirect()->back()->with('success', 'Lead Agent Added!');
-
+        dd($request->all());
+        if($request->zone_id == 0){
+            $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
+    
+            if(!$check_leads->exists()){
+                $lead_tagging = new LeadTagging;
+                $lead_tagging->sale_person_id = $request->agent_id;
+                $lead_tagging->zone_id = $request->zone_id;
+                $lead_tagging->service_id = $request->service_id;
+                $lead_tagging->save();
+    
+                return redirect()->back()->with('success', 'Lead Agent Added!');
+    
+            }else{
+                return redirect()->back()->with('error', 'Lead Agent already exist');
+            }
         }else{
-            return redirect()->back()->with('error', 'Lead Agent already exist');
+
+            $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
+    
+            if(!$check_leads->exists()){
+                $lead_tagging = new LeadTagging;
+                $lead_tagging->sale_person_id = $request->agent_id;
+                $lead_tagging->zone_id = $request->zone_id;
+                $lead_tagging->city_id = $request->city_id;
+                $lead_tagging->service_id = $request->service_id;
+                $lead_tagging->territory_id = $request->territory_id;
+                $lead_tagging->save();
+    
+                return redirect()->back()->with('success', 'Lead Agent Added!');
+    
+            }else{
+                return redirect()->back()->with('error', 'Lead Agent already exist');
+            }
         }
     }
 
@@ -5573,13 +5595,15 @@ public function sales_incentive()
         $zone_id = $lead_tagging->zone_id;
         $service_id = $lead_tagging->service_id;
         $lead_tagging_id = $lead_tagging->id;
-        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'zone_id'=> $zone_id ,'service_id'=> $service_id ,'lead_tagging_id'=> $lead_tagging_id]);
+        $territory_id = $lead_tagging->territory_id;
+
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'zone_id'=> $zone_id ,'service_id'=> $service_id ,'lead_tagging_id'=> $lead_tagging_id ,'territory_id'=> $territory_id]);
 
     }
 
 
     public function lead_tagging_update(Request $request){
-        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
+        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
 
         if(!$check_leads->exists()){
             $lead_tagging = LeadTagging::find($request->lead_tagging_id);
@@ -5587,6 +5611,7 @@ public function sales_incentive()
             $lead_tagging->zone_id = $request->zone_id;
             $lead_tagging->city_id = $request->city_id;
             $lead_tagging->service_id = $request->service_id;
+            $lead_tagging->territory_id = $request->territory_id;
             $lead_tagging->save();
             return redirect()->back()->with('success', 'Lead Agent Updated!');
         }else{
