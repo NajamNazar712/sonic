@@ -1424,7 +1424,7 @@
                                         <li><a class="menu-item" href="{{route('admin.settings.debriefing_time_setting.index')}}">Debriefing Time Setting</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(674, session('permissions')))
-                                            <li><a class="menu-item" href="{{route('admin.settings.debriefing_total_time.index')}}">Debriefing Total Time Setting</a></li>
+                                            <li><a class="menu-item" href="{{route('admin.settings.debriefing_break_time.index')}}">Debriefing Break Time Setting</a></li>
                                         @endif
 
                                     @if (session('role_id') == 1 || in_array(659, session('permissions')))

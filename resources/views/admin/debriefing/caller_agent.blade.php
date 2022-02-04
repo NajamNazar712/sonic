@@ -10,6 +10,13 @@
             <div class="content-body">
                 <h1 class="mb-1">
                     Caller Agent Screen
+
+                    <div class="text-right">
+                        <button class="btn btn-lg btn-info" id="follow_btn">Follow Up</button>
+                        <button class="btn btn-lg btn-success" id="live_btn">Live (<span id="live_timer">00:00</span>)</button>
+                        <button class="btn btn-lg btn-warning" id="break_btn">Break (<span id="break_timer">00:00</span>)</button>
+                        <button class="btn btn-lg btn-danger" id="end_btn">End Session</button>
+                    </div>
                 </h1>
 
                 <div class="card">
@@ -18,16 +25,6 @@
                             @include('admin.inc.messages')
 
                             @if($data)
-                            {{--<div class="row justify-content-center">
-
-                                <div class="col-6 text-center border tracking_box ">
-                                    --}}{{-- <fieldset class="position-relative has-icon-left"> --}}{{--
-                                        <u><a href='{{route('admin.tracking.index')}}?tracking_number={{$shipment->tracking_number}}' class='tracking' target='_blank'>{{$shipment->tracking_number}}</a></u>
-                                        --}}{{-- <input type="text" class="form-control" placeholder="Tracking Number" value="{{$shipment->tracking_number}}" readonly style="text-align: center;"> --}}{{--
-                                    --}}{{-- </fieldset> --}}{{--
-                                </div>
-                            </div>--}}
-
                             <div class="row justify-content-center">
                                 <div class="col-4">
                                     <div class="card bg-gradient-directional-total-calls pull-up">

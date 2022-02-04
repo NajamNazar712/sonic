@@ -385,18 +385,15 @@ class LastMileDebriefingController extends Controller
         else {
             $time = 0;
         }
-        // $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
-        // if(Carbon::now() > $time){
-        //     $time->addDays(1);
-        // }
 
         $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateString();
-          
-        // $next_time = Carbon::today()->addHours($time);
+
         $prev_time = Carbon::today()->addHours($time)->toDateString();
 
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
-            ->where('completed',0)->where('skip',0)->where('created_at','>=',$prev_time)
+            ->where('completed',0)
+            ->where('skip',0)
+            ->where('created_at','>=',$prev_time)
             ->where('created_at','<=',$next_time);
         if($calls->exists())
         {
@@ -404,7 +401,9 @@ class LastMileDebriefingController extends Controller
         }
         else{
             $calls = AgentCallMonitoring::where('agent_id',Auth::id())
-                ->where('completed',0)->where('skip',1)->where('created_at','>=',$prev_time)
+                ->where('completed',0)
+                ->where('skip',1)
+                ->where('created_at','>=',$prev_time)
                 ->where('created_at','<=',$next_time);
 
             if($calls->exists()) {
@@ -418,25 +417,38 @@ class LastMileDebriefingController extends Controller
         $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->where('status', 1)->get();
         $shipment = Shipment::find($data->shipment_id);
         $delivery_note = DeliveryNote::find($data->delivery_note_id);
-        $total_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',$prev_time)
-        ->where('created_at','<=',$next_time)->count();
-        $completed_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',$prev_time)
-        ->where('created_at','<=',$next_time)->where('completed',1)->count();
-        $pending_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',$prev_time)
-        ->where('created_at','<=',$next_time)->where('completed',0)->count();
+        $total_calls = AgentCallMonitoring::where('agent_id',Auth::id())
+            ->where('created_at','>=',$prev_time)
+            ->where('created_at','<=',$next_time)
+            ->count();
+        $completed_calls = AgentCallMonitoring::where('agent_id',Auth::id())
+            ->where('created_at','>=',$prev_time)
+            ->where('created_at','<=',$next_time)
+            ->where('completed',1)
+            ->count();
+        $pending_calls = AgentCallMonitoring::where('agent_id',Auth::id())
+            ->where('created_at','>=',$prev_time)
+            ->where('created_at','<=',$next_time)
+            ->where('completed',0)
+            ->count();
 
         $reattempt_count = ShipmentsJourney::where('shipment_id', $data->shipment_id)
-                ->where('shipper_status_id','=',5)
-                ->where('verification','=',1)
-                ->select(DB::raw('count(shipment_id) as reattempts'))
-                ->get()->first();
+            ->where('shipper_status_id','=',5)
+            ->where('verification','=',1)
+            ->select(DB::raw('count(shipment_id) as reattempts'))
+            ->get()
+            ->first();
 
-        $rider_status = ShipmentsJourney::where('shipment_id',$data->shipment_id)->whereNotNull('rider_id')->get()->last();
+        $rider_status = ShipmentsJourney::where('shipment_id',$data->shipment_id)
+            ->whereNotNull('rider_id')
+            ->get()
+            ->last();
         if(!$rider_status){
             $rider_status = NULL;
         }
 
-        $rider_deliveries = RiderDelivery::where('shipment_id', $data->shipment_id)->where('delivery_note_id', $data->delivery_note_id);
+        $rider_deliveries = RiderDelivery::where('shipment_id', $data->shipment_id)
+            ->where('delivery_note_id', $data->delivery_note_id);
         if ($rider_deliveries->exists()) {
             $rider_deliveries = $rider_deliveries->latest('id')->first();
         }

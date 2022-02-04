@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Debriefing Total Time Settings')
+@section('title', 'Debriefing Break Time Settings')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Debriefing Total Time Settings
+                    Debriefing Break Time Settings
                 </h1>
 
                 <div class="card">
@@ -19,20 +19,12 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-2">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.debriefing_total_time.store') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.debriefing_break_time.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
-
                                         <div class="form-group">
 
                                             <div class="input-group">
-                                                <input type="number" name="work_timings" class="form-control bg-primary border-primary white rounded-right work_time" id="work_time" min="0.5" step="0.5" max="9" placeholder="Debriefing Work Time*" data-rule-required="true" data-msg-required="Debriefing Work Time is required" value="{{$work_timings}}" >
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-
-                                            <div class="input-group">
-                                                <input type="number" name="break_timings" class="form-control bg-primary border-primary white rounded-right break_time" id="break_time" min="0.5" step="0.5" max="9" placeholder="Debriefing Break Time*" data-rule-required="true" data-msg-required="Debriefing Break Time is required" value="{{$break_timings}}" >
+                                                <input type="number" name="break_timings" class="form-control bg-primary border-primary white rounded-right break_time" id="break_time" min="0.5" step="0.5" max="8.5" placeholder="Debriefing Break Time*" data-rule-required="true" data-msg-required="Debriefing Break Time is required" value="{{$break_timings}}" >
                                             </div>
                                         </div>
                                         <button type="submit" class="btn btn-primary">Update</button>
@@ -59,10 +51,6 @@
 
     <script>
         $(document).ready(function() {
-            $('#settings_form input.work_time').inputmask({
-                'allowMinus': false,
-                'allowPlus': false
-            });
 
             $('#settings_form input.break_time').inputmask({
                 'allowMinus': false,
@@ -74,20 +62,6 @@
                 successClass: 'success',
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function (form){
-                  work_timing = parseFloat($("#work_time").val());
-                  break_timing = parseFloat($("#break_time").val());
-
-                  if(work_timing + break_timing != 9)
-                  {
-                      error = "Total Day Timing must be 9 hours";
-                      toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                      console.log(1);
-                      return false;
-                  }
-
-                    form.submit();
                 }
             });
         });
