@@ -3118,7 +3118,8 @@ class AdminCargoManifestController extends Controller
       $draft = CargoManifestDraftBags::join('cities as c','c.id','=','cargo_manifest_draft_bags.origin_id')
           ->join('cities as d','d.id','=','cargo_manifest_draft_bags.destination_id')
           ->select('cargo_manifest_draft_bags.bag_id as bag_id','cargo_manifest_draft_bags.seal_number as bag_number','cargo_manifest_draft_bags.shipments_count','d.name as destination','c.name as origin')
-          ->where('cargo_manifest_draft_bags.added_by',Auth::id());
+          ->where('cargo_manifest_draft_bags.added_by',Auth::id())
+      ->orderby('cargo_manifest_draft_bags.created_at','desc');
 
         return Datatables::of($draft)
             ->addColumn('action',function ($shipments){
