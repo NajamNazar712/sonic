@@ -21,7 +21,11 @@ class LeadTaggingController extends Controller
     public static function auto_tagging($lead_id, $admin_id)
     {
         $lead = Lead::find($lead_id);
-        $sales_person = LeadTagging::where('city_id', $lead->city_id)->where('service_id', $lead->service_id)->where('territory_id', $lead->territory_id)->where('status', 1)->orWhere('zone_id', '=', '0');
+        $sales_person = LeadTagging::where('city_id', $lead->city_id)->where('territory_id', $lead->territory_id)->where('service_id', $lead->service_id)->where('status', 1)->orWhere(function ($query) use ($lead){
+            $query->where('zone_id', '=', '0')
+            ->where('service_id', $lead->service_id)
+            ->where('status', 1);
+        });
         if($sales_person->exists()){
             $sales_person = $sales_person->orderBy('count', 'asc')->get()->first();
             $lead->sale_person_id = $sales_person->sale_person_id;
