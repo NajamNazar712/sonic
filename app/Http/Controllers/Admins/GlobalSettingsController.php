@@ -5504,7 +5504,7 @@ public function sales_incentive()
             ActivityTrailController::createActivityTrailLog(Auth::id(), 494);
         }
         $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
-                ->join('cities as c','c.id','lead_taggings.city_id')   
+                ->leftjoin('cities as c','c.id','lead_taggings.city_id')   
                 ->leftjoin('territories as t','t.id','lead_taggings.territory_id')   
                  ->join('zones as z','z.id','lead_taggings.zone_id')   
                  ->join('service_list as s','s.id','lead_taggings.service_id')   
