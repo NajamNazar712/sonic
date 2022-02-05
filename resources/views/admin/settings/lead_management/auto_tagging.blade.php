@@ -182,7 +182,7 @@
 
             $('#AssignAgentModal').on('hidden.bs.modal', function () {
                 
-                $("agent_id").select2('val', '')
+                $('#agent_id').val('').trigger('change.select2');
                 $('#zone_id').val('').trigger('change.select2');
                 $('#city_id').val('').trigger('change.select2');
                 $('#territory_id').val('').trigger('change.select2');
@@ -533,15 +533,15 @@
 
                     }else{
                         if(data.city_id == 0){
+                            $('#edit_zone_id').val(data.zone_id).change();
                         console.log('agent _cty  zero',data.agent_id);
 
                         console.log('city_0');
                         $('#edit_city_id').css('display','block');
                         $('#edit_city_select').css('display','block');
-
-                            $('#edit_agent_id').val(data.agent_id).change();
+                            $('#edit_agent_id').val(data.agent_id).trigger('change.select2');
+                            // $('#edit_agent_id').val(2);
                             $('#edit_city_id').val(data.city_id);
-                            $('#edit_zone_id').val(data.zone_id).change();
                             $('#edit_service_id').val(data.service_id).change();
                             // $('#lead_tagging_id').val(data.lead_tagging_id).change();
                             $('#edit_territory_id').css('display','none');
@@ -551,13 +551,13 @@
                             // $('#edit_territory_id').val(data.territory_id).change();
                         }else{
                         console.log('agent _cty not zero',data.agent_id);
+                            $('#edit_zone_id').val(data.zone_id).change();
 
                             $('#edit_territory_select').css('display','block');
                             $('#edit_territory_id').css('display','block');
 
                             $('#edit_agent_id').val(data.agent_id).change();
                             $('#edit_city_id').val(data.city_id).change();
-                            $('#edit_zone_id').val(data.zone_id).change();
                             $('#edit_service_id').val(data.service_id).change();
                             // $('#lead_tagging_id').val(data.lead_tagging_id).change();
                             $('#edit_territory_id').val(data.territory_id).change();
