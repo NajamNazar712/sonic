@@ -297,9 +297,8 @@
             });    
 
 
-            $('#edit_agent_id').prepend('<option selected></option>').select2({
+            $('#edit_agent_id').select2({
                 width:'100%',
-                placeholder:"Select Agent",
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
@@ -369,7 +368,6 @@
                         var id = parseInt($(this).val());
                             console.log('change_city');
                         if(id == 0){
-                            $("#edit_agent_id").select2('val', '');
                             $("#edit_service_id").select2('val', '');
 
                             $('#edit_territory_select').css('display','none');
@@ -379,7 +377,6 @@
                         }else{
                             $('#edit_territory_select').css('display','block');
 
-                            $("#edit_agent_id").select2('val', '');
                             $("#edit_service_id").select2('val', '');
 
                             $('#edit_territory_id').children().remove();
@@ -519,6 +516,9 @@
                 }).done(function (data) {
                     console.log(data.city_id);
                     console.log(data.zone_id);
+                    console.log('agent_id',data.agent_id);
+                    $('#lead_tagging_id').val(data.lead_tagging_id);
+
                     if(data.zone_id == 0){
                     console.log('zone_0');
                         $('#edit_zone_id').val(data.zone_id);
@@ -532,6 +532,8 @@
 
                     }else{
                         if(data.city_id == 0){
+                        console.log('agent _cty  zero',data.agent_id);
+
                         console.log('city_0');
                         $('#edit_city_id').css('display','block');
                         $('#edit_city_select').css('display','block');
@@ -540,14 +542,14 @@
                             $('#edit_city_id').val(data.city_id);
                             $('#edit_zone_id').val(data.zone_id).change();
                             $('#edit_service_id').val(data.service_id).change();
-                            $('#lead_tagging_id').val(data.lead_tagging_id).change();
+                            // $('#lead_tagging_id').val(data.lead_tagging_id).change();
                             $('#edit_territory_id').css('display','none');
 
                             $('#edit_territory_select').css('display','none');
 
                             // $('#edit_territory_id').val(data.territory_id).change();
                         }else{
-                        console.log('city_0',data.city_id);
+                        console.log('agent _cty not zero',data.agent_id);
 
                             $('#edit_territory_select').css('display','block');
                             $('#edit_territory_id').css('display','block');
@@ -556,7 +558,7 @@
                             $('#edit_city_id').val(data.city_id).change();
                             $('#edit_zone_id').val(data.zone_id).change();
                             $('#edit_service_id').val(data.service_id).change();
-                            $('#lead_tagging_id').val(data.lead_tagging_id).change();
+                            // $('#lead_tagging_id').val(data.lead_tagging_id).change();
                             $('#edit_territory_id').val(data.territory_id).change();
                         }
                         

@@ -5634,6 +5634,7 @@ public function sales_incentive()
 
 
     public function lead_tagging_update(Request $request){
+        dd($request->all());
         $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
 
         if(!$check_leads->exists()){
