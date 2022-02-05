@@ -339,6 +339,7 @@
                     $('#edit_service_id').val('').trigger('change.select2');
                     $('#edit_agent_id').val('').trigger('change.select2');
                     $('#edit_city_select').css('display','none');
+                    $('#edit_city_id').val('').trigger('change.select2');
                     $('#edit_territory_select').css('display','none');
                     $('#edit_territory_id').val('').trigger('change.select2');
 
