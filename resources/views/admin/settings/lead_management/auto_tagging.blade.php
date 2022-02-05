@@ -339,9 +339,13 @@
                     $('#edit_agent_id').val('').trigger('change.select2');
                     $('#edit_city_select').css('display','none');
                     $('#edit_territory_select').css('display','none');
-                }else{
+                }else{  
+                    $('#edit_service_id').val('').trigger('change.select2');
+                    $('#edit_agent_id').val('').trigger('change.select2');
+                    $('#edit_city_id').val(0).trigger('change.select2');
                     $('#edit_city_select').css('display','block');
-                    $('#edit_territory_select').css('display','block');
+                    $('#edit_territory_select').css('display','none');
+                    $('#edit_territory_id').val('').trigger('change.select2');
                     // $('#edit_city_id').children().remove();
                 // $('#edit_city_id').select2('destroy');
                     var city_obj = [];
@@ -366,7 +370,7 @@
                             console.log('change_city');
                         if(id == 0){
                             $("#edit_agent_id").select2('val', '');
-                        $("#edit_service_id").select2('val', '');
+                            $("#edit_service_id").select2('val', '');
 
                             $('#edit_territory_select').css('display','none');
                             $('#edit_territory_id').children().remove();
