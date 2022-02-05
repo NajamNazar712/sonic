@@ -182,7 +182,7 @@
 
             $('#AssignAgentModal').on('hidden.bs.modal', function () {
                 
-                $('#agent_id').val('').trigger('change.select2');
+                $("agent_id").select2('val', '')
                 $('#zone_id').val('').trigger('change.select2');
                 $('#city_id').val('').trigger('change.select2');
                 $('#territory_id').val('').trigger('change.select2');
@@ -192,11 +192,11 @@
 
             $('#EditAgentModal').on('hidden.bs.modal', function () {
                 
-                $("#edit_agent_id").val('').trigger('change.select2');
-                $('#edit_zone_id').val('').trigger('change.select2');
-                $('#edit_city_id').val('').trigger('change.select2');
-                $('#edit_territory_id').val('').trigger('change.select2');
-                $('#edit_service_id').val('').trigger('change.select2');
+                $("agent_id").select2('val', '')
+                $('#zone_id').val('').trigger('change.select2');
+                $('#city_id').val('').trigger('change.select2');
+                $('#territory_id').val('').trigger('change.select2');
+                $('#service_id').val('').trigger('change.select2');
                 
             });
            
@@ -299,7 +299,7 @@
 
             $('#edit_agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
-                placeholder:"Select Agent",
+                placeholder:"Select Service",
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
@@ -339,6 +339,8 @@
                     $('#edit_agent_id').val('').trigger('change.select2');
                     $('#edit_city_select').css('display','none');
                     $('#edit_territory_select').css('display','none');
+                    $('#edit_territory_id').val('').trigger('change.select2');
+
                 }else{  
                     $('#edit_service_id').val('').trigger('change.select2');
                     $('#edit_agent_id').val('').trigger('change.select2');
@@ -517,10 +519,6 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
-                    console.log(data.city_id);
-                    console.log(data.zone_id);
-                    console.log('agent_id',data.agent_id);
-                    $('#edit_agent_id').val(data.agent_id).trigger('change.select2');
                     $('#lead_tagging_id').val(data.lead_tagging_id);
 
                     if(data.zone_id == 0){
