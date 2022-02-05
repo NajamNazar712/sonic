@@ -57,6 +57,8 @@
                     </div>
                     <div class="form-group" id="city_select">
                         <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                            <option value="0" > All Cities </option>
+
                         </select>
                     </div>
                     <div class="form-group" id="territory_select">
@@ -114,6 +116,8 @@
 
                     <div class="form-group" id="edit_city_select">
                         <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                            <option value="0" > All Cities </option>
+                            
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
@@ -218,6 +222,8 @@
                 if(id == 0){
                         $('#service_select').css('display','block');
                         $('#agent_select').css('display','block');
+                    $('#city_select').css('display','none');
+
                 }else{
                     $('#city_select').css('display','block');
                     $('#city_id').children().remove()
@@ -225,7 +231,10 @@
                     var city_obj = [];
                     city_obj.length = 0
 
-                $.map({!! $cities !!}, function (obj) {
+                $.map({!! $cities !!}, function (obj,index) {
+                    if(index == 0){
+                        city_obj.push({id: 0, text: 'All Cities'});
+                    }
                         if(id == obj.zone_id){
                             city_obj.push({id: obj.id, text: obj.name});
                         }
@@ -238,29 +247,41 @@
                         dropdownParent:$('#agent_assign'),
                         data:city_obj
                     }).bind('change', function() {
-                        $('#territory_select').css('display','block');
-                        $('#service_select').css('display','block');
-                        $('#agent_select').css('display','block');
-
-                        $('#territory_id').children().remove()
 
                         var id = parseInt($(this).val());
-                            var territory_obj  = [];
-                            territory_obj.length = 0
 
-                        $.map({!! $territories !!}, function (obj) {
-                                if(id == obj.city_id){
-                                    territory_obj.push({id: obj.id, text: obj.name});
-                                }
-                        });
+                        if(id == 0){
+                            $('#service_select').css('display','block');
+                            $('#agent_select').css('display','block');
+                            $('#territory_select').css('display','none');
 
-                        $('#territory_id').prepend('<option selected></option>').select2({
-                                width:'100%',
-                                placeholder:"Select Territory",
-                                allowClear:true,
-                                dropdownParent:$('#agent_assign'),
-                                data:territory_obj
+                        }else{
+
+
+                            $('#service_select').css('display','block');
+                            $('#territory_select').css('display','block');
+                            $('#agent_select').css('display','block');
+
+                            $('#territory_id').children().remove()
+
+                                var territory_obj  = [];
+                                territory_obj.length = 0
+
+                            $.map({!! $territories !!}, function (obj) {
+                                    if(id == obj.city_id){
+                                        territory_obj.push({id: obj.id, text: obj.name});
+                                    }
                             });
+
+                            $('#territory_id').prepend('<option selected></option>').select2({
+                                    width:'100%',
+                                    placeholder:"Select Territory",
+                                    allowClear:true,
+                                    dropdownParent:$('#agent_assign'),
+                                    data:territory_obj
+                                });
+                        }
+
                     });
                 }
             });    

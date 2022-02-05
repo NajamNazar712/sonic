@@ -5551,6 +5551,13 @@ public function sales_incentive()
                 return $roles->zone;
             }
             
+        })->editColumn('city_name', function($roles) {
+            if($roles->city_name == '' || $roles->city_name == null){
+                return 'All Cities';
+            }else{
+                return $roles->city_name;
+            }
+            
         });
 
     return $datatables->make(true);
@@ -5559,11 +5566,28 @@ public function sales_incentive()
     public function lead_tagging_submit(Request $request){
         if($request->zone_id == 0){
             $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
-    
+            $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('city_id', $request->city_id)->where('territory_id', $request->territory_id)->where('service_id', $request->service_id)->where('sale_person_id',$request->agent_id)->where('status', 1)->orWhere(function ($query) use ($request){
+                $query->where('zone_id', '=', '0')
+                ->where('service_id', $request->service_id)
+                ->where('sale_person_id',$request->agent_id)
+                ->where('status', 1);
+            })->orWhere(function ($query) use ($request){
+                $query->where('zone_id', '=', $request->zone_id)
+                ->where('city_id', '=', '0')
+                ->where('sale_person_id',$request->agent_id)
+                ->where('service_id', $request->service_id)
+                ->where('status', 1);
+            });
             if(!$check_leads->exists()){
                 $lead_tagging = new LeadTagging;
                 $lead_tagging->sale_person_id = $request->agent_id;
                 $lead_tagging->zone_id = $request->zone_id;
+                if($request->city_id){
+                    $lead_tagging->city_id = $request->city_id;
+                }
+                if($request->territory_id){
+                    $lead_tagging->territory_id = $request->territory_id;
+                }
                 $lead_tagging->service_id = $request->service_id;
                 $lead_tagging->save();
     

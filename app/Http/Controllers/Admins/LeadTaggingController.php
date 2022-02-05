@@ -25,6 +25,11 @@ class LeadTaggingController extends Controller
             $query->where('zone_id', '=', '0')
             ->where('service_id', $lead->service_id)
             ->where('status', 1);
+        })->orWhere(function ($query) use ($lead){
+            $query->where('zone_id', '=', $lead->zone_id)
+            ->where('city_id', '=', '0')
+            ->where('service_id', $lead->service_id)
+            ->where('status', 1);
         });
         if($sales_person->exists()){
             $sales_person = $sales_person->orderBy('count', 'asc')->get()->first();
