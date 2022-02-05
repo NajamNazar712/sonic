@@ -190,15 +190,15 @@
                 
             });
 
-            $('#EditAgentModal').on('hidden.bs.modal', function () {
+            // $('#EditAgentModal').on('hidden.bs.modal', function () {
                 
-                $("agent_id").select2('val', '')
-                $('#zone_id').val('').trigger('change.select2');
-                $('#city_id').val('').trigger('change.select2');
-                $('#territory_id').val('').trigger('change.select2');
-                $('#service_id').val('').trigger('change.select2');
+            //     $("agent_id").select2('val', '')
+            //     $('#edit_zone_id').val('').trigger('change.select2');
+            //     $('#city_id').val('').trigger('change.select2');
+            //     $('#territory_id').val('').trigger('change.select2');
+            //     $('#service_id').val('').trigger('change.select2');
                 
-            });
+            // });
            
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
@@ -299,7 +299,7 @@
 
             $('#edit_agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
-                placeholder:"Select Service",
+                placeholder:"Select Agent",
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
@@ -372,7 +372,7 @@
                             console.log('change_city');
                         if(id == 0){
                             $("#edit_service_id").select2('val', '');
-                            $("#edit_agent_id").select2('val', '');
+                            $("#edit_agent_id").select2('val', '').change();
 
                             $('#edit_territory_select').css('display','none');
                             $('#edit_territory_id').children().remove();
@@ -382,7 +382,7 @@
                             $('#edit_territory_select').css('display','block');
 
                             $("#edit_service_id").select2('val', '');
-                            $("#edit_agent_id").select2('val', '');
+                            $("#edit_agent_id").select2('val', '').change();
 
                             $('#edit_territory_id').children().remove();
                             // $('#edit_territory_id').select2('destroy');
@@ -522,7 +522,7 @@
                     $('#lead_tagging_id').val(data.lead_tagging_id);
 
                     if(data.zone_id == 0){
-                        $('#edit_zone_id').val(data.zone_id);
+                        $('#edit_zone_id').val(data.zone_id).change();
                         $('#edit_city_id').css('display','none');
                         $('#edit_territory_id').css('display','none');
                         $('#edit_city_select').css('display','none');
@@ -539,7 +539,7 @@
                         $('#edit_city_id').css('display','block');
                         $('#edit_city_select').css('display','block');
 
-                            $('#edit_agent_id').val(data.agent_id)
+                            $('#edit_agent_id').val(data.agent_id).change();
                             $('#edit_city_id').val(data.city_id);
                             $('#edit_zone_id').val(data.zone_id).change();
                             $('#edit_service_id').val(data.service_id).change();
