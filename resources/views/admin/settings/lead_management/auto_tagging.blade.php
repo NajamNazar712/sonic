@@ -107,7 +107,7 @@
                     
                     <div class="form-group">
                         <select name="zone_id" id="edit_zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
-                            <option value="0" > All Pakistan </option>
+                            <option value="0" > All Zones </option>
                             @foreach($zones as $zone)
                                 <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
                             @endforeach
@@ -310,9 +310,8 @@
                 dropdownParent:$('#agent_edit')
             });
 
-            $('#edit_city_id').prepend('<option selected></option>').select2({
+            $('#edit_city_id').select2({
                 width:'100%',
-                placeholder:"Select City",
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
@@ -343,8 +342,8 @@
                 }else{
                     $('#edit_city_select').css('display','block');
                     $('#edit_territory_select').css('display','block');
-                    $('#edit_city_id').children().remove();
-                $('#edit_city_id').select2('destroy');
+                    // $('#edit_city_id').children().remove();
+                // $('#edit_city_id').select2('destroy');
                     var city_obj = [];
                     city_obj.length = 0
 
@@ -371,7 +370,7 @@
 
                             $('#edit_territory_select').css('display','none');
                             $('#edit_territory_id').children().remove();
-                        $('#edit_territory_id').select2('destroy');
+                        // $('#edit_territory_id').select2('destroy');
                         
                         }else{
                             $('#edit_territory_select').css('display','block');
@@ -530,9 +529,11 @@
                     }else{
                         if(data.city_id == 0){
                         console.log('city_0');
+                        $('#edit_city_id').css('display','block');
+                        $('#edit_city_select').css('display','block');
 
                             $('#edit_agent_id').val(data.agent_id).change();
-                            $('#edit_city_id').val(data.city_id).change();
+                            $('#edit_city_id').val(data.city_id);
                             $('#edit_zone_id').val(data.zone_id).change();
                             $('#edit_service_id').val(data.service_id).change();
                             $('#lead_tagging_id').val(data.lead_tagging_id).change();
@@ -542,6 +543,10 @@
 
                             // $('#edit_territory_id').val(data.territory_id).change();
                         }else{
+                        console.log('city_0',data.city_id);
+
+                            $('#edit_territory_select').css('display','block');
+                            $('#edit_territory_id').css('display','block');
 
                             $('#edit_agent_id').val(data.agent_id).change();
                             $('#edit_city_id').val(data.city_id).change();
