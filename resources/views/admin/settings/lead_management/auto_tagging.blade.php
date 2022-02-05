@@ -337,7 +337,10 @@
                     var city_obj = [];
                     city_obj.length = 0
 
-                $.map({!! $cities !!}, function (obj) {
+                $.map({!! $cities !!}, function (obj, index) {
+                    if(index == 0){
+                        city_obj.push({id: 0, text: 'All Cities'});
+                    }
                         if(id == obj.zone_id){
                             city_obj.push({id: obj.id, text: obj.name});
                         }
@@ -350,6 +353,19 @@
                         data:city_obj
                     }).bind('change', function() {
                 
+                        var id = parseInt($(this).val());
+                        if(id == 0){
+                            console.log('eee')
+                            $("#edit_agent_id").select2('val', '');
+                        $("#edit_service_id").select2('val', '');
+
+                            $('#edit_territory_select').css('display','none');
+                            $('#edit_territory_id').children().remove();
+                        $('#edit_territory_id').select2('destroy');
+                        
+                        }else{
+
+                        }
                         $("#edit_agent_id").select2('val', '');
                         $("#edit_service_id").select2('val', '');
 
@@ -357,7 +373,6 @@
                         $('#edit_territory_id').select2('destroy');
                         
                         
-                        var id = parseInt($(this).val());
                             var territory_obj = [];
                             territory_obj.length = 0
 
