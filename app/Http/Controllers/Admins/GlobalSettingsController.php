@@ -5488,6 +5488,7 @@ public function sales_incentive()
     }
 
     public function lead_tagging_index(){
+        
         ActivityTrailController::createActivityTrailLog(Auth::id(),493);
         $agents = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         // $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
