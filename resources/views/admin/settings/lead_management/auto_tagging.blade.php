@@ -49,7 +49,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <select name="zone_id" id="zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
-                                <option value="0" > All Pakistan </option>
+                                <option value="0" > All Zones </option>
                             @foreach($zones as $zone)
                                 <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
                             @endforeach
@@ -233,6 +233,7 @@
                         $('#service_select').css('display','block');
                         $('#agent_select').css('display','block');
                     $('#city_select').css('display','none');
+                    $('#territory_select').css('display','none');
 
                 }else{
                     $('#city_select').css('display','block');
@@ -539,7 +540,7 @@
                         console.log('city_0');
                         $('#edit_city_id').css('display','block');
                         $('#edit_city_select').css('display','block');
-                            $('#edit_agent_id').val(data.agent_id).trigger('change.select2');
+                        $('#edit_agent_id').val(data.agent_id).change();
                             // $('#edit_agent_id').val(2);
                             $('#edit_city_id').val(data.city_id);
                             $('#edit_service_id').val(data.service_id).change();
