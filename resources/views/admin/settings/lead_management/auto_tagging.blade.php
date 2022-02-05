@@ -373,7 +373,7 @@
                             console.log('change_city');
                         if(id == 0){
                             $("#edit_service_id").select2('val', '');
-                            $("#edit_agent_id").select2('val', '').change();
+                            $("#edit_agent_id").select2('val', '');
 
                             $('#edit_territory_select').css('display','none');
                             $('#edit_territory_id').children().remove();
@@ -383,7 +383,7 @@
                             $('#edit_territory_select').css('display','block');
 
                             $("#edit_service_id").select2('val', '');
-                            $("#edit_agent_id").select2('val', '').change();
+                            $("#edit_agent_id").select2('val', '');
 
                             $('#edit_territory_id').children().remove();
                             // $('#edit_territory_id').select2('destroy');
