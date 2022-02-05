@@ -5547,7 +5547,7 @@ public function sales_incentive()
             
         })->editColumn('zone', function($roles) {
             if($roles->zone == '' || $roles->zone == null){
-                return 'All Pakistan';
+                return 'All Zones';
             }else{
                 return $roles->zone;
             }
