@@ -1425,6 +1425,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\LastMileDebriefingController@caller_agent_view')->name('index');
             Route::post('next','Admins\LastMileDebriefingController@caller_agent_next')->name('next');
             Route::post('skip','Admins\LastMileDebriefingController@caller_agent_skip')->name('skip');
+            Route::post('follow_up/{id}','Admins\LastMileDebriefingController@caller_agent_follow_up')->name('follow_up');
+            Route::post('start','Admins\LastMileDebriefingController@caller_agent_start')->name('start');
+            Route::post('break','Admins\LastMileDebriefingController@caller_agent_break')->name('break');
+            Route::post('end','Admins\LastMileDebriefingController@caller_agent_end')->name('end');
         });
     });
 
