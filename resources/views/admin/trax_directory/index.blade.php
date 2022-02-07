@@ -16,20 +16,51 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
+
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12">
+                                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
+                                        <div class="col-4 mt-1">
+                                            <fieldset class="form-group input-group">
+                                                <input type="text" class="form-control" name="search_name" id="search_name" placeholder="Search Employee Name">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-4 mt-1">
+                                            <fieldset class="form-group input-group">
+                                                <input type="text" class="form-control" name="search_phone_number" id="search_phone_number" placeholder="Search Phone Number">
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="col-4 mt-1">
+                                            <fieldset class="form-group input-group">
+                                                <input type="text" class="form-control" name="search_trax_id" id="search_trax_id" placeholder="Search Employee ID">
+                                            </fieldset>
+                                        </div>
+
+                                        <div class="col-2 mt-1">
+                                            <div class="form-group">
+                                                <button type="button" id="search_filter_btn"
+                                                        class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                                    Search
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Employee ID</th>
+                                    <th class="border-primary border-darken-1">Name</th>
+                                    <th class="border-primary border-darken-1">Phone Number</th>
+                                    <th class="border-primary border-darken-1">Email</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Designation</th>
-                                    <th class="border-primary border-darken-1">Name</th>
-                                    <th class="border-primary border-darken-1">Outlook ID</th>
-                                    <th class="border-primary border-darken-1">Phone Number</th>
-                                    <th class="border-primary border-darken-1">Official Phone Number</th>
-                                    <th class="border-primary border-darken-1">Emergency Contact No.</th>
-                                    <th class="border-primary border-darken-1">Emergency Contact Person</th>
-                                    <th class="border-primary border-darken-1">Created At</th>
-                                   {{-- <th class="border-primary border-darken-1"></th>--}}
+                                    <th class="border-primary border-darken-1">Department</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -77,27 +108,23 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Employee ID');
+                            head.push('Name');
+                            head.push('Phone Number');
+                            head.push('Email');
                             head.push('City');
                             head.push('Designation');
-                            head.push('Name');
-                            head.push('Outlook ID');
-                            head.push('Phone');
-                            head.push('Official Phone');
-                            head.push('Emergency Contact No.');
-                            head.push('Emergency Contact Person');
-                            head.push('Created Datetime');
+                            head.push('Department');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
+                                row.push(values.trax_id);
+                                row.push(values.name);
+                                row.push(values.phone_number);
+                                row.push(values.email);
                                 row.push(values.city);
                                 row.push(values.designation);
-                                row.push(values.name);
-                                row.push(values.email);
-                                row.push(values.phone);
-                                row.push(values.official_phone);
-                                row.push(values.emergency_contact);
-                                row.push(values.emergency_contact_person);
-                                row.push(values.date);
+                                row.push(values.department_name);
                                 body.push(row);
                             });
                         },
@@ -130,20 +157,27 @@
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },*/
                 serverSide: true,
-                ajax: '{{ route('admin.trax_directory.list') }}',
+                ajax: {
+                    url: '{{ route('admin.trax_directory.list')}}',
+                    data: function (d) {
+
+                        d.search_name = $('#search_name').val();
+                        d.search_phone = $('#search_phone_number').val();
+                        d.search_trax_id = $('#search_trax_id').val();
+
+                    }
+                },
                 rowId: 'id',
-                order: [[9, 'asc']],
+                order: [[1, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_address_id', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'city', name: 'h.name', class: 'text-center align-middle city',},
-                    {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
-                    {data: 'name', name: 'admins.name', class: 'align-middle name'},
-                    {data: 'email', name: 'admins.email', class: 'align-middle email'},
-                    {data: 'phone', name: 'admins.phone_number', class: 'align-middle phone'},
-                    {data: 'official_phone', name: 'admins.official_phone_number', class: 'align-middle official_phone'},
-                    {data: 'emergency_contact', name: 'emp.emergency_contact', class: 'align-middle emergency_contact'},
-                    {data: 'emergency_contact_person', name: 'emp.emergency_contact_person', class: 'align-middle emergency_contact_person'},
-                    {data: 'date', name: 'admins.created_at', class: 'align-middle date'},
+                    {data: 'trax_id', name: 'e.trax_id', class: 'text-center align-middle trax_id',},
+                    {data: 'name', name: 'e.name', class: 'align-middle name'},
+                    {data: 'phone_number', name: 'e.phone_number', class: 'align-middle phone_number'},
+                    {data: 'email', name: 'e.official_email', class: 'align-middle email'},
+                    {data: 'city', name: 'c.name', class: 'align-middle city'},
+                    {data: 'designation', name: 'd.name', class: 'align-middle designation'},
+                    {data: 'department_name', name: 'ad.name', class: 'align-middle department_name'},
                     //{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -179,6 +213,17 @@
                     });
                     this.api().table().columns.adjust();
                 }
+            });
+
+            $('#search_filter_btn').on('click',function () {
+               var search_name = $('#search_name').val();
+               var search_phone = $('#search_phone_number').val();
+               var search_trax_id = $('#search_trax_id').val();
+               if(search_name == '' && search_phone == '' && search_trax_id == ''){
+                   toastr.error("Provide atleast one parameter", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+               }else{
+                   table.draw(true);
+               }
             });
         });
     </script>
