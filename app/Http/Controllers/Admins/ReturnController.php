@@ -4663,4 +4663,9 @@ class ReturnController extends Controller
         $nsa_charges_log->updated_by = Auth::id();
         $nsa_charges_log->save();
     }
+
+    public function confirmation_pending_sms_index(){
+       ActivityTrailController::createActivityTrailLog(Auth::id(),502);
+       return view('admin.return.confirmation_pending_sms');
+    }
 }
