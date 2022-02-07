@@ -57,9 +57,9 @@ class LastMileDebriefingController extends Controller
             $time = 0;
         }
 
-        $next_time = Carbon::today()->endOfDay()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateTimeString();
           
-        $prev_time = Carbon::today()->addHours($time);
+        $prev_time = Carbon::today()->addHours($time)->toDateTimeString();
 
         $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
 
@@ -154,9 +154,9 @@ class LastMileDebriefingController extends Controller
         }
 
         // $next_time = Carbon::today()->addHours($time);
-        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateString();
+        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateTimeString();
           
-        $prev_time = Carbon::today()->addHours($time)->toDateString();
+        $prev_time = Carbon::today()->addHours($time)->toDateTimeString();
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -307,10 +307,9 @@ class LastMileDebriefingController extends Controller
         else {
             $time = 0;
         }
-        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateString();
-          
-        // $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time)->toDateString();
+        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateTimeString();
+
+        $prev_time = Carbon::today()->addHours($time)->toDateTimeString();
         $data = AgentCallMonitoring::join('admins as agent','agent.id','=','agent_call_monitorings.agent_id')
             ->leftjoin('cities as hub','hub.id','=','agent.default_hub_id')
             ->select(['agent.id as agent_id','agent.name as agent_name','hub.name as hub'])
@@ -457,9 +456,9 @@ class LastMileDebriefingController extends Controller
                     $time = 0;
                 }
 
-                $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateString();
+                $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateTimeString();
 
-                $prev_time = Carbon::today()->addHours($time)->toDateString();
+                $prev_time = Carbon::today()->addHours($time)->toDateTimeString();
 
                 $calls = AgentCallMonitoring::where('agent_id', Auth::id())
                     ->where('completed', 0)

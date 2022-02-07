@@ -2282,6 +2282,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('debriefing')->name('debriefing.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@debriefing_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@debriefing_list')->name('list');
+            Route::get('agent-report', 'Admins\AdminReportsController@debriefing_agent_report')->name('agent_index');
+            Route::get('agent-report/list', 'Admins\AdminReportsController@debriefing_agent_report_list')->name('agent_list');
             Route::get('export', 'Admins\AdminReportsController@debriefing_export')->name('export');
         });
         Route::prefix('cargo_returns_shipment')->name('cargo_returns_shipment.')->group(function (){
