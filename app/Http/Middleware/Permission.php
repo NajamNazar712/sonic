@@ -1117,7 +1117,10 @@ class Permission
             'settings.escalation.in_process.edit.index' => 517,
 			'reports.operation_service_level.index' => 524,
             'reports.operation_service_level.list' => 524,
-            
+
+            'reports.debriefing.agent_list' => 676,
+            'reports.debriefing.agent_index' => 676,
+
 			'finance.ftl_invoice.index' => 509,           
             'settings.debriefing_time_setting.index' => 526,
             'settings.debriefing_time_setting.update' => 526,
