@@ -265,7 +265,7 @@ class AdminHumanResourseController extends Controller
             $employees = $employees->whereIn('cities.hub_id', session('hubs'));
         }
 
-        return Datatables::of($employees)
+        $datatable =  Datatables::of($employees)
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->employee_id, 6, '0', STR_PAD_LEFT);
             })
@@ -434,8 +434,18 @@ class AdminHumanResourseController extends Controller
                 else {
                     return '';
                 }
-            })
-            ->make(true);
+            });
+            if ($request->get('search_date_from')) {
+                if($request->get('search_date_to')){
+                    $from = $request->get('search_date_from').' 00:00:00';
+                    $to = $request->get('search_date_to').' 23:59:59';
+                    $datatable->whereBetween('employees.created_at', [$from, $to]);
+                }else{
+                    $from = $request->get('search_date_from');
+                    $datatable->whereDate('employees.created_at', $from);
+                }
+            }
+        return $datatable->make(true);
     }
 
     public function employee_directory_pin(Request $request)
