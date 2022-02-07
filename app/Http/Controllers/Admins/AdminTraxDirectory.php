@@ -51,8 +51,8 @@ class AdminTraxDirectory extends Controller
         if($request->search_phone_number){
             $phone = $request->search_phone_number;
             $datatable->where(function($query) use($phone){
-                $query->where('e.phone_number', substr_replace($phone, '-', 4, 0))
-                    ->orWhere('e.official_phone_number', substr_replace($phone, '-', 4, 0));
+                $query->where('e.phone_number', $phone)
+                    ->orWhere('e.official_phone_number', $phone);
             });
         }
         if($request->search_trax_id){
