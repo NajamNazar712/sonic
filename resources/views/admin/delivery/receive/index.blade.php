@@ -273,6 +273,7 @@
                             head.push('S.No');
                             head.push('Delivery Note No.');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Business Category');
                             head.push('Rider');
                             head.push('Route');
@@ -292,6 +293,7 @@
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
                                 row.push(values.hub);
+                                row.push(values.zone_name);
                                 row.push(values.business_category);
                                 row.push(values.rider);
                                 row.push(values.route);
