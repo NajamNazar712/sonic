@@ -1381,7 +1381,7 @@ class AdminCargoManifestController extends Controller
                         $details['destination'] = $destination->name;
                         $details['bag_weight'] = $bag->shipments_weight;
 
-                     /*   CargoManifestDraftBags::create(['bag_id'=> $bag->id,'seal_number' => $bag->seal_number,'shipments_count' => $bag->shipments , 'origin_id' => $origin->id,'destination_id' => $destination->id ,'added_by' => Auth::id(),'weight' => $bag->shipments_weight]);*/
+                        CargoManifestDraftBags::create(['bag_id'=> $bag->id,'seal_number' => $bag->seal_number,'shipments_count' => $bag->shipments , 'origin_id' => $origin->id,'destination_id' => $destination->id ,'added_by' => Auth::id(),'weight' => $bag->shipments_weight]);
 
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                         }
