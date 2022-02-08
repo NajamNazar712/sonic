@@ -10098,10 +10098,13 @@ class AdminReportsController extends Controller
                 $end = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','desc')->first()->end;
                 if($end == null)
                 {
-                    $end = "*";
+                    return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - *";
+                }
+                else{
+                    return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - ".Carbon::createFromFormat('H:i:s',$end)->format("h:i A");
                 }
 
-                return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - ".Carbon::createFromFormat('H:i:s',$end)->format("h:i A");
+
             })
             ->addColumn('break_hours', function($calls) {
                 $logs = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',2)->get();
