@@ -10004,7 +10004,7 @@ class AdminReportsController extends Controller
         }
 
         $data = AgentDay::leftjoin('admins as agent','agent.id','agent_days.agent_id')
-            ->select(['agent.id as agent_id','agent.name as agent_name','agent_days.date as date','agent_days.id as day_id']);
+            ->select(['agent.id as agent_id','agent.name as agent_name','agent_days.date as date','agent_days.id as day_id','agent_days.auto_close as auto_close']);
 
         $datatables = Datatables::of($data)
             ->addColumn('assigned_calls_excel', function($calls){
@@ -10096,12 +10096,13 @@ class AdminReportsController extends Controller
             ->addColumn('live_hours', function($calls) {
                 $start = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','asc')->first()->start;
                 $end = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','desc')->first()->end;
+                $closed = ($calls->auto_close == 1) ? " (Auto Closed)" : " (Self Closed)";
                 if($end == null)
                 {
-                    return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - *";
+                    return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - *".$closed;
                 }
                 else{
-                    return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - ".Carbon::createFromFormat('H:i:s',$end)->format("h:i A");
+                    return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - ".Carbon::createFromFormat('H:i:s',$end)->format("h:i A").$closed;
                 }
 
 
