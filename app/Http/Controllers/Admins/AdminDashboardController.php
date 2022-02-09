@@ -1439,7 +1439,7 @@ class AdminDashboardController extends Controller
 
             if($user->status == 2){
                 $now = Carbon::now();
-                $action = User::where('id',$id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now ,'reactivated_at'=>$now ]);
+                $action = User::where('id',$user->id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now ,'reactivated_at'=>$now ]);
                 if($user->lead_id != null){
                     $lead = Lead::find($user->lead_id);
                     $lead_log = new LeadLog();
@@ -1456,7 +1456,7 @@ class AdminDashboardController extends Controller
                     $lead->save();
                 }
                 if($action == 1){
-                    NotificationsController::send(1, $id);
+                    NotificationsController::send(1, $user->id);
 
                     return redirect()->route('admin.accounts.active')->with('success', 'User is activated.');
                 }else{
