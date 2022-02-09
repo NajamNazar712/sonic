@@ -8966,6 +8966,38 @@ class NotificationsController extends Controller
                     }
                     self::email($subject, $body, $to, $cc);
                 }
+                else if($id == 169){
+
+                    $shipment_id = $reference_1_id;
+                    $shipment = Shipment::find($shipment_id);
+                    $shipper_name = NULL;
+                    if($shipment->user->brand_name != null){
+                        $shipper_name = $shipment->user->brand_name;
+                    }
+                    else{
+                        $shipper_name = $shipment->user->name;
+                    }
+
+                    if (strpos($body, '[consignee]') !== FALSE) {
+                        $body = str_replace('[consignee]',$shipment->consignee_name , $body);
+                    }
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]',$shipment->tracking_number , $body);
+                    }
+
+                    if (strpos($body, '[amount]') !== FALSE) {
+                        $body = str_replace('[amount]',$shipment->amount , $body);
+                    }
+
+                    if (strpos($body, '[brand_name]') !== FALSE) {
+                        $body = str_replace('[brand_name]',$shipper_name, $body);
+                    }
+
+                    $to = $shipment->consignee_phone_number_1;
+                    self::sms($body, $to);
+                  
+                }
             }
         }
     }

@@ -76,6 +76,7 @@ use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Jobs\ProcessAgentCallMonitoring;
+use App\Jobs\RCPSmsToConsignee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -2200,9 +2201,12 @@ class DeliveryController extends Controller
 
     public function receive_delivery_status_submit(Request $request)
     {
+        $now = Carbon::now();
+        $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
+
         $open_box_ids = array();
         $shipments = explode(',', $request->shipment_ids);
-
+        $rcp_sms_setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
         $open_box_ids = explode(',', $request->open_box_ids);
         $invalid_reason_shipments = array();
         $delivery_note_id = $request->delivery_note_id;
@@ -2293,6 +2297,9 @@ class DeliveryController extends Controller
                                 $return_assign_log->assigned_by = Auth::id();
                                 $return_assign_log->save();
                             }
+                            if(in_array(session('role_id'),[1,18,19]) && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
+                                dispatch(new RCPSmsToConsignee($shipment));
+                            }
                         }
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
                             if($shipment_status->packaging_material_request == 0){
@@ -2338,8 +2345,6 @@ class DeliveryController extends Controller
                 }
 
 				}
-
-
             }
             $delivery_note_data = DeliveryNote::find($delivery_note_id);
             $delivery_note_data->last_updated_at = Carbon::now();

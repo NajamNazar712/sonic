@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Models\Notification;
 use Illuminate\Database\Seeder;
 
 class UpdateNotificationsForReturnConfirmationPendingSms extends Seeder
@@ -11,9 +12,10 @@ class UpdateNotificationsForReturnConfirmationPendingSms extends Seeder
      */
     public function run()
     {
+
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('notifications')->insert(array(
-        array('id' => 169, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'RCP Sms', 'type_id' => 2, 'subject' => null, 'body' => 'Dear Consignee [consignee],' . PHP_EOL .'
+        array('id' => 169, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'RCP Sms', 'type_id' => 2, 'subject' => null, 'body' => 'Dear [consignee],' . PHP_EOL .'
 Your order [tracking_number] from [brand_name] worth Rs. [amount] is marked as returned. Reply with TRX (space) (tracking_number) Y to receive it. ', 'updated_by' => 3, 'status' => 1)
         )
         );

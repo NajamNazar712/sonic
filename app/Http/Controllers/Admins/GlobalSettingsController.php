@@ -5982,8 +5982,8 @@ public function sales_incentive()
 
     public function rcp_sms_update(Request $request){
         $setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
-        $setting->setting_value = $request->sms_count;
-        $setting->text = $request->toggle_check;
+        $setting->setting_value = $request->toggle_check;
+        $setting->text = $request->sms_count;
         $setting->save();
 
         return redirect()->back()->with('success','Setting Updated');
