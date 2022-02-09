@@ -6142,9 +6142,20 @@ class AdminAPIController extends Controller
     {
         $rules = [
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'mother_name' => ['required'],
+            'employee_gender_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_genders,id'],
+            'shift_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
+            'staff_category_id' => ['required', 'integer', 'digits_between:1,10', 'exists:staff_categories,id'],
+            'guardian_name' => ['required'],
+            'religion_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
+            'domicile_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
+            'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
             'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
-            'emergency_contact_no' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'address' => ['required'],
+            'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
             'emergency_contact_person' => ['required'],
+            'official_email' => ['required', 'email'],
+            'date_of_birth' => ['required'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -6154,12 +6165,25 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $employee = Employee::find($request->employee_id);
-            if ($employee) {
-                $employee->blood_group = $request->blood_group_id;
-                $employee->emergency_contact = $request->emergency_contact_no;
-                $employee->emergency_contact_person = $request->emergency_contact_person;
-                $employee->save();
+            $employee_request = Employee::find($request->employee_id);
+            if ($employee_request) {
+                $city = City::find($employee_request->city_id);
+                $employee_request->employee_gender_id = $request->employee_gender_id;
+                $employee_request->guardian_name = $request->guardian_name;
+                $employee_request->religion_id = $request->religion_id;
+                $employee_request->domicile_id = $request->domicile_id;
+                $employee_request->marital_status_id = $request->marital_status_id;
+                $employee_request->blood_group = $request->blood_group_id;
+                $employee_request->address = $request->address;
+                $employee_request->emergency_contact = $request->emergency_contact;
+                $employee_request->emergency_contact_person = $request->emergency_contact_person;
+                $employee_request->zone_id = $city->zone_id;
+                $employee_request->official_email = $request->official_email;
+                $employee_request->date_of_birth = $request->date_of_birth;
+                $employee_request->mother_name = $request->mother_name;
+                $employee_request->shift_id = $request->shift_id;
+                $employee_request->staff_category_id = $request->staff_category_id;
+                $employee_request->save();
                 return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'User not found!']);
