@@ -5838,6 +5838,7 @@ public function sales_incentive()
 
 
     public function lead_notification_update(Request $request){
+
         $lead_notification = LeadNotification::find($request->lead_notification_id);
 
         $lead_notification->subject = $request->subject;
@@ -5845,25 +5846,27 @@ public function sales_incentive()
 
         $lead_notification->save();
         if($request->lead_notification_id == 1){
-
-            $image_ids = explode(',', $request->selected_ids);
-            foreach ($image_ids as $id){
-    
-                $file_name = 'notification_image_'.$id;
-                $image = $request->file($file_name);
-    
-                $extension = $image->getClientOriginalExtension();
-                $random = rand(1000, 100000);
-                $now = Carbon::now();
-                $time = $now->year . '_' . $now->month;
-                $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-                $image->move(public_path('uploads/notification_attachments'), $generated_image_name);
-                $notification_image = new LeadNotificationAttachment();
-                $notification_image->notification_id = $lead_notification->id;
-                $notification_image->added_by = Auth::id();
-                $notification_image->attachment = $generated_image_name;
-                $notification_image->save();
+            if($request->selected_ids){
+                $image_ids = explode(',', $request->selected_ids);
+                foreach ($image_ids as $id){
+        
+                    $file_name = 'notification_image_'.$id;
+                    $image = $request->file($file_name);
+        
+                    $extension = $image->getClientOriginalExtension();
+                    $random = rand(1000, 100000);
+                    $now = Carbon::now();
+                    $time = $now->year . '_' . $now->month;
+                    $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+                    $image->move(public_path('uploads/notification_attachments'), $generated_image_name);
+                    $notification_image = new LeadNotificationAttachment();
+                    $notification_image->notification_id = $lead_notification->id;
+                    $notification_image->added_by = Auth::id();
+                    $notification_image->attachment = $generated_image_name;
+                    $notification_image->save();
+                }
             }
+
         }
         return redirect()->back()->with('success', 'Notification Updated!');
        
