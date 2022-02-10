@@ -226,6 +226,10 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'Rider\RiderAPIController@get_profile')->name('index');
                 Route::get('check', 'Rider\RiderAPIController@check_profile')->name('check');
                 Route::post('update', 'Rider\RiderAPIController@update_profile')->name('update');
+
+                Route::get('index_v2', 'Rider\RiderAPIController@get_profile_v2')->name('index_v2');
+                Route::get('check_v2', 'Rider\RiderAPIController@check_profile_v2')->name('check_v2');
+                Route::post('update_v2', 'Rider\RiderAPIController@update_profile_v2')->name('update_v2');
             });
 
             Route::post('payslip', 'Rider\RiderAPIController@rider_payslip')->name('payslip');
