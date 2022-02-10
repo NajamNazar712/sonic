@@ -1932,11 +1932,15 @@ class DeliveryController extends Controller
     }
 
     public function receive_delivery_status_submit_all(Request $request){
+
         $open_box_ids = array();
         $received_shipments = array();
         $first_attempt_shipments = array();
         $restrict_status_shipments = array();
+        $now = Carbon::now();
+        $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
 
+        $rcp_sms_setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
         if($request->has('open_box_ids')){
@@ -2114,6 +2118,10 @@ class DeliveryController extends Controller
                                 $return_assign_log->assigned_by = Auth::id();
                                 $return_assign_log->save();
                             }
+                            if(in_array(session('role_id'),[1,18,19]) && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
+                                dispatch(new RCPSmsToConsignee($shipment));
+                            }
+
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
                             if ($shipment_details->packaging_material_request == 0) {

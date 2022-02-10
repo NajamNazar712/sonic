@@ -8995,7 +8995,8 @@ class NotificationsController extends Controller
                     }
 
                     $to = $shipment->consignee_phone_number_1;
-                    self::sms($body, $to);
+                    $data = array($body, $to);
+                    return $data;
                   
                 }
             }
