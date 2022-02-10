@@ -2509,7 +2509,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('crm_count')->name('crm_count.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@crm_count_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@crm_count_list')->name('list');
+            Route::post('list', 'Admins\AdminReportsController@crm_count_list')->name('list');
         });
         
     });
