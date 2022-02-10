@@ -6100,7 +6100,7 @@ class AdminAPIController extends Controller
             $admin_profile = Employee::where('trax_id', $admin->trax_id);
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->first();
-                if(!$admin_profile->blood_group_id || !$admin_profile->emergency_contact_no || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->official_email || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id){
+                if(!$admin_profile->blood_group_id || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->official_email || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id){
                     return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
                 }else{
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
