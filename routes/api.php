@@ -226,10 +226,6 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'Rider\RiderAPIController@get_profile')->name('index');
                 Route::get('check', 'Rider\RiderAPIController@check_profile')->name('check');
                 Route::post('update', 'Rider\RiderAPIController@update_profile')->name('update');
-
-                Route::get('index_v2', 'Rider\RiderAPIController@get_profile_v2')->name('index_v2');
-                Route::get('check_v2', 'Rider\RiderAPIController@check_profile_v2')->name('check_v2');
-                Route::post('update_v2', 'Rider\RiderAPIController@update_profile_v2')->name('update_v2');
             });
 
             Route::post('payslip', 'Rider\RiderAPIController@rider_payslip')->name('payslip');
@@ -324,6 +320,10 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'AdminAPIController@get_profile')->name('index');
                 Route::get('check', 'AdminAPIController@check_profile')->name('check');
                 Route::post('update', 'AdminAPIController@update_profile')->name('update');
+
+                Route::get('index_v2', 'AdminAPIController@get_profile_v2')->name('index_v2');
+                Route::get('check_v2', 'AdminAPIController@check_profile_v2')->name('check_v2');
+                Route::post('update_v2', 'AdminAPIController@update_profile_v2')->name('update_v2');
             });
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
