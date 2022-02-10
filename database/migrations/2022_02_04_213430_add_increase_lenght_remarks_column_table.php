@@ -14,10 +14,7 @@ class AddIncreaseLenghtRemarksColumnTable extends Migration
     public function up()
     {
         Schema::table('petty_cash_statement_details', function (Blueprint $table) {
-            //
-            Schema::table('petty_cash_statement_details', function (Blueprint $table) {
                 $table->longText('remarks')->change();
-            });
         });
     }
 
@@ -29,7 +26,7 @@ class AddIncreaseLenghtRemarksColumnTable extends Migration
     public function down()
     {
         Schema::table('petty_cash_statement_details', function (Blueprint $table) {
-            //
+            $table->string('remarks')->change();
         });
     }
 }

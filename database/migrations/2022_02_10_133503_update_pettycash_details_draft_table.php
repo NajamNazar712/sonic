@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddIncreaseLenghtRemarksColumnTable extends Migration
+class UpdatePettycashDetailsDraftTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,9 @@ class AddIncreaseLenghtRemarksColumnTable extends Migration
      */
     public function up()
     {
-            //
-            Schema::table('petty_cash_statement_detail_drafts', function (Blueprint $table) {
-                $table->longText('remarks')->change();
-            });
-
+        Schema::table('petty_cash_statement_detail_drafts', function (Blueprint $table) {
+            $table->longText('remarks')->change();
+        });
     }
 
     /**
@@ -28,7 +26,7 @@ class AddIncreaseLenghtRemarksColumnTable extends Migration
     public function down()
     {
         Schema::table('petty_cash_statement_detail_drafts', function (Blueprint $table) {
-            //
+            $table->string('remarks')->change();
         });
     }
 }
