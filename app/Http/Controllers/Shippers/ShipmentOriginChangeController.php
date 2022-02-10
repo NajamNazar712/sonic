@@ -215,8 +215,12 @@ class ShipmentOriginChangeController extends Controller
 
                     $pickup_address_id = $shipment->pickup_address_id;
                     $city = City::where('name', $row['city'])->first();
-
-                    if(!UserShippingInfo::where('user_id', $user_id)->where('vendor', $row['vendor'])->where('city_id', $city->id)->exists()){
+                    $check_pickup_address = UserShippingInfo::where('user_id', $user_id)->where('vendor', $row['vendor'])->where('city_id', $city->id);
+                    if($check_pickup_address->exists()){
+                        $check_pickup_address = $check_pickup_address->first();
+                        $pickup_address_id = $check_pickup_address->id;
+                    }
+                    else{
                         $pickup_address_id = ShipperShipmentBookController::add_pickup_address($user_id, $row['pickup_address'], $row['contact_person'], $row['vendor'], $row['phone_number'], $row['email_address'], $city->id,0);
                     }
 
