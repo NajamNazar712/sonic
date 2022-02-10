@@ -10874,12 +10874,11 @@ class RiderAPIController extends Controller
             $marital_status_list = EmployeeMaritalStatus::all();
             $shift_list = EmployeeShift::all();
             $domecile_list = EmployeeDomicile::all();
-            $rider_main_category_list = RiderMainCategory::all();
-            $rider_sub_category_list = RiderCategory::all();
+            $rider_type_list = RiderType::all();
             $profile = Employee::where('trax_id', $rider->trax_id);
             if ($profile->exists()) {
                 $profile = $profile->get();
-                return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'gender_list' => $gender_list, 'religion_list' => $religion_list, 'marital_status_list' => $marital_status_list, 'rider_main_category_list' => $rider_main_category_list, 'shift_list' => $shift_list, 'domecile_list' => $domecile_list, 'employee_data' => $profile, 'rider_sub_category_list' => $rider_sub_category_list]);
+                return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'gender_list' => $gender_list, 'religion_list' => $religion_list, 'marital_status_list' => $marital_status_list, 'rider_type_list' => $rider_type_list, 'shift_list' => $shift_list, 'domecile_list' => $domecile_list, 'employee_data' => $profile]);
             } else {
                 return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
             }
@@ -10893,8 +10892,7 @@ class RiderAPIController extends Controller
         $rules = [
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
             'mother_name' => ['required'],
-            'rider_sub_category' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_categories,id'],
-            'rider_main_category' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_main_categories,id'],
+            'rider_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
             'employee_gender_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_genders,id'],
             'shift_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
             'guardian_name' => ['required'],
@@ -10931,8 +10929,7 @@ class RiderAPIController extends Controller
                 $employee_request->date_of_birth = $request->date_of_birth;
                 $employee_request->mother_name = $request->mother_name;
                 $employee_request->shift_id = $request->shift_id;
-                $employee_request->rider_main_category = $request->rider_main_category;
-                $employee_request->rider_sub_category = $request->rider_sub_category;
+                $employee_request->rider_type_id = $request->rider_type_id;
                 $employee_request->save();
                 return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
             } else {
