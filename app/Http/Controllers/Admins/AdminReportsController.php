@@ -10126,7 +10126,7 @@ class AdminReportsController extends Controller
                     $break += $difference;
                 }
 
-                return round($break/60,2).' Minute(s)';
+                return round($break/60,0).' Minute(s)';
             });
 
         return $datatables->make(true);
