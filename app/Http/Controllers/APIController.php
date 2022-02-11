@@ -4494,9 +4494,9 @@ class APIController extends Controller
                 if($message != null) {
                     $data = explode(" ", $message);
                     if (count($data) == 3) {
-                        $response_yes = array("yes",'ye','y');
-                        $response_no = array("no", 'n');
-                        $res = strtolower($data[1]);
+                        $response_yes = array("YES",'YE','Y');
+                        $response_no = array("NO", 'N');
+                        $res = strtoupper($data[1]);
                         $tracking_number = $data[2];
 
                         $shipment = Shipment::where('tracking_number', $tracking_number)->first();
@@ -4554,7 +4554,7 @@ class APIController extends Controller
                                             NotificationsController::send(15, 0, $shipment->id);
                                             NotificationsController::send(16, 0, $shipment->id);
                                         }
-                                    $res_from_consignee = $data[1] . " ". $res;
+                                    $res_from_consignee = $data[0] . " ". $res;
 
                                     $rcp->response = $res_from_consignee;
                                     $rcp->status = 2;
@@ -4562,7 +4562,6 @@ class APIController extends Controller
 
                                 }
                                 elseif (in_array($res, $response_no)) {
-
 
                                     if(!in_array($shipment->shipper_status_id, [13, 15, 20, 54, 55])){
 
@@ -4592,7 +4591,7 @@ class APIController extends Controller
                                                 AdminFinanceController::done_payment($shipment->id, 1);
                                             }
                                         }
-                                        ShipmentsJourneyController::add($shipment, 20, 20, 38, NULL, NULL, 50);
+                                        ShipmentsJourneyController::add($shipment->id, 20, 20, 38, NULL, NULL, 50);
                                         $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
                                         if($return_assign_shipment->exists()){
 
@@ -4608,7 +4607,7 @@ class APIController extends Controller
                                         }
                                     }
 
-                                    $res_from_consignee = $data[1] . " ". $res;
+                                    $res_from_consignee = $data[0] . " ". $res;
 
                                     $rcp->response = $res_from_consignee;
                                     $rcp->status = 1;

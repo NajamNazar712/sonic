@@ -43,6 +43,7 @@ use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\Zone;
+use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
@@ -56,6 +57,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
+use Yajra\Datatables\Services\DataTable;
 use function foo\func;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Support\Str;
@@ -4667,5 +4669,37 @@ class ReturnController extends Controller
     public function confirmation_pending_sms_index(){
        ActivityTrailController::createActivityTrailLog(Auth::id(),502);
        return view('admin.return.confirmation_pending_sms');
+    }
+
+    public function confirmation_pending_sms_list(Request $request){
+       $rcp = ReturnConfirmationPendingSmsAttempt::join('shipments as s','s.id','=','return_confirmation_pending_sms_attempts.shipment_id')
+           ->select('s.id as shipment_id','s.tracking_number as tracking_number','s.tracking_number as tracking','s.consignee_phone_number_1 as phone','return_confirmation_pending_sms_attempts.response as response','return_confirmation_pending_sms_attempts.created_at as created_at','return_confirmation_pending_sms_attempts.updated_at as updated_at','return_confirmation_pending_sms_attempts.status as status');
+
+       $datatable = DataTables::of($rcp)
+           ->editColumn('tracking_number', function ($shipments) {
+               $route = route('admin.tracking.index');
+               return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+           })
+       ->editColumn('updated_at',function($rcp){
+            if($rcp->status == 0){
+                return '-';
+            }
+            else{
+                return $rcp->updated_at;
+            }
+       })
+       ->editColumn('status',function ($rcp){
+            if($rcp->status == 0){
+                return 'Pending';
+            }
+            else if($rcp->status == 2){
+                return 'Re-Attempt';
+            }
+            else{
+                return 'Return';
+            }
+       });
+
+        return $datatable->make(true);
     }
 }
