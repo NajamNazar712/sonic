@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateReturnConfirmationPendingSmsAttemptsTable extends Migration
+class CreateGuestApiTokensTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateReturnConfirmationPendingSmsAttemptsTable extends Migration
      */
     public function up()
     {
-        Schema::create('return_confirmation_pending_sms_attempts', function (Blueprint $table) {
+        Schema::create('guest_api_tokens', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('shipment_id')->index();
-            $table->tinyInteger('status');
-            $table->Integer('count');
-            $table->string('response')->nullable();
+            $table->string('name');
+            $table->string('token');
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ class CreateReturnConfirmationPendingSmsAttemptsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('return_confirmation_pending_sms_attempts');
+        Schema::dropIfExists('guest_api_tokens');
     }
 }
