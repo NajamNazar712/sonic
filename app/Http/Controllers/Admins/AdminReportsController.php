@@ -10096,8 +10096,8 @@ class AdminReportsController extends Controller
                 $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format((($item->closed / (($item->pending + $item->new_launched) - $item->closed)) * 100), 2);
                 $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format(((($item->pending + $item->new_launched) / (($item->pending + $item->new_launched) - $item->closed)) * 100), 2);
             }
-            $crm_count_data[$key]['weekly_close'] = $avg_closed/$value->count();
-            $crm_count_data[$key]['weekly_remaining'] = $avg_remaining/$value->count();
+            $crm_count_data[$key]['weekly_close'] = number_format($avg_closed/$value->count() , 2);
+            $crm_count_data[$key]['weekly_remaining'] = number_format($avg_remaining/$value->count() , 2);
         }
 
 

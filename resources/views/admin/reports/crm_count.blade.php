@@ -118,6 +118,9 @@
             width: auto !important;
             text-align: left;
         }
+        .border_none{
+            border: none !important;
+        }
     </style>
 @endsection
 @section('js')
@@ -268,8 +271,10 @@
                                     shipment += '<td class="align-middle remaining">'+crm_counts.remaining+'</td>';
                                     shipment += '<td class="align-middle closure_percent">'+crm_counts.closure_percent+'</td>';
                                     shipment += '<td class="align-middle remaining_percent">'+crm_counts.remaining_percent+'</td>';
-                                    shipment += '<td class="align-middle weekly_remaining" rowspan="'+details.count_days+'">'+details.weekly_remaining+'</td>';
-                                    shipment += '<td class="align-middle weekly_close" rowspan="'+details.count_days+'">'+details.weekly_close+'</td>';
+                                    // shipment += '<td class="align-middle weekly_remaining" rowspan="'+details.count_days+'">'+details.weekly_remaining+'</td>';
+                                    // shipment += '<td class="align-middle weekly_close" rowspan="'+details.count_days+'">'+details.weekly_close+'</td>';
+                                    shipment += '<td class="align-middle weekly_remaining text-center">'+details.weekly_remaining+'</td>';
+                                    shipment += '<td class="align-middle weekly_close text-center">'+details.weekly_close+'</td>';
                                     shipment +='</tr>';
                                 }else{
                                     shipment += '<tr><td class="align-middle stations">'+counter+'</td>';
@@ -281,6 +286,9 @@
                                     shipment += '<td class="align-middle remaining">'+crm_counts.remaining+'</td>';
                                     shipment += '<td class="align-middle closure_percent">'+crm_counts.closure_percent+'</td>';
                                     shipment += '<td class="align-middle remaining_percent">'+crm_counts.remaining_percent+'</td>';
+                                    shipment += '<td class="align-middle weekly_remaining border_none"></td>';
+                                    shipment += '<td class="align-middle weekly_close border_none"></td>';
+                                    shipment +='</tr>';
                                     shipment +='</tr>';
 
                                 }
