@@ -475,11 +475,11 @@ class NotificationsController extends Controller
                         }
 
 //              $to = $shipper->email;
-                        $to = array();
+
                         if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
-                            $to[] = ShipperNotificationEmail::where('user_id', $shipper->id)->whereNotNull('email')->pluck('email')->toArray();
+                            $to = ShipperNotificationEmail::where('user_id', $shipper->id)->whereNotNull('email')->pluck('email')->toArray();
                         } else {
-                            $to[] = $shipper->email;
+                            $to = $shipper->email;
                         }
                         $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
 
