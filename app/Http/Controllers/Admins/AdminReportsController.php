@@ -10096,8 +10096,10 @@ class AdminReportsController extends Controller
             ->addColumn('live_hours', function($calls) {
                 $start = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','asc')->first()->start;
                 $end = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','desc')->first()->end;
-                $closed = ($calls->auto_close == 1) ? " (Auto Closed)" : " (Self Closed)";
-                if($end == null)
+                $closed = "";
+                if($calls->status == 3) {
+                    $closed = ($calls->auto_close == 1) ? " (Auto Closed)" : " (Self Closed)";
+                }                if($end == null)
                 {
                     return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - *".$closed;
                 }
