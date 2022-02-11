@@ -10085,7 +10085,7 @@ class AdminReportsController extends Controller
             $avg_remaining = 0;
             foreach($value as $item){
                 $avg_closed += number_format((($item->closed / ($item->pending + $item->new_launched) ) * 100), 2);
-                $avg_remaining += number_format( ( ( ($item->pending + $item->new_launched) - $item->closed) / (($item->pending + $item->new_launched)  * 100) ), 2);
+                $avg_remaining += number_format( (((($item->pending + $item->new_launched) - $item->closed) / ($item->pending + $item->new_launched)) * 100) , 2  );
                 $crm_count_data[$key]['data'][$item->id]['id'] = $item->id;
                 $crm_count_data[$key]['data'][$item->id]['pending'] = $item->pending;
                 $crm_count_data[$key]['data'][$item->id]['new_launched'] = $item->new_launched;
@@ -10094,7 +10094,7 @@ class AdminReportsController extends Controller
                 $crm_count_data[$key]['data'][$item->id]['remaining'] = (($item->pending + $item->new_launched) - $item->closed);
                 $crm_count_data[$key]['data'][$item->id]['total'] = ($item->pending + $item->new_launched);
                 $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format(( ($item->closed / ($item->pending + $item->new_launched)  ) * 100), 2);
-                $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format(( (($item->pending + $item->new_launched)- $item->closed) / (($item->pending + $item->new_launched)  * 100)), 2);
+                $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format(( ( (($item->pending + $item->new_launched) - $item->closed) / ($item->pending + $item->new_launched) )  * 100), 2);
             }
             $crm_count_data[$key]['weekly_close'] = number_format($avg_closed/$value->count() , 2);
             $crm_count_data[$key]['weekly_remaining'] = number_format($avg_remaining/$value->count() , 2);
