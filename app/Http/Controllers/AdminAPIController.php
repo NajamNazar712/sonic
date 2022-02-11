@@ -6142,20 +6142,20 @@ class AdminAPIController extends Controller
     {
         $rules = [
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
-            'mother_name' => ['required'],
-            'employee_gender_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_genders,id'],
-            'shift_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
-            'staff_category_id' => ['required', 'integer', 'digits_between:1,10', 'exists:staff_categories,id'],
-            'guardian_name' => ['required'],
-            'religion_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
-            'domicile_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
-            'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
+            'mother_name' => ['nullable'],
+            'employee_gender_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_genders,id'],
+            'shift_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
+            'staff_category_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:staff_categories,id'],
+            'guardian_name' => ['nullable'],
+            'religion_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
+            'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
+            'marital_status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
             'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
-            'address' => ['required'],
+            'address' => ['nullable'],
             'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
             'emergency_contact_person' => ['required'],
-            'official_email' => ['required', 'email'],
-            'date_of_birth' => ['required'],
+            'official_email' => ['nullable', 'email'],
+            'date_of_birth' => ['nullable'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);

@@ -10891,19 +10891,19 @@ class RiderAPIController extends Controller
     {
         $rules = [
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
-            'mother_name' => ['required'],
-            'rider_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
-            'employee_gender_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_genders,id'],
-            'shift_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
-            'guardian_name' => ['required'],
-            'religion_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
-            'domicile_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
-            'marital_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
+            'mother_name' => ['nullable'],
+            'rider_type_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
+            'employee_gender_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_genders,id'],
+            'shift_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
+            'guardian_name' => ['nullable'],
+            'religion_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
+            'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
+            'marital_status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
             'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
-            'address' => ['required'],
+            'address' => ['nullable'],
             'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
             'emergency_contact_person' => ['required'],
-            'date_of_birth' => ['required'],
+            'date_of_birth' => ['nullable'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
