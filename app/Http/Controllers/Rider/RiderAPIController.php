@@ -10916,20 +10916,58 @@ class RiderAPIController extends Controller
             $employee_request = Employee::find($request->employee_id);
             if ($employee_request) {
                 $city = City::find($employee_request->city_id);
-                $employee_request->employee_gender_id = $request->employee_gender_id;
-                $employee_request->guardian_name = $request->guardian_name;
-                $employee_request->religion_id = $request->religion_id;
-                $employee_request->domicile_id = $request->domicile_id;
-                $employee_request->marital_status_id = $request->marital_status_id;
-                $employee_request->blood_group = $request->blood_group_id;
-                $employee_request->address = $request->address;
-                $employee_request->emergency_contact = $request->emergency_contact;
-                $employee_request->emergency_contact_person = $request->emergency_contact_person;
                 $employee_request->zone_id = $city->zone_id;
-                $employee_request->date_of_birth = $request->date_of_birth;
-                $employee_request->mother_name = $request->mother_name;
-                $employee_request->shift_id = $request->shift_id;
-                $employee_request->rider_type_id = $request->rider_type_id;
+                if ($request->has('employee_gender_id')) {
+                    $employee_request->employee_gender_id = $request->employee_gender_id;
+                }
+                if ($request->has('guardian_name')) {
+                    $employee_request->guardian_name = $request->guardian_name;
+                }
+
+                if ($request->has('religion_id')) {
+                    $employee_request->religion_id = $request->religion_id;
+                }
+
+                if ($request->has('domicile_id')) {
+                    $employee_request->domicile_id = $request->domicile_id;
+                }
+
+                if ($request->has('marital_status_id')) {
+                    $employee_request->marital_status_id = $request->marital_status_id;
+                }
+
+                if ($request->has('blood_group_id')) {
+                    $employee_request->blood_group = $request->blood_group_id;
+                }
+
+                if ($request->has('address')) {
+                    $employee_request->address = $request->address;
+                }
+
+                if ($request->has('emergency_contact')) {
+                    $employee_request->emergency_contact = $request->emergency_contact;
+                }
+
+                if ($request->has('emergency_contact_person')) {
+                    $employee_request->emergency_contact_person = $request->emergency_contact_person;
+                }
+
+                if ($request->has('date_of_birth')) {
+                    $employee_request->date_of_birth = $request->date_of_birth;
+                }
+
+                if ($request->has('mother_name')) {
+                    $employee_request->mother_name = $request->mother_name;
+                }
+
+                if ($request->has('shift_id')) {
+                    $employee_request->shift_id = $request->shift_id;
+                }
+
+                if ($request->has('rider_type_id')) {
+                    $employee_request->rider_type_id = $request->rider_type_id;
+                }
+
                 $employee_request->save();
                 return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
             } else {

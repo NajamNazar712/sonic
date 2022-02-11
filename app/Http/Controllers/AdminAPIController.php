@@ -63,9 +63,7 @@ use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PayslipPdf;
-use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\Product;
-use App\Http\Models\RateStatus;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
@@ -90,7 +88,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Password;
-use phpDocumentor\Reflection\PseudoTypes\False_;
 
 class AdminAPIController extends Controller
 {
@@ -6100,7 +6097,7 @@ class AdminAPIController extends Controller
             $admin_profile = Employee::where('trax_id', $admin->trax_id);
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->first();
-                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->official_email || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id){
+                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id){
                     return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
                 }else{
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
@@ -6168,21 +6165,62 @@ class AdminAPIController extends Controller
             $employee_request = Employee::find($request->employee_id);
             if ($employee_request) {
                 $city = City::find($employee_request->city_id);
-                $employee_request->employee_gender_id = $request->employee_gender_id;
-                $employee_request->guardian_name = $request->guardian_name;
-                $employee_request->religion_id = $request->religion_id;
-                $employee_request->domicile_id = $request->domicile_id;
-                $employee_request->marital_status_id = $request->marital_status_id;
-                $employee_request->blood_group = $request->blood_group_id;
-                $employee_request->address = $request->address;
-                $employee_request->emergency_contact = $request->emergency_contact;
-                $employee_request->emergency_contact_person = $request->emergency_contact_person;
                 $employee_request->zone_id = $city->zone_id;
-                $employee_request->official_email = $request->official_email;
-                $employee_request->date_of_birth = $request->date_of_birth;
-                $employee_request->mother_name = $request->mother_name;
-                $employee_request->shift_id = $request->shift_id;
-                $employee_request->staff_category_id = $request->staff_category_id;
+                if ($request->has('employee_gender_id')) {
+                    $employee_request->employee_gender_id = $request->employee_gender_id;
+                }
+                if ($request->has('guardian_name')) {
+                    $employee_request->guardian_name = $request->guardian_name;
+                }
+
+                if ($request->has('religion_id')) {
+                    $employee_request->religion_id = $request->religion_id;
+                }
+
+                if ($request->has('domicile_id')) {
+                    $employee_request->domicile_id = $request->domicile_id;
+                }
+
+                if ($request->has('marital_status_id')) {
+                    $employee_request->marital_status_id = $request->marital_status_id;
+                }
+
+                if ($request->has('blood_group_id')) {
+                    $employee_request->blood_group = $request->blood_group_id;
+                }
+
+                if ($request->has('address')) {
+                    $employee_request->address = $request->address;
+                }
+
+                if ($request->has('emergency_contact')) {
+                    $employee_request->emergency_contact = $request->emergency_contact;
+                }
+
+                if ($request->has('emergency_contact_person')) {
+                    $employee_request->emergency_contact_person = $request->emergency_contact_person;
+                }
+
+                if ($request->has('official_email')) {
+                    $employee_request->official_email = $request->official_email;
+                }
+
+                if ($request->has('date_of_birth')) {
+                    $employee_request->date_of_birth = $request->date_of_birth;
+                }
+
+                if ($request->has('mother_name')) {
+                    $employee_request->mother_name = $request->mother_name;
+                }
+
+                if ($request->has('shift_id')) {
+                    $employee_request->shift_id = $request->shift_id;
+                }
+
+                if ($request->has('staff_category_id')) {
+                    $employee_request->staff_category_id = $request->staff_category_id;
+                }
+
                 $employee_request->save();
                 return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
             } else {
