@@ -17,7 +17,9 @@ class PettyCashStatement extends Model
     public function shipment(){
         return $this->belongsTo('App\Http\Models\Shipment');
     }
-
+    public function zone() {
+        return $this->belongsTo('App\Http\Models\Zone', 'zone_id', 'id');
+    }
     public function sdn()
     {
         return $this->belongsTo('App\Http\Models\Admin\StationDepositNote','sdn_id');
