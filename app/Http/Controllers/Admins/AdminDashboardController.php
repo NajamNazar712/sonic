@@ -178,7 +178,7 @@ class AdminDashboardController extends Controller
     }
 
     public function index(){
-        $stats = array();
+        /*$stats = array();
         $graph = array();
         $sales=array();
         $leads = array();
@@ -344,7 +344,7 @@ class AdminDashboardController extends Controller
         }
 
         $cities = City::select('id','name')->get();
-        $service_type = BookingType::where('id', '!=', 3)->select('id','booking_type')->get();
+        $service_type = BookingType::where('id', '!=', 3)->select('id','booking_type')->get();*/
 
 //        $admin = Admin::where('id', Auth::id())->first();
 //        //incoming
@@ -475,7 +475,8 @@ class AdminDashboardController extends Controller
 //        $last_updated_at = OperationsForecastLastUpdatedTime::latest('created_at')->first();
 
 //        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_dates' => $operation_dates, 'default_hub_id' => $admin->default_hub_id, 'operation_incoming' => $operation_incoming, 'service_types' => $service_type, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing, 'last_updated_at' => $last_updated_at]);
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
+//        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
+        return view('admin.simple_dashboard');
     }
     public function statistics_search(Request $request){
 //        return $request;
