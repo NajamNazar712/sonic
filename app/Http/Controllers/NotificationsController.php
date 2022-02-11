@@ -177,19 +177,23 @@ class NotificationsController extends Controller
                     return false;
                 }
             }
+            if($cc != NULL){
+                if(is_array($cc)){
+                    $cc = array_values(array_filter($cc));
+                    if(empty($cc)){
+                        $cc = NULL;
+                    }
+                }
+            }
+            if($bcc != NULL){
+                if(is_array($bcc)){
+                    $bcc = array_values(array_filter($bcc));
+                    if(empty($bcc)){
+                        $bcc = NULL;
+                    }
+                }
+            }
 
-            if(is_array($cc)){
-                $cc = array_values(array_filter($cc));
-                if(empty($cc)){
-                    $cc = NULL;
-                }
-            }
-            if(is_array($bcc)){
-                $bcc = array_values(array_filter($bcc));
-                if(empty($bcc)){
-                    $bcc = NULL;
-                }
-            }
 
             $mail = Mail::to($to);
 
