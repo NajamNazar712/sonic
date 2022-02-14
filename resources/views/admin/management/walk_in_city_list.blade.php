@@ -17,7 +17,7 @@
                                     <table class="table table-bordered">
                                             <thead>
                                             <tr role="row" class="bg-primary white text-center">
-                                                <th colspan="2" class="border-primary border-darken-1">Overnight</th>
+                                                <th colspan="2" class="border-primary border-darken-1">Rush</th>
                                             </tr>
                                             <tr role="row" class="bg-primary bg-lighten-1 white">
                                                 <th class="text-center border-primary border-lighten-2">ID</th>
@@ -42,7 +42,7 @@
                                     <table class="table table-bordered">
                                             <thead>
                                             <tr role="row" class="bg-primary white text-center">
-                                                <th colspan="2" class="border-primary border-darken-1">Overland</th>
+                                                <th colspan="2" class="border-primary border-darken-1">Saver Plus</th>
                                             </tr>
                                             <tr role="row" class="bg-primary bg-lighten-1 white">
                                                 <th class="text-center border-primary border-lighten-2">ID</th>
@@ -67,7 +67,7 @@
                                     <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
-                                            <th colspan="2" class="border-primary border-darken-1">Detain</th>
+                                            <th colspan="2" class="border-primary border-darken-1">Swift</th>
                                         </tr>
                                         <tr role="row" class="bg-primary bg-lighten-1 white">
                                             <th class="text-center border-primary border-lighten-2">ID</th>
