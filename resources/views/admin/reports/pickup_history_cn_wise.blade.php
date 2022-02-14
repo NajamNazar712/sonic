@@ -183,6 +183,7 @@
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
+                clear: '',
                 max: from_max,
                 format:'dd mmmm, yyyy',
                 selectYears: true,
@@ -204,6 +205,7 @@
             });
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
+                clear: '',
                 max: to_max,
                 format:'dd mmmm, yyyy',
                 selectYears: true,
