@@ -11665,7 +11665,7 @@ class AdminDashboardController extends Controller
 
     public function check_profile(Request $request)
     {
-        $admin_id = $request->admin_id;
+        $admin_id = Auth::id();
         $admin = Admin::find($admin_id);
         if($admin && $admin->trax_id){
             $admin_profile = Employee::where('trax_id', $admin->trax_id);
@@ -11673,14 +11673,14 @@ class AdminDashboardController extends Controller
                 $admin_profile = $admin_profile->first();
                 if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id){
                     return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
-                }else{
-                    return response()->json(['status' => 1, 'message' => "Profile already updated"]);
                 }
+                return response()->json(['status' => 2, 'info' => "Profile Already Updated"]);
             } else {
-                return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+
+                return response()->json(['status' => 1, 'error' => "Admin Profile Not Found"]);
             }
         }else{
-            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+            return response()->json(['status' => 1, 'error' => "Admin Profile Not Found"]);
         }
 
     }
