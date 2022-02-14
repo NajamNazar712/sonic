@@ -309,7 +309,7 @@
                                 {
                                     extend: 'excelHtml5',
                                     footer: true,
-                                    title: 'QA Report',
+                                    title: 'CRM Count Report',
                                     text:'<i class="la la-file-excel-o"></i> Excel',
                                     action: function (e, dt, node, config) {
                                         var that = this;
