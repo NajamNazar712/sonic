@@ -192,10 +192,15 @@
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#from_date_root').css('top','40px');
+                    $('#to_date').val('');
                 },
                 onSet: function(context) {
                     var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(9, 'days');
                     to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
                 }
             });
             var to_date = $('#to_date').pickadate({
@@ -275,7 +280,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Lead Time Report',
+                        title: 'Pickup History (CN wise)',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
