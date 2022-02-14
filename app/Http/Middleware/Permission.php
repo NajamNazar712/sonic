@@ -587,6 +587,9 @@ class Permission
             'reports.reverse_pickup.index' => 624,
             'reports.reverse_pickup.list' => 624,
 
+            'reports.pickup_history_cn_wise.index' => 679,
+            'reports.pickup_history_cn_wise.list' => 679,
+
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,
