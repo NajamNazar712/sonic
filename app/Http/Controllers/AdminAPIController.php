@@ -5360,9 +5360,8 @@ class AdminAPIController extends Controller
                         $information['address'] = '';
                     }
                     $information['role'] = 'staff';
-
-                    EmployeeDeviceToken::where('employee_id', $user->id)->where('employee_type_id', 1)->delete();
                     if($request->has('device_token')){
+                        EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
                         $employee_device_token = new EmployeeDeviceToken();
                         $employee_device_token->employee_id = $user->id;
                         $employee_device_token->employee_type_id = 1;
