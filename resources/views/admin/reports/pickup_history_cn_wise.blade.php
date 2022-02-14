@@ -336,6 +336,38 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
+            $('#datatable tbody').on('click', 'tr td.pickup_note_no_print button.print', function() {
+                var pickup_note_id = parseInt($(this).attr('rel'));
+                print(pickup_note_id);
+            });
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.v2_pickups.pending.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'ids': [id],
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
 
         });
 
