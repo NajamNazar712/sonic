@@ -177,19 +177,23 @@ class NotificationsController extends Controller
                     return false;
                 }
             }
+            if($cc != NULL){
+                if(is_array($cc)){
+                    $cc = array_values(array_filter($cc));
+                    if(empty($cc)){
+                        $cc = NULL;
+                    }
+                }
+            }
+            if($bcc != NULL){
+                if(is_array($bcc)){
+                    $bcc = array_values(array_filter($bcc));
+                    if(empty($bcc)){
+                        $bcc = NULL;
+                    }
+                }
+            }
 
-            if(is_array($cc)){
-                $cc = array_values(array_filter($cc));
-                if(empty($cc)){
-                    $cc = NULL;
-                }
-            }
-            if(is_array($bcc)){
-                $bcc = array_values(array_filter($bcc));
-                if(empty($bcc)){
-                    $bcc = NULL;
-                }
-            }
 
             $mail = Mail::to($to);
 
@@ -471,11 +475,11 @@ class NotificationsController extends Controller
                         }
 
 //              $to = $shipper->email;
-                        $to = array();
+
                         if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
-                            $to[] = ShipperNotificationEmail::where('user_id', $shipper->id)->whereNotNull('email')->pluck('email')->toArray();
+                            $to = ShipperNotificationEmail::where('user_id', $shipper->id)->whereNotNull('email')->pluck('email')->toArray();
                         } else {
-                            $to[] = $shipper->email;
+                            $to = $shipper->email;
                         }
                         $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
 
