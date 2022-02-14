@@ -720,7 +720,7 @@ class APIController extends Controller
 
                 $consignee_city = City::find($request->input('consignee_city_id'));
 
-                if (($request->input('consignee_city_id') == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110)) {
+                if (($request->input('consignee_city_id') == 1244 && $user_id != 5982 && $user_id != 3324 && $user_id != 10104 && $user_id != 14110 && $user_id != 16292)) {
                     return response()->json(['status' => 1, 'message' => 'User is not allowed to book from ' . $request->input('consignee_city_id')]);
                 }
 
