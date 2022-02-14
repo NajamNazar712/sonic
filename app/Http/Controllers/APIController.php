@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
@@ -54,6 +55,7 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserShipment;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\ZoneClassCity;
+use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
@@ -4477,6 +4479,159 @@ class APIController extends Controller
             {
                 return ['status' => 1, 'message' => 'Receiving Sheet has been Cancelled or Removed'];
             }
+        }
+    }
+
+    public function rcp_sms_from_consignee(Request $request)
+    {
+        $rcp_token = GuestApiToken::where('name','telecard_rcp_sms')->first();
+        $api_token = $request->header('Authorization');
+       
+        if ($api_token) {
+            if($api_token == $rcp_token->token) {
+
+                $message = $request->message;
+                if($message != null) {
+                    $data = explode(" ", $message);
+                    if (count($data) == 3) {
+                        $response_yes = array("YES",'YE','Y');
+                        $response_no = array("NO", 'N');
+                        $res = strtoupper($data[1]);
+                        $tracking_number = $data[2];
+
+                        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+                        if ($shipment) {
+                            $rcp = ReturnConfirmationPendingSmsAttempt::where('shipment_id', $shipment->id)->where('status', 0);
+                            if ($rcp->exists()) {
+                                $rcp = $rcp->first();
+                                if (in_array($res, $response_yes)) {
+
+                                        if(!in_array($shipment->shipper_status_id, [13, 20])){
+                                            /*$remark_inp = "remark.$shipment->id";
+                                            $remarks = ($request->has($remark_inp) && $request->remark[$shipment->id] != null)? $request->remark[$shipment->id] : null;*/
+
+                                            $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest('id')->first();
+
+                                            if ($journey) {
+                                                if ($shipment->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
+                                                    $shipment->nsa_osa_status = 1;
+
+                                                    $shipment->save();
+
+                                                    ShipmentChargesController::nsa_osa_charges($shipment->id);
+
+                                                    NotificationsController::send(33, $shipment->id);
+                                                }
+                                                else if ($shipment->shipper_status_id == 52) {
+                                                    $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest('id')->first();
+
+                                                    if ($journey && ($journey->status_reason_id == 12)) {
+                                                        $shipment->nsa_osa_status = 1;
+
+                                                        $shipment->save();
+
+                                                        ShipmentChargesController::nsa_osa_charges($shipment->id);
+                                                    }
+                                                }
+                                            }
+
+                                            $shipment->shipper_status_id = 13;
+                                            $shipment->consignee_status_id = 13;
+                                            $shipment->save();
+
+                                            ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 50);
+                                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id)->latest()->first();
+                                            if($return_assign_shipment){
+                                                $return_assign_shipment->status = 0;
+                                                $return_assign_shipment->save();
+
+                                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                                $return_assign_log->status = 1;
+                                                $return_assign_log->assigned_by = 50;
+                                                $return_assign_log->save();
+                                            }
+                                            NotificationsController::send(15, 0, $shipment->id);
+                                            NotificationsController::send(16, 0, $shipment->id);
+                                        }
+                                    $res_from_consignee = $data[0] . " ". $res;
+
+                                    $rcp->response = $res_from_consignee;
+                                    $rcp->status = 2;
+                                    $rcp->save();
+
+                                }
+                                elseif (in_array($res, $response_no)) {
+
+                                    if(!in_array($shipment->shipper_status_id, [13, 15, 20, 54, 55])){
+
+                                        $shipment->shipper_status_id = 20;
+                                        $shipment->consignee_status_id = 20;
+                                        $shipment->save();
+
+                                        NotificationsController::send(15, 0, $shipment->id);
+                                        NotificationsController::send(16, 0, $shipment->id);
+
+                                        if ($shipment->shipment_type == 1) {
+                                            if ($shipment->booking_type_id != 4) {
+                                                ShipmentChargesController::return($shipment->id);
+
+                                                if ($shipment->packaging_material_request != 1) {
+
+                                                    AdminFinanceController::add_payment($shipment->id, 1);
+                                                }
+                                            }
+                                            else {
+                                                ShipmentChargesController::walk_in_return($shipment->id);
+
+                                                $shipment->walk_in_status = 2;
+
+                                                $shipment->save();
+
+                                                AdminFinanceController::done_payment($shipment->id, 1);
+                                            }
+                                        }
+                                        ShipmentsJourneyController::add($shipment->id, 20, 20, 38, NULL, NULL, 50);
+                                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
+                                        if($return_assign_shipment->exists()){
+
+                                            $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                                            $return_assign_shipment->status = 0;
+                                            $return_assign_shipment->save();
+
+                                            $return_assign_log = new ReturnAssignedShipmentLogs();
+                                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                            $return_assign_log->status = 2;
+                                            $return_assign_log->assigned_by = 50;
+                                            $return_assign_log->save();
+                                        }
+                                    }
+
+                                    $res_from_consignee = $data[0] . " ". $res;
+
+                                    $rcp->response = $res_from_consignee;
+                                    $rcp->status = 1;
+                                    $rcp->save();
+                                }
+                            }
+
+                        }
+                        return ['status' => 1, 'message' => 'Message Received'];     //shown to telecard
+                    }
+                    else{
+                        return ['status' => 0, 'message' => 'Invalid message response from consignee'];
+                    }
+                }
+                else{
+                    return ['status' => 0, 'message' => 'message field is required'];
+                }
+            }
+            else{
+                return ['status' => 0, 'message' => 'Invalid Api Token'];
+            }
+        }
+        else{
+            return ['status' => 0, 'message' => 'Api Token is required'];
         }
     }
 }

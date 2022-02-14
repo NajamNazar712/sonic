@@ -108,6 +108,7 @@ class Kernel extends ConsoleKernel
 
         '\App\Console\Commands\EmployeeDocumentsUpdateNotification',
         'App\Console\Commands\AutoEmailDwsArrival',
+        'App\Console\Commands\RCPSMSToConsigneeReattempt',
 //        '\App\Console\Commands\ReattemptRatioCalculate',
     ];
 
@@ -375,6 +376,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('email:dwsarrival')->dailyAt('17:00')->runInBackground();
 //        $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
+        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt('00:01')->runInBackground();
 
     }
     /**
