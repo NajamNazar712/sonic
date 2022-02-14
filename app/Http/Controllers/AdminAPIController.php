@@ -5206,8 +5206,10 @@ class AdminAPIController extends Controller
                             $dws_detail->dws_date = $request->date;
                             $dws_detail->save();
                         }
-                        $this->dws_pickup_note($pickup_note_id, $rider_id);
-                        
+                        if($pickup_note_id != NULL){
+                            $this->dws_pickup_note($pickup_note_id, $rider_id);
+                        }
+
                     return response()->json(true);
 
                 } else {
