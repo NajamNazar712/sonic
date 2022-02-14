@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Lead Time Report')
+@section('title', 'Pickup History (CN wise)')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 @section('content')
     <h1 class="mb-1">
-        Lead Time Report
+        Pickup History (CN wise)
     </h1>
 
     <div class="card">
@@ -18,19 +18,9 @@
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
-                                @foreach($cities as $city)
-                                    <option value="{{$city->id}}">{{$city->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_destination" id="search_destination" class="form-control select2">
                                 @foreach($cities as $city)
                                     <option value="{{$city->id}}">{{$city->name}}</option>
                                 @endforeach
@@ -48,27 +38,9 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_status" id="search_status" class="form-control select2">
-                                @foreach($statuses as $status)
-                                    <option value="{{$status->id}}">{{$status->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                 @foreach($shipper as $shippers)
                                     <option value="{{$shippers->id}}">{{$shippers->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                                @foreach($shipping_modes as $mode)
-                                    <option value="{{$mode->id}}">{{$mode->mode}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -192,33 +164,13 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
-            $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Shipping Mode',
-                width:'100%',
-                allowClear:true
-            });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Origin',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Destination',
-                width:'100%',
-                allowClear:true
-            });
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Hub',
-                width:'100%',
-                allowClear:true
-            });
-            // $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-            //     placeholder:'Search Shipper',
-            //     width:'100%',
-            //     allowClear:true
-            // });
-            $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Status',
                 width:'100%',
                 allowClear:true
             });
@@ -263,7 +215,7 @@
                     from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
-            /*jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
@@ -272,7 +224,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.lead_time.list') }}',
+                        url: '{{ route('admin.reports.pickup_history_cn_wise.list') }}',
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -280,100 +232,32 @@
                         data: params,
                         success: function (result) {
                             head = [];
-
                             head.push('S.No');
                             head.push('Tracking .No');
-                            head.push('Account No.');
-                            head.push('Cargo Number');
-                            head.push('In Transit Date');
-                            head.push('Vendor Name');
+                            head.push('Pickup Note');
                             head.push('Shipper');
-                            head.push('Origin');
-                            head.push('Destination');
+                            head.push('Address');
+                            head.push('Arrived at Origin');
                             head.push('Hub');
-                            head.push('Shipping Mode');
-                            head.push('Current Status');
-                            head.push('Payment Status');
-                            head.push('Arrival Date(A)');
-                            head.push('Reached At Destination Date(B)');
-                            head.push('Transit TAT(A-B)');
-                            head.push('junction Date');
-                            head.push('First Delivery Note No');
-                            head.push('First Attempt Date');
-                            head.push('First Status');
-                            head.push('First Status Date(C)');
-                            head.push('First Verification Status');
-                            head.push('First Verification Date');
-                            head.push('Last Delivery Note No');
-                            head.push('Last Status');
-                            head.push('Last Status Date(C)');
-                            head.push('Last Verification Status');
-                            head.push('Last Verification Date');
-                            head.push('Attempt TAT(A-C)');
-                            head.push('Dispatch TAT(B-C)');
-                            head.push('Delivered Date(D)');
-                            head.push('Delivered TAT(A-D)');
-                            head.push('Return Confirm(E)');
-                            head.push('Return Cargo Number');
-                            head.push('Return In Transit Date');
-                            head.push('Reached At Origin(F)');
-                            head.push('Return Transit TAT(E-F)');
-                            head.push('Return Status');
-                            head.push('Return Status Date(G)');
-                            head.push('Return Dispatch TAT(F-G)');
-                            head.push('Return TAT(E-G)');
-                            head.push('Payment Done Date(H)');
-                            head.push('Payment TAT(D-H,G-H)');
-                            head.push('Shipment TAT');
+                            head.push('Booking Date');
+                            head.push('Pickup Date');
+                            head.push('Arrival Date');
+                            head.push('Rider');
+                            head.push('Arrival Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
-
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
-                                row.push(values.account_no);
-                                row.push(values.cargo_number);
-                                row.push(values.cargo_date_time);
-                                row.push(values.vendor);
+                                row.push(values.pickup_note_no);
                                 row.push(values.shipper);
+                                row.push(values.pickup_address);
                                 row.push(values.origin);
-                                row.push(values.destination);
                                 row.push(values.hub);
-                                row.push(values.shipping_mode);
-                                row.push(values.current_status);
-                                row.push(values.payment_status);
+                                row.push(values.booking_date);
+                                row.push(values.pickup_date);
                                 row.push(values.arrival_date);
-                                row.push(values.reached_at_destination);
-                                row.push(values.transit_tat);
-                                row.push(values.junction);
-                                row.push(values.first_delivery_note_id);
-                                row.push(values.first_attempt);
-                                row.push(values.first_status);
-                                row.push(values.first_status_date);
-                                row.push(values.first_verification);
-                                row.push(values.verification_status_date);
-                                row.push(values.last_delivery_note_id);
-                                row.push(values.last_status);
-                                row.push(values.last_status_date);
-                                row.push(values.last_verification);
-                                row.push(values.last_verification_status_date);
-                                row.push(values.attempt_tat);
-                                row.push(values.dispatch_tat);
-                                row.push(values.delivered_date);
-                                row.push(values.delivered_tat);
-                                row.push(values.return_confirm);
-                                row.push(values.return_cargo_number);
-                                row.push(values.return_cargo_date_time);
-                                row.push(values.return_reached_at_destination);
-                                row.push(values.return_transit_tat);
-                                row.push(values.return_delivered_status);
-                                row.push(values.return_delivered_date);
-                                row.push(values.return_dispatch_tat);
-                                row.push(values.return_tat);
-                                row.push(values.payment_done_date);
-                                row.push(values.payment_tat);
-                                row.push(values.total_tat);
-
-
+                                row.push(values.rider);
+                                row.push(values.arrival_status);
                                 body.push(row);
                             });
                         },
@@ -383,7 +267,7 @@
 
                     return {body: body, header: head};
                 }
-            } ); */
+            } );
               var index_column = 0;
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',
@@ -398,6 +282,7 @@
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
+                autoWidth: false,
                 processing: true,
                 language: {
                     processing: data_table_loader
@@ -412,11 +297,8 @@
                     data: function (d) {
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
-                        d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();
-                        d.search_status = $('#search_status').val();
                         d.search_shipper = $('#search_shipper').val();
-                        d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -426,7 +308,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link',searchable: false},
-                    {data: 'pickup_note_no', name: 'vpn.pickup_note_no', class: 'align-middle pickup_note_no',searchable: false},
+                    {data: 'pickup_note_no_print', name: 'vpn.pickup_note_id', class: 'align-middle pickup_note_no_print',searchable: false},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper',searchable: false},
                     {data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address',searchable: false},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin',searchable: false},
@@ -446,9 +328,9 @@
                     this.api().table().columns.adjust();
                 }
             });
-            table.draw();
-            /*$('#search_filter_btn').on('click',function () {
-            });*/
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
 
         });
 

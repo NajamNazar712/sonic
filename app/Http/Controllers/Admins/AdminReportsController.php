@@ -9992,28 +9992,25 @@ class AdminReportsController extends Controller
     }
 
     public function pickup_history_cn_wise_index(Request $request){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),135);
-//        $shippers = User$generator::all(['id','name']);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),506);
         $cities = DB::connection('reports')->table('cities')->get(['id','name']);
         $shipper = DB::connection('reports')->table('users')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->select(['id','name'])->where('hub',1)->get();
-        $statuses = DB::connection('reports')->table('shipment_status')->get(['id','name']);
-        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
-        return view('admin.reports.pickup_history_cn_wise')->with(['cities'=>$cities,'statuses'=>$statuses,'hubs'=>$hubs,'shipper'=>$shipper, 'shipping_modes' => $shipping_modes]);
+        return view('admin.reports.pickup_history_cn_wise')->with(['cities'=>$cities,'hubs'=>$hubs,'shipper'=>$shipper]);
     }
 
-    public function pickup_history_cn_wise_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),136);
+    public function pickup_history_cn_wise_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 507);
         }
         $shipments = DB::connection('reports')->table('shipments')
-            ->join('users as u','u.id','=','shipments.user_id')
+            ->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities as h' ,'oc.hub_id', '=' , 'h.id')
-            ->join('v2_pickup_request_shipments as vps','vps.shipment_id', '=', 'shipments.id')
-            ->join('v2_pickup_requests as vpr', 'vps.pickup_request_id','=','vpr.id')
+            ->join('cities as h', 'oc.hub_id', '=', 'h.id')
+            ->join('v2_pickup_request_shipments as vps', 'vps.shipment_id', '=', 'shipments.id')
+            ->join('v2_pickup_requests as vpr', 'vps.pickup_request_id', '=', 'vpr.id')
             ->leftjoin('riders as cr', 'cr.id', '=', 'vpr.current_rider_id')
             ->leftJoin('v2_pickup_note_requests as vpn', function ($join) {
                 $join->on('vpn.pickup_request_id', '=', 'vpr.id')
@@ -10022,7 +10019,7 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id','=',
+                    ->where('sj.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('v2_rider_pickups as vrp', function ($join) {
@@ -10030,7 +10027,7 @@ class AdminReportsController extends Controller
                     ->where('vrp.id', '=',
                         DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = vpr.id)'));
             })
-            ->select('shipments.tracking_number as tracking_number','shipments.created_at as booking_date','shipments.tracking_number as tracking_number_link','usi.pickup_address as pickup_address','oc.name as origin','h.name as hub','vpn.pickup_note_id as pickup_note_id','vrp.created_at as pickup_date','sj.created_at as arrival_date','cr.name as rider','u.name as shipper');
+            ->select('shipments.tracking_number as tracking_number', 'shipments.created_at as booking_date', 'shipments.tracking_number as tracking_number_link', 'usi.pickup_address as pickup_address', 'oc.name as origin', 'h.name as hub', 'vpn.pickup_note_id as pickup_note_id', 'vrp.created_at as pickup_date', 'sj.created_at as arrival_date', 'cr.name as rider', 'u.name as shipper');
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
@@ -10039,27 +10036,50 @@ class AdminReportsController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            ->editColumn('pickup_note_no', function ($shipments) {
+            ->editColumn('pickup_note_no_print', function ($shipments) {
                 if ($shipments->pickup_note_id != null) {
                     return '<button class="btn btn-sm btn-outline-info align-middle print" rel="' . $shipments->pickup_note_id . '"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
                 }
                 return '';
             })
-            ->addColumn('arrival_status_badge', function ($shipments){
-                if($shipments->arrival_date){
+            ->editColumn('pickup_note_no', function ($shipments) {
+                if ($shipments->pickup_note_id != null) {
+                    return str_pad($shipments->pickup_note_id, 6, '0', STR_PAD_LEFT);
+                }
+                return '';
+            })
+            ->addColumn('arrival_status_badge', function ($shipments) {
+                if ($shipments->arrival_date) {
                     return '<span class="badge bg-success">Arrival Done</span>';
-                }else{
+                } else {
                     return '<span class="badge bg-danger">Arrival Not Done</span>';
                 }
             })
-            ->addColumn('arrival_status', function ($shipments){
-                if($shipments->arrival_date){
+            ->addColumn('arrival_status', function ($shipments) {
+                if ($shipments->arrival_date) {
                     return 'Arrival Done';
-                }else{
+                } else {
                     return 'Arrival Not Done';
                 }
             });
-            return $pickup_history->make(true);
+        if ($tracking = $request->get('search_tracking_no')) {
+            $shipments->where('shipments.tracking_number', '=', $tracking);
+        }
+        if ($shipper = $request->get('search_shipper')) {
+            $shipments->where('u.id', '=', $shipper);
+        }
+        if ($origin = $request->get('search_origin')) {
+            $shipments->where('oc.id', '=', $origin);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $shipments->where('h.id', '=', $hub);
+        }
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments->whereBetween('sj.created_at', [$from, $to]);
+        }
+        return $pickup_history->make(true);
     }
 }
 
