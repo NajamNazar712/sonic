@@ -4954,12 +4954,16 @@ class RiderAPIController extends Controller
                         $information['address'] = $rider->address;
                         $information['role'] = 'rider';
                         $information['cargo_user'] = 0;
-                        EmployeeDeviceToken::where('employee_id', $rider->id)->where('employee_type_id', 2)->delete();
+
                         if($request->has('device_token')){
                             EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
                             $employee_device_token = new EmployeeDeviceToken();
                             $employee_device_token->employee_id = $rider->id;
                             $employee_device_token->employee_type_id = 2;
+                            $employee_device_token->device_token = $request->get('device_token');
+                            $employee_device_token->save();
+                        }
+
                         $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
                             ->join('riders as r', 'e.id', 'r.employee_id')
                             ->where('r.id', $rider->id);
