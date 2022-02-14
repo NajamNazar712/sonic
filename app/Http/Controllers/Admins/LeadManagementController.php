@@ -340,7 +340,14 @@ class LeadManagementController extends Controller
                     $html = "";
                     foreach ($images as $image)
                     {
-                        $html .= '<a target="_blank" class="btn btn-sm btn-outline-info align-middle" href="' . $image . '"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View Image</span></a><br>';
+                        $exists = Storage::disk('public')->exists($image);
+                        if ($exists) {
+                            $route = Storage::disk('public')->url($image);
+                        }
+                        else{
+                            $route = Storage::disk('s3')->temporaryUrl($image, now()->addMinutes(5));
+                        }
+                        $html .= '<a target="_blank" class="btn btn-sm btn-outline-info align-middle" href="' . $route . '"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View Image</span></a><br>';
                     }
                     return $html;
                 }

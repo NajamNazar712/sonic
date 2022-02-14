@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Lead\LeadNotification;
 use App\Http\Models\Admin\Lead\LeadNotificationAttachment;
 use App\Http\Models\Admin\Lead\LeadTagging;
 use App\Http\Models\Admin\Lead\LeadTaggingHistory;
+use App\Http\Models\City;
 use App\Http\Models\SMS;
 use App\Jobs\ProcessSMS;
 use App\Mail\Notifications;
@@ -21,7 +22,21 @@ class LeadTaggingController extends Controller
     public static function auto_tagging($lead_id, $admin_id)
     {
         $lead = Lead::find($lead_id);
-        $sales_person = LeadTagging::where('city_id', $lead->city_id)->where('service_id', $lead->service_id)->where('status', 1);
+        $zone = City::find($lead->city_id);
+
+        $sales_person = LeadTagging::where('city_id', $lead->city_id)->where('territory_id', $lead->territory_id)->where('service_id', $lead->service_id)->where('status', 1)->orWhere(function ($query) use ($lead){
+            $query->where('zone_id', '=', '0')
+            ->where('service_id', $lead->service_id)
+            ->where('status', 1);
+        })->orWhere(function ($query) use ($lead,$zone){
+            $query->where('zone_id', '=', $zone->zone_id)
+            ->where('city_id', '=', '0')
+            ->where('service_id', $lead->service_id)
+            ->where('status', 1);
+        });
+
+
+
         if($sales_person->exists()){
             $sales_person = $sales_person->orderBy('count', 'asc')->get()->first();
             $lead->sale_person_id = $sales_person->sale_person_id;
