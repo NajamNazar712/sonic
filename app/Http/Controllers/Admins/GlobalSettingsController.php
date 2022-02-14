@@ -5976,6 +5976,7 @@ public function sales_incentive()
     }
 
     public function rcp_sms_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),508);
         $setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
         return view('admin.settings.return.rcp_sms',compact('setting'));
     }
