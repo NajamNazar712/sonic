@@ -6061,6 +6061,7 @@ class AdminAPIController extends Controller
                     ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
                     ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
                     ->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
+                    ->orwhere('e.official_phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
                     ->where('admins.status', 1);
             } elseif ($request->search_with == 3) {
                 $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')

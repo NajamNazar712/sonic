@@ -612,7 +612,7 @@
                         <p>You have to update your profile, cannot proceed without it.</p>
                     </div>
                     <div class="form-actions center">
-                        <button type="button" class="btn btn-primary">OK!</button>
+                        <button type="button" class="btn btn-primary">OK</button>
                     </div>
                 </form>
             </div>

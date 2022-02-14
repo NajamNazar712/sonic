@@ -143,8 +143,8 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Domicile</label>
-                                                <select name="domicile" id="domicile" class="select2 form-control " style="width: 100%">
+                                                <label>Domicile<span class="text-danger">*</span></label>
+                                                <select name="domicile" id="domicile" class="select2 form-control " data-rule-required="true" data-msg-required="Domicile is required" style="width: 100%">
                                                     @foreach($domiciles as $domicile)
                                                         <option value="{{$domicile->id}}">{{$domicile->name}}</option>
                                                     @endforeach
@@ -153,8 +153,8 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Blood Group</label>
-                                                <select name="blood_group" id="blood_group" class="select2 form-control " style="width: 100%">
+                                                <label>Blood Group<span class="text-danger">*</span></label>
+                                                <select name="blood_group" id="blood_group" class="select2 form-control " data-rule-required="true" data-msg-required="Blood Group is required" style="width: 100%">
                                                     @foreach($blood_groups as $blood_group)
                                                         <option value="{{$blood_group->id}}">{{$blood_group->name}}</option>
                                                     @endforeach
