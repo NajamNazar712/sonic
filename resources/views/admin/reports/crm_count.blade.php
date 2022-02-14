@@ -259,8 +259,8 @@
                                 console.log(crm_counts);
                                 console.log('crm_counts.date');
                                 console.log(crm_counts.date);
+                                counter++;
                                 if(i == 0){
-                                    counter++;
 
                                     shipment += '<tr><td class="align-middle serial_number">'+counter+'</td>';
                                     shipment += '<td class="align-middle serial_number">'+crm_counts.date+'</td>';
@@ -273,8 +273,8 @@
                                     shipment += '<td class="align-middle remaining_percent">'+crm_counts.remaining_percent+'</td>';
                                     // shipment += '<td class="align-middle weekly_remaining" rowspan="'+details.count_days+'">'+details.weekly_remaining+'</td>';
                                     // shipment += '<td class="align-middle weekly_close" rowspan="'+details.count_days+'">'+details.weekly_close+'</td>';
-                                    shipment += '<td class="align-middle weekly_remaining text-center">'+details.weekly_remaining+'</td>';
-                                    shipment += '<td class="align-middle weekly_close text-center">'+details.weekly_close+'</td>';
+                                    shipment += '<td class="align-middle weekly_remaining text-center"><strong>'+details.weekly_remaining+'</strong></td>';
+                                    shipment += '<td class="align-middle weekly_close text-center"><strong>'+details.weekly_close+'</strong></td>';
                                     shipment +='</tr>';
                                 }else{
                                     shipment += '<tr><td class="align-middle stations">'+counter+'</td>';
@@ -325,65 +325,6 @@
                                         });
                                     },
 
-                                    customize: function (xlsx) {
-                                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
-                                        var numrows = 1;
-                                        var rows = $('row', sheet);
-
-                                      //update Row
-
-
-                                        // var new_sheet = rows.slice(1);
-                                        $.each(rows,function () {
-                                            var attr = $(this).attr('r');
-                                                var ind = parseInt(attr);
-                                                ind = ind + numrows;
-                                                $(this).attr("r", ind);
-                                        });
-
-                                    //     // Create row before data
-
-                                        $('row c', sheet).each(function () {
-                                                var attr = $(this).attr('r');
-                                                var pre = attr.substring(0, 1);
-                                                var ind = parseInt(attr.substring(1, attr.length));
-                                                ind = ind + numrows;
-                                                $(this).attr("r", pre + ind);
-
-                                        });
-
-
-                                        var merge_cells = '';
-                                        first_row = '<row r="1"><c r="A1" t="inlineStr" s="51"><is><t>QA Report</t></is></c></row>';
-                                        function Addrow(index,data) {
-                                            msg='<row r="'+index+'">';
-                                            for(i=0;i<data.length;i++){
-                                                var key=data[i].key;
-                                                var range=data[i].range;
-                                                var value=data[i].value;
-                                                msg += '<c t="inlineStr" s="2" r="' + key + index + '">';
-                                                msg += '<is>';
-                                                msg +=  '<t>'+value+'</t>';
-                                                msg+=  '</is>';
-                                                msg+='</c>';
-
-                                                merge_cells += '<mergeCell ref="' + key + index + ':' + range + index + '"/>';
-                                            }
-                                            msg += '</row>';
-
-                                            return msg;
-                                        }
-
-                                    //     //insert
-                                        var second_row = Addrow(2, [{ key: 'A',range:'A', value: '' }, { key: 'B',range:'C', value: 'Parcel Pending for Cargo' },{ key: 'D',range:'E', value: 'Cargo In Transit' },{ key: 'F',range:'G', value: 'Pending Deliveries' },{ key: 'H',range:'I', value: 'Receive Delivery Note' },{ key: 'J',range:'K', value: 'Return Marked' },{ key: 'L',range:'M', value: 'Confirmed Returns' },{ key: 'N',range:'O', value: 'Return Cargo In Transit' },{ key: 'P',range:'Q', value: 'Return Pending for Delivery' },{ key: 'R',range:'S', value: 'Receive Return Note' },{ key: 'T',range:'V', value: 'Grand Total' }]);
-
-                                        sheet.childNodes[0].childNodes[1].innerHTML = first_row + second_row + sheet.childNodes[0].childNodes[1].innerHTML;
-                                        sheet.childNodes[0].childNodes[2].innerHTML =  sheet.childNodes[0].childNodes[2].innerHTML + merge_cells;
-
-                                        // console.log(sheet.childNodes[0].childNodes[1].innerHTML);
-
-                                        // console.log(sheet.childNodes[0].childNodes[2].innerHTML);
-                                    }
                                 },
                             ],
                             paging:false,
