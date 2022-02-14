@@ -60,6 +60,19 @@
                                     </div>
                                 </div>
                                 @endif
+                                @if(!$employee->date_of_birth)
+                                    <div class="col-md-12">
+                                        <label>Date Of Birth<span class="text-danger">*</span></label>
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                            </div>
+                                            <input type="text" name="date_of_birth" data-rule-required="true" data-msg-required="Date of Birth is required" data-value="{{$employee->date_of_birth != null ? $employee->date_of_birth : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="date_of_birth" placeholder="Date of Birth">
+                                        </div>
+                                    </div>
+                                @endif
                                 @if(!$employee->employee_gender_id)
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -117,19 +130,6 @@
                                                 <option value="{{$blood_group->id}}">{{$blood_group->name}}</option>
                                             @endforeach
                                         </select>
-                                    </div>
-                                </div>
-                                @endif
-                                @if(!$employee->date_of_birth)
-                                <div class="col-md-12">
-                                    <label>Date Of Birth<span class="text-danger">*</span></label>
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                        <span class="la la-calendar-o small-calender-icon"></span>
-                                                    </span>
-                                        </div>
-                                        <input type="text" name="date_of_birth" data-rule-required="true" data-msg-required="Date of Birth is required" data-value="{{$employee->date_of_birth != null ? $employee->date_of_birth : ''}}" class="form-control bg-primary border-primary white rounded-right pickadate" id="date_of_birth" placeholder="Date of Birth">
                                     </div>
                                 </div>
                                 @endif
