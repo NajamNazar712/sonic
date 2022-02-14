@@ -805,21 +805,23 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(361, session('permissions')))
 
 
+                        @if (session('role_id') == 1 || in_array(678, session('permissions')))
                     {
                         text: 'Update Bulk Status',
                         className: 'btn btn-primary update_status',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            table.button('.update_status').disable();
+                            // table.button('.update_status').disable();
                             //todo show modal
                             if (selected_rows != '') {
                                 $('#add_bulk_status_modal').modal('show');
                             }
                         }
                     },
+                    @endif
+                        @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
                         text: 'Tag',
                         className: 'btn btn-primary bulk_tagging',
@@ -1488,7 +1490,7 @@
                 $('#lead_status_irrelevant').val('').trigger('change');
             });
             $('#add_bulk_status_modal').on('hide.bs.modal', function () {
-                $('#update_lead_bulk_status').val('').trigger('change');
+                $('#update_bulk_lead_status').val('').trigger('change');
                 $('#lead_status_rejected1').val('').trigger('change');
                 $('#lead_status_notinterested1').val('').trigger('change');
                 $('#lead_status_irrelevant1').val('').trigger('change');
