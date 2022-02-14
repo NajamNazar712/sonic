@@ -5318,7 +5318,7 @@ class AdminAPIController extends Controller
         }
     }
 
-	public function login_v3(Request $request)
+    public function login_v3(Request $request)
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
@@ -5362,12 +5362,15 @@ class AdminAPIController extends Controller
                         $information['address'] = '';
                     }
                     $information['role'] = 'staff';
-                    EmployeeDeviceToken::where('employee_id', $user->id)->where('employee_type_id', 1)->delete();
                     if($request->has('device_token')){
                         EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
                         $employee_device_token = new EmployeeDeviceToken();
                         $employee_device_token->employee_id = $user->id;
                         $employee_device_token->employee_type_id = 1;
+                        $employee_device_token->device_token = $request->get('device_token');
+                        $employee_device_token->save();
+                    }
+
                     $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
                         ->join('admins as a', 'e.id', 'a.employee_id')
                         ->where('a.id', $user->id);
