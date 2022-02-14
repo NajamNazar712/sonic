@@ -577,6 +577,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('update/profile/password','Admins\AdminDashboardController@update_profile_password')->name('update.profile.password');
     Route::post('update/profile/password/submit','Admins\AdminDashboardController@update_profile_password_submit')->name('update.profile.password.submit');
     Route::post('update/profile/submit','Admins\AdminDashboardController@edit_profile_submit')->name('update.profile.submit');
+    Route::prefix('update_one_time_profile')->name('update_one_time_profile.')->group(function () {
+        Route::get('','Admins\AdminDashboardController@get_one_time_profile')->name('index');
+        Route::get('check','Admins\AdminDashboardController@check_profile')->name('check');
+        Route::post('submit','Admins\AdminDashboardController@update_one_time_profile_v2')->name('submit');
+    });
 
 
 

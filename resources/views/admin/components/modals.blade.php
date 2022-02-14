@@ -598,6 +598,28 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade text-left" id="EditOneTimeProfileModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="EditOneTimeProfileModal"
+         aria-hidden="true">
+    <div class="modal-dialog modal-m" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="edit_one_time_profile_modal_heading">Edit Your Profile<span></span></h4>
+            </div>
+            <div class="modal-body edit_one_time_profile_body text-center" id="edit_one_time_profile_body">
+                <form class="form form-horizontal">
+                    <div class="form-body">
+                        <p>You have to update your profile, cannot proceed without it.</p>
+                    </div>
+                    <div class="form-actions center">
+                        <button type="button" class="btn btn-primary">OK!</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade text-left" id="editIncidenceReport" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editIncidenceReport"
      aria-hidden="true">
      <div class="modal-dialog" role="document">
