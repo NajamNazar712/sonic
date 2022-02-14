@@ -9987,7 +9987,7 @@ class AdminReportsController extends Controller
     }
 
     public function crm_count_index(){
-        // dd(Carbon::today()->format('D'));
+        // dd(Carbon::now()->subDays());
         // dd(date('D'));
         
         

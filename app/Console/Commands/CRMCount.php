@@ -57,7 +57,7 @@ class CRMCount extends Command
                                 ->whereBetween('crmsh.created_at', [$from,$to])
                                 ->count();
         
-                $pending = CRMCRMCount::whereDate('date',Carbon::yesterday()->toDateString()); // yesterday +1
+                $pending = CRMCRMCount::whereDate('date',Carbon::yesterday()->toDateString()); // yesterday + 1
                 
                 if($pending->exists()){
                     $pending = $pending->first();
