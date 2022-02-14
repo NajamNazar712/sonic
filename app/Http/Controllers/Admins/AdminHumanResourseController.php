@@ -1050,6 +1050,7 @@ class AdminHumanResourseController extends Controller
         $employee->religion_id = $request->religion;
         $employee->nationality_id = $request->nationality;
         $employee->domicile_id = $request->domicile;
+        $employee->employee_gender_id = $request->gender;
         $employee->marital_status_id = $request->marital_status;
         $employee->blood_group = $request->blood_group;
         $employee->personal_email = $request->personal_email;

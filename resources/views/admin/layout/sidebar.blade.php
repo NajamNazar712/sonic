@@ -1793,58 +1793,59 @@
                     </ul>
                 </li>
             @endif
-            @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human Resource</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs')}}">Download Docs</a></li>
-                    @if (session('role_id') == 1 || in_array(449, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.human_resource.allusers')}}">All Employees</a></li>
+                    @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613], session('permissions'))) !== 0)
+
+                        <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs')}}">Download Docs</a></li>
+                        @if (session('role_id') == 1 || in_array(449, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.allusers')}}">All Employees</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(465, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.attendance.index')}}">Employee Attendance</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.attendance.horizontal.index')}}">Employee Attendance (Horizontal)</a></li>
+                        @endif
+
+
+                            @if (session('role_id') == 1 || in_array(467, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.human_resource.employee_directory.index')}}">Employee Directory</a></li>
+                            @endif
+
+                            @if (session('role_id') == 1 || in_array(478, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.human_resource.reporting_location.index')}}">Reporting Location</a></li>
+                            @endif
+
+                            @if (session('role_id') == 1 || in_array(592, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.human_resource.employee_shifts.index')}}">Employee Shifts</a></li>
+                            @endif
+
+                            @if (session('role_id') == 1 || in_array(481, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.human_resource.designation.index')}}">Designation</a></li>
+                            @endif
+
+                            @if (session('role_id') == 1 || in_array(484, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.human_resource.department.index')}}">Department</a></li>
+                            @endif
+
+                            @if (session('role_id') == 1 || in_array(492, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.human_resource.rider_incentive.index')}}">Rider Incentives</a></li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(506, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.human_resource.erf.index')}}">ERF</a></li>
+                            @endif
+                            @if (session('role_id') == 1 || in_array(568, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.human_resource.fnf.index')}}">FNF</a></li>
+                            @endif
+
+                            @if (session('role_id') == 1 || in_array(613, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.human_resource.leave.index')}}">Employee Leaves</a></li>
+                            @endif
+                @endif
+                    @if (Auth::user()->trax_id != NULL)
+                        <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
                     @endif
-                    @if (session('role_id') == 1 || in_array(465, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.attendance.index')}}">Employee Attendance</a></li>
-                        <li><a class="menu-item" href="{{ route('admin.attendance.horizontal.index')}}">Employee Attendance (Horizontal)</a></li>
-                    @endif
-
-
-                        @if (session('role_id') == 1 || in_array(467, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.employee_directory.index')}}">Employee Directory</a></li>
-                        @endif
-
-                        @if (session('role_id') == 1 || in_array(478, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.reporting_location.index')}}">Reporting Location</a></li>
-                        @endif
-
-                        @if (session('role_id') == 1 || in_array(592, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.employee_shifts.index')}}">Employee Shifts</a></li>
-                        @endif
-
-                        @if (session('role_id') == 1 || in_array(481, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.designation.index')}}">Designation</a></li>
-                        @endif
-
-                        @if (session('role_id') == 1 || in_array(484, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.department.index')}}">Department</a></li>
-                        @endif
-
-                        @if (session('role_id') == 1 || in_array(492, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.rider_incentive.index')}}">Rider Incentives</a></li>
-                        @endif
-                        @if (session('role_id') == 1 || in_array(506, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.erf.index')}}">ERF</a></li>
-                        @endif
-                        @if (session('role_id') == 1 || in_array(568, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.fnf.index')}}">FNF</a></li>
-                        @endif
-
-                        @if (session('role_id') == 1 || in_array(613, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.leave.index')}}">Employee Leaves</a></li>
-                        @endif
-                        @if (Auth::user()->trax_id != NULL)
-                            <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
-                        @endif
                 </ul>
             </li>
-            @endif
             @if (session('role_id') == 1 || count(array_intersect([535,648], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Quality Assurance</span></a>
                 <ul class="menu-content">

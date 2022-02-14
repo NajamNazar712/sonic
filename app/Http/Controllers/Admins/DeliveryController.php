@@ -6096,20 +6096,25 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $query->whereRaw('false');
                 }
             })
-            ->editColumn('updated_via_app', function($shipment){
-                    if($shipment->updated_via_app == 1 ){
+            ->editColumn('updated_via_app', function($shipment) {
+               if ($shipment->updated_via_app == 1) {
                         return 'Partial';
-                    }
-                    elseif ($shipment->updated_via_app == 2){
+                    } elseif ($shipment->updated_via_app == 2) {
                         return 'Yes';
-                    }
-                    elseif ($shipment->updated_via_app == 0){
+                    } elseif ($shipment->updated_via_app == 0) {
                         return 'No';
                     }
                     else{
                         return '-';
                     }
-                });
+            })
+            ->filterColumn('rdns.status', function ($query, $keyword) {
+                if ($keyword != 0) {
+                    $query->where('rdns.status', $keyword);
+                } else {
+                    $query->where('rdns.status' , null)->orWhere('rdns.status',0);
+                }
+            });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');

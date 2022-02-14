@@ -5208,8 +5208,10 @@ class AdminAPIController extends Controller
                             $dws_detail->dws_date = $request->date;
                             $dws_detail->save();
                         }
-                        $this->dws_pickup_note($pickup_note_id, $rider_id);
-                        
+                        if($pickup_note_id != NULL){
+                            $this->dws_pickup_note($pickup_note_id, $rider_id);
+                        }
+
                     return response()->json(true);
 
                 } else {
@@ -5360,15 +5362,12 @@ class AdminAPIController extends Controller
                         $information['address'] = '';
                     }
                     $information['role'] = 'staff';
-
                     EmployeeDeviceToken::where('employee_id', $user->id)->where('employee_type_id', 1)->delete();
                     if($request->has('device_token')){
-                            $employee_device_token = new EmployeeDeviceToken();
-                            $employee_device_token->employee_id = $user->id;
-                            $employee_device_token->employee_type_id = 1;
-                            $employee_device_token->device_token = $request->get('device_token');
-                            $employee_device_token->save();
-                        }
+                        EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                        $employee_device_token = new EmployeeDeviceToken();
+                        $employee_device_token->employee_id = $user->id;
+                        $employee_device_token->employee_type_id = 1;
                     $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
                         ->join('admins as a', 'e.id', 'a.employee_id')
                         ->where('a.id', $user->id);

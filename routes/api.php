@@ -347,6 +347,7 @@ Route::name('api.')->group(function () {
 
     Route::prefix('retail_user')->name('retail_user.')->group(function() {
         Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
+        Route::post('login_v3', 'Retail\RetailAPIController@login')->name('login_v3');
         Route::get('slider', 'Retail\RetailAPIController@retail_ticker_images')->name('slider');
 
         Route::middleware('RetailUserAPIToken')->group(function () {
