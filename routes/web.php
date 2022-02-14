@@ -2511,6 +2511,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@return_revert_log')->name('index');
             Route::get('list', 'Admins\AdminReportsController@return_revert_list')->name('list');
         });
+
+        Route::prefix('pickup_history_cn_wise')->name('pickup_history_cn_wise.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@pickup_history_cn_wise_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@pickup_history_cn_wise_list')->name('list');
+        });
         
     });
 

@@ -9999,7 +9999,7 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->select(['id','name'])->where('hub',1)->get();
         $statuses = DB::connection('reports')->table('shipment_status')->get(['id','name']);
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get();
-        return view('admin.reports.lead_time_report')->with(['cities'=>$cities,'statuses'=>$statuses,'hubs'=>$hubs,'shipper'=>$shipper, 'shipping_modes' => $shipping_modes]);
+        return view('admin.reports.pickup_history_cn_wise')->with(['cities'=>$cities,'statuses'=>$statuses,'hubs'=>$hubs,'shipper'=>$shipper, 'shipping_modes' => $shipping_modes]);
     }
 
     public function pickup_history_cn_wise_list(Request $request){
@@ -10007,285 +10007,59 @@ class AdminReportsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),136);
         }
-        $shipments = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
-//            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
+        $shipments = DB::connection('reports')->table('shipments')
+            ->join('users as u','u.id','=','shipments.user_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->join('shipping_modes','shipping_modes.id', '=', 'shipments.shipping_mode_id')
-            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+            ->join('cities as h' ,'oc.hub_id', '=' , 'h.id')
+            ->join('v2_pickup_request_shipments as vps','vps.shipment_id', '=', 'shipments.id')
+            ->join('v2_pickup_requests as vpr', 'vps.pickup_request_id','=','vpr.id')
+            ->leftjoin('riders as cr', 'cr.id', '=', 'vpr.current_rider_id')
+            ->leftJoin('v2_pickup_note_requests as vpn', function ($join) {
+                $join->on('vpn.pickup_request_id', '=', 'vpr.id')
+                    ->where('vpn.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from v2_pickup_note_requests where v2_pickup_note_requests.pickup_request_id = vpr.id)'));
+            })
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id','=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->leftJoin('shipments_journey as radd', function ($join) {
-                $join->on('radd.shipment_id', '=', 'shipments.id')
-                    ->where('radd.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)'));
+            ->leftJoin('v2_rider_pickups as vrp', function ($join) {
+                $join->on('vrp.pickup_request_id', '=', 'vpr.id')
+                    ->where('vrp.id', '=',
+                        DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = vpr.id)'));
             })
-            ->leftJoin('shipments_journey as fstatus', function ($join) {
-                $join->on('fstatus.shipment_id', '=', 'shipments.id')
-                    ->where('fstatus.id','>',
-                        DB::connection('reports')->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)'));
-            })
-            ->leftJoin('shipments_journey as lstatus', function ($join) {
-                $join->on('lstatus.shipment_id', '=', 'shipments.id')
-                    ->where('lstatus.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 0)'));
-            })
-            ->leftJoin('shipments_journey as dd', function ($join) {
-                $join->on('dd.shipment_id', '=', 'shipments.id')
-                    ->where('dd.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,16,30,36) )'));
-            })
-            ->leftJoin('shipments_journey as rc', function ($join) {
-                $join->on('rc.shipment_id', '=', 'shipments.id')
-                    ->where('rc.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,42))'));
-            })
-            ->leftJoin('shipments_journey as rrad', function ($join) {
-                $join->on('rrad.shipment_id', '=', 'shipments.id')
-                    ->where('rrad.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 22)'));
-            })
-            ->leftJoin('shipments_journey as rds', function ($join) {
-                $join->on('rds.shipment_id', '=', 'shipments.id')
-                    ->where('rds.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(24,25,29,31,35,38))'));
-            })
-            ->leftJoin('shipments_journey as pd', function ($join) {
-                $join->on('pd.shipment_id', '=', 'shipments.id')
-                    ->where('pd.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(39,40,41,43))'));
-            })
-            ->leftJoin('shipments_journey as ret_or_del', function ($join) {
-                $join->on('ret_or_del.shipment_id', '=', 'shipments.id')
-                    ->where('ret_or_del.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37,42))'));
-            })
-            ->leftJoin('shipments_journey as lj', function ($join) {
-                $join->on('lj.shipment_id', '=', 'shipments.id')
-                    ->where('lj.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id)'));
-            })
-            ->leftJoin('delivery_note_shipments as dns', function ($join) {
-                $join->on('dns.shipment_id', '=', 'shipments.id')
-                    ->where('dns.delivery_note_id','=',
-                        DB::connection('reports')->raw('(select min(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
-            })
-            ->leftJoin('shipments_journey as fatstatus', function ($join) {
-                $join->on('fatstatus.shipment_id', '=', 'shipments.id')
-                    ->where('fatstatus.id','=',
-                        DB::connection('reports')->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)'));
-            })
-            ->leftJoin('shipment_status as fs','fs.id','=','fstatus.shipper_status_id')
-            ->leftJoin('shipment_status as ls','ls.id','=','lstatus.shipper_status_id')
-            ->leftJoin('shipment_status as rdss','rdss.id','=','rds.shipper_status_id')
-            ->leftjoin('delivery_note_shipments as dnss', function ($join) {
-                $join->on('dnss.shipment_id', '=', 'shipments.id')
-                    ->where('dnss.delivery_note_id','=',
-                        DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
-            })
-//            ->leftjoin('shipment_status as sss','sss.id','=','lsj.shipper_status_id')
-            ->leftjoin('cargo_consignment_shipments as ccs', function($join){
-                $join->on('ccs.shipment_id','=','shipments.id')
-                    ->leftjoin('cargo_consignments as cc','cc.id','=','ccs.cargo_consignment_id')
-                    ->leftjoin('cargo_consignment_junction_receivals as ccjr', 'ccjr.junction_id', '=', 'cc.junction_hub_1_id');
-            })
-//            ->leftjoin('transport_mode_vendor as tmv','tmv.id','=','cc.transport_mode_vendor_id')
-            ->leftjoin('delivery_note_shipments as dnssaa', function ($join) {
-                $join->on('dnssaa.shipment_id', '=', 'shipments.id')
-                    ->where('dnssaa.delivery_note_id','=',
-                        DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
-            })
-            ->leftjoin('delivery_note_shipments as fdnsv', function($join){
-                $join->on('fdnsv.shipment_id','=','shipments.id')
-                    ->where('fdnsv.delivery_note_id','=',
-                        DB::connection('reports')->raw('(select min(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
-            })
-//            ->leftjoin('shipments_journey as lss','lss.shipper_status_id','=',[7, 8, 9, 10, 11, 12, 15, 18])
-            ->leftjoin('delivery_note_shipments as ldnsv', function($join){
-                $join->on('ldnsv.shipment_id','=','shipments.id')
-                    ->where('ldnsv.delivery_note_id','=',
-                        DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
-            })
-            ->leftjoin('shipments_journey as fsjv',function($join) {
-                $join->on('fsjv.reference_1_id', '=', 'fdnsv.delivery_note_id')
-                    ->where('fsjv.id','=', DB::connection('reports')->raw('(select min(id) from shipments_journey where shipments_journey.reference_1_id = fdnsv.delivery_note_id and shipments_journey.shipper_status_id > 5 and shipments_journey.verification = 1)'));
-            })
-            ->leftjoin('shipment_status as fssv','fssv.id','=','fsjv.shipper_status_id')
-            ->leftjoin('shipments_journey as lsjv',function($join) {
-                $join->on('lsjv.reference_1_id', '=', 'ldnsv.delivery_note_id')
-                    ->where('lsjv.id','=', DB::connection('reports')->raw('(select max(id) from shipments_journey  where shipments_journey.reference_1_id = ldnsv.delivery_note_id and shipments_journey.verification = 1)'));
-            })
-            ->leftjoin('cargo_consignment_shipments as cccc',function($join){
-                $join->on('cccc.shipment_id', '=', 'shipments.id')
-                    ->where('cccc.id', '=', DB::connection('reports')->raw('(select min(id) from cargo_consignment_shipments where cargo_consignment_shipments.shipment_id = shipments.id)'));
-            })
-            ->leftjoin('cargo_consignment_shipments as ccrc',function($join){
-                $join->on('ccrc.shipment_id', '=', 'shipments.id')
-                    ->where('ccrc.id', '=', DB::connection('reports')->raw('(select max(id) from cargo_consignment_shipments where cargo_consignment_shipments.shipment_id = shipments.id)'));
-            })            ->leftjoin('cargo_consignments as ccss','ccss.id', '=', 'cccc.cargo_consignment_id')
-            ->leftjoin('cargo_consignments as ccssr','ccssr.id', '=', 'ccrc.cargo_consignment_id')
-            ->leftjoin('shipment_status as lssv','lssv.id','=','lsjv.shipper_status_id')
-            ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link', 'shipments.shipping_mode_id','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc', 'ccss.id as cargo_number', 'ccss.created_at as cargo_date_time', 'ccssr.type as return_type', 'ccssr.id as return_cargo_number', 'ccssr.created_at as return_cargo_date_time','shipping_modes.mode as shipping_mode')
-            ->groupBy('shipments.id');
+            ->select('shipments.tracking_number as tracking_number','shipments.created_at as booking_date','shipments.tracking_number as tracking_number_link','usi.pickup_address as pickup_address','oc.name as origin','h.name as hub','vpn.pickup_note_id as pickup_note_id','vrp.created_at as pickup_date','sj.created_at as arrival_date','cr.name as rider','u.name as shipper');
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
-        $lead_time = Datatables::of($shipments)
-            ->editColumn('account_no', function ($shipments) {
-                return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
-            })
-            ->editcolumn('vendor',function ($shipments){
-                if($shipments->vendor != null) {
-                    $name = DB::connection('reports')->table('transport_mode_vendors')->where('transport_mode_vendors.id', $shipments->vendor)->first();
-                    return $name->name;
-                }
-                else
-                {
-                    return "-";
-                }
-            })
-            ->editColumn('return_cargo_number', function ($shipment){
-                if($shipment->return_type == 2){
-                    return $shipment->return_cargo_number;
-                }
-                else{
-                    return "-";
-                }
-            })
-            ->editColumn('return_cargo_date_time', function ($shipment){
-                if($shipment->return_type == 2){
-                    return $shipment->return_cargo_date_time;
-                }
-                else{
-                    return "-";
-                }
-            })
-            ->editColumn('cargo_number', function ($shipment){
-                if($shipment->cargo_number != null){
-                    return $shipment->cargo_number;
-                }
-                else{
-                    return "-";
-                }
-            })
-            ->editColumn('cargo_date_time', function ($shipment){
-                if($shipment->cargo_date_time != null){
-                    return $shipment->cargo_date_time;
-                }
-                else{
-                    return "-";
-                }
-            })
-            ->editColumn('shipper', function ($shipment) {
-                if ($shipment->booking_type_id == 4) {
-                    return $shipment->shipper .' (' . $shipment->poc . ')';
-                }
-                else {
-                    return $shipment->shipper;
-                }
-            })
-            ->filterColumn('u.name', function ($query, $keyword) {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('shipments.booking_type_id', '!=', 4)
-                        ->where('u.name', 'like', '%' . $keyword . '%');
-                })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.booking_type_id', '=', 4)
-                            ->where('usi.poc', 'like', '%' . $keyword . '%');
-                    });
-            })
+        $pickup_history = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            ->filterColumn('shipper', function ($query, $keyword) {
-                return $query->where('u.name', '=', $keyword);
+            ->editColumn('pickup_note_no', function ($shipments) {
+                if ($shipments->pickup_note_id != null) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle print" rel="' . $shipments->pickup_note_id . '"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+                }
+                return '';
             })
-            ->addColumn('transit_tat',function ($shipments){
-                return ($shipments->arrival_date && $shipments->reached_at_destination)? with((new Carbon($shipments->arrival_date, 'UTC'))->diffInWeekendDays($shipments->reached_at_destination)-(new Carbon($shipments->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
-                        $date->isSunday();
-                    },$shipments->reached_at_destination)):'-';
-            })
-            ->addColumn('attempt_tat',function ($shipments){
-                return ($shipments->arrival_date && $shipments->first_status_date)? with((new Carbon($shipments->arrival_date, 'UTC'))->diffInWeekendDays($shipments->first_status_date)-(new Carbon($shipments->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
-                        $date->isSunday();
-                    },$shipments->first_status_date)):'-';
-            })
-            ->addColumn('delivered_tat',function ($shipments){
-                return ($shipments->arrival_date && $shipments->delivered_date)? with((new Carbon($shipments->arrival_date, 'UTC'))->diffInWeekendDays($shipments->delivered_date)-(new Carbon($shipments->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
-                        $date->isSunday();
-                    },$shipments->delivered_date)):'-';
-            })
-            ->addColumn('dispatch_tat',function ($shipments){
-                return ($shipments->reached_at_destination && $shipments->first_status_date)? with((new Carbon($shipments->reached_at_destination, 'UTC'))->diffInWeekendDays($shipments->first_status_date)-(new Carbon($shipments->reached_at_destination, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
-                        $date->isSunday();
-                    },$shipments->first_status_date)):'-';
-            })
-            ->addColumn('return_transit_tat',function ($shipments){
-                return ($shipments->return_confirm && $shipments->return_reached_at_destination)? with((new Carbon($shipments->return_confirm, 'UTC'))->diffInWeekendDays($shipments->return_reached_at_destination)-(new Carbon($shipments->return_confirm, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
-                        $date->isSunday();
-                    },$shipments->return_reached_at_destination)):'-';
-            })
-            ->addColumn('return_dispatch_tat',function ($shipments){
-                return ($shipments->return_delivered_date && $shipments->return_reached_at_destination)? with((new Carbon($shipments->return_reached_at_destination, 'UTC'))->diffInWeekendDays($shipments->return_delivered_date)-(new Carbon($shipments->return_reached_at_destination, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
-                        $date->isSunday();
-                    },$shipments->return_delivered_date)):'-';
-            })
-            ->addColumn('return_tat',function ($shipments){
-                return ($shipments->return_confirm && $shipments->return_delivered_date)? with((new Carbon($shipments->return_confirm, 'UTC'))->diffInWeekendDays($shipments->return_delivered_date)-(new Carbon($shipments->return_confirm, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
-                        $date->isSunday();
-                    },$shipments->return_delivered_date)):'-';
-            })
-            ->addColumn('payment_tat',function ($shipments){
-                $return = array(20,42);
-                if(in_array($shipments->return_check,$return)){
-                    return ($shipments->return_delivered_date && $shipments->payment_done_date)? with((new Carbon($shipments->return_delivered_date, 'UTC'))->diffInWeekendDays($shipments->payment_done_date)-(new Carbon($shipments->return_delivered_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
-                            $date->isSunday();
-                        },$shipments->payment_done_date)):'-';
+            ->addColumn('arrival_status_badge', function ($shipments){
+                if($shipments->arrival_date){
+                    return '<span class="badge bg-success">Arrival Done</span>';
                 }else{
-                    return ($shipments->delivered_date && $shipments->payment_done_date)? with((new Carbon($shipments->delivered_date, 'UTC'))->diffInWeekendDays($shipments->payment_done_date)-(new Carbon($shipments->delivered_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
-                            $date->isSunday();
-                        },$shipments->payment_done_date)):'-';
+                    return '<span class="badge bg-danger">Arrival Not Done</span>';
                 }
             })
-            ->addColumn('total_tat',function ($shipments){
-                return ($shipments->arrival_date && $shipments->latest_journey_date)? with((new Carbon($shipments->arrival_date, 'UTC'))->diffInWeekDays($shipments->latest_journey_date)-(new Carbon($shipments->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
-                        $date->isSunday();
-                    },$shipments->latest_journey_date)):'-';
+            ->addColumn('arrival_status', function ($shipments){
+                if($shipments->arrival_date){
+                    return 'Arrival Done';
+                }else{
+                    return 'Arrival Not Done';
+                }
             });
-        if($tracking = $request->get('search_tracking_no')){
-            $lead_time->where('shipments.tracking_number', '=', $tracking);
-        }
-        if($shipper = $request->get('search_shipper')){
-            $lead_time->where('u.id', '=', $shipper);
-        }
-        if($origin = $request->get('search_origin')){
-            $lead_time->where('oc.id','=',$origin);
-        }
-        if($destination = $request->get('search_destination')){
-            $lead_time->where('dc.id','=',$destination);
-        }
-        if($hub = $request->get('search_hub')){
-            $lead_time->where('h.id','=',$hub);
-        }
-        if($status = $request->get('search_status')){
-            $lead_time->where('ss.id','=',$status);
-        }
-        if($mode = $request->get('search_shipping_mode')){
-            $lead_time->where('shipments.shipping_mode_id','=',$mode);
-        }
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $lead_time->whereBetween('sj.created_at', [$from,$to]);
-        }
-        return $lead_time->make(true);
+            return $pickup_history->make(true);
     }
 }
 
