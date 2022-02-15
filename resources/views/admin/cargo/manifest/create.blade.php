@@ -80,12 +80,12 @@
                                             </div>
                                             <div class="modal-body">
                                                 <div class="row">
-                                                    <div class="col-3">
+                                                    <div class="col-4">
                                                         <div class="form-group">
                                                             <input type="text" name="total_weight" placeholder="Total Weight*" readonly class="form-control" id="total_weight">
                                                         </div>
                                                     </div>
-                                                    <div class="col-3">
+                                                    <div class="col-4">
                                                         <div class="form-group">
                                                             <select name="shipping_mode" class="select2" id="shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
                                                                 @foreach($shipping_modes as $mode)
@@ -94,17 +94,18 @@
                                                             </select>
                                                         </div>
                                                     </div>
-                                                    <div class="col-6">
-                                                        <div class="row">
-                                                            <div class="col-4">
+                                                    <div class="col-4">
+                                                        <div class="form-group">
+                                                            <input type="text" name="route_name" placeholder="Route Name*" class="form-control" data-rule-required="true" id="route_name" data-msg-required="Route Name is Required" data-rule-minlength="3" data-msg-minlength="Route Name must be atleast 3 character long">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12 mb-2 text-center">
                                                                 <label for=""><b>Vehicle Type :</b></label>
-                                                            </div>
-                                                            <div class="col-8">
+
                                                                 <label class="display-inline ml-1">Temporary</label>
                                                                 <input type="checkbox" name="vehicle_type" id="vehicle_type" class="switchery vehicle_type" data-size="xs" data-switchery="true" checked>
                                                                 <label class="display-inline ml-1">Fixed</label>
-                                                            </div>
-                                                        </div>
+
                                                     </div>
                                                 </div>
                                                 <div class="row">
@@ -383,6 +384,8 @@
 
                 $("#cargo_details #total_weight").val(total_weight);
 
+                $("#cargo_details #route_name").val('');
+
                 blockPagePermanently();
                 $.ajax({
                     url: '{!! route('admin.cargo_manifest.cargo_details') !!}',
@@ -401,6 +404,8 @@
                     },
                     success: function (data) {
                         if(data.status == 0) {
+
+
                             $('#cargo_details form #bag_ids').val(bag_ids);
 
                             $('#cargo_details form #vehicle_number').html("");

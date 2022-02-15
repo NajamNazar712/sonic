@@ -360,6 +360,12 @@
                         '<option value="4">Verified</option>' +
                         '<option value="5">Canceled</option>' +
                         '</select>';
+
+                    var updated_by_app_select = '<select name="updated_by_app_select" id="updated_by_app_select" class="select2 form-control">' +
+                        '<option value="0">No</option>' +
+                        '<option value="1">Partial</option>' +
+                        '<option value="2">Yes</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -368,6 +374,12 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.updated_via_app')){
+                            $(updated_by_app_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -384,6 +396,13 @@
                     });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    $("#updated_by_app_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Updated Via App",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
