@@ -1522,7 +1522,7 @@ class AdminPettyCashController extends Controller
                             <td>' . $detail->employee_name . '</td>
                             <td>' . $detail->employee_designation . '</td>
                             <td>Rs ' . number_format($detain_amount) . '</td>
-                            <td>' . $detail->remarks . '</td>
+                            <td style="" >' . $detail->remarks . '</td>
                 ';
 
                 $shipment_details_row_start .= '
@@ -1770,10 +1770,12 @@ class AdminPettyCashController extends Controller
 
     public function draft_edit_petty_cash_statement_list(Request $request, $id)
     {
+        dd(1);
         $petty_details = PettyCashStatementDetailDraft::leftjoin('cities as h', 'h.id', '=', 'petty_cash_statement_detail_drafts.hub_id')
             ->join('petty_cash_statement_drafts as pcs', 'pcs.id', '=', 'petty_cash_statement_detail_drafts.petty_cash_statement_draft_id')
             ->select('petty_cash_statement_detail_drafts.id as draft_detail_id', 'h.name as hub', 'petty_cash_statement_detail_drafts.hub_id', 'petty_cash_statement_detail_drafts.account_head_id', 'petty_cash_statement_detail_drafts.account_title_id', 'petty_cash_statement_detail_drafts.date', 'petty_cash_statement_detail_drafts.expense_details', 'petty_cash_statement_detail_drafts.amount', 'petty_cash_statement_detail_drafts.reference_no', 'petty_cash_statement_detail_drafts.remarks', 'petty_cash_statement_detail_drafts.reference_document as reference_document')
             ->where('petty_cash_statement_detail_drafts.petty_cash_statement_draft_id', $id);
+//        dd($petty_details);
         return Datatables::of($petty_details)
             ->addColumn('account_head', function ($petty_details) {
 
