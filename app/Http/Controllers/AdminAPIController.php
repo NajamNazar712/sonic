@@ -6252,11 +6252,15 @@ class AdminAPIController extends Controller
             $lead = Lead::find($request->lead_id);
             $admin_id = $request->admin_id;
             if($lead){
+                $reason_id = NULL;
+                if($request->has('reason_id')){
+                    $reason_id = $request->reason_id;
+                }
                 $lead_log = new LeadLog();
                 $lead_log->lead_id = $lead->id;
                 $lead_log->prev_status_id = $lead->status_id;
                 $lead_log->status_id = $request->status_id;
-                $lead_log->reason = $request->reason_id;
+                $lead_log->reason = $reason_id;
                 $lead_log->sale_person_id = $lead->sale_person_id;
                 if ($lead->reference_person_id == NULL) {
                     $lead_log->reference_person_id = $admin_id;
@@ -6267,7 +6271,7 @@ class AdminAPIController extends Controller
                 $lead_log->save();
 
                 $lead->status_id = $request->status_id;
-                $lead->reason = $request->reason_id;
+                $lead->reason = $reason_id;
                 $lead->updated_by = $admin_id;
                 $lead->save();
 
