@@ -6226,5 +6226,11 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function lead_statuses(Request $request)
+    {
+        $lead_statuses = LeadStatus::wherenotin('id', [1, 12])->select('id', 'name')->get();
+        return response()->json(['status' => 0, 'statuses' => $lead_statuses]);
+    }
+
 
 }
