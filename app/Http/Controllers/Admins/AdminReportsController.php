@@ -10062,9 +10062,6 @@ class AdminReportsController extends Controller
                     return 'Arrival Not Done';
                 }
             });
-        if ($tracking = $request->get('search_tracking_no')) {
-            $shipments->where('shipments.tracking_number', '=', $tracking);
-        }
         if ($rider = $request->get('search_rider')) {
             $shipments->where('cr.id', '=', $rider);
         }
