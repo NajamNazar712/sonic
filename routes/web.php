@@ -577,6 +577,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('update/profile/password','Admins\AdminDashboardController@update_profile_password')->name('update.profile.password');
     Route::post('update/profile/password/submit','Admins\AdminDashboardController@update_profile_password_submit')->name('update.profile.password.submit');
     Route::post('update/profile/submit','Admins\AdminDashboardController@edit_profile_submit')->name('update.profile.submit');
+    Route::prefix('update_one_time_profile')->name('update_one_time_profile.')->group(function () {
+        Route::get('','Admins\AdminDashboardController@get_one_time_profile')->name('index');
+        Route::get('check','Admins\AdminDashboardController@check_profile')->name('check');
+        Route::post('submit','Admins\AdminDashboardController@update_one_time_profile_v2')->name('submit');
+    });
 
 
 
@@ -1336,6 +1341,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('excel/assign_agent_excel','Admins\ReturnController@assign_agent_excel')->name('excel.assign_agent_excel');
         Route::post('assign/agent','Admins\ReturnController@assign_agent')->name('assign.agent');   
         Route::post('unassign/agent','Admins\ReturnController@unassign_agent')->name('unassign.agent');   
+        Route::get('/confirmation_pending/sms','Admins\ReturnController@confirmation_pending_sms_index')->name('confirmation_pending_sms');
+        Route::get('/confirmation_pending/sms/list','Admins\ReturnController@confirmation_pending_sms_list')->name('confirmation_pending_sms_list');
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
@@ -2512,6 +2519,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@return_revert_log')->name('index');
             Route::get('list', 'Admins\AdminReportsController@return_revert_list')->name('list');
         });
+
+        Route::prefix('pickup_history_cn_wise')->name('pickup_history_cn_wise.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@pickup_history_cn_wise_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@pickup_history_cn_wise_list')->name('list');
+        });
+        Route::prefix('crm_count')->name('crm_count.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@crm_count_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@crm_count_list')->name('list');    
+        });
         
     });
 
@@ -3069,6 +3085,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('update','Admins\GlobalSettingsController@rcp_tat_update')->name('update');
         });
 
+        Route::prefix('return_confirmation_pending_sms_setting')->name('rcp_sms.')->group(function () {
+            Route::get('','Admins\GlobalSettingsController@rcp_sms_index')->name('index');
+            Route::post('update','Admins\GlobalSettingsController@rcp_sms_update')->name('update');
+        });
+
         Route::prefix('debriefing_time_setting')->name('debriefing_time_setting.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@debriefing_time_setting_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@debriefing_time_setting_update')->name('update');
@@ -3458,6 +3479,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\LeadManagementController@index')->name('index');
         Route::get('list', 'Admins\LeadManagementController@list')->name('list');
         Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
+        Route::post('add_bulk_status', 'Admins\LeadManagementController@add_bulk_status')->name('add_bulk_status');
         Route::post('tag_sale_person', 'Admins\LeadManagementController@tag_sale_person_forward_lead')->name('tag_sale_person');
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
         Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');

@@ -35,8 +35,14 @@ use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DuplicateUser;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeBloodGroup;
+use App\Http\Models\HR\EmployeeDomicile;
+use App\Http\Models\HR\EmployeeGender;
+use App\Http\Models\HR\EmployeeMaritalStatus;
+use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\InternationalUsersInformation;
 use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
@@ -178,7 +184,7 @@ class AdminDashboardController extends Controller
     }
 
     public function index(){
-        $stats = array();
+        /*$stats = array();
         $graph = array();
         $sales=array();
         $leads = array();
@@ -344,7 +350,7 @@ class AdminDashboardController extends Controller
         }
 
         $cities = City::select('id','name')->get();
-        $service_type = BookingType::where('id', '!=', 3)->select('id','booking_type')->get();
+        $service_type = BookingType::where('id', '!=', 3)->select('id','booking_type')->get();*/
 
 //        $admin = Admin::where('id', Auth::id())->first();
 //        //incoming
@@ -475,7 +481,8 @@ class AdminDashboardController extends Controller
 //        $last_updated_at = OperationsForecastLastUpdatedTime::latest('created_at')->first();
 
 //        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_dates' => $operation_dates, 'default_hub_id' => $admin->default_hub_id, 'operation_incoming' => $operation_incoming, 'service_types' => $service_type, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing, 'last_updated_at' => $last_updated_at]);
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
+//        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
+        return view('admin.simple_dashboard');
     }
     public function statistics_search(Request $request){
 //        return $request;
@@ -1439,7 +1446,7 @@ class AdminDashboardController extends Controller
 
             if($user->status == 2){
                 $now = Carbon::now();
-                $action = User::where('id',$id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now ,'reactivated_at'=>$now ]);
+                $action = User::where('id',$user->id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now ,'reactivated_at'=>$now ]);
                 if($user->lead_id != null){
                     $lead = Lead::find($user->lead_id);
                     $lead_log = new LeadLog();
@@ -1456,7 +1463,7 @@ class AdminDashboardController extends Controller
                     $lead->save();
                 }
                 if($action == 1){
-                    NotificationsController::send(1, $id);
+                    NotificationsController::send(1, $user->id);
 
                     return redirect()->route('admin.accounts.active')->with('success', 'User is activated.');
                 }else{
@@ -11655,5 +11662,120 @@ class AdminDashboardController extends Controller
 
         return back()->with(['success'=>'Auto Cancelation Days Updated Successfully']);
 
-    }}
+    }
+
+    public function check_profile(Request $request)
+    {
+        $admin_id = Auth::id();
+        $admin = Admin::find($admin_id);
+        if($admin && $admin->trax_id){
+            $admin_profile = Employee::where('trax_id', $admin->trax_id);
+            if ($admin_profile->exists()) {
+                $admin_profile = $admin_profile->first();
+                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id){
+                    return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
+                }
+                return response()->json(['status' => 2, 'info' => "Profile Already Updated"]);
+            } else {
+
+                return response()->json(['status' => 1, 'error' => "Admin Profile Not Found"]);
+            }
+        }else{
+            return response()->json(['status' => 1, 'error' => "Admin Profile Not Found"]);
+        }
+
+    }
+
+    public function get_one_time_profile(Request $request)
+    {
+        $admin_id = Auth::id();
+        $admin = Admin::find($admin_id);
+        if($admin && $admin->trax_id){
+            $blood_group_list = EmployeeBloodGroup::all();
+            $gender_list = EmployeeGender::all();
+            $religion_list = EmployeeReligion::all();
+            $marital_status_list = EmployeeMaritalStatus::all();
+            $staff_category_list = StaffCategory::all();
+            $shift_list = EmployeeShift::all();
+            $domecile_list = EmployeeDomicile::all();
+            $admin_profile = Employee::where('trax_id', $admin->trax_id);
+            if ($admin_profile->exists()) {
+                $admin_profile = $admin_profile->first();
+                return view('admin.profile.edit_one_time_profile')->with(["blood_groups" => $blood_group_list, 'genders' => $gender_list, 'religions' => $religion_list, 'maritial_statuses' => $marital_status_list, 'domiciles' => $domecile_list, 'staff_categories' => $staff_category_list, 'shifts' => $shift_list, 'employee' => $admin_profile]);
+            } else {
+                return redirect()->back()->with('error', 'Admin Profile Not Found');
+            }
+        }else{
+            return redirect()->back()->with('error', 'Admin Profile Not Found');
+        }
+    }
+
+    public function update_one_time_profile_v2(Request $request)
+    {
+        $employee_request = Employee::find($request->employee_id);
+        if ($employee_request) {
+            $city = City::find($employee_request->city_id);
+            $employee_request->zone_id = $city->zone_id;
+            if ($request->has('gender')) {
+                $employee_request->employee_gender_id = $request->gender;
+            }
+            if ($request->has('guardian_name')) {
+                $employee_request->guardian_name = $request->guardian_name;
+            }
+
+            if ($request->has('religion')) {
+                $employee_request->religion_id = $request->religion;
+            }
+
+            if ($request->has('domicile')) {
+                $employee_request->domicile_id = $request->domicile;
+            }
+
+            if ($request->has('marital_status')) {
+                $employee_request->marital_status_id = $request->marital_status;
+            }
+
+            if ($request->has('blood_group')) {
+                $employee_request->blood_group = $request->blood_group;
+            }
+
+            if ($request->has('address')) {
+                $employee_request->address = $request->address;
+            }
+
+            if ($request->has('emergency_contact')) {
+                $employee_request->emergency_contact = $request->emergency_contact;
+            }
+
+            if ($request->has('emergency_contact_person')) {
+                $employee_request->emergency_contact_person = $request->emergency_contact_person;
+            }
+
+            if ($request->has('official_email')) {
+                $employee_request->official_email = $request->official_email;
+            }
+
+            if ($request->has('date_of_birth')) {
+                $employee_request->date_of_birth = $request->date_of_birth;
+            }
+
+            if ($request->has('mother_name')) {
+                $employee_request->mother_name = $request->mother_name;
+            }
+
+            if ($request->has('shift_id')) {
+                $employee_request->shift_id = $request->shift_id;
+            }
+
+            if ($request->has('staff_category')) {
+                $employee_request->staff_category_id = $request->staff_category;
+            }
+
+            $employee_request->save();
+            return redirect()->route('admin.dashboard.index')->with('success', 'Profile Updated Successfully');
+        } else {
+            return redirect()->route('admin.dashboard.index')->with('error', 'User not found!');
+        }
+    }
+}
 

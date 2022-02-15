@@ -586,6 +586,12 @@ class Permission
             
             'reports.reverse_pickup.index' => 624,
             'reports.reverse_pickup.list' => 624,
+            
+            'reports.crm_count.index' => 673,
+            'reports.crm_count.list' => 673,
+
+            'reports.pickup_history_cn_wise.index' => 679,
+            'reports.pickup_history_cn_wise.list' => 679,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -1041,8 +1047,8 @@ class Permission
             'human_resource.employee_directory.employment.update' => 652,
             'human_resource.employee_directory.attachments.update' => 652,
             'human_resource.employee_directory.rider.update' => 652,
-            'human_resource.employee_directory.rider.deactivate' => 99,
-            'human_resource.employee_directory.rider.activate' => 99,
+            'human_resource.employee_directory.rider.deactivate' => 652,
+            'human_resource.employee_directory.rider.activate' => 652,
             'human_resource.employee_directory.rider.incentive' => 652,
             'human_resource.employee_directory.rider.permanent' => 652,
             'human_resource.employee_directory.rider.blacklist' => 652,

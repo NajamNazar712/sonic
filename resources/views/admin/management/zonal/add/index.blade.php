@@ -40,7 +40,7 @@
 									</div>
 
 									<div class="col-12 col-lg-6 mt-2 mt-lg-0">
-										<h3 class="form-section mb-2">Overnight/Same-day</h3>
+										<h3 class="form-section mb-2">Rush/Same-day</h3>
 
 										@foreach($cities as $city)
 											<div class="form-group">

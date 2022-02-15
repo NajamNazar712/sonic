@@ -22,6 +22,6 @@ class Seeder4617ForPermission extends Seeder
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Movit Lead', 'url'=>'admin.pam_leads.index', 'permission_id' => 669));
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Movit Lead > Movit Lead Management', 'url'=>'admin.pam_leads.index', 'permission_id' => 669));
     }
 }
