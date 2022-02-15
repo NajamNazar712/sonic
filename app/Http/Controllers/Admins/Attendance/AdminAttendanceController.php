@@ -676,11 +676,12 @@ class AdminAttendanceController extends Controller
                 'integer' => ':attribute must be an Integer.',
                 'exists' => 'Given :attribute is Invalid.',
                 'check_trax_id' => 'Employee id not found!',
+                'date_format' => 'Invalid Date Format d-m-yyyy h:m:s | NOTE : Please do not use zero(0) from 1 to 9.'
 
             ];
             $rules = [
                 'trax_id' => ['required', 'between:1,100', 'check_trax_id'],
-                'attendance_datetime' => ['required', 'date_format:Y-m-d H:i:s'],
+                'attendance_datetime' => ['required', 'date_format:j-n-Y H:i:s'],
             ];
 
 
@@ -726,9 +727,16 @@ class AdminAttendanceController extends Controller
 
                     $attendance_data = array();
                     foreach ($rows as $key => $row) {
-                        $date_string = Carbon::parse(trim($row['attendance_datetime']))->format("Y-m-d H:i:s");
-                        $rows[$key]['attendance_datetime'] = $date_string;
-                        $row['attendance_datetime'] = $date_string;
+                        $date_string = explode(":", trim($row['attendance_datetime']));
+                        if (count($date_string) == 3) {
+                            $date = explode(" ", str_replace("  "," ", $date_string[0]));
+                            $date[1] = str_pad($date[1], 2, 0, STR_PAD_LEFT);
+                            $date_string[0] = implode(' ', $date);
+                            $date_string[2] = str_pad($date_string[2], 2, 0, STR_PAD_LEFT);
+                            $date_string[1] = str_pad($date_string[1], 2, 0, STR_PAD_LEFT);
+                            $rows[$key]['attendance_datetime'] = implode(':', $date_string);
+                            $row['attendance_datetime'] = implode(':', $date_string);
+                        }
                         $rows[$key]['trax_id'] = "Trax" . trim($row['trax_id']);
                         $row['trax_id'] = "Trax" . trim($row['trax_id']);
 
@@ -740,8 +748,9 @@ class AdminAttendanceController extends Controller
 
                         if ($validate->fails()) {
                             $errors['Row #' . $row_id] = $validate->errors()->all();
+                        }else{
+                            $attendance_data[trim($row['trax_id'])][Carbon::parse($row['attendance_datetime'])->format("Y-m-d")][] = Carbon::parse($row['attendance_datetime'])->format("H:i:s");
                         }
-                        $attendance_data[trim($row['trax_id'])][Carbon::parse($row['attendance_datetime'])->format("Y-m-d")][] = Carbon::parse($row['attendance_datetime'])->format("H:i:s");
                     }
                     if (empty($errors)) {
                         $updated = 0;
@@ -784,24 +793,23 @@ class AdminAttendanceController extends Controller
                                         } else {
                                             $clock_out = Carbon::parse($date . ' ' . $max)->format("Y-m-d H:i:s");
                                         }
-
-                                        $employee_attendance = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->where('attendance_date', $date);
-                                        $clock_in_flag = false;
-                                        if ($employee_attendance->exists()) {
-                                            $employee_attendance = $employee_attendance->first();
-                                            if (!$employee_attendance->clock_in_datetime) {
-                                                $clock_in_flag = true;
-                                            } else {
-                                                $clock_out = Carbon::parse($date . ' ' . $max)->format("Y-m-d H:i:s");
-                                            }
-                                        } else {
+                                    }
+                                    $employee_attendance = EmployeeAttendance::where('employee_id', $employee_id)->where('employee_type', $type)->where('attendance_date', $date);
+                                    $clock_in_flag = false;
+                                    if ($employee_attendance->exists()) {
+                                        $employee_attendance = $employee_attendance->first();
+                                        if (!$employee_attendance->clock_in_datetime) {
                                             $clock_in_flag = true;
-                                            $employee_attendance = new EmployeeAttendance();
-                                            $employee_attendance->employee_id = $employee_id;
-                                            $employee_attendance->employee_type = $type;
-                                            $employee_attendance->attendance_date = Carbon::parse($date)->format("Y-m-d");
-                                            $employee_attendance->save();
+                                        } else {
+                                            $clock_out = Carbon::parse($date . ' ' . $max)->format("Y-m-d H:i:s");
                                         }
+                                    } else {
+                                        $clock_in_flag = true;
+                                        $employee_attendance = new EmployeeAttendance();
+                                        $employee_attendance->employee_id = $employee_id;
+                                        $employee_attendance->employee_type = $type;
+                                        $employee_attendance->attendance_date = Carbon::parse($date)->format("Y-m-d");
+                                        $employee_attendance->save();
                                     }
                                     if ($clock_in_flag) {
                                         $employee_attendance->clock_in_datetime = $clock_in;

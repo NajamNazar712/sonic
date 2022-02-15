@@ -102,6 +102,13 @@
 										</div>
 									</div>
 
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<input type="checkbox" name="duplicate_account" id="duplicate_account" class="switchery duplicate_account" data-size="xl" data-switchery="true">
+											<label class="display-inline ml-1"><b>Create Duplicate Account</b></label>
+										</div>
+									</div>
+
 									<div class="col-12">
 										<h4 class="form-section mb-2">Hubs</h4>
 										<div class=" text-center mt-2">
