@@ -5206,8 +5206,10 @@ class AdminAPIController extends Controller
                             $dws_detail->dws_date = $request->date;
                             $dws_detail->save();
                         }
-                        $this->dws_pickup_note($pickup_note_id, $rider_id);
-                        
+                        if($pickup_note_id != NULL){
+                            $this->dws_pickup_note($pickup_note_id, $rider_id);
+                        }
+
                     return response()->json(true);
 
                 } else {
@@ -5359,16 +5361,11 @@ class AdminAPIController extends Controller
                     }
                     $information['role'] = 'staff';
 
+                    EmployeeDeviceToken::where('employee_id', $user->id)->where('employee_type_id', 1)->delete();
                     if($request->has('device_token')){
-                        $employee_device_token = EmployeeDeviceToken::where('employee_id', $user->id)
-                            ->where('employee_type_id', 1);
-                        if ($employee_device_token->exists()) {
-                            $employee_device_token = $employee_device_token->first();
-                        } else {
-                            $employee_device_token = new EmployeeDeviceToken();
-                            $employee_device_token->employee_id = $user->id;
-                            $employee_device_token->employee_type_id = 1;
-                        }
+                        $employee_device_token = new EmployeeDeviceToken();
+                        $employee_device_token->employee_id = $user->id;
+                        $employee_device_token->employee_type_id = 1;
                         $employee_device_token->device_token = $request->get('device_token');
                         $employee_device_token->save();
                     }

@@ -186,8 +186,6 @@ class RiderManagementController extends Controller
             'rider_category'=>'required|numeric',
             'rider_main_category'=>'required|numeric',
             'pin' => 'required|numeric',
-            'rider_shift' => 'required|numeric',
-            'location_id' => 'nullable|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
         if ($validate->fails()) {
@@ -243,8 +241,7 @@ class RiderManagementController extends Controller
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
             'rider_type_id' => $type,
-            'shift_id' => $request->rider_shift,
-            'reporting_location_id' => $request->location_id,
+            'shift_id' => 1,
         ]);
         if($rider){
             $employee = new Employee();
@@ -257,7 +254,7 @@ class RiderManagementController extends Controller
             $employee->status_id = 3;
             $employee->address = $request->address;
             $employee->pin =  $request->pin;
-            $employee->shift_id = $request->shift_id;
+            $employee->shift_id = 1;
             $employee->department_id = 6;
             $employee->trax_id = $trax_id;
             $employee->rider_main_category = $request->rider_main_category;
@@ -308,8 +305,6 @@ class RiderManagementController extends Controller
             'route_id'=>'required',
             'rider_category'=>'required|numeric',
             'rider_main_category'=>'required|numeric',
-            'rider_shift'=>'required|numeric',
-            'location_id'=>'nullable|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -328,9 +323,7 @@ class RiderManagementController extends Controller
         $rider->cnic = $request->cnic;
         $rider->address = $request->address;
         $rider->trax_id = $request->trax_id;
-        $rider->shift_id = $request->rider_shift;
-        $rider->reporting_location_id = $request->location_id;
-
+        $rider->shift_id = 1;
 
         $rider->rider_category_id = $request->rider_category;
         $rider->rider_main_category_id = $request->rider_main_category;
