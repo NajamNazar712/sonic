@@ -13,7 +13,7 @@ class Seeder4608ForDebriefingSettingsPermission extends Seeder
     {
         DB::table('module_permissions')->insert(array(
             array('id' => 674, 'name' => 'Debriefing Break Time Settings', 'module_id' => 14),
-            array('id' => 675, 'name' => 'Debriefing Agent Report', 'module_id' => 9),
+            array('id' => 676, 'name' => 'Debriefing Agent Report', 'module_id' => 9),
         ));
 
         DB::table('activity_trail_actions')->insert(array(
@@ -25,7 +25,7 @@ class Seeder4608ForDebriefingSettingsPermission extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Last Mile > Debriefing Break Time Settings', 'url'=>'admin.settings.debriefing_break_time.index', 'permission_id' => 674),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Debriefing Agent Report', 'url'=>'admin.reports.debriefing.agent_index', 'permission_id' => 675),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Debriefing Agent Report', 'url'=>'admin.reports.debriefing.agent_index', 'permission_id' => 676),
         ));
         
         DB::table('global_settings')->insert(array(
