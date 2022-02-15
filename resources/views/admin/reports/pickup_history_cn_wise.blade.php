@@ -303,7 +303,7 @@
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_hub = $('#search_hub').val();
-                        d.search_shipper = $('#search_shipper').val();
+                        d.search_rider = $('#search_rider').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
