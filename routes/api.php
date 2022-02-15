@@ -20,6 +20,7 @@ Route::name('api.')->group(function () {
 	Route::post('reset_pin', 'APIController@bolt_reset_pin')->name('reset_pin');
 	Route::post('store_device_token', 'APIController@store_device_token')->name('store_device_token');
 	Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
+	Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
 
 	Route::middleware('APIToken')->group(function() {
 		Route::post('verify', 'APIController@verify')->name('verify');
@@ -252,7 +253,8 @@ Route::name('api.')->group(function () {
         Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::get('slider', 'AdminAPIController@admin_ticker_images')->name('slider');
-        Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');        Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
+        Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');
+        Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
         Route::post('forget_pin', 'AdminAPIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'AdminAPIController@reset_pin')->name('reset_pin');
         Route::get('check_pin', 'AdminAPIController@check_pin')->name('check_pin');
