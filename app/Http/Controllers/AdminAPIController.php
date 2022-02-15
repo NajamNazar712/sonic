@@ -81,6 +81,7 @@ use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\Zone;
+use App\Models\Admin\Lead\LeadReason;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
@@ -6230,8 +6231,33 @@ class AdminAPIController extends Controller
 
     public function lead_statuses(Request $request)
     {
-        $lead_statuses = LeadStatus::wherenotin('id', [1, 12])->select('id', 'name')->get();
-        return response()->json(['status' => 0, 'statuses' => $lead_statuses]);
+        $rules = [
+            'status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:lead_statuses,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            if(!$request->has('status_id')){
+                $lead_statuses = LeadStatus::wherenotin('id', [1, 12])->select('id', 'name')->get();
+                return response()->json(['status' => 0, 'statuses' => $lead_statuses]);
+            }else{
+                $lead_reason = LeadReason::join('lead_status_reasons as lsr', 'lsr.reason_id', 'lead_reasons.id')
+                    ->select('lead_reasons.id as id', 'lead_reasons.name as name')
+                    ->where('lsr.status_id', $request->status_id);
+                if($lead_reason->exists()){
+                    $lead_reason = $lead_reason->get();
+                    return response()->json(['status' => 0, 'reasons' => $lead_reason]);
+                }else{
+                    return response()->json(['status' => 0, 'reasons' => []]);
+                }
+            }
+        }
+
     }
 
     public function lead_status_update(Request $request)
