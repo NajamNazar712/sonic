@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
+use App\Http\Controllers\Admins\LeadTaggingController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
@@ -23,6 +24,7 @@ use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\Lead\LeadRemark;
 use App\Http\Models\Admin\Lead\LeadStatus;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
@@ -6230,6 +6232,56 @@ class AdminAPIController extends Controller
     {
         $lead_statuses = LeadStatus::wherenotin('id', [1, 12])->select('id', 'name')->get();
         return response()->json(['status' => 0, 'statuses' => $lead_statuses]);
+    }
+
+    public function lead_status_update(Request $request)
+    {
+        $rules = [
+            'lead_id' => ['required', 'integer', 'digits_between:1,10', 'exists:leads,id'],
+            'status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:lead_statuses,id'],
+            'reason_id' => ['nullable'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $lead = Lead::find($request->lead_id);
+            $admin_id = $request->admin_id;
+            if($lead){
+                $lead_log = new LeadLog();
+                $lead_log->lead_id = $lead->id;
+                $lead_log->prev_status_id = $lead->status_id;
+                $lead_log->status_id = $request->status_id;
+                $lead_log->reason = $request->reason_id;
+                $lead_log->sale_person_id = $lead->sale_person_id;
+                if ($lead->reference_person_id == NULL) {
+                    $lead_log->reference_person_id = $admin_id;
+                } else {
+                    $lead_log->reference_person_id = $lead->reference_person_id;
+                }
+                $lead_log->updated_by = $admin_id;
+                $lead_log->save();
+
+                $lead->status_id = $request->status_id;
+                $lead->reason = $request->reason_id;
+                $lead->updated_by = $admin_id;
+                $lead->save();
+
+                if ($request->status_id == 9) {
+                    NotificationsController::send(113, $lead);
+                } elseif ($request->status_id == 2) {
+                    LeadTaggingController::notification_unresponsive($lead->id);
+                }
+
+                return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
+            }
+            return response()->json(['status' => 1, 'message' => 'Invalid Lead']);
+
+        }
     }
 
 
