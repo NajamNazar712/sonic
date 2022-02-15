@@ -6307,7 +6307,7 @@ class AdminAPIController extends Controller
                     LeadTaggingController::notification_unresponsive($lead->id);
                 }
 
-                return response()->json(['status' => 1, 'success' => 'Status updated Successfully!']);
+                return response()->json(['status' => 0, 'message' => 'Status updated Successfully!']);
             }
             return response()->json(['status' => 1, 'message' => 'Invalid Lead']);
 
