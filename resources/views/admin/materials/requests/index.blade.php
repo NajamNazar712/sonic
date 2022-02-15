@@ -18,6 +18,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Shipper Cell Number</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Total Quantity</th>
@@ -365,6 +366,7 @@
                             head.push('S.No');
                             head.push('Tracking Number');
                             head.push('Shipper');
+                            head.push('Shipper Cell Number');
                             head.push('Requested Date/Time');
                             head.push('City');
                             head.push('Total Quantity');
@@ -384,6 +386,7 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
+                                row.push(values.shipper_phone);
                                 row.push(values.created_at);
                                 row.push(values.city);
                                 row.push(values.total_quantity);
@@ -447,11 +450,12 @@
                 serverSide: true,
                 ajax: '{{ route('admin.packaging.requests.list') }}',
                 rowId: 'request_id',
-                order: [[3, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'shipper_phone',name:'u.phone',class: 'align-middle shipper_phone'},
                     {data: 'created_at', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
                     {data: 'city', name: 'ct.name', class: 'align-middle city'},
                     {data: 'total_quantity_button', class: 'align-middle total_quantity_button',orderable: false, searchable: false},
@@ -464,7 +468,6 @@
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'confirmed_aging', class: 'align-middle confirmed_aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
-
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

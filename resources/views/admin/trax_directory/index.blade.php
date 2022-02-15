@@ -145,8 +145,8 @@
                 buttons: [{
                     extend: 'excel',
                     title: 'Trax Directory',
-                    className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
+                    className: 'btn btn-primary datatable_excel_btn d-none',
                 }],
                 scrollX: true, scrollY: '500px',
                 autoWidth: false,
@@ -230,6 +230,7 @@
                if(search_name == '' && search_phone == '' && search_trax_id == ''){
                    toastr.error("Provide atleast one parameter", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                }else{
+                   $('.datatable_excel_btn').removeClass('d-none');
                    table.draw(true);
                }
             });

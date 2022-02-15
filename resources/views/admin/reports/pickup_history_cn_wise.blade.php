@@ -15,7 +15,11 @@
 
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                            <select name="search_rider" id="search_rider" class="form-control select2">
+                                @foreach($riders as $rider)
+                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
@@ -36,26 +40,17 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_rider" id="search_rider" class="form-control select2">
-                                @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
+                    <div class="col-6">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{Carbon\Carbon::now()->subDays(10)}}">
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{Carbon\Carbon::now()->subDays(2)}}">
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-6">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -79,11 +74,11 @@
                         <th class="border-primary border-darken-1">Pickup Note</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">Arrive at Origin</th>
+                        <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Booking Date</th>
-                        <th class="border-primary border-darken-1">Pickup Date</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Booking Date/Time</th>
+                        <th class="border-primary border-darken-1">Pickup Date/Time</th>
+                        <th class="border-primary border-darken-1">Arrival Date/Time</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Status</th>
                     </tr>
@@ -97,6 +92,7 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
@@ -156,14 +152,10 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_tracking_no').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Origin',
                 width:'100%',
@@ -197,7 +189,7 @@
                 onSet: function(context) {
                     var old_date_formatted = $('input[name="from_date_formatted"]').val();
                     var contractMoment = moment(old_date_formatted);
-                    var current = moment(contractMoment).add(9, 'days');
+                    var current = moment(contractMoment).add(2, 'days');
                     to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
                     to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
                     to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
@@ -225,9 +217,10 @@
                     blockPagePermanently();
                     body = [];
                     var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
+                        params.start = 0;
+                        params.length = -1;
+                        params.excel = true;
+                        params['_token'] = "{{csrf_token()}}";
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.pickup_history_cn_wise.list') }}',
                         method: 'POST',
@@ -238,15 +231,15 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Tracking .No');
+                            head.push('Tracking No.');
                             head.push('Pickup Note');
                             head.push('Shipper');
                             head.push('Address');
-                            head.push('Arrived at Origin');
+                            head.push('Origin');
                             head.push('Hub');
-                            head.push('Booking Date');
-                            head.push('Pickup Date');
-                            head.push('Arrival Date');
+                            head.push('Booking Date/Time');
+                            head.push('Pickup Date/Time');
+                            head.push('Arrival Date/Time');
                             head.push('Rider');
                             head.push('Arrival Status');
                             $.each(result.data, function(index, values) {
@@ -282,6 +275,7 @@
                         extend: 'excelHtml5',
                         title: 'Pickup History (CN wise)',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                        className: 'btn btn-primary datatable_excel_btn d-none',
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -292,6 +286,7 @@
                 language: {
                     processing: data_table_loader
                 },
+                deferLoading: 0,
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.pickup_history_cn_wise.list') }}',
@@ -300,7 +295,6 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: function (d) {
-                        d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
@@ -334,7 +328,14 @@
                 }
             });
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                var rider_id = $('#search_rider').val();
+                if(rider_id == ''){
+                    toastr.error("Select Rider",'', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }else{
+                    $('.datatable_excel_btn').removeClass('d-none');
+                    table.draw(true);
+                }
+
             });
             $('#datatable tbody').on('click', 'tr td.pickup_note_no_print button.print', function() {
                 var pickup_note_id = parseInt($(this).attr('rel'));

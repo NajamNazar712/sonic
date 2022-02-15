@@ -10029,7 +10029,7 @@ class AdminReportsController extends Controller
             })
             ->select('shipments.tracking_number as tracking_number', 'shipments.created_at as booking_date', 'shipments.tracking_number as tracking_number_link', 'usi.pickup_address as pickup_address', 'oc.name as origin', 'h.name as hub', 'vpn.pickup_note_id as pickup_note_id', 'vrp.created_at as pickup_date', 'sj.created_at as arrival_date', 'cr.name as rider', 'u.name as shipper');
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
         }
         $pickup_history = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -10062,9 +10062,6 @@ class AdminReportsController extends Controller
                     return 'Arrival Not Done';
                 }
             });
-        if ($tracking = $request->get('search_tracking_no')) {
-            $shipments->where('shipments.tracking_number', '=', $tracking);
-        }
         if ($rider = $request->get('search_rider')) {
             $shipments->where('cr.id', '=', $rider);
         }
@@ -10077,7 +10074,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $shipments->whereBetween('sj.created_at', [$from, $to]);
+            $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
         return $pickup_history->make(true);
     }

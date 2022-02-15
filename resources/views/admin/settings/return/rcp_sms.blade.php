@@ -1,0 +1,85 @@
+@extends('admin.layout.master')
+
+@section('title', 'RCP SMS')
+
+@section('content')
+    <div class="app-content content">
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                <h1 class="mb-1">
+                   RCP SMS
+                </h1>
+
+                <div class="card">
+                    <div class="card-content" aria-expanded="true">
+                        <div class="card-body">
+                            @include('admin.inc.messages')
+
+                            <div class="row justify-content-center">
+                                <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.rcp_sms.update') }}" novalidate="novalidate">
+                                    {{ csrf_field() }}
+                                    <input type="hidden" name="toggle_check" id="toggle_check" class="toggle_check">
+                                    <div class="row">
+                                        <div class="input-group ml-1">
+                                            <label class="mr-2">On/Off</label>
+                                            <div class="form-group">
+                                                <input type="checkbox" name="count_toggle" id="count_toggle" class="switchery count_toggle" data-size="sm" data-switchery="true" @if(isset($setting->setting_value) && $setting->setting_value == 1) checked @endif>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="input-group">
+                                            <label class="m-1">Count</label>
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" name="sms_count"  placeholder="SMS Count" required data-rule-required="true" data-msg-required="This field is required" value=" {{$setting->text}}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+@endsection
+
+@section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#settings_form input.reattempt_percentage').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+            $('#settings_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                }
+            });
+
+            $("#count_toggle").on('change', function(){
+                if($("#count_toggle").is(":checked")){
+                    $('#toggle_check').val(1);
+                }
+                else{
+                    $('#toggle_check').val(0);
+                }
+            });
+        });
+    </script>
+@endsection

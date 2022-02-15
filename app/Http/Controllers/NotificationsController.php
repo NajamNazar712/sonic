@@ -8974,6 +8974,88 @@ class NotificationsController extends Controller
                     }
                     self::email($subject, $body, $to, $cc);
                 }
+                else if($id == 168){
+                    $from = $reference_1_id;
+                    $to = $reference_2_id;
+                    $statuses = ShipmentStatus::whereIn('id',[1,2,3,4,5,8,12,13,14,20,21,22,23,24,25,55])->orderBy('id','asc')->orderBy('name','desc')->get();
+                    $shipments_counts = array();
+                    $settings = GlobalSettings::where('type', 'nsa_accounts');
+                    $nsa_accounts = array();
+                    if ($settings->exists()) {
+                        $settings = $settings->first();
+                        $nsa_accounts = array_map('intval', explode(',', $settings->text));
+                    }
+                    if (count($nsa_accounts) > 0) {
+                        foreach ($statuses as $status)
+                        {
+                            $shipments_counts[$status->name] = Shipment::whereIn('user_id', $nsa_accounts)->where('shipper_status_id',$status->id)->whereBetween('created_at',[$from,$to])->count();
+                        }
+
+                        $preview = "<div style='display: flex;flex-wrap: wrap;margin-right: -15px;margin-left: -15px'>";
+                        foreach($shipments_counts as $status => $count)
+                        {
+                            $preview .= "
+                                <div style='background-color: #11f118;flex: 0 0 16.666667%;max-width: 25%;min-width: 25%;width: 100%;min-height: 150px;max-height: 150px;margin-right: 20px;position: relative;text-align:center;height:fit-content;padding:0px 20px;margin-bottom:20px;'>
+                                
+                                    <h2 style='color:#fff;padding-bottom:0px;margin-bottom:0px;'>".$count."</h2>
+                                    <h4 style='color:#fff;padding-top:0px;margin-top:0px;'>".$status."</h4>    
+                                </div>
+                            ";
+                        }
+
+                        $preview .= "</div>";
+
+                        $date = $from->toDateString();
+
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $subject);
+                        }
+
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $date, $body);
+                        }
+
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $preview, $body);
+                        }
+
+                        $to = ["talha.hussain@trax.pk",'syed.anam@trax.pk','waqas@trax.pk','ops.telenor@trax.pk'];
+                        self::email($subject, $body, $to);
+                    }
+                }
+ 					else if($id == 169){
+
+                    $shipment_id = $reference_1_id;
+                    $shipment = Shipment::find($shipment_id);
+                    $shipper_name = NULL;
+                    if($shipment->user->brand_name != null){
+                        $shipper_name = $shipment->user->brand_name;
+                    }
+                    else{
+                        $shipper_name = $shipment->user->name;
+                    }
+
+                    if (strpos($body, '[consignee]') !== FALSE) {
+                        $body = str_replace('[consignee]',$shipment->consignee_name , $body);
+                    }
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]',$shipment->tracking_number , $body);
+                    }
+
+                    if (strpos($body, '[amount]') !== FALSE) {
+                        $body = str_replace('[amount]',$shipment->amount , $body);
+                    }
+
+                    if (strpos($body, '[brand_name]') !== FALSE) {
+                        $body = str_replace('[brand_name]',$shipper_name, $body);
+                    }
+
+                    $to = $shipment->consignee_phone_number_1;
+                    $data = array($body, $to);
+                    return $data;
+                  
+                }
             }
         }
     }
