@@ -850,6 +850,39 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+    public function debriefing_break_time_setting_index()
+    {
+        $settings = GlobalSettings::where('type', 'debriefing_break_time_setting')->first();
+
+        if ($settings) {
+            $break_timings = floatval($settings->text);
+        }
+        else{
+            $break_timings = 0;
+        }
+
+        return view('admin.settings.debriefing_total_time_setting',compact('break_timings'));
+    }
+
+    public function debriefing_break_time_setting_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'debriefing_break_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'debriefing_break_time_setting';
+        }
+
+        $settings->text = $request->break_timings;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
     public function auto_invoice_generation_and_due_date_index()
     {
         $auto_invoice_generation = GlobalSettings::where('type', 'auto_invoice_generation_time')->first();
