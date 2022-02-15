@@ -10101,8 +10101,8 @@ class AdminReportsController extends Controller
             $avg_remaining = 0;
             foreach($value as $item){
                 if($item->pending + $item->new_launched == 0){
-                    $avg_closed = 0;
-                    $avg_remaining = 0;
+                    $avg_closed += 0;
+                    $avg_remaining += 0;
                     $crm_count_data[$key]['data'][$item->id]['closure_percent'] = 0;
                     $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = 0;
                 }else{
