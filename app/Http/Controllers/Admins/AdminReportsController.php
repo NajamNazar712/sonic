@@ -10240,7 +10240,7 @@ class AdminReportsController extends Controller
         }
 
         $data = AgentDay::leftjoin('admins as agent','agent.id','agent_days.agent_id')
-            ->select(['agent.id as agent_id','agent.name as agent_name','agent_days.date as date','agent_days.id as day_id','agent_days.auto_close as auto_close']);
+            ->select(['agent.id as agent_id','agent.name as agent_name','agent_days.date as date','agent_days.id as day_id','agent_days.auto_close as auto_close','agent_days.status as status']);
 
         $datatables = Datatables::of($data)
             ->addColumn('assigned_calls_excel', function($calls){
@@ -10258,15 +10258,6 @@ class AdminReportsController extends Controller
                 $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
 
                 return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])
-                    ->where('created_at','>=',$prev_time)
-                    ->where('created_at','<=',$next_time)
-                    ->count();
-            })
-            ->addColumn('pending_calls_excel', function($calls){
-                $next_time = Carbon::createFromFormat('Y-m-d',$calls->date)->endOfDay()->toDateTimeString();
-                $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
-
-                return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',0]])
                     ->where('created_at','>=',$prev_time)
                     ->where('created_at','<=',$next_time)
                     ->count();
@@ -10308,34 +10299,14 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             })
-            ->addColumn('pending_calls', function($calls) {
-                $next_time = Carbon::createFromFormat('Y-m-d',$calls->date)->endOfDay()->toDateTimeString();
-                $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
-
-                $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)
-                    ->where('created_at','>=',$prev_time)
-                    ->where('created_at','<=',$next_time)
-                    ->count();
-                $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',0]])
-                    ->where('created_at','>=',$prev_time)
-                    ->where('created_at','<=',$next_time)
-                    ->count();
-                if($count != 0)
-                {
-                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="danger">'. round(($count / $total_count) * 100, 2) .'%</h4>';
-                    return $count_cell;
-                }
-                else{
-                    return 0;
-                }
-            })
             ->addColumn('live_hours', function($calls) {
                 $start = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','asc')->first()->start;
                 $end = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','desc')->first()->end;
                 $closed = "";
                 if($calls->status == 3) {
                     $closed = ($calls->auto_close == 1) ? " (Auto Closed)" : " (Self Closed)";
-                }                if($end == null)
+                }
+                if($end == null)
                 {
                     return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - *".$closed;
                 }

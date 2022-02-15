@@ -343,9 +343,9 @@
                         @csrf
                         <div class="container">
                             <div class="form-group">
-                                <label>Follow Up After <span class="text-warning">(Time In Hours)</span></label>
+                                <label>Follow Up After <span class="text-warning">(hh:mm)</span></label>
                                 <div class="input-group">
-                                    <input type="number" name="follow_up" class="form-control bg-primary border-primary white rounded-right follow_up" id="follow_up" min="0.5" step="0.5" max="8.5" placeholder="Follow Up Time*" data-rule-required="true" data-msg-required="Follow Up Time is required" value="0.5" >
+                                    <input type="text" name="follow_up" class="form-control rounded-right follow_up" id="follow_up"  placeholder="Follow Up Time*" data-rule-required="true" data-msg-required="Follow Up Time is required" >
                                 </div>
                             </div>
                         </div>
@@ -584,6 +584,10 @@
                     placeholder: 'Select Reason',
                     width:'100%',
                     allowClear: true
+                });
+
+                $("#follow_up").inputmask({
+                    mask: "99:99",
                 });
 
                 $('body').on('select2:select','#status',function (e) {
