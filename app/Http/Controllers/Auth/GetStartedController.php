@@ -34,10 +34,10 @@ class GetStartedController extends Controller
             return redirect()->back()->with('error', 'Duplicate entry - You have already provided this Number or Email previously. Kindly fill new details. Thanks');
         }
 
-        $max_lead_id = Lead::max('lead_id');
-        $max_lead_id = $max_lead_id + 1;
+        // $max_lead_id = Lead::max('lead_id');
+        // $max_lead_id = $max_lead_id + 1;
         $new_lead = new Lead();
-        $new_lead->lead_id = $max_lead_id;
+        // $new_lead->lead_id = $max_lead_id;
         $new_lead->contact_person = $request->name;
         $new_lead->city_id = $request->city;
         $new_lead->territory_id = $request->territory;

@@ -120,7 +120,7 @@ class OrderManagementController extends Controller
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
             ->filterColumn('u.id', function ($query, $keyword) {
-                return $query->where('u.id', '=', $keyword);
+                return $query->where('shipments.user_id', '=', $keyword);
             })
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
@@ -148,7 +148,7 @@ class OrderManagementController extends Controller
             ->filterColumn('status',function ($query,$keyword){
 
                 if ($keyword != '') {
-                    $query->where('ss.id',$keyword);
+                    $query->where('shipments_journey.shipper_status_id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -157,7 +157,7 @@ class OrderManagementController extends Controller
             ->filterColumn('service_type',function ($query,$keyword){
 
                 if ($keyword != '') {
-                    $query->where('bt.id',$keyword);
+                    $query->where('shipments.booking_type_id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -166,16 +166,7 @@ class OrderManagementController extends Controller
             ->filterColumn('payment_status',function ($query,$keyword){
 
                 if ($keyword != '') {
-                    $query->where('sps.id',$keyword);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->filterColumn('product_type',function ($query,$keyword){
-
-                if ($keyword != '') {
-                    $query->where('p.id',$keyword);
+                    $query->where('shipments.payment_status_id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -202,7 +193,7 @@ class OrderManagementController extends Controller
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
         if ($shipment_status_select = $request->get('shipment_status_select')) {
-            $datatable->whereIn('ss.id', $shipment_status_select);
+            $datatable->whereIn('shipments_journey.shipper_status_id', $shipment_status_select);
         }
         if ($request->get('booking_from_date') && $request->get('booking_to_date')) {
             $from = $request->get('booking_from_date');

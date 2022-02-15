@@ -23,6 +23,7 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Territory</th>
                                     <th class="border-primary border-darken-1">Service</th>
                                     <th class="border-primary border-darken-1">Tagged Salesperson</th>
                                     <th class="border-primary border-darken-1">Status</th>
@@ -48,6 +49,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <select name="zone_id" id="zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                                <option value="0" > All Zones </option>
                             @foreach($zones as $zone)
                                 <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
                             @endforeach
@@ -55,8 +57,15 @@
                     </div>
                     <div class="form-group" id="city_select">
                         <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                            <option value="0" > All Cities </option>
+
                         </select>
                     </div>
+                    <div class="form-group" id="territory_select">
+                        <select name="territory_id" id="territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                        </select>
+                    </div>
+                    
                     <div class="form-group" id="service_select">
                         <select name="service_id" id="service_id" class="form-control select2" data-rule-required="true" data-msg-required="Service is required">
                             @foreach($services as $service)
@@ -98,16 +107,26 @@
                     
                     <div class="form-group">
                         <select name="zone_id" id="edit_zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                            <option value="0" > All Zones </option>
                             @foreach($zones as $zone)
                                 <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="edit_city_select">
                         <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                            <option value="0" > All Cities </option>
+                            
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group" id="edit_territory_select">
+                        <select name="territory_id" id="edit_territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                            @foreach($territories as $territory)
+                                <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
                             @endforeach
                         </select>
                     </div>
@@ -163,12 +182,23 @@
 
             $('#AssignAgentModal').on('hidden.bs.modal', function () {
                 
-                $("agent_id").select2('val', '')
+                $('#agent_id').val('').trigger('change.select2');
                 $('#zone_id').val('').trigger('change.select2');
                 $('#city_id').val('').trigger('change.select2');
+                $('#territory_id').val('').trigger('change.select2');
                 $('#service_id').val('').trigger('change.select2');
                 
             });
+
+            // $('#EditAgentModal').on('hidden.bs.modal', function () {
+                
+            //     $("agent_id").select2('val', '')
+            //     $('#edit_zone_id').val('').trigger('change.select2');
+            //     $('#city_id').val('').trigger('change.select2');
+            //     $('#territory_id').val('').trigger('change.select2');
+            //     $('#service_id').val('').trigger('change.select2');
+                
+            // });
            
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
@@ -184,6 +214,8 @@
             });
             $('#service_select').css('display','none');
             $('#city_select').css('display','none');
+            $('#territory_select').css('display','none');
+
             $('#agent_select').css('display','none');
 
             $('#zone_id').prepend('<option selected></option>').select2({
@@ -192,17 +224,28 @@
                 allowClear:true,
                 dropdownParent:$('#agent_assign')
             }).bind('change', function() {
-                $('#service_select').css('display','block');
-                $('#city_select').css('display','block');
-                $('#agent_select').css('display','block');
-
-                $('#city_id').children().remove()
-
+                // $('#service_select').css('display','block');
+                // $('#agent_select').css('display','block');
+                
+               
                 var id = parseInt($(this).val());
+                if(id == 0){
+                        $('#service_select').css('display','block');
+                        $('#agent_select').css('display','block');
+                    $('#city_select').css('display','none');
+                    $('#territory_select').css('display','none');
+
+                }else{
+                    $('#city_select').css('display','block');
+                    $('#city_id').children().remove()
+
                     var city_obj = [];
                     city_obj.length = 0
 
-                $.map({!! $cities !!}, function (obj) {
+                $.map({!! $cities !!}, function (obj,index) {
+                    if(index == 0){
+                        city_obj.push({id: 0, text: 'All Cities'});
+                    }
                         if(id == obj.zone_id){
                             city_obj.push({id: obj.id, text: obj.name});
                         }
@@ -214,7 +257,44 @@
                         allowClear:true,
                         dropdownParent:$('#agent_assign'),
                         data:city_obj
+                    }).bind('change', function() {
+
+                        var id = parseInt($(this).val());
+
+                        if(id == 0){
+                            $('#service_select').css('display','block');
+                            $('#agent_select').css('display','block');
+                            $('#territory_select').css('display','none');
+
+                        }else{
+
+
+                            $('#service_select').css('display','block');
+                            $('#territory_select').css('display','block');
+                            $('#agent_select').css('display','block');
+
+                            $('#territory_id').children().remove()
+
+                                var territory_obj  = [];
+                                territory_obj.length = 0
+
+                            $.map({!! $territories !!}, function (obj) {
+                                    if(id == obj.city_id){
+                                        territory_obj.push({id: obj.id, text: obj.name});
+                                    }
+                            });
+
+                            $('#territory_id').prepend('<option selected></option>').select2({
+                                    width:'100%',
+                                    placeholder:"Select Territory",
+                                    allowClear:true,
+                                    dropdownParent:$('#agent_assign'),
+                                    data:territory_obj
+                                });
+                        }
+
                     });
+                }
             });    
 
 
@@ -231,9 +311,14 @@
                 dropdownParent:$('#agent_edit')
             });
 
-            $('#edit_city_id').prepend('<option selected></option>').select2({
+            $('#edit_city_id').select2({
                 width:'100%',
-                placeholder:"Select City",
+                allowClear:true,
+                dropdownParent:$('#agent_edit')
+            });
+            $('#edit_territory_id').prepend('<option selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Territory",
                 allowClear:true,
                 dropdownParent:$('#agent_edit')
             });
@@ -244,29 +329,87 @@
                 dropdownParent:$('#agent_edit')
             }).bind('change', function() {
                 
-                $("#edit_agent_id").select2('val', '');
-                $("#edit_service_id").select2('val', '');
+                // $("#edit_agent_id").select2('val', '');
+                // $("#edit_service_id").select2('val', '');
+                
 
-                $('#edit_city_id').children().remove();
-                $('#edit_city_id').select2('destroy');
-
+               
                 var id = parseInt($(this).val());
+                if(id == 0){
+                    $('#edit_service_id').val('').trigger('change.select2');
+                    $('#edit_agent_id').val('').trigger('change.select2');
+                    $('#edit_city_select').css('display','none');
+                    $('#edit_city_id').val('').trigger('change.select2');
+                    $('#edit_territory_select').css('display','none');
+                    $('#edit_territory_id').val('').trigger('change.select2');
+
+                }else{  
+                    $('#edit_service_id').val('').trigger('change.select2');
+                    $('#edit_agent_id').val('').trigger('change.select2');
+                    $('#edit_city_id').val(0).trigger('change.select2');
+                    $('#edit_city_select').css('display','block');
+                    $('#edit_territory_select').css('display','none');
+                    $('#edit_territory_id').val('').trigger('change.select2');
+                    $('#edit_city_id').children().remove();
+                // $('#edit_city_id').select2('destroy');
                     var city_obj = [];
                     city_obj.length = 0
 
-                $.map({!! $cities !!}, function (obj) {
+                $.map({!! $cities !!}, function (obj, index) {
+                    if(index == 0){
+                        city_obj.push({id: 0, text: 'All Cities'});
+                    }
                         if(id == obj.zone_id){
                             city_obj.push({id: obj.id, text: obj.name});
                         }
-                });
-
-                $('#edit_city_id').prepend('<option selected></option>').select2({
+                });    
+                $('#edit_city_id').select2({
                         width:'100%',
-                        placeholder:"Select City",
                         allowClear:true,
                         dropdownParent:$('#agent_edit'),
                         data:city_obj
+                    }).bind('change', function() {
+                
+                        var id = parseInt($(this).val());
+                            console.log('change_city');
+                        if(id == 0){
+                            $("#edit_service_id").select2('val', '');
+                            $("#edit_agent_id").select2('val', '');
+
+                            $('#edit_territory_select').css('display','none');
+                            $('#edit_territory_id').children().remove();
+                        // $('#edit_territory_id').select2('destroy');
+                        
+                        }else{
+                            $('#edit_territory_select').css('display','block');
+
+                            $("#edit_service_id").select2('val', '');
+                            $("#edit_agent_id").select2('val', '');
+
+                            $('#edit_territory_id').children().remove();
+                            // $('#edit_territory_id').select2('destroy');
+                            var territory_obj = [];
+                            territory_obj.length = 0
+
+                        $.map({!! $territories !!}, function (obj) {
+                                if(id == obj.city_id){
+                                    territory_obj.push({id: obj.id, text: obj.name});
+                                }
+                        });
+
+                        $('#edit_territory_id').prepend('<option selected></option>').select2({
+                                width:'100%',
+                                placeholder:"Select Territory",
+                                allowClear:true,
+                                dropdownParent:$('#agent_edit'),
+                                data:territory_obj
+                            });
+                        }
+                        
+                        
                     });
+                }
+
             }); 
 
             var table = $('#datatable').DataTable({
@@ -296,11 +439,12 @@
                 },
                 ajax: '{{ route('admin.settings.lead_tagging.list') }}',
                 rowId: 'id',
-                order: [[3, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
+                    {data: 'territory_name', name: 't.name', class: 'align-middle territory_name'},
                     {data: 'service', name: 's.name', class: 'align-middle service'},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
                     {data: 'status', name: 'lead_taggings.status', class: 'align-middle status'},
@@ -377,12 +521,51 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
-                    console.log(data.city_id);
-                    $('#edit_agent_id').val(data.agent_id).change();
-                    $('#edit_city_id').val(data.city_id).change();
-                    $('#edit_zone_id').val(data.zone_id);
-                    $('#edit_service_id').val(data.service_id).change();
-                    $('#lead_tagging_id').val(data.lead_tagging_id).change();
+                    $('#lead_tagging_id').val(data.lead_tagging_id);
+
+                    if(data.zone_id == 0){
+                        $('#edit_zone_id').val(data.zone_id).change();
+                        $('#edit_city_id').css('display','none');
+                        $('#edit_territory_id').css('display','none');
+                        $('#edit_city_select').css('display','none');
+                        $('#edit_territory_select').css('display','none');
+                        $('#edit_service_id').val(data.service_id).change();
+
+                        $('#edit_agent_id').val(data.agent_id).change();
+
+                    }else{
+                        if(data.city_id == 0){
+                            $('#edit_zone_id').val(data.zone_id).change();
+                        console.log('agent _cty  zero',data.agent_id);
+
+                        console.log('city_0');
+                        $('#edit_city_id').css('display','block');
+                        $('#edit_city_select').css('display','block');
+                        $('#edit_agent_id').val(data.agent_id).change();
+                            // $('#edit_agent_id').val(2);
+                            $('#edit_city_id').val(data.city_id);
+                            $('#edit_service_id').val(data.service_id).change();
+                            // $('#lead_tagging_id').val(data.lead_tagging_id).change();
+                            $('#edit_territory_id').css('display','none');
+
+                            $('#edit_territory_select').css('display','none');
+
+                            // $('#edit_territory_id').val(data.territory_id).change();
+                        }else{
+                        console.log('agent _cty not zero',data.agent_id);
+                            $('#edit_zone_id').val(data.zone_id).change();
+
+                            $('#edit_territory_select').css('display','block');
+                            $('#edit_territory_id').css('display','block');
+
+                            $('#edit_agent_id').val(data.agent_id).change();
+                            $('#edit_city_id').val(data.city_id).change();
+                            $('#edit_service_id').val(data.service_id).change();
+                            // $('#lead_tagging_id').val(data.lead_tagging_id).change();
+                            $('#edit_territory_id').val(data.territory_id).change();
+                        }
+                        
+                    }
                     
                     $('#EditAgentModal').modal('show');
 
