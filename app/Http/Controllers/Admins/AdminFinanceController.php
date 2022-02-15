@@ -732,11 +732,11 @@ class AdminFinanceController extends Controller
                     }
                     else if(StationDepositNote::where('id',$row['sdn_id'])->whereIn('hub_id', session('hubs'))->doesntExist())
                     {
-                        $errors['Row #' . $row_id] = "Invalid SDN Number";
+                        $errors['Row #' . $row_id] = array("Invalid SDN Number");
                     }
                     else if(in_array($row['sdn_id'],$sdn_array))
                     {
-                        $errors['Row #' . $row_id] = "Duplicate SDN Number";
+                        $errors['Row #' . $row_id] = array("Duplicate SDN Number");
                     }
 
                     $sdn_array[] = $row['sdn_id'];
