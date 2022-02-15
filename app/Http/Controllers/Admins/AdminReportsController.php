@@ -10064,11 +10064,7 @@ class AdminReportsController extends Controller
 
         // });
 
-        // if ($request->get('search_from') && $request->get('search_to')) {
-        //     $from = $request->get('search_from');
-        //     $to = $request->get('search_to');
-        //     $shipments = $crm_count_report->whereBetween('date', [$from,$to]);
-        // }
+        
         // return $datatable->make(true);
 
         $from = $request->search_date_from;
@@ -10076,9 +10072,28 @@ class AdminReportsController extends Controller
         
         // $mode = $request->search_shipping_mode;
         $crm_count_data = array();
-        $crm_count_records = CRMCount::all()->groupBy(function($date) {
+       
+        if ($request->search_date_from && $request->search_date_to) {
+            $crm_count_records = CRMCount::whereBetween('date', [$from,$to])->get();
+            // dd($crm_count_records->get());
+        }else{
+            $crm_count_records = CRMCount::all();
+        }
+
+        $crm_count_records = $crm_count_records->groupBy(function($date) {
             return Carbon::parse($date->date)->format('W');
         });
+        // if ($request->search_date_from && $request->search_date_to) {
+        //     $crm_count_records = CRMCount::whereBetween('date', [$from,$to])->groupBy(function($date) {
+        //         return Carbon::parse($date->date)->format('W');
+        //     });
+        //     dd($crm_count_records->get());
+        // }else{
+        //     $crm_count_records = CRMCount::all()->groupBy(function($date) {
+        //         return Carbon::parse($date->date)->format('W');
+        //     });
+        // }
+        
         foreach ($crm_count_records as $key => $value) {
           
             $crm_count_data[$key]['count_days'] = $value->count();

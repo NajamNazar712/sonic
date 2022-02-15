@@ -119,7 +119,7 @@
             text-align: left;
         }
         .border_none{
-            border: none !important;
+            border-top: none !important;
         }
     </style>
 @endsection
@@ -141,7 +141,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
@@ -154,7 +154,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
