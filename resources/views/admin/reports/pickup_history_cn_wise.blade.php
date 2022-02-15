@@ -76,9 +76,9 @@
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Booking Date</th>
-                        <th class="border-primary border-darken-1">Pickup Date</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Booking Date/Time</th>
+                        <th class="border-primary border-darken-1">Pickup Date/Time</th>
+                        <th class="border-primary border-darken-1">Arrival Date/Time</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Status</th>
                     </tr>
@@ -237,9 +237,9 @@
                             head.push('Address');
                             head.push('Origin');
                             head.push('Hub');
-                            head.push('Booking Date');
-                            head.push('Pickup Date');
-                            head.push('Arrival Date');
+                            head.push('Booking Date/Time');
+                            head.push('Pickup Date/Time');
+                            head.push('Arrival Date/Time');
                             head.push('Rider');
                             head.push('Arrival Status');
                             $.each(result.data, function(index, values) {
