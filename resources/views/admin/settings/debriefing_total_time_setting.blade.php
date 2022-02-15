@@ -22,7 +22,7 @@
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.debriefing_break_time.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
                                         <div class="form-group">
-
+                                            <label><b>Break Time <span class="text-warning">(In Hrs)</span></b></label>
                                             <div class="input-group">
                                                 <input type="number" name="break_timings" class="form-control bg-primary border-primary white rounded-right break_time" id="break_time" min="0.5" step="0.5" max="8.5" placeholder="Debriefing Break Time*" data-rule-required="true" data-msg-required="Debriefing Break Time is required" value="{{$break_timings}}" >
                                             </div>
