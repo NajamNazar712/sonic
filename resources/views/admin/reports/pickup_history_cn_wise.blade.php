@@ -74,7 +74,7 @@
                         <th class="border-primary border-darken-1">Pickup Note</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">Arrive at Origin</th>
+                        <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Booking Date</th>
                         <th class="border-primary border-darken-1">Pickup Date</th>
@@ -235,7 +235,7 @@
                             head.push('Pickup Note');
                             head.push('Shipper');
                             head.push('Address');
-                            head.push('Arrived at Origin');
+                            head.push('Origin');
                             head.push('Hub');
                             head.push('Booking Date');
                             head.push('Pickup Date');
