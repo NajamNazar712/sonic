@@ -6307,8 +6307,8 @@ class AdminAPIController extends Controller
                     } elseif ($request->status_id == 2) {
                         LeadTaggingController::notification_unresponsive($lead->id);
                     }
-
-                    return response()->json(['status' => 0, 'message' => 'Status updated Successfully!']);
+                    $lead_status = LeadStatus::find($request->status_id);
+                    return response()->json(['status' => 0, 'message' => 'Status updated Successfully!', 'status' => $lead_status->name]);
                 }else{
                     return response()->json(['status' => 1, 'message' => 'Sales Person not Tagged']);
                 }
