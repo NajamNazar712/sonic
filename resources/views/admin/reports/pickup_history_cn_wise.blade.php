@@ -330,7 +330,7 @@
             $('#search_filter_btn').on('click',function () {
                 var rider_id = $('#search_rider').val();
                 if(rider_id == ''){
-                    toastr.error("Select Rider", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    toastr.error("Select Rider",'', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }else{
                     $('.datatable_excel_btn').removeClass('d-none');
                     table.draw(true);
