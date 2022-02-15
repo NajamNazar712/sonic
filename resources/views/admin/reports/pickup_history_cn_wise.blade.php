@@ -231,7 +231,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Tracking .No');
+                            head.push('Tracking No.');
                             head.push('Pickup Note');
                             head.push('Shipper');
                             head.push('Address');
