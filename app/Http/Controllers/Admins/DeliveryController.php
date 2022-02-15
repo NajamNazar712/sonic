@@ -76,6 +76,7 @@ use App\Http\Models\WarehouseStockRequest;
 use App\Http\Models\WarehouseStockRequestHistory;
 use App\Http\Models\Admin\PettyCashStatement;
 use App\Jobs\ProcessAgentCallMonitoring;
+use App\Jobs\RCPSmsToConsignee;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -1901,7 +1902,10 @@ class DeliveryController extends Controller
         $received_shipments = array();
         $first_attempt_shipments = array();
         $restrict_status_shipments = array();
+        $now = Carbon::now();
+        $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
 
+        $rcp_sms_setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
         if ($request->has('open_box_ids')) {
@@ -2070,6 +2074,10 @@ class DeliveryController extends Controller
                                 $return_assign_log->assigned_by = Auth::id();
                                 $return_assign_log->save();
                             }
+                            if(in_array(session('role_id'),[18,19]) && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
+                                dispatch(new RCPSmsToConsignee($shipment));
+                            }
+
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
                             if ($shipment_details->packaging_material_request == 0) {
@@ -2157,9 +2165,12 @@ class DeliveryController extends Controller
 
     public function receive_delivery_status_submit(Request $request)
     {
+        $now = Carbon::now();
+        $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
+
         $open_box_ids = array();
         $shipments = explode(',', $request->shipment_ids);
-
+        $rcp_sms_setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
         $open_box_ids = explode(',', $request->open_box_ids);
         $invalid_reason_shipments = array();
         $delivery_note_id = $request->delivery_note_id;
@@ -2250,10 +2261,17 @@ class DeliveryController extends Controller
                                     $return_assign_log->save();
                                 }
                             }
-                            if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
-                                if ($shipment_status->packaging_material_request == 0) {
-                                    ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
-                                } else if ($shipment_status->packaging_material_charges != '' && $shipment_status->packaging_material_request == 1) {
+                            if(in_array(session('role_id'),[18,19]) && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
+                                dispatch(new RCPSmsToConsignee($shipment));
+                            }
+                        }
+                        if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
+                            if($shipment_status->packaging_material_request == 0){
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                            }else if($shipment_status->packaging_material_charges != '' && $shipment_status->packaging_material_request == 1){
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
+                            }else if($shipment_status->packaging_material_charges == null && $shipment_status->packaging_material_request == 1){
+                                if($request->status_drop[$shipment] != 12){
                                     ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
                                 } else if ($shipment_status->packaging_material_charges == null && $shipment_status->packaging_material_request == 1) {
                                     if ($request->status_drop[$shipment] != 12) {
@@ -2293,7 +2311,6 @@ class DeliveryController extends Controller
                     }
 
                 }
-
 
             }
             $delivery_note_data = DeliveryNote::find($delivery_note_id);
@@ -5952,15 +5969,23 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->editColumn('updated_via_app', function ($shipment) {
-                if ($shipment->updated_via_app == 1) {
-                    return 'Partial';
-                } elseif ($shipment->updated_via_app == 2) {
-                    return 'Yes';
-                } elseif ($shipment->updated_via_app == 0) {
-                    return 'No';
+            ->editColumn('updated_via_app', function($shipment) {
+               if ($shipment->updated_via_app == 1) {
+                        return 'Partial';
+                    } elseif ($shipment->updated_via_app == 2) {
+                        return 'Yes';
+                    } elseif ($shipment->updated_via_app == 0) {
+                        return 'No';
+                    }
+                    else{
+                        return '-';
+                    }
+            })
+            ->filterColumn('rdns.status', function ($query, $keyword) {
+                if ($keyword != 0) {
+                    $query->where('rdns.status', $keyword);
                 } else {
-                    return '-';
+                    $query->where('rdns.status' , null)->orWhere('rdns.status',0);
                 }
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
