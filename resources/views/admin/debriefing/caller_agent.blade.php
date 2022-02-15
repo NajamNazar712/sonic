@@ -343,6 +343,7 @@
                         @csrf
                         <div class="container">
                             <div class="form-group">
+                                <label>Follow Up After <span class="text-warning">(Time In Hours)</span></label>
                                 <div class="input-group">
                                     <input type="number" name="follow_up" class="form-control bg-primary border-primary white rounded-right follow_up" id="follow_up" min="0.5" step="0.5" max="8.5" placeholder="Follow Up Time*" data-rule-required="true" data-msg-required="Follow Up Time is required" value="0.5" >
                                 </div>
