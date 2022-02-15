@@ -368,6 +368,7 @@ class Permission
             'return.return_deliveries.index' => 566,
             'return.return_deliveries.list' => 566,
             'return.revert.index' => 643,
+            'return.confirmation_pending_sms' => 675,
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
@@ -902,6 +903,7 @@ class Permission
 
             'settings.shippers_origin_change.index' => 667,
             'settings.shippers_return_address.index' => 668,
+            'settings.rcp_sms.index' => 680,
 
 
 
