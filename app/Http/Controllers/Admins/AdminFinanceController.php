@@ -718,6 +718,7 @@ class AdminFinanceController extends Controller
 
                 unset($spreadsheet);
                 $errors = array();
+                $sdn_array = array();
 
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
@@ -729,6 +730,16 @@ class AdminFinanceController extends Controller
                     if ($validate->fails()) {
                         $errors['Row #' . $row_id] = $validate->errors()->all();
                     }
+                    else if(StationDepositNote::where('id',$row['sdn_id'])->whereIn('hub_id', session('hubs'))->doesntExist())
+                    {
+                        $errors['Row #' . $row_id] = "Invalid SDN Number";
+                    }
+                    else if(in_array($row['sdn_id'],$sdn_array))
+                    {
+                        $errors['Row #' . $row_id] = "Duplicate SDN Number";
+                    }
+
+                    $sdn_array[] = $row['sdn_id'];
                 }
 
                 if (empty($errors)) {
