@@ -6278,39 +6278,43 @@ class AdminAPIController extends Controller
             $lead = Lead::find($request->lead_id);
             $admin_id = $request->admin_id;
             if($lead){
-                $reason_id = NULL;
-                if($request->has('reason_id')){
-                    $reason_id = $request->reason_id;
-                }
-                $lead_log = new LeadLog();
-                $lead_log->lead_id = $lead->id;
-                $lead_log->prev_status_id = $lead->status_id;
-                $lead_log->status_id = $request->status_id;
-                $lead_log->reason = $reason_id;
-                $lead_log->sale_person_id = $lead->sale_person_id;
-                if ($lead->reference_person_id == NULL) {
-                    $lead_log->reference_person_id = $admin_id;
-                } else {
-                    $lead_log->reference_person_id = $lead->reference_person_id;
-                }
-                $lead_log->updated_by = $admin_id;
-                $lead_log->save();
+                if($lead->sale_person_id){
+                    $reason_id = NULL;
+                    if($request->has('reason_id')){
+                        $reason_id = $request->reason_id;
+                    }
+                    $lead_log = new LeadLog();
+                    $lead_log->lead_id = $lead->id;
+                    $lead_log->prev_status_id = $lead->status_id;
+                    $lead_log->status_id = $request->status_id;
+                    $lead_log->reason = $reason_id;
+                    $lead_log->sale_person_id = $lead->sale_person_id;
+                    if ($lead->reference_person_id == NULL) {
+                        $lead_log->reference_person_id = $admin_id;
+                    } else {
+                        $lead_log->reference_person_id = $lead->reference_person_id;
+                    }
+                    $lead_log->updated_by = $admin_id;
+                    $lead_log->save();
 
-                $lead->status_id = $request->status_id;
-                $lead->reason = $reason_id;
-                $lead->updated_by = $admin_id;
-                $lead->save();
+                    $lead->status_id = $request->status_id;
+                    $lead->reason = $reason_id;
+                    $lead->updated_by = $admin_id;
+                    $lead->save();
 
-                if ($request->status_id == 9) {
-                    NotificationsController::send(113, $lead);
-                } elseif ($request->status_id == 2) {
-                    LeadTaggingController::notification_unresponsive($lead->id);
+                    if ($request->status_id == 9) {
+                        NotificationsController::send(113, $lead);
+                    } elseif ($request->status_id == 2) {
+                        LeadTaggingController::notification_unresponsive($lead->id);
+                    }
+
+                    return response()->json(['status' => 0, 'message' => 'Status updated Successfully!']);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Sales Person not Tagged']);
                 }
-
-                return response()->json(['status' => 0, 'message' => 'Status updated Successfully!']);
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Invalid Lead']);
             }
-            return response()->json(['status' => 1, 'message' => 'Invalid Lead']);
-
         }
     }
 
