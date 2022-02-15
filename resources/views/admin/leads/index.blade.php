@@ -811,7 +811,7 @@
 
                         @if (session('role_id') == 1 || in_array(678, session('permissions')))
                     {
-                        text: 'Update Bulk Status',
+                        text: 'Update Status',
                         className: 'btn btn-primary update_status',
                         enabled: false,
                         action: function (e, dt, node, config) {
@@ -1443,6 +1443,10 @@
                             $('#add_bulk_status_modal').modal('hide');
                             UnblockPagePermanently();
                             new_status = null;
+                            selected_rows = [];
+
+                            table.rows().deselect();
+                            table.button('.update_status').disable();
                             if (data.status == 1) {
                                 toastr.success(data.success, 'Success!', {
                                     positionClass: 'toast-bottom-center',
