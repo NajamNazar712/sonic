@@ -38,9 +38,9 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shipper as $shippers)
-                                    <option value="{{$shippers->id}}">{{$shippers->name}}</option>
+                            <select name="search_rider" id="search_rider" class="form-control select2">
+                                @foreach($riders as $rider)
+                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -174,8 +174,8 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Shipper',
+            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Rider',
                 width:'100%',
                 allowClear:true
             });

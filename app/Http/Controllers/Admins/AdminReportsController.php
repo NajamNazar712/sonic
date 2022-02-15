@@ -9994,9 +9994,9 @@ class AdminReportsController extends Controller
     public function pickup_history_cn_wise_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),506);
         $cities = DB::connection('reports')->table('cities')->get(['id','name']);
-        $shipper = DB::connection('reports')->table('users')->get(['id','name']);
-        $hubs = DB::connection('reports')->table('cities')->select(['id','name'])->where('hub',1)->get();
-        return view('admin.reports.pickup_history_cn_wise')->with(['cities'=>$cities,'hubs'=>$hubs,'shipper'=>$shipper]);
+        $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+        $hubs = DB::connection('reports')->table('cities')->where('hub','=',1)->select(['id','name'])->get();
+        return view('admin.reports.pickup_history_cn_wise')->with(['cities'=>$cities,'hubs'=>$hubs,'riders'=>$riders]);
     }
 
     public function pickup_history_cn_wise_list(Request $request)
@@ -10065,8 +10065,8 @@ class AdminReportsController extends Controller
         if ($tracking = $request->get('search_tracking_no')) {
             $shipments->where('shipments.tracking_number', '=', $tracking);
         }
-        if ($shipper = $request->get('search_shipper')) {
-            $shipments->where('u.id', '=', $shipper);
+        if ($rider = $request->get('search_rider')) {
+            $shipments->where('cr.id', '=', $rider);
         }
         if ($origin = $request->get('search_origin')) {
             $shipments->where('oc.id', '=', $origin);
