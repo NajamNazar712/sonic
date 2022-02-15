@@ -20,6 +20,7 @@ Route::name('api.')->group(function () {
 	Route::post('reset_pin', 'APIController@bolt_reset_pin')->name('reset_pin');
 	Route::post('store_device_token', 'APIController@store_device_token')->name('store_device_token');
 	Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
+	Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
 
 	Route::middleware('APIToken')->group(function() {
 		Route::post('verify', 'APIController@verify')->name('verify');
@@ -226,6 +227,10 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'Rider\RiderAPIController@get_profile')->name('index');
                 Route::get('check', 'Rider\RiderAPIController@check_profile')->name('check');
                 Route::post('update', 'Rider\RiderAPIController@update_profile')->name('update');
+
+                Route::get('index_v2', 'Rider\RiderAPIController@get_profile_v2')->name('index_v2');
+                Route::get('check_v2', 'Rider\RiderAPIController@check_profile_v2')->name('check_v2');
+                Route::post('update_v2', 'Rider\RiderAPIController@update_profile_v2')->name('update_v2');
             });
 
             Route::post('payslip', 'Rider\RiderAPIController@rider_payslip')->name('payslip');
@@ -248,7 +253,8 @@ Route::name('api.')->group(function () {
         Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::get('slider', 'AdminAPIController@admin_ticker_images')->name('slider');
-        Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');        Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
+        Route::post('login_v3', 'AdminAPIController@login_v3')->name('login_v3');
+        Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
         Route::post('forget_pin', 'AdminAPIController@forget_pin')->name('forget_pin');
         Route::post('reset_pin', 'AdminAPIController@reset_pin')->name('reset_pin');
         Route::get('check_pin', 'AdminAPIController@check_pin')->name('check_pin');
@@ -320,6 +326,10 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'AdminAPIController@get_profile')->name('index');
                 Route::get('check', 'AdminAPIController@check_profile')->name('check');
                 Route::post('update', 'AdminAPIController@update_profile')->name('update');
+
+                Route::get('index_v2', 'AdminAPIController@get_profile_v2')->name('index_v2');
+                Route::get('check_v2', 'AdminAPIController@check_profile_v2')->name('check_v2');
+                Route::post('update_v2', 'AdminAPIController@update_profile_v2')->name('update_v2');
             });
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');
             Route::get('employee_id', 'AdminAPIController@get_employee_id')->name('employee_id');
@@ -339,6 +349,7 @@ Route::name('api.')->group(function () {
 
     Route::prefix('retail_user')->name('retail_user.')->group(function() {
         Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
+        Route::post('login_v3', 'Retail\RetailAPIController@login')->name('login_v3');
         Route::get('slider', 'Retail\RetailAPIController@retail_ticker_images')->name('slider');
 
         Route::middleware('RetailUserAPIToken')->group(function () {

@@ -108,6 +108,9 @@ class Kernel extends ConsoleKernel
 
         '\App\Console\Commands\EmployeeDocumentsUpdateNotification',
         'App\Console\Commands\AutoEmailDwsArrival',
+        
+        'App\Console\Commands\RCPSMSToConsigneeReattempt',
+        'App\Console\Commands\CRMCount',
 //        '\App\Console\Commands\ReattemptRatioCalculate',
     ];
 
@@ -178,6 +181,7 @@ class Kernel extends ConsoleKernel
         }
 
         $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
+        $schedule->command('telenor:shipmentStatus')->dailyAt('08:00')->runInBackground();
 
 
         $schedule->command('email:activitytraillog')->dailyAt('2:00')->runInBackground();
@@ -195,6 +199,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('month:averagerm')->dailyAt('07:30')->runInBackground();
         $schedule->command('month:averageindividual')->dailyAt('07:30')->runInBackground();
+        $schedule->command('auto:endSession')->dailyAt('22:00')->runInBackground();
 
 
         $schedule->command('reimbursement_invoice:generate')->monthlyOn(1, '00:30')->runInBackground();
@@ -373,7 +378,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('employee_directory:documents_update')->dailyAt('12:00')->runInBackground();
 
         $schedule->command('email:dwsarrival')->dailyAt('17:00')->runInBackground();
+        $schedule->command('crm:count')->dailyAt('17:30')->runInBackground();
 //        $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
+        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt('00:01')->runInBackground();
 
     }
     /**

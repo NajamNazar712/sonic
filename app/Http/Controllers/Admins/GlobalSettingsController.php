@@ -106,6 +106,7 @@ use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Admin\SalesDesignationJourney;
 use App\Http\Models\Admin\SalesDesignation;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use http\Env\Response;
@@ -845,6 +846,39 @@ class GlobalSettingsController extends Controller
         $start->setting_value = $request->debriefing_report_day_cut_off_time;
 
         $start->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function debriefing_break_time_setting_index()
+    {
+        $settings = GlobalSettings::where('type', 'debriefing_break_time_setting')->first();
+
+        if ($settings) {
+            $break_timings = floatval($settings->text);
+        }
+        else{
+            $break_timings = 0;
+        }
+
+        return view('admin.settings.debriefing_total_time_setting',compact('break_timings'));
+    }
+
+    public function debriefing_break_time_setting_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'debriefing_break_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'debriefing_break_time_setting';
+        }
+
+        $settings->text = $request->break_timings;
+
+        $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
@@ -5487,28 +5521,28 @@ public function sales_incentive()
     }
 
     public function lead_tagging_index(){
-        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        
+        ActivityTrailController::createActivityTrailLog(Auth::id(),493);
         $agents = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         // $agents = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
         $services = DB::table('service_list')->where('status',1)->get();
         $cities = City::where('status',1)->get();
-        if (session('role_id') == 1){
-            $zones = Zone::where('zones.status',1)->where('zones.business_category_id',1)->select('zones.id as id','zones.name as name')->get();
-        }else{
-            $zones = Zone::join('lead_zones as lz','lz.zone_id','=','zones.id')
-                    ->where('zones.status',1)->where('zones.business_category_id',1)->where('lz.admin_id',Auth::id())
-                    ->select('zones.id as id','zones.name as name')->get();
-        }
+        $territories = Territory::all();
+        $zones = Zone::where('zones.status',1)->where('zones.business_category_id',1)->select('zones.id as id','zones.name as name')->get();
 
-        return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities , 'services' => $services , 'zones' => $zones]);
+        return view('admin.settings.lead_management.auto_tagging')->with(['agents' => $agents , 'cities' => $cities , 'services' => $services , 'zones' => $zones , 'territories' => $territories ]);
     }
 
-    public function lead_tagging_list(){
+    public function lead_tagging_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 494);
+        }
         $roles = LeadTagging::join('admins as ad', 'ad.id', '=', 'lead_taggings.sale_person_id')
-                 ->join('cities as c','c.id','lead_taggings.city_id')   
-                 ->join('zones as z','z.id','lead_taggings.zone_id')   
-                 ->join('service_list as s','s.id','lead_taggings.service_id')   
-        ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 'z.name as zone', 's.name as service','lead_taggings.status');
+        ->leftjoin('zones as z','z.id','lead_taggings.zone_id')   
+        ->join('service_list as s','s.id','lead_taggings.service_id')   
+        ->leftjoin('territories as t','t.id','lead_taggings.territory_id')   
+        ->leftjoin('cities as c','c.id','lead_taggings.city_id')   
+        ->select('lead_taggings.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name', 'z.name as zone', 's.name as service','lead_taggings.status');
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
@@ -5544,27 +5578,76 @@ public function sales_incentive()
                 return 'Disable';
             }
             
+        })->editColumn('zone', function($roles) {
+            if($roles->zone == '' || $roles->zone == null){
+                return 'All Zones';
+            }else{
+                return $roles->zone;
+            }
+            
+        })->editColumn('city_name', function($roles) {
+            if($roles->city_name == '' || $roles->city_name == null){
+                return 'All Cities';
+            }else{
+                return $roles->city_name;
+            }
+            
         });
 
     return $datatables->make(true);
     }
 
     public function lead_tagging_submit(Request $request){
-
-        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
-
-        if(!$check_leads->exists()){
-            $lead_tagging = new LeadTagging;
-            $lead_tagging->sale_person_id = $request->agent_id;
-            $lead_tagging->zone_id = $request->zone_id;
-            $lead_tagging->city_id = $request->city_id;
-            $lead_tagging->service_id = $request->service_id;
-            $lead_tagging->save();
-
-            return redirect()->back()->with('success', 'Lead Agent Added!');
-
+        if($request->zone_id == 0){
+            $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
+            // $check_leads = LeadTagging::where('zone_id',$request->zone_id)->where('city_id', $request->city_id)->where('territory_id', $request->territory_id)->where('service_id', $request->service_id)->where('sale_person_id',$request->agent_id)->where('status', 1)->orWhere(function ($query) use ($request){
+            //     $query->where('zone_id', '=', '0')
+            //     ->where('service_id', $request->service_id)
+            //     ->where('sale_person_id',$request->agent_id)
+            //     ->where('status', 1);
+            // })->orWhere(function ($query) use ($request){
+            //     $query->where('zone_id', '=', $request->zone_id)
+            //     ->where('city_id', '=', '0')
+            //     ->where('sale_person_id',$request->agent_id)
+            //     ->where('service_id', $request->service_id)
+            //     ->where('status', 1);
+            // });
+            if(!$check_leads->exists()){
+                $lead_tagging = new LeadTagging;
+                $lead_tagging->sale_person_id = $request->agent_id;
+                $lead_tagging->zone_id = $request->zone_id;
+                if($request->city_id){
+                    $lead_tagging->city_id = $request->city_id;
+                }
+                if($request->territory_id){
+                    $lead_tagging->territory_id = $request->territory_id;
+                }
+                $lead_tagging->service_id = $request->service_id;
+                $lead_tagging->save();
+    
+                return redirect()->back()->with('success', 'Lead Agent Added!');
+    
+            }else{
+                return redirect()->back()->with('error', 'Lead Agent already exist');
+            }
         }else{
-            return redirect()->back()->with('error', 'Lead Agent already exist');
+
+            $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
+    
+            if(!$check_leads->exists()){
+                $lead_tagging = new LeadTagging;
+                $lead_tagging->sale_person_id = $request->agent_id;
+                $lead_tagging->zone_id = $request->zone_id;
+                $lead_tagging->city_id = $request->city_id;
+                $lead_tagging->service_id = $request->service_id;
+                $lead_tagging->territory_id = $request->territory_id;
+                $lead_tagging->save();
+    
+                return redirect()->back()->with('success', 'Lead Agent Added!');
+    
+            }else{
+                return redirect()->back()->with('error', 'Lead Agent already exist');
+            }
         }
     }
 
@@ -5576,20 +5659,16 @@ public function sales_incentive()
         $zone_id = $lead_tagging->zone_id;
         $service_id = $lead_tagging->service_id;
         $lead_tagging_id = $lead_tagging->id;
-        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'zone_id'=> $zone_id ,'service_id'=> $service_id ,'lead_tagging_id'=> $lead_tagging_id]);
+        $territory_id = $lead_tagging->territory_id;
+
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'zone_id'=> $zone_id ,'service_id'=> $service_id ,'lead_tagging_id'=> $lead_tagging_id ,'territory_id'=> $territory_id]);
 
     }
-
-    // public function lead_tagging_delete(Request $request){
-    //     CrmAutoTagUser::find($request->id)->delete();
-    //     return response()->json(['status' => 1, 'success' => 'Tagged Agent Deleted']);
-
-    // }
 
 
     public function lead_tagging_update(Request $request){
         // dd($request->all());
-        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id);
+        $check_leads = LeadTagging::where('city_id',$request->city_id)->where('sale_person_id',$request->agent_id)->where('service_id',$request->service_id)->where('territory_id',$request->territory_id);
 
         if(!$check_leads->exists()){
             $lead_tagging = LeadTagging::find($request->lead_tagging_id);
@@ -5597,6 +5676,7 @@ public function sales_incentive()
             $lead_tagging->zone_id = $request->zone_id;
             $lead_tagging->city_id = $request->city_id;
             $lead_tagging->service_id = $request->service_id;
+            $lead_tagging->territory_id = $request->territory_id;
             $lead_tagging->save();
             return redirect()->back()->with('success', 'Lead Agent Updated!');
         }else{
@@ -5623,7 +5703,7 @@ public function sales_incentive()
 
 
     public function lead_zones_index(){
-        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),495);
         $admins = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
 
         // $admins = Admin::select('id', 'name')->whereIn('role_id', [9,10,11,33,55])->where('status',1)->get();//37,28 role
@@ -5631,7 +5711,10 @@ public function sales_incentive()
         return view('admin.settings.lead_management.zone_tagging')->with(['admins' => $admins , 'zones' => $zones]);
     }
 
-    public function lead_zones_list(){
+    public function lead_zones_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 496);
+        }
         $roles = LeadZone::join('admins as ad', 'ad.id', '=', 'lead_zones.admin_id')
                  ->join('zones as z','z.id','lead_zones.zone_id')   
         ->select('lead_zones.id', 'ad.name as agent_name', 'z.name as zone','lead_zones.status');
@@ -5738,11 +5821,14 @@ public function sales_incentive()
 
     
     public function lead_notification_index(){
-        // ActivityTrailController::createActivityTrailLog(Auth::id(),474);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),497);
         return view('admin.settings.lead_management.notification');
     }
 
-    public function lead_notification_list(){
+    public function lead_notification_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 498);
+        }
         $notifications = LeadNotification::join('admins as a', 'lead_notifications.updated_by', '=', 'a.id')
         ->select('lead_notifications.id', 'lead_notifications.name', 'lead_notifications.type_id as type', 'lead_notifications.updated_at', 'a.name as updated_by', 'lead_notifications.status');
 
@@ -5838,6 +5924,7 @@ public function sales_incentive()
 
 
     public function lead_notification_update(Request $request){
+
         $lead_notification = LeadNotification::find($request->lead_notification_id);
 
         $lead_notification->subject = $request->subject;
@@ -5845,25 +5932,27 @@ public function sales_incentive()
 
         $lead_notification->save();
         if($request->lead_notification_id == 1){
-
-            $image_ids = explode(',', $request->selected_ids);
-            foreach ($image_ids as $id){
-    
-                $file_name = 'notification_image_'.$id;
-                $image = $request->file($file_name);
-    
-                $extension = $image->getClientOriginalExtension();
-                $random = rand(1000, 100000);
-                $now = Carbon::now();
-                $time = $now->year . '_' . $now->month;
-                $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-                $image->move(public_path('uploads/notification_attachments'), $generated_image_name);
-                $notification_image = new LeadNotificationAttachment();
-                $notification_image->notification_id = $lead_notification->id;
-                $notification_image->added_by = Auth::id();
-                $notification_image->attachment = $generated_image_name;
-                $notification_image->save();
+            if($request->selected_ids){
+                $image_ids = explode(',', $request->selected_ids);
+                foreach ($image_ids as $id){
+        
+                    $file_name = 'notification_image_'.$id;
+                    $image = $request->file($file_name);
+        
+                    $extension = $image->getClientOriginalExtension();
+                    $random = rand(1000, 100000);
+                    $now = Carbon::now();
+                    $time = $now->year . '_' . $now->month;
+                    $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+                    $image->move(public_path('uploads/notification_attachments'), $generated_image_name);
+                    $notification_image = new LeadNotificationAttachment();
+                    $notification_image->notification_id = $lead_notification->id;
+                    $notification_image->added_by = Auth::id();
+                    $notification_image->attachment = $generated_image_name;
+                    $notification_image->save();
+                }
             }
+
         }
         return redirect()->back()->with('success', 'Notification Updated!');
        
@@ -5970,6 +6059,21 @@ public function sales_incentive()
 
         }
 
+    }
+
+    public function rcp_sms_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),508);
+        $setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
+        return view('admin.settings.return.rcp_sms',compact('setting'));
+    }
+
+    public function rcp_sms_update(Request $request){
+        $setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
+        $setting->setting_value = $request->toggle_check;
+        $setting->text = $request->sms_count;
+        $setting->save();
+
+        return redirect()->back()->with('success','Setting Updated');
     }
 
 }

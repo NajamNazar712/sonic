@@ -120,6 +120,22 @@
           }, 250);
         }
 
+        function check_profile() {
+            $.ajax({
+                url: '{{ route('admin.update_one_time_profile.check') }}',
+                method: 'GET'
+            }).done(function (data) {
+                    if (data.status == 1) {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    } else if(data.status == 0) {
+                        $('#EditOneTimeProfileModal').modal('show');
+                    }
+                });
+        }
+
         function locationSuccess(position) {
           $.ajax({
               url: '{{ route('admin.save_coordinates') }}',
@@ -135,12 +151,20 @@
 
           $('#LocationDeniedModal').modal('hide');
           swal.close();
+          @if(!Illuminate\Support\Facades\Route::is('admin.update_one_time_profile.index'))
+          check_profile();
+          @endif
         }
 
         function locationFail() {
           swal.close();
           $('#LocationDeniedModal').modal('show');
         }
+
+        $('#EditOneTimeProfileModal form button').bind('click', function() {
+            $('#EditOneTimeProfileModal').modal('hide');
+            window.location.href = "{{route("admin.update_one_time_profile.index")}}";
+        });
 
         $('#LocationDeniedModal form button').bind('click', function() {
             getLocation();

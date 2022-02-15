@@ -1002,9 +1002,12 @@ class AdminTrackingController extends Controller
                                         }
                                     }
                                     if ($rider_delivery->audio_path != null) {
-                                        $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                        $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
                                         if ($exists) {
                                             $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_delivery->audio_path)) . '"><i class="la la-file-sound-o"></i></button>';
+                                        }else {
+                                            $sound = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
+                                            $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $sound . '" target="_blank"><i class="la la-file-sound-o"></i></button>';
                                         }
                                     }
                                     if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
@@ -1032,6 +1035,9 @@ class AdminTrackingController extends Controller
                                         $exists = Storage::disk('public')->exists($rider_return_deliveries->audio_path);
                                         if ($exists) {
                                             $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . asset(Storage::url($rider_return_deliveries->audio_path)) . '"><i class="la la-file-sound-o"></i></button>';
+                                        }else {
+                                            $sound = Storage::disk('s3')->temporaryUrl($rider_return_deliveries->audio_path, now()->addMinutes(5));
+                                            $journey_details['image_audio_location'] .= '| <button type="button" class="btn btn-sm btn-outline-info align-middle picture p-0" data-link="' . $sound . '" target="_blank"><i class="la la-file-sound-o"></i></button>';
                                         }
                                     }
                                     if ($rider_return_deliveries->actual_location_latitude != null && $rider_return_deliveries->actual_location_longitude != null) {
