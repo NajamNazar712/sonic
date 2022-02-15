@@ -212,8 +212,8 @@ class RetailShipmentBookController extends Controller
         }
         $same_day_timing_id = NULL;
 
-        $request->weight_charges = str_replace(',', '', $request->input('weight_charges'));
-        $request->fuel_surcharge = str_replace(',', '', $request->input('fuel_surcharge'));
+        $request->weight_charges = (float)str_replace(',', '', $request->input('weight_charges'));
+        $request->fuel_surcharge = (float)str_replace(',', '', $request->input('fuel_surcharge'));
 
         $city = City::find($pickup_city_id);
         $gst = $city->zone->gst;

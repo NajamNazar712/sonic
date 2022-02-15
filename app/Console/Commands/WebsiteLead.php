@@ -65,10 +65,10 @@ class WebsiteLead extends Command
         if($response->status == 0){
             $leads = $response->leads;
             foreach ($leads as $lead) {
-                $max_lead_id = Lead::max('lead_id');
-                $max_lead_id = $max_lead_id + 1;
+                // $max_lead_id = Lead::max('lead_id');
+                // $max_lead_id = $max_lead_id + 1;
                 $new_lead = new Lead();
-                $new_lead->lead_id = $max_lead_id;
+                // $new_lead->lead_id = $max_lead_id;
                 $new_lead->contact_person = $lead->full_name;
                 $new_lead->city_id = $lead->city_id;
                 $new_lead->territory_id = $lead->territory_id;

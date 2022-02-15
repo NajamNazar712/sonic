@@ -7,6 +7,7 @@ use App\Http\Models\Admin\Lead\PamLeadItem;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 
 class WebsitePAMLead extends Command
 {
@@ -64,7 +65,24 @@ class WebsitePAMLead extends Command
                 $new_lead->name = $lead->name;
                 $new_lead->phone = $lead->phone;
                 $new_lead->video_link = $lead->video_link;
-                $new_lead->images = $lead->images;
+                if($lead->images != null)
+                {
+                    $image_path = explode('|',$lead->images_path);
+                    $images = explode('|',$lead->images);
+                    foreach ($images as $key => $image)
+                    {
+                        if ($environment == 'production') {
+                            Storage::disk('s3')->put($image_path[$key], hex2bin($image));
+                        }
+                        else{
+                            Storage::disk('public')->put($image_path[$key], hex2bin($image));
+                        }
+                    }
+                    $new_lead->images = $lead->images_path;
+                }
+                else {
+                    $new_lead->images = null;
+                }
                 $new_lead->origin_id = $lead->origin_id;
                 $new_lead->destination_id = $lead->destination_id;
                 $new_lead->location_type = $lead->location_type;
