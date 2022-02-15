@@ -1454,7 +1454,6 @@ class AdminPettyCashController extends Controller
                         <tbody>
                           <tr>
                             <td class="color primary"><strong>S. No.</strong></td>
-                            <td class="color primary"><strong>Creation Date</strong></td>
                             <td class="color primary"><strong>Chart of Account</strong></td>
                             <td class="color primary"><strong>Account Title</strong></td>
                             <td class="color primary"><strong>Details</strong></td>
@@ -1471,6 +1470,7 @@ class AdminPettyCashController extends Controller
         ';
 
 
+            $petty_cash_statement = $petty_cash_statement->first();
             foreach ($statement_details as $detail) {
                 $total_statements++;
                 $detain_amount = 0;
@@ -1492,10 +1492,16 @@ class AdminPettyCashController extends Controller
                 {
                     $zone_name = $detail->zone->name;
                 }
+                else{
+                    $zone_name = $petty_cash_statement->zone->name;
+                }
 
                 if($detail->hub_id != null)
                 {
                     $hub_name = $detail->location->name;
+                }
+                else{
+                    $hub_name = $petty_cash_statement->hub->name;
                 }
 
                 if($detail->city_id != null)
@@ -1510,7 +1516,6 @@ class AdminPettyCashController extends Controller
                 $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_statements . '</td>
-                            <td>' . Carbon::parse($detail->date)->toDateString() . '</td>
                             <td>' . $detail->heads->name . '</td>
                             <td>' . $detail->titles->name . '</td>
                             <td>' . $detail->expense_details . '</td>
@@ -1534,7 +1539,6 @@ class AdminPettyCashController extends Controller
                         </tbody>
                       </table>
         ';
-            $petty_cash_statement = $petty_cash_statement->first();
             $hub_name = "";
 
             $main_details = '
@@ -1576,7 +1580,7 @@ class AdminPettyCashController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Period</strong></td>
-                            <td>' . Carbon::parse($petty_cash_statement->from)->toDateString() . ' -- ' . Carbon::parse($petty_cash_statement->to)->toDateString() . '</td>
+                            <td>' . Carbon::parse($petty_cash_statement->date)->toDateString() .'</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Total Amount</strong></td>

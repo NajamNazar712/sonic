@@ -320,6 +320,35 @@
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 	<script>
+		function printStatement(id) {
+			$.ajax({
+				url: '{!! route('admin.petty_cash.statements.print') !!}',
+				method: 'POST',
+				data: {
+					'id': id,
+					'_token': '{{ csrf_token() }}'
+				}
+			})
+					.done(function(data) {
+						var tab = window.open('', '_blank');
+
+						if(!tab) {
+							swal({
+								title: 'Popup Blocker Enabled!',
+								text: 'Please add this site to your exception list.',
+								icon: 'error',
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
+						}
+						else {
+							tab.document.write(data);
+							tab.document.close();
+							tab.focus();
+						}
+					});
+		}
+
 		$(document).ready(function() {
 
 			
@@ -352,6 +381,7 @@
 					}
 				});
 			}
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
