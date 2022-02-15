@@ -443,14 +443,16 @@
                     <form id="add_bulk_status_form" class="form-horizontal mb-1 justify-content-center"
                           novalidate="novalidate">
                         <div class="form-group">
-                            <select name="update_lead_bulk_status" id="update_bulk_lead_status" class="form-control select2">
+                            <select name="update_lead_bulk_status" id="update_bulk_lead_status"
+                                    class="form-control select2">
                                 @foreach($lead_statuses as $lead_status)
                                     <option value="{{ $lead_status->id }}"> {{ $lead_status->name }} </option>
                                 @endforeach
                             </select>
                         </div>
                         <div id="div_lead_status_rejected1" class="form-group d-none">
-                            <select name="lead_status_rejected1" id="lead_status_rejected1" class="form-control select2">
+                            <select name="lead_status_rejected1" id="lead_status_rejected1"
+                                    class="form-control select2">
                                 <option value="1"> Prohibited Items</option>
                                 <option value="2"> Wrong Contact Details</option>
                                 <option value="3"> Duplicate</option>
@@ -820,7 +822,7 @@
                             }
                         }
                     },
-                    @endif
+                        @endif
                         @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
                         text: 'Tag',
