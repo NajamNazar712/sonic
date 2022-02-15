@@ -332,7 +332,7 @@
                 if(rider_id == ''){
                     toastr.error("Select Rider", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }else{
-                    $('button.datatable_excel_btn').removeClass('d-none');
+                    $('.datatable_excel_btn').removeClass('d-none');
                     table.draw(true);
                 }
 
