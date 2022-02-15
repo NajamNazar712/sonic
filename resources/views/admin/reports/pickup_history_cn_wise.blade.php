@@ -15,7 +15,11 @@
 
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                            <select name="search_rider" id="search_rider" class="form-control select2">
+                                @foreach($riders as $rider)
+                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
@@ -36,16 +40,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_rider" id="search_rider" class="form-control select2">
-                                @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
+                    <div class="col-6">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -55,7 +50,7 @@
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{Carbon\Carbon::now()->subDays(10)}}">
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-6">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -159,11 +154,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_tracking_no').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Origin',
                 width:'100%',
@@ -225,9 +215,18 @@
                     blockPagePermanently();
                     body = [];
                     var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
+                    if(params !== undefined){
+                        params.start = 0;
+                        params.length = -1;
+                        params.excel = true;
+                        params['_token'] = "{{csrf_token()}}";
+                    }
+                    else{
+                        params = {
+                            'excel':true,
+                            '_token': "{{csrf_token()}}",
+                        };
+                    }
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.pickup_history_cn_wise.list') }}',
                         method: 'POST',
@@ -292,6 +291,7 @@
                 language: {
                     processing: data_table_loader
                 },
+                deferLoading: 0,
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.pickup_history_cn_wise.list') }}',
@@ -300,7 +300,6 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: function (d) {
-                        d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
