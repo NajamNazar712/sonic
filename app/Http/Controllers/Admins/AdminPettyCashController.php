@@ -1439,6 +1439,7 @@ class AdminPettyCashController extends Controller
                         background: #c8c8c8;
                         border-radius: 25px;
                       }
+                  
                     </style>
                   </head>
                   <body>
@@ -1450,7 +1451,7 @@ class AdminPettyCashController extends Controller
             $statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $statement_id)->where('status', '!=', 1)->get();
 
             $petty_statement_details = '
-                      <table class="table table-sm table-bordered border">
+                      <table class="table table-sm table-bordered border" style=" display: table-row-group;page-break-inside:avoid; page-break-after:auto;">
                         <tbody>
                           <tr>
                             <td class="color primary"><strong>S. No.</strong></td>
@@ -1522,7 +1523,7 @@ class AdminPettyCashController extends Controller
                             <td>' . $detail->employee_name . '</td>
                             <td>' . $detail->employee_designation . '</td>
                             <td>Rs ' . number_format($detain_amount) . '</td>
-                            <td style="" >' . $detail->remarks . '</td>
+                            <td><p style="width:70px;overflow-wrap: break-word; display: inline-block">' . $detail->remarks . '</p></td>
                 ';
 
                 $shipment_details_row_start .= '
