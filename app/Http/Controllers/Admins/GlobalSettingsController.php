@@ -6043,4 +6043,43 @@ public function sales_incentive()
         return redirect()->back()->with('success','Setting Updated');
     }
 
+    public function sales_user_restriction_index()
+    {
+        $user_ids = array();
+
+        $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $user_ids = array_map('intval', explode(',', $settings->text));
+        }
+
+        $sale_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
+
+        return view('admin.settings.sales.sale_person_restriction_bypass')->with(['sale_persons' => $sale_persons, 'user_ids' => $user_ids]);
+    }
+
+    public function sales_user_restriction_store(Request $request)
+    {
+        if ($request->has('users')) {
+            $roles = implode(',', $request->users);
+            $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+
+                $settings->type = 'sales_user_restriction_bypass';
+                $settings->setting_value = 0;
+
+            }
+            $settings->text = $roles;
+            $settings->save();
+        } else {
+            GlobalSettings::where('type', 'sales_user_restriction_bypass')->delete();
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }

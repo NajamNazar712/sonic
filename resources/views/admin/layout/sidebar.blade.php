@@ -31,10 +31,10 @@
                                     @if (session('role_id') == 1 || in_array(15, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.accounts.block')}}">Blocked</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || session('role_id') == 4 || in_array(242, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || in_array(242, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.accounts.merged_account.index')}}">Merged</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || session('role_id') == 4 || in_array(428, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || in_array(428, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.retail.accounts.index')}}">Retail Accounts</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(470, session('permissions')))
@@ -1733,6 +1733,10 @@
 
                                 @if (session('role_id') == 1 || in_array(632, session('permissions')))
                                  <li class=" nav-item"><a href="{{route('admin.settings.sales.incentive.index')}}"><span class="menu-title">Incentive Settings</span></a> </li>
+                                @endif
+
+                                @if (session('role_id') == 1 || in_array(681, session('permissions')))
+                                    <li class=" nav-item"><a href="{{route('admin.settings.sales.user_restriction.index')}}"><span class="menu-title">User Restriction</span></a> </li>
                                 @endif
                             </ul>
                         </li>

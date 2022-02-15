@@ -336,7 +336,7 @@ class AdminDashboardController extends Controller
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
 
-        if (session('department_id') == 7 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('department_id') == 7 && (in_array(session('id'), session('sale_users_bypass')))) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         }
         else {
@@ -1928,7 +1928,7 @@ class AdminDashboardController extends Controller
 
 
             if(session('department_id') == 7){
-                if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
+                if($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))){
                     return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
                 else{
@@ -2148,7 +2148,7 @@ class AdminDashboardController extends Controller
                 }
             }
             if(session('department_id') == 7){
-                if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
+                if($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))){
                     return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
                 else{
@@ -2297,7 +2297,7 @@ class AdminDashboardController extends Controller
             }
             $existing = 1;
             if(session('department_id') == 7){
-                if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
+                if($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))){
                     return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
                 else{
@@ -8391,7 +8391,7 @@ class AdminDashboardController extends Controller
         }
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(in_array(session('id'), session('sale_users_bypass')) ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -8561,13 +8561,13 @@ class AdminDashboardController extends Controller
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
-                    if($result->status == 3 && (session('role_id') == 1 || session('role_id') == 4))
+                    if($result->status == 3 && (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass'))))
                     {
                         $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                     }
                     if($result->account_type_id == 1){
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
-                            if($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || session('role_id') == 4 || session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 44) {
+                            if($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || session('role_id') == 2 || session('role_id') == 7 || in_array(session('id'), session('sale_users_bypass'))4) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         }
@@ -8654,7 +8654,7 @@ class AdminDashboardController extends Controller
 
                     $merged = MergedSisterAccount::where('user_id', $result->id);
                     if(!$merged->exists()){
-                        if(session('role_id') == 1 || session('role_id') == 4 || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions'))))
+                        if(session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions'))))
                         {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
@@ -8762,7 +8762,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(in_array(session('id'), session('sale_users_bypass')) ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -8925,7 +8925,7 @@ class AdminDashboardController extends Controller
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
-                if(session('role_id') == 1 || session('role_id') == 4)
+                if(session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')))
                 {
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                 }
@@ -8936,7 +8936,7 @@ class AdminDashboardController extends Controller
                 if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
                     if($result->account_type_id == 1){
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
-                            if($result->status != 2 && ($result->rate_status == 0 || $result->rate_status == 2 || $result->status == 5 || session('role_id') == 1 || session('role_id') == 4 || session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 44)) {
+                            if($result->status != 2 && ($result->rate_status == 0 || $result->rate_status == 2 || $result->status == 5 || session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || session('role_id') == 2 || session('role_id') == 7 || in_array(session('id'), session('sale_users_bypass'))4)) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         } else {
@@ -9008,7 +9008,7 @@ class AdminDashboardController extends Controller
                 $merged = MergedSisterAccount::where('user_id', $result->id);
                 if($sale_check != null) {
                     if (!$merged->exists()) {
-                        if (session('role_id') == 1 || session('role_id') == 4 || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions')))) {
+                        if (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions')))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
                     }
@@ -9095,7 +9095,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(in_array(session('id'), session('sale_users_bypass')) ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -10507,7 +10507,7 @@ class AdminDashboardController extends Controller
             })
             ->addColumn("action", function ($users) {
                 $dropdown = '';
-                if (session('role_id') == 1 || session('role_id') == 4 || in_array(242, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || in_array(242, session('permissions'))) {
                     $dropdown .= '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -11493,7 +11493,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75){
+            if(in_array(session('id'), session('sale_users_bypass'))){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }

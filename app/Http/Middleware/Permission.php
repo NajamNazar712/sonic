@@ -903,7 +903,7 @@ class Permission
             'settings.shippers_origin_change.index' => 667,
             'settings.shippers_return_address.index' => 668,
 
-
+            'settings.sales.user_restriction.index' => 681,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,

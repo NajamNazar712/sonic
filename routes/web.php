@@ -2804,6 +2804,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('details', 'Admins\AdminSalesController@key_accounts_dashboard_details')->name('dashboard.details');
             });
 
+            Route::prefix('user_restriction')->name('user_restriction.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@sales_user_restriction_index')->name('index');
+                Route::post('store', 'Admins\GlobalSettingsController@sales_user_restriction_store')->name('store');
+            });
+
 
             Route::prefix('projection')->name('projection.')->group(function () {
                 Route::prefix('percentage')->name('percentage.')->group(function () {

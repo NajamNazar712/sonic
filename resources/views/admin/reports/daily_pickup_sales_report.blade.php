@@ -20,7 +20,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        @if(session('role_id') == 4 )
+                        @if(in_array(session('id'), session('sale_users_bypass')) )
                         <div class="form-group ml-1">
                             <select name="sales_person" class="select2" id="sales_person">
                                 @foreach($sales_persons as $person)
@@ -153,7 +153,7 @@
                 var city = $('#city').val();
                 var shipping_modes = $('#shipping_mode').val();
                 var sales = '';
-                @if(session('role_id') == 4)
+                @if(in_array(session('id'), session('sale_users_bypass')))
                 sales = $('#sales_person').val();
                 @endif
                 $.ajax({
