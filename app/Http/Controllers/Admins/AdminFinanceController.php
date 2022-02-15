@@ -729,10 +729,12 @@ class AdminFinanceController extends Controller
 
                     if ($validate->fails()) {
                         $errors['Row #' . $row_id] = $validate->errors()->all();
-                    }
-                    else if(StationDepositNote::where('id',$row['sdn_id'])->whereIn('hub_id', session('hubs'))->doesntExist())
-                    {
+                    } else if (StationDepositNote::where('id', $row['sdn_id'])->whereIn('hub_id', session('hubs'))->doesntExist()) {
                         $errors['Row #' . $row_id] = array("Invalid SDN Number");
+                    }
+                    else if (StationDepositNote::where('id', $row['sdn_id'])->where('status', 2)->exists())
+                    {
+                        $errors['Row #' . $row_id] = array("SDN Already Reconciled");
                     }
                     else if(in_array($row['sdn_id'],$sdn_array))
                     {
