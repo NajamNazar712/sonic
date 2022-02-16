@@ -343,7 +343,7 @@
                         @csrf
                         <div class="container">
                             <div class="form-group">
-                                <label>Follow Up After <span class="text-warning">(hh:mm)</span></label>
+                                <label><b>Follow Up After <span class="text-warning">(hh:mm)</span></b></label>
                                 <div class="input-group">
                                     <input type="text" name="follow_up" class="form-control rounded-right follow_up" id="follow_up"  placeholder="Follow Up Time*" data-rule-required="true" data-msg-required="Follow Up Time is required" >
                                 </div>
