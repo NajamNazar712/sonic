@@ -5011,7 +5011,7 @@ class DeliveryController extends Controller
         if ($sdn->sdn_amount >= $total_amount) {
             $sdn->sdn_deposit_amount = $total_amount;
         } else {
-            return redirect()->back()->with(['status' => 0, 'error' => 'Deposit Amount cannot be less than DNCC Amount!']);
+            return redirect()->back()->with(['status' => 0, 'error' => 'Deposit Amount cannot be greater than DNCC Amount!']);
         }
         foreach ($deposit_rows as $row) {
 
@@ -5021,6 +5021,7 @@ class DeliveryController extends Controller
             $deposit_details->deposit_date = $request->date[$row];
             $deposit_details->bank_id = $request->bank[$row];
             $deposit_details->amount = $request->amount[$row];
+            $deposit_details->uploaded_by = Auth::id();
             $image = $request->file($file_name);
 //            $extension = $image->getClientOriginalExtension();
             $extension = 'png';
@@ -6886,10 +6887,11 @@ class DeliveryController extends Controller
                     $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
                     $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;
                     $sorted_array[$slip->id]['amount'] = $slip->amount;
-                    $sorted_array[$slip->id]['created_at'] = Carbon::parse($slip->created_at)->toDateTimeString();;
+                    $sorted_array[$slip->id]['created_at'] = Carbon::parse($slip->created_at)->toDateTimeString();
                     $sorted_array[$slip->id]['uploaded_by'] = $slip->uploaded_by_admin->name;
                     $img_url = 'uploads/sdn/'. $slip->created_at;
-                    if(file_exists($img_url)){                        $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    if(file_exists($img_url)){
+                        $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl('station_deposit_notes/' . $slip->image, now()->addMinutes(5));
                         $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
