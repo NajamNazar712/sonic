@@ -9,7 +9,7 @@
         "aws/aws-sdk-php": "^3.95",
         "barryvdh/laravel-snappy": "^0.4.8",
         "buzz/laravel-google-captcha": "^2.3",
-        "doctrine/dbal": "^2.13",
+        "doctrine/dbal": "^2.13.2",
         "fideloper/proxy": "^4.0",
         "fruitcake/laravel-cors": "^2.0",
         "fx3costa/laravelchartjs": "^2.5",
