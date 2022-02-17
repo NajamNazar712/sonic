@@ -730,7 +730,9 @@ class LastMileDebriefingController extends Controller
         $data = AgentCallMonitoring::find($id);
         if($data)
         {
-            $follow_up = Carbon::now()->addMinute((floatval($request->follow_up) * 60))->format('Y-m-d H:i:s');
+            $time = explode(':',$request->follow_up);
+            $minutes = ($time[0] * 60) + $time[1];
+            $follow_up = Carbon::now()->addMinute($minutes)->format('Y-m-d H:i:s');
             $data->skip = 1;
             $data->follow_up = $follow_up;
             $data->update();

@@ -4567,7 +4567,7 @@ class APIController extends Controller
                                     $rcp->response = $res_from_consignee;
                                     $rcp->status = 2;
                                     $rcp->save();
-
+                                    return ['status' => 1, 'message' => 'Message Received'];     //shown to telecard
                                 }
                                 elseif (in_array($res, $response_no)) {
 
@@ -4620,11 +4620,16 @@ class APIController extends Controller
                                     $rcp->response = $res_from_consignee;
                                     $rcp->status = 1;
                                     $rcp->save();
+                                    return ['status' => 1, 'message' => 'Message Received'];     //shown to telecard
+                                }
+                                else{
+                                    return ['status' => 0, 'message' => 'Invalid message response from consignee'];
                                 }
                             }
-
                         }
-                        return ['status' => 1, 'message' => 'Message Received'];     //shown to telecard
+                        else{
+                            return ['status' => 0, 'message' => 'Invalid message response from consignee'];
+                        }
                     }
                     else{
                         return ['status' => 0, 'message' => 'Invalid message response from consignee'];

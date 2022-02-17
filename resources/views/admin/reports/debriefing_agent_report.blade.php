@@ -23,7 +23,7 @@
                         <th class="border-primary border-darken-1">Break Hours</th>
                         <th class="border-primary border-darken-1">Assigned Calls</th>
                         <th class="border-primary border-darken-1">Completed Calls</th>
-                        <th class="border-primary border-darken-1">Pending Calls</th>
+
                     </tr>
                     </thead>
                 </table>
@@ -115,7 +115,7 @@
                             head.push('Break Hours');
                             head.push('Assigned Calls');
                             head.push('Completed Calls');
-                            head.push('Pending Calls');
+
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -126,7 +126,7 @@
                                 row.push(values.break_hours);
                                 row.push(values.assigned_calls_excel);
                                 row.push(values.completed_calls_excel);
-                                row.push(values.pending_calls_excel);
+
                                 body.push(row);
                             });
                         },
@@ -167,7 +167,6 @@
                     { data:'break_hours' ,name: 'break_hours', class: 'align-middle break_hours text-center',orderable: false, searchable: false},
                     { data:'assigned_calls' ,name: 'assigned_calls', class: 'align-middle assigned_calls text-center',orderable: false, searchable: false},
                     { data:'completed_calls' ,name: 'completed_calls', class: 'align-middle completed_calls text-center',orderable: false, searchable: false},
-                    { data:'pending_calls' ,name: 'pending_calls', class: 'align-middle pending_calls text-center',orderable: false, searchable: false},
                 ],
                 drawCallback: function (settings) {
                     var api = new $.fn.dataTable.Api( settings );

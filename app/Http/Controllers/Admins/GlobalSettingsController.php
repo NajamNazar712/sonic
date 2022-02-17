@@ -853,15 +853,19 @@ class GlobalSettingsController extends Controller
     public function debriefing_break_time_setting_index()
     {
         $settings = GlobalSettings::where('type', 'debriefing_break_time_setting')->first();
+        $total = GlobalSettings::where('type', 'debriefing_total_time_setting')->first();
 
+        $break_timings = 0;
+        $total_timings = 0;
         if ($settings) {
             $break_timings = floatval($settings->text);
         }
-        else{
-            $break_timings = 0;
+
+        if ($total) {
+            $total_timings = floatval($total->text);
         }
 
-        return view('admin.settings.debriefing_total_time_setting',compact('break_timings'));
+        return view('admin.settings.debriefing_total_time_setting',compact('break_timings','total_timings'));
     }
 
     public function debriefing_break_time_setting_store(Request $request)
@@ -877,6 +881,20 @@ class GlobalSettingsController extends Controller
         }
 
         $settings->text = $request->break_timings;
+
+        $settings->save();
+
+        $settings = GlobalSettings::where('type', 'debriefing_total_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'debriefing_total_time_setting';
+        }
+
+        $settings->text = $request->total_timings;
 
         $settings->save();
 
