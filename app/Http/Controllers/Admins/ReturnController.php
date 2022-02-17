@@ -2993,7 +2993,7 @@ class ReturnController extends Controller
                 $shipment_details .= '<div class="mb-1 text-center">';
 
                 $shipment_details .= '
-                          <table class="table table-sm table-bordered border">
+                          <table class="table table-sm table-bordered border" style="display:table-row-group;page-break-inside:avoid;page-break-after:auto;">
                             <tbody>
                                 <tr>
                                     <td class="color primary" colspan="10"><strong style="font-size: large">' . $filtered_shipments_user->user->name . '</strong></td>
