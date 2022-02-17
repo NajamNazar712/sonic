@@ -610,6 +610,7 @@
                 <form class="form form-horizontal">
                     <div class="form-body">
                         <p>You have to update your profile, cannot proceed without it.</p>
+                        <p><b>If you have any query,please contact HR.</b></p>
                     </div>
                     <div class="form-actions center">
                         <button type="button" class="btn btn-primary">OK</button>
