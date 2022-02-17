@@ -176,16 +176,16 @@
                     }
                 },
                 rowId: 'id',
-                order: [[1, 'asc']],
+                order: [[0, 'asc']],
                 columns: [
-                    {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_address_id', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'trax_id', name: 'e.trax_id', class: 'text-center align-middle trax_id',},
-                    {data: 'name', name: 'e.name', class: 'align-middle name'},
-                    {data: 'phone_number', name: 'e.phone_number', class: 'align-middle phone_number'},
-                    {data: 'email', name: 'e.official_email', class: 'align-middle email'},
-                    {data: 'city', name: 'c.name', class: 'align-middle city'},
-                    {data: 'designation', name: 'd.name', class: 'align-middle designation'},
-                    {data: 'department_name', name: 'ad.name', class: 'align-middle department_name'},
+                    {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'trax_id', name: 'e.trax_id', class: 'text-center align-middle trax_id',searchable: false,orderable:false},
+                    {data: 'name', name: 'e.name', class: 'align-middle name',searchable: false,orderable:false},
+                    {data: 'phone_number', name: 'e.phone_number', class: 'align-middle phone_number',searchable: false,orderable:false},
+                    {data: 'email', name: 'e.official_email', class: 'align-middle email',searchable: false,orderable:false},
+                    {data: 'city', name: 'c.name', class: 'align-middle city',searchable: false,orderable:false},
+                    {data: 'designation', name: 'd.name', class: 'align-middle designation',searchable: false,orderable:false},
+                    {data: 'department_name', name: 'ad.name', class: 'align-middle department_name',searchable: false,orderable:false},
                     //{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -206,7 +206,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select-checkbox')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select-checkbox') || $(header).is('.trax_id') || $(header).is('.name') || $(header).is('.phone_number') || $(header).is('.email') || $(header).is('.city') || $(header).is('.designation') || $(header).is('.department_name') ||  $(header).is('.select-checkbox')) {
                             $(td).appendTo($(search));
                         }
                         else {
