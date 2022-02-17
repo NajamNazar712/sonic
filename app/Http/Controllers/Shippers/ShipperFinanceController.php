@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\BanksList;
 use App\Http\Models\Invoice;
+use App\Http\Models\InvoiceForReimbursement;
 use App\Http\Models\InvoiceStatus;
 use App\Http\Models\Notification;
 use App\Http\Models\PackagingMaterialRequest;
@@ -964,13 +965,23 @@ class ShipperFinanceController extends Controller
     public function invoice_list(Request $request)
     {
 
-        $invoices = Invoice::join('users as u', 'invoices.user_id', '=', 'u.id')
+        $invoice = DB::table('invoices as invoices')->join('users as u', 'invoices.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
-            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle','invoices.invoice_type as invoice_type')->whereIn('is.id', [1,3])->where('u.id',session('user_id'))->where('ubi.default_bank',1);
+            ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date','ic.name as invoicing_cycle','invoices.invoice_type as invoice_type',DB::raw('NULL as payment_type'))
+            ->whereIn('is.id', [1,3])
+            ->where('u.id',session('user_id'))
+            ->where('ubi.default_bank',1);
+
+        $invoices = DB::table('invoice_for_reimbursements as invoices')->join('users as u', 'invoices.user_id', '=', 'u.id')
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at',DB::raw('NULL as due_date'),DB::raw('NULL as received_date'),DB::raw('NULL as company_bank'),DB::raw('NULL as received_amount'),DB::raw('NULL as tax_amount'),DB::raw('NULL as deposit_date'),DB::raw('NULL as status'),DB::raw('NULL as status_id'), 'invoices.invoicing_date as invoicing_date',DB::raw('NULL as invoicing_cycle'),DB::raw('NULL as invoice_type'),'invoices.payment_type as payment_type')
+            ->where('u.id',session('user_id'))
+            ->where('invoices.to_show',1)
+            ->union($invoice);
 
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function ($invoice) {
@@ -990,26 +1001,6 @@ class ShipperFinanceController extends Controller
             })
             ->editColumn('invoicing_date', function ($invoice) {
                 return Carbon::parse($invoice->invoicing_date)->format('Y-m-d');
-            })
-            ->editColumn('due_date', function ($invoice) {
-                return Carbon::parse($invoice->due_date)->format('Y-m-d');
-            })
-            ->editColumn('received_date', function ($invoice) {
-                if ($invoice->received_date) {
-                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
-                } else {
-                    return '';
-                }
-            })
-            ->editColumn('deposit_date', function ($invoice) {
-                if ($invoice->deposit_date) {
-                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
-                } else {
-                    return '';
-                }
-            })
-            ->editColumn('due_date', function ($invoice) {
-                return Carbon::parse($invoice->due_date)->format('Y-m-d');
             })
             ->editColumn('invoice_type',function($invoice){
                 if($invoice->invoice_type == 1){
@@ -1032,8 +1023,6 @@ class ShipperFinanceController extends Controller
             })
             ->addColumn('action', function ($invoice) {
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
-                $email_reminder_button = '<button type="button" class="dropdown-item email_reminder"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Email Reminder</div></button>';
-                $mark_as_received_button = '<button type="button" class="dropdown-item mark_as_received"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark as Received</div></button>';
                 $origin_wise_print_button = '<button type="button" class="dropdown-item print_origin_wise"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Origin Wise Print</div></button>';
 
                 $dropdown = '
@@ -1043,14 +1032,6 @@ class ShipperFinanceController extends Controller
             ';
 
                 $dropdown .= $export_to_excel_button;
-
-              /*  if ($invoice->status_id == 1 && Notification::find(28)->status) {
-                    $dropdown .= $email_reminder_button;
-                }*/
-
-             /*   if ($invoice->status_id != 3) {
-                    $dropdown .= $mark_as_received_button;
-                }*/
 
                 $dropdown .= $origin_wise_print_button;
 
