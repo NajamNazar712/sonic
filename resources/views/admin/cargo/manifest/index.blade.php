@@ -308,7 +308,7 @@
                     {data: 'actual_weight', name: 'actual_weight', class: 'align-middle actual_weight'},
                     {data: 'shipping_mode', name: 'sm.id', class: 'align-middle shipping_mode'},
                     {data: 'manifest_id', name: 'cm.id', class: 'align-middle manifest_id'},
-                    {data: 'junctions', name: 'junctions', class: 'align-middle junctions'},
+                    {data: 'junctions', name: 'junctions', class: 'align-middle junctions',orderable:false,searchable:false},
                     {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles',orderable: false},
                     /*{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'},*/
                     {data: 'status', name: 'bs.id', class: 'align-middle status'},
@@ -342,7 +342,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.junctions')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))
