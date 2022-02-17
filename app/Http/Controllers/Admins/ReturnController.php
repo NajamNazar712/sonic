@@ -2812,6 +2812,7 @@ class ReturnController extends Controller
                                   <tr>
                                     <td class="color primary"><strong>S. No.</strong></td>
                                     <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
+                                    
                                     <td class="color primary"><strong>Contact Person</strong></td>
                                     <td class="color primary"><strong>Contact Person Phone</strong></td>
                                     <td class="color primary"><strong>Client Address</strong></td>
@@ -2835,6 +2836,9 @@ class ReturnController extends Controller
                                   <tr>
                                     <td>' . $total_users . '</td>
                                     <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
+                                   
+                                   
+                                   
                                     <td>' . $filtered_shipments_user->return_address->poc . '</td>
                                     <td>' . $filtered_shipments_user->return_address->phone . '</td>
                                     <td>' . $filtered_shipments_user->return_address->pickup_address . '</td>
@@ -2847,6 +2851,9 @@ class ReturnController extends Controller
                                   <tr>
                                     <td>' . $total_users . '</td>
                                     <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
+                                   
+                                   
+                                   
                                     <td>' . $filtered_shipments_user->pickup_address->poc . '</td>
                                     <td>' . $filtered_shipments_user->pickup_address->phone . '</td>
                                     <td>' . $filtered_shipments_user->pickup_address->pickup_address . '</td>
@@ -2989,12 +2996,15 @@ class ReturnController extends Controller
                           <table class="table table-sm table-bordered border">
                             <tbody>
                                 <tr>
-                                    <td class="color primary" colspan="9"><strong style="font-size: large">' . $filtered_shipments_user->user->name . '</strong></td>
+                                    <td class="color primary" colspan="10"><strong style="font-size: large">' . $filtered_shipments_user->user->name . '</strong></td>
                                 </tr>
                               <tr>
                                 <td class="color primary"><strong>S. No.</strong></td>
                                 <td class="color primary"><strong>Tracking No.</strong></td>
+                                
+                                
                                 <td class="color primary"><strong>Client Name & Phone No(s).</strong></td>
+                                <td class="color primary"><strong>Order ID.</strong></td>
                                 <td class="color primary"><strong>Contact Person</strong></td>
                                 <td class="color primary"><strong>Contact Person Phone</strong></td>
                                 <td class="color primary"><strong>Client Address</strong></td>
@@ -3017,7 +3027,10 @@ class ReturnController extends Controller
                                 <td>' . $total_shipments . '</td>
                                 <td class="'. $class .'">' . $shipment->tracking_number . '</td>
                                 <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->user->phone2) ? (' / ' . $shipment->user->phone2) : '') . '</td>
+                                <td>' . $shipment->order_id . '</td>
+                                
                                 <td>' . $shipment->return_address->poc . '</td>
+                                
                                 <td>' . $shipment->return_address->phone . '</td>
                                 <td>' . $shipment->return_address->pickup_address . '</td>
                                 <td>' . $shipment->items->where('bought', 0)->sum('quantity') . '</td>
@@ -3029,6 +3042,7 @@ class ReturnController extends Controller
                                 <td>' . $total_shipments . '</td>
                                 <td class="'. $class .'">' . $shipment->tracking_number . '</td>
                                 <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->user->phone2) ? (' / ' . $shipment->user->phone2) : '') . '</td>
+                                <td>' . $shipment->order_id . '</td>
                                 <td>' . $shipment->pickup_address->poc . '</td>
                                 <td>' . $shipment->pickup_address->phone . '</td>
                                 <td>' . $shipment->pickup_address->pickup_address . '</td>
