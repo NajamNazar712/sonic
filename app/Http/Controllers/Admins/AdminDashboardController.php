@@ -11714,65 +11714,75 @@ class AdminDashboardController extends Controller
     {
         $employee_request = Employee::find($request->employee_id);
         if ($employee_request) {
-            $city = City::find($employee_request->city_id);
-            $employee_request->zone_id = $city->zone_id;
-            if ($request->has('gender')) {
-                $employee_request->employee_gender_id = $request->gender;
-            }
-            if ($request->has('guardian_name')) {
-                $employee_request->guardian_name = $request->guardian_name;
-            }
+            $admin = Admin::where('trax_id', $employee_request->trax_id);
+            if($admin->exists()){
+                $admin = $admin->first();
+                $city = City::find($employee_request->city_id);
+                $employee_request->zone_id = $city->zone_id;
+                if ($request->has('gender')) {
+                    $employee_request->employee_gender_id = $request->gender;
+                }
+                if ($request->has('guardian_name')) {
+                    $employee_request->guardian_name = $request->guardian_name;
+                }
 
-            if ($request->has('religion')) {
-                $employee_request->religion_id = $request->religion;
-            }
+                if ($request->has('religion')) {
+                    $employee_request->religion_id = $request->religion;
+                }
 
-            if ($request->has('domicile')) {
-                $employee_request->domicile_id = $request->domicile;
-            }
+                if ($request->has('domicile')) {
+                    $employee_request->domicile_id = $request->domicile;
+                }
 
-            if ($request->has('marital_status')) {
-                $employee_request->marital_status_id = $request->marital_status;
-            }
+                if ($request->has('marital_status')) {
+                    $employee_request->marital_status_id = $request->marital_status;
+                }
 
-            if ($request->has('blood_group')) {
-                $employee_request->blood_group = $request->blood_group;
-            }
+                if ($request->has('blood_group')) {
+                    $employee_request->blood_group = $request->blood_group;
+                }
 
-            if ($request->has('address')) {
-                $employee_request->address = $request->address;
-            }
+                if ($request->has('address')) {
+                    $employee_request->address = $request->address;
+                }
 
-            if ($request->has('emergency_contact')) {
-                $employee_request->emergency_contact = $request->emergency_contact;
-            }
+                if ($request->has('emergency_contact')) {
+                    $employee_request->emergency_contact = $request->emergency_contact;
+                }
 
-            if ($request->has('emergency_contact_person')) {
-                $employee_request->emergency_contact_person = $request->emergency_contact_person;
-            }
+                if ($request->has('emergency_contact_person')) {
+                    $employee_request->emergency_contact_person = $request->emergency_contact_person;
+                }
 
-            if ($request->has('official_email')) {
-                $employee_request->official_email = $request->official_email;
-            }
+                if ($request->has('official_email')) {
+                    $employee_request->official_email = $request->official_email;
+                    $admin->email = $request->official_email;
+                }
 
-            if ($request->has('date_of_birth')) {
-                $employee_request->date_of_birth = $request->date_of_birth;
-            }
+                if ($request->has('date_of_birth')) {
+                    $employee_request->date_of_birth = $request->date_of_birth;
+                }
 
-            if ($request->has('mother_name')) {
-                $employee_request->mother_name = $request->mother_name;
-            }
+                if ($request->has('mother_name')) {
+                    $employee_request->mother_name = $request->mother_name;
+                }
 
-            if ($request->has('shift_id')) {
-                $employee_request->shift_id = $request->shift_id;
-            }
+                if ($request->has('shift_id')) {
+                    $employee_request->shift_id = $request->shift_id;
+                    $admin->shift_id = $request->shift_id;
+                }
 
-            if ($request->has('staff_category')) {
-                $employee_request->staff_category_id = $request->staff_category;
-            }
+                if ($request->has('staff_category')) {
+                    $employee_request->staff_category_id = $request->staff_category;
+                }
 
-            $employee_request->save();
-            return redirect()->route('admin.dashboard.index')->with('success', 'Profile Updated Successfully');
+                $employee_request->save();
+                $admin->save();
+                return redirect()->route('admin.dashboard.index')->with('success', 'Profile Updated Successfully');
+            }
+            else {
+                return redirect()->route('admin.dashboard.index')->with('error', 'User not found!');
+            }
         } else {
             return redirect()->route('admin.dashboard.index')->with('error', 'User not found!');
         }
