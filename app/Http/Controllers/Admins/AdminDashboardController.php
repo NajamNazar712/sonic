@@ -6383,7 +6383,7 @@ class AdminDashboardController extends Controller
                 PendingDiscountCharge::where('user_id', $id)->delete();
                 PendingRateOriginHub::where('user_id', $id)->delete();
                 PendingRateDestinationHub::where('user_id', $id)->delete();
-                User::where('id', $id)->update(['rate_status' => 0,'agreement_signed' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
+                User::where('id', $id)->update(['rate_status' => 0,'agreement_signed' => 1, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
                     $rate_remark->user_id = $id;
