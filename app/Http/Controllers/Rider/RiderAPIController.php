@@ -10843,7 +10843,7 @@ class RiderAPIController extends Controller
             $profile = Employee::where('trax_id', $rider->trax_id);
             if ($profile->exists()) {
                 $profile = $profile->first();
-                if(!$profile->blood_group || !$profile->emergency_contact || !$profile->emergency_contact_person || !$profile->guardian_name || !$profile->mother_name  || !$profile->address  || !$profile->employee_gender_id || !$profile->religion_id || !$profile->marital_status_id || !$profile->date_of_birth || !$profile->shift_id || !$profile->domicile_id || !$profile->rider_main_category || !$profile->rider_sub_category){
+                if(!$profile->blood_group || !$profile->emergency_contact || !$profile->emergency_contact_person || !$profile->guardian_name || !$profile->mother_name  || !$profile->address  || !$profile->employee_gender_id || !$profile->religion_id || !$profile->marital_status_id || !$profile->date_of_birth || !$profile->shift_id || !$profile->domicile_id || !$profile->rider_main_category || !$profile->rider_sub_category || !$profile->nationality_id){
                     return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
                 }else{
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
@@ -10868,11 +10868,12 @@ class RiderAPIController extends Controller
             $marital_status_list = EmployeeMaritalStatus::all();
             $shift_list = EmployeeShift::all();
             $domecile_list = EmployeeDomicile::all();
+            $nationalities_list = EmployeeNationality::all();
             $rider_type_list = RiderType::all();
             $profile = Employee::where('trax_id', $rider->trax_id);
             if ($profile->exists()) {
                 $profile = $profile->get();
-                return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'gender_list' => $gender_list, 'religion_list' => $religion_list, 'marital_status_list' => $marital_status_list, 'rider_type_list' => $rider_type_list, 'shift_list' => $shift_list, 'domecile_list' => $domecile_list, 'employee_data' => $profile]);
+                return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'gender_list' => $gender_list, 'religion_list' => $religion_list, 'marital_status_list' => $marital_status_list, 'rider_type_list' => $rider_type_list, 'shift_list' => $shift_list, 'domecile_list' => $domecile_list, 'nationalities_list' => $nationalities_list, 'employee_data' => $profile]);
             } else {
                 return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
             }
@@ -10894,6 +10895,7 @@ class RiderAPIController extends Controller
             'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
             'marital_status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
             'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+            'nationality_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
             'address' => ['nullable'],
             'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
             'emergency_contact_person' => ['required'],
@@ -10960,6 +10962,9 @@ class RiderAPIController extends Controller
 
                 if ($request->has('rider_type_id')) {
                     $employee_request->rider_type_id = $request->rider_type_id;
+                }
+                if ($request->has('nationality_id')) {
+                    $employee_request->nationality_id = $request->nationality_id;
                 }
 
                 $employee_request->save();
