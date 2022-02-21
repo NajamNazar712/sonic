@@ -6150,7 +6150,7 @@ class AdminAPIController extends Controller
             'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
             'marital_status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
             'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
-            'nationality_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
+            'nationality_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
             'address' => ['nullable'],
             'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
             'emergency_contact_person' => ['required'],
