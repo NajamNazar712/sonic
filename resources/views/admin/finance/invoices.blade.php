@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Pending Invoices')
+@section('title', 'Invoices')
 
 @section('content')
 	<h1 class="mb-1">
-		Pending Invoices
+		Invoices
 	</h1>
 
 	<div class="card">
@@ -41,7 +41,7 @@
 						<th class="border-primary border-darken-1">Tax Amount</th>
 
 						<th class="border-primary border-darken-1">Invoice Type</th>
-						<th class="border-primary border-darken-1">Payment Type</th>
+						{{--<th class="border-primary border-darken-1">Payment Type</th>--}}
 						{{--  <th class="border-primary border-darken-1">Status</th>--}}
 					</tr>
 					</thead>
@@ -472,7 +472,7 @@
 					{data:'deposit_date', name: 'deposit_date', class: 'align-middle text-center deposit_date'},
 					{data:'received_amount', name: 'received_amount', class: 'align-middle text-center received_amount'},
 					{data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
-					{data:'status_id', name: 'status_id', class: 'align-middle text-center status_id'},
+					/*{data:'status_id', name: 'status_id', class: 'align-middle text-center status_id'},*/
 					{data:'payment_type', name: 'payment_type', class: 'align-middle text-center payment_type'},
 				],
 				rowCallback: function(row, data, index) {

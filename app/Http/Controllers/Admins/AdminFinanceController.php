@@ -10128,7 +10128,20 @@ class AdminFinanceController extends Controller
                    return '-';
                }
             })
-            ->filterColumn('account', function($invoice, $keyword) {
+            ->editColumn('payment_type', function($invoice) {
+                if($invoice->invoice_type == 2) {
+                    if ($invoice->payment_type == 1) {
+                        return "Done";
+                    } else {
+                        return "Make";
+                    }
+                }
+                else{
+                    return '-';
+                }
+            })
+
+           /* ->filterColumn('account', function($invoice, $keyword) {
 
                 if ($keyword == 'Corporate Account') {
                     $invoice->account_type = 1;
@@ -10136,10 +10149,10 @@ class AdminFinanceController extends Controller
                 else if($keyword == 'Reimbursement Account'){
                     $query->whereRaw(2);
                 }
-                else {
+                else {                                          s
                     $query->whereRaw('false');
                 }
-            });
+            })*/;
 
             /*->editColumn('total_gst', function($invoice) {
                 return number_format($invoice->total_gst, 2);
