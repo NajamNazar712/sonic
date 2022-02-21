@@ -222,6 +222,10 @@ class Permission
             'cargo_manifest.history' => 556,
             'cargo_manifest.history.list' => 556,
 
+            'cargo_manifest.draft.setting.list' => 682,
+            'cargo_manifest.draft.setting' => 682,
+            'cargo_manifest.draft.update' => 682,
+
 
 
 

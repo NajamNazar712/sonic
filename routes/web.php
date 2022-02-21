@@ -1721,7 +1721,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('draft')->name('draft.')->group(function () {
             Route::get('/list', 'Admins\AdminCargoManifestController@manifest_draft')->name('list');
             Route::post('/delete', 'Admins\AdminCargoManifestController@manifest_draft_delete')->name('delete');
-
+            Route::get('setting/list', 'Admins\AdminCargoManifestController@manifest_draft_setting_list')->name('setting.list');
+            Route::get('setting', 'Admins\AdminCargoManifestController@manifest_draft_setting')->name('setting');
+            Route::post('update', 'Admins\AdminCargoManifestController@manifest_draft_update')->name('update');
         });
 
     });
