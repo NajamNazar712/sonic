@@ -889,13 +889,13 @@
                         }
                     }
 
-                    if ($('#scan_sdn').val() != '') {
-                        if (data.length > 0) {
-                            scan_sound(1);
-                        } else {
-                            scan_sound(2);
-                        }
-                    }
+                    // if ($('#scan_sdn').val() != '') {
+                    //     if (data.length > 0) {
+                    //         scan_sound(1);
+                    //     } else {
+                    //         scan_sound(2);
+                    //     }
+                    // }
                 },
                 initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -982,13 +982,15 @@
                 table.draw();
             });
 
-            $('#scan_sdn').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            }).bind('input', function () {
-                table.draw();
-            });
+
+
+            // $('#scan_sdn').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // }).bind('input', function () {
+            //     table.draw();
+            // });
 
 
             $("#sdn_add_dncc #dncc_select").prepend('<option value="" selected="selected"></option>').select2({
