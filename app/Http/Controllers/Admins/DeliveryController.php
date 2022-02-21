@@ -4872,6 +4872,10 @@ class DeliveryController extends Controller
                 ->where('dnsdns.delivery_note_id', '=', $dncc)
                 ->groupBy('station_deposit_notes.id');
         }
+        if ($sdn = $request->get('scan_sdn')) {
+            $datatable->where('station_deposit_notes.id', '=', $sdn)
+                ->groupBy('station_deposit_notes.id');
+        }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
