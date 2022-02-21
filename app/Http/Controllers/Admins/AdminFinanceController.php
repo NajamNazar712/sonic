@@ -10092,30 +10092,69 @@ class AdminFinanceController extends Controller
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
-            ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date','ic.name as invoicing_cycle','invoices.invoice_type as invoice_type',DB::raw('NULL as payment_type'))
+            ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date','ic.name as invoicing_cycle','invoices.invoice_type as invoice_type',DB::raw('NULL as payment_type'),DB::raw('1 as account_type'))
             ->whereIn('is.id', [1,3])
-            /* ->where('u.id',session('user_id'))*/
             ->where('ubi.default_bank',1);
 
         $invoices = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->select('invoice_for_reimbursements.id as id', 'invoice_for_reimbursements.invoice_number as invoice_number', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at',DB::raw('NULL as due_date'),DB::raw('NULL as received_date'),DB::raw('NULL as company_bank'),DB::raw('NULL as received_amount'),DB::raw('NULL as tax_amount'),DB::raw('NULL as deposit_date'),DB::raw('NULL as status'),DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date',DB::raw('NULL as invoicing_cycle'),DB::raw('NULL as invoice_type'),'invoice_for_reimbursements.payment_type as payment_type')
-            /*  ->where('u.id',session('user_id'))*/
+            ->select( 'invoice_for_reimbursements.id as id','invoice_for_reimbursements.invoice_number as invoice_number', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at',DB::raw('NULL as due_date'),DB::raw('NULL as received_date'),DB::raw('NULL as company_bank'),DB::raw('NULL as received_amount'),DB::raw('NULL as tax_amount'),DB::raw('NULL as deposit_date'),DB::raw('NULL as status'),DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date',DB::raw('NULL as invoicing_cycle'),DB::raw('NULL as invoice_type'),'invoice_for_reimbursements.payment_type as payment_type',DB::raw('2 as account_type'))
             ->where('invoice_for_reimbursements.to_show',1)
             ->union($invoice);
-       
+
 
            /* if(session('department_id') == 7){
                 $invoices->whereIn('invoices.user_id', session('tagged_shippers'));
             }*/
-            $datatables = Datatables::of($invoices);
-           /* ->addColumn('invoice_number_button', function($invoice) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
+            $datatables = Datatables::of($invoices)
+            ->addColumn('account', function($invoice) {
+              if($invoice->account_type == 1){
+                  return 'Corporate Account';
+              }
+              else{
+                  return 'Reimbursement Account';
+              }
             })
-            ->editColumn('total_charges', function($invoice) {
-                return number_format($invoice->total_charges, 2);
+            ->editColumn('invoice_type', function($invoice) {
+               if($invoice->account_type == 1){
+                 if($invoice->invoice_type == 1){
+                     return 'Courier Invoice';
+                 }
+                 else{
+                     return 'Packaging Invoice';
+                 }
+               }
+               else{
+                   return '-';
+               }
             })
-            ->editColumn('total_gst', function($invoice) {
+            ->editColumn('payment_type', function($invoice) {
+                if($invoice->invoice_type == 2) {
+                    if ($invoice->payment_type == 1) {
+                        return "Done";
+                    } else {
+                        return "Make";
+                    }
+                }
+                else{
+                    return '-';
+                }
+            })
+
+           /* ->filterColumn('account', function($invoice, $keyword) {
+
+                if ($keyword == 'Corporate Account') {
+                    $invoice->account_type = 1;
+                }
+                else if($keyword == 'Reimbursement Account'){
+                    $query->whereRaw(2);
+                }
+                else {                                          s
+                    $query->whereRaw('false');
+                }
+            })*/;
+
+            /*->editColumn('total_gst', function($invoice) {
                 return number_format($invoice->total_gst, 2);
             })
             ->editColumn('total_invoice_amount', function($invoice) {
@@ -10245,8 +10284,6 @@ class AdminFinanceController extends Controller
 
                 return $dropdown;
             });*/
-        $datatables = Datatables::of($invoices);
-       
         return $datatables->make(true);
     }
 
@@ -10752,6 +10789,7 @@ class AdminFinanceController extends Controller
     }
 
     public function invoices_mark_as_received_all(Request $request) {
+        dd($request);
         foreach ($request->id as $id)
         {
             $invoice = Invoice::find($id);

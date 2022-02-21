@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Pending Invoices')
+@section('title', 'Invoices')
 
 @section('content')
 	<h1 class="mb-1">
-		Pending Invoices
+		Invoices
 	</h1>
 
 	<div class="card">
@@ -17,6 +17,7 @@
 					<tr role="row" class="bg-primary white">
 						<th class="border-primary border-darken-1"></th>
 						<th class="border-primary border-darken-1">S. No.</th>
+						<th class="border-primary border-darken-1">Account</th>
 						<th class="border-primary border-darken-1">Invoice Number</th>
 						<th class="border-primary border-darken-1">Shipper</th>
 						<th class="border-primary border-darken-1">City</th>
@@ -24,19 +25,23 @@
 						<th class="border-primary border-darken-1">Total GST</th>
 						<th class="border-primary border-darken-1">Total Invoice Amount</th>
 						<th class="border-primary border-darken-1">Generation Date</th>
-						<th class="border-primary border-darken-1">Due Date</th>
-						<th class="border-primary border-darken-1">Received Date</th>
-						<th class="border-primary border-darken-1">Company Bank</th>
-						<th class="border-primary border-darken-1">Invoicing Cycle</th>
-						<th class="border-primary border-darken-1">Received Amount</th>
-						<th class="border-primary border-darken-1">Tax Amount</th>
-						<th class="border-primary border-darken-1">Deposit Date</th>
-						<th class="border-primary border-darken-1">Status</th>
-						<th class="border-primary border-darken-1">Status Id</th>
 						<th class="border-primary border-darken-1">Invoicing Date</th>
 						<th class="border-primary border-darken-1">Invoicing Cycle</th>
+						{{--<th class="border-primary border-darken-1">Aging</th>--}}
+						<th class="border-primary border-darken-1">Due Date</th>
+					{{--	<th class="border-primary border-darken-1">Overdue By</th>--}}
+						<th class="border-primary border-darken-1">Corporate Invoicing Type</th>
+						
+						<th class="border-primary border-darken-1">Received Date</th>
+						<th class="border-primary border-darken-1">Company Bank</th>
+						<th class="border-primary border-darken-1">Status</th>
+
+						<th class="border-primary border-darken-1">Deposit Date</th>
+						<th class="border-primary border-darken-1">Received Amount</th>
+						<th class="border-primary border-darken-1">Tax Amount</th>
+
 						<th class="border-primary border-darken-1">Invoice Type</th>
-						<th class="border-primary border-darken-1">Payment Type</th>
+						{{--<th class="border-primary border-darken-1">Payment Type</th>--}}
 						{{--  <th class="border-primary border-darken-1">Status</th>--}}
 					</tr>
 					</thead>
@@ -386,6 +391,7 @@
 
 									if (index === -1) {
 										selected_rows.push(id);
+										console.log(selected_rows)
 									}
 
 									table.button('.mark_as_received_all_btn').enable();
@@ -446,7 +452,9 @@
 				rowId: 'id',
 				order: [[8, 'desc']],
 				columns: [
+					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data:'account', name: 'account', class: 'align-middle text-center account'},
 					{data:'invoice_number', name: 'invoice_number', class: 'align-middle text-center invoice_number'},
 					{data:'shipper', name: 'shipper', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'city', class: 'align-middle text-center city'},
@@ -454,18 +462,17 @@
 					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
 					{data:'total_invoice_amount', name: 'total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
 					{data:'created_at', name: 'created_at', class: 'align-middle text-center created_at'},
-					{data:'due_date', name: 'due_date', class: 'align-middle text-center due_date'},
-					{data:'received_date', name: 'received_date', class: 'align-middle text-center received_date'},
-					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
-					{data:'invoicing_cycle', name: 'invoicing_cycle', class: 'align-middle text-center invoicing_cycle'},
-					{data:'received_amount', name: 'received_amount', class: 'align-middle text-center received_amount'},
-					{data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
-					{data:'deposit_date', name: 'deposit_date', class: 'align-middle text-center deposit_date'},
-					{data:'status', name: 'status', class: 'align-middle text-center status'},
-					{data:'status_id', name: 'status_id', class: 'align-middle text-center status_id'},
 					{data:'invoicing_date', name: 'invoicing_date', class: 'align-middle text-center invoicing_date'},
 					{data:'invoicing_cycle', name: 'invoicing_cycle', class: 'align-middle text-center invoicing_cycle'},
+					{data:'due_date', name: 'due_date', class: 'align-middle text-center due_date'},
 					{data:'invoice_type', name: 'invoice_type', class: 'align-middle text-center invoice_type'},
+					{data:'received_date', name: 'received_date', class: 'align-middle text-center received_date'},
+					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
+					{data:'status', name: 'status', class: 'align-middle text-center status'},
+					{data:'deposit_date', name: 'deposit_date', class: 'align-middle text-center deposit_date'},
+					{data:'received_amount', name: 'received_amount', class: 'align-middle text-center received_amount'},
+					{data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
+					/*{data:'status_id', name: 'status_id', class: 'align-middle text-center status_id'},*/
 					{data:'payment_type', name: 'payment_type', class: 'align-middle text-center payment_type'},
 				],
 				rowCallback: function(row, data, index) {
@@ -492,6 +499,10 @@
 							'<option value="1">Courier Invoice</option>' +
 							'<option value="2">Packaging Invoice</option>' +
 							'</select>';
+				/*	var account = '<select name="account" id="account" class="select2 form-control">' +
+							'<option value="1">Corporate Account</option>' +
+							'<option value="2">Reimbursement Account</option>' +
+							'</select>';*/
 
 
 					this.api().columns().every(function(column_id) {
@@ -513,6 +524,13 @@
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td);
                         }
+						/*else if ($(header).is('.account')) {
+							$(account).appendTo($(search))
+									.on('change', function() {
+										column.search($(this).val(), false, false, true).draw();
+									}).wrap(td);
+						}*/
+
 						else if($(header).is('.invoice_type')){
 							$(invoice_type_select).appendTo($(search))
 									.on( 'change', function () {
@@ -544,6 +562,14 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+					/*$('#account').prepend('<option value="" selected></option>').select2({
+						data: account,
+						placeholder: 'Select Account Type',
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});*/
 
 					$("#invoice_type_select").prepend('<option value="" selected></option>').select2({
 						placeholder: "Select Invoice Type",
@@ -582,7 +608,7 @@
 
 			$('#datatable tbody').on('click', 'tr td.invoice_number button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
-
+				console.log(id);
                 if (id) {
                     $.ajax({
 						url: '{!! route('admin.finance.invoices.print') !!}',
