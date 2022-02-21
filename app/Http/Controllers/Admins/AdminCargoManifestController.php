@@ -1561,6 +1561,8 @@ class AdminCargoManifestController extends Controller
                 $master_cargo->actual_weight = $actual_weight;
                 $master_cargo->created_by = Auth::id();
 
+                $master_cargo->vehicle_seal_number = $request->vehicle_seal[$hub_id];
+
                 if($request->has('vehicle_type'))
                 {
                     $master_cargo->vehicle_type = 1;
@@ -1917,9 +1919,18 @@ class AdminCargoManifestController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>No. of Bags</strong></td>
-                              <td>' . $cargo->bags . '</td>
-                              <td colspan="2"></td>
-                            </tr>
+                              <td>' . $cargo->bags . '</td>';
+
+                          if($cargo->vehicle_seal_number != null)
+                          {
+                              $html .= '<td class="color secondary"><strong>Vehicle Seal Number</strong></td>
+                            <td>' . $cargo->vehicle_seal_number . '</td>';
+                          }
+                          else{
+                              $html .= '<td colspan="2"></td>';
+                          }
+
+                            $html .='</tr>
                             <tr>
                               <td class="color secondary"><strong>No. of Shipments</strong></td>
                               <td>' . $cargo->shipments . '</td>
