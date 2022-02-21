@@ -10128,6 +10128,9 @@ class AdminFinanceController extends Controller
                    return '-';
                }
             })
+            ->editColumn('invoice_number', function($invoice) {
+                return '<button class="btn btn-sm btn-outline-info align-middle ">' . $invoice->invoice_number . '</button>';
+            })
             ->editColumn('payment_type', function($invoice) {
                 if($invoice->invoice_type == 2) {
                     if ($invoice->payment_type == 1) {
@@ -10137,7 +10140,7 @@ class AdminFinanceController extends Controller
                     }
                 }
                 else{
-                    return '-';
+                    return '';
                 }
             })
 
@@ -10152,9 +10155,9 @@ class AdminFinanceController extends Controller
                 else {                                          s
                     $query->whereRaw('false');
                 }
-            })*/;
+            })*/
 
-            /*->editColumn('total_gst', function($invoice) {
+            ->editColumn('total_gst', function($invoice) {
                 return number_format($invoice->total_gst, 2);
             })
             ->editColumn('total_invoice_amount', function($invoice) {
@@ -10167,7 +10170,7 @@ class AdminFinanceController extends Controller
                 return Carbon::parse($invoice->invoicing_date)->format('Y-m-d');
             })
             ->addColumn('aging', function($invoice) {
-                if ($invoice->status_id == 1) {
+                if ($invoice->status_id == 1 && $invoice->account_type == 1) {
                     $days = Carbon::now()->diffInDays($invoice->created_at);
 
                     if ($days == 0) {
@@ -10200,20 +10203,21 @@ class AdminFinanceController extends Controller
                     return '';
                 }
             })
-            ->editColumn('due_date', function($invoice) {
-                return Carbon::parse($invoice->due_date)->format('Y-m-d');
-            })
-            ->addColumn('upload_slip', function($invoice) {
-                $invoice_slip_count = InvoiceUploadSlip::where('invoice_id',$invoice->id)->count();
-                if($invoice_slip_count > 0)
-                {
-                    return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+            ->addColumn('deposit_slip', function($invoice) {
+                if($invoice->account_type == 1){
+                    $invoice_slip_count = InvoiceUploadSlip::where('invoice_id',$invoice->id)->count();
+                    if($invoice_slip_count > 0)
+                    {
+                        return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+                    return "-";
                 }
-
-                return "-";
+                else{
+                    return "-";
+                }
             })
             ->addColumn('overdue_by', function($invoice) {
-                if ($invoice->status_id == 1) {
+                if ($invoice->status_id == 1 && $invoice->account_type == 1) {
                     $days = Carbon::now()->diffInDays($invoice->due_date);
 
                     if ($days == 0) {
@@ -10227,15 +10231,7 @@ class AdminFinanceController extends Controller
                     return '-';
                 }
             })
-            ->editColumn('invoice_type',function($invoice){
-               if($invoice->invoice_type == 1){
-                   return 'Courier Invoice';
-               }
-               else{
-                   return 'Packaging Invoice';
-               }
-            })
-            ->filterColumn('invoice_type', function($query, $keyword) {
+           /* ->filterColumn('invoice_type', function($query, $keyword) {
                 if ($keyword == 1) {
                     $query->where('invoices.invoice_type', 1);
                 }
@@ -10245,7 +10241,7 @@ class AdminFinanceController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
+            })*/
             ->addColumn('action', function($invoice) {
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
                 $email_reminder_button = '<button type="button" class="dropdown-item email_reminder"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Email Reminder</div></button>';
@@ -10283,7 +10279,7 @@ class AdminFinanceController extends Controller
             ';
 
                 return $dropdown;
-            });*/
+            });
         return $datatables->make(true);
     }
 
@@ -10542,6 +10538,7 @@ class AdminFinanceController extends Controller
     }
 
     public function invoices_print(Request $request) {
+     
         $invoice = Invoice::find($request->id);
 
         if ($invoice) {

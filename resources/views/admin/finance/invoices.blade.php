@@ -27,20 +27,19 @@
 						<th class="border-primary border-darken-1">Generation Date</th>
 						<th class="border-primary border-darken-1">Invoicing Date</th>
 						<th class="border-primary border-darken-1">Invoicing Cycle</th>
-						{{--<th class="border-primary border-darken-1">Aging</th>--}}
+						<th class="border-primary border-darken-1">Aging</th>
 						<th class="border-primary border-darken-1">Due Date</th>
-					{{--	<th class="border-primary border-darken-1">Overdue By</th>--}}
+						<th class="border-primary border-darken-1">Overdue By</th>
 						<th class="border-primary border-darken-1">Corporate Invoicing Type</th>
-						
 						<th class="border-primary border-darken-1">Received Date</th>
 						<th class="border-primary border-darken-1">Company Bank</th>
 						<th class="border-primary border-darken-1">Status</th>
-
 						<th class="border-primary border-darken-1">Deposit Date</th>
+						<th class="border-primary border-darken-1">Deposit Slip</th>
 						<th class="border-primary border-darken-1">Received Amount</th>
 						<th class="border-primary border-darken-1">Tax Amount</th>
-
-						<th class="border-primary border-darken-1">Invoice Type</th>
+						<th class="border-primary border-darken-1">Payment Type</th>
+						<th class="border-primary border-darken-1"></th>
 						{{--<th class="border-primary border-darken-1">Payment Type</th>--}}
 						{{--  <th class="border-primary border-darken-1">Status</th>--}}
 					</tr>
@@ -464,16 +463,19 @@
 					{data:'created_at', name: 'created_at', class: 'align-middle text-center created_at'},
 					{data:'invoicing_date', name: 'invoicing_date', class: 'align-middle text-center invoicing_date'},
 					{data:'invoicing_cycle', name: 'invoicing_cycle', class: 'align-middle text-center invoicing_cycle'},
+					{data:'aging', name: 'aging', class: 'align-middle text-center aging'},
 					{data:'due_date', name: 'due_date', class: 'align-middle text-center due_date'},
+					{data:'overdue_by', name: 'overdue_by', class: 'align-middle text-center overdue_by'},
 					{data:'invoice_type', name: 'invoice_type', class: 'align-middle text-center invoice_type'},
 					{data:'received_date', name: 'received_date', class: 'align-middle text-center received_date'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
 					{data:'deposit_date', name: 'deposit_date', class: 'align-middle text-center deposit_date'},
+					{data:'deposit_slip', name: 'deposit_slip', class: 'align-middle text-center deposit_slip'},
 					{data:'received_amount', name: 'received_amount', class: 'align-middle text-center received_amount'},
 					{data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
-					/*{data:'status_id', name: 'status_id', class: 'align-middle text-center status_id'},*/
 					{data:'payment_type', name: 'payment_type', class: 'align-middle text-center payment_type'},
+					{data:'action', name: 'action', class: 'align-middle text-center action'},
 				],
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
@@ -608,7 +610,8 @@
 
 			$('#datatable tbody').on('click', 'tr td.invoice_number button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
-				console.log(id);
+                var account = table.row($(this).parents('tr')).data().account;
+
                 if (id) {
                     $.ajax({
 						url: '{!! route('admin.finance.invoices.print') !!}',
