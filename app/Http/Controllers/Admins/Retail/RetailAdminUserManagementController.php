@@ -79,7 +79,7 @@ class RetailAdminUserManagementController extends Controller
 
         $franchise = RetailFranchise::join('admins as a', 'a.id', '=', 'retail_franchises.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_franchises.default_hub')
-            ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at', 'retail_franchises.updated_at');
+            ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at', 'retail_franchises.updated_at','retail_franchises.discount');
 
         $datatables = Datatables::of($franchise)
             ->editColumn('status', function ($data) {
@@ -107,6 +107,11 @@ class RetailAdminUserManagementController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                     } else {
                         $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }
+                    if ($data->discount != Null) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit Discount</div></button>';
+                    } else {
+                        $dropdown .= '<button type="button" class="dropdown-item add_discount"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Add Discount</div></button>';
                     }
                     $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>
                     </div>
