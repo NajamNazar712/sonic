@@ -3523,6 +3523,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('edit/name/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_edit_name')->name('edit.name');
         });
 
+        Route::prefix('international')->name('international.')->group(function () {
+            Route::prefix('rates')->name('rates.')->group(function () {
+                Route::get('', 'Admins\AdminInternationalRatesController@retail_international_rates_upload_index')->name('index');
+                Route::get('list', 'Admins\AdminInternationalRatesController@retail_international_rates_list')->name('list');
+                Route::post('excel', 'Admins\AdminInternationalRatesController@retail_international_rates_upload_excel')->name('excel');
+
+                Route::prefix('margin')->name('margin.')->group(function () {
+                    Route::get('', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_index')->name('index');
+                    Route::post('/submit', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_submit')->name('update');
+                    Route::get('/list', 'Admins\AdminInternationalRatesController@retail_international_rates_margin_list')->name('list');
+                });
+            });
+        });
+
+
         Route::prefix('accounts')->name('accounts.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminAccounts@index')->name('index');
             Route::get('/list', 'Admins\Retail\RetailAdminAccounts@list')->name('list');
