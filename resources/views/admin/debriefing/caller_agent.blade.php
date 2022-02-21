@@ -10,24 +10,20 @@
             <div class="content-body">
                 <h1 class="mb-1">
                     Caller Agent Screen
+
+                    <div class="text-right">
+                        <button class="btn btn-lg btn-info" {{$data ? 'data-toggle=modal data-target=#FollowUpModal' : 'disabled'}} id="follow_btn">Follow Up</button>
+                        <button class="btn btn-lg btn-success" id="live_btn">Live (<span id="live_timer">00:00:00</span>)</button>
+                        <button class="btn btn-lg btn-warning" id="break_btn">Break (<span id="break_timer">00:00:00</span>)</button>
+                        <button class="btn btn-lg btn-danger" id="end_btn">End Session</button>
+                    </div>
                 </h1>
 
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
                             @if($data)
-                            {{--<div class="row justify-content-center">
-
-                                <div class="col-6 text-center border tracking_box ">
-                                    --}}{{-- <fieldset class="position-relative has-icon-left"> --}}{{--
-                                        <u><a href='{{route('admin.tracking.index')}}?tracking_number={{$shipment->tracking_number}}' class='tracking' target='_blank'>{{$shipment->tracking_number}}</a></u>
-                                        --}}{{-- <input type="text" class="form-control" placeholder="Tracking Number" value="{{$shipment->tracking_number}}" readonly style="text-align: center;"> --}}{{--
-                                    --}}{{-- </fieldset> --}}{{--
-                                </div>
-                            </div>--}}
-
                             <div class="row justify-content-center">
                                 <div class="col-4">
                                     <div class="card bg-gradient-directional-total-calls pull-up">
@@ -39,7 +35,6 @@
                                                     </div>
                                                     <div class="media-body text-white text-center">
                                                         <h3 class="text-white">Total Calls : {{$total_calls}}</h3>
-                                                      {{--  <span>Total Call(s)</span>--}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -56,7 +51,6 @@
                                                     </div>
                                                     <div class="media-body text-white text-center">
                                                         <h3 class="text-white">Completed Call(s) : {{$completed_calls}}</h3>
-                                                       {{-- <span>Completed Call(s)</span>--}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -73,7 +67,6 @@
                                                     </div>
                                                     <div class="media-body text-white text-center">
                                                         <h3 class="text-white">Pending Call(s) : {{$pending_calls}}</h3>
-                                                      {{--  <span>Pending Call(s)</span>--}}
                                                     </div>
                                                 </div>
                                             </div>
@@ -334,6 +327,39 @@
             </div>
         </div>
     </div>
+
+    @if($data)
+    <div class="modal fade" id="FollowUpModal" data-backdrop="static" role="dialog" aria-labelledby="FollowUpModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header"><h2>Follow Up</h2>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="follow_up_form" method="post" action="{{route('admin.debriefing.caller_agent.follow_up',$call->id)}}" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        @csrf
+                        <div class="container">
+                            <div class="form-group">
+                                <label><b>Follow Up After <span class="text-warning">(hh:mm)</span></b></label>
+                                <div class="input-group">
+                                    <input type="text" name="follow_up" class="form-control rounded-right follow_up" id="follow_up"  placeholder="Follow Up Time*" data-rule-required="true" data-msg-required="Follow Up Time is required" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="btnReturn" type="submit" class="btn btn-primary btn-block">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 @endsection
 
 @section('css')
@@ -376,81 +402,264 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/timer/easytimer.min.js')}}" type="text/javascript"></script>
     <script src="https://kit.fontawesome.com/e7bc565afe.js" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function() {
-            $('#status').prepend('<option value="" selected></option>').select2({
-                placeholder: 'Select Status',
-                width:'100%',
-                allowClear: true
+
+            var live_timer = new easytimer.Timer({precision: 'seconds', startValues: {seconds: {{$work_start ?? 0}} }});
+            var break_timer = new easytimer.Timer({precision: 'seconds', startValues: {seconds: {{$break_start ?? 0}} }, target: {seconds: {{$break_limit}} }});
+            live_timer.addEventListener('secondsUpdated', function (e) {
+                $('#live_btn #live_timer').html(live_timer.getTimeValues().toString());
             });
 
-            $('#reasons').prepend('<option value="" selected></option>').select2({
-                placeholder: 'Select Reason',
-                width:'100%',
-                allowClear: true
+            break_timer.addEventListener('secondsUpdated', function (e) {
+                $('#break_btn #break_timer').html(break_timer.getTimeValues().toString());
             });
 
-            $('body').on('select2:select','#status',function (e) {
-
-                var statusSelection = $(this).find(':selected');
-                var status = statusSelection.val();
-                var all_reason = $('#reasons');
+            break_timer.addEventListener('targetAchieved', function (e) {
                 $.ajax({
-                    url:'{!! route('admin.delivery.receive.reason_all') !!}',
-                    type:'POST',
-                    dataType:'json',
-                    data: {
-                        'status':status,
-                        '_token': '{{ csrf_token() }}'
+                    url:'{{route("admin.debriefing.caller_agent.start")}}',
+                    method:'post',
+                    data:{
+                        '_token': '{{csrf_token()}}',
                     }
-                }).done(function (data) {
-                    if(data.status == 0){
-                        all_reason.empty().trigger('change');
-                        $.each(data.reasons,function (key,value) {
-                            var newOption = new Option(value.name, value.id, false, false);
-                            all_reason.append(newOption).trigger('change');
-                            if(all_reason != 14){
-                                all_reason.attr('data-rule-required', 'true');
-                                all_reason.attr('data-msg-required', 'Reason is required');
-                            }
-                        });
-                        all_reason.val('').trigger('change');
-                    }else{
-                        all_reason.empty().trigger('change');
-                        toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                }).done(function (data){
+                    if(data.status == 1)
+                    {
+                        location.reload();
+                    }
+                    else{
+                        swal.close();
+                        toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 });
             });
 
-            $('#next_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                }
-            });
-            @if($data == true && $call->skip == 0)
-            $("#skip_btn").on('click',function () {
-                var id = $("#call_id").val();
-                $.ajax({
-                    url: '{!! route('admin.debriefing.caller_agent.skip') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
+            $('#live_btn #live_timer').html(live_timer.getTimeValues().toString());
+            $('#break_btn #break_timer').html(break_timer.getTimeValues().toString());
+
+            @if(isset($current_agent_status))
+                    @if($current_agent_status == 1)
+                        live_timer.start();
+                    @endif
+
+                    @if($current_agent_status == 2)
+                        break_timer.start();
+                    @endif
+            @endif
+
+            $("#live_btn").on('click',function (){
+                @if(!isset($current_agent_status) || ($current_agent_status == 2))
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Starting Your Session',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    $.ajax({
+                        url:'{{route("admin.debriefing.caller_agent.start")}}',
+                        method:'post',
+                        data:{
+                            '_token': '{{csrf_token()}}',
+                        }
+                    }).done(function (data){
                         if(data.status == 1)
                         {
                             location.reload();
                         }
+                        else{
+                            swal.close();
+                            toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
                     });
+                @else
+                var error = "Can\'t Start Session Again";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                @endif
             });
-            @endif
 
+            $("#break_btn").on('click',function (){
+
+                @if((isset($current_agent_status) && $current_agent_status == 1) && ($break_start < $break_limit))
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Pausing Your Session',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    $.ajax({
+                        url:'{{route("admin.debriefing.caller_agent.break")}}',
+                        method:'post',
+                        data:{
+                            '_token': '{{csrf_token()}}',
+                        }
+                    }).done(function (data){
+                        if(data.status == 1)
+                        {
+                            location.reload();
+                        }
+                        else{
+                            swal.close();
+                            toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                @else
+                var error = "Can\'t Take Break now";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                @endif
+
+            });
+
+            $("#end_btn").on('click',function (){
+
+                @if(isset($current_agent_status) && $current_agent_status != 3)
+                swal({
+                    text: 'Are you sure you want to end your session?',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                }).then(function(confirm) {
+                    if(confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Ending Your Session',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        $.ajax({
+                            url: '{{route("admin.debriefing.caller_agent.end")}}',
+                            method: 'post',
+                            data: {
+                                '_token': '{{csrf_token()}}',
+                            }
+                        }).done(function (data) {
+                            if (data.status == 1) {
+                                location.reload();
+                            } else {
+                                swal.close();
+                                toastr.error(data.message, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                    }
+                });
+                @else
+                var error = "Session Not Started or Already Ended";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                @endif
+
+            });
+
+            @if($data == true)
+                $('#status').prepend('<option value="" selected></option>').select2({
+                    placeholder: 'Select Status',
+                    width:'100%',
+                    allowClear: true
+                });
+
+                $('#reasons').prepend('<option value="" selected></option>').select2({
+                    placeholder: 'Select Reason',
+                    width:'100%',
+                    allowClear: true
+                });
+
+                $("#follow_up").inputmask({
+                    mask: "99:99",
+                });
+
+                $('body').on('select2:select','#status',function (e) {
+
+                    var statusSelection = $(this).find(':selected');
+                    var status = statusSelection.val();
+                    var all_reason = $('#reasons');
+                    $.ajax({
+                        url:'{!! route('admin.delivery.receive.reason_all') !!}',
+                        type:'POST',
+                        dataType:'json',
+                        data: {
+                            'status':status,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 0){
+                            all_reason.empty().trigger('change');
+                            $.each(data.reasons,function (key,value) {
+                                var newOption = new Option(value.name, value.id, false, false);
+                                all_reason.append(newOption).trigger('change');
+                                if(all_reason != 14){
+                                    all_reason.attr('data-rule-required', 'true');
+                                    all_reason.attr('data-msg-required', 'Reason is required');
+                                }
+                            });
+                            all_reason.val('').trigger('change');
+                        }else{
+                            all_reason.empty().trigger('change');
+                            toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+                    });
+                });
+
+                $('#next_form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    }
+                });
+
+                $('#follow_up_form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.input-group'));
+                    }
+                });
+
+                @if($call->skip == 0)
+                $("#skip_btn").on('click',function () {
+                    var id = $("#call_id").val();
+                    $.ajax({
+                        url: '{!! route('admin.debriefing.caller_agent.skip') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function(data) {
+                            if(data.status == 1)
+                            {
+                                location.reload();
+                            }
+                        });
+                });
+                @endif
+            @endif
         });
 
     </script>
+
 @endsection

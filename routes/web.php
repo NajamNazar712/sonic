@@ -1432,6 +1432,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\LastMileDebriefingController@caller_agent_view')->name('index');
             Route::post('next','Admins\LastMileDebriefingController@caller_agent_next')->name('next');
             Route::post('skip','Admins\LastMileDebriefingController@caller_agent_skip')->name('skip');
+            Route::post('follow_up/{id}','Admins\LastMileDebriefingController@caller_agent_follow_up')->name('follow_up');
+            Route::post('start','Admins\LastMileDebriefingController@caller_agent_start')->name('start');
+            Route::post('break','Admins\LastMileDebriefingController@caller_agent_break')->name('break');
+            Route::post('end','Admins\LastMileDebriefingController@caller_agent_end')->name('end');
         });
     });
 
@@ -1844,6 +1848,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments/delivered', 'Admins\AdminFinanceController@outstanding_sdn_shipments_delivered')->name('shipments.delivered');
             Route::get('delivery_notes_list', 'Admins\AdminFinanceController@outstanding_sdn_delivery_notes_list')->name('delivery_notes_list');
             Route::post('reconcile_delivery_notes', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes')->name('reconcile_delivery_notes');
+            Route::post('reconcile_delivery_notes_excel', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes_excel')->name('reconcile_delivery_notes_excel');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@outstanding_sdn_export_to_excel')->name('export_to_excel');
             Route::post('deposit_slip_list', 'Admins\AdminFinanceController@outstanding_sdn_edit_deposit_slip')->name('deposit_slip_list');
             Route::post('edit', 'Admins\AdminFinanceController@outstanding_sdn_edit_deposit_slip_submit')->name('edit');
@@ -2285,6 +2290,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('debriefing')->name('debriefing.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@debriefing_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@debriefing_list')->name('list');
+            Route::get('agent-report', 'Admins\AdminReportsController@debriefing_agent_report')->name('agent_index');
+            Route::get('agent-report/list', 'Admins\AdminReportsController@debriefing_agent_report_list')->name('agent_list');
             Route::get('export', 'Admins\AdminReportsController@debriefing_export')->name('export');
         });
         Route::prefix('cargo_returns_shipment')->name('cargo_returns_shipment.')->group(function (){
@@ -2518,6 +2525,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@pickup_history_cn_wise_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@pickup_history_cn_wise_list')->name('list');
         });
+        Route::prefix('crm_count')->name('crm_count.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@crm_count_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@crm_count_list')->name('list');    
+        });
         
     });
 
@@ -2685,6 +2696,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('debriefing_report_cut_off_time')->name('debriefing_report_cut_off_time.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_store')->name('store');
+        });
+
+        Route::prefix('debriefing_break_time')->name('debriefing_break_time.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@debriefing_break_time_setting_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@debriefing_break_time_setting_store')->name('store');
         });
 
         Route::prefix('fuel_factor')->name('fuel_factor.')->group(function () {
@@ -3714,7 +3730,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-    Route::prefix('retail')->name('retail.')->group(function () {
+Route::prefix('retail')->name('retail.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('retail.login');
     });

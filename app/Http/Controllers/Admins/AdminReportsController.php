@@ -1,6 +1,10 @@
 <?php
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\AgentCallMonitoring;
+use App\Http\Models\Admin\AgentDay;
+use App\Http\Models\Admin\AgentDayLog;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
@@ -43,7 +47,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\OSAChargesLog;
 use App\Http\Models\Admin\ReturnRevertLog;
-
+use App\Http\Models\CRM\CRMCount;
 
 class AdminReportsController extends Controller
 {
@@ -9913,7 +9917,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+            $datatable->whereBetween('sj.created_at', [$from,$to]);
         }
         if ($tracking_number = $request->get('tracking_number')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_number));
@@ -9990,6 +9994,8 @@ class AdminReportsController extends Controller
         return $datatable->make(true);
 
     }
+
+    
 
     public function pickup_history_cn_wise_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),506);
@@ -10077,6 +10083,260 @@ class AdminReportsController extends Controller
             $shipments->whereBetween('shipments.created_at', [$from, $to]);
         }
         return $pickup_history->make(true);
+    }
+    public function crm_count_index(){
+        // dd(Carbon::now()->subDays());
+        // dd(date('D'));
+        
+        
+        
+        // $crm_count_report = CRMCount::all()->groupBy(function($date) {
+        //     return Carbon::parse($date->date)->format('W');
+        // });
+        // foreach ($crm_count_report as $key => $value) {
+        //     dump($key);
+        //     // dump('count');
+        //     // dump($value->count());
+        //     foreach($value as $item){
+        //         dump($item);
+        //     }
+        // }
+        // dd($crm_count_report);
+        // $crm_count_data = array();
+        // $crm_count_records = CRMCount::all()->groupBy(function($date) {
+        //     return Carbon::parse($date->date)->format('W');
+        // });
+        // foreach ($crm_count_records as $key => $value) {
+          
+        //     $crm_count_data[$key]['count_days'] = $value->count();
+        //     $avg_closed = 0;
+        //     $avg_remaining = 0;
+        //     foreach($value as $item){
+        //         $avg_closed += number_format((($item->closed / (($item->pending + $item->new_launched) - $item->closed)) * 100), 2);
+        //         $avg_remaining += number_format(((($item->pending + $item->new_launched) / (($item->pending + $item->new_launched) - $item->closed)) * 100), 2);
+        //         $crm_count_data[$key]['data'][$item->id]['id'] = $item->id;
+        //         $crm_count_data[$key]['data'][$item->id]['pending'] = $item->pending;
+        //         $crm_count_data[$key]['data'][$item->id]['new_launched'] = $item->new_launched;
+        //         $crm_count_data[$key]['data'][$item->id]['closed'] = $item->closed;
+        //         $crm_count_data[$key]['data'][$item->id]['date'] = $item->date;
+        //         $crm_count_data[$key]['data'][$item->id]['remaining'] = ($item->pending + $item->new_launched);
+        //         $crm_count_data[$key]['data'][$item->id]['total'] = (($item->pending + $item->new_launched) - $item->closed);
+        //         $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format((($item->closed / (($item->pending + $item->new_launched) - $item->closed)) * 100), 2);
+        //         $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format(((($item->pending + $item->new_launched) / (($item->pending + $item->new_launched) - $item->closed)) * 100), 2);
+        //     }
+        //     $crm_count_data[$key]['weekly_close'] = $avg_closed/$value->count();
+        //     $crm_count_data[$key]['weekly_remaining'] = $avg_remaining/$value->count();
+        // }
+        // dd($crm_count_data);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),499);
+
+        return view('admin.reports.crm_count');
+
+    }
+    public function crm_count_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),500);
+        }
+        // $crm_count_report = CRMCount::select('pending','new_launched','closed','date');
+
+        // $datatable = Datatables::of($crm_count_report)
+        // ->addColumn('remaining', function ($crm_count_report) {
+            
+        //     return ($crm_count_report->pending + $crm_count_report->new_launched);
+        
+        // })
+        // ->addColumn('total', function ($crm_count_report) {
+           
+        //     return (($crm_count_report->pending + $crm_count_report->new_launched) - $crm_count_report->closed);
+
+        // })
+        // ->addColumn('closure_percent', function ($crm_count_report) {
+           
+        //     return number_format((($crm_count_report->closed / (($crm_count_report->pending + $crm_count_report->new_launched) - $crm_count_report->closed)) * 100), 2);
+
+        // })
+        // ->addColumn('remaining_percent', function ($crm_count_report) {
+           
+        //     return number_format(((($crm_count_report->pending + $crm_count_report->new_launched) / (($crm_count_report->pending + $crm_count_report->new_launched) - $crm_count_report->closed)) * 100), 2);
+
+        // });
+
+        
+        // return $datatable->make(true);
+
+        $from = $request->search_date_from;
+        $to = $request->search_date_to;
+        
+        // $mode = $request->search_shipping_mode;
+        $crm_count_data = array();
+       
+        if ($request->search_date_from && $request->search_date_to) {
+            $crm_count_records = CRMCount::whereBetween('date', [$from,$to])->get();
+            // dd($crm_count_records->get());
+        }else{
+            $crm_count_records = CRMCount::all();
+        }
+
+        $crm_count_records = $crm_count_records->groupBy(function($date) {
+            return Carbon::parse($date->date)->format('W');
+        });
+        // if ($request->search_date_from && $request->search_date_to) {
+        //     $crm_count_records = CRMCount::whereBetween('date', [$from,$to])->groupBy(function($date) {
+        //         return Carbon::parse($date->date)->format('W');
+        //     });
+        //     dd($crm_count_records->get());
+        // }else{
+        //     $crm_count_records = CRMCount::all()->groupBy(function($date) {
+        //         return Carbon::parse($date->date)->format('W');
+        //     });
+        // }
+        
+        foreach ($crm_count_records as $key => $value) {
+          
+            $crm_count_data[$key]['count_days'] = $value->count();
+            $avg_closed = 0;
+            $avg_remaining = 0;
+            foreach($value as $item){
+                if($item->pending + $item->new_launched == 0){
+                    $avg_closed += 0;
+                    $avg_remaining += 0;
+                    $crm_count_data[$key]['data'][$item->id]['closure_percent'] = 0;
+                    $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = 0;
+                }else{
+                    $avg_closed += number_format((($item->closed / ($item->pending + $item->new_launched) ) * 100), 2);
+                    $avg_remaining += number_format( (((($item->pending + $item->new_launched) - $item->closed) / ($item->pending + $item->new_launched)) * 100) , 2  );
+                    $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format(( ($item->closed / ($item->pending + $item->new_launched)  ) * 100), 2);
+                    $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format(( ( (($item->pending + $item->new_launched) - $item->closed) / ($item->pending + $item->new_launched) )  * 100), 2);
+                }
+                $crm_count_data[$key]['data'][$item->id]['id'] = $item->id;
+                $crm_count_data[$key]['data'][$item->id]['pending'] = $item->pending;
+                $crm_count_data[$key]['data'][$item->id]['new_launched'] = $item->new_launched;
+                $crm_count_data[$key]['data'][$item->id]['closed'] = $item->closed;
+                $crm_count_data[$key]['data'][$item->id]['date'] = $item->date;
+                $crm_count_data[$key]['data'][$item->id]['remaining'] = (($item->pending + $item->new_launched) - $item->closed);
+                $crm_count_data[$key]['data'][$item->id]['total'] = ($item->pending + $item->new_launched);
+                 $inner_pending = $item->pending;
+            }
+            $crm_count_data[$key]['weekly_close'] = number_format($avg_closed/$value->count() , 2);
+            $crm_count_data[$key]['weekly_remaining'] = number_format($avg_remaining/$value->count() , 2);
+        }
+
+
+        return $crm_count_data;
+    }
+
+	    public function debriefing_agent_report(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),504);
+
+        return view('admin.reports.debriefing_agent_report');
+
+    }
+
+    public function debriefing_agent_report_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),505);
+        }
+
+        $data = AgentDay::leftjoin('admins as agent','agent.id','agent_days.agent_id')
+            ->select(['agent.id as agent_id','agent.name as agent_name','agent_days.date as date','agent_days.id as day_id','agent_days.auto_close as auto_close','agent_days.status as status']);
+
+        $datatables = Datatables::of($data)
+            ->addColumn('assigned_calls_excel', function($calls){
+
+                $next_time = Carbon::createFromFormat('Y-m-d',$calls->date)->endOfDay()->toDateTimeString();
+                $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
+
+                return AgentCallMonitoring::where('agent_id',$calls->agent_id)
+                    ->where('created_at','>=',$prev_time)
+                    ->where('created_at','<=',$next_time)
+                    ->count();
+            })
+            ->addColumn('completed_calls_excel', function($calls) {
+                $next_time = Carbon::createFromFormat('Y-m-d',$calls->date)->endOfDay()->toDateTimeString();
+                $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
+
+                return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])
+                    ->where('created_at','>=',$prev_time)
+                    ->where('created_at','<=',$next_time)
+                    ->count();
+            })
+            ->addColumn('assigned_calls', function($calls) {
+                $next_time = Carbon::createFromFormat('Y-m-d',$calls->date)->endOfDay()->toDateTimeString();
+                $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
+
+                $count = AgentCallMonitoring::where('agent_id',$calls->agent_id)
+                    ->whereBetween('created_at',[$prev_time,$next_time])
+                    ->count();
+
+                if($count != 0)
+                {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="warning">100%</h4>';
+
+                    return $count_cell;
+                }
+                else{
+                    return 0;
+                }
+            })
+            ->addColumn('completed_calls', function($calls) {
+                $next_time = Carbon::createFromFormat('Y-m-d',$calls->date)->endOfDay()->toDateTimeString();
+                $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
+
+                $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)
+                    ->whereBetween('created_at',[$prev_time,$next_time])
+                    ->count();
+                $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])
+                    ->whereBetween('created_at',[$prev_time,$next_time])
+                    ->count();
+                if($count != 0)
+                {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="success">'. round(($count / $total_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
+                }
+                else{
+                    return 0;
+                }
+            })
+            ->addColumn('live_hours', function($calls) {
+                $start = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','asc')->first()->start;
+                $end = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','desc')->first()->end;
+                $closed = "";
+                if($calls->status == 3) {
+                    $closed = ($calls->auto_close == 1) ? " (Auto Closed)" : " (Self Closed)";
+                }
+                if($end == null)
+                {
+                    return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - *".$closed;
+                }
+                else{
+                    return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - ".Carbon::createFromFormat('H:i:s',$end)->format("h:i A").$closed;
+                }
+
+
+            })
+            ->addColumn('break_hours', function($calls) {
+                $logs = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',2)->get();
+                $break = 0;
+                foreach($logs as $log)
+                {
+                    if($log->end != null)
+                    {
+                        $start = Carbon::parse($log->start);
+                        $end = Carbon::parse($log->end);
+                        $difference = $start->diffInSeconds($end);
+                    }
+                    else{
+                        $difference = 0;
+                    }
+                    $break += $difference;
+                }
+
+                return round($break/60,0).' Minute(s)';
+            });
+
+        return $datatables->make(true);
     }
 }
 
