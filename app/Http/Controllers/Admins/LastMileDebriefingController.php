@@ -1022,7 +1022,7 @@ class LastMileDebriefingController extends Controller
                     if($bot_sms){
                         $bot_admin_id = $bot_sms->setting_value;
                     }
-                    ShipmentsJourneyController::add($shipment_id, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, $bot_admin_id, $delivery_note_id, NULL,1);
+                    /*ShipmentsJourneyController::add($shipment_id, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, $bot_admin_id, $delivery_note_id, NULL,1);*/
 
                     $agent_call_monitoring = AgentCallMonitoring::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note_id);
                     if($agent_call_monitoring->exists()){

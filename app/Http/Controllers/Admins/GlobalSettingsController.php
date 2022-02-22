@@ -6094,4 +6094,36 @@ public function sales_incentive()
         return redirect()->back()->with('success','Setting Updated');
     }
 
+    public function consignee_sms_expire_index()
+    {
+        $settings = GlobalSettings::where('type', 'consignee_sms_expire_time')->first();
+
+        if ($settings) {
+            $consignee_sms_expire_time = $settings->setting_value;
+        } else {
+            $consignee_sms_expire_time = 20;
+        }
+
+        return view('admin.settings.last_mile.consignee_sms_expire_time')->with(['consignee_sms_expire_time' => $consignee_sms_expire_time]);
+    }
+
+    public function consignee_sms_expire_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'consignee_sms_expire_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'consignee_sms_expire_time';
+        }
+
+        $settings->setting_value = $request->consignee_sms_expire_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
 }

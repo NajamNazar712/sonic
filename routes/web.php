@@ -3172,6 +3172,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@shippers_return_address_store')->name('store');
         });
 
+        Route::prefix('consignee_sms_expire')->name('consignee_sms_expire.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@consignee_sms_expire_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@consignee_sms_expire_store')->name('store');
+        });
+
     });
 
 
