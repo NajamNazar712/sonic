@@ -404,7 +404,6 @@
 
                                 $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
                                 $('#shipper_id').val(data.shipper_id);
-                                alert(data.shipper_id);
                                 UnblockPagePermanently();
                             } else {
                                 var rowNo = table.rows().count();
@@ -489,7 +488,6 @@
                                     }
                                     $('#add_shipment_form button.add').prop('disabled', false);
 
-                                    alert(data.shipper_id);
                                     $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
                                     $('#shipper_id').val(data.shipper_id);
                                     UnblockPagePermanently();
@@ -506,7 +504,6 @@
                                     UnblockPagePermanently();
                                     shipment_ids.push(data.shId);
                                     $('#shipper_id').val(data.shipper_id);
-                                    alert(data.shipper_id);
                                     table.order([0, 'desc']).draw();
                                 }
 
