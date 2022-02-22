@@ -157,7 +157,7 @@
                                                         @if($shipment->height != null)
                                                             <tr>
                                                                 <td><strong>Weight </strong><small>(Volumetric)</small></td>
-                                                                <td>{{$shipment->weight}}kg</td>
+                                                                <td>{{$shipment->actual_weight}}kg</td>
                                                                 <td><strong>Service Type</strong></td>
                                                                 <td>{{$shipment->booking_type->booking_type}}</td>
                                                                 <td><strong>Collection Amount</strong></td>
