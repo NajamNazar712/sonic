@@ -7499,12 +7499,12 @@ class AdminReportsController extends Controller
                     ->where('cps.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1)'));
             })
-            ->leftJoin('shipments_journey as ps', function ($join) {
-                $join->on('ps.shipment_id', '=', 's.id')
-                    ->where('ps.id', '=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 5 and verification = 1)'));
+            ->leftJoin('shipments_journey as us', function ($join) {
+                $join->on('us.shipment_id', '=', 's.id')
+                    ->where('us.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,12,15,18,56) and verification = 1)'));
             })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(ps.id) as pending_shipments'), 'c.name as hub')
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 'c.name as hub')
             ->groupBy('r.id');
 
         $datatables = Datatables::of($route_distribution_summary)
@@ -7517,12 +7517,9 @@ class AdminReportsController extends Controller
                 return '';
             }
         })
-        ->addColumn('undelivered_shipments', function ($entry) {
-            return round($entry->shipments_count - $entry->delivered_shipments);
-        })
         ->addColumn('undelivered_shipments_per', function ($entry) {
             if ($entry->shipments_count) {
-                return round((($entry->shipments_count - $entry->delivered_shipments) / $entry->shipments_count) * 100, 2);
+                return round(($entry->undelivered_shipments / $entry->shipments_count) * 100, 2);
             }
             else {
                 return '';
@@ -7531,6 +7528,14 @@ class AdminReportsController extends Controller
         ->addColumn('confirmation_pending_shipments_per', function ($entry) {
             if ($entry->shipments_count) {
                 return round(($entry->confirmation_pending_shipments / $entry->shipments_count) * 100, 2);
+            }
+            else {
+                return '';
+            }
+        })
+        ->addColumn('pending_shipments', function ($entry) {
+            if ($entry->shipments_count) {
+                return round((($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments)) / $entry->shipments_count) * 100, 2);
             }
             else {
                 return '';
