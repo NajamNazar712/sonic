@@ -18,6 +18,7 @@
 
                 <form action="#" id="return_note_form">
                 <div class="row justify-content-center mb-2">
+                    <input type="hidden" name="shipper_id" id="shipper_id">
                     <div class="col-3">
                         <fieldset>
                             <input type="text" class="form-control" placeholder="Scan Tracking Number" id="scan_tracking">
@@ -335,10 +336,10 @@
                 var scan = $('#scan_tracking');
                 var tracking = scan.val();
                 var hub_id = $('#hub_id').val();
+                var shipper_id = $('#shipper_id').val();
 
                 if (tracking != '') {
                     scan.attr('disabled', true);
-
                     if(table.row().count() == 0) {
                         blockPagePermanently();
                         $.ajax({
@@ -346,6 +347,7 @@
                             type: 'POST',
                             data: {
                                 'tracking': tracking,
+                                'shipper_id': shipper_id,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
@@ -401,6 +403,8 @@
                                 $('#add_shipment_form button.add').prop('disabled', false);
 
                                 $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+                                $('#shipper_id').val(data.shipper_id);
+                                alert(data.shipper_id);
                                 UnblockPagePermanently();
                             } else {
                                 var rowNo = table.rows().count();
@@ -414,13 +418,15 @@
                                 UnblockPagePermanently();
                                 shipment_ids.push(data.shId);
                                 $('#hub_id').val(data.hub);
+                                $('#shipper_id').val(data.shipper_id);
                             }
 
                             scan.val('');
                             scan.attr('disabled', false);
                             scan.focus();
                         });
-                    }else {
+                    }
+                    else {
                         if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1) {
                             blockPagePermanently();
                             $.ajax({
@@ -429,11 +435,11 @@
                                 data: {
                                     'tracking': tracking,
                                     'hub_id':hub_id,
+                                    'shipper_id':shipper_id,
                                     '_token': '{{ csrf_token() }}'
                                 }
                             })
                                 .done(function (data) {
-
                                 if (data.status == 1) {
                                     UnblockPagePermanently();
                                     scan_sound(2);
@@ -483,9 +489,12 @@
                                     }
                                     $('#add_shipment_form button.add').prop('disabled', false);
 
+                                    alert(data.shipper_id);
                                     $('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+                                    $('#shipper_id').val(data.shipper_id);
                                     UnblockPagePermanently();
-                                } else {
+                                }
+                                else {
                                     var rowNo = table.rows().count();
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
                                     var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
@@ -496,6 +505,8 @@
                                     scan_sound(1);
                                     UnblockPagePermanently();
                                     shipment_ids.push(data.shId);
+                                    $('#shipper_id').val(data.shipper_id);
+                                    alert(data.shipper_id);
                                     table.order([0, 'desc']).draw();
                                 }
 

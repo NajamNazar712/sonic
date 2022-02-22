@@ -16,6 +16,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\BookingType;
@@ -1484,6 +1485,12 @@ class ReturnController extends Controller
             if($shipment->exists()) {
                 $shipment = $shipment->first();
                 ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), null,null);
+                if($request->shipper_id != null){
+                    $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
+                    if(in_array($request->shipper_id, $mandatory_shipper) && $request->shipper_id != $shipment->user_id){
+                        return ['status' => 1, 'error' => 'Different Shipper, scan shipments of same shipper!.'];
+                    }
+                }
                 if($shipment->return_address_id != NULL){
                     $destination_id = $shipment->return_address->city_id;
                 }
@@ -1570,13 +1577,14 @@ class ReturnController extends Controller
                                     $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
 
                                     $details['id'] = $shipment->id;
+                                    $details['shipper_id'] = $shipment->user_id;
                                     $details['tracking_number'] = $shipment->tracking_number;
                                     $details['pieces_count'] = $shipment->pieces;
                                     $details['pieces_tracking_numbers'] = $shipment_pieces;
                                     return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                                 }
                             }
-                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
+                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class, 'shipper_id' => $shipment->user_id]);
 
                         } else
                             if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses))) {
@@ -1650,13 +1658,14 @@ class ReturnController extends Controller
                                         $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
 
                                         $details['id'] = $shipment->id;
+                                        $details['shipper_id'] = $shipment->user_id;
                                         $details['tracking_number'] = $shipment->tracking_number;
                                         $details['pieces_count'] = $shipment->pieces;
                                         $details['pieces_tracking_numbers'] = $shipment_pieces;
                                         return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                                     }
                                 }
-                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
+                                return response()->json(['status' => 0,'shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
 
                             } else {
                                 return ['status' => 1, 'error' => 'Return Shipment not arrived at origin center yet.'];
@@ -1741,7 +1750,7 @@ class ReturnController extends Controller
                                         return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                                     }
                                 }
-                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
+                                return response()->json(['status' => 0, 'shipper_id' =>$shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
 
                             } else
                                 if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses_2))) {
@@ -1820,7 +1829,7 @@ class ReturnController extends Controller
                                             return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                                         }
                                     }
-                                    return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
+                                    return response()->json(['status' => 0,'shipper_id'=> $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'class' => $class]);
 
                                 } else {
                                     return ['status' => 1, 'error' => 'Return Shipment not arrived at origin center yet.'];

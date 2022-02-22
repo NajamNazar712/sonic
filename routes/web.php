@@ -3172,6 +3172,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@shippers_return_address_store')->name('store');
         });
 
+        Route::prefix('return_reason_mandatory')->name('return_reason_mandatory.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_reason_mandatory_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@return_reason_mandatory_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@return_reason_mandatory_store')->name('store');
+        });
+
     });
 
 
