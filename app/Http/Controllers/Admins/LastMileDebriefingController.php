@@ -513,6 +513,11 @@ class LastMileDebriefingController extends Controller
                 $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->where('status', 1)->get();
                 $shipment = Shipment::find($data->shipment_id);
                 $delivery_note = DeliveryNote::find($data->delivery_note_id);
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $delivery_note->id)->where('shipment_id', $shipment->id)->first();
+                $fake_status = FALSE;
+                if($delivery_note_shipment->fake_status == 1){
+                    $fake_status = TRUE;
+                }
                 $total_calls = AgentCallMonitoring::where('agent_id', Auth::id())
                     ->where('created_at', '>=', $prev_time)
                     ->where('created_at', '<=', $next_time)
@@ -537,8 +542,8 @@ class LastMileDebriefingController extends Controller
 
                 $rider_status = ShipmentsJourney::where('shipment_id', $data->shipment_id)
                     ->whereNotNull('rider_id')
-                    ->get()
-                    ->last();
+                    ->orderBy('id', 'desc')
+                    ->first();
                 if (!$rider_status) {
                     $rider_status = NULL;
                 }
@@ -551,7 +556,7 @@ class LastMileDebriefingController extends Controller
                     $rider_deliveries = NULL;
                 }
 
-                return view('admin.debriefing.caller_agent')->with(['data' => true, 'statuses' => $statuses, 'shipment' => $shipment, 'delivery_note' => $delivery_note, 'total_calls' => $total_calls, 'completed_calls' => $completed_calls, 'pending_calls' => $pending_calls, 'call' => $data, 'reattempt_count' => $reattempt_count, 'rider_status' => $rider_status, 'rider_delivery' => $rider_deliveries]);
+                return view('admin.debriefing.caller_agent')->with(['data' => true, 'statuses' => $statuses, 'shipment' => $shipment, 'delivery_note' => $delivery_note, 'total_calls' => $total_calls, 'completed_calls' => $completed_calls, 'pending_calls' => $pending_calls, 'call' => $data, 'reattempt_count' => $reattempt_count, 'rider_status' => $rider_status, 'rider_delivery' => $rider_deliveries, 'fake_status' => $fake_status]);
             }
             else{
                 return view('admin.debriefing.caller_agent')->with(['data' => false]);
