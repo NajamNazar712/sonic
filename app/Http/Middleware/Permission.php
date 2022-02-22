@@ -368,6 +368,7 @@ class Permission
             'return.return_deliveries.index' => 566,
             'return.return_deliveries.list' => 566,
             'return.revert.index' => 643,
+            'return.confirmation_pending_sms' => 675,
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
@@ -586,6 +587,12 @@ class Permission
             
             'reports.reverse_pickup.index' => 624,
             'reports.reverse_pickup.list' => 624,
+            
+            'reports.crm_count.index' => 673,
+            'reports.crm_count.list' => 673,
+
+            'reports.pickup_history_cn_wise.index' => 679,
+            'reports.pickup_history_cn_wise.list' => 679,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -773,6 +780,8 @@ class Permission
             'settings.auto_invoice_generation_and_due_date.store' => 171,
 			'settings.debriefing_report_cut_off_time.index' => 175,
             'settings.debriefing_report_cut_off_time.store' => 175,
+            'settings.debriefing_break_time.index' => 674,
+            'settings.debriefing_break_time.store' => 674,
             'settings.return_note_restriction_bypass.index' => 192,
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
@@ -902,6 +911,7 @@ class Permission
 
             'settings.shippers_origin_change.index' => 667,
             'settings.shippers_return_address.index' => 668,
+            'settings.rcp_sms.index' => 680,
 
 
 
@@ -1115,7 +1125,10 @@ class Permission
             'settings.escalation.in_process.edit.index' => 517,
 			'reports.operation_service_level.index' => 524,
             'reports.operation_service_level.list' => 524,
-            
+
+            'reports.debriefing.agent_list' => 676,
+            'reports.debriefing.agent_index' => 676,
+
 			'finance.ftl_invoice.index' => 509,           
             'settings.debriefing_time_setting.index' => 526,
             'settings.debriefing_time_setting.update' => 526,

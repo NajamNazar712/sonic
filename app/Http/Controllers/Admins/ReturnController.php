@@ -43,6 +43,7 @@ use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\Zone;
+use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
@@ -56,6 +57,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
+use Yajra\Datatables\Services\DataTable;
 use function foo\func;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Support\Str;
@@ -142,7 +144,8 @@ class ReturnController extends Controller
                     ->where('consolidations.consolidation_id','=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
             })
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by','consolidations.consolidation_id','ras.admin_id as assigned_agent_id','tat_options.value as tat_value','u.rcp_tat_option_id as tat_option_id')
+           /* ->leftjoin('return_confirmation_pending_sms_attempts as rcps','rcps.shipment_id','=','shipments.id')*/
+            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 'shipments_journey.remarks as shipper_remarks','shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges', 'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted','dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 'ras.created_at as assigned_at', 'asadby.name as assigned_by','consolidations.consolidation_id','ras.admin_id as assigned_agent_id','tat_options.value as tat_value','u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/)
             ->whereIn('shipments.shipper_status_id', [12,52])
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
@@ -4662,5 +4665,62 @@ class ReturnController extends Controller
         $nsa_charges_log->osa_charges = $charge;
         $nsa_charges_log->updated_by = Auth::id();
         $nsa_charges_log->save();
+    }
+
+    public function confirmation_pending_sms_index(){
+       ActivityTrailController::createActivityTrailLog(Auth::id(),502);
+       return view('admin.return.confirmation_pending_sms');
+    }
+
+    public function confirmation_pending_sms_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),503);
+        }
+       $rcp = ReturnConfirmationPendingSmsAttempt::join('shipments as s','s.id','=','return_confirmation_pending_sms_attempts.shipment_id')
+           ->select('s.id as shipment_id','s.tracking_number as tracking_number','s.tracking_number as tracking','s.consignee_phone_number_1 as phone','return_confirmation_pending_sms_attempts.response as response','return_confirmation_pending_sms_attempts.created_at as created_at','return_confirmation_pending_sms_attempts.updated_at as updated_at','return_confirmation_pending_sms_attempts.status as status');
+
+       $datatable = DataTables::of($rcp)
+           ->editColumn('tracking_number', function ($shipments) {
+               $route = route('admin.tracking.index');
+               return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+           })
+       ->editColumn('updated_at',function($rcp){
+            if($rcp->status == 0){
+                return '-';
+            }
+            else{
+                return $rcp->updated_at;
+            }
+       })
+       ->editColumn('status',function ($rcp){
+            if($rcp->status == 0){
+                return 'Pending';
+            }
+            else if($rcp->status == 2){
+                return 'Re-Attempt';
+            }
+            else{
+                return 'Return';
+            }
+       })
+       ->filterColumn('return_confirmation_pending_sms_attempts.status',function ($query,$keyword){
+
+           $keyword = strtolower($keyword);
+           if ($keyword == 'pending') {
+               $query->where('return_confirmation_pending_sms_attempts.status',0);
+           }
+           else if($keyword == 'return'){
+               $query->where('return_confirmation_pending_sms_attempts.status',1);
+           }
+           else if($keyword == 're-attempt'){
+               $query->where('return_confirmation_pending_sms_attempts.status',2);
+           }
+           else {
+               $query->whereRaw('false');
+           }
+       });
+
+        return $datatable->make(true);
     }
 }

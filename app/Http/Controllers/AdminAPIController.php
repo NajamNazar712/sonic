@@ -51,16 +51,19 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
+use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
+use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\HR\EmployeeLeave;
+use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeePayslip;
+use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PayslipPdf;
-use App\Http\Models\PendingDwsWeightCharges;
 use App\Http\Models\Product;
-use App\Http\Models\RateStatus;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider;
@@ -85,7 +88,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Password;
-use phpDocumentor\Reflection\PseudoTypes\False_;
 
 class AdminAPIController extends Controller
 {
@@ -5316,7 +5318,7 @@ class AdminAPIController extends Controller
         }
     }
 
-	public function login_v3(Request $request)
+    public function login_v3(Request $request)
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
@@ -6061,6 +6063,7 @@ class AdminAPIController extends Controller
                     ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
                     ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person', 'c.name as city','e.official_phone_number as official_phone_number')
                     ->where('e.phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
+                    ->orwhere('e.official_phone_number', substr_replace($request->input('search_param'), '-', 4, 0))
                     ->where('admins.status', 1);
             } elseif ($request->search_with == 3) {
                 $admin_profile = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
@@ -6079,6 +6082,162 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 0, 'data' => $admin_profile]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'No User found!']);
+            }
+        }
+    }
+
+    public function check_profile_v2(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            $admin_profile = Employee::where('trax_id', $admin->trax_id);
+            if ($admin_profile->exists()) {
+                $admin_profile = $admin_profile->first();
+                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id || !$admin_profile->nationality_id){
+                    return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => "Profile already updated"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+            }
+        }else{
+            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+
+    }
+
+    public function get_profile_v2(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            $blood_group_list = EmployeeBloodGroup::all();
+            $gender_list = EmployeeGender::all();
+            $religion_list = EmployeeReligion::all();
+            $marital_status_list = EmployeeMaritalStatus::all();
+            $staff_category_list = StaffCategory::all();
+            $shift_list = EmployeeShift::all();
+            $domecile_list = EmployeeDomicile::all();
+            $nationalities_list = EmployeeNationality::all();
+            $admin_profile = Employee::where('trax_id', $admin->trax_id);
+            if ($admin_profile->exists()) {
+                $admin_profile = $admin_profile->get();
+                return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'gender_list' => $gender_list, 'religion_list' => $religion_list, 'marital_status_list' => $marital_status_list, 'staff_category_list' => $staff_category_list, 'shift_list' => $shift_list, 'domecile_list' => $domecile_list, 'nationalities_list' => $nationalities_list, 'employee_data' => $admin_profile]);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+            }
+        }else{
+            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+    }
+
+    public function update_profile_v2(Request $request)
+    {
+        $rules = [
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'mother_name' => ['nullable'],
+            'employee_gender_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_genders,id'],
+            'shift_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_shifts,id'],
+            'staff_category_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:staff_categories,id'],
+            'guardian_name' => ['nullable'],
+            'religion_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
+            'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
+            'marital_status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
+            'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+            'nationality_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
+            'address' => ['nullable'],
+            'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'emergency_contact_person' => ['required'],
+            'official_email' => ['nullable', 'email'],
+            'date_of_birth' => ['nullable'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee_request = Employee::find($request->employee_id);
+            if ($employee_request) {
+                $admin = Admin::where('trax_id', $employee_request->trax_id);
+                if($admin->exists()){
+                    $admin = $admin->first();
+                    $city = City::find($employee_request->city_id);
+                    $employee_request->zone_id = $city->zone_id;
+                    if ($request->has('employee_gender_id')) {
+                        $employee_request->employee_gender_id = $request->employee_gender_id;
+                    }
+                    if ($request->has('guardian_name')) {
+                        $employee_request->guardian_name = $request->guardian_name;
+                    }
+
+                    if ($request->has('religion_id')) {
+                        $employee_request->religion_id = $request->religion_id;
+                    }
+
+                    if ($request->has('domicile_id')) {
+                        $employee_request->domicile_id = $request->domicile_id;
+                    }
+
+                    if ($request->has('marital_status_id')) {
+                        $employee_request->marital_status_id = $request->marital_status_id;
+                    }
+
+                    if ($request->has('blood_group_id')) {
+                        $employee_request->blood_group = $request->blood_group_id;
+                    }
+
+                    if ($request->has('address')) {
+                        $employee_request->address = $request->address;
+                    }
+
+                    if ($request->has('emergency_contact')) {
+                        $employee_request->emergency_contact = $request->emergency_contact;
+                    }
+
+                    if ($request->has('emergency_contact_person')) {
+                        $employee_request->emergency_contact_person = $request->emergency_contact_person;
+                    }
+
+                    if ($request->has('official_email')) {
+                        $employee_request->official_email = $request->official_email;
+                        $admin->email = $request->official_email;
+                    }
+
+                    if ($request->has('date_of_birth')) {
+                        $employee_request->date_of_birth = $request->date_of_birth;
+                    }
+
+                    if ($request->has('mother_name')) {
+                        $employee_request->mother_name = $request->mother_name;
+                    }
+
+                    if ($request->has('shift_id')) {
+                        $employee_request->shift_id = $request->shift_id;
+                        $admin->shift_id = $request->shift_id;
+                    }
+
+                    if ($request->has('staff_category_id')) {
+                        $employee_request->staff_category_id = $request->staff_category_id;
+                    }
+                    if ($request->has('nationality_id')) {
+                        $employee_request->nationality_id = $request->nationality_id;
+                    }
+
+                    $employee_request->save();
+                    $admin->save();
+                    return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
+                }
+                else {
+                    return response()->json(['status' => 1, 'message' => 'User not found!']);
+                }
+            }
+            else {
+                return response()->json(['status' => 1, 'message' => 'User not found!']);
             }
         }
     }

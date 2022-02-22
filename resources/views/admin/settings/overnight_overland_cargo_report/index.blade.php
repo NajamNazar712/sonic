@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Overnight & Overland Cargo Origin List')
+@section('title', 'Rush & Saver Plus Cargo Origin List')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Overnight & Overland Cargo
+                    Rush & Saver Plus Cargo
                 </h1>
 
                 <div class="card">

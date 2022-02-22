@@ -286,13 +286,13 @@ class UserManagementController extends Controller
 
     public function user_add_store(Request $request) {
         $employee_id = null;
+        $duplicate_account = $request->has('duplicate_account') ? true : false;
         $admin = new Admin();
 
         $admin->name = $request->input('name');
         $admin->email = $request->input('email');
         $admin->phone_number = $request->input('phone_number');
         $admin->official_phone_number = $request->input('official_phone_number');
-        $admin->cnic = $request->input('cnic');
         $admin->role_id = $request->input('role_id');
         $admin->default_hub_id = $request->input('default_hub');
         $admin->password = bcrypt($request->input('pin'));
@@ -300,72 +300,75 @@ class UserManagementController extends Controller
         $admin->shift_id = $request->input('shift_id');
         $admin->designation_id = $request->input('designation_id');
 
-        if($request->trax_id != null){
-            $trax_id = $request->trax_id;
-            $employee = Employee::where('trax_id', $request->trax_id);
-            if($employee->exists()){
-                $employee = $employee->first();
-                $employee_id = $employee->id;
+        if(!$duplicate_account) {
+            $admin->cnic = $request->input('cnic');
+            if ($request->trax_id != null) {
+                $trax_id = $request->trax_id;
+                $employee = Employee::where('trax_id', $request->trax_id);
+                if ($employee->exists()) {
+                    $employee = $employee->first();
+                    $employee_id = $employee->id;
+                } else {
+                    $employee = new Employee();
+                    $employee->trax_id = $trax_id;
+                    $employee->name = $request->name;
+                    $employee->city_id = $request->default_hub;
+                    $employee->cnic = $request->cnic;
+                    $employee->phone_number = $request->phone_number;
+                    $employee->official_phone_number = $request->official_phone_number;
+                    $employee->employee_type_id = 1;
+                    $employee->request_status_id = 3;
+                    $employee->status_id = 3;
+                    $employee->official_email = $request->email;
+                    $employee->designation_id = $request->designation_id;
+                    $employee->department_id = EmployeeDesignation::find($request->designation_id)->department_id ?? null;
+                    $employee->pin = $request->pin;
+                    $employee->shift_id = $request->shift_id;
+                    $employee->save();
+
+                    $employee_id = $employee->id;
+
+                }
+
+            } else {
+                $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+
+                if ($global_setting->exists()) {
+                    $global_setting = $global_setting->first();
+                    $trax_id = $global_setting->setting_value + 1;
+                    $global_setting->setting_value = $trax_id;
+                    $global_setting->save();
+                    $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+
+                    $employee = new Employee();
+                    $employee->trax_id = $trax_id;
+                    $employee->name = $request->name;
+                    $employee->city_id = $request->default_hub;
+                    $employee->cnic = $request->cnic;
+                    $employee->phone_number = $request->phone_number;
+                    $employee->official_phone_number = $request->official_phone_number;
+                    $employee->employee_type_id = 1;
+                    $employee->request_status_id = 3;
+                    $employee->status_id = 3;
+                    $employee->official_email = $request->email;
+                    $employee->designation_id = $request->designation_id;
+                    $employee->department_id = EmployeeDesignation::find($request->designation_id)->department_id ?? null;
+                    $employee->pin = $request->pin;
+                    $employee->shift_id = $request->shift_id;
+                    $employee->save();
+
+                    $employee_id = $employee->id;
+                } else {
+                    $trax_id = null;
+                }
             }
-            else{
-                $employee = new Employee();
-                $employee->trax_id = $trax_id;
-                $employee->name = $request->name;
-                $employee->city_id = $request->default_hub;
-                $employee->cnic = $request->cnic;
-                $employee->phone_number = $request->phone_number;
-                $employee->official_phone_number = $request->official_phone_number;
-                $employee->employee_type_id = 1;
-                $employee->request_status_id = 3;
-                $employee->status_id = 3;
-                $employee->official_email = $request->email;
-                $employee->designation_id = $request->designation_id;
-                $employee->department_id = EmployeeDesignation::find($request->designation_id)->department_id ?? null;
-                $employee->pin = $request->pin;
-                $employee->shift_id = $request->shift_id;
-                $employee->save();
 
-                $employee_id = $employee->id;
-
-            }
-
+            $admin->trax_id = $trax_id;
+            $admin->employee_id = $employee_id;
         }
         else{
-            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
-
-            if($global_setting->exists()){
-                $global_setting = $global_setting->first();
-                $trax_id = $global_setting->setting_value + 1;
-                $global_setting->setting_value = $trax_id;
-                $global_setting->save();
-                $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-
-                $employee = new Employee();
-                $employee->trax_id = $trax_id;
-                $employee->name = $request->name;
-                $employee->city_id = $request->default_hub;
-                $employee->cnic = $request->cnic;
-                $employee->phone_number = $request->phone_number;
-                $employee->official_phone_number = $request->official_phone_number;
-                $employee->employee_type_id = 1;
-                $employee->request_status_id = 3;
-                $employee->status_id = 3;
-                $employee->official_email = $request->email;
-                $employee->designation_id = $request->designation_id;
-                $employee->department_id = EmployeeDesignation::find($request->designation_id)->department_id ?? null;
-                $employee->pin = $request->pin;
-                $employee->shift_id = $request->shift_id;
-                $employee->save();
-
-                $employee_id = $employee->id;
-            }
-            else{
-                $trax_id = null;
-            }
+            $admin->duplicate_user = 1;
         }
-
-        $admin->trax_id = $trax_id;
-        $admin->employee_id = $employee_id;
 
         $admin->save();
 
@@ -486,7 +489,6 @@ class UserManagementController extends Controller
             $admin->email = $request->input('email');
             $admin->phone_number = $request->input('phone_number');
             $admin->official_phone_number = $request->input('official_phone_number');
-            $admin->cnic = $request->input('cnic');
             if($admin->role_id != $request->input('role_id'))
             {
                 ActivityTrailController::createActivityTrailLog(Auth::id(),232,1);
@@ -494,7 +496,6 @@ class UserManagementController extends Controller
             $admin->role_id = $request->input('role_id');
             $admin->default_hub_id = $request->input('default_hub');
             $admin->updated_by = Auth::id();
-            $admin->trax_id = $request->trax_id;
             $admin->shift_id = $request->input('shift_id');
             $admin->designation_id = $request->input('designation_id');
 
@@ -504,7 +505,10 @@ class UserManagementController extends Controller
             }
 
 
-
+            if($admin->duplicate_user == 0) {
+                $admin->cnic = $request->input('cnic');
+                $admin->trax_id = $request->trax_id;
+            }
             $admin->save();
 
             if ($request->has('hub_ids')) {
@@ -528,22 +532,23 @@ class UserManagementController extends Controller
                 AdminHub::where('admin_id', $id)->delete();
             }
 
-            $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
-            if($employee->exists())
-            {
-                $employee = $employee->first();
-                $employee->designation_id = $admin->designation_id;
-                $employee->department_id = EmployeeDesignation::find($admin->designation_id)->department_id ?? null;
-                $employee->city_id = $admin->default_hub_id;
-                $employee->phone_number = $admin->phone_number;
-                $employee->official_phone_number = $admin->official_phone_number;
-                $employee->official_email = $admin->email;
-                $employee->cnic = $admin->cnic;
-                $employee->name = $admin->name;
-                $employee->pin = $admin->dummy_pin;
-                $employee->shift_id = $admin->shift_id;
+            if($admin->duplicate_user == 0) {
+                $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);
+                if ($employee->exists()) {
+                    $employee = $employee->first();
+                    $employee->designation_id = $admin->designation_id;
+                    $employee->department_id = EmployeeDesignation::find($admin->designation_id)->department_id ?? null;
+                    $employee->city_id = $admin->default_hub_id;
+                    $employee->phone_number = $admin->phone_number;
+                    $employee->official_phone_number = $admin->official_phone_number;
+                    $employee->official_email = $admin->email;
+                    $employee->cnic = $admin->cnic;
+                    $employee->name = $admin->name;
+                    $employee->pin = $admin->dummy_pin;
+                    $employee->shift_id = $admin->shift_id;
 
-                $employee->update();
+                    $employee->update();
+                }
             }
             return redirect()->route('admin.user_management.users.index')->with(['success' => 'User: ' . $request->input('name') . ' has been updated!']);
     }
