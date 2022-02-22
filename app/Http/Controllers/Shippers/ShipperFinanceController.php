@@ -976,12 +976,25 @@ class ShipperFinanceController extends Controller
             ->where('u.id',session('user_id'))
             ->where('ubi.default_bank',1);
 
+        if ($request->get('from_date') && $request->get('to_date')) {
+            $from = Carbon::parse($request->get('from_date'))->format('Y-m-d');
+            $to = Carbon::parse($request->get('to_date'))->format('Y-m-d');
+            $invoice->whereBetween('invoices.invoicing_date', [$from,$to]);
+        }
+
         $invoices = DB::table('invoice_for_reimbursements as invoices')->join('users as u', 'invoices.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at',DB::raw('NULL as due_date'),DB::raw('NULL as received_date'),DB::raw('NULL as company_bank'),DB::raw('NULL as received_amount'),DB::raw('NULL as tax_amount'),DB::raw('NULL as deposit_date'),DB::raw('NULL as status'),DB::raw('NULL as status_id'), 'invoices.invoicing_date as invoicing_date',DB::raw('NULL as invoicing_cycle'),DB::raw('NULL as invoice_type'),'invoices.payment_type as payment_type',DB::raw('1 as type_id'))
             ->where('u.id',session('user_id'))
-            ->where('invoices.to_show',1)
-            ->union($invoice);
+            ->where('invoices.to_show',1);
+
+         if ($request->get('from_date') && $request->get('to_date')) {
+             $from = Carbon::parse($request->get('from_date'))->format('Y-m-d');
+             $to = Carbon::parse($request->get('to_date'))->format('Y-m-d');
+             $invoice->whereBetween('invoices.invoicing_date', [$from,$to]);
+         }
+
+        $invoices->union($invoice);
 
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function ($invoice) {

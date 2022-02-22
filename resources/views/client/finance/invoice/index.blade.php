@@ -11,7 +11,34 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('client.inc.messages')
+                <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                      <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                      </span>
+                            </div>
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                            </div>
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To">
+                        </div>
+                    </div>
 
+                    <div class="col-2">
+                        <div class="form-group">
+                            <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                         </div>
+                    </div>
+                </form>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -107,6 +134,38 @@
                 }
             });
 
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #to_date').pickadate('picker').set('min', $('#track_form #from_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #from_date').pickadate('picker').set('max', $('#track_form #to_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
@@ -125,7 +184,13 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('cod.finance.invoice.list') }}',
+                ajax:{
+                    url: '{{ route('cod.finance.invoice.list') }}',
+                    data: function (d) {
+                        d.from_date = $('input[name="from_date_formatted"]').val();
+                        d.to_date = $('input[name="to_date_formatted"]').val();
+                    }
+                },
                 rowId: 'id',
                 order: [[0, 'desc']],
                 columns: [
@@ -193,6 +258,7 @@
                     this.api().table().columns.adjust();
                 }
             });
+
 
             $('#datatable tbody').on('click', 'tr td.invoice_number button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
@@ -298,7 +364,15 @@
                         });
                 }
             });
+            $('#track_form').bind('submit', function (e) {
+                e.preventDefault();
+                var from_date = $('#track_form #from_date').val();
+                var to_date = $('#track_form #to_date').val();
 
+                if ((from_date != '' && to_date != '')) {
+                    table.draw();
+                }
+            });
         });
     </script>
 @endsection
