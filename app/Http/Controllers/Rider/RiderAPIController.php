@@ -3407,7 +3407,6 @@ class RiderAPIController extends Controller
                 $rider_delivery_history = array();
                 foreach ($rider_deliveries as $rider_delivery) {
                     $fake_status_count = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)
-                        ->where('rider_id', $rider_id)
                         ->where('update_type', 1)
                         ->where('fake_status', 1)->count('fake_status');
                     $undelivered_shipments = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)->where('status', 1)->where('update_type', 1)->count();
