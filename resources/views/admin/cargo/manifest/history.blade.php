@@ -16,20 +16,98 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
-                            <div class="text-center">
-                                <form id="tracking_number_search_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
-                                    <div class="form-group">
-                                        <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                            </div>
+                                            <input type="text" name="transit_from_date"
+                                                   class="form-control bg-primary border-primary white rounded-right"
+                                                   id="transit_from_date" placeholder="Transit Date From">
+                                        </div>
                                     </div>
-                                </form>
-
-                                <form id="bag_number_search_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
-                                    <div class="form-group">
-                                        <input type="text" name="bag_number" class="form-control bag_number" id="bag_number" placeholder="Bag No">
+                                    <div class="col">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                            </div>
+                                            <input type="text" name="transit_to_date"
+                                                   class="form-control bg-primary border-primary white rounded-right"
+                                                   id="transit_to_date" placeholder="Transit Date To">
+                                        </div>
                                     </div>
-                                </form>
+                                    <div class="col">
+                                        <select name="search_filter_origin" id="search_filter_origin" class="form-control select2">
+
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->name}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <select name="search_filter_destination" id="search_filter_destination" class="form-control select2">
+
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->name}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <form id="tracking_number_search_form"
+                                              class=""
+                                              novalidate="novalidate">
+                                            <div class="form-group">
+                                                <input type="text" name="tracking_number" class="form-control tracking_number"
+                                                       id="tracking_number" placeholder="Tracking Number">
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <form id="bag_number_search_form"
+                                              class=""
+                                              novalidate="novalidate">
+                                            <div class="form-group">
+                                                <input type="text" name="bag_number" class="form-control bag_number"
+                                                       id="bag_number" placeholder="Bag No">
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div class="col-md-7">
+                                        <button type="button" id="search_filter_btn"
+                                                class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
+                                                    class="la la-search" style="margin-right: 10px"></i> Search
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+{{--                            <div class="text-center">--}}
+{{--                                <form id="tracking_number_search_form"--}}
+{{--                                      class="d-inline-block form-inline ml-1 mb-1 justify-content-center"--}}
+{{--                                      novalidate="novalidate">--}}
+{{--                                    <div class="form-group">--}}
+{{--                                        <input type="text" name="tracking_number" class="form-control tracking_number"--}}
+{{--                                               id="tracking_number" placeholder="Tracking Number">--}}
+{{--                                    </div>--}}
+{{--                                </form>--}}
+
+{{--                                <form id="bag_number_search_form"--}}
+{{--                                      class="d-inline-block form-inline ml-1 mb-1 justify-content-center"--}}
+{{--                                      novalidate="novalidate">--}}
+{{--                                    <div class="form-group">--}}
+{{--                                        <input type="text" name="bag_number" class="form-control bag_number"--}}
+{{--                                               id="bag_number" placeholder="Bag No">--}}
+{{--                                    </div>--}}
+{{--                                </form>--}}
+{{--                            </div>--}}
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -45,7 +123,7 @@
                                     <th class="border-primary border-darken-1">Total Weight</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
-{{--                                    <th class="border-primary border-darken-1">Route Name</th>--}}
+                                    {{--                                    <th class="border-primary border-darken-1">Route Name</th>--}}
                                     <th class="border-primary border-darken-1">Driver Name</th>
                                     <th class="border-primary border-darken-1">Vehicle</th>
                                     <th class="border-primary border-darken-1">Contact No.</th>
@@ -56,7 +134,8 @@
                                 </thead>
                             </table>
 
-                            <div class="modal fade" id="info_modal" role="dialog" aria-labelledby="info_modal_title" aria-hidden="true">
+                            <div class="modal fade" id="info_modal" role="dialog" aria-labelledby="info_modal_title"
+                                 aria-hidden="true">
                                 <div class="modal-dialog modal-sm" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -64,7 +143,8 @@
                                         <div class="modal-body text-center">
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -88,7 +168,8 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="short_received_bags" role="dialog" aria-labelledby="short_received_bags" aria-hidden="true">
+    <div class="modal fade" id="short_received_bags" role="dialog" aria-labelledby="short_received_bags"
+         aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -119,26 +200,63 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css"
+          href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css"
+          href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
+            type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
+            type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script>
-        $(document).ready(function() {
+        var booking_from_date = $('#transit_from_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            max: '{{ Carbon\Carbon::now() }}',
+            // format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                if (context.select) {
+                    $('#transit_to_date').pickadate('picker').set('min', $('#transit_from_date').pickadate('picker').get('select'));
+                }
+            }
+        });
+        var booking_to_date = $('#transit_to_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            max: '{{ Carbon\Carbon::now() }}',
+            // format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                if (context.select) {
+                    $('#transit_from_date').pickadate('picker').set('max', $('#transit_to_date').pickadate('picker').get('select'));
+                }
+            }
+        });
+
+        $(document).ready(function () {
             @if(session('errors'))
             scan_sound(2);
             @endif
@@ -154,10 +272,10 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         var tab = window.open('', '_blank');
 
-                        if(!tab) {
+                        if (!tab) {
                             swal({
                                 title: 'Popup Blocker Enabled!',
                                 text: 'Please add this site to your exception list.',
@@ -165,8 +283,7 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                        }
-                        else {
+                        } else {
                             tab.document.write(data);
                             tab.document.close();
                             tab.focus();
@@ -174,9 +291,20 @@
                     });
             }
 
+            $('#search_filter_origin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search',
+                width:'100%',
+                allowClear:false
+            });
+            $('#search_filter_destination').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search',
+                width:'100%',
+                allowClear:false
+            });
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
+
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
@@ -206,7 +334,7 @@
                             head.push('Status');
 
 
-                            $.each(result.data, function(index, values) {
+                            $.each(result.data, function (index, values) {
                                 row = [];
 
                                 row.push(index + 1);
@@ -236,7 +364,7 @@
 
                     return {body: body, header: head};
                 }
-            } );
+            });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -245,7 +373,7 @@
                         title: 'Manifest History',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },'reset'],
+                    }, 'reset'],
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -258,6 +386,10 @@
                 ajax: {
                     url: '{{ route('admin.cargo_manifest.history.list') }}',
                     data: function (d) {
+                        d.transit_from_date = $('#transit_from_date').val();
+                        d.transit_to_date = $('#transit_to_date').val();
+                        d.search_filter_origin = $('#search_filter_origin').val();
+                        d.search_filter_destination = $('#search_filter_destination').val();
                         d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
                         d.bag_number = $('#bag_number_search_form #bag_number').val();
                     }
@@ -265,10 +397,24 @@
                 rowId: 'id',
                 order: [[14, 'desc']],
                 columns: [
-                    {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {
+                        data: 'serial_number',
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 1,
+                        render: function (data, type, row) {
+                            return '';
+                        }
+                    },
                     {data: 'manifest_id', name: 'cargo_manifests.id', class: 'align-middle manifest_id'},
                     {data: 'bags', name: 'cargo_manifests.bags', class: 'align-middle text-center bags'},
-                    {data: 'short_received_bags', name: 'cargo_manifests.bags', class: 'align-middle text-center short_received_bags'},
+                    {
+                        data: 'short_received_bags',
+                        name: 'cargo_manifests.bags',
+                        class: 'align-middle text-center short_received_bags'
+                    },
                     {data: 'shipments', name: 'cargo_manifests.shipments', class: 'align-middle text-center shipments'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
@@ -284,12 +430,12 @@
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'status', name: 'cargo_manifests.status_id', class: 'align-middle status'}
                 ],
-                rowCallback: function(row, data, index) {
+                rowCallback: function (row, data, index) {
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-                initComplete: function() {
+                initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -300,35 +446,34 @@
                     var transport_select = '<select name="transport_select" id="transport_select" class="select2 form-control"></select>';
                     var vendor_select = '<select name="vendor_select" id="vendor_select" class="select2 form-control"></select>';
 
-                    this.api().columns().every(function(column_id) {
+                    this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.aging')  || $(header).is('.junctions') ) {
+                        if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.junctions')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.shipping_mode')){
+                        } else if ($(header).is('.shipping_mode')) {
                             $(mode_drop_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.status')){
+                                }).wrap(td);
+                        } else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.transport_mode')){
+                                }).wrap(td);
+                        } else if ($(header).is('.transport_mode')) {
                             $(transport_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.vendor')){
+                                }).wrap(td);
+                        } else if ($(header).is('.vendor')) {
                             $(vendor_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
+                                }).wrap(td);
+                        } else {
+                            var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
 
@@ -344,16 +489,16 @@
                     });
 
                     $("#mode_select").prepend('<option value="" selected></option>').select2({
-                        data:data1,
+                        data: data1,
                         placeholder: "Select Mode",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -364,9 +509,9 @@
                     });
 
                     $("#transport_select").prepend('<option value="" selected></option>').select2({
-                        data:data3,
+                        data: data3,
                         placeholder: "Select Transport",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -378,9 +523,9 @@
 
 
                     $("#vendor_select").prepend('<option value="" selected></option>').select2({
-                        data:data4,
+                        data: data4,
                         placeholder: "Select Transport",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -388,11 +533,11 @@
                 }
             });
 
-          
+
             var route = '{!! route('admin.tracking.index') !!}';
 
 
-            $('#tracking_number_search_form').bind('submit', function(e) {
+            $('#tracking_number_search_form').bind('submit', function (e) {
                 e.preventDefault();
 
                 length = $('#tracking_number_search_form #tracking_number').val().length;
@@ -406,13 +551,13 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
+            }).bind('input', function () {
                 if (this.value.length == 0 || this.value.length >= 6) {
                     table.draw();
                 }
             });
 
-            $('#bag_number_search_form').bind('submit', function(e) {
+            $('#bag_number_search_form').bind('submit', function (e) {
                 e.preventDefault();
 
                 table.draw();
@@ -422,10 +567,10 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
+            }).bind('input', function () {
                 table.draw();
             });
-            
+
             $('#datatable tbody').on('click', '.manifest_id', function () {
                 var manifest_id = table.row($(this).parents('tr')).data().manifest;
                 console.log(manifest_id);
@@ -448,8 +593,7 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                        }
-                        else {
+                        } else {
                             tab.document.write(data);
                             tab.document.close();
                             tab.focus();
@@ -457,7 +601,7 @@
                     });
             });
 
-            $('#datatable tbody').on('click', 'tr td.bags button', function() {
+            $('#datatable tbody').on('click', 'tr td.bags button', function () {
                 var manifest_id = table.row($(this).parents('tr')).data().manifest;
 
 
@@ -471,7 +615,7 @@
                         'manifest_id': manifest_id
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         if (data) {
                             var head = '';
                             var tracking_numbers = '';
@@ -481,8 +625,8 @@
                                 '<span aria-hidden="true">×</span>\n' +
                                 '</button>';
 
-                            $.each(data, function(index, $bag_numbers) {
-                                tracking_numbers += '<u>'+ $bag_numbers+ '</u><br>';
+                            $.each(data, function (index, $bag_numbers) {
+                                tracking_numbers += '<u>' + $bag_numbers + '</u><br>';
                             });
 
                             $('#bags_data .modal-header').html(head);
@@ -493,7 +637,7 @@
                     });
             });
 
-            $('#datatable tbody').on('click', 'tr td.short_received_bags button', function() {
+            $('#datatable tbody').on('click', 'tr td.short_received_bags button', function () {
                 var manifest_id = table.row($(this).parents('tr')).data().manifest;
 
 
@@ -507,7 +651,7 @@
                         'manifest_id': manifest_id
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         if (data.status == 1) {
                             var head = '';
                             var tracking_numbers = '';
@@ -517,10 +661,10 @@
                                 '<span aria-hidden="true">×</span>\n' +
                                 '</button>';
 
-                            $.each(data.tracking_numbers, function(bag_number, tracking_number_array) {
-                                tracking_numbers += '<u>'+ bag_number+ '</u><br>';
-                                $.each(tracking_number_array, function(index, tracking_nuber) {
-                                    tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_nuber+' target="_blank">'+tracking_nuber+'</a></u><br>';
+                            $.each(data.tracking_numbers, function (bag_number, tracking_number_array) {
+                                tracking_numbers += '<u>' + bag_number + '</u><br>';
+                                $.each(tracking_number_array, function (index, tracking_nuber) {
+                                    tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_nuber + ' target="_blank">' + tracking_nuber + '</a></u><br>';
                                 });
                                 tracking_numbers += '<br>';
                             });
@@ -529,14 +673,16 @@
                             $('#short_received_bags .modal-body').html(tracking_numbers);
 
                             $('#short_received_bags').modal('show');
-                        }
-                        else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
                         }
                     });
             });
 
-            $('#datatable tbody').on('click', 'tr td.shipments button', function() {
+            $('#datatable tbody').on('click', 'tr td.shipments button', function () {
                 var manifest_id = table.row($(this).parents('tr')).data().manifest;
 
 
@@ -550,26 +696,29 @@
                         'manifest_id': manifest_id
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
 
-                            var head = '';
-                            var tracking_numbers = '';
+                        var head = '';
+                        var tracking_numbers = '';
 
-                            head = '<h4 class="modal-title" id="shipments_title">Shipment(s)</h4>' +
-                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                                '<span aria-hidden="true">×</span>\n' +
-                                '</button>';
+                        head = '<h4 class="modal-title" id="shipments_title">Shipment(s)</h4>' +
+                            '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                            '<span aria-hidden="true">×</span>\n' +
+                            '</button>';
 
-                            $.each(data, function(index, tracking_number) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                            });
+                        $.each(data, function (index, tracking_number) {
+                            tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
+                        });
 
-                            $('#shipments .modal-header').html(head);
-                            $('#shipments .modal-body').html(tracking_numbers);
+                        $('#shipments .modal-header').html(head);
+                        $('#shipments .modal-body').html(tracking_numbers);
 
-                            $('#shipments').modal('show');
+                        $('#shipments').modal('show');
 
                     });
+            });
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
             });
         });
 
