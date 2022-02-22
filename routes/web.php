@@ -3537,6 +3537,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+        Route::get('add/standard_rates', 'Admins\Retail\RetailAdminUserManagementController@add_standard_rates')->name('add.rates');
+        Route::post('standard_rates/submit', 'Admins\Retail\RetailAdminUserManagementController@standard_rates_submit')->name('standard.rates.submit');
+        Route::get('standard_rates/edit', 'Admins\Retail\RetailAdminUserManagementController@standard_rates_edit')->name('rates.edit');
+        Route::post('update/standard_rates', 'Admins\Retail\RetailAdminUserManagementController@standard_rates_update')->name('standard.rates.update');
+
 
         Route::prefix('accounts')->name('accounts.')->group(function () {
             Route::get('', 'Admins\Retail\RetailAdminAccounts@index')->name('index');

@@ -1688,6 +1688,10 @@
                                                 @if (session('role_id') == 1 || in_array(474, session('permissions')))
                                                     <li><a class="menu-item" href="{{ route('admin.retail.users.index') }}">Users</a></li>
                                                 @endif
+                                                @if (session('role_id') == 1 || in_array(584, session('permissions')))
+                                                    <li><a class="menu-item" href="{{ route('admin.retail.add.rates') }}">Retail Standard Rates</a></li>
+                                                @endif
+
                                                 @if (session('role_id') == 1 || in_array(431, session('permissions')))
                                                     <li><a class="menu-item" href="{{ route('admin.retail.franchise.index') }}">Franchise</a></li>
                                                 @endif
