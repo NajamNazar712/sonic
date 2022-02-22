@@ -3251,6 +3251,8 @@ class RiderAPIController extends Controller
                         $datum['update_date_time'] = $shipment_detail->update_date_time;
                         $datum['received_or_refused_by'] = $shipment_detail->received_or_refused_by;
                         $datum['picture_path'] = $shipment_detail->picture_path;
+                        $datum['fake_status'] = $shipment_detail->fake_status;
+                        $datum['fake_status_updated_at'] = $shipment_detail->fake_status_updated_at;
                         if ($shipment_detail->updated_type == 0) {
                             $datum['updated_by'] = "Debriefer";
                         } else {
