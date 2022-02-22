@@ -7535,7 +7535,7 @@ class AdminReportsController extends Controller
         })
         ->addColumn('pending_shipments', function ($entry) {
             if ($entry->shipments_count) {
-                return round((($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments)) / $entry->shipments_count) * 100, 2);
+                return ($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments));
             }
             else {
                 return '';
@@ -7543,7 +7543,7 @@ class AdminReportsController extends Controller
         })
         ->addColumn('pending_shipments_per', function ($entry) {
             if ($entry->shipments_count) {
-                return round(($entry->pending_shipments / $entry->shipments_count) * 100, 2);
+                return round((($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments)) / $entry->shipments_count) * 100, 2);
             }
             else {
                 return '';
