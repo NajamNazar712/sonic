@@ -6098,7 +6098,7 @@ class AdminAPIController extends Controller
             $admin_profile = Employee::where('trax_id', $admin->trax_id);
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->first();
-                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id){
+                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id || !$admin_profile->nationality_id){
                     return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
                 }else{
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
@@ -6124,10 +6124,11 @@ class AdminAPIController extends Controller
             $staff_category_list = StaffCategory::all();
             $shift_list = EmployeeShift::all();
             $domecile_list = EmployeeDomicile::all();
+            $nationalities_list = EmployeeNationality::all();
             $admin_profile = Employee::where('trax_id', $admin->trax_id);
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->get();
-                return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'gender_list' => $gender_list, 'religion_list' => $religion_list, 'marital_status_list' => $marital_status_list, 'staff_category_list' => $staff_category_list, 'shift_list' => $shift_list, 'domecile_list' => $domecile_list, 'employee_data' => $admin_profile]);
+                return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'gender_list' => $gender_list, 'religion_list' => $religion_list, 'marital_status_list' => $marital_status_list, 'staff_category_list' => $staff_category_list, 'shift_list' => $shift_list, 'domecile_list' => $domecile_list, 'nationalities_list' => $nationalities_list, 'employee_data' => $admin_profile]);
             } else {
                 return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
             }
@@ -6149,6 +6150,7 @@ class AdminAPIController extends Controller
             'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
             'marital_status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
             'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+            'nationality_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
             'address' => ['nullable'],
             'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
             'emergency_contact_person' => ['required'],
@@ -6225,6 +6227,9 @@ class AdminAPIController extends Controller
 
                     if ($request->has('staff_category_id')) {
                         $employee_request->staff_category_id = $request->staff_category_id;
+                    }
+                    if ($request->has('nationality_id')) {
+                        $employee_request->nationality_id = $request->nationality_id;
                     }
 
                     $employee_request->save();
