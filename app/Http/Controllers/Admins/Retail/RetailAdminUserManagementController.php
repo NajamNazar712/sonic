@@ -9,8 +9,9 @@ use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\City;
+use App\Http\Models\RetailStandardRates;
 use App\Http\Models\Shipper\UserShippingInfo;
-use App\RetailStandardRates;
+
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
