@@ -45,7 +45,7 @@
                                     <th class="border-primary border-darken-1">Total Weight</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
-                                    <th class="border-primary border-darken-1">Route Name</th>
+{{--                                    <th class="border-primary border-darken-1">Route Name</th>--}}
                                     <th class="border-primary border-darken-1">Driver Name</th>
                                     <th class="border-primary border-darken-1">Vehicle</th>
                                     <th class="border-primary border-darken-1">Contact No.</th>
@@ -197,7 +197,7 @@
                             head.push('Total Weight');
                             head.push('Transport Mode');
                             head.push('Vendor');
-                            head.push('Route Name');
+                            // head.push('Route Name');
                             head.push('Driver Name');
                             head.push('Vehicle');
                             head.push('Contact No.');
@@ -220,7 +220,7 @@
                                 row.push(values.actual_weight);
                                 row.push(values.transport_mode);
                                 row.push(values.vendor);
-                                row.push(values.route_name);
+                                // row.push(values.route_name);
                                 row.push(values.driver_name);
                                 row.push(values.vehicles);
                                 row.push(values.phone_number);
@@ -263,7 +263,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[15, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'manifest_id', name: 'cargo_manifests.id', class: 'align-middle manifest_id'},
@@ -276,7 +276,7 @@
                     {data: 'actual_weight', name: 'cargo_manifests.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'vendor', name: 'cargo_manifests.vendor_name', class: 'align-middle vendor'},
-                    {data: 'route_name', name: 'cargo_manifests.route_name', class: 'align-middle route_name'},
+                    // {data: 'route_name', name: 'cargo_manifests.route_name', class: 'align-middle route_name'},
                     {data: 'driver_name', name: 'cargo_manifests.driver_name', class: 'align-middle driver_name'},
                     {data: 'vehicles', name: 'vehicles', class: 'align-middle vehicles'},
                     {data: 'phone_number', name: 'cargo_manifests.driver_phone', class: 'align-middle phone_number'},
