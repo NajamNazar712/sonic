@@ -15,13 +15,17 @@
                     <div class="row mb-2 justify-content-center">
 
                         <div class="col-4">
-                            <fieldset class="position-relative has-icon-left">
+{{--                            <fieldset class="position-relative has-icon-left">--}}
+
+{{--                                <div class="form-control-position">--}}
+{{--                                    <i class="ft-search"></i>--}}
+{{--                                </div>--}}
+{{--                            </fieldset>--}}
+                            <div class="form-group">
                                 <input type="text" class="form-control" placeholder="Scan SDN" name="scan_sdn"
-                                       id="scan_sdn">
-                                <div class="form-control-position">
-                                    <i class="ft-search"></i>
-                                </div>
-                            </fieldset>
+                                       id="scan_sdn"  data-tags-input-name="scan_sdn">
+                            </div>
+
                         </div>
                         <div class="col-4">
                             <fieldset class="position-relative has-icon-left">
@@ -556,6 +560,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css"
           href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
@@ -624,6 +629,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
             type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     {{--    <script src="{{asset('app-assets/js/scripts/extensions/dropzone.js')}}" type="text/javascript"></script>--}}
 
@@ -963,6 +969,28 @@
                     this.api().table().columns.adjust();
                 }
             });
+            var select = $('#track_form #scan_sdn').selectize({
+                placeholder: 'Scan sdn(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                create: function (input) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(input)) {
+                        return false;
+                    }
+                    return {
+                        value: input,
+                        text: input
+                    }
+                }
+            });
+
 
             $('#search_tracking').inputmask({
                 'alias': 'integer',
@@ -984,13 +1012,13 @@
 
 
 
-            $('#scan_sdn').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            }).bind('input', function () {
-                table.draw();
-            });
+            // $('#scan_sdn').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // }).bind('input', function () {
+            //     table.draw();
+            // });
 
 
             $("#sdn_add_dncc #dncc_select").prepend('<option value="" selected="selected"></option>').select2({
