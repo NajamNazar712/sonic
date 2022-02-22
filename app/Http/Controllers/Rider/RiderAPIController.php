@@ -3237,7 +3237,7 @@ class RiderAPIController extends Controller
                     })
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-                    ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'delivery_note_shipments.status as delivery_note_shipments_status', 'delivery_note_shipments.update_type as updated_type')
+                    ->select('s.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'delivery_note_shipments.status as delivery_note_shipments_status', 'delivery_note_shipments.update_type as updated_type', 'delivery_note_shipments.fake_status as fake_status', 'delivery_note_shipments.fake_status_updated_at as fake_status_updated_at')
                     ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
                 if ($shipment_details->exists()) {
@@ -3406,6 +3406,10 @@ class RiderAPIController extends Controller
                 $rider_deliveries = $rider_deliveries->orderBy('delivery_notes.created_at', 'DESC')->get();
                 $rider_delivery_history = array();
                 foreach ($rider_deliveries as $rider_delivery) {
+                    $fake_status_count = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)
+                        ->where('rider_id', $rider_id)
+                        ->where('update_type', 1)
+                        ->where('fake_status', 1)->count('fake_status');
                     $undelivered_shipments = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)->where('status', 1)->where('update_type', 1)->count();
                     $delivered_shipments = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)->where('status', '>', 1)->where('update_type', 1)->count();
                     $delivery_history = array();
@@ -3413,6 +3417,7 @@ class RiderAPIController extends Controller
                     $delivery_history['shipments_count'] = $delivered_shipments + $undelivered_shipments;
                     $delivery_history['delivered_shipments'] = $delivered_shipments;
                     $delivery_history['undelivered_shipments'] = $undelivered_shipments;
+                    $delivery_history['fake_status_count'] = $fake_status_count;
                     $delivery_history['created_at'] = date('Y-m-d', strtotime($rider_delivery->created_at));
                     $rider_delivery_history[] = $delivery_history;
                 }
