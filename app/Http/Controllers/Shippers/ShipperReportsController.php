@@ -988,7 +988,7 @@ class ShipperReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
             ->editColumn('shipper_name', function ($shipment) {
-                if($shipment->shipper_id == 7306){
+                if($shipment->shipper_id == 1091){
                     return '-';
                 }else{
                     return $shipment->shipper_name;
