@@ -295,10 +295,15 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('invoice')->name('invoice.')->group(function () {
             Route::get('', 'Shippers\ShipperFinanceController@invoice_index')->name('index');
             Route::get('list', 'Shippers\ShipperFinanceController@invoice_list')->name('list');
-            Route::post('print', 'Shippers\ShipperFinanceController@invoices_print')->name('print');
+            Route::post('detail_print', 'Shippers\ShipperFinanceController@invoices_detail_print')->name('detail_print');
             Route::get('export_to_excel', 'Shippers\ShipperFinanceController@invoices_export_to_excel')->name('export_to_excel');
             Route::put('email_reminder', 'Shippers\ShipperFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('print_origin_wise', 'Shippers\ShipperFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
+
+            Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
+                Route::post('detail_print', 'Shippers\ShipperFinanceController@reimbursement_invoices_print')->name('detail_print');
+            });
+
         });
     });
 
@@ -1980,7 +1985,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
         });
 
-
         Route::prefix('retail')->name('retail.')->group(function () {
 
             Route::prefix('make_payments')->name('make_payments.')->group(function () {
@@ -2013,10 +2017,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
         });
-
-
-
-
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function() {

@@ -265,16 +265,17 @@
                 var type_id = table.row($(this).parents('tr')).data().type_id;
                 console.log(type_id,id);
                 if ($(this).hasClass('detail_print')) {
+                    var url ='';
                     if(type_id == 2){
-
+                        url = '{!! route('cod.finance.invoice.detail_print') !!}';
                     }
                     else{
-
+                        url = '{!! route('cod.finance.invoice.reimbursement.detail_print') !!}';
                     }
 
                     if (id) {
                         $.ajax({
-                            url: '{!! route('cod.finance.invoice.print') !!}',
+                            url:url,
                             method: 'POST',
                             data: {
                                 '_token': '{{ csrf_token() }}',
@@ -310,7 +311,7 @@
 
                 if (id) {
                     $.ajax({
-                        url: '{!! route('cod.finance.invoice.print') !!}',
+                        url: '{!! route('cod.finance.invoice.detail_print') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',

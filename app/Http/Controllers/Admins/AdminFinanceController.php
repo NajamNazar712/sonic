@@ -10093,7 +10093,6 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
             ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date','ic.name as invoicing_cycle','invoices.invoice_type as invoice_type',DB::raw('NULL as payment_type'),DB::raw('1 as account_type'))
-            ->whereIn('is.id', [1,3])
             ->where('ubi.default_bank',1);
 
         $invoices = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
