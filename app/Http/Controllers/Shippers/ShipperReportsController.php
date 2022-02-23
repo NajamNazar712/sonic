@@ -912,7 +912,7 @@ class ShipperReportsController extends Controller
             ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
 
         $shipment = $shipment->where(function ($query) {
-            $query->where('shipments.user_id', 1091)
+            $query->where('shipments.user_id', 117)
                 ->orWhereIn('shipments.user_id', session('sister_users'));
         });
 
@@ -973,22 +973,24 @@ class ShipperReportsController extends Controller
                 $reattempt_time = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
                     ->where('shipper_status_id','=',23)
                     ->where('verification','=',1)
-                    ->select('created_at')
-                    ->latest()->first();
-
-                if($reattempt_time){
-                    return $reattempt_time->created_at;
-                }
-                else{
-                    return '';
-                }
+                    ->select('created_at',DB::raw('count(shipment_id) as return_attempts'))
+                    ->get()->first();
+                    if($reattempt_time){
+                        if($reattempt_time->return_attempts-1 == -1){
+                            return '';
+                        }else{
+                            return $reattempt_time->created_at;
+                        }
+                    }else{
+                        return '-';
+                    }
             })
             ->addColumn('tracking_number_link', function ($shipment) {
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
             ->editColumn('shipper_name', function ($shipment) {
-                if($shipment->shipper_id == 1091){
+                if($shipment->shipper_id == 117){
                     return '-';
                 }else{
                     return $shipment->shipper_name;
