@@ -82,6 +82,7 @@
 
             var table = $('#datatable').DataTable({
 
+                @if (session('role_id') == 1 || in_array(685, session('permissions')))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     className: 'btn btn-primary',
@@ -90,6 +91,10 @@
                         $('#AddShipperModal').modal('show');
                     }
                 },'reset'],
+                @else
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: ['reset'],
+                @endif
 
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,

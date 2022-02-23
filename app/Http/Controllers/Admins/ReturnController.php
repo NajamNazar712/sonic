@@ -2586,6 +2586,9 @@ class ReturnController extends Controller
             $shipment_status = $request->shipment_status;
             $shipment_reason = $request->shipment_reason;
             $actual_date = $request->actual_date;
+            $reason_mandatory_shipments = array();
+            $shipment_status_mandatory = array(24,47,48);
+            $mandatory_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
             $open_box_ids = array();
             if($request->has('open_box_ids')){
                 $open_box_ids = $request->open_box_ids;
@@ -2688,20 +2691,24 @@ class ReturnController extends Controller
                 $remarks = $request->remarks;
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
-                    $shipment->shipper_status_id = $shipment_status;
-                    $shipment->save();
-                    ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, $shipment_reason, $remarks, NULL, Auth::id(), $request->return_note_id);
+                    if(in_array($shipment_status,$shipment_status_mandatory) && in_array($shipment->user_id,$mandatory_shippers) && $shipment_reason == null){
+                        array_push($reason_mandatory_shipments, $shipment->tracking_number);
+                    }
+                    else{
+                        $shipment->shipper_status_id = $shipment_status;
+                        $shipment->save();
+                        ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, $shipment_reason, $remarks, NULL, Auth::id(), $request->return_note_id);
 
 
-                    ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
-                    if(count($open_box_ids) > 0){
-                        if(in_array($shipment_id, $open_box_ids)){
-                            $shipment->open_box = 1;
-                            $shipment->save();
-                            ShipmentOpenBoxJourneyController::add($shipment_id, 7,Auth::id());
+                        ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
+                        if(count($open_box_ids) > 0){
+                            if(in_array($shipment_id, $open_box_ids)){
+                                $shipment->open_box = 1;
+                                $shipment->save();
+                                ShipmentOpenBoxJourneyController::add($shipment_id, 7,Auth::id());
+                            }
                         }
                     }
-
                 }
                 $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
                 if($shipment_status == 0){
@@ -2720,7 +2727,11 @@ class ReturnController extends Controller
 
                 NotificationsController::send(15, $request->return_note_id);
                 NotificationsController::send(16, $request->return_note_id);
-                return response()->json(['status'=> 0, 'success' => 'Return Note Status Has Been Updated']);
+                if(count($reason_mandatory_shipments) > 0){
+                    return response()->json(['status'=> 2, 'success' => 'Return Note Status Has Been Updated', 'reason_mandatory_shipments' => $reason_mandatory_shipments]);
+                }else{
+                    return response()->json(['status'=> 0, 'success' => 'Return Note Status Has Been Updated']);
+                }
             }
         }
     }

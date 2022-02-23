@@ -6092,6 +6092,7 @@ public function sales_incentive()
     }
 
     public function return_reason_mandatory_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 510);
         $already_added_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
         $shippers = User::join('cities as c', 'users.city_id', '=', 'c.id')
             ->where('users.status', 3)->where('users.blacklist', 0)->whereNotIn('users.id',$already_added_shippers)->select('users.id as id', 'users.name as name');
@@ -6104,9 +6105,6 @@ public function sales_incentive()
     }
 
     public function return_reason_mandatory_list(Request $request){
-        if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 498);
-        }
         $shippers = ReturnReasonMandatoryShipper::join('users as u', 'return_reason_mandatory_shippers.shipper_id', 'u.id')
             ->join('admins as ad', 'return_reason_mandatory_shippers.added_by', '=', 'ad.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
