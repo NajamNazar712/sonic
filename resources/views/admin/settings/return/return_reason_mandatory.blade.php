@@ -1,5 +1,5 @@
 @extends('admin.layout.master')
-@section('title','Return Reasons')
+@section('title','Return Reason Mandatory')
 
 @section('content')
     <h1 class="mb-1">
@@ -78,6 +78,7 @@
             $('#shipper_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Shipper',
+                dropdownParent:$('#addShipperForm')
             });
 
             var table = $('#datatable').DataTable({

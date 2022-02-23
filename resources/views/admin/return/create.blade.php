@@ -532,6 +532,10 @@
                 if (index !== -1) {
                     shipment_ids.splice(index, 1);
                 }
+                console.log(shipment_ids.length);
+                if(shipment_ids.length < 1){
+                    $("#shipper_id").val('');
+                }
                 table.row( $(this).parents('tr') ).remove().draw();
             });
 
