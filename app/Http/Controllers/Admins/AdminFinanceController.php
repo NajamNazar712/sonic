@@ -10479,7 +10479,7 @@ class AdminFinanceController extends Controller
     }
 
     public function invoices_detail_print(Request $request) {
-        dd($request);
+      
         $invoice = Invoice::find($request->id);
 
         if ($invoice) {
