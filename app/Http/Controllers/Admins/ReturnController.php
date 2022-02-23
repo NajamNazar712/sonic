@@ -1486,8 +1486,11 @@ class ReturnController extends Controller
                 $shipment = $shipment->first();
                 ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), null,null);
                 if($request->shipper_id != null){
+                    $mandatory_shipper = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     if($request->shipper_id != $shipment->user_id){
-                        return ['status' => 1, 'error' => 'Different Shipper, scan shipments of same shipper!.'];
+                        if (in_array($request->shipper_id, $mandatory_shipper) || in_array($shipment->user_id, $mandatory_shipper)){
+                            return ['status' => 1, 'error' => 'Different Shipper, scan shipments of same shipper!.'];
+                        }
                     }
                 }
                 if($shipment->return_address_id != NULL){
