@@ -235,7 +235,7 @@
                                             <i class="la la-hourglass text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p>(<p id="active_percentage" class="d-inline">{{$leads['accounts_activated_percentage']}}</p>%)</h3>
+                                            <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
                                             <span>Dormant</span>
                                         </div>
                                     </div>
@@ -1613,6 +1613,10 @@
             });
             $('#in_process_activation_div').on('click', function () {
                 $('#search_statistics_div').val(6);
+                table.draw();
+            });
+            $('#dormant_div').on('click', function () {
+                $('#search_statistics_div').val(7);
                 table.draw();
             });
         });
