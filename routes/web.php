@@ -1950,7 +1950,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
             Route::post('slip', 'Admins\AdminFinanceController@invoices_slip')->name('slip');
             Route::post('slip/view', 'Admins\AdminFinanceController@invoices_slip_view')->name('slip_view');
-            Route::post('print', 'Admins\AdminFinanceController@invoices_print')->name('print');
+            Route::post('invoices_detail_print ', 'Admins\AdminFinanceController@invoices_detail_print ')->name('invoices_detail_print');
             Route::post('print_origin_wise', 'Admins\AdminFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
             Route::post('print_gst_wise', 'Admins\AdminFinanceController@invoices_print_gst_wise')->name('print_gst_wise');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@invoices_export_to_excel')->name('export_to_excel');
@@ -1967,7 +1967,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('print_origin_wise', 'Admins\AdminFinanceController@reimbursement_invoices_print_origin_wise')->name('print_origin_wise');
                 Route::post('print_gst_wise', 'Admins\AdminFinanceController@reimbursement_invoices_print_gst_wise')->name('print_gst_wise');
                 Route::get('export_to_excel', 'Admins\AdminFinanceController@reimbursement_invoices_export_to_excel')->name('export_to_excel');
-                Route::post('print', 'Admins\AdminFinanceController@reimbursement_invoices_print')->name('print');
+                Route::post('detail_print', 'Admins\AdminFinanceController@reimbursement_detail_invoices_print')->name('detail_print');
 
             });
         });

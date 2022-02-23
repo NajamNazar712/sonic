@@ -2201,7 +2201,7 @@ class ShipperFinanceController extends Controller
 }
 
 
-    public function invoices_print(Request $request) {
+    public function invoices_detail_print (Request $request) {
         $invoice = Invoice::find($request->id);
         
 
@@ -2425,7 +2425,6 @@ class ShipperFinanceController extends Controller
 
         return $amount_in_words;
     }
-
 
     static public function generate_invoice_print_origin_wise($id, $email = FALSE) {
         $invoice = Invoice::find($id);
