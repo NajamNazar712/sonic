@@ -58,7 +58,7 @@
                             <i class="ft-chevron-down"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="#" id="adminprofileshow"><span class="menu-title adminprofile"><i class="ft-user"></i> Profile</span></a>
+                            <a class="dropdown-item" href="#" id="adminprofileshow"><span class="menu-title adminprofile"><i class="ft-user"></i> Profileee</span></a>
                             <a class="dropdown-item" href="http://bit.ly/sonic_manuals" target="_blank"><i class="ft-help-circle"></i> HELP</a>
                             <a class="dropdown-item" href="{{ route('admin.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
                             <a class="dropdown-item" href="#" id="editprofileshow"><span class="menu-title editprofile"><i class="ft-edit-2"></i>Edit Profile</span></a>
@@ -97,15 +97,15 @@
                         emergency_contact_person = data.emergency_contact_person;
                         emergency_contact_no = data.emergency_contact_no;
 
-                        $('#adminprofile #admin_profile_body #full_name').html(full_name);
-                        $('#adminprofile #admin_profile_body #department').html(department);
-                        $('#adminprofile #admin_profile_body #employee_id').html(employee_id);
-                        $('#adminprofile #admin_profile_body #email').html(email);
-                        $('#adminprofile #admin_profile_body #contact').html(contact);
-                        $('#adminprofile #admin_profile_body #designation').html(designation);
-                        $('#adminprofile #admin_profile_body #blood_group').html(blood_group);
-                        $('#adminprofile #admin_profile_body #emergency_contact_person').html(emergency_contact_person);
-                        $('#adminprofile #admin_profile_body #emergency_contact_no').html(emergency_contact_no);
+                        $('#adminprofile #admin_profile_body #full_name').html((full_name)? full_name : '--');
+                        $('#adminprofile #admin_profile_body #department').html((department)? department : '--');
+                        $('#adminprofile #admin_profile_body #employee_id').html((employee_id) ? employee_id : '--');
+                        $('#adminprofile #admin_profile_body #email').html((email)? email : '--');
+                        $('#adminprofile #admin_profile_body #contact').html((contact)? contact : '--');
+                        $('#adminprofile #admin_profile_body #designation').html((designation)? designation : '--');
+                        $('#adminprofile #admin_profile_body #blood_group').html((blood_group)? blood_group : '--');
+                        $('#adminprofile #admin_profile_body #emergency_contact_person').html((emergency_contact_person)? emergency_contact_person : '--');
+                        $('#adminprofile #admin_profile_body #emergency_contact_no').html((emergency_contact_no)? emergency_contact_no : '--');
                         $('#adminprofile').modal('show');
                     }
                 });
