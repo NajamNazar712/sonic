@@ -991,7 +991,7 @@ class ShipperFinanceController extends Controller
          if ($request->get('from_date') && $request->get('to_date')) {
              $from = Carbon::parse($request->get('from_date'))->format('Y-m-d');
              $to = Carbon::parse($request->get('to_date'))->format('Y-m-d');
-             $invoice->whereBetween('invoices.invoicing_date', [$from,$to]);
+             $invoices->whereBetween('invoices.invoicing_date', [$from,$to]);
          }
 
         $invoices->union($invoice);
@@ -1037,7 +1037,7 @@ class ShipperFinanceController extends Controller
             ->addColumn('action', function ($invoice) {
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
                 $origin_wise_print_button = '<button type="button" class="dropdown-item print_origin_wise"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Origin Wise Print</div></button>';
-
+                $detail_print = '<button type="button" class="dropdown-item detail_print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Detailed Print</div></button>';
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -1047,6 +1047,7 @@ class ShipperFinanceController extends Controller
                 $dropdown .= $export_to_excel_button;
 
                 $dropdown .= $origin_wise_print_button;
+                $dropdown .= $detail_print;
 
                 $dropdown .= '
                 </div>

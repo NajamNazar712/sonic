@@ -260,36 +260,46 @@
             });
 
 
-            $('#datatable tbody').on('click', 'tr td.invoice_number button', function() {
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
+                var type_id = table.row($(this).parents('tr')).data().type_id;
+                console.log(type_id,id);
+                if ($(this).hasClass('detail_print')) {
+                    if(type_id == 2){
 
-                if (id) {
-                    $.ajax({
-                        url: '{!! route('cod.finance.invoice.print') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': id
-                        }
-                    })
-                        .done(function(data) {
-                            var tab = window.open('', '_blank');
+                    }
+                    else{
 
-                            if(!tab) {
-                                swal({
-                                    title: 'Popup Blocker Enabled!',
-                                    text: 'Please add this site to your exception list.',
-                                    icon: 'error',
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
-                                });
+                    }
+
+                    if (id) {
+                        $.ajax({
+                            url: '{!! route('cod.finance.invoice.print') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'id': id
                             }
-                            else {
-                                tab.document.write(data);
-                                tab.document.close();
-                                tab.focus();
-                            }
-                        });
+                        })
+                            .done(function(data) {
+                                var tab = window.open('', '_blank');
+
+                                if(!tab) {
+                                    swal({
+                                        title: 'Popup Blocker Enabled!',
+                                        text: 'Please add this site to your exception list.',
+                                        icon: 'error',
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                }
+                                else {
+                                    tab.document.write(data);
+                                    tab.document.close();
+                                    tab.focus();
+                                }
+                            });
+                    }
                 }
             });
 
