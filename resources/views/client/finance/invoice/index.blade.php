@@ -341,6 +341,7 @@
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
+                var account_type = parseInt(table.row($(this).parents('tr')).data().type_id);
 
                 if ($(this).hasClass('export_to_excel')) {
                     window.open('{!! route('cod.finance.invoice.export_to_excel') !!}?id=' + id, '_blank');
@@ -351,7 +352,8 @@
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'id': id
+                            'id': id,
+                            'account_type': account_type,
                         }
                     })
                         .done(function(data) {

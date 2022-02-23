@@ -2305,14 +2305,38 @@ class ShipperFinanceController extends Controller
     }
 
     public function invoices_print_origin_wise(Request $request) {
-        $invoice = Invoice::find($request->id);
+        if($account_type = $request->get('account_type'))
+        {
+            if($account_type == 1)
+            {
+                $invoice = InvoiceForReimbursement::find($request->id);
 
-        if ($invoice) {
-            return self::generate_invoice_print_origin_wise($invoice->id);
+                if ($invoice) {
+                    return self::generate_reimbursement_invoice_print_origin_wise($invoice->id);
+                }
+                else {
+                    return '';
+                }
+            }
+            else if($account_type == 2)
+            {
+                $invoice = Invoice::find($request->id);
+
+                if ($invoice) {
+                    return self::generate_invoice_print_origin_wise($invoice->id);
+                }
+                else {
+                    return '';
+                }
+            }
+            else{
+                return "";
+            }
         }
-        else {
-            return '';
+        else{
+            return "";
         }
+
     }
     
     static private function amount_to_words($amount) {
@@ -2334,8 +2358,644 @@ class ShipperFinanceController extends Controller
         return $amount_in_words;
     }
 
-    /*static public function generate_invoice_print_origin_wise($id, $email = FALSE) {
+
+    static public function generate_invoice_print_origin_wise($id, $email = FALSE) {
         $invoice = Invoice::find($id);
+
+        $shipper = $invoice->shipper;
+
+        $shipper_bank = $shipper->bank()->where('default_bank', 1)->first();
+
+        $account_type_id = $shipper->account_type_id;
+
+        $html = '';
+
+        if (!$email) {
+            $html .= '
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                <title>Invoice</title>
+            ';
+        }
+
+        $html .= '
+                <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
+        ';
+
+        $html .= '
+            <style>@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-before:always;page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
+        ';
+
+        if (!$email) {
+            $html .= '
+              </head>
+              <body>
+            ';
+        }
+
+        $shipment_counts = array();
+
+        $origins = array();
+
+        $total_charges = array();
+        $total_gst = array();
+        $total_invoice_amount = array();
+
+        $packaging_details = array();
+
+        if($invoice->invoice_type == 1) {
+            foreach ($invoice->invoice_shipments as $invoice_shipment) {
+                $shipment = $invoice_shipment->shipment;
+
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+
+                if ($shipment_journey->exists()) {
+                    $date = $shipment_journey->first()->created_at;
+                } else {
+                    $date = $shipment->created_at;
+                }
+
+                $date = Carbon::parse($date)->format('Y-m-d');
+
+                $origin = $shipment->pickup_address->city->name;
+
+                if (!in_array($origin, $origins)) {
+                    $origins[] = $origin;
+                }
+
+                if (!isset($shipment_counts[$origin])) {
+                    $shipment_counts[$origin] = 1;
+                }
+
+                $shipment_counts[$origin]++;
+
+                if (!isset($total_weight_charges[$origin])) {
+                    $total_weight_charges[$origin] = 0;
+                }
+
+                if (!isset($total_cash_handling_charges[$origin])) {
+                    $total_cash_handling_charges[$origin] = 0;
+                }
+
+                if (!isset($total_insurance_charges[$origin])) {
+                    $total_insurance_charges[$origin] = 0;
+                }
+
+                if (!isset($total_return_charges[$origin])) {
+                    $total_return_charges[$origin] = 0;
+                }
+
+                if (!isset($total_fuel_surcharge[$origin])) {
+                    $total_fuel_surcharge[$origin] = 0;
+                }
+
+                if (!isset($total_replacement_charges[$origin])) {
+                    $total_replacement_charges[$origin] = 0;
+                }
+
+                if (!isset($total_try_and_buy_charges[$origin])) {
+                    $total_try_and_buy_charges[$origin] = 0;
+                }
+
+                if (!isset($total_packaging_material_charges[$origin])) {
+                    $total_packaging_material_charges[$origin] = 0;
+                }
+
+                if (!isset($total_intercept_charges[$origin])) {
+                    $total_intercept_charges[$origin] = 0;
+                }
+
+                if (!isset($total_nsa_osa_charges[$origin])) {
+                    $total_nsa_osa_charges[$origin] = 0;
+                }
+
+                if (!isset($total_adjustment_charges[$origin])) {
+                    $total_adjustment_charges[$origin] = 0;
+                }
+
+                if (!isset($total_charges[$origin])) {
+                    $total_charges[$origin] = 0;
+                }
+
+                if (!isset($total_gst[$origin])) {
+                    $total_gst[$origin] = 0;
+                }
+
+                if (!isset($total_invoice_amount[$origin])) {
+                    $total_invoice_amount[$origin] = 0;
+                }
+
+                if ($invoice_shipment->type != 2) {
+                    if ($invoice_shipment->type == 0) {
+                        $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
+                        $total_replacement_charges[$origin] += $shipment->replacement_charges;
+                        $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
+                    } else {
+                        $total_return_charges[$origin] += $shipment->return_charges;
+                    }
+
+                    $total_weight_charges[$origin] += $shipment->weight_charges;
+
+                    if ($shipment->packaging_material_request) {
+                        $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                    }
+
+                    $total_insurance_charges[$origin] += $shipment->insurance_charges;
+                    $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    $total_intercept_charges[$origin] += $shipment->intercept_charges;
+                    $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                } else {
+                    $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
+                }
+
+                $total_charges[$origin] += $invoice_shipment->charges;
+                $total_gst[$origin] += $invoice_shipment->gst;
+                $total_invoice_amount[$origin] += $invoice_shipment->invoice_amount;
+            }
+        }
+        else{
+
+            $shipment_ids = $invoice->invoice_shipments->pluck('shipment_id')->toArray();
+
+            if(count($shipment_ids) > 0) {
+
+                $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id',$shipment_ids)->where('packaging_material_requests.status_id', 4)
+                    ->where('packaging_material_requests.user_id', $shipper->id);
+
+                if ($packaging_materials->exists()) {
+                    $packaging_materials = $packaging_materials->orderBy('city_id', 'asc')->get();
+                    foreach ($packaging_materials as $packaging_material) {
+                        foreach ($packaging_material->items as $details) {
+                            if (!isset($packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'])) {
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'] = 1;
+                                $zone = Zone::find($packaging_material->city->zone_id);
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['origin'] = $packaging_material->city->name;
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['rates'] = $details->packaging_type_size->standard_charges;
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['description'] = $details->packaging_type_size->type->type . '-' . $details->packaging_type_size->size;
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'] = $details->quantity;
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['gst'] = $zone->gst;
+                            }
+                            else {
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity']++;
+                            }
+                        }
+                    }
+                }
+
+            }
+
+        }
+
+        $invoice_number_serial_number = 1;
+
+        if(count($origins) > 0 && $invoice->invoice_type == 1) {
+            foreach ($origins as $origin) {
+
+                $html .= '
+                <div>
+                  <div class="p-1">
+        ';
+                $html .= '
+                    <div class="row align-items-start justify-content-between summary">
+                        
+                        <div class="col-6">
+                            <h1><b><u>SALES TAX INVOICE</u></b></h1>
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Bill To</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Account No.</strong></td>
+                                    <td>' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . '</td>
+                                </tr>';
+                if($account_type_id == 2){
+                    $html .= '<tr>
+                                        <td class="color secondary"><strong>Shipper Name</strong></td>
+                                        <td>' . $shipper->name . '</td>
+                                    </tr>';
+                }
+                $html .= '<tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_name : $shipper->name) . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Address</strong></td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_address : $shipper->address) . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_phone : $shipper->phone)  . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color secondary"><strong>NTN</strong></td>
+                                  <td>' . $shipper->ntn_no . '</td>
+                                </tr>  ';
+
+                $html .= '<tr>
+                                  <td class="color secondary"><strong>STRN</strong></td>
+                                  <td>' . $shipper->strn_no . '</td>
+                                </tr>';
+
+
+                $html .= '</tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-4">
+                            <h1 style="text-align:center"><img style="width:50%;height:90px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
+                            <table class="table table-sm table-bordered border">
+                              <tbody> ';
+                if($invoice->invoice_type == 1) {
+                    $html .=  '<tr>
+                                    <td class="color primary"><strong>SNTN</strong></td>
+                                    <td>S-7930679-5</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>PNTN</strong></td>
+                                    <td>P-7930679-5</td>
+                                </tr>';
+
+                }
+
+                $html .= '<tr>
+                                    <td class="color primary"><strong>Billing Period</strong></td>
+                                    <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>Invoice No.</strong></td>
+                                    <td>' . $invoice->invoice_number . ' - ' . $invoice_number_serial_number . '</td>
+                                </tr>
+                                <tr> ';
+
+                $html .=  '<td class="color primary"><strong>Invoice Date</strong></td>
+                                    <td>' . Carbon::parse($invoice->invoicing_date)->format('Y-m-d') . '</td>
+                                </tr>';
+
+
+
+                $html .= '<tr>
+                                    <td class="color primary"><strong>Due Date</strong></td>
+                                    <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+            ';
+
+                $html .= '
+                    <table class="table table-sm table-bordered border">
+                      <thead>
+                        <tr>
+                            <th colspan="3" class="color primary text-center">Invoice Summary - ' . $origin . '</th>
+                        </tr>
+                        <tr>
+                            <th class="color secondary">Description Of Services</th>
+                            <th class="color secondary">Quantity</th>
+                            <th class="color secondary">Total Charges</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Weight Charges</td>
+                            <td rowspan="11">'.$shipment_counts[$origin].'</td>
+                            <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Fuel Surcharge</td>
+                            <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Cash Handling Charges</td>
+                            <td>' . number_format($total_cash_handling_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Insurance Charges</td>
+                            <td>' . number_format($total_insurance_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Replacement Charges</td>
+                            <td>' . number_format($total_replacement_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Try & Buy Charges</td>
+                            <td>' . number_format($total_try_and_buy_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Return Charges</td>
+                            <td>' . number_format($total_return_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Intercept Charges</td>
+                            <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>OSA Charges</td>
+                            <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Packaging Charges</td>
+                            <td>' . number_format($total_packaging_material_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Adjustments</td>
+                            <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
+                        </tr>
+                      </tbody>
+                      </table>
+            ';
+                $html .= '
+                    <div class="row justify-content-end">
+                        <div class="col-4">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                  <td class="color secondary text-left"><strong>Subtotal (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_charges[$origin], 2) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color secondary text-left"><strong>SST (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_gst[$origin], 2) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
+                                  <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount[$origin], 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>';
+
+                $amount_in_words = '';
+                $amount_in_words = self::amount_to_words(ROUND($total_invoice_amount[$origin], 0, PHP_ROUND_HALF_DOWN));
+
+                $html .= '<table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
+                          <td class="color secondary">' . $amount_in_words . ' Only</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
+                          <td>Trax Online Private Limited</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td>Meezan Bank</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0102951143</td>
+                        </tr> 
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
+                          <td>9912</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
+                          <td>Liaqatabad Market Malir Branch</td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
+            ';
+
+                $invoice_number_serial_number++;
+            }
+        }
+        else{
+
+            $html .= '
+                <div>
+                  <div class="p-1">
+        ';
+            $html .= '
+                    <div class="row align-items-start justify-content-between summary">
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Customer Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Account No.</strong></td>
+                                    <td>' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . '</td>
+                                </tr>';
+            if($account_type_id == 2){
+                $html .= '<tr>
+                                        <td class="color secondary"><strong>Shipper Name</strong></td>
+                                        <td>' . $shipper->name . '</td>
+                                    </tr>';
+            }
+            $html .= '<tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_name : $shipper->name) . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Address</strong></td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_address : $shipper->address) . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_phone : $shipper->phone)  . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color secondary"><strong>NTN</strong></td>
+                                  <td>' . $shipper->ntn_no . '</td>
+                                </tr>  ';
+
+            $html .= '</tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-4">
+                            <table class="table table-sm table-bordered border">
+                              <tbody> ';
+
+
+            $html .= '<tr>
+                                    <td class="color primary"><strong>Billing Period</strong></td>
+                                    <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>Invoice No.</strong></td>
+                                    <td>' . $invoice->invoice_number . ' - ' . $invoice_number_serial_number . '</td>
+                                </tr>
+                                <tr> ';
+            if($invoice->invoice_type == 1) {
+                $html .=  '<td class="color primary"><strong>Invoice Date</strong></td>
+                                    <td>' . Carbon::parse($invoice->invoicing_date)->format('Y-m-d') . '</td>
+                                </tr>';
+
+            }
+
+            $html .= '<tr>
+                                    <td class="color primary"><strong>Due Date</strong></td>
+                                    <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+            ';
+
+            $html .= '<table class="table table-sm table-bordered border">
+          <thead>
+            <tr>
+                <th colspan="12" class="color primary text-center">Invoice Summary</th>
+            </tr>
+            <tr>
+                <th class="color secondary">Origin</th>
+                <th class="color secondary">Description</th>
+                <th class="color secondary">Rates</th>
+                <th class="color secondary">Quantity</th>
+                <th class="color secondary">Total Charges Without GST</th>
+                <th class="color secondary">SST %</th>
+                <th class="color secondary">SST Amount</th>
+                <th class="color secondary">Total Amount with SST</th>
+              
+            </tr>
+          </thead>
+          <tbody>
+';
+            $rates_total = 0;
+            $quantity_total = 0;
+            $total_amount_without_gst = 0;
+            $total_sst_amount = 0;
+            $overall_amount = 0;
+
+
+            foreach ($packaging_details as $cities) {
+                foreach ($cities as $packaging_material) {
+                    $amount_without_gst = $packaging_material['rates'] * $packaging_material['quantity'];
+                    $sst_amount = round($amount_without_gst * $packaging_material['gst']);
+                    $total_amount_with_sst = round($amount_without_gst + $sst_amount);
+
+                    $rates_total = $rates_total + $packaging_material['rates'];
+                    $quantity_total = $quantity_total + $packaging_material['quantity'];
+                    $total_amount_without_gst = $total_amount_without_gst + $amount_without_gst;
+                    $total_sst_amount = $total_sst_amount + $sst_amount;
+                    $overall_amount = $overall_amount + $total_amount_with_sst;
+                    $html .= '
+                        <tr>
+                            <td>' . $packaging_material['origin'] . '</td>
+                            <td>' . $packaging_material['description'] . '</td>
+                            <td>' . $packaging_material['rates'] . '</td>
+                            <td>' . $packaging_material['quantity'] . '</td>
+                            <td>' . $amount_without_gst . '</td>
+                            <td>' . $packaging_material['gst'] * 100 . '%' . '</td>
+                            <td>' . round($sst_amount) . '</td>
+                            <td>' . number_format($total_amount_with_sst) . '</td>
+                          
+                        </tr>';
+                }
+            }
+
+
+
+            $html .= '<tr>
+                <td colspan="3" class="text-center">Total Amount</td>
+            
+                <td>'.$quantity_total.'</td>
+                <td>'.$total_amount_without_gst.'</td>
+                <td></td>
+                <td>'.number_format($total_sst_amount).'</td>
+                <td>'.number_format($overall_amount).'</td>
+            </tr>';
+            $amount_in_words = '';
+            $amount_in_words = self::amount_to_words($overall_amount);
+
+            $html .= '<table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
+                          <td class="color secondary">' . $amount_in_words . ' Only</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
+                          <td>Trax Online Private Limited</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td>Meezan Bank</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0102951143</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Branch Name.</strong></td>
+                          <td>Liaquat Market Malir Branch</td>
+                        </tr>';
+
+            $html .= ' <tr>
+                                      <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
+                                      <td>9912</td>
+                                    </tr>
+                                    </tbody>
+                    </table>
+
+                    <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
+            ';
+
+
+            $html .= '
+                      </tbody>
+                    </table>
+            ';
+
+
+        }
+
+        $html .= '
+                  </div>
+                </div>
+        ';
+
+        if (!$email) {
+            $html .= '
+                <script>
+                  window.onload = function() {
+
+                    window.print();
+                  }
+                </script>
+              </body>
+            </html>
+            ';
+        }
+
+        return $html;
+    }
+
+    static public function generate_reimbursement_invoice_print_origin_wise($id, $email = FALSE) {
+        $invoice = InvoiceForReimbursement::find($id);
 
         $shipper = $invoice->shipper;
 
@@ -2374,7 +3034,7 @@ class ShipperFinanceController extends Controller
 
         $shipment_details = array();
 
-        $serial_number = array();
+        $shipment_counts = array();
 
         $origins = array();
 
@@ -2402,35 +3062,11 @@ class ShipperFinanceController extends Controller
                 $origins[] = $origin;
             }
 
-            if (!isset($shipment_details[$origin])) {
-                $shipment_details[$origin] = '';
+            if (!isset($shipment_counts[$origin])) {
+                $shipment_counts[$origin] = 1;
             }
 
-            if (!isset($serial_number[$origin])) {
-                $serial_number[$origin] = 1;
-            }
-
-            $shipment_details[$origin] .= '
-                        <tr>
-                          <td>' . $serial_number[$origin] . '</td>
-                          <td>' . $shipment->tracking_number . '</td>
-                          <td>' . $shipment->order_id . '</td>
-                          <td>' . $shipment->consignee_city->name . '</td>
-                          <td>' . $shipment->shipping_mode->mode . '</td>
-                          <td>' . $date . '</td>
-                          <td>' . $shipment->actual_weight . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
-                          <td>' . number_format($invoice_shipment->charges, 2) . '</td>
-                          <td>' . number_format($invoice_shipment->gst, 2) . '</td>
-                          <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
-                        </tr>
-            ';
-
-            $serial_number[$origin]++;
+            $shipment_counts[$origin]++;
 
             if (!isset($total_weight_charges[$origin])) {
                 $total_weight_charges[$origin] = 0;
@@ -2526,463 +3162,6 @@ class ShipperFinanceController extends Controller
         ';
 
         foreach ($origins as $origin) {
-            $html .= '
-                    <div class="row align-items-start justify-content-between summary">
-                        <div class="col-6">
-                            <table class="table table-sm table-bordered border">
-                              <tbody>
-                                <tr>
-                                    <td class="color primary" colspan="2"><strong>Customer Details</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Account No.</strong></td>
-                                    <td>' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . '</td>
-                                </tr>';
-            if($account_type_id == 2){
-                $html .= '<tr>
-                                        <td class="color secondary"><strong>Shipper Name</strong></td>
-                                        <td>' . $shipper->name . '</td>
-                                    </tr>';
-            }
-            $html .= '<tr>
-                                    <td class="color secondary"><strong>Name</strong></td>
-                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_name : $shipper->name) . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Address</strong></td>
-                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_address : $shipper->address) . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Contact No.</strong></td>
-                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_phone : $shipper->phone)  . '</td>
-                                </tr>
-                                <tr>
-                                  <td class="color secondary"><strong>NTN</strong></td>
-                                  <td>' . $shipper->ntn_no . '</td>
-                                </tr>
-                                <tr>
-                                  <td class="color secondary"><strong>STRN</strong></td>
-                                  <td>' . $shipper->strn_no . '</td>
-                                </tr>
-                               </tbody>
-                            </table>
-                        </div>
-
-                        <div class="col-4">
-                            <table class="table table-sm table-bordered border">
-                              <tbody>
-                                <tr>
-                                    <td class="color primary"><strong>NTN</strong></td>
-                                    <td>7930679-5</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>SNTN</strong></td>
-                                    <td>S-7930679-5</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>PNTN</strong></td>
-                                    <td>P-7930679-5</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Billing Period</strong></td>
-                                    <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Invoice No.</strong></td>
-                                    <td>' . $invoice->invoice_number . ' - ' . $invoice_number_serial_number . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Invoice Date</strong></td>
-                                    <td>' . Carbon::parse($invoice->invoicing_date)->format('Y-m-d') . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Due Date</strong></td>
-                                    <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
-                                </tr>
-                               </tbody>
-                            </table>
-                        </div>
-                    </div>
-            ';
-
-            $html .= '
-                    <table class="table table-sm table-bordered border">
-                      <thead>
-                        <tr>
-                            <th colspan="12" class="color primary text-center">Invoice Summary - ' . $origin . '</th>
-                        </tr>
-                        <tr>
-                            <th class="color secondary">Weight Charges (PKR)</th>
-                            <th class="color secondary">Cash Handling Charges (PKR)</th>
-                            <th class="color secondary">Insurance Charges (PKR)</th>
-                            <th class="color secondary">Replacement Charges (PKR)</th>
-                            <th class="color secondary">Try & Buy Charges (PKR)</th>
-                            <th class="color secondary">Return Charges (PKR)</th>
-                            <th class="color secondary">Fuel Surcharge (PKR)</th>
-                            <th class="color secondary">Intercept Charges (PKR)</th>
-                            <th class="color secondary">OSA Charges (PKR)</th>
-                            <th class="color secondary">Packaging Charges (PKR)</th>
-                            <th class="color secondary">Adjustment Charges (PKR)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-            ';
-
-            $html .= '
-                        <tr>
-                            <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_cash_handling_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_insurance_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_replacement_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_try_and_buy_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_return_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
-                            <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_packaging_material_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
-                        </tr>
-            ';
-
-            $html .= '
-                      </tbody>
-                    </table>
-
-                    <div class="row justify-content-end">
-                        <div class="col-4">
-                            <table class="table table-sm table-bordered border">
-                              <tbody>
-                                <tr>
-                                  <td class="color secondary text-left"><strong>Subtotal (PKR)</strong></td>
-                                  <td class="text-right">' . number_format($total_charges[$origin], 2) . '</td>
-                                </tr>
-                                <tr>
-                                  <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
-                                  <td class="text-right">' . number_format($total_gst[$origin], 2) . '</td>
-                                </tr>
-                                <tr>
-                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
-                                  <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount[$origin], 0, PHP_ROUND_HALF_DOWN)) . '</td>
-                                </tr>
-                              </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <table class="table table-sm table-bordered border">
-                      <tbody>
-                        <tr>
-                          <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount[$origin]) . ' Only</td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    <table class="table table-sm table-bordered border">
-                      <tbody>
-                        <tr>
-                          <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
-                          <td>Meezan Bank</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
-            ';
-
-            $html .= '
-                    <table class="table table-sm table-bordered border shipments_summary">
-                      <thead>
-                        <tr>
-                            <th class="color primary text-center" colspan="15">Shipment(s) Summary - ' . $origin . '</th>
-                        </tr>
-                        <tr>
-                          <th class="color secondary">S. No.</th>
-                          <th class="color secondary">Tracking No.</th>
-                          <th class="color secondary">Order ID</th>
-                          <th class="color secondary">Destination</th>
-                          <th class="color secondary">Shipping Mode</th>
-                          <th class="color secondary">Arrival Date</th>
-                          <th class="color secondary">Weight (kg)</th>
-                          <th class="color secondary">Weight Charges (PKR)</th>
-                          <th class="color secondary">Fuel Surcharge (PKR)</th>
-                          <th class="color secondary">OSA Charges (PKR)</th>
-                          <th class="color secondary">Adjustment Charges (PKR)</th>
-                          <th class="color secondary">Packaging Charges (PKR)</th>
-                          <th class="color secondary">Total Charges (PKR)</th>
-                          <th class="color secondary">GST (PKR)</th>
-                          <th class="color secondary">Invoice Amount (PKR)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            ';
-
-            $html .= $shipment_details[$origin];
-
-            $html .= '
-                      </tbody>
-                    </table>
-            ';
-
-            $invoice_number_serial_number++;
-        }
-
-        $html .= '
-                  </div>
-                </div>
-        ';
-
-        if (!$email) {
-            $html .= '
-                <script>
-                  window.onload = function() {
-
-                    window.print();
-                  }
-                </script>
-              </body>
-            </html>
-            ';
-        }
-
-        return $html;
-    }*/
-     public function generate_invoice_print_origin_wise($id, $email = FALSE) {
-    $invoice = Invoice::find($id);
-
-    $shipper = $invoice->shipper;
-
-    $shipper_bank = $shipper->bank()->where('default_bank', 1)->first();
-
-    $account_type_id = $shipper->account_type_id;
-
-    $html = '';
-
-    if (!$email) {
-        $html .= '
-            <!doctype html>
-            <html lang="en">
-              <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-                <title>Invoice</title>
-            ';
-    }
-
-    $html .= '
-                <style>' . file_get_contents(public_path('app-assets/css/bootstrap.min.css')) . '</style>
-        ';
-
-    $html .= '
-            <style>@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-before:always;page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
-        ';
-
-    if (!$email) {
-        $html .= '
-              </head>
-              <body>
-            ';
-    }
-
-    $shipment_details = array();
-
-    $serial_number = array();
-
-    $origins = array();
-
-    $total_charges = array();
-    $total_gst = array();
-    $total_invoice_amount = array();
-
-    $size_array = array();
-    $packaging_details = array();
-
-    if($invoice->invoice_type == 1) {
-        foreach ($invoice->invoice_shipments as $invoice_shipment) {
-            $shipment = $invoice_shipment->shipment;
-
-            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
-
-            if ($shipment_journey->exists()) {
-                $date = $shipment_journey->first()->created_at;
-            } else {
-                $date = $shipment->created_at;
-            }
-
-            $date = Carbon::parse($date)->format('Y-m-d');
-
-            $origin = $shipment->pickup_address->city->name;
-
-            if (!in_array($origin, $origins)) {
-                $origins[] = $origin;
-            }
-
-            if (!isset($shipment_details[$origin])) {
-                $shipment_details[$origin] = '';
-            }
-
-            if (!isset($serial_number[$origin])) {
-                $serial_number[$origin] = 1;
-            }
-
-            $shipment_details[$origin] .= '
-                        <tr>
-                          <td>' . $serial_number[$origin] . '</td>
-                          <td>' . $shipment->tracking_number . '</td>
-                          <td>' . $shipment->order_id . '</td>
-                          <td>' . $shipment->consignee_city->name . '</td>
-                          <td>' . $shipment->shipping_mode->mode . '</td>
-                          <td>' . $date . '</td>
-                          <td>' . $shipment->actual_weight . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->weight_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->fuel_surcharge, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type != 2) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 2) ? number_format($invoice_shipment->invoice_amount, 2) : '0') . '</td>
-                          <td>' . (($invoice_shipment->type == 2) ? number_format($shipment->packaging_material_charges, 2) : '0') . '</td>
-                          <td>' . number_format($invoice_shipment->charges, 2) . '</td>
-                          <td>' . number_format($invoice_shipment->gst, 2) . '</td>
-                          <td>' . number_format($invoice_shipment->invoice_amount, 2) . '</td>
-                        </tr>
-            ';
-
-            $serial_number[$origin]++;
-
-            if (!isset($total_weight_charges[$origin])) {
-                $total_weight_charges[$origin] = 0;
-            }
-
-            if (!isset($total_cash_handling_charges[$origin])) {
-                $total_cash_handling_charges[$origin] = 0;
-            }
-
-            if (!isset($total_insurance_charges[$origin])) {
-                $total_insurance_charges[$origin] = 0;
-            }
-
-            if (!isset($total_return_charges[$origin])) {
-                $total_return_charges[$origin] = 0;
-            }
-
-            if (!isset($total_fuel_surcharge[$origin])) {
-                $total_fuel_surcharge[$origin] = 0;
-            }
-
-            if (!isset($total_replacement_charges[$origin])) {
-                $total_replacement_charges[$origin] = 0;
-            }
-
-            if (!isset($total_try_and_buy_charges[$origin])) {
-                $total_try_and_buy_charges[$origin] = 0;
-            }
-
-            if (!isset($total_packaging_material_charges[$origin])) {
-                $total_packaging_material_charges[$origin] = 0;
-            }
-
-            if (!isset($total_intercept_charges[$origin])) {
-                $total_intercept_charges[$origin] = 0;
-            }
-
-            if (!isset($total_nsa_osa_charges[$origin])) {
-                $total_nsa_osa_charges[$origin] = 0;
-            }
-
-            if (!isset($total_adjustment_charges[$origin])) {
-                $total_adjustment_charges[$origin] = 0;
-            }
-
-            if (!isset($total_charges[$origin])) {
-                $total_charges[$origin] = 0;
-            }
-
-            if (!isset($total_gst[$origin])) {
-                $total_gst[$origin] = 0;
-            }
-
-            if (!isset($total_invoice_amount[$origin])) {
-                $total_invoice_amount[$origin] = 0;
-            }
-
-            if ($invoice_shipment->type != 2) {
-                if ($invoice_shipment->type == 0) {
-                    $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
-                    $total_replacement_charges[$origin] += $shipment->replacement_charges;
-                    $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
-                } else {
-                    $total_return_charges[$origin] += $shipment->return_charges;
-                }
-
-                $total_weight_charges[$origin] += $shipment->weight_charges;
-
-                if ($shipment->packaging_material_request) {
-                    $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
-                }
-
-                $total_insurance_charges[$origin] += $shipment->insurance_charges;
-                $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
-                $total_intercept_charges[$origin] += $shipment->intercept_charges;
-                $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
-            } else {
-                $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
-            }
-
-            $total_charges[$origin] += $invoice_shipment->charges;
-            $total_gst[$origin] += $invoice_shipment->gst;
-            $total_invoice_amount[$origin] += $invoice_shipment->invoice_amount;
-        }
-    }
-    else{
-
-        $shipment_ids = $invoice->invoice_shipments->pluck('shipment_id')->toArray();
-
-        if(count($shipment_ids) > 0) {
-
-            $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id',$shipment_ids)->where('packaging_material_requests.status_id', 4)
-                ->where('packaging_material_requests.user_id', $shipper->id);
-
-            if ($packaging_materials->exists()) {
-                $packaging_materials = $packaging_materials->orderBy('city_id', 'asc')->get();
-                foreach ($packaging_materials as $packaging_material) {
-                    foreach ($packaging_material->items as $details) {
-                        if (!isset($packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'])) {
-                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'] = 1;
-                            $zone = Zone::find($packaging_material->city->zone_id);
-                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['origin'] = $packaging_material->city->name;
-                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['rates'] = $details->packaging_type_size->standard_charges;
-                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['description'] = $details->packaging_type_size->type->type . '-' . $details->packaging_type_size->size;
-                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'] = $details->quantity;
-                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['gst'] = $zone->gst;
-                        }
-                        else {
-                            $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity']++;
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-
-    $invoice_number_serial_number = 1;
-
-    if(count($origins) > 0 && $invoice->invoice_type == 1) {
-        foreach ($origins as $origin) {
 
             $html .= '
                 <div>
@@ -2990,11 +3169,13 @@ class ShipperFinanceController extends Controller
         ';
             $html .= '
                     <div class="row align-items-start justify-content-between summary">
+                        
                         <div class="col-6">
+                            <h1><b><u>SALES TAX INVOICE</u></b></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody>
                                 <tr>
-                                    <td class="color primary" colspan="2"><strong>Customer Details</strong></td>
+                                    <td class="color primary" colspan="2"><strong>Bill To</strong></td>
                                 </tr>
                                 <tr>
                                     <td class="color secondary"><strong>Account No.</strong></td>
@@ -3034,14 +3215,10 @@ class ShipperFinanceController extends Controller
                         </div>
 
                         <div class="col-4">
+                            <h1 style="text-align:center"><img style="width:50%;height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
-            if($invoice->invoice_type == 1) {
-                $html .=  '<tr>
-                                    <td class="color primary"><strong>NTN</strong></td>
-                                    <td>7930679-5</td>
-                                </tr>
-                                <tr>
+            $html .=  '<tr>
                                     <td class="color primary"><strong>SNTN</strong></td>
                                     <td>S-7930679-5</td>
                                 </tr>
@@ -3049,8 +3226,6 @@ class ShipperFinanceController extends Controller
                                     <td class="color primary"><strong>PNTN</strong></td>
                                     <td>P-7930679-5</td>
                                 </tr>';
-
-            }
 
             $html .= '<tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
@@ -3068,10 +3243,7 @@ class ShipperFinanceController extends Controller
 
 
 
-            $html .= '<tr>
-                                    <td class="color primary"><strong>Due Date</strong></td>
-                                    <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
-                                </tr>
+            $html .= '
                                </tbody>
                             </table>
                         </div>
@@ -3082,45 +3254,64 @@ class ShipperFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="12" class="color primary text-center">Invoice Summary - ' . $origin . '</th>
+                            <th colspan="3" class="color primary text-center">Invoice Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
-                            <th class="color secondary">Weight Charges (PKR)</th>
-                            <th class="color secondary">Cash Handling Charges (PKR)</th>
-                            <th class="color secondary">Insurance Charges (PKR)</th>
-                            <th class="color secondary">Replacement Charges (PKR)</th>
-                            <th class="color secondary">Try & Buy Charges (PKR)</th>
-                            <th class="color secondary">Return Charges (PKR)</th>
-                            <th class="color secondary">Fuel Surcharge (PKR)</th>
-                            <th class="color secondary">Intercept Charges (PKR)</th>
-                            <th class="color secondary">OSA Charges (PKR)</th>
-                            <th class="color secondary">Packaging Charges (PKR)</th>
-                            <th class="color secondary">Adjustment Charges (PKR)</th>
+                            <th class="color secondary">Description Of Services</th>
+                            <th class="color secondary">Quantity</th>
+                            <th class="color secondary">Total Charges</th>
                         </tr>
-                      </thead>
-                      <tbody>
-            ';
-
-            $html .= '
+                        </thead>
+                        <tbody>
                         <tr>
+                            <td>Weight Charges</td>
+                            <td rowspan="11">'.$shipment_counts[$origin].'</td>
                             <td>' . number_format($total_weight_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_cash_handling_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_insurance_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_replacement_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_try_and_buy_charges[$origin], 2) . '</td>
-                            <td>' . number_format($total_return_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Fuel Surcharge</td>
                             <td>' . number_format($total_fuel_surcharge[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Cash Handling Charges</td>
+                            <td>' . number_format($total_cash_handling_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Insurance Charges</td>
+                            <td>' . number_format($total_insurance_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Replacement Charges</td>
+                            <td>' . number_format($total_replacement_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Try & Buy Charges</td>
+                            <td>' . number_format($total_try_and_buy_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Return Charges</td>
+                            <td>' . number_format($total_return_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Intercept Charges</td>
                             <td>' . number_format($total_intercept_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>OSA Charges</td>
                             <td>' . number_format($total_nsa_osa_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Packaging Charges</td>
                             <td>' . number_format($total_packaging_material_charges[$origin], 2) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Adjustments</td>
                             <td>' . number_format($total_adjustment_charges[$origin], 2) . '</td>
                         </tr>
-            ';
-
-            $html .= '
                       </tbody>
-                    </table>
-
+                      </table>
+            ';
+            $html .= '
                     <div class="row justify-content-end">
                         <div class="col-4">
                             <table class="table table-sm table-bordered border">
@@ -3130,7 +3321,7 @@ class ShipperFinanceController extends Controller
                                   <td class="text-right">' . number_format($total_charges[$origin], 2) . '</td>
                                 </tr>
                                 <tr>
-                                  <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
+                                  <td class="color secondary text-left"><strong>SST (PKR)</strong></td>
                                   <td class="text-right">' . number_format($total_gst[$origin], 2) . '</td>
                                 </tr>
                                 <tr>
@@ -3143,7 +3334,7 @@ class ShipperFinanceController extends Controller
                     </div>';
 
             $amount_in_words = '';
-            $amount_in_words = self::amount_to_words($total_invoice_amount[$origin]);
+            $amount_in_words = self::amount_to_words(ROUND($total_invoice_amount[$origin], 0, PHP_ROUND_HALF_DOWN));
 
             $html .= '<table class="table table-sm table-bordered border">
                       <tbody>
@@ -3170,258 +3361,31 @@ class ShipperFinanceController extends Controller
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
                           <td>0102951143</td>
-                        </tr>';
-
-
-            $html .= ' <tr>
-                                      <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                                      <td>9912</td>
-                                    </tr>
-                                    </tbody>
+                        </tr> 
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
+                          <td>9912</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
+                          <td>Liaqatabad Market Malir Branch</td>
+                        </tr>
+                        </tbody>
                     </table>
 
                     <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
-            ';
-
-            $html .= '
-                    <table class="table table-sm table-bordered border shipments_summary">
-                      <thead>
-                        <tr>
-                            <th class="color primary text-center" colspan="15">Shipment(s) Summary - ' . $origin . '</th>
-                        </tr>
-                        <tr>
-                          <th class="color secondary">S. No.</th>
-                          <th class="color secondary">Tracking No.</th>
-                          <th class="color secondary">Order ID</th>
-                          <th class="color secondary">Destination</th>
-                          <th class="color secondary">Shipping Mode</th>
-                          <th class="color secondary">Arrival Date</th>
-                          <th class="color secondary">Weight (kg)</th>
-                          <th class="color secondary">Weight Charges (PKR)</th>
-                          <th class="color secondary">Fuel Surcharge (PKR)</th>
-                          <th class="color secondary">OSA Charges (PKR)</th>
-                          <th class="color secondary">Adjustment Charges (PKR)</th>
-                          <th class="color secondary">Packaging Charges (PKR)</th>
-                          <th class="color secondary">Total Charges (PKR)</th>
-                          <th class="color secondary">GST (PKR)</th>
-                          <th class="color secondary">Invoice Amount (PKR)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            ';
-
-            $html .= $shipment_details[$origin];
-
-            $html .= '
-                      </tbody>
-                    </table>
             ';
 
             $invoice_number_serial_number++;
         }
-    }
-    else{
 
         $html .= '
-                <div>
-                  <div class="p-1">
-        ';
-        $html .= '
-                    <div class="row align-items-start justify-content-between summary">
-                        <div class="col-6">
-                            <table class="table table-sm table-bordered border">
-                              <tbody>
-                                <tr>
-                                    <td class="color primary" colspan="2"><strong>Customer Details</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Account No.</strong></td>
-                                    <td>' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . '</td>
-                                </tr>';
-        if($account_type_id == 2){
-            $html .= '<tr>
-                                        <td class="color secondary"><strong>Shipper Name</strong></td>
-                                        <td>' . $shipper->name . '</td>
-                                    </tr>';
-        }
-        $html .= '<tr>
-                                    <td class="color secondary"><strong>Name</strong></td>
-                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_name : $shipper->name) . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Address</strong></td>
-                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_address : $shipper->address) . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color secondary"><strong>Contact No.</strong></td>
-                                    <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_phone : $shipper->phone)  . '</td>
-                                </tr>
-                                <tr>
-                                  <td class="color secondary"><strong>NTN</strong></td>
-                                  <td>' . $shipper->ntn_no . '</td>
-                                </tr>  ';
-
-        $html .= '</tbody>
-                            </table>
-                        </div>
-
-                        <div class="col-4">
-                            <table class="table table-sm table-bordered border">
-                              <tbody> ';
-
-
-        $html .= '<tr>
-                                    <td class="color primary"><strong>Billing Period</strong></td>
-                                    <td>' . Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d') . ' <-> ' . Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d') . '</td>
-                                </tr>
-                                <tr>
-                                    <td class="color primary"><strong>Invoice No.</strong></td>
-                                    <td>' . $invoice->invoice_number . ' - ' . $invoice_number_serial_number . '</td>
-                                </tr>
-                                <tr> ';
-        if($invoice->invoice_type == 1) {
-            $html .=  '<td class="color primary"><strong>Invoice Date</strong></td>
-                                    <td>' . Carbon::parse($invoice->invoicing_date)->format('Y-m-d') . '</td>
-                                </tr>';
-
-        }
-
-        $html .= '<tr>
-                                    <td class="color primary"><strong>Due Date</strong></td>
-                                    <td>' . Carbon::parse($invoice->due_date)->format('Y-m-d') . '</td>
-                                </tr>
-                               </tbody>
-                            </table>
-                        </div>
-                    </div>
-            ';
-
-        $html .= '<table class="table table-sm table-bordered border">
-          <thead>
-            <tr>
-                <th colspan="12" class="color primary text-center">Invoice Summary</th>
-            </tr>
-            <tr>
-                <th class="color secondary">Origin</th>
-                <th class="color secondary">Description</th>
-                <th class="color secondary">Rates</th>
-                <th class="color secondary">Quantity</th>
-                <th class="color secondary">Total Charges Without GST</th>
-                <th class="color secondary">SST %</th>
-                <th class="color secondary">SST Amount</th>
-                <th class="color secondary">Total Amount with SST</th>
-              
-            </tr>
-          </thead>
-          <tbody>
-';
-        $rates_total = 0;
-        $quantity_total = 0;
-        $total_amount_without_gst = 0;
-        $total_sst_amount = 0;
-        $overall_amount = 0;
-
-        foreach ($packaging_details as $cities) {
-            foreach ($cities as $packaging_material) {
-                $amount_without_gst = $packaging_material['rates'] * $packaging_material['quantity'];
-                $sst_amount = round($amount_without_gst * $packaging_material['gst']);
-                $total_amount_with_sst = round($amount_without_gst + $sst_amount);
-
-                $rates_total = $rates_total + $packaging_material['rates'];
-                $quantity_total = $quantity_total + $packaging_material['quantity'];
-                $total_amount_without_gst = $total_amount_without_gst + $amount_without_gst;
-                $total_sst_amount = $total_sst_amount + $sst_amount;
-                $overall_amount = $overall_amount + $total_amount_with_sst;
-                $html .= '
-                    <tr>
-                        <td>' . $packaging_material['origin'] . '</td>
-                        <td>' . $packaging_material['description'] . '</td>
-                        <td>' . $packaging_material['rates'] . '</td>
-                        <td>' . $packaging_material['quantity'] . '</td>
-                        <td>' . $amount_without_gst . '</td>
-                        <td>' . $packaging_material['gst'] * 100 . '%' . '</td>
-                        <td>' . round($sst_amount) . '</td>
-                        <td>' . number_format($total_amount_with_sst) . '</td>
-                      
-                    </tr>';
-                /* $html .= $packaging_material['origin'];*/
-            }
-        }
-
-
-        $html .= '<tr>
-                <td colspan="3" class="text-center">Total Amount</td>
-            
-                <td>'.$quantity_total.'</td>
-                <td>'.$total_amount_without_gst.'</td>
-                <td></td>
-                <td>'.number_format($total_sst_amount).'</td>
-                <td>'.number_format($overall_amount).'</td>
-            </tr>';
-        $amount_in_words = '';
-        $amount_in_words = self::amount_to_words($overall_amount);
-
-        $html .= '<table class="table table-sm table-bordered border">
-                      <tbody>
-                        <tr>
-                          <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . $amount_in_words . ' Only</td>
-                        </tr>
-                      </tbody>
-                    </table>
-
-                    <table class="table table-sm table-bordered border">
-                      <tbody>
-                        <tr>
-                          <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
-                          <td>Meezan Bank</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
-                          <td>PK02MEZN0099120104111731</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Name.</strong></td>
-                          <td>Liaquat Market Malir Branch</td>
-                        </tr>';
-
-        $html .= ' <tr>
-                                      <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                                      <td>9912</td>
-                                    </tr>
-                                    </tbody>
-                    </table>
-
-                    <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
-            ';
-
-
-        $html .= '
-                      </tbody>
-                    </table>
-            ';
-
-
-    }
-
-    $html .= '
                   </div>
                 </div>
         ';
 
-    if (!$email) {
-        $html .= '
+        if (!$email) {
+            $html .= '
                 <script>
                   window.onload = function() {
 
@@ -3431,10 +3395,9 @@ class ShipperFinanceController extends Controller
               </body>
             </html>
             ';
+        }
+
+        return $html;
     }
-
-    return $html;
-}
-
 }
 
