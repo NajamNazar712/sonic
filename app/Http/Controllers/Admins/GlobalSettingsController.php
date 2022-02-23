@@ -3,15 +3,10 @@
 namespace App\Http\Controllers\Admins;
 
 
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\SalesIncentiveDate;
-use App\Http\Models\Admin\AdminAppSlider;
-use App\Http\Models\Admin\RetailAppSlider;use App\Http\Models\FleetDriver;
-use App\Http\Models\FleetVendor;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminAppSlider;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
@@ -36,12 +31,19 @@ use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashConsignee;
 use App\Http\Models\Admin\PettyCashConsigneeHub;
 use App\Http\Models\Admin\RcpTatOption;
+use App\Http\Models\Admin\RetailAppSlider;
+use App\http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\RouteManagement;
 use App\Http\Models\Admin\RouteManagementJunction;
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
+use App\Http\Models\Admin\SalesDesignation;
+use App\Http\Models\Admin\SalesDesignationJourney;
+use App\Http\Models\Admin\SalesIncentiveDate;
 use App\Http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\Admin\VehicleType;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
@@ -64,37 +66,36 @@ use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
-use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\CrmAgent;
-use App\Http\Models\CrmAgentLog;
 use App\Http\Models\DeliveryCallVerificationRatio;
+use App\Http\Models\FleetDriver;
+use App\Http\Models\FleetVendor;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\Holiday;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\MultipleSaleTagging;
 use App\Http\Models\OvernightOverlandReportOriginHubs;
-use App\Http\Models\RateStatus;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
+use App\Http\Models\RateStatus;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
-use App\Http\Models\RiderCategory;
 use App\Http\Models\Rider\RidersIncentiveSetting;
 use App\Http\Models\Rider\RidersShipmentPaymentType;
 use App\Http\Models\Rider\RidersShipmentWeightRange;
 use App\Http\Models\Rider\RiderTickerImage;
+use App\Http\Models\RiderCategory;
 use App\Http\Models\Runner;
 use App\Http\Models\RunnerJunction;
 use App\Http\Models\SaleTierTag;
-use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
@@ -104,12 +105,8 @@ use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
-use App\Http\Models\Admin\SalesDesignationJourney;
-use App\Http\Models\Admin\SalesDesignation;
-use App\Http\Models\Admin\Territory;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
-use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -6092,6 +6089,44 @@ public function sales_incentive()
         $setting->save();
 
         return redirect()->back()->with('success','Setting Updated');
+    }
+
+    public function return_reason_mandatory_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 510);
+        $already_added_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
+        $shippers = User::join('cities as c', 'users.city_id', '=', 'c.id')
+            ->where('users.status', 3)->where('users.blacklist', 0)->whereNotIn('users.id',$already_added_shippers)->select('users.id as id', 'users.name as name');
+        if (session('role_id') != 1) {
+            $shippers = $shippers->whereIn('c.hub_id', session('hubs'));
+        }
+        $shippers = $shippers->get();
+        return view('admin.settings.return.return_reason_mandatory',compact('shippers'));
+
+    }
+
+    public function return_reason_mandatory_list(Request $request){
+        $shippers = ReturnReasonMandatoryShipper::join('users as u', 'return_reason_mandatory_shippers.shipper_id', 'u.id')
+            ->join('admins as ad', 'return_reason_mandatory_shippers.added_by', '=', 'ad.id')
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->select('u.name as shipper_name', 'ad.name as added_by','c.name as shipper_city', 'return_reason_mandatory_shippers.created_at as added_at');
+        if (session('role_id') != 1) {
+            $shippers = $shippers->whereIn('c.hub_id', session('hubs'));
+        }
+        $datatables = Datatables::of($shippers)
+            ->editColumn('added_at', function ($shippers) {
+                return Carbon::parse($shippers->added_at)->format("Y-m-d");
+            });
+        return $datatables->make(true);
+    }
+
+    public function return_reason_mandatory_store(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+        $return_shipper_reason = new ReturnReasonMandatoryShipper();
+        $return_shipper_reason->shipper_id = $shipper_id;
+        $return_shipper_reason->added_by = Auth::id();
+        $return_shipper_reason->save();
+        return redirect()->back()->with('success', 'Shipper Has Been Added!');
     }
 
 }

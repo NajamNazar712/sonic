@@ -24,6 +24,7 @@ use App\Http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\ReturnReattemptRatio;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\AppNotification;
@@ -4171,15 +4172,21 @@ class RiderAPIController extends Controller
                 $information['return_deliveries'] = array();
                 $return_note_shipments = $return_note->return_note_shipments->where('status', 0);
                 foreach ($return_note_shipments as $return_note_shipment) {
-
+                    $reason_mandatory_shippers = ReturnReasonMandatoryShipper::pluck('email')->toArray();
                     $shipment_data = $return_note_shipment->shipment;
-                    $pickup_address = $shipment_data->pickup_address;
+                    if($shipment_data->return_address_id){
+                        $pickup_address = $shipment_data->return_address;
+                        $address_id = $shipment_data->return_address_id;
+                    }else{
+                        $pickup_address = $shipment_data->pickup_address;
+                        $address_id = $shipment_data->pickup_address_id;
+                    }
 
                     $shipment_id = $shipment_data->id;
                     $tracking_number = $shipment_data->tracking_number;
                     $shipper_name = $pickup_address->user->name;
                     $shipper_id = $shipment_data->user_id;
-                    $shipper_address_id = $shipment_data->pickup_address_id;
+                    $shipper_address_id = $address_id;
                     $shipper_poc = $pickup_address->poc;
                     $shipper_address = $pickup_address->pickup_address;
                     $shipper_phone = $pickup_address->phone;
@@ -4201,6 +4208,7 @@ class RiderAPIController extends Controller
                     } else {
                         $status = 1;
                     }
+                    $reason_mandatory = (in_array($shipper_id, $reason_mandatory_shippers)) ? 1 : 0;
 
                     $deliveries = array();
                     $deliveries['shipment_id'] = $shipment_id;
@@ -4213,6 +4221,7 @@ class RiderAPIController extends Controller
                     $deliveries['consignee_phone'] = $shipper_phone;
                     $deliveries['special_instructions'] = $special_instructions;
                     $deliveries['remarks'] = $remarks;
+                    $deliveries['reason_mandatory'] = $reason_mandatory;
                     $deliveries['latitude'] = NULL;
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
