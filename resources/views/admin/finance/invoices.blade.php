@@ -703,7 +703,13 @@
 				var account_type = parseInt(table.row($(this).parents('tr')).data().account_type);
 
 				if ($(this).hasClass('export_to_excel')) {
-					window.open('{!! route('admin.finance.invoices.export_to_excel') !!}?id=' + id, '_blank');
+					if(account_type == 2) {
+						window.open('{!! route('admin.finance.invoices.export_to_excel') !!}?id=' + id, '_blank');
+					}
+					else if(account_type == 1)
+					{
+						window.open('{!! route('admin.finance.invoices.reimbursement.export_to_excel') !!}?id=' + id, '_blank');
+					}
 				}
 				else if ($(this).hasClass('email_reminder')) {
 					$.ajax({
@@ -786,7 +792,8 @@
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
-							'id': id
+							'id': id,
+							'account_type':account_type,
 						}
 					})
 					.done(function(data) {

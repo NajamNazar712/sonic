@@ -344,7 +344,14 @@
                 var account_type = parseInt(table.row($(this).parents('tr')).data().type_id);
 
                 if ($(this).hasClass('export_to_excel')) {
-                    window.open('{!! route('cod.finance.invoice.export_to_excel') !!}?id=' + id, '_blank');
+                    if(account_type == 2)
+                    {
+                        window.open('{!! route('cod.finance.invoice.export_to_excel') !!}?id=' + id, '_blank');
+                    }
+                    else if(account_type == 1)
+                    {
+                        window.open('{!! route('cod.finance.invoice.reimbursement.export_to_excel') !!}?id=' + id, '_blank');
+                    }
                 }
                 else if ($(this).hasClass('print_origin_wise')) {
                     $.ajax({

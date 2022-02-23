@@ -2287,6 +2287,74 @@ class ShipperFinanceController extends Controller
         $writer->save('php://output');
     }
 
+    public function reimbursement_invoices_export_to_excel(Request $request) {
+        $invoice = InvoiceForReimbursement::find($request->id);
+
+        $filename = 'sonic_invoice_details_' . $request->id . '.xlsx';
+
+        $details = array();
+
+        $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+
+        $serial_number = 1;
+
+        foreach ($invoice->invoice_shipments as $invoice_shipment) {
+            $shipment = $invoice_shipment->shipment;
+
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+
+            if ($shipment_journey->exists()) {
+                $date = $shipment_journey->first()->created_at;
+            }
+            else {
+                $date = $shipment->created_at;
+            }
+
+            $date = Carbon::parse($date)->format('Y-m-d');
+
+            $row = array();
+
+            $row[] = $serial_number;
+            $row[] = $shipment->tracking_number;
+            $row[] = $shipment->pickup_address->city->name;
+            $row[] = $shipment->consignee_city->name;
+            $row[] = $shipment->created_at;
+            $row[] = $shipment->actual_weight;
+            $row[] = (($invoice_shipment->type != 2) ? $shipment->weight_charges : 0);
+            $row[] = (($invoice_shipment->type != 2) ? $shipment->fuel_surcharge : 0);
+            $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
+            $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
+            $row[] = $invoice_shipment->charges;
+            $row[] = $invoice_shipment->gst;
+            $row[] = $invoice_shipment->invoice_amount;
+
+            $details[] = $row;
+
+            $serial_number++;
+        }
+
+        $spreadsheet = new Spreadsheet();
+
+        $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('G')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
+        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0.00');
+
+        $spreadsheet->getActiveSheet()->fromArray($details);
+
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename .'"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+    }
+
     public function invoices_email_reminder(Request $request) {
         $invoice = Invoice::find($request->id);
 
