@@ -969,6 +969,20 @@ class ShipperReportsController extends Controller
                 }
 
             })
+            ->addColumn('return_attempt_time', function($shipment) {
+                $reattempt_time = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
+                    ->where('shipper_status_id','=',23)
+                    ->where('verification','=',1)
+                    ->select('created_at')
+                    ->latest()->first();
+
+                if($reattempt_time){
+                    return $reattempt_time->created_at;
+                }
+                else{
+                    return '';
+                }
+            })
             ->addColumn('tracking_number_link', function ($shipment) {
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";

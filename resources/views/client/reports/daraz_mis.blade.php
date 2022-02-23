@@ -67,6 +67,7 @@
                         <th class="border-primary border-darken-1">Last Reason</th>
                         <th class="border-primary border-darken-1">Attempts</th>
                         <th class="border-primary border-darken-1">Return Attempts</th>
+                        <th class="border-primary border-darken-1">Return Attempt Time</th>
                         <th class="border-primary border-darken-1">Last Remarks</th>
                         <th class="border-primary border-darken-1">Last Attempt Date</th>
                         <th class="border-primary border-darken-1">Delivered Returned Date</th>
@@ -254,6 +255,7 @@
                             head.push('Last Reason');
                             head.push('Attempts');
                             head.push('Return Attempts');
+                            head.push('Return Attempt Time');
 
                             head.push('Last Remarks');
                             head.push('Last Attempt Date');
@@ -273,6 +275,7 @@
                                 row.push(values.last_reason);
                                 row.push(values.attempts);
                                 row.push(values.return_attempts);
+                                row.push(values.return_attempt_time);
                                 row.push(values.rider_remarks);
                                 row.push(values.last_attempt_date);
                                 row.push(values.delivered_or_returned);
@@ -331,6 +334,7 @@
                     { data:'last_reason' ,name: 'last_reason', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'attempts' ,name: 'attempts', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'return_attempts' ,name: 'return_attempts', class: 'align-middle not_search', orderable: false, searchable: false},
+                    { data:'return_attempt_time' ,name: 'return_attempt_time', class: 'align-middle return_attempt_time', orderable: false, searchable: false},
                     { data:'rider_remarks' ,name: 'rider_remarks', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'last_attempt_date' ,name: 'atmpdate.created_at', class: 'align-middle not_search'},
                     { data:'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle not_search'},
