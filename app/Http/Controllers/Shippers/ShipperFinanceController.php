@@ -3467,8 +3467,8 @@ class ShipperFinanceController extends Controller
 
         return $html;
     }
-}
-public function reimbursement_invoices_print(Request $request) {
+
+    public function reimbursement_invoices_print(Request $request) {
         $invoice = InvoiceForReimbursement::find($request->id);
 
         if ($invoice) {
@@ -3483,7 +3483,6 @@ public function reimbursement_invoices_print(Request $request) {
             return '';
         }
     }
-
     static public function generate_reimbursement_invoice_print($id, $email = FALSE, $header = FALSE) {
         $invoice = InvoiceForReimbursement::find($id);
 
@@ -3929,4 +3928,5 @@ public function reimbursement_invoices_print(Request $request) {
 
         return $html;
     }
+}
 
