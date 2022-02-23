@@ -686,7 +686,7 @@
      aria-hidden="true">
 
     <div class="modal-dialog modal-xl" role="document" style="margin-left: 35%!important;">
-        <div class="modal-content" style="width: 50%!important;">
+        <div class="modal-content" style="width: 60%!important;">
             <div class="modal-header">
                 <h4 class="modal-title" id="admin_profile_heading">User Profile<span></span></h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -696,24 +696,39 @@
             <div class="modal-body admin_profile" id="admin_profile_body">
                 <table class="table table-sm table-bordered border">
                     <thead>
-                    <tr>
-                        <th><span class="la la-user"></span><strong class="">Employee ID</strong></th>
-                        <td id="employee_id"></td>
-                    </tr>
+{{--                    <tr>--}}
+{{--                        <th>--}}
+{{--                        <fieldset class="position-relative has-icon-left">--}}
+{{--                            <i class="la la-user">--}}
+{{--                            </i><label>Employ ID</label>--}}
+{{--                        </fieldset>--}}
+{{--                        </th>--}}
+{{--                        <td id="full_name"></td>--}}
+{{--                    </tr>--}}
+                                        <tr>
+                                            <th><span class="la la-user"></span><strong class="">Employee ID</strong></th>
+                                            <td id="employee_id"></td>
+                                        </tr>
                     <tr>
                         <th><span class="la la-user"></span><strong>Full Name</strong></th>
                         <td id="full_name"></td>
                     </tr>
                     <tr>
-                        <th><span class="la la-envelope"></span><strong>Email</strong></th>
+{{--                        <th>--}}
+{{--                            <fieldset class="position-relative has-icon-left">--}}
+{{--                                <i class="la la-envelope">--}}
+{{--                                </i>$nbsp<label>Email</label>--}}
+{{--                            </fieldset>--}}
+{{--                        </th>--}}
+                        <th><span class="la la-envelope"></span><strong>&nbsp;Email</strong></th>
                         <td id="email"></td>
                     </tr>
                     <tr>
                         <th><span class="la la-mobile-phone"></span><strong>Contact</strong></th>
-                        <td id="contact"></td>
+                        <td style="color: red" id="contact"></td>
                     </tr>
                     <tr>
-                        <th><span class="la la-th"></span><strong>Department</strong></th>
+                        <th><span class="la la-th"></span><strong>&nbsp;Department</strong></th>
                         <td id="department"></td>
                     </tr>
                     <tr>
@@ -726,11 +741,11 @@
                     </tr>
                     <tr>
                         <th><span class="la la-mobile-phone"></span><strong>Emergency Contact Person</strong></th>
-                        <td id="emergency_contact_person"></td>
+                        <td style="color: red" id="emergency_contact_person"></td>
                     </tr>
                     <tr>
                         <th><span class="la la-mobile-phone"></span><strong>Emergency Contact Number</strong></th>
-                        <td id="emergency_contact_no"></td>
+                        <td style="color: red" id="emergency_contact_no"></td>
                     </tr>
                     <tr>
                         <th>
