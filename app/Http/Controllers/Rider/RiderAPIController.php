@@ -4168,13 +4168,19 @@ class RiderAPIController extends Controller
                 foreach ($return_note_shipments as $return_note_shipment) {
                     $reason_mandatory_shippers = ReturnReasonMandatoryShipper::pluck('email')->toArray();
                     $shipment_data = $return_note_shipment->shipment;
-                    $pickup_address = $shipment_data->pickup_address;
+                    if($shipment_data->return_address_id){
+                        $pickup_address = $shipment_data->return_address;
+                        $address_id = $shipment_data->return_address_id;
+                    }else{
+                        $pickup_address = $shipment_data->pickup_address;
+                        $address_id = $shipment_data->pickup_address_id;
+                    }
 
                     $shipment_id = $shipment_data->id;
                     $tracking_number = $shipment_data->tracking_number;
                     $shipper_name = $pickup_address->user->name;
                     $shipper_id = $shipment_data->user_id;
-                    $shipper_address_id = $shipment_data->pickup_address_id;
+                    $shipper_address_id = $address_id;
                     $shipper_poc = $pickup_address->poc;
                     $shipper_address = $pickup_address->pickup_address;
                     $shipper_phone = $pickup_address->phone;
