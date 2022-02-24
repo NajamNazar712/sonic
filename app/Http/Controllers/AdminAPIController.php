@@ -81,6 +81,8 @@ use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Models\WMS\WmsPendingPicking;
+use App\Http\Models\WMS\WmsPicklist;
 use App\Http\Models\Zone;
 use App\Models\Admin\Lead\LeadReason;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -6357,7 +6359,7 @@ class AdminAPIController extends Controller
 
     public function pending_pick_list(Request $request){
         $admin_id = $request->admin_id;
-        $pending_picklist = DB::table('wms_picklists')->join('admins', 'admins.id', '=', 'wms_picklists.created_by')
+        $pending_picklist = WmsPicklist::join('admins', 'admins.id', '=', 'wms_picklists.created_by')
             ->join('wms_pickers as wp', 'wp.id', '=', 'wms_picklists.picker_id')
             ->select('wms_picklists.id as picklist_id', 'admins.name as created_by','wms_picklists.created_at as picking_date','wms_picklists.sku_count', 'wms_picklists.tracking_count','wms_picklists.quantity')
             ->where('wms_picklists.status', 0)
@@ -6371,36 +6373,29 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function pick_list_details(Request $request){
-        $picklist = DB::table('wms_picklists')->find($request->picklist_id);
+    public function pick_list_details(Request $request, $id){
+        $picklist = WmsPicklist::find($id);
         $picklist_data = array();
         $product_ids = array();
-        if($picklist){
-            if($picklist->status == 0){
-                $items = DB::table('wms_picklist_items')->where('picklist_id',$picklist->id)->get();
-                foreach($items as $item){
-                    $picklist_datum = array();
-                    $pending_picking = DB::table('wms_pending_pickings')->find($item->pending_picking_id);
-                    $picklist_datum['pending_picking_id'] = $pending_picking->id;
-                    $picklist_datum['product_id'] = $pending_picking->product_id;
-                    $picklist_datum['sku_id'] = $pending_picking->product->sku_id;
-                    $picklist_datum['product_name'] = $pending_picking->product->name;
-                    $picklist_datum['shipper_name'] = $pending_picking->product->shipper->name;
-                    $picklist_datum['listed_quantity'] = $item->quantity;
-                    $picklist_data[] = $picklist_datum;
-                    /*if(!in_array($pending_picking->product_id, $product_ids)){
-                        $product_ids[] = $pending_picking->product_id;
-                    }*/
+
+        if($picklist && $picklist->status == 0){
+            foreach($picklist->items as $item){
+                $pending_picking = WmsPendingPicking::find($item->pending_picking_id);
+
+                $picklist_data[$pending_picking->product->user_id][$item->id]['pending_picking_id'] = $pending_picking->id;
+                $picklist_data[$pending_picking->product->user_id][$item->id]['product_id'] = $pending_picking->product_id;
+                $picklist_data[$pending_picking->product->user_id][$item->id]['sku_id'] = $pending_picking->product->sku_id;
+                $picklist_data[$pending_picking->product->user_id][$item->id]['product_name'] = $pending_picking->product->name;
+                $picklist_data[$pending_picking->product->user_id][$item->id]['shipper_name'] = $pending_picking->product->shipper->name;
+                $picklist_data[$pending_picking->product->user_id][$item->id]['listed_quantity'] = $item->quantity;
+                if(!in_array($pending_picking->product_id, $product_ids)){
+                    $product_ids[] = $pending_picking->product_id;
                 }
-                return response()->json(['status' => 0, 'message' => "Picklist already updated",'picklist' => $picklist, 'picklist_data' => $picklist_data, 'product_ids' => $product_ids]);
             }
-            else{
-                return response()->json(['status' => 1, 'message' => "Picklist already updated"]);
-            }
+            return response()->json(['status' => 0, 'message' => "Picklist already updated",'picklist' => $picklist, 'picklist_data' => $picklist_data, 'product_ids' => $product_ids]);
         }else{
             return response()->json(['status' => 1, 'message' => "Invalid Picklist"]);
         }
-
     }
 
 
