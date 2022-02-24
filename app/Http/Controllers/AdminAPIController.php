@@ -6357,7 +6357,7 @@ class AdminAPIController extends Controller
 
     public function pending_pick_list(Request $request){
         $admin_id = $request->admin_id;
-        $pending_picklist = DB::table('wms_picklists')::join('admins', 'admins.id', '=', 'wms_picklists.created_by')
+        $pending_picklist = DB::table('wms_picklists')->join('admins', 'admins.id', '=', 'wms_picklists.created_by')
             ->select('wms_picklists.id as picklist_id', 'admins.name as created_by','wms_picklists.created_at as picking_date','wms_picklists.sku_count', 'wms_picklists.tracking_count','wms_picklists.quantity')
             ->where('wms_picklists.status', 0)
             ->where('wms_picklists.picker_id', $admin_id);
