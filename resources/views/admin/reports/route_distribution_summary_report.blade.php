@@ -450,7 +450,7 @@
                     api.columns('.pending_shipments_per', {
                         page: 'current'
                     }).every(function() {
-                        pending_shipments_per = (pending_shipments_per/shipments_count)*100;
+                        pending_shipments_per = (pending_shipments/shipments_count)*100;
                         $(this.footer()).html(pending_shipments_per.toFixed(2));
                     });
                 }
