@@ -6423,7 +6423,7 @@ class AdminAPIController extends Controller
         } else {
             $barcode = $request->barcode;
             $product_ids = WmsPicklist::join('wms_picklist_items as wpi', 'wms_picklists.id', '=', 'wpi.picklist_id')
-                ->join('wms_pending_pickings as wpp','wpi.pending_picking_id','=', 'wpp.id')->pluck('wpp.product_id')->toArray();
+                ->join('wms_pending_pickings as wpp','wpi.pending_picking_id','=', 'wpp.id')->where('wms_picklists.id', $request->picklist_id)->pluck('wpp.product_id')->toArray();
 
             $product = WmsProductBarcode::whereNULL('shipment_id')->where('status', 3)->whereIn('product_id', $product_ids)->where(function ($query) use ($barcode) {
                 $query->where('barcode', '=', $barcode)
