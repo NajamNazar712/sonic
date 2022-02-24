@@ -171,6 +171,8 @@
         $(document).ready(function () {
             $('#datatable_wrapper').hide();
             var shipments_count = 0;
+            var pending_shipments = 0;
+            var pending_shipments_per = 0;
             var delivered_shipments = 0;
             var delivered_shipments_per = 0;
             var undelivered_shipments = 0;
@@ -268,8 +270,6 @@
                             head.push('RCP %');
                             $.each(result.data, function(index, values) {
                                 row = [];
-
-
                                 row.push(index + 1);
                                 row.push(values.courier_name);
                                 row.push(values.hub);
@@ -282,7 +282,6 @@
                                 row.push(values.undelivered_shipments_per);
                                 row.push(values.confirmation_pending_shipments);
                                 row.push(values.confirmation_pending_shipments_per);
-
                                 body.push(row);
                             });
 
@@ -290,6 +289,8 @@
                             footer.push('Total');
                             footer.push('');
                             footer.push(shipments_count.toFixed(2));
+                            footer.push(pending_shipments.toFixed(2));
+                            footer.push(pending_shipments_per.toFixed(2));
                             footer.push(delivered_shipments.toFixed(2));
                             footer.push(delivered_shipments_per.toFixed(2));
                             footer.push(undelivered_shipments.toFixed(2));
@@ -432,6 +433,25 @@
                     }).every(function() {
                         confirmation_pending_shipments_per = (confirmation_pending_shipments/shipments_count)*100;
                         $(this.footer()).html(confirmation_pending_shipments_per.toFixed(2));
+                    });
+
+                    api.columns('.pending_shipments', {
+                        page: 'current'
+                    }).every(function() {
+                        pending_shipments = this
+                            .data()
+                            .reduce(function(a, b) {
+                                var x = parseFloat(a) || 0;
+                                var y = parseFloat(b) || 0;
+                                return x + y;
+                            }, 0);
+                        $(this.footer()).html(pending_shipments.toFixed(2));
+                    });
+                    api.columns('.pending_shipments_per', {
+                        page: 'current'
+                    }).every(function() {
+                        pending_shipments_per = (pending_shipments_per/shipments_count)*100;
+                        $(this.footer()).html(pending_shipments_per.toFixed(2));
                     });
                 }
             });
