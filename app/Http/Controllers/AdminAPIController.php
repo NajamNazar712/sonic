@@ -74,6 +74,7 @@ use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentPiecesRequest;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\V2Pickup\DwsPickupNote;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -6381,7 +6382,6 @@ class AdminAPIController extends Controller
         if($picklist && $picklist->status == 0){
             foreach($picklist->items as $item){
                 $pending_picking = WmsPendingPicking::find($item->pending_picking_id);
-
                 $picklist_data[$pending_picking->product->user_id][$item->id]['pending_picking_id'] = $pending_picking->id;
                 $picklist_data[$pending_picking->product->user_id][$item->id]['product_id'] = $pending_picking->product_id;
                 $picklist_data[$pending_picking->product->user_id][$item->id]['sku_id'] = $pending_picking->product->sku_id;
