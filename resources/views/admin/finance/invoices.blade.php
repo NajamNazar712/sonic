@@ -458,7 +458,7 @@
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data:'account', name: 'account', class: 'align-middle text-center account'},
+					{data:'account', name: 'account_type', class: 'align-middle text-center account'},
 					{data:'invoice_number_btn', name: 'invoice_number_btn', class: 'align-middle text-center invoice_number_btn'},
 					{data:'shipper', name: 'shipper', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'city', class: 'align-middle text-center city'},
@@ -468,19 +468,19 @@
 					{data:'created_at', name: 'created_at', class: 'align-middle text-center created_at'},
 					{data:'invoicing_date', name: 'invoicing_date', class: 'align-middle text-center invoicing_date'},
 					{data:'invoicing_cycle', name: 'invoicing_cycle', class: 'align-middle text-center invoicing_cycle'},
-					{data:'aging', name: 'aging', class: 'align-middle text-center aging'},
+					{data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
 					{data:'due_date', name: 'due_date', class: 'align-middle text-center due_date'},
-					{data:'overdue_by', name: 'overdue_by', class: 'align-middle text-center overdue_by'},
+					{data:'overdue_by', name: 'overdue_by', class: 'align-middle text-center overdue_by', orderable: false, searchable: false},
 					{data:'invoice_type', name: 'invoice_type', class: 'align-middle text-center invoice_type'},
 					{data:'received_date', name: 'received_date', class: 'align-middle text-center received_date'},
-					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
+					{data:'company_bank', name: 'invoices.company_bank', class: 'align-middle text-center company_bank'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
 					{data:'deposit_date', name: 'deposit_date', class: 'align-middle text-center deposit_date'},
-					{data:'deposit_slip', name: 'deposit_slip', class: 'align-middle text-center deposit_slip'},
+					{data:'deposit_slip', name: 'deposit_slip', class: 'align-middle text-center deposit_slip', orderable: false, searchable: false},
 					{data:'received_amount', name: 'received_amount', class: 'align-middle text-center received_amount'},
 					{data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
 					{data:'payment_type', name: 'payment_type', class: 'align-middle text-center payment_type'},
-					{data:'action', name: 'action', class: 'align-middle text-center action'},
+					{data:'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
 				],
 				rowCallback: function(row, data, index) {
 
@@ -520,7 +520,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip') || $(header).is('.deposit_slip')) {
 							$(td).appendTo($(search));
 						}
 						else if ($(header).is('.company_bank')) {
@@ -560,7 +560,7 @@
 					});
 
 					var company_banks = $.map({!! $company_banks !!}, function (obj) {
-                        obj.id = obj.id;
+                        obj.id = obj.name;
                         obj.text = obj.name;
 
                         return obj;
@@ -590,7 +590,7 @@
 					});
 
                     var statuses = $.map({!! $invoice_statuses !!}, function (obj) {
-                        obj.id = obj.id;
+                        obj.id = obj.name;
                         obj.text = obj.name;
 
                         return obj;

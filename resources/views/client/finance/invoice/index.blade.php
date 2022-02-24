@@ -196,14 +196,14 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'invoice_number_button', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
-                    {data:'city', name: 'c.name', class: 'align-middle text-center shipper'},
-                    {data:'total_charges', name: 'invoices.total_charges', class: 'align-middle text-center total_charges'},
-                    {data:'total_gst', name: 'invoices.total_gst', class: 'align-middle text-center total_gst'},
-                    {data:'total_invoice_amount', name: 'invoices.total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
-                    {data:'created_at', name: 'invoices.created_at', class: 'align-middle text-center generation_date'},
-                    {data:'invoicing_cycle', name: 'ic.name', class: 'align-middle text-center invoicing_cycle'},
-                    {data:'invoicing_date', name: 'invoices.invoicing_date', class: 'align-middle text-center invoicing_date'},
-                    {data:'invoice_type', name: 'invoices.invoice_type', class: 'align-middle text-center invoice_type'},
+                    {data:'city', name: 'city', class: 'align-middle text-center shipper'},
+                    {data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
+                    {data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
+                    {data:'total_invoice_amount', name: 'total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
+                    {data:'created_at', name: 'created_at', class: 'align-middle text-center generation_date'},
+                    {data:'invoicing_cycle', name: 'invoicing_cycle', class: 'align-middle text-center invoicing_cycle'},
+                    {data:'invoicing_date', name: 'invoicing_date', class: 'align-middle text-center invoicing_date'},
+                    {data:'invoice_type', name: 'invoice_type', class: 'align-middle text-center invoice_type'},
                     {data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {

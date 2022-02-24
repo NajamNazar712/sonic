@@ -10003,7 +10003,7 @@ class AdminFinanceController extends Controller
     public function invoices_index() {
         ActivityTrailController::createActivityTrailLog(Auth::id(),34);
         $company_banks = BanksList::where('affiliate', 1)->get();
-        $invoice_statuses = InvoiceStatus::whereIn('id',[1,2])->get();
+        $invoice_statuses = InvoiceStatus::get();
 
         return view('admin.finance.invoices')->with(['company_banks' => $company_banks, 'invoice_statuses' => $invoice_statuses]);
     }
@@ -10034,17 +10034,22 @@ class AdminFinanceController extends Controller
             ->select('invoices.id as id', 'invoices.invoice_number as invoice_number','invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date','ic.name as invoicing_cycle','invoices.invoice_type as invoice_type',DB::raw('NULL as payment_type'),DB::raw('2 as account_type'),'is.id as is_id')
             ->where('ubi.default_bank',1);
 
-        $invoices = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
+        if(session('department_id') == 7){
+            $invoice->whereIn('invoices.user_id', session('tagged_shippers'));
+        }
+
+        $reim_invoice = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->select( 'invoice_for_reimbursements.id as id','invoice_for_reimbursements.invoice_number as invoice_number','invoice_for_reimbursements.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at',DB::raw('NULL as due_date'),DB::raw('NULL as received_date'),DB::raw('NULL as company_bank'),DB::raw('NULL as received_amount'),DB::raw('NULL as tax_amount'),DB::raw('NULL as deposit_date'),DB::raw('NULL as status'),DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date',DB::raw('NULL as invoicing_cycle'),DB::raw('NULL as invoice_type'),'invoice_for_reimbursements.payment_type as payment_type',DB::raw('1 as account_type'),DB::raw('NULL as is_id'))
-            ->where('invoice_for_reimbursements.to_show',1)
-            ->union($invoice);
+            ->where('invoice_for_reimbursements.to_show',1);
 
+        if(session('department_id') == 7){
+            $reim_invoice->whereIn('invoice_for_reimbursements.user_id', session('tagged_shippers'));
+        }
 
-           /* if(session('department_id') == 7){
-                $invoices->whereIn('invoices.user_id', session('tagged_shippers'));
-            }*/
-            $datatables = Datatables::of($invoices)
+        $invoices = DB::query()->fromSub($reim_invoice->union($invoice),'invoices');
+
+        $datatables = Datatables::of($invoices)
             ->addColumn('account', function($invoice) {
               if($invoice->account_type == 2){
                   return 'Corporate Account';
@@ -10081,20 +10086,6 @@ class AdminFinanceController extends Controller
                     return '';
                 }
             })
-
-           /* ->filterColumn('account', function($invoice, $keyword) {
-
-                if ($keyword == 'Corporate Account') {
-                    $invoice->account_type = 1;
-                }
-                else if($keyword == 'Reimbursement Account'){
-                    $query->whereRaw(2);
-                }
-                else {                                          s
-                    $query->whereRaw('false');
-                }
-            })*/
-
             ->editColumn('total_gst', function($invoice) {
                 return number_format($invoice->total_gst, 2);
             })
@@ -10169,7 +10160,7 @@ class AdminFinanceController extends Controller
                     return '-';
                 }
             })
-           /* ->filterColumn('invoice_type', function($query, $keyword) {
+            ->filterColumn('invoice_type', function($query, $keyword) {
                 if ($keyword == 1) {
                     $query->where('invoices.invoice_type', 1);
                 }
@@ -10179,7 +10170,7 @@ class AdminFinanceController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })*/
+            })
             ->addColumn('action', function($invoice) {
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
                 $email_reminder_button = '<button type="button" class="dropdown-item email_reminder"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Email Reminder</div></button>';
