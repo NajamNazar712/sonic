@@ -306,7 +306,7 @@
 
             $('#datatable tbody').on('contextmenu', 'tr td.invoice_number button', function(e) {
                 e.preventDefault();
-
+                console.log(1111);
                 var id = parseInt($(this).parents('tr').attr('id'));
 
                 if (id) {
@@ -317,6 +317,48 @@
                             '_token': '{{ csrf_token() }}',
                             'id': id,
                             'header': true
+                        }
+                    })
+                        .done(function(data) {
+                            var tab = window.open('', '_blank');
+
+                            if(!tab) {
+                                swal({
+                                    title: 'Popup Blocker Enabled!',
+                                    text: 'Please add this site to your exception list.',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            }
+                            else {
+                                tab.document.write(data);
+                                tab.document.close();
+                                tab.focus();
+                            }
+                        });
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.invoice_number', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var account = table.row($(this).parents('tr')).data().type_id;
+                console.log()
+                var url ='';
+                if(account == 2){
+                    url = '{!! route('cod.finance.invoice.invoices_print') !!}';
+                }
+                else{
+                    url = '{!! route('cod.finance.invoice.reimbursement.invoices_print') !!}';
+                }
+
+                if (id) {
+                    $.ajax({
+                        url: url,
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id
                         }
                     })
                         .done(function(data) {

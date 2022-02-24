@@ -659,7 +659,7 @@
                 }
             });
 
-            $('#datatable tbody').on('contextmenu', 'tr td.invoice_number_btn button', function(e) {
+           /* $('#datatable tbody').on('contextmenu', 'tr td.invoice_number_btn button', function(e) {
                 e.preventDefault();
 
                 var id = parseInt($(this).parents('tr').attr('id'));
@@ -693,7 +693,7 @@
                         }
                     });
                 }
-            });
+            });*/
 
 			$('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
 				var id = parseInt($(this).parent('tr').attr('id'));

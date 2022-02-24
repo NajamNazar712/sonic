@@ -300,9 +300,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('reimbursement/export_to_excel', 'Shippers\ShipperFinanceController@reimbursement_invoices_export_to_excel')->name('reimbursement.export_to_excel');
             Route::put('email_reminder', 'Shippers\ShipperFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('print_origin_wise', 'Shippers\ShipperFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
+            Route::post('print', 'Shippers\ShipperFinanceController@corporate_invoice_print')->name('invoices_print');
 
             Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
                 Route::post('detail_print', 'Shippers\ShipperFinanceController@reimbursement_invoices_print')->name('detail_print');
+                Route::post('print', 'Shippers\ShipperFinanceController@invoice_reimbursement_print')->name('invoices_print');
             });
 
         });

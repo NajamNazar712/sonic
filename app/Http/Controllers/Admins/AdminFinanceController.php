@@ -14429,7 +14429,7 @@ class AdminFinanceController extends Controller
 
             if (count($shipment_ids) > 0) {
 
-                $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id', $shipment_ids)->where('packaging_material_requests.status_id', 2)
+                $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id', $shipment_ids)->where('packaging_material_requests.status_id', 4)
                     ->where('packaging_material_requests.user_id', $shipper->id);
 
                 if ($packaging_materials->exists()) {
