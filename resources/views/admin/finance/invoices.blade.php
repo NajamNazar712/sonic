@@ -245,6 +245,7 @@
                             head = [];
 
                             head.push('S.No');
+                            head.push('Account');
                             head.push('Invoice No.');
                             head.push('Shipper');
                             head.push('City');
@@ -252,23 +253,26 @@
                             head.push('Total GST');
                             head.push('Total Invoice Amount');
                             head.push('Generation Date');
-                            head.push('Invoicing Cycle');
-                            head.push('Invoicing Date');
+							head.push('Invoicing Date');
+							head.push('Invoicing Cycle');
                             head.push('Aging');
                             head.push('Due Date');
                             head.push('Overdue By');
-                           /* head.push('Received Date');
+							head.push('Corporate Invoicing Type');
+                            head.push('Received Date');
                             head.push('Company Bank');
-                            head.push('Received Amount');
-                            head.push('Tax Amount');
-                            head.push('Deposit Date');*/
-                            head.push('Invoice Type');
                             head.push('Status');
+                            head.push('Deposit Date');
+							head.push('Received Amount');
+							head.push('Tax Amount');
+                            head.push('Payment Type');
+
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.account);
                                 row.push(values.invoice_number);
                                 row.push(values.shipper);
                                 row.push(values.city);
@@ -276,18 +280,19 @@
                                 row.push(values.total_gst);
                                 row.push(values.total_invoice_amount);
                                 row.push(values.created_at);
-                                row.push(values.invoicing_cycle);
-                                row.push(values.invoicing_date);
+								row.push(values.invoicing_date);
+								row.push(values.invoicing_cycle);
                                 row.push(values.aging);
                                 row.push(values.due_date);
                                 row.push(values.overdue_by);
-                                /*row.push(values.received_date);
+                                row.push(values.invoice_type);
+                                row.push(values.received_date);
                                 row.push(values.company_bank);
+                                row.push(values.status);
+                                row.push(values.deposit_date);
                                 row.push(values.received_amount);
                                 row.push(values.tax_amount);
-                                row.push(values.deposit_date);*/
-                                row.push(values.invoice_type);
-                                row.push(values.status);
+                                row.push(values.payment_type);
 
                                 body.push(row);
                             });
@@ -427,7 +432,7 @@
 					},
 					{
 						extend: 'excel',
-						title: 'Pending Invoices',
+						title: 'Invoices',
 						className: 'btn btn-primary',
 						text: '<i class="la la-file-excel-o"></i> Excel',
 					},
@@ -454,7 +459,7 @@
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'account', name: 'account', class: 'align-middle text-center account'},
-					{data:'invoice_number', name: 'invoice_number', class: 'align-middle text-center invoice_number'},
+					{data:'invoice_number_btn', name: 'invoice_number_btn', class: 'align-middle text-center invoice_number_btn'},
 					{data:'shipper', name: 'shipper', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'city', class: 'align-middle text-center city'},
 					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
@@ -478,12 +483,16 @@
 					{data:'action', name: 'action', class: 'align-middle text-center action'},
 				],
 				rowCallback: function(row, data, index) {
+
+					if (data.account_type == 2 && (data.is_id == 1 || data.is_id == 2)) {
+						$('td:eq(0)', row).addClass('select-checkbox');
+					}
+
 					var info = table.page.info();
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
-					if (data.status_id != 3) {
-						$('td:eq(0)', row).addClass('select-checkbox');
 
+					if (selected_rows.length != 0) {
 						if ($.inArray(data.id, selected_rows) !== -1) {
 							table.row(row).select();
 						}

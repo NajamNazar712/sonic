@@ -10031,12 +10031,12 @@ class AdminFinanceController extends Controller
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
-            ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date','ic.name as invoicing_cycle','invoices.invoice_type as invoice_type',DB::raw('NULL as payment_type'),DB::raw('2 as account_type'))
+            ->select('invoices.id as id', 'invoices.invoice_number as invoice_number','invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date','ic.name as invoicing_cycle','invoices.invoice_type as invoice_type',DB::raw('NULL as payment_type'),DB::raw('2 as account_type'),'is.id as is_id')
             ->where('ubi.default_bank',1);
 
         $invoices = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->select( 'invoice_for_reimbursements.id as id','invoice_for_reimbursements.invoice_number as invoice_number', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at',DB::raw('NULL as due_date'),DB::raw('NULL as received_date'),DB::raw('NULL as company_bank'),DB::raw('NULL as received_amount'),DB::raw('NULL as tax_amount'),DB::raw('NULL as deposit_date'),DB::raw('NULL as status'),DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date',DB::raw('NULL as invoicing_cycle'),DB::raw('NULL as invoice_type'),'invoice_for_reimbursements.payment_type as payment_type',DB::raw('1 as account_type'))
+            ->select( 'invoice_for_reimbursements.id as id','invoice_for_reimbursements.invoice_number as invoice_number','invoice_for_reimbursements.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at',DB::raw('NULL as due_date'),DB::raw('NULL as received_date'),DB::raw('NULL as company_bank'),DB::raw('NULL as received_amount'),DB::raw('NULL as tax_amount'),DB::raw('NULL as deposit_date'),DB::raw('NULL as status'),DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date',DB::raw('NULL as invoicing_cycle'),DB::raw('NULL as invoice_type'),'invoice_for_reimbursements.payment_type as payment_type',DB::raw('1 as account_type'),DB::raw('NULL as is_id'))
             ->where('invoice_for_reimbursements.to_show',1)
             ->union($invoice);
 
@@ -10066,8 +10066,8 @@ class AdminFinanceController extends Controller
                    return '-';
                }
             })
-            ->editColumn('invoice_number', function($invoice) {
-                return '<button class="btn btn-sm btn-outline-info align-middle ">' . $invoice->invoice_number . '</button>';
+            ->editColumn('invoice_number_btn', function($invoice) {
+                return '<button class="btn btn-sm btn-outline-info align-middle ">' . $invoice->invoice_number_btn . '</button>';
             })
             ->editColumn('payment_type', function($invoice) {
                 if($invoice->invoice_type == 2) {
@@ -10210,7 +10210,7 @@ class AdminFinanceController extends Controller
                 $dropdown .= $gst_wise_print_button;
                 $dropdown .= $detailed_print_button;
 
-                if ((session('role_id') == 1 || in_array(589, session('permissions')))) {
+                if ((session('role_id') == 1 || in_array(589, session('permissions'))) && $invoice->account_type == 2) {
                     $dropdown .= $upload_deposit_slip_button;
                 }
                 $dropdown .= '
@@ -10774,7 +10774,7 @@ class AdminFinanceController extends Controller
     }
 
     public function invoices_mark_as_received_all(Request $request) {
-        dd($request);
+
         foreach ($request->id as $id)
         {
             $invoice = Invoice::find($id);
