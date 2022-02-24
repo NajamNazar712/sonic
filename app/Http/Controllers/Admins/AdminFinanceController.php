@@ -87,12 +87,11 @@ use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\InvoiceForReimbursement;
 use SnappyImage;
 use SnappyPDF;
-/*use Barryvdh\Snappy\Facades\SnappyPdf;*/
 use Auth;
 use DB;
 
 use Illuminate\Support\Facades\Storage;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
@@ -649,7 +648,127 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_sdn_reconcile_delivery_notes(Request $request) {
-        $station_deposit_note = StationDepositNote::find($request->station_deposit_note_id);
+
+        $this::outstanding_sdn_reconcile_delivery_notes_function($request->station_deposit_note_id,$request->delivery_note_ids);
+
+        return redirect()->back()->with('success', 'Station Deposit No.' . str_pad($request->station_deposit_note_id, 6, '0', STR_PAD_LEFT) . ' has been Reconciled');
+    }
+
+    public function outstanding_sdn_reconcile_delivery_notes_excel(Request $request) {
+
+        $rules = [
+            'excel' => ['required', 'mimes:xlx,xlsx'],
+        ];
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return back()->with(['error' => "Only Excel files are allowed"]);
+        }
+
+        $names = [
+            'sdn_id' => 'Outstanding SDN Number',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'exists' => 'Given :attribute is Invalid.',
+
+        ];
+        $rules = [
+            'sdn_id' => ['required', 'integer', Rule::exists('station_deposit_notes','id')->where(function($query){
+                $query->where('status',1);
+            })],
+        ];
+
+
+        $fields = [0 => 'sdn_id'];
+        if ($file = $request->file('excel')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Outstanding SDN Number'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = true;
+
+                foreach ($spreadsheet[0] as $index => $header_value) {
+                    if (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = false;
+                        break;
+                    }
+                }
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+                $errors = array();
+                $sdn_array = array();
+
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+
+                    $validate = Validator::make($row, $rules, $messages);
+
+                    $validate->setAttributeNames($names);
+
+                    if ($validate->fails()) {
+                        $errors['Row #' . $row_id] = $validate->errors()->all();
+                    } else if (StationDepositNote::where('id', $row['sdn_id'])->whereIn('hub_id', session('hubs'))->doesntExist()) {
+                        $errors['Row #' . $row_id] = array("Invalid SDN Number");
+                    }
+                    else if (StationDepositNote::where('id', $row['sdn_id'])->where('status', 2)->exists())
+                    {
+                        $errors['Row #' . $row_id] = array("SDN Already Reconciled");
+                    }
+                    else if(in_array($row['sdn_id'],$sdn_array))
+                    {
+                        $errors['Row #' . $row_id] = array("Duplicate SDN Number");
+                    }
+
+                    $sdn_array[] = $row['sdn_id'];
+                }
+
+                if (empty($errors)) {
+
+                    foreach ($rows as $index => $row) {
+                        $delivery_notes = DeliveryNoteStationDepositNote::where('station_deposit_note_id',$row['sdn_id'])->pluck('delivery_note_id')->toArray();
+                        $delivery_notes = implode(',',$delivery_notes);
+                        $this::outstanding_sdn_reconcile_delivery_notes_function($row['sdn_id'],$delivery_notes);
+                    }
+
+                    return redirect()->back()->with(['success' => 'SDN Reconciled Successfully']);
+                } else {
+                    $errors = array_map(function ($row, $errors) {
+                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                    }, array_keys($errors), $errors);
+                    return redirect()->back()->withErrors($errors);
+                }
+
+            } else {
+                return redirect()->back()->with('error', 'No Records in File');
+            }
+        }
+    }
+
+    public static function outstanding_sdn_reconcile_delivery_notes_function($station_deposit_note_id,$delivery_note_ids)
+    {
+        $station_deposit_note = StationDepositNote::find($station_deposit_note_id);
 
         $station_deposit_note->status = 2;
         $station_deposit_note->status_updated_at = Carbon::now();
@@ -657,7 +776,7 @@ class AdminFinanceController extends Controller
 
         $station_deposit_note->save();
 
-        $delivery_note_ids = explode(',', $request->delivery_note_ids);
+        $delivery_note_ids = explode(',', $delivery_note_ids);
 
         foreach ($delivery_note_ids as $delivery_note_id) {
             foreach (DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->get() as $delivery_note_shipment) {
@@ -677,8 +796,6 @@ class AdminFinanceController extends Controller
                 }
             }
         }
-
-        return redirect()->back()->with('success', 'Station Deposit No.' . str_pad($request->station_deposit_note_id, 6, '0', STR_PAD_LEFT) . ' has been Reconciled');
     }
 
     public function outstanding_sdn_export_to_excel(Request $request) {

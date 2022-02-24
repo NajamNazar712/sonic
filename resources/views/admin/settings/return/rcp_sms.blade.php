@@ -23,7 +23,7 @@
                                     <input type="hidden" name="toggle_check" id="toggle_check" class="toggle_check">
                                     <div class="row">
                                         <div class="input-group ml-1">
-                                            <label class="mr-2">On/Off</label>
+                                            <label class="mr-2"><b>On/Off</b></label>
                                             <div class="form-group">
                                                 <input type="checkbox" name="count_toggle" id="count_toggle" class="switchery count_toggle" data-size="sm" data-switchery="true" @if(isset($setting->setting_value) && $setting->setting_value == 1) checked @endif>
                                             </div>
@@ -31,7 +31,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="input-group">
-                                            <label class="m-1">Count</label>
+                                            <label class="m-1"><b>Count</b></label>
                                             <div class="form-group">
                                                 <input type="text" class="form-control" name="sms_count"  placeholder="SMS Count" required data-rule-required="true" data-msg-required="This field is required" value=" {{$setting->text}}">
                                             </div>

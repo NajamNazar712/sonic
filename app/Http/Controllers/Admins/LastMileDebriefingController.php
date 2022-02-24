@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\AgentCallMonitoring;
+use App\Http\Models\Admin\AgentDay;
+use App\Http\Models\Admin\AgentDayLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\ConsigneeLocation;
@@ -27,6 +29,7 @@ use App\Http\Models\WarehouseStockRequestHistory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
 use Yajra\Datatables\Datatables;
 
 class LastMileDebriefingController extends Controller
@@ -54,9 +57,9 @@ class LastMileDebriefingController extends Controller
             $time = 0;
         }
 
-        $next_time = Carbon::today()->endOfDay()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateTimeString();
           
-        $prev_time = Carbon::today()->addHours($time);
+        $prev_time = Carbon::today()->addHours($time)->toDateTimeString();
 
         $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
 
@@ -81,8 +84,14 @@ class LastMileDebriefingController extends Controller
         ->where('dns.status',1)
         ->select('s.id as shipment_id','s.tracking_number as tracking_number')
         ->get();
+
+        $today = Carbon::now()->format('Y-m-d');
+        $admin_ids = AgentDay::where('date',$today)
+            ->where('status',1)
+            ->whereIn('agent_id',$admin_ids)
+            ->pluck('agent_id')
+            ->toArray();
         if(count($admin_ids) > 0){
-            //$agents = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->get();
             $agents = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.id')
             ->whereIn('admins.id', $admin_ids)
             ->where('admins.role_id', 18)
@@ -90,7 +99,7 @@ class LastMileDebriefingController extends Controller
             ->where('ea.clock_out_datetime','=',null)
             ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))
             ->select('admins.id', 'admins.name')->get();
-           
+
             return response()->json(['status' => 1, 'agents' => $agents,'delivery_note_id'=>$delivery_note_id]);
         }
         else{
@@ -145,9 +154,9 @@ class LastMileDebriefingController extends Controller
         }
 
         // $next_time = Carbon::today()->addHours($time);
-        $next_time = Carbon::today()->endOfDay()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateTimeString();
           
-        $prev_time = Carbon::today()->addHours($time);
+        $prev_time = Carbon::today()->addHours($time)->toDateTimeString();
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -298,10 +307,9 @@ class LastMileDebriefingController extends Controller
         else {
             $time = 0;
         }
-        $next_time = Carbon::today()->endOfDay()->addHours($time);
-          
-        // $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time);
+        $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateTimeString();
+
+        $prev_time = Carbon::today()->addHours($time)->toDateTimeString();
         $data = AgentCallMonitoring::join('admins as agent','agent.id','=','agent_call_monitorings.agent_id')
             ->leftjoin('cities as hub','hub.id','=','agent.default_hub_id')
             ->select(['agent.id as agent_id','agent.name as agent_name','hub.name as hub'])
@@ -376,75 +384,339 @@ class LastMileDebriefingController extends Controller
     public function caller_agent_view()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 237);
-        $settings = GlobalSettings::where('type', 'debriefing_time_setting');
 
-        if ($settings->exists()) {
-            $settings = $settings->first();
-            $time = $settings->text;
+        $break_hour = GlobalSettings::where('type','debriefing_break_time_setting');
+        if ($break_hour->exists()) {
+            $break_hour = $break_hour->first();
+            $break_hour = floatval($break_hour->text);
+        } else {
+            $break_hour = 1;
         }
-        else {
-            $time = 0;
-        }
-        // $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
-        // if(Carbon::now() > $time){
-        //     $time->addDays(1);
-        // }
 
-        $next_time = Carbon::today()->endOfDay()->addHours($time);
-          
-        // $next_time = Carbon::today()->addHours($time);
-        $prev_time = Carbon::today()->addHours($time);
+        $break_seconds = $break_hour * 3600;
+        View::share(['break_limit'=>$break_seconds]);
 
-        $calls = AgentCallMonitoring::where('agent_id',Auth::id())
-            ->where('completed',0)->where('skip',0)->where('created_at','>=',$prev_time)
-            ->where('created_at','<=',$next_time);
-        if($calls->exists())
-        {
-            $data = $calls->first();
-        }
-        else{
-            $calls = AgentCallMonitoring::where('agent_id',Auth::id())
-                ->where('completed',0)->where('skip',1)->where('created_at','>=',$prev_time)
-                ->where('created_at','<=',$next_time);
+        $today = Carbon::now()->format('Y-m-d');
+        $agent_day = AgentDay::where('date',$today)
+            ->where('agent_id',Auth::id());
+        if($agent_day->exists()) {
+            $agent_day = $agent_day->first();
+            $current_agent_status = $agent_day->status;
+            $log_times = AgentDayLog::where('agent_day_id',$agent_day->id)
+                ->get();
+            $work_start = 0;
+            $break_start = 0;
+            foreach ($log_times as $log_time)
+            {
+                if($log_time->status == 1) {
+                    if ($log_time->end != null) {
+                        $start = Carbon::parse($log_time->start);
+                        $end = Carbon::parse($log_time->end);
+                    } else {
+                        $start = Carbon::parse($log_time->start);
+                        $end = Carbon::now();
+                    }
 
-            if($calls->exists()) {
-                $data = $calls->first();
+                    $difference = $start->diffInSeconds($end);
+                    $work_start += $difference;
+                }
+                else if($log_time->status == 2)
+                {
+                    if($log_time->end != null)
+                    {
+                        $start = Carbon::parse($log_time->start);
+                        $end = Carbon::parse($log_time->end);
+                    }
+                    else{
+                        $start = Carbon::parse($log_time->start);
+                        $end = Carbon::now();
+                    }
+
+                    $difference = $start->diffInSeconds($end);
+                    $break_start += $difference;
+                }
+            }
+            if($break_start > $break_seconds && $agent_day->status == 2)
+            {
+                $previous_status = 2;
+                $agent_day->status = 1;
+                $agent_day->save();
+
+                $this::create_day_log($agent_day->id,$previous_status);
+                $current_agent_status = 1;
+            }
+            View::share(['current_agent_status'=>$current_agent_status,'work_start'=>$work_start,'break_start'=>$break_start]);
+            if($current_agent_status == 1) {
+                $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $time = $settings->text;
+                } else {
+                    $time = 0;
+                }
+
+                $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateTimeString();
+
+                $prev_time = Carbon::today()->addHours($time)->toDateTimeString();
+
+                $calls = AgentCallMonitoring::where('agent_id', Auth::id())
+                    ->where('completed', 0)
+                    ->where('skip',1)
+                    ->where('follow_up','<=' ,Carbon::now()->format('Y-m-d H:i:s'))
+                    ->where('created_at', '>=', $prev_time)
+                    ->where('created_at', '<=', $next_time);
+
+                if($calls->exists())
+                {
+                    $data = $calls->first();
+                }
+                else {
+                    $calls = AgentCallMonitoring::where('agent_id', Auth::id())
+                        ->where('completed', 0)
+                        ->where('skip', 0)
+                        ->where('follow_up' ,null)
+                        ->where('created_at', '>=', $prev_time)
+                        ->where('created_at', '<=', $next_time);
+                    if ($calls->exists()) {
+                        $data = $calls->first();
+                    } else {
+                        $calls = AgentCallMonitoring::where('agent_id', Auth::id())
+                            ->where('completed', 0)
+                            ->where('skip', 1)
+                            ->where('follow_up' ,null)
+                            ->where('created_at', '>=', $prev_time)
+                            ->where('created_at', '<=', $next_time);
+
+                        if ($calls->exists()) {
+                            $data = $calls->first();
+                        }
+                        else{
+                            $calls = AgentCallMonitoring::where('agent_id', Auth::id())
+                                ->where('completed', 0)
+                                ->where('skip', 1)
+                                ->where('follow_up' ,'!=',null)
+                                ->where('created_at', '>=', $prev_time)
+                                ->where('created_at', '<=', $next_time)
+                                ->orderBy('follow_up','asc');
+
+                            if($calls->exists())
+                            {
+                                $data = $calls->first();
+                            } else {
+                                return view('admin.debriefing.caller_agent')->with(['data' => false]);
+                            }
+                        }
+                    }
+                }
+                $where = array(7, 8, 9, 15, 18, 56, 12);
+                $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->where('status', 1)->get();
+                $shipment = Shipment::find($data->shipment_id);
+                $delivery_note = DeliveryNote::find($data->delivery_note_id);
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $delivery_note->id)->where('shipment_id', $shipment->id)->first();
+                $fake_status = FALSE;
+                if($delivery_note_shipment->fake_status == 1){
+                    $fake_status = TRUE;
+                }
+                $total_calls = AgentCallMonitoring::where('agent_id', Auth::id())
+                    ->where('created_at', '>=', $prev_time)
+                    ->where('created_at', '<=', $next_time)
+                    ->count();
+                $completed_calls = AgentCallMonitoring::where('agent_id', Auth::id())
+                    ->where('created_at', '>=', $prev_time)
+                    ->where('created_at', '<=', $next_time)
+                    ->where('completed', 1)
+                    ->count();
+                $pending_calls = AgentCallMonitoring::where('agent_id', Auth::id())
+                    ->where('created_at', '>=', $prev_time)
+                    ->where('created_at', '<=', $next_time)
+                    ->where('completed', 0)
+                    ->count();
+
+                $reattempt_count = ShipmentsJourney::where('shipment_id', $data->shipment_id)
+                    ->where('shipper_status_id', '=', 5)
+                    ->where('verification', '=', 1)
+                    ->select(DB::raw('count(shipment_id) as reattempts'))
+                    ->get()
+                    ->first();
+
+                $rider_status = ShipmentsJourney::where('shipment_id', $data->shipment_id)
+                    ->whereNotNull('rider_id')
+                    ->orderBy('id', 'desc')
+                    ->first();
+                if (!$rider_status) {
+                    $rider_status = NULL;
+                }
+
+                $rider_deliveries = RiderDelivery::where('shipment_id', $data->shipment_id)
+                    ->where('delivery_note_id', $data->delivery_note_id);
+                if ($rider_deliveries->exists()) {
+                    $rider_deliveries = $rider_deliveries->latest('id')->first();
+                } else {
+                    $rider_deliveries = NULL;
+                }
+
+                return view('admin.debriefing.caller_agent')->with(['data' => true, 'statuses' => $statuses, 'shipment' => $shipment, 'delivery_note' => $delivery_note, 'total_calls' => $total_calls, 'completed_calls' => $completed_calls, 'pending_calls' => $pending_calls, 'call' => $data, 'reattempt_count' => $reattempt_count, 'rider_status' => $rider_status, 'rider_delivery' => $rider_deliveries, 'fake_status' => $fake_status]);
             }
             else{
-                return view('admin.debriefing.caller_agent')->with(['data'=>false]);
+                return view('admin.debriefing.caller_agent')->with(['data' => false]);
             }
         }
-        $where = array(7, 8, 9, 15, 18, 56, 12);
-        $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->where('status', 1)->get();
-        $shipment = Shipment::find($data->shipment_id);
-        $delivery_note = DeliveryNote::find($data->delivery_note_id);
-        $total_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',$prev_time)
-        ->where('created_at','<=',$next_time)->count();
-        $completed_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',$prev_time)
-        ->where('created_at','<=',$next_time)->where('completed',1)->count();
-        $pending_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',$prev_time)
-        ->where('created_at','<=',$next_time)->where('completed',0)->count();
-
-        $reattempt_count = ShipmentsJourney::where('shipment_id', $data->shipment_id)
-                ->where('shipper_status_id','=',5)
-                ->where('verification','=',1)
-                ->select(DB::raw('count(shipment_id) as reattempts'))
-                ->get()->first();
-
-        $rider_status = ShipmentsJourney::where('shipment_id',$data->shipment_id)->whereNotNull('rider_id')->get()->last();
-        if(!$rider_status){
-            $rider_status = NULL;
+        else{
+            return view('admin.debriefing.caller_agent')->with(['data' => false]);
         }
+    }
 
-        $rider_deliveries = RiderDelivery::where('shipment_id', $data->shipment_id)->where('delivery_note_id', $data->delivery_note_id);
-        if ($rider_deliveries->exists()) {
-            $rider_deliveries = $rider_deliveries->latest('id')->first();
+    public function caller_agent_start(Request $request)
+    {
+        $today = Carbon::now()->format('Y-m-d');
+        $agent_day = AgentDay::where('date',$today)
+            ->where('agent_id',Auth::id());
+        if($agent_day->exists())
+        {
+            $agent_day = $agent_day->first();
+            if($agent_day->status == 1)
+            {
+                return response()->json(['status'=>0,'message'=>'Session Already Live']);
+            }
+            else if($agent_day->status == 3)
+            {
+                return response()->json(['status'=>0,'message'=>'Can\'t Restart Session']);
+            }
+
+            $day_status = $agent_day->status;
+            $day_id = $agent_day->id;
+            $agent_day->status = 1;
+            $agent_day->save();
         }
         else{
-            $rider_deliveries = NULL;
+            $agent_day = new AgentDay();
+            $agent_day->agent_id = Auth::id();
+            $agent_day->date = $today;
+            $agent_day->status = 1;
+            $agent_day->save();
+
+            $day_status = 0;
+            $day_id = $agent_day->id;
         }
 
-        return view('admin.debriefing.caller_agent')->with(['data'=>true,'statuses'=>$statuses,'shipment'=>$shipment,'delivery_note'=>$delivery_note,'total_calls'=>$total_calls,'completed_calls'=>$completed_calls,'pending_calls'=>$pending_calls,'call'=>$data , 'reattempt_count' => $reattempt_count, 'rider_status' => $rider_status, 'rider_delivery' => $rider_deliveries]);
+        $this::create_day_log($day_id,$day_status);
+
+        return response()->json(['status'=>1]);
+    }
+
+    public function caller_agent_break(Request $request)
+    {
+        $today = Carbon::now()->format('Y-m-d');
+        $agent_day = AgentDay::where('date',$today)
+            ->where('agent_id',Auth::id());
+        if($agent_day->exists())
+        {
+            $agent_day = $agent_day->first();
+            if($agent_day->status == 2)
+            {
+                return response()->json(['status'=>0,'message'=>'Session Already Paused']);
+            }
+            else if($agent_day->status == 3)
+            {
+                return response()->json(['status'=>0,'message'=>'Can\'t Restart Session']);
+            }
+            $day_status = $agent_day->status;
+            $day_id = $agent_day->id;
+            $agent_day->status = 2;
+            $agent_day->save();
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'Please Start Session First']);
+        }
+
+        $this::create_day_log($day_id,$day_status);
+
+        return response()->json(['status'=>1]);
+    }
+
+    public function caller_agent_end(Request $request)
+    {
+        $today = Carbon::now()->format('Y-m-d');
+        $agent_day = AgentDay::where('date',$today)
+            ->where('agent_id',Auth::id());
+        if($agent_day->exists())
+        {
+            $agent_day = $agent_day->first();
+            if($agent_day->status == 3)
+            {
+                return response()->json(['status'=>0,'message'=>'Session Already Ended']);
+            }
+            $day_status = $agent_day->status;
+            $day_id = $agent_day->id;
+            $agent_day->status = 3;
+            $agent_day->save();
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'Please Start Session First']);
+        }
+
+        $this::create_day_log($day_id,$day_status);
+
+        return response()->json(['status'=>1]);
+    }
+
+    public static function create_day_log($day_id,$old_status)
+    {
+        $agent_day = AgentDay::where('id',$day_id)->first();
+        if($old_status != 3)
+        {
+            $time = Carbon::now()->format("H:i:s");
+            if($old_status == 0)
+            {
+                AgentDayLog::create([
+                    'agent_day_id' => $day_id,
+                    'status' => 1,
+                    'start' => $time,
+                ]);
+            }
+            else if($old_status == 1)
+            {
+                AgentDayLog::where('agent_day_id',$day_id)
+                    ->where('status',1)
+                    ->where('end',null)
+                    ->update(['end'=> $time]);
+
+                if($agent_day->status == 2)
+                {
+                    AgentDayLog::create([
+                       'agent_day_id' => $day_id,
+                       'status' => 2,
+                       'start' => $time,
+                    ]);
+                }
+            }
+            else if ($old_status == 2)
+            {
+                AgentDayLog::where('agent_day_id',$day_id)
+                    ->where('status',2)
+                    ->where('end',null)
+                    ->update(['end'=> $time]);
+
+                if($agent_day->status == 1)
+                {
+                    AgentDayLog::create([
+                        'agent_day_id' => $day_id,
+                        'status' => 1,
+                        'start' => $time,
+                    ]);
+                }
+                elseif ($agent_day->status == 3)
+                {
+                    AgentDayLog::create([
+                        'agent_day_id' => $day_id,
+                        'status' => 1,
+                        'start' => $time,
+                        'end' => $time,
+                    ]);
+                }
+            }
+        }
     }
 
     public function caller_agent_skip(Request $request)
@@ -455,6 +727,21 @@ class LastMileDebriefingController extends Controller
             $data->skip = 1;
             $data->update();
             return response()->json(['status'=>1]);
+        }
+    }
+
+    public function caller_agent_follow_up($id,Request $request)
+    {
+        $data = AgentCallMonitoring::find($id);
+        if($data)
+        {
+            $time = explode(':',$request->follow_up);
+            $minutes = ($time[0] * 60) + $time[1];
+            $follow_up = Carbon::now()->addMinute($minutes)->format('Y-m-d H:i:s');
+            $data->skip = 1;
+            $data->follow_up = $follow_up;
+            $data->update();
+            return redirect()->route('admin.debriefing.caller_agent.index');
         }
     }
 
@@ -740,7 +1027,7 @@ class LastMileDebriefingController extends Controller
                     if($bot_sms){
                         $bot_admin_id = $bot_sms->setting_value;
                     }
-                    ShipmentsJourneyController::add($shipment_id, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, $bot_admin_id, $delivery_note_id, NULL,1);
+                    /*ShipmentsJourneyController::add($shipment_id, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, $bot_admin_id, $delivery_note_id, NULL,1);*/
 
                     $agent_call_monitoring = AgentCallMonitoring::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note_id);
                     if($agent_call_monitoring->exists()){

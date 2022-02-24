@@ -164,18 +164,22 @@ class AdminLoginController extends Controller
             return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
         }
         if (Hash::check($request->input('pin'), $admin->password)) {
-            $environment = config('app.env');
+            if($admin->status){
+                $environment = config('app.env');
 
-            if ($environment == 'production' || $environment == 'staging') {
-                $otp = mt_rand(100000, 999999);
-                $admin->otp = $otp;
-                $admin->last_login_attempt = Carbon::now();
-                $admin->save();
-                $data = array("otp"=>$otp,"phone_number"=>$request->phone_number);
-                NotificationsController::send(138, $admin, $data);
+                if ($environment == 'production' || $environment == 'staging') {
+                    $otp = mt_rand(100000, 999999);
+                    $admin->otp = $otp;
+                    $admin->last_login_attempt = Carbon::now();
+                    $admin->save();
+                    $data = array("otp"=>$otp,"phone_number"=>$request->phone_number);
+                    NotificationsController::send(138, $admin, $data);
+                }
+
+                return response()->json(['status' => 1]);
+            }else{
+                return response()->json(['status' => 0, 'error' => 'Your Account is Disabled, Contact Admin']);
             }
-
-            return response()->json(['status' => 1]);
         } else {
             return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
         }

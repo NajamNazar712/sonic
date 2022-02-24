@@ -16,58 +16,108 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <div class="row justify-content-end">
-                                <div class="col-1">
-                                    <input type="text" name="cut_off_time" class="form-control cut_off_time" value="{{$cut_off_time}}:00" disabled>
-                                </div>
-                                <div class="col-3">
-                                    <select name="search_filter" id="search_filter" class="form-control select2">
-                                        
+{{--                            --}}
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        <input type="text" name="cut_off_time" class="form-control cut_off_time"
+                                               value="{{$cut_off_time}}:00" disabled>
+                                    </div>
+                                    <div class="col">
+                                        <select name="search_filter" id="search_filter" class="form-control select2">
+
                                             <option value="10">Pickup Request Before Cut Off Time</option>
                                             <option value="0">All</option>
-                                    </select>
-                                </div>
-                                <div class="col-2">
-                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                                </div>
-                                <div class="col-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <div class="heading-elements">
-                                                <ul class="list-inline mb-0">
-                                                    <li class="primary border-primary round"><a data-action="collapse">Legend <i class="ft-minus"></i></a></li>
-                                                </ul>
+                                        </select>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
                                             </div>
-                                        </div>
-                                        <div class="card-content collapse">
-                                            <div class="card-body p-1">
-                                                <h4 class=" info">Legend</h4>
-                                                <input type="hidden" id="legend_filter">
-
-                                                <table class="table mb-0">
-                                                    <tbody>
-                                                    @foreach($legends as $legend)
-                                                        @if($legend->id == 7)
-                                                            <tr style="background-color: {{$legend->color}}; color:#010a10;" id="{{$legend->id}}">
-{{--                                                                <td><button type="button" class="btn btn-sm round btn-min-width text-white" style="background-color: {{$legend->color}}" disabled>{{$cut_off_time}}:00</button></td>--}}
-                                                                <td class="align-middle">{{ $legend->name }} <b>({{$cut_off_time}}:00)</b></td>
-                                                            </tr>
-                                                            @else
-                                                            <tr style="background-color: {{$legend->color}}; color:#010a10;" id="{{$legend->id}}">
-{{--                                                                <td><button type="button" class="btn btn-sm round btn-min-width p-1" style="background-color: {{$legend->color}}" disabled> </button></td>--}}
-                                                                <td class="align-middle">{{ $legend->name }}</td>
-                                                            </tr>
-                                                            @endif
-
-                                                    @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                            <input type="text" name="requested_from_date"
+                                                   class="form-control bg-primary border-primary white rounded-right"
+                                                   id="requested_from_date" placeholder="Requested Date From">
                                         </div>
                                     </div>
+                                    <div class="col">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                            </div>
+                                            <input type="text" name="requested_to_date"
+                                                   class="form-control bg-primary border-primary white rounded-right"
+                                                   id="requested_to_date" placeholder="Requested Date To">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <button type="button" id="search_filter_btn"
+                                                class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
+                                                    class="la la-search" style="margin-right: 10px"></i> Search
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <div class="heading-elements">
+                                                    <ul class="list-inline mb-0">
+                                                        <li class="primary border-primary round"><a
+                                                                    data-action="collapse">Legend
+                                                                <i class="ft-minus"></i></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="card-content collapse">
+                                                <div class="card-body p-1">
+                                                    <h4 class=" info">Legend</h4>
+                                                    <input type="hidden" id="legend_filter">
 
+                                                    <table class="table mb-0">
+                                                        <tbody>
+                                                        @foreach($legends as $legend)
+                                                            @if($legend->id == 7)
+                                                                <tr style="background-color: {{$legend->color}}; color:#010a10;"
+                                                                    id="{{$legend->id}}">
+                                                                    <td>
+                                                                        <button type="button"
+                                                                                class="btn btn-sm round btn-min-width text-white"
+                                                                                style="background-color: {{$legend->color}}"
+                                                                                disabled>{{$cut_off_time}}:00
+                                                                        </button>
+                                                                    </td>
+                                                                    <td class="align-middle">{{ $legend->name }}
+                                                                        <b>({{$cut_off_time}}:00)</b></td>
+                                                                </tr>
+                                                            @else
+                                                                <tr style="background-color: {{$legend->color}}; color:#010a10;"
+                                                                    id="{{$legend->id}}">
+                                                                    <td>
+                                                                        <button type="button"
+                                                                                class="btn btn-sm round btn-min-width p-1"
+                                                                                style="background-color: {{$legend->color}}"
+                                                                                disabled></button>
+                                                                    </td>
+                                                                    <td class="align-middle">{{ $legend->name }}</td>
+                                                                </tr>
+                                                            @endif
+
+                                                        @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
+                            {{--                            --}}
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -251,6 +301,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
         .btn-min-width {
             min-width: 5.5rem;
@@ -308,6 +360,49 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    {{--    todo for datepicker--}}
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    {{--    todo for datepicker end--}}
+
+    {{--    todo date filter field--}}
+    <script>
+        var booking_from_date = $('#requested_from_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            max: '{{ Carbon\Carbon::now() }}',
+            // format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                if (context.select) {
+                    $('#requested_to_date').pickadate('picker').set('min', $('#requested_from_date').pickadate('picker').get('select'));
+                }
+            }
+        });
+        var booking_to_date = $('#requested_to_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            max: '{{ Carbon\Carbon::now() }}',
+            // format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 23:59:59',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                if (context.select) {
+                    $('#requested_from_date').pickadate('picker').set('max', $('#requested_to_date').pickadate('picker').get('select'));
+                }
+            }
+        });
+
+    </script>
+    {{--    todo date filter field end--}}
 
     <script>
         $(document).ready(function () {
@@ -526,6 +621,8 @@
                     data: function (d) {
                         d.legend_filter = $('#legend_filter').val();
                         d.before_cut_off_time = $('#search_filter').val();
+                        d.requested_from_date = $('#requested_from_date').val();
+                        d.requested_to_date = $('#requested_to_date').val();
                     }
                 },
             rowId: 'id',

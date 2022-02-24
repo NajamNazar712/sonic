@@ -850,6 +850,57 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+    public function debriefing_break_time_setting_index()
+    {
+        $settings = GlobalSettings::where('type', 'debriefing_break_time_setting')->first();
+        $total = GlobalSettings::where('type', 'debriefing_total_time_setting')->first();
+
+        $break_timings = 0;
+        $total_timings = 0;
+        if ($settings) {
+            $break_timings = floatval($settings->text);
+        }
+
+        if ($total) {
+            $total_timings = floatval($total->text);
+        }
+
+        return view('admin.settings.debriefing_total_time_setting',compact('break_timings','total_timings'));
+    }
+
+    public function debriefing_break_time_setting_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'debriefing_break_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'debriefing_break_time_setting';
+        }
+
+        $settings->text = $request->break_timings;
+
+        $settings->save();
+
+        $settings = GlobalSettings::where('type', 'debriefing_total_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'debriefing_total_time_setting';
+        }
+
+        $settings->text = $request->total_timings;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
     public function auto_invoice_generation_and_due_date_index()
     {
         $auto_invoice_generation = GlobalSettings::where('type', 'auto_invoice_generation_time')->first();
@@ -6043,7 +6094,39 @@ public function sales_incentive()
         return redirect()->back()->with('success','Setting Updated');
     }
 
-    public function sales_user_restriction_index()
+    public function consignee_sms_expire_index()
+    {
+        $settings = GlobalSettings::where('type', 'consignee_sms_expire_time')->first();
+
+        if ($settings) {
+            $consignee_sms_expire_time = $settings->setting_value;
+        } else {
+            $consignee_sms_expire_time = 20;
+        }
+
+        return view('admin.settings.last_mile.consignee_sms_expire_time')->with(['consignee_sms_expire_time' => $consignee_sms_expire_time]);
+    }
+
+    public function consignee_sms_expire_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'consignee_sms_expire_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'consignee_sms_expire_time';
+        }
+
+        $settings->setting_value = $request->consignee_sms_expire_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+	public function sales_user_restriction_index()
     {
         $user_ids = array();
 
