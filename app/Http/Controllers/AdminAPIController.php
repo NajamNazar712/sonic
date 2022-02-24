@@ -60,6 +60,7 @@ use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
+use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\StaffCategory;
