@@ -8090,7 +8090,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                             <th class="color secondary">Description Of Services</th>
-                            <th class="color secondary">Quantity</th>
+                            <th class="color secondary" style="width:50px;">Quantity</th>
                             <th class="color secondary">Total Charges</th>
                         </tr>
                         </thead>
@@ -8692,7 +8692,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                             <th class="color secondary">Description Of Services</th>
-                            <th class="color secondary">Quantity</th>
+                            <th class="color secondary" style="width:50px;">Quantity</th>
                             <th class="color secondary">Total Charges</th>
                         </tr>
                         </thead>
