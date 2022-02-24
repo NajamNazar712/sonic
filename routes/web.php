@@ -854,6 +854,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add', 'Admins\AdminTerritoryController@add')->name('add');
             Route::post('/store', 'Admins\AdminTerritoryController@store')->name('store');
             Route::post('/ajax', 'Admins\AdminTerritoryController@edit_territory_ajax')->name('edit');
+            Route::post('/disable_territory', 'Admins\AdminTerritoryController@disable_territory')->name('disable_territory');
+            Route::post('/enable_territory', 'Admins\AdminTerritoryController@enable_territory')->name('enable_territory');
             Route::put('{id}/update', 'Admins\AdminTerritoryController@update')->name('update');
             
         });
@@ -863,6 +865,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add', 'Admins\AdminTerritoryController@area_add')->name('add');
             Route::post('/store', 'Admins\AdminTerritoryController@area_store')->name('store');
             Route::post('/ajax', 'Admins\AdminTerritoryController@area_edit')->name('edit');
+            Route::post('/disable_area_status', 'Admins\AdminTerritoryController@disable_area_status')->name('disable_area_status');
+            Route::post('/enable_area_status', 'Admins\AdminTerritoryController@enable_area_status')->name('enable_area_status');
             Route::put('{id}/update', 'Admins\AdminTerritoryController@area_update')->name('update');
             Route::post('tag', 'Admins\AdminTerritoryController@area_tag')->name('tag');
 
