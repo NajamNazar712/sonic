@@ -349,7 +349,8 @@ Route::name('api.')->group(function () {
             Route::prefix('pending_pick_list')->name('pick_list.')->group(function () {
                 Route::get('list', 'AdminAPIController@pending_pick_list')->name('list');
                 Route::post('detail', 'AdminAPIController@pick_list_details')->name('detail');
-                Route::post('barcode_validate', 'AdminAPIController@pick_list_barcode_check')->name('barcode_validate');
+                Route::post('barcode_validate', 'AdminAPIController@pick_list_barcode_validate')->name('barcode_validate');
+                Route::post('receive', 'AdminAPIController@pick_list_barcode_validate')->name('receive');
             });
 
         });
