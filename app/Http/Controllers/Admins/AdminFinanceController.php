@@ -14321,105 +14321,145 @@ class AdminFinanceController extends Controller
         $total_gst = 0;
         $total_invoice_amount = 0;
 
-        foreach ($invoice->invoice_shipments as $invoice_shipment) {
-            $shipment = $invoice_shipment->shipment;
+        if($invoice->invoice_type == 1) {
+            foreach ($invoice->invoice_shipments as $invoice_shipment) {
+                $shipment = $invoice_shipment->shipment;
 
-            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
 
-            if ($shipment_journey->exists()) {
-                $date = $shipment_journey->first()->created_at;
-            }
-            else {
-                $date = $shipment->created_at;
-            }
-
-            $date = Carbon::parse($date)->format('Y-m-d');
-
-            $origin = $shipment->pickup_address->city->name;
-
-            if (!in_array($origin, $origins)) {
-                $origins[] = $origin;
-            }
-
-            if (!isset($shipment_counts[$origin])) {
-                $shipment_counts[$origin] = 1;
-            }else{
-                $shipment_counts[$origin]++;
-            }
-
-
-            if (!isset($total_weight_charges[$origin])) {
-                $total_weight_charges[$origin] = 0;
-            }
-
-            if (!isset($total_cash_handling_charges[$origin])) {
-                $total_cash_handling_charges[$origin] = 0;
-            }
-
-            if (!isset($total_insurance_charges[$origin])) {
-                $total_insurance_charges[$origin] = 0;
-            }
-
-            if (!isset($total_return_charges[$origin])) {
-                $total_return_charges[$origin] = 0;
-            }
-
-            if (!isset($total_fuel_surcharge[$origin])) {
-                $total_fuel_surcharge[$origin] = 0;
-            }
-
-            if (!isset($total_replacement_charges[$origin])) {
-                $total_replacement_charges[$origin] = 0;
-            }
-
-            if (!isset($total_try_and_buy_charges[$origin])) {
-                $total_try_and_buy_charges[$origin] = 0;
-            }
-
-            if (!isset($total_packaging_material_charges[$origin])) {
-                $total_packaging_material_charges[$origin] = 0;
-            }
-
-            if (!isset($total_intercept_charges[$origin])) {
-                $total_intercept_charges[$origin] = 0;
-            }
-
-            if (!isset($total_nsa_osa_charges[$origin])) {
-                $total_nsa_osa_charges[$origin] = 0;
-            }
-
-            if (!isset($total_adjustment_charges[$origin])) {
-                $total_adjustment_charges[$origin] = 0;
-            }
-
-            if ($invoice_shipment->type != 2) {
-                if ($invoice_shipment->type == 0) {
-                    $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
-                    $total_replacement_charges[$origin] += $shipment->replacement_charges;
-                    $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
-                }
-                else {
-                    $total_return_charges[$origin] += $shipment->return_charges;
+                if ($shipment_journey->exists()) {
+                    $date = $shipment_journey->first()->created_at;
+                } else {
+                    $date = $shipment->created_at;
                 }
 
-                $total_weight_charges[$origin] += $shipment->weight_charges;
+                $date = Carbon::parse($date)->format('Y-m-d');
 
-                if ($shipment->packaging_material_request) {
-                    $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                $origin = $shipment->pickup_address->city->name;
+
+                if (!in_array($origin, $origins)) {
+                    $origins[] = $origin;
                 }
 
-                $total_insurance_charges[$origin] += $shipment->insurance_charges;
-                $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
-                $total_intercept_charges[$origin] += $shipment->intercept_charges;
-                $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                if (!isset($shipment_counts[$origin])) {
+                    $shipment_counts[$origin] = 1;
+                } else {
+                    $shipment_counts[$origin]++;
+                }
+
+
+                if (!isset($total_weight_charges[$origin])) {
+                    $total_weight_charges[$origin] = 0;
+                }
+
+                if (!isset($total_cash_handling_charges[$origin])) {
+                    $total_cash_handling_charges[$origin] = 0;
+                }
+
+                if (!isset($total_insurance_charges[$origin])) {
+                    $total_insurance_charges[$origin] = 0;
+                }
+
+                if (!isset($total_return_charges[$origin])) {
+                    $total_return_charges[$origin] = 0;
+                }
+
+                if (!isset($total_fuel_surcharge[$origin])) {
+                    $total_fuel_surcharge[$origin] = 0;
+                }
+
+                if (!isset($total_replacement_charges[$origin])) {
+                    $total_replacement_charges[$origin] = 0;
+                }
+
+                if (!isset($total_try_and_buy_charges[$origin])) {
+                    $total_try_and_buy_charges[$origin] = 0;
+                }
+
+                if (!isset($total_packaging_material_charges[$origin])) {
+                    $total_packaging_material_charges[$origin] = 0;
+                }
+
+                if (!isset($total_intercept_charges[$origin])) {
+                    $total_intercept_charges[$origin] = 0;
+                }
+
+                if (!isset($total_nsa_osa_charges[$origin])) {
+                    $total_nsa_osa_charges[$origin] = 0;
+                }
+
+                if (!isset($total_adjustment_charges[$origin])) {
+                    $total_adjustment_charges[$origin] = 0;
+                }
+
+                if ($invoice_shipment->type != 2) {
+                    if ($invoice_shipment->type == 0) {
+                        $total_cash_handling_charges[$origin] += $shipment->cash_handling_charges;
+                        $total_replacement_charges[$origin] += $shipment->replacement_charges;
+                        $total_try_and_buy_charges[$origin] += $shipment->try_and_buy_charges;
+                    } else {
+                        $total_return_charges[$origin] += $shipment->return_charges;
+                    }
+
+                    $total_weight_charges[$origin] += $shipment->weight_charges;
+
+                    if ($shipment->packaging_material_request) {
+                        $total_packaging_material_charges[$origin] += $shipment->packaging_material_charges;
+                    }
+
+                    $total_insurance_charges[$origin] += $shipment->insurance_charges;
+                    $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
+                    $total_intercept_charges[$origin] += $shipment->intercept_charges;
+                    $total_nsa_osa_charges[$origin] += $shipment->nsa_osa_charges;
+                } else {
+                    $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
+                }
+
+                $total_charges += $invoice_shipment->charges;
+                $total_gst += $invoice_shipment->gst;
+                $total_invoice_amount += $invoice_shipment->invoice_amount;
             }
-            else {
-                $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
+        }
+        else{
+            $shipment_ids = $invoice->invoice_shipments->pluck('shipment_id')->toArray();
+
+            $packaging_details = array();
+            $origin_arrays = array();
+            $size_arrays = array();
+
+            if (count($shipment_ids) > 0) {
+
+                $packaging_materials = PackagingMaterialRequest::whereIn('shipment_id', $shipment_ids)->where('packaging_material_requests.status_id', 2)
+                    ->where('packaging_material_requests.user_id', $shipper->id);
+
+                if ($packaging_materials->exists()) {
+                    $packaging_materials = $packaging_materials->orderBy('city_id', 'asc')->get();
+                    foreach ($packaging_materials as $packaging_material) {
+                        foreach ($packaging_material->items as $details) {
+                            if (!isset($packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'])) {
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'] = 1;
+                                $zone = Zone::find($packaging_material->city->zone_id);
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['origin'] = $packaging_material->city->name;
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['rates'] = $details->packaging_type_size->standard_charges;
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['description'] = $details->packaging_type_size->type->type . '-' . $details->packaging_type_size->size;
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity'] = $details->quantity;
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['gst'] = $zone->gst;
+                            }
+                            else {
+                                $packaging_details[$packaging_material->city_id][$details->packaging_type_size->id]['quantity']++;
+                            }
+                        }
+                    }
+                }
+
             }
 
-            $total_charges += $invoice_shipment->charges;
-            $total_gst += $invoice_shipment->gst;
-            $total_invoice_amount += $invoice_shipment->invoice_amount;
+            $html .= '
+                      </tbody>
+                    </table>
+            ';
+
+            //$invoice_number_serial_number++;
         }
 
         $invoice_number_serial_number = 1;
@@ -14464,16 +14504,19 @@ class AdminFinanceController extends Controller
                                 <tr>
                                     <td class="color secondary"><strong>Contact No.</strong></td>
                                     <td>' . (($account_type_id == 2) ? $shipper_bank->billing_person_phone : $shipper->phone)  . '</td>
-                                </tr>
-                                <tr>
+                                </tr>';
+
+                        if($invoice->invoice_type == 1) {
+                            $html .= '<tr>
                                   <td class="color secondary"><strong>NTN</strong></td>
                                   <td>' . $shipper->ntn_no . '</td>
-                                </tr>  ';
+                                </tr>  
 
-        $html .= '<tr>
+                                <tr>
                                   <td class="color secondary"><strong>STRN</strong></td>
                                   <td>' . $shipper->strn_no . '</td>
                                 </tr>';
+                        }
 
 
         $html .= '</tbody>
@@ -14484,7 +14527,8 @@ class AdminFinanceController extends Controller
                             <h1 style="text-align:center"><img style="width:50%;height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
-        $html .=  '<tr>
+                    if($invoice->invoice_type == 1) {
+                        $html .= '<tr>
                                     <td class="color primary"><strong>SNTN</strong></td>
                                     <td>S-7930679-5</td>
                                 </tr>
@@ -14492,6 +14536,7 @@ class AdminFinanceController extends Controller
                                     <td class="color primary"><strong>PNTN</strong></td>
                                     <td>P-7930679-5</td>
                                 </tr>';
+                    }
 
         $html .= '<tr>
                                     <td class="color primary"><strong>Billing Period</strong></td>
@@ -14515,10 +14560,10 @@ class AdminFinanceController extends Controller
                         </div>
                     </div>
             ';
+         if($invoice->invoice_type == 1){
+             foreach ($origins as $origin) {
 
-        foreach ($origins as $origin) {
-
-            $html .= '
+                 $html .= '
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
@@ -14580,10 +14625,81 @@ class AdminFinanceController extends Controller
                       </table>
             ';
 
-            $invoice_number_serial_number++;
-        }
+                 $invoice_number_serial_number++;
+             }
+         }
+         else{
+             if (count($packaging_details) > 0) {
 
-        $html .= '
+                 $html .= '<table class="table table-sm table-bordered border">
+          <thead>
+            <tr>
+                <th colspan="12" class="color primary text-center">Invoice Summary</th>
+            </tr>
+            <tr>
+                <th class="color secondary">Origin</th>
+                <th class="color secondary">Description</th>
+                <th class="color secondary">Rates</th>
+                <th class="color secondary">Quantity</th>
+                <th class="color secondary">Total Charges Without GST</th>
+                <th class="color secondary">SST %</th>
+                <th class="color secondary">SST Amount</th>
+                <th class="color secondary">Total Amount with SST</th>
+              
+            </tr>
+          </thead>
+          <tbody>
+';
+                 $rates_total = 0;
+                 $quantity_total = 0;
+                 $total_amount_without_gst = 0;
+                 $total_sst_amount = 0;
+                 $overall_amount = 0;
+
+
+                 foreach ($packaging_details as $cities) {
+                     foreach ($cities as $packaging_material) {
+                         $amount_without_gst = $packaging_material['rates'] * $packaging_material['quantity'];
+                         $sst_amount = round($amount_without_gst * $packaging_material['gst']);
+                         $total_amount_with_sst = round($amount_without_gst + $sst_amount);
+
+                         $rates_total = $rates_total + $packaging_material['rates'];
+                         $quantity_total = $quantity_total + $packaging_material['quantity'];
+                         $total_amount_without_gst = $total_amount_without_gst + $amount_without_gst;
+                         $total_sst_amount = $total_sst_amount + $sst_amount;
+                         $overall_amount = $overall_amount + $total_amount_with_sst;
+                         $html .= '
+            <tr>
+                <td>' . $packaging_material['origin'] . '</td>
+                <td>' . $packaging_material['description'] . '</td>
+                <td>' . $packaging_material['rates'] . '</td>
+                <td>' . $packaging_material['quantity'] . '</td>
+                <td>' . $amount_without_gst . '</td>
+                <td>' . $packaging_material['gst'] * 100 . '%' . '</td>
+                <td>' . round($sst_amount) . '</td>
+                <td>' . number_format($total_amount_with_sst) . '</td>
+              
+            </tr>';
+                         /* $html .= $packaging_material['origin'];*/
+                     }
+                 }
+                 $html .= '<tr>
+                <td colspan="3" class="text-center">Total Amount</td>
+            
+                <td>' . $quantity_total . '</td>
+                <td>' . $total_amount_without_gst . '</td>
+                <td></td>
+                <td>' . number_format($total_sst_amount) . '</td>
+                <td>' . number_format($overall_amount) . '</td>
+            </tr>';
+               /*  $amount_in_words = '';
+                 $amount_in_words = self::amount_to_words($overall_amount);*/
+             }
+         }
+
+
+        if($invoice->invoice_type == 1) {
+            $html .= '
                     <div class="row justify-content-end">
                         <div class="col-4">
                             <table class="table table-sm table-bordered border">
@@ -14604,8 +14720,16 @@ class AdminFinanceController extends Controller
                             </table>
                         </div>
                     </div>';
-
-        $amount_in_words = self::amount_to_words(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN));
+        }
+        $amount = '';
+        if($invoice->invoice_type == 1) {
+             $amount =  $total_invoice_amount;
+        }
+        else{
+             $amount = $overall_amount;
+        }
+        
+        $amount_in_words = self::amount_to_words(ROUND($amount, 0, PHP_ROUND_HALF_DOWN));
 
         $html .= '<table class="table table-sm table-bordered border">
                       <tbody>
@@ -14616,7 +14740,7 @@ class AdminFinanceController extends Controller
                       </tbody>
                     </table>
 
-                    <table class="table table-sm table-bordered border">
+                     <table class="table table-sm table-bordered border">
                       <tbody>
                         <tr>
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
@@ -14632,18 +14756,25 @@ class AdminFinanceController extends Controller
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
                           <td>0102951143</td>
-                        </tr> 
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                          <td>9912</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
-                          <td>Liaqatabad Market Malir Branch</td>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
-                        </tbody>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Branch Name.</strong></td>
+                          <td>Liaquat Market Malir Branch</td>
+                        </tr>';
+
+                    $html .= ' <tr>
+                                      <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
+                                      <td>9912</td>
+                                    </tr>
+                                    </tbody>
                     </table>
 
+                  
+        
                     <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
             ';
 
