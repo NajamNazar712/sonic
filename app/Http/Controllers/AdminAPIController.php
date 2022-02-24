@@ -6371,5 +6371,36 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function pick_list_details(Request $request){
+        $picklist = DB::table('wms_picklists')->find($request->picklist_id);
+        $picklist_data = array();
+        $product_ids = array();
+        if($picklist){
+            if($picklist->status == 0){
+                foreach($picklist->items as $item){
+                    $pending_picking = DB::table('wms_pending_pickings')->find($item->pending_picking_id);
+
+                    $picklist_data[$pending_picking->product->user_id][$item->id]['pending_picking_id'] = $pending_picking->id;
+                    $picklist_data[$pending_picking->product->user_id][$item->id]['product_id'] = $pending_picking->product_id;
+                    $picklist_data[$pending_picking->product->user_id][$item->id]['sku_id'] = $pending_picking->product->sku_id;
+                    $picklist_data[$pending_picking->product->user_id][$item->id]['product_name'] = $pending_picking->product->name;
+                    $picklist_data[$pending_picking->product->user_id][$item->id]['shipper_name'] = $pending_picking->product->shipper->name;
+                    $picklist_data[$pending_picking->product->user_id][$item->id]['listed_quantity'] = $item->quantity;
+                    if(!in_array($pending_picking->product_id, $product_ids)){
+                        $product_ids[] = $pending_picking->product_id;
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => "Picklist already updated",'picklist' => $picklist, 'picklist_data' => $picklist_data, 'product_ids' => $product_ids]);
+            }
+            else{
+                return response()->json(['status' => 1, 'message' => "Picklist already updated"]);
+            }
+        }else{
+            return response()->json(['status' => 1, 'message' => "Invalid Picklist"]);
+        }
+
+    }
+
+
 
 }
