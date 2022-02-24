@@ -6373,8 +6373,8 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function pick_list_details(Request $request, $id){
-        $picklist = WmsPicklist::find($id);
+    public function pick_list_details(Request $request){
+        $picklist = WmsPicklist::find($request->picklist_id);
         $picklist_data = array();
         $product_ids = array();
 
