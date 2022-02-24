@@ -74,7 +74,6 @@ use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentPiecesRequest;
-use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\V2Pickup\DwsPickupNote;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -84,6 +83,7 @@ use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\WMS\WmsPendingPicking;
 use App\Http\Models\WMS\WmsPicklist;
+use App\Http\Models\WMS\WmsProductBarcode;
 use App\Http\Models\Zone;
 use App\Models\Admin\Lead\LeadReason;
 use Barryvdh\Snappy\Facades\SnappyPdf;
@@ -6405,6 +6405,37 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => "Invalid Picklist"]);
         }
 
+    }
+
+    public function pick_list_barcode_check(Request $request)
+    {
+        $rules = [
+            'product_id' => ['required', 'integer', 'digits_between:1,10'],
+            'barcode' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $barcode = $request->barcode;
+            $product_id = $request->product_id;
+
+            $product = WmsProductBarcode::whereNULL('shipment_id')->where('status', 3)->where('product_id', $product_id)->where(function ($query) use ($barcode) {
+                $query->where('barcode', '=', $barcode)
+                    ->orWhere('id', '=', $barcode);
+            });
+            if ($product->exists()) {
+                $product = $product->first();
+                return response()->json(['status' => 0, 'message' => "Barcode Valid", 'product_id' => $product->product_id, 'barcode' => $product->barcode, 'barcode_id' => $product->id]);
+            } else {
+                return response()->json(['status' => 0, 'message' => "Barcode Invalid"]);
+            }
+
+        }
     }
 
 
