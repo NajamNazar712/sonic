@@ -350,7 +350,7 @@ Route::name('api.')->group(function () {
                 Route::get('list', 'AdminAPIController@pending_pick_list')->name('list');
                 Route::post('detail', 'AdminAPIController@pick_list_details')->name('detail');
                 Route::post('barcode_validate', 'AdminAPIController@pick_list_barcode_validate')->name('barcode_validate');
-                Route::post('receive', 'AdminAPIController@pick_list_barcode_validate')->name('receive');
+                Route::post('receive', 'AdminAPIController@pick_list_receive')->name('receive');
             });
 
         });
