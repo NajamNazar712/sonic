@@ -6376,10 +6376,10 @@ class AdminAPIController extends Controller
 
     public function pick_list_details(Request $request){
         $picklist = WmsPicklist::find($request->picklist_id);
-        $picklist_data = array();
-        $product_ids = array();
         if($picklist){
-            if($picklist && $picklist->status == 0){
+            if($picklist->status == 0){
+                $picklist_data = array();
+                $product_ids = array();
                 foreach($picklist->items as $item){
                     $picklist_datum = array();
                     $pending_picking = WmsPendingPicking::find($item->pending_picking_id);
@@ -6388,6 +6388,7 @@ class AdminAPIController extends Controller
                     $picklist_datum['sku_id'] = $pending_picking->product->sku_id;
                     $picklist_datum['product_name'] = $pending_picking->product->name;
                     $picklist_datum['shipper_name'] = $pending_picking->product->shipper->name;
+                    $picklist_datum['shipper_id'] = $pending_picking->product->user_id;
                     $picklist_datum['listed_quantity'] = $item->quantity;
                     $picklist_datum['item_id'] = $item->id;
                     $picklist_data[] = $picklist_datum;
