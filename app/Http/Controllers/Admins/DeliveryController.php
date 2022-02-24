@@ -2685,12 +2685,18 @@ class DeliveryController extends Controller
                         $where = array(7, 8, 9, 15, 18, 56);
                     } else {
                         if ($deliveries->booking_type_id == 5) {
-                            $where = array(7, 8, 9, 15, 18, 56);
+                            $where = array(7, 8, 9, 15, 18);
                         } else {
                             if ($not_rcp === true) {
-                                $where = array(7, 8, 9, 15, 18, 56);
+                                $where = array(7, 8, 9, 15, 18);
+                                if($deliveries->booking_type_id == 2){
+                                    array_push($where,56);
+                                }
                             } else {
-                                $where = array(7, 8, 9, 12, 15, 18, 56);
+                                $where = array(7, 8, 9, 12, 15, 18);
+                                if($deliveries->booking_type_id == 2){
+                                    array_push($where,56);
+                                }
                             }
 
                         }
