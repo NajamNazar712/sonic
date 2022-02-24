@@ -6344,68 +6344,81 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function check_permissions(Request $request){
+    public function check_permissions(Request $request)
+    {
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
-        if($admin){
+        if ($admin) {
             $permissions = array();
             $wms_user_permissions = DB::table('wms_admin_role_module_permissions')->where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
-            $permissions['cargo_user'] = (in_array($admin->role_id,[11,10, 15, 55, 23, 33, 46])) ? 1 : 0;
-            if($admin->designation_id){
+            $permissions['cargo_user'] = (in_array($admin->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
+            if ($admin->designation_id) {
                 $user_department = $admin->Edesignation->department_id;
-            }else{
+            } else {
                 $user_department = $admin->role->department_id;
             }
             $permissions['sales_person'] = ($user_department == 7) ? 1 : 0;
-            $permissions['pick_list_user'] = (in_array(23,$wms_user_permissions)) ? 1 : 0;
+            $permissions['pick_list_user'] = (in_array(23, $wms_user_permissions)) ? 1 : 0;
             return response()->json(['status' => 0, 'permissions' => $permissions]);
 
         }
     }
 
-    public function pending_pick_list(Request $request){
+    public function pending_pick_list(Request $request)
+    {
         $admin_id = $request->admin_id;
         $pending_picklist = WmsPicklist::join('admins', 'admins.id', '=', 'wms_picklists.created_by')
             ->join('wms_pickers as wp', 'wp.id', '=', 'wms_picklists.picker_id')
-            ->select('wms_picklists.id as picklist_id', 'admins.name as created_by','wms_picklists.created_at as picking_date','wms_picklists.sku_count', 'wms_picklists.tracking_count','wms_picklists.quantity')
+            ->select('wms_picklists.id as picklist_id', 'admins.name as created_by', 'wms_picklists.created_at as picking_date', 'wms_picklists.sku_count', 'wms_picklists.tracking_count', 'wms_picklists.quantity')
             ->where('wms_picklists.status', 0)
             ->where('wp.admin_id', $admin_id);
 
-        if($pending_picklist->exists()){
+        if ($pending_picklist->exists()) {
             $pending_picklist = $pending_picklist->get();
             return response()->json(['status' => 0, 'pending_picklist' => $pending_picklist]);
-        }else{
+        } else {
             return response()->json(['status' => 1, 'message' => "No Picklist Assigned!"]);
         }
     }
 
-    public function pick_list_details(Request $request){
-        $picklist = WmsPicklist::find($request->picklist_id);
-        if($picklist){
-            if($picklist->status == 0){
-                $picklist_data = array();
-                foreach($picklist->items as $item){
-                    $picklist_datum = array();
-                    $pending_picking = WmsPendingPicking::find($item->pending_picking_id);
-                    $picklist_datum['pending_picking_id'] = $pending_picking->id;
-                    $picklist_datum['product_id'] = $pending_picking->product_id;
-                    $picklist_datum['sku_id'] = $pending_picking->product->sku_id;
-                    $picklist_datum['product_name'] = $pending_picking->product->name;
-                    $picklist_datum['shipper_name'] = $pending_picking->product->shipper->name;
-                    $picklist_datum['shipper_id'] = $pending_picking->product->user_id;
-                    $picklist_datum['listed_quantity'] = $item->quantity;
-                    $picklist_datum['item_id'] = $item->id;
-                    $picklist_data[] = $picklist_datum;
-                }
-                return response()->json(['status' => 0,'picklist_id' => $picklist->id, 'picklist_data' => $picklist_data]);
-            }
-            else{
-                return response()->json(['status' => 1, 'message' => "Picklist already updated"]);
-            }
-        }else{
-            return response()->json(['status' => 1, 'message' => "Invalid Picklist"]);
-        }
+    public function pick_list_details(Request $request)
+    {
+        $rules = [
+            'picklist_id' => ['required', 'integer', 'digits_between:1,10'],
+        ];
 
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $picklist = WmsPicklist::find($request->picklist_id);
+            if ($picklist) {
+                if ($picklist->status == 0) {
+                    $picklist_data = array();
+                    foreach ($picklist->items as $item) {
+                        $picklist_datum = array();
+                        $pending_picking = WmsPendingPicking::find($item->pending_picking_id);
+                        $picklist_datum['pending_picking_id'] = $pending_picking->id;
+                        $picklist_datum['product_id'] = $pending_picking->product_id;
+                        $picklist_datum['sku_id'] = $pending_picking->product->sku_id;
+                        $picklist_datum['product_name'] = $pending_picking->product->name;
+                        $picklist_datum['shipper_name'] = $pending_picking->product->shipper->name;
+                        $picklist_datum['shipper_id'] = $pending_picking->product->user_id;
+                        $picklist_datum['listed_quantity'] = $item->quantity;
+                        $picklist_datum['item_id'] = $item->id;
+                        $picklist_data[] = $picklist_datum;
+                    }
+                    return response()->json(['status' => 0, 'picklist_id' => $picklist->id, 'picklist_data' => $picklist_data]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Picklist already updated"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "Invalid Picklist"]);
+            }
+        }
     }
 
     public function pick_list_barcode_validate(Request $request)
@@ -6423,7 +6436,7 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $barcode = $request->barcode;
-            $product_ids = WmsPicklistItem::join('wms_pending_pickings as wpp','wms_picklist_items.pending_picking_id','=', 'wpp.id')
+            $product_ids = WmsPicklistItem::join('wms_pending_pickings as wpp', 'wms_picklist_items.pending_picking_id', '=', 'wpp.id')
                 ->where('wms_picklist_items.picklist_id', $request->picklist_id)->pluck('wpp.product_id')->toArray();
 
             $product = WmsProductBarcode::whereNULL('shipment_id')->where('status', 3)->whereIn('product_id', $product_ids)->where(function ($query) use ($barcode) {
@@ -6470,7 +6483,7 @@ class AdminAPIController extends Controller
                     if ($request->has('barcode_list')) {
                         $barcode_lists = json_decode($request->barcode_list, true);
                         foreach ($barcode_lists as $barcode_list) {
-                            array_push($barcode_list['barcode_id'], $scanned_barcodes);
+                            array_push($barcode_list['barcode'], $scanned_barcodes);
                         }
                     }
                     foreach ($picklist->items as $item) {
@@ -6482,10 +6495,7 @@ class AdminAPIController extends Controller
                         foreach ($shipment_products as $shipment_product) {
                             $product_barcodes = WmsProductBarcode::whereNull('shipment_id')
                                 ->where('wms_product_barcodes.status', 3)
-                                ->where(function ($query) use ($scanned_barcodes) {
-                                    $query->whereIn('barcode', $scanned_barcodes)
-                                        ->orWhereIn('id', $scanned_barcodes);
-                                })
+                                ->whereIn('id', $scanned_barcodes)
                                 ->where('product_id', $shipment_product->product_id)
                                 ->take($shipment_product->quantity);
                             if ($product_barcodes->exists()) {
