@@ -276,6 +276,7 @@ Route::name('api.')->group(function () {
 
         Route::middleware('AdminAPIToken')->group(function () {
             Route::post('verify', 'AdminAPIController@verify')->name('verify');
+            Route::get('check_permissions', 'AdminAPIController@check_permissions')->name('check_permissions');
             Route::post('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
             Route::post('history_update_image', 'AdminAPIController@history_update_image')->name('history_update_image');
 
@@ -343,6 +344,10 @@ Route::name('api.')->group(function () {
                 Route::post('status_update', 'AdminAPIController@lead_status_update')->name('status_update');
                 Route::post('add_remarks', 'AdminAPIController@add_remarks')->name('add_remarks');
                 Route::post('view_remarks', 'AdminAPIController@view_remarks')->name('view_remarks');
+            });
+
+            Route::prefix('pending_pick_list')->name('pick_list.')->group(function () {
+                Route::post('list', 'AdminAPIController@pending_pick_list')->name('list');
             });
 
         });

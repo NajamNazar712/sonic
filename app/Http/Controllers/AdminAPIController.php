@@ -86,6 +86,7 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -6331,6 +6332,40 @@ class AdminAPIController extends Controller
             }else{
                 return response()->json(['status' => 1, 'message' => 'Invalid Lead']);
             }
+        }
+    }
+
+    public function check_permissions(Request $request){
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            $permissions = array();
+            $wms_user_permissions = DB::table('wms_admin_role_module_permissions')->where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
+            $permissions['cargo_user'] = (in_array($admin->role_id,[11,10, 15, 55, 23, 33, 46])) ? 1 : 0;
+            if($admin->designation_id){
+                $user_department = $admin->Edesignation->department_id;
+            }else{
+                $user_department = $admin->role->department_id;
+            }
+            $permissions['sales_person'] = ($user_department == 7) ? 1 : 0;
+            $permissions['pick_list_user'] = (in_array(23,$wms_user_permissions)) ? 1 : 0;
+            return response()->json(['status' => 0, 'permissions' => $permissions]);
+
+        }
+    }
+
+    public function pending_pick_list(Request $request){
+        $admin_id = $request->admin_id;
+        $pending_picklist = DB::table('wms_picklists')::join('admins', 'admins.id', '=', 'wms_picklists.created_by')
+            ->select('wms_picklists.id as picklist_id', 'admins.name as created_by','wms_picklists.created_at as picking_date','wms_picklists.sku_count', 'wms_picklists.tracking_count','wms_picklists.quantity')
+            ->where('wms_picklists.status', 0)
+            ->where('wms_picklists.picker_id', $admin_id);
+
+        if($pending_picklist->exists()){
+            $pending_picklist = $pending_picklist->get();
+            return response()->json(['status' => 0, 'pending_picklist' => $pending_picklist]);
+        }else{
+            return response()->json(['status' => 1, 'message' => "No Picklist Assigned!"]);
         }
     }
 
