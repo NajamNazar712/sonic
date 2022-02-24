@@ -4172,7 +4172,7 @@ class RiderAPIController extends Controller
                 $information['return_deliveries'] = array();
                 $return_note_shipments = $return_note->return_note_shipments->where('status', 0);
                 foreach ($return_note_shipments as $return_note_shipment) {
-                    $reason_mandatory_shippers = ReturnReasonMandatoryShipper::pluck('email')->toArray();
+                    $reason_mandatory_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     $shipment_data = $return_note_shipment->shipment;
                     if($shipment_data->return_address_id){
                         $pickup_address = $shipment_data->return_address;

@@ -43,7 +43,7 @@ class LeadManagementController extends Controller
 
         $leads['total'] = Lead::whereBetween('requested_date', [$thirtyDays, $today]);
         $leads['received'] = Lead::whereBetween('requested_date', [$thirtyDays, $today])->where('status_id', 1);
-        $leads['in_process'] = Lead::whereIn('status_id', [2, 5, 6, 7, 8])->whereBetween('requested_date', [$thirtyDays, $today]);
+        $leads['in_process'] = Lead::whereIn('status_id', [2, 5, 6, 7, 8, 9])->whereBetween('requested_date', [$thirtyDays, $today]);
         $leads['in_process_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date', [$thirtyDays, $today]);
         $leads['dead_leads'] = Lead::whereIn('status_id', [3, 4, 10, 11, 13])->whereBetween('requested_date', [$thirtyDays, $today]);
         $leads['accounts_activated'] = Lead::where('status_id', 12)->whereBetween('requested_date', [$thirtyDays, $today]);
@@ -187,7 +187,7 @@ class LeadManagementController extends Controller
             } elseif ($statistics == 2) {
                 $search_statuses = [1];
             } elseif ($statistics == 3) {
-                $search_statuses = [2, 5, 6, 7, 8];
+                $search_statuses = [2, 5, 6, 7, 8, 9];
             } elseif ($statistics == 4) {
                 $search_statuses = [3, 4, 10, 11, 13];
             } elseif ($statistics == 5) {

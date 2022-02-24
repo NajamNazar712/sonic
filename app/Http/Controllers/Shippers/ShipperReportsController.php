@@ -38,13 +38,13 @@ class ShipperReportsController extends Controller
     }
     public function sales_list(Request $request)
     {
-         if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
+        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
             $connection = 'reports';
-         } else {
-             $connection = 'mysql';
-         }
+        } else {
+            $connection = 'mysql';
+        }
 
-         if (empty($request->get('search_tracking')) && empty($request->get('search_date_from')) && empty($request->get('dr_search_date_from'))) {
+        if (empty($request->get('search_tracking')) && empty($request->get('search_date_from')) && empty($request->get('dr_search_date_from'))) {
             $sales = DB::connection($connection)->table('shipments')->whereRaw('FALSE');
             $datatable = Datatables::of($sales);
             return $datatable->make(true);
@@ -134,7 +134,7 @@ class ShipperReportsController extends Controller
                 $sales->whereBetween('dr.created_at', [$from, $to]);
 
                 $sales->where('dr.id', '>=', $from_id)
-                ->where('dr.id', '<=', $to_id);
+                    ->where('dr.id', '<=', $to_id);
             }
             else {
                 $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to) {
@@ -317,7 +317,7 @@ class ShipperReportsController extends Controller
                     $to_id = $to_id->first()->id;
 
                     $datatable->where('sj.id', '>=', $from_id)
-                    ->where('sj.id', '<=', $to_id);
+                        ->where('sj.id', '<=', $to_id);
                 }
             }
         }
@@ -587,7 +587,7 @@ class ShipperReportsController extends Controller
                     $to_id = $to_id->first()->id;
 
                     $shipments->where('shipments.id', '>=', $from_id)
-                    ->where('shipments.id', '<=', $to_id);
+                        ->where('shipments.id', '<=', $to_id);
                 }
             }
         }
@@ -884,32 +884,32 @@ class ShipperReportsController extends Controller
 
     public function daraz_mis_list(Request $request){
         $shipment = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
-        ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-        ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-        ->leftJoin('shipments_journey as sj', function ($join) {
-            $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where('sj.id','=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1)'));
-        })
-        ->leftJoin('shipments_journey as dr', function ($join) {
-            $join->on('dr.shipment_id', '=', 'shipments.id')
-                ->where('dr.id', '=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In (14, 25, 30, 36, 37) AND shipments_journey.verification = 1)'));
-        })
-        ->leftJoin('shipments_journey as atmpdate', function ($join) {
-            $join->on('atmpdate.shipment_id', '=', 'shipments.id')
-                ->where('atmpdate.id', '=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5 AND shipments_journey.verification = 1)'));
-        })
-        ->leftJoin('shipments_journey as sjrr', function ($join) {
-            $join->on('sjrr.shipment_id', '=', 'shipments.id')
-                ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
-                ->where('sjrr.id', '=',
-                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
-        })
-        ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1)'));
+            })
+            ->leftJoin('shipments_journey as dr', function ($join) {
+                $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->where('dr.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In (14, 25, 30, 36, 37) AND shipments_journey.verification = 1)'));
+            })
+            ->leftJoin('shipments_journey as atmpdate', function ($join) {
+                $join->on('atmpdate.shipment_id', '=', 'shipments.id')
+                    ->where('atmpdate.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5 AND shipments_journey.verification = 1)'));
+            })
+            ->leftJoin('shipments_journey as sjrr', function ($join) {
+                $join->on('sjrr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
+                    ->where('sjrr.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
+            })
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
 
-        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
+            ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
 
         $shipment = $shipment->where(function ($query) {
             $query->where('shipments.user_id', 7306)
@@ -918,30 +918,30 @@ class ShipperReportsController extends Controller
 
 
         $datatable = Datatables::of($shipment)
-        ->addColumn('rider_remarks', function($shipment) {
-            $rider_status = ShipmentsJourney::where('shipment_id',$shipment->shipment_id)->whereNotNull('rider_id')->get()->last();
-            if ($rider_status) {
-                return $rider_status->remarks;
-            } else {
-                return '-';
-            }
-        })
-        ->addColumn('last_reason', function($shipment) {
-            $last_reason = ShipmentsJourney::where('shipment_id',$shipment->shipment_id)->whereNotNull('status_reason_id')->get()->last();
+            ->addColumn('rider_remarks', function($shipment) {
+                $rider_status = ShipmentsJourney::where('shipment_id',$shipment->shipment_id)->whereNotNull('rider_id')->get()->last();
+                if ($rider_status) {
+                    return $rider_status->remarks;
+                } else {
+                    return '-';
+                }
+            })
+            ->addColumn('last_reason', function($shipment) {
+                $last_reason = ShipmentsJourney::where('shipment_id',$shipment->shipment_id)->whereNotNull('status_reason_id')->get()->last();
                 if($last_reason){
-                    return $last_reason->shipment_status_reason->name;
+                    return $last_reason->shipment_status_reason->name ?? "-";
                 } else {
                     return '-';
                 }
                 // ($rider_status->remarks) ? $rider_status->remarks : '-'
 
-        })
-        ->addColumn('attempts', function($shipment) {
-            $reattempt_count = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
-                ->where('shipper_status_id','=',5)
-                ->where('verification','=',1)
-                ->select(DB::raw('count(shipment_id) as reattempts'))
-                ->get()->first();
+            })
+            ->addColumn('attempts', function($shipment) {
+                $reattempt_count = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
+                    ->where('shipper_status_id','=',5)
+                    ->where('verification','=',1)
+                    ->select(DB::raw('count(shipment_id) as reattempts'))
+                    ->get()->first();
                 if($reattempt_count){
                     if($reattempt_count->reattempts-1 == -1){
                         return 0;
@@ -951,13 +951,13 @@ class ShipperReportsController extends Controller
                 } else {
                     return '-';
                 }
-        })
-        ->addColumn('return_attempts', function($shipment) {
-            $reattempt_count = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
-                ->where('shipper_status_id','=',23)
-                ->where('verification','=',1)
-                ->select(DB::raw('count(shipment_id) as return_attempts'))
-                ->get()->first();
+            })
+            ->addColumn('return_attempts', function($shipment) {
+                $reattempt_count = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
+                    ->where('shipper_status_id','=',23)
+                    ->where('verification','=',1)
+                    ->select(DB::raw('count(shipment_id) as return_attempts'))
+                    ->get()->first();
                 if($reattempt_count){
                     if($reattempt_count->return_attempts-1 == -1){
                         return 0;
@@ -967,32 +967,48 @@ class ShipperReportsController extends Controller
                 }else{
                     return '-';
                 }
-                
-        })
-        ->addColumn('tracking_number_link', function ($shipment) {
-            $route = route('cod.tracking.index');
-            return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
-        })
-        ->editColumn('shipper_name', function ($shipment) {
-            if($shipment->shipper_id == 7306){
-                return '-';
-            }else{
-                return $shipment->shipper_name;
-            }
-        })
-        ->editColumn('current_status', function ($shipment) {
-            if($shipment->status_id == 2 ||$shipment->status_id == 3 ||$shipment->status_id == 4 ||$shipment->status_id == 5 ||$shipment->status_id == 8 ||$shipment->status_id == 9 ||$shipment->status_id == 12 ||$shipment->status_id == 6 ||$shipment->status_id == 7 ||$shipment->status_id == 10 || $shipment->status_id == 11 || $shipment->status_id == 13  || $shipment->status_id == 15 || $shipment->status_id == 49 || $shipment->status_id == 52 || $shipment->status_id == 54  || $shipment->status_id == 55 || $shipment->status_id == 61 || $shipment->status_id == 62 || $shipment->status_id == 63){
-                return 'In Process';
-            }elseif($shipment->status_id == 14){
-                return 'Delivered';
-            }elseif($shipment->status_id == 20 ||$shipment->status_id == 21 ||$shipment->status_id == 22 ||$shipment->status_id == 23 ||$shipment->status_id == 24 || $shipment->status_id == 48 || $shipment->status_id == 44 || $shipment->status_id == 47 || $shipment->status_id == 57 || $shipment->status_id == 60){
-                return 'Return In Process';
-            }elseif($shipment->status_id == 25){
-                return 'Returned';
-            }else{
-                return $shipment->current_status;
-            }
-        });
+
+            })
+            ->addColumn('return_attempt_time', function($shipment) {
+                $reattempt_time = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
+                    ->where('shipper_status_id','=',23)
+                    ->where('verification','=',1)
+                    ->select(DB::raw('count(shipment_id) as count, max(created_at) as created_at'))
+                    ->latest()->first();
+                if($reattempt_time){
+                    if($reattempt_time->count > 1){
+                        return $reattempt_time->created_at;
+                        }else{
+                        return '';
+                    }
+                }else{
+                    return '-';
+                }
+            })
+            ->addColumn('tracking_number_link', function ($shipment) {
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
+            })
+            ->editColumn('shipper_name', function ($shipment) {
+                if($shipment->shipper_id == 7306){
+                    return '-';
+                }else{
+                    return $shipment->shipper_name;
+                }
+            })
+            ->editColumn('current_status', function ($shipment) {
+                if($shipment->status_id == 2 ||$shipment->status_id == 3 ||$shipment->status_id == 4 ||$shipment->status_id == 5 ||$shipment->status_id == 8 ||$shipment->status_id == 9 ||$shipment->status_id == 12 ||$shipment->status_id == 6 ||$shipment->status_id == 7 ||$shipment->status_id == 10 || $shipment->status_id == 11 || $shipment->status_id == 13  || $shipment->status_id == 15 || $shipment->status_id == 49 || $shipment->status_id == 52 || $shipment->status_id == 54  || $shipment->status_id == 55 || $shipment->status_id == 61 || $shipment->status_id == 62 || $shipment->status_id == 63){
+                    return 'In Process';
+                }elseif($shipment->status_id == 14){
+                    return 'Delivered';
+                }elseif($shipment->status_id == 20 ||$shipment->status_id == 21 ||$shipment->status_id == 22 ||$shipment->status_id == 23 ||$shipment->status_id == 24 || $shipment->status_id == 48 || $shipment->status_id == 44 || $shipment->status_id == 47 || $shipment->status_id == 57 || $shipment->status_id == 60){
+                    return 'Return In Process';
+                }elseif($shipment->status_id == 25){
+                    return 'Returned';
+                }else{
+                    return $shipment->current_status;
+                }
+            });
 
 
         // if($tracking = $request->get('search_tracking')){
@@ -1062,9 +1078,9 @@ class ShipperReportsController extends Controller
             ->select(['shipments.id as shId','shipments.weight_charges', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'bkg_date.created_at as booking_date', 'arv_date.created_at as arrival_date', 'sm.mode as shipping_mode', 'shipments.estimated_weight', 'shipments.actual_weight', 'shipments.length', 'shipments.breadth', 'shipments.height'])
             ->whereNotNull('shipments.actual_weight');
 
-            $shipments = $shipments->where(function ($query) {
-                $query->where('shipments.user_id', session('user_id'));
-            });
+        $shipments = $shipments->where(function ($query) {
+            $query->where('shipments.user_id', session('user_id'));
+        });
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipment) {
@@ -1082,7 +1098,7 @@ class ShipperReportsController extends Controller
                     return 'Dense';
                 }
             });
-       
+
         // if ($tracking_numbers = $request->get('tracking_numbers')) {
         //     $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         // }
