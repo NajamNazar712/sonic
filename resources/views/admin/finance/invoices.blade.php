@@ -617,13 +617,21 @@
 			});
 
 
-			$('#datatable tbody').on('click', 'tr td.invoice_number button', function() {
+			$('#datatable tbody').on('click', 'tr td.invoice_number_btn button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                var account = table.row($(this).parents('tr')).data().account;
+                var account = table.row($(this).parents('tr')).data().account_type;
+
+				var url ='';
+				if(account == 2){
+					url = '{!! route('admin.finance.invoices.invoices_print') !!}';
+				}
+				else{
+					url = '{!! route('admin.finance.invoices.reimbursement.invoices_print') !!}';
+				}
 
                 if (id) {
                     $.ajax({
-						url: '{!! route('admin.finance.invoices.invoices_detail_print') !!}',
+						url: url,
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -651,7 +659,7 @@
                 }
             });
 
-            $('#datatable tbody').on('contextmenu', 'tr td.invoice_number button', function(e) {
+            $('#datatable tbody').on('contextmenu', 'tr td.invoice_number_btn button', function(e) {
                 e.preventDefault();
 
                 var id = parseInt($(this).parents('tr').attr('id'));
@@ -1015,7 +1023,7 @@
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 				var account_type = parseInt(table.row($(this).parents('tr')).data().account_type);
-				console.log(account_type,id);
+
 				if ($(this).hasClass('detail_print')) {
 					var url ='';
 					if(account_type == 2){
