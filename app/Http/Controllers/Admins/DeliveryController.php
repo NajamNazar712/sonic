@@ -1903,6 +1903,7 @@ class DeliveryController extends Controller
 
     public function receive_delivery_status_submit_all(Request $request)
     {
+        $open_box_ids = array();
         $received_shipments = array();
         $first_attempt_shipments = array();
         $regular_type_shipments = array();
