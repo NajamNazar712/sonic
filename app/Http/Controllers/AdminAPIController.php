@@ -6410,7 +6410,7 @@ class AdminAPIController extends Controller
     public function pick_list_barcode_check(Request $request)
     {
         $rules = [
-            'product_id' => ['required', 'integer', 'digits_between:1,10'],
+            'picklist_id' => ['required', 'integer', 'digits_between:1,10'],
             'barcode' => ['required'],
         ];
 
@@ -6422,9 +6422,10 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $barcode = $request->barcode;
-            $product_id = $request->product_id;
+            $product_ids = WmsPicklist::join('wms_picklist_items as wpi', 'wms_picklists.id', '=', 'wpi.picklist_id')
+                ->join('wms_pending_pickings as wpp','wpi.pending_picking_id','=', 'wpp.id')->pluck('wpp.product_id')->toArray();
 
-            $product = WmsProductBarcode::whereNULL('shipment_id')->where('status', 3)->where('product_id', $product_id)->where(function ($query) use ($barcode) {
+            $product = WmsProductBarcode::whereNULL('shipment_id')->where('status', 3)->whereIn('product_id', $product_ids)->where(function ($query) use ($barcode) {
                 $query->where('barcode', '=', $barcode)
                     ->orWhere('id', '=', $barcode);
             });
