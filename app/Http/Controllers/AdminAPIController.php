@@ -6483,7 +6483,7 @@ class AdminAPIController extends Controller
                     if ($request->has('barcode_list')) {
                         $barcode_lists = json_decode($request->barcode_list, true);
                         foreach ($barcode_lists as $barcode_list) {
-                            array_push($barcode_list['barcode'], $scanned_barcodes);
+                            array_push($scanned_barcodes,$barcode_list['barcode']);
                         }
                     }
                     foreach ($picklist->items as $item) {
