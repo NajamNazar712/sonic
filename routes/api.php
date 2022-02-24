@@ -348,6 +348,7 @@ Route::name('api.')->group(function () {
 
             Route::prefix('pending_pick_list')->name('pick_list.')->group(function () {
                 Route::get('list', 'AdminAPIController@pending_pick_list')->name('list');
+                Route::post('detail', 'AdminAPIController@pick_list_details')->name('detail');
             });
 
         });
