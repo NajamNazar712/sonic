@@ -448,7 +448,7 @@
                 var employee_designation_input = '<input class="form-control form-control-sm employee_designation" readonly name="employee_designation['+rows_count+']" placeholder="Employee Designation">';
                 var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount"  data-rule-required="true" data-msg-required="Amount is required">';
                 var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No">';
-                var remarks_input = '<textarea class="form-control form-control-sm" rows="5" name="remarks['+rows_count+']" placeholder="Remarks"></textarea>';
+                var remarks_input = '<textarea class="form-control form-control-sm" rows="5" name="remarks['+rows_count+']" maxlength="1000" placeholder="Remarks"></textarea>';
 
                 var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" type="file" name="upload_2_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
                 if(rows_count == 1){

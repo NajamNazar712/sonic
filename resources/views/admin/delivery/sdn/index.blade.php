@@ -11,71 +11,100 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <form id="track_form" class="justify-content-center m-2"  novalidate="novalidate">
+                <form id="track_form" class="justify-content-center m-2" novalidate="novalidate">
                     <div class="row mb-2 justify-content-center">
 
-                    <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Scan DNCC" name="scan_dncc" id="scan_dncc">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
+                        <div class="col-4">
+{{--                            <fieldset class="position-relative has-icon-left">--}}
+
+{{--                                <div class="form-control-position">--}}
+{{--                                    <i class="ft-search"></i>--}}
+{{--                                </div>--}}
+{{--                            </fieldset>--}}
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Scan SDN" name="scan_sdn"
+                                       id="scan_sdn"  data-tags-input-name="scan_sdn">
                             </div>
-                        </fieldset>
-                    </div>
-                    <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Search By Tracking Number" name="search_tracking" id="search_tracking">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
-                            </div>
-                        </fieldset>
-                    </div>
-                    <div class="col-3">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
+
+                        </div>
+                        <div class="col-4">
+                            <fieldset class="position-relative has-icon-left">
+                                <input type="text" class="form-control" placeholder="Scan DNCC" name="scan_dncc"
+                                       id="scan_dncc">
+                                <div class="form-control-position">
+                                    <i class="ft-search"></i>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="col-4">
+                            <fieldset class="position-relative has-icon-left">
+                                <input type="text" class="form-control" placeholder="Search By Tracking Number"
+                                       name="search_tracking" id="search_tracking">
+                                <div class="form-control-position">
+                                    <i class="ft-search"></i>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="mt-5">
+
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                         <span class="la la-calendar-o small-calender-icon"></span>
                                     </span>
+                                </div>
+                                <input type="text" name="search_date_from"
+                                       class="form-control bg-primary border-primary white rounded-right pickadate"
+                                       id="search_date_from" placeholder="Resolved Date From">
                             </div>
-                            <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Resolved Date From">
                         </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                         <span class="la la-calendar-o small-calender-icon"></span>
                                     </span>
+                                </div>
+                                <input type="text" name="search_date_to"
+                                       class="form-control bg-primary border-primary white rounded-right pickadate"
+                                       id="search_date_to" placeholder="Resolved Date To">
                             </div>
-                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Resolved Date To">
                         </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                         <span class="la la-calendar-o small-calender-icon"></span>
                                     </span>
+                                </div>
+                                <input type="text" name="search_date_from_deposited"
+                                       class="form-control bg-primary border-primary white rounded-right pickadate"
+                                       id="search_date_from_deposited" placeholder="Deposited Date From">
                             </div>
-                            <input type="text" name="search_date_from_deposited"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from_deposited" placeholder="Deposited Date From">
                         </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                         <span class="la la-calendar-o small-calender-icon"></span>
                                     </span>
+                                </div>
+                                <input type="text" name="search_date_to_deposited"
+                                       class="form-control bg-primary border-primary white rounded-right pickadate"
+                                       id="search_date_to_deposited" placeholder="Deposited Date To">
                             </div>
-                            <input type="text" name="search_date_to_deposited" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to_deposited" placeholder="Deposited Date To">
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <button type="submit" id="search_filter_btn"
+                                        class="btn btn-outline-primary btn-min-width search"><i
+                                            class="la la-search"></i> Search
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <div class="form-group">
-                            <button type="submit" id="search_filter_btn" class="btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
-                        </div>
-                    </div>
-                </div>
                 </form>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -109,7 +138,8 @@
 
 
     <!--Deposit Slip Modal -->
-    <div class="modal fade text-left" id="uploadDepositSlip" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadDepositSlip"
+    <div class="modal fade text-left" id="uploadDepositSlip" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="uploadDepositSlip"
          aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
@@ -120,10 +150,11 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="sdn_upload_form" class="form" action="{{route('admin.delivery.sdn.slip')}}" method="post" enctype="multipart/form-data">
-                            @csrf
-                            <input type="hidden" name="sdn_id" id="sdn_id"/>
-                            <input type="hidden" name="deposit_rows" id="deposit_rows"/>
+                    <form id="sdn_upload_form" class="form" action="{{route('admin.delivery.sdn.slip')}}" method="post"
+                          enctype="multipart/form-data">
+                        @csrf
+                        <input type="hidden" name="sdn_id" id="sdn_id"/>
+                        <input type="hidden" name="deposit_rows" id="deposit_rows"/>
                         <table class="table table-bordered datatable" id="sdn_upload_table" style="z-index: 3;">
                             <thead>
                             <tr role="row" class="bg-primary white">
@@ -145,12 +176,14 @@
                             </tr>
                             </tfoot>
                         </table>
-                    <hr>
-                    <div class="row justify-content-center">
-                        <div class="col-3">
-                            <button id="DepositSlipButton" type="submit" class="btn btn-primary btn-block" disabled>Upload</button>
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="DepositSlipButton" type="submit" class="btn btn-primary btn-block" disabled>
+                                    Upload
+                                </button>
+                            </div>
                         </div>
-                    </div>
                     </form>
                 </div>
             </div>
@@ -158,7 +191,8 @@
     </div>
     <!--Deposit Slip Modal -->
     <!--Shipments popup -->
-    <div class="modal fade" id="dncc_modal" data-backdrop="static" role="dialog" aria-labelledby="dncc_modal" aria-hidden="true">
+    <div class="modal fade" id="dncc_modal" data-backdrop="static" role="dialog" aria-labelledby="dncc_modal"
+         aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -178,7 +212,8 @@
     </div>
     <!--Shipments popup -->
     <!--Shipments popup -->
-    <div class="modal fade" id="pncc_modal" data-backdrop="static" role="dialog" aria-labelledby="pncc_modal" aria-hidden="true">
+    <div class="modal fade" id="pncc_modal" data-backdrop="static" role="dialog" aria-labelledby="pncc_modal"
+         aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -198,7 +233,8 @@
     </div>
     <!--Shipments popup -->
     <!--Shipments popup -->
-    <div class="modal fade" id="delivered_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="delivered_shipments_modal" aria-hidden="true">
+    <div class="modal fade" id="delivered_shipments_modal" data-backdrop="static" role="dialog"
+         aria-labelledby="delivered_shipments_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -217,7 +253,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="adjustment_reference_modal" data-backdrop="static" role="dialog" aria-labelledby="adjustment_reference_modal" aria-hidden="true">
+    <div class="modal fade" id="adjustment_reference_modal" data-backdrop="static" role="dialog"
+         aria-labelledby="adjustment_reference_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -237,7 +274,8 @@
     </div>
     <!--Shipments popup -->
 
-    <div class="modal fade text-left" id="ViewDepositSlip" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewDepositSlip"
+    <div class="modal fade text-left" id="ViewDepositSlip" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="ViewDepositSlip"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -248,32 +286,36 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                        <table class="table table-bordered datatable" id="deposit_slip_table" style="z-index: 3;">
-                            <thead>
-                            <tr role="row" class="bg-primary white">
+                    <table class="table table-bordered datatable" id="deposit_slip_table" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
 
-                                <th class="border-primary border-darken-1">S. No.</th>
-                                <th class="border-primary border-darken-1">Date</th>
-                                <th class="border-primary border-darken-1">Bank Name</th>
-                                <th class="border-primary border-darken-1">Amount </th>
-                                <th class="border-primary border-darken-1">Deposit Slip</th>
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Date</th>
+                            <th class="border-primary border-darken-1">Bank Name</th>
+                            <th class="border-primary border-darken-1">Amount</th>
+                            <th class="border-primary border-darken-1">Uploaded At</th>
+                            <th class="border-primary border-darken-1">Uploaded By</th>
+                            <th class="border-primary border-darken-1">Deposit Slip</th>
 
-                            </tr>
-                            </thead>
-                        </table>
+                        </tr>
+                        </thead>
+                    </table>
 
-                        <hr>
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
-                            </div>
+                    <hr>
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close
+                            </button>
                         </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade text-left" id="AddAdjustmentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddAdjustmentModal"
+    <div class="modal fade text-left" id="AddAdjustmentModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="AddAdjustmentModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -284,34 +326,37 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="sdn_adjustment_add" class="form" action="{{route('admin.delivery.sdn.adjustment.add')}}" method="post">
+                    <form id="sdn_adjustment_add" class="form" action="{{route('admin.delivery.sdn.adjustment.add')}}"
+                          method="post">
                         @csrf
                         <input type="hidden" name="sdn_id" id="sdn_id_for_adjustment">
                         <input type="hidden" name="sdn_rows" id="sdn_rows_for_adjustment">
-                        <table class="table table-bordered datatable" id="sdn_adjustment_table" style="z-index: 3;width: 100%;">
+                        <table class="table table-bordered datatable" id="sdn_adjustment_table"
+                               style="z-index: 3;width: 100%;">
                             <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
-                                    <th class="border-primary border-darken-1">Statement #</th>
-                                    <th class="border-primary border-darken-1">Statement Creation Date</th>
-                                    <th class="border-primary border-darken-1">Amount</th>
-                                    <th class="border-primary border-darken-1">Action</th>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1"></th>
+                                <th class="border-primary border-darken-1">Statement #</th>
+                                <th class="border-primary border-darken-1">Statement Creation Date</th>
+                                <th class="border-primary border-darken-1">Amount</th>
+                                <th class="border-primary border-darken-1">Action</th>
 
-                                </tr>
+                            </tr>
                             </thead>
                             <tfoot>
-                                <tr>
-                                    <td colspan="3">Total</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
+                            <tr>
+                                <td colspan="3">Total</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
                             </tfoot>
                         </table>
 
                         <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close
+                                </button>
                             </div>
                             <div class="col-3">
                                 <button type="submit" class="btn btn-primary btn-block">Add Adjustment</button>
@@ -324,7 +369,8 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="AddDNCCModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddDNCCModal"
+    <div class="modal fade text-left" id="AddDNCCModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="AddDNCCModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -335,22 +381,26 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="sdn_add_dncc" class="form" action="{{route('admin.delivery.sdn.dncc.add')}}" method="post">
+                    <form id="sdn_add_dncc" class="form" action="{{route('admin.delivery.sdn.dncc.add')}}"
+                          method="post">
                         @csrf
                         <input type="hidden" name="sdn_id" id="sdn_id_for_add_dncc">
                         <div class="form-group">
-                            <select name="dncc_id" id="dncc_select" data-rule-required="true" data-msg-required="DNCC is Required" class="select2 form-control">
+                            <select name="dncc_id" id="dncc_select" data-rule-required="true"
+                                    data-msg-required="DNCC is Required" class="select2 form-control">
 
                             </select>
                         </div>
                         <div class="form-group">
-                            <input type="text" name="remarks" id="dncc_remarks_input" placeholder="Remarks" class="form-control">
+                            <input type="text" name="remarks" id="dncc_remarks_input" placeholder="Remarks"
+                                   class="form-control">
                         </div>
 
                         <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close
+                                </button>
                             </div>
                             <div class="col-3">
                                 <button type="submit" class="btn btn-primary btn-block">Add DNCC</button>
@@ -363,7 +413,8 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="RemoveDNCCModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RemoveDNCCModal"
+    <div class="modal fade text-left" id="RemoveDNCCModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="RemoveDNCCModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -374,28 +425,33 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="sdn_remove_dncc" class="form" action="{{route('admin.delivery.sdn.dncc.remove')}}" method="post">
+                    <form id="sdn_remove_dncc" class="form" action="{{route('admin.delivery.sdn.dncc.remove')}}"
+                          method="post">
                         @csrf
                         <input type="hidden" name="sdn_id" id="sdn_id_for_remove_dncc">
                         <input type="hidden" name="dncc_id" id="dncc_id_for_remove_dncc">
-                        <table class="table table-bordered datatable" id="remove_dncc_table" style="z-index: 3;width: 100%;">
+                        <table class="table table-bordered datatable" id="remove_dncc_table"
+                               style="z-index: 3;width: 100%;">
                             <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
-                                    <th class="border-primary border-darken-1">S NO.</th>
-                                    <th class="border-primary border-darken-1">DNCC #</th>
-                                    <th class="border-primary border-darken-1">No. of Delivered Shipments</th>
-                                    <th class="border-primary border-darken-1">Amount</th>
-                                </tr>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1"></th>
+                                <th class="border-primary border-darken-1">S NO.</th>
+                                <th class="border-primary border-darken-1">DNCC #</th>
+                                <th class="border-primary border-darken-1">No. of Delivered Shipments</th>
+                                <th class="border-primary border-darken-1">Amount</th>
+                            </tr>
                             </thead>
                         </table>
                         <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close
+                                </button>
                             </div>
                             <div class="col-3">
-                                <button type="submit" id="remove_dncc_btn" disabled class="btn btn-primary btn-block">Remove DNCC</button>
+                                <button type="submit" id="remove_dncc_btn" disabled class="btn btn-primary btn-block">
+                                    Remove DNCC
+                                </button>
                             </div>
 
                         </div>
@@ -406,7 +462,8 @@
     </div>
 
 
-    <div class="modal fade text-left" id="AddPNCCModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddPNCCModal"
+    <div class="modal fade text-left" id="AddPNCCModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="AddPNCCModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -417,22 +474,26 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="sdn_add_pncc" class="form" action="{{route('admin.delivery.sdn.pncc.add')}}" method="post">
+                    <form id="sdn_add_pncc" class="form" action="{{route('admin.delivery.sdn.pncc.add')}}"
+                          method="post">
                         @csrf
                         <input type="hidden" name="sdn_id" id="sdn_id_for_add_pncc">
                         <div class="form-group">
-                            <select name="pncc_id" id="pncc_select" data-rule-required="true" data-msg-required="PNCC is Required" class="select2 form-control">
+                            <select name="pncc_id" id="pncc_select" data-rule-required="true"
+                                    data-msg-required="PNCC is Required" class="select2 form-control">
 
                             </select>
                         </div>
                         <div class="form-group">
-                            <input type="text" name="remarks" id="pncc_remarks_input" placeholder="Remarks" class="form-control">
+                            <input type="text" name="remarks" id="pncc_remarks_input" placeholder="Remarks"
+                                   class="form-control">
                         </div>
 
                         <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close
+                                </button>
                             </div>
                             <div class="col-3">
                                 <button type="submit" class="btn btn-primary btn-block">Add PNCC</button>
@@ -445,7 +506,8 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="RemovePNCCModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RemovePNCCModal"
+    <div class="modal fade text-left" id="RemovePNCCModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="RemovePNCCModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -456,11 +518,13 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="sdn_remove_pncc" class="form" action="{{route('admin.delivery.sdn.pncc.remove')}}" method="post">
+                    <form id="sdn_remove_pncc" class="form" action="{{route('admin.delivery.sdn.pncc.remove')}}"
+                          method="post">
                         @csrf
                         <input type="hidden" name="sdn_id" id="sdn_id_for_remove_pncc">
                         <input type="hidden" name="pncc_id" id="pncc_id_for_remove_pncc">
-                        <table class="table table-bordered datatable" id="remove_pncc_table" style="z-index: 3;width: 100%;">
+                        <table class="table table-bordered datatable" id="remove_pncc_table"
+                               style="z-index: 3;width: 100%;">
                             <thead>
                             <tr role="row" class="bg-primary white">
                                 <th class="border-primary border-darken-1"></th>
@@ -474,10 +538,13 @@
                         <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close
+                                </button>
                             </div>
                             <div class="col-3">
-                                <button type="submit" id="remove_pncc_btn" disabled class="btn btn-primary btn-block">Remove PNCC</button>
+                                <button type="submit" id="remove_pncc_btn" disabled class="btn btn-primary btn-block">
+                                    Remove PNCC
+                                </button>
                             </div>
 
                         </div>
@@ -493,7 +560,9 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css"
+          href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -553,11 +622,14 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
+            type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
+            type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     {{--    <script src="{{asset('app-assets/js/scripts/extensions/dropzone.js')}}" type="text/javascript"></script>--}}
 
@@ -571,10 +643,10 @@
                     '_token': '{{ csrf_token() }}'
                 }
             })
-                .done(function(data) {
+                .done(function (data) {
                     var tab = window.open('', '_blank');
 
-                    if(!tab) {
+                    if (!tab) {
                         swal({
                             title: 'Popup Blocker Enabled!',
                             text: 'Please add this site to your exception list.',
@@ -582,8 +654,7 @@
                             closeOnClickOutside: false,
                             closeOnEsc: false
                         });
-                    }
-                    else {
+                    } else {
                         tab.document.write(data);
                         tab.document.close();
                         tab.focus();
@@ -599,7 +670,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
+                onSet: function (context) {
                     if (context.select) {
                         $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
                     }
@@ -610,12 +681,12 @@
                 firstDay: 1,
                 clear: '',
                 max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
+                format: 'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
+                onSet: function (context) {
                     if (context.select) {
                         $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
                     }
@@ -629,7 +700,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
+                onSet: function (context) {
                     if (context.select) {
                         $('#search_date_to_deposited').pickadate('picker').set('min', $('#search_date_from_deposited').pickadate('picker').get('select'));
                     }
@@ -640,19 +711,19 @@
                 firstDay: 1,
                 clear: '',
                 max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
+                format: 'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
+                onSet: function (context) {
                     if (context.select) {
                         $('#search_date_from_deposited').pickadate('picker').set('max', $('#search_date_to_deposited').pickadate('picker').get('select'));
                     }
                 }
             });
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
@@ -679,7 +750,7 @@
                             head.push('Adjustment Reference');
                             head.push('Difference Amount');
 
-                            $.each(result.data, function(index, values) {
+                            $.each(result.data, function (index, values) {
                                 row = [];
 
 
@@ -707,7 +778,9 @@
 
                     return {body: body, header: head};
                 }
-            } );
+            });
+
+
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -715,10 +788,10 @@
                     {
                         extend: 'excel',
                         title: 'Station Deposit Notes',
-                        className:'btn btn-primary',
+                        className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
-                'reset'],
+                    'reset'],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -730,6 +803,7 @@
                 ajax: {
                     url: '{{ route('admin.delivery.sdn.list') }}',
                     data: function (d) {
+                        d.scan_sdn = $('#scan_sdn').val();
                         d.scan_dncc = $('#scan_dncc').val();
                         d.search_tracking = $('#search_tracking').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
@@ -741,44 +815,95 @@
                 rowId: 'sdn_id',
                 order: [[1, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'sdn' ,name: 'station_deposit_notes.id', class: 'align-middle text-center sdn'},
-                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    { data:'dncc_link' ,name: 'station_deposit_notes.dncc_count', class: 'align-middle dncc_link text-center'},
-                    { data:'delivered_shipments_link' ,name: 'station_deposit_notes.sdn_delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
-                    { data:'sdn_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle sdn_amount'},
-                    { data:'sdn_deposit_amount' ,name: 'station_deposit_notes.sdn_deposit_amount', class: 'align-middle sdn_deposit_amount'},
+                    {
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 0,
+                        render: function (data, type, row) {
+                            return '';
+                        }
+                    },
+                    {data: 'sdn', name: 'station_deposit_notes.id', class: 'align-middle text-center sdn'},
+                    {data: 'hub', name: 'oc.name', class: 'align-middle hub'},
+                    {
+                        data: 'dncc_link',
+                        name: 'station_deposit_notes.dncc_count',
+                        class: 'align-middle dncc_link text-center'
+                    },
+                    {
+                        data: 'delivered_shipments_link',
+                        name: 'station_deposit_notes.sdn_delivered_shipments',
+                        class: 'align-middle delivered_shipments_link text-center'
+                    },
+                    {data: 'sdn_amount', name: 'station_deposit_notes.sdn_amount', class: 'align-middle sdn_amount'},
+                    {
+                        data: 'sdn_deposit_amount',
+                        name: 'station_deposit_notes.sdn_deposit_amount',
+                        class: 'align-middle sdn_deposit_amount'
+                    },
                     // { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
                     // { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
-                    { data:'deposited_by' ,name: 'admins.name', class: 'align-middle deposited_by'},
-                    { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
-                    { data:'resolved_by' ,name: 'admins.name', class: 'align-middle resolved_by'},
-                    { data:'status' ,name: 'status', class: 'align-middle status'},
-                    { data:'adjustment_date' ,name: 'sdna.date', class: 'align-middle adjustment_date'},
-                    { data:'sdn_adjustment_amount' ,name: 'station_deposit_notes.adjustment_amount', class: 'align-middle adjustment_amount'},
-                    { data:'adjusted_reference_link' ,name: 'station_deposit_notes.adjustment_ref', class: 'align-middle text-center adjustment_ref',orderable: false, searchable: false},
-                    { data:'difference_amount' ,name: 'difference_amount', class: 'align-middle difference_amount',orderable: false, searchable: false},
-                    { data:'deposit_slip' ,name: 'deposit_slip', class: 'align-middle deposit_slip',orderable: false, searchable: false},
-                    { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
+                    {data: 'deposited_by', name: 'admins.name', class: 'align-middle deposited_by'},
+                    {data: 'created_at', name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
+                    {data: 'resolved_by', name: 'admins.name', class: 'align-middle resolved_by'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'adjustment_date', name: 'sdna.date', class: 'align-middle adjustment_date'},
+                    {
+                        data: 'sdn_adjustment_amount',
+                        name: 'station_deposit_notes.adjustment_amount',
+                        class: 'align-middle adjustment_amount'
+                    },
+                    {
+                        data: 'adjusted_reference_link',
+                        name: 'station_deposit_notes.adjustment_ref',
+                        class: 'align-middle text-center adjustment_ref',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'difference_amount',
+                        name: 'difference_amount',
+                        class: 'align-middle difference_amount',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'deposit_slip',
+                        name: 'deposit_slip',
+                        class: 'align-middle deposit_slip',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
-                rowCallback: function(row, data, index) {
+                rowCallback: function (row, data, index) {
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 drawCallback: function (settings) {
-                    var api = new $.fn.dataTable.Api( settings );
-                    var data = api.rows( {page:'current'} ).data();
+                    var api = new $.fn.dataTable.Api(settings);
+                    var data = api.rows({page: 'current'}).data();
 
-                    if($('#scan_dncc').val() != ''){
-                            if(data.length > 0){
-                                scan_sound(1);
-                            }else{
-                                scan_sound(2);
-                            }
+                    if ($('#scan_dncc').val() != '') {
+                        if (data.length > 0) {
+                            scan_sound(1);
+                        } else {
+                            scan_sound(2);
+                        }
+                    }
+
+                    if ($('#scan_sdn').val() != '') {
+                        if (data.length > 0) {
+                            scan_sound(1);
+                        } else {
+                            scan_sound(2);
+                        }
                     }
                 },
-                initComplete: function() {
+                initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -790,25 +915,24 @@
                         '<option value="2">Resolved</option>' +
                         '</select>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
-                    this.api().columns().every(function(column_id) {
+                    this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action') || $(header).is('.difference_amount')) {
+                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action') || $(header).is('.difference_amount') || $(header).is('.adjustment_ref')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
+                        } else if ($(header).is('.status')) {
                             $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.bank')){
+                                }).wrap(td);
+                        } else if ($(header).is('.bank')) {
                             $(bank_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
+                                }).wrap(td);
+                        } else {
+                            var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
 
@@ -817,9 +941,10 @@
                             }
                         }
                     });
+
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select a Status",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -835,21 +960,43 @@
                     });
 
                     $("#bank_select").prepend('<option value="" selected></option>').select2({
-                        data:data,
+                        data: data,
                         placeholder: "Select Bank",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }
             });
+            var select = $('#track_form #scan_sdn').selectize({
+                placeholder: 'Scan sdn(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                create: function (input) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(input)) {
+                        return false;
+                    }
+                    return {
+                        value: input,
+                        text: input
+                    }
+                }
+            });
+
 
             $('#search_tracking').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
+            }).bind('input', function () {
                 if (this.value.length == 0 || this.value.length >= 6) {
                     table.draw();
                 }
@@ -859,71 +1006,82 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
+            }).bind('input', function () {
                 table.draw();
             });
 
+
+
+            // $('#scan_sdn').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // }).bind('input', function () {
+            //     table.draw();
+            // });
+
+
             $("#sdn_add_dncc #dncc_select").prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select DNCC*',
-                width:'100%',
+                placeholder: 'Select DNCC*',
+                width: '100%',
                 dropdownCssClass: 'form-control-sm p-0',
                 dropdownParent: $("#sdn_add_dncc")
             });
 
 
             $("#sdn_add_pncc #pncc_select").prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select PNCC*',
-                width:'100%',
+                placeholder: 'Select PNCC*',
+                width: '100%',
                 dropdownCssClass: 'form-control-sm p-0',
                 dropdownParent: $("#sdn_add_pncc")
             });
 
 
             {{--$('#sdn_upload_form').bind('submit',function (e) {--}}
-                {{--e.preventDefault();--}}
+            {{--e.preventDefault();--}}
 
-                {{--var url = '{!! route('admin.delivery.sdn.slip') !!}';--}}
+            {{--var url = '{!! route('admin.delivery.sdn.slip') !!}';--}}
 
-                {{--var imagefile = $('#deposit_slip').val();--}}
+            {{--var imagefile = $('#deposit_slip').val();--}}
 
-                {{--if(!imagefile){--}}
-                    {{--error = "Please select a deposit slip first!";--}}
-                    {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                {{--}else{--}}
-                    {{--$.ajax({--}}
-                        {{--type:'post',--}}
-                        {{--url:url,--}}
-                        {{--enctype: 'multipart/form-data',--}}
-                        {{--processData: false,--}}
-                        {{--contentType: false,--}}
-                        {{--cache: false,--}}
-                        {{--data: new FormData($(this)[0])--}}
-                    {{--}).done(function (data) {--}}
-                        {{--if(data.status == 1){--}}
+            {{--if(!imagefile){--}}
+            {{--error = "Please select a deposit slip first!";--}}
+            {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}else{--}}
+            {{--$.ajax({--}}
+            {{--type:'post',--}}
+            {{--url:url,--}}
+            {{--enctype: 'multipart/form-data',--}}
+            {{--processData: false,--}}
+            {{--contentType: false,--}}
+            {{--cache: false,--}}
+            {{--data: new FormData($(this)[0])--}}
+            {{--}).done(function (data) {--}}
+            {{--if(data.status == 1){--}}
 
-                            {{--table.draw('false');--}}
-                            {{--$('#deposit_slip').val('');--}}
-                            {{--$('#uploadDepositSlip').modal('hide');--}}
-                            {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+            {{--table.draw('false');--}}
+            {{--$('#deposit_slip').val('');--}}
+            {{--$('#uploadDepositSlip').modal('hide');--}}
+            {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
 
-                        {{--}else{--}}
-                            {{--$('#deposit_slip').val('');--}}
-                            {{--$('#uploadDepositSlip').modal('hide');--}}
-                            {{--toastr.error(data.error.deposit_slip[0], 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}else{--}}
+            {{--$('#deposit_slip').val('');--}}
+            {{--$('#uploadDepositSlip').modal('hide');--}}
+            {{--toastr.error(data.error.deposit_slip[0], 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                        {{--}--}}
-                    {{--});--}}
+            {{--}--}}
+            {{--});--}}
 
-                {{--}--}}
+            {{--}--}}
             {{--});--}}
 
             $('#sdn_upload_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
-                errorPlacement: function(error, element) {
+                errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
-                submitHandler: function(form) {
+                submitHandler: function (form) {
                     var pressed_button = $(this.submitButton);
                     swal({
                         title: 'Are You Sure?',
@@ -959,6 +1117,7 @@
 
                 }
             });
+
             function printSDN(id) {
                 $.ajax({
                     url: '{!! route('admin.delivery.sdn.print') !!}',
@@ -968,10 +1127,10 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         var tab = window.open('', '_blank');
 
-                        if(!tab) {
+                        if (!tab) {
                             swal({
                                 title: 'Popup Blocker Enabled!',
                                 text: 'Please add this site to your exception list.',
@@ -979,8 +1138,7 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                        }
-                        else {
+                        } else {
                             tab.document.write(data);
                             tab.document.close();
                             tab.focus();
@@ -988,16 +1146,17 @@
                     });
             }
 
-            $('body').on('click','.printSDN',function () {
+            $('body').on('click', '.printSDN', function () {
                 var sdn = $(this).parents('tr').attr('id');
                 // console.log(sdn);
                 printSDN(sdn);
             });
             var route = '{!! route('admin.tracking.index') !!}';
 
-            $('#datatable tbody').on('click','tr td.dncc_link button',function () {
+            $('#datatable tbody').on('click', 'tr td.dncc_link button', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                if(id){}
+                if (id) {
+                }
                 $.ajax({
                     url: '{!! route('admin.delivery.sdn.dn') !!}',
                     method: 'POST',
@@ -1006,43 +1165,46 @@
                         'sdn_id': id,
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         if (data.status == 1) {
                             var notes = '<div>PNCC Number(s) :</div>';
 
                             if (data.pickup_notes) {
-                                $.each(data.pickup_notes, function(index, value) {
-                                    notes += '<u><a href="javascript:void(0);" class="pncc_print" dnid="'+value+'">'+value+'</a></u><br>';
+                                $.each(data.pickup_notes, function (index, value) {
+                                    notes += '<u><a href="javascript:void(0);" class="pncc_print" dnid="' + value + '">' + value + '</a></u><br>';
                                 });
                             }
                             $('#pncc_modal .modal-body').html('');
                             $('#pncc_modal').modal('show');
                             $('#pncc_modal .modal-body').html(notes);
-                        }
-                        else if(data.status == 2){
+                        } else if (data.status == 2) {
                             var notes = '<div>DNCC Number(s) :</div>';
 
                             if (data.delivery_notes) {
-                                $.each(data.delivery_notes, function(index, value) {
-                                    notes += '<u><a href="javascript:void(0);" class="dncc_print" dnid="'+value+'">'+value+'</a></u><br>';
+                                $.each(data.delivery_notes, function (index, value) {
+                                    notes += '<u><a href="javascript:void(0);" class="dncc_print" dnid="' + value + '">' + value + '</a></u><br>';
                                 });
                             }
                             $('#dncc_modal .modal-body').html('');
                             $('#dncc_modal').modal('show');
                             $('#dncc_modal .modal-body').html(notes);
-                        }
-                        else if(data.status == 0){
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                        else{
-                            toastr.error('Something went wrong!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        } else if (data.status == 0) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        } else {
+                            toastr.error('Something went wrong!', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
                         }
                     });
 
             });
-            $('#datatable tbody').on('click','tr td.adjustment_ref button',function () {
+            $('#datatable tbody').on('click', 'tr td.adjustment_ref button', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                if(id) {
+                if (id) {
                     $.ajax({
                         url: '{!! route('admin.delivery.sdn.get.adjustment_reference') !!}',
                         method: 'POST',
@@ -1071,9 +1233,7 @@
             });
 
 
-
-
-            $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
+            $('#datatable tbody').on('click', 'tr td.delivered_shipments_link button', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#delivered_shipments_modal .modal-body').html('');
                 $('#delivered_shipments_modal').modal('show');
@@ -1086,23 +1246,22 @@
                         'sdn_id': id
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         if (data.status == 1 || data.status == 2) {
                             var html = '<div><b>Delivered Shipment(s) :</b></div>';
                             var dn_pn_title = '';
-                            if(data.status == 1){
+                            if (data.status == 1) {
                                 dn_pn_title = 'PNCC Number ';
-                            }
-                            else{
+                            } else {
                                 dn_pn_title = 'DNCC Number ';
                             }
                             if (data.shipments) {
-                                $.each(data.shipments, function(index, value) {
+                                $.each(data.shipments, function (index, value) {
 
-                                    html += dn_pn_title + index +': <br>';
+                                    html += dn_pn_title + index + ': <br>';
 
                                     $.each(value, function (ind, tracking_number) {
-                                        html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                        html += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                     });
                                 });
                             }
@@ -1112,10 +1271,11 @@
                     });
 
             });
-            $('body').on('click','a.dncc_print',function(){
+            $('body').on('click', 'a.dncc_print', function () {
                 var id = parseInt($(this).attr('dnid'));
                 printDNCC(id);
             });
+
             function printDNCC(id) {
                 $.ajax({
                     url: '{!! route('admin.delivery.sdn.dncc.print') !!}',
@@ -1125,10 +1285,10 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         var tab = window.open('', '_blank');
 
-                        if(!tab) {
+                        if (!tab) {
                             swal({
                                 title: 'Popup Blocker Enabled!',
                                 text: 'Please add this site to your exception list.',
@@ -1136,8 +1296,7 @@
                                 closeOnClickOutside: false,
                                 closeOnEsc: false
                             });
-                        }
-                        else {
+                        } else {
                             tab.document.write(data);
                             tab.document.close();
                             tab.focus();
@@ -1160,21 +1319,29 @@
                 $('#sdn_id').val($(id).data('target-id'));
 
 
-
                 deposit_table = $('#sdn_upload_table').DataTable({
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                    buttons:[{
+                    buttons: [{
                         title: 'Add Row',
                         className: 'btn btn-primary mb-1',
                         text: '<i class="la la-plus"></i> Add Row',
-                        action:function (e) {
+                        action: function (e) {
                             add_row();
                         }
                     }],
-                    ordering:false,
-                    paging:false,
+                    ordering: false,
+                    paging: false,
                     columns: [
-                        {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                        {
+                            orderable: false,
+                            searchable: false,
+                            name: 'serial_number',
+                            class: 'align-middle serial_number',
+                            targets: 0,
+                            render: function (data, type, row) {
+                                return '';
+                            }
+                        },
                         {name: 'date', class: 'align-middle date date-col-width form-group', width: '20%'},
                         {name: 'bank_name', class: 'align-middle bank_name form-group'},
                         {name: 'amount', class: 'align-middle expense_amount form-group'},
@@ -1182,13 +1349,13 @@
                         {name: 'action', class: 'align-middle action'},
                     ],
 
-                    rowCallback: function(row, data, index) {
+                    rowCallback: function (row, data, index) {
                         var info = deposit_table.page.info();
 
                         $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
                     },
-                    initComplete: function() {
+                    initComplete: function () {
 
                         // this.api().table().columns.adjust();
                     }
@@ -1197,27 +1364,27 @@
 
                 function add_row() {
                     rows_count++;
-                    var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="deposit_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div>';
-                    var bank_select = '<select class="form-control hub_select select2" name="bank['+rows_count+']" data-rule-required="true" data-msg-required="Bank is required"></select>';
-                    var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">';
-                    var deposit_slip = '<input class="form-control form-control-sm" type="file" name="deposit_slip_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Deposit Slip is required">';
-                    if(rows_count == 1){
+                    var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date[' + rows_count + ']" id="deposit_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div>';
+                    var bank_select = '<select class="form-control hub_select select2" name="bank[' + rows_count + ']" data-rule-required="true" data-msg-required="Bank is required"></select>';
+                    var amount_input = '<input class="form-control form-control-sm amount" name="amount[' + rows_count + ']" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">';
+                    var deposit_slip = '<input class="form-control form-control-sm" type="file" name="deposit_slip_' + rows_count + '" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Deposit Slip is required">';
+                    if (rows_count == 1) {
                         var remove = '';
-                    }else{
+                    } else {
                         var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
 
                     }
                     // deposit_table.row.add(0,1,2,3,4,5);
-                    deposit_table.row.add([0, date_input,bank_select,amount_input,deposit_slip,remove]).node().id = rows_count;
+                    deposit_table.row.add([0, date_input, bank_select, amount_input, deposit_slip, remove]).node().id = rows_count;
                     deposit_table.draw(true);
                     // $('#sdn_upload_table tbody').append(html);
                     $('#DepositSlipButton').attr('disabled', false);
                     selected_rows.push(rows_count);
-                    $('select[name="bank['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                        data:banks_list,
-                        placeholder:'Select Bank',
-                        allowClear:true,
-                        width:'100%',
+                    $('select[name="bank[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data: banks_list,
+                        placeholder: 'Select Bank',
+                        allowClear: true,
+                        width: '100%',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     $('#deposit_date_' + rows_count).pickadate({
@@ -1229,7 +1396,7 @@
                         showMonthsShort: true,
                         formatSubmit: 'yyyy-mm-dd 00:00:00',
                         hiddenSuffix: '_formatted',
-                        onOpen: function() {
+                        onOpen: function () {
                             // $('#deposit_date_' + rows_count+'_root').css('top', '-262px');
                         },
                     });
@@ -1241,184 +1408,203 @@
                         'digits': 2,
                         'min': 0.00,
                         'max': 10000000.00
-                    }).bind('keyup',function (){
+                    }).bind('keyup', function () {
                         update_upload_slip_total();
                     });
                 }
             });
 
-            function update_upload_slip_total()
-            {
+            function update_upload_slip_total() {
                 let upload_total = 0
-                $('#sdn_upload_table .amount').each(function(v){
-                    if($(this).val() != "") {
+                $('#sdn_upload_table .amount').each(function (v) {
+                    if ($(this).val() != "") {
                         upload_total += parseFloat($(this).val());
                     }
                 });
                 $("#upload_deposit_total").html(upload_total);
             }
 
-            $('body').on('click', 'a.remove_row',function () {
+            $('body').on('click', 'a.remove_row', function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, selected_rows);
 
                 if (index !== -1) {
                     selected_rows.splice(index, 1);
                 }
-                deposit_table.row( $(this).parents('tr') ).remove().draw();
+                deposit_table.row($(this).parents('tr')).remove().draw();
                 update_upload_slip_total();
             });
             var deposit_slip_table;
-            $('body').on('click','.deposit_slip_view', function () {
-               var id = $(this).parents('tr').attr('id');
-               if(id){
-                   $.ajax({
-                       url:'{!! route('admin.delivery.sdn.slip_view') !!}',
-                       type:'POST',
-                       data: {
-                           'sdn_id':id,
-                           '_token': '{{ csrf_token() }}'
-                       }
-                   }).done(function (data) {
-                        if(data.status){
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }else{
+            $('body').on('click', '.deposit_slip_view', function () {
+                var id = $(this).parents('tr').attr('id');
+                if (id) {
+                    $.ajax({
+                        url: '{!! route('admin.delivery.sdn.slip_view') !!}',
+                        type: 'POST',
+                        data: {
+                            'sdn_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status) {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        } else {
                             $('#ViewDepositSlip').modal('show');
                             deposit_slip_table = $('#deposit_slip_table').DataTable({
                                 dom: 'ltipr',
-                                ordering:false,
-                                paging:false,
+                                ordering: false,
+                                paging: false,
                                 columns: [
-                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {
+                                        orderable: false,
+                                        searchable: false,
+                                        name: 'serial_number',
+                                        class: 'align-middle serial_number',
+                                        targets: 0,
+                                        render: function (data, type, row) {
+                                            return '';
+                                        }
+                                    },
                                     {name: 'date', class: 'align-middle date date-col-width form-group'},
                                     {name: 'bank_name', class: 'align-middle bank_name form-group'},
                                     {name: 'amount', class: 'align-middle expense_amount form-group'},
+                                    {name: 'created_at', class: 'align-middle expense_created_at form-group'},
+                                    {name: 'uploaded_by', class: 'align-middle expense_uploaded_by form-group'},
                                     {name: 'deposit_slip', class: 'align-middle deposit_slip form-group'}
                                 ],
 
-                                rowCallback: function(row, data, index) {
+                                rowCallback: function (row, data, index) {
                                     var info = deposit_slip_table.page.info();
 
                                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
                                 },
-                                initComplete: function() {
+                                initComplete: function () {
 
                                 }
                             });
 
                             $.each(data.slips, function (index, value) {
-                                deposit_slip_table.row.add([0, value.date, value.bank, value.amount, value.image]);
+                                deposit_slip_table.row.add([0, value.date, value.bank, value.amount, value.created_at, value.uploaded_by, value.image]);
                                 deposit_slip_table.draw(true);
                             });
                         }
-                   });
-               }
+                    });
+                }
             });
-            $('body').on('click','.update_status_deposit', function () {
-               var id = $(this).parents('tr').attr('id');
-               if(id){
-                   swal({
-                       title: 'Are You Sure?',
-                       text: 'Select Yes to Mark SDN Deposited!',
-                       icon: 'warning',
-                       buttons: {
-                           cancel: {
-                               text: 'No',
-                               value: null,
-                               visible: true,
-                               closeModal: true,
-                           },
-                           confirm: {
-                               text: 'Yes',
-                               value: true,
-                               visible: true,
-                               closeModal: true
-                           }
-                       },
-                       closeOnClickOutside: false,
-                       closeOnEsc: false,
-                       dangerMode: true
-                   }).then(function (confirm) {
-                       if (confirm) {
-                           $.ajax({
-                               url:'{!! route('admin.delivery.sdn.back_to_deposit') !!}',
-                               type:'POST',
-                               data: {
-                                   'sdn_id':id,
-                                   '_token': '{{ csrf_token() }}'
-                               }
-                           }).done(function (data) {
-                               if(data.status == 1)
-                               {
-                                   table.draw(false);
-                                   toastr.success(data.message, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                               }
-                               else{
-                                   toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                               }
-                           });
-                       }
-                   });
-               }
-            });
-            $('body').on('click','.add_dncc', function () {
-               var id = $(this).parents('tr').attr('id');
-               if(id){
-                   $.ajax({
-                       url:'{!! route('admin.delivery.sdn.dncc.get.add') !!}',
-                       type:'POST',
-                       data: {
-                           'sdn_id':id,
-                           '_token': '{{ csrf_token() }}'
-                       }
-                   }).done(function (data) {
-                       if(data.status == 1)
-                       {
-                           html = "";
-                          $.each(data.dn,function (i,v){
-                              let dn_id = v.id.toString();
-                              html +=  '<option value="'+dn_id+'">'+dn_id.padStart(6,0)+'</option>';
-                          });
-
-                          $("#sdn_add_dncc #dncc_select").html(html).val("").trigger('change');
-                          $("#sdn_add_dncc #dncc_remarks_input").val("");
-                          $("#sdn_add_dncc #sdn_id_for_add_dncc").val(id);
-                          $("#AddDNCCModal").modal('show');
-                       }
-                       else{
-                           toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                       }
-                   });
-               }
-            });
-
-            $('body').on('click','.add_pncc', function () {
+            $('body').on('click', '.update_status_deposit', function () {
                 var id = $(this).parents('tr').attr('id');
-                if(id){
+                if (id) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Mark SDN Deposited!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.delivery.sdn.back_to_deposit') !!}',
+                                type: 'POST',
+                                data: {
+                                    'sdn_id': id,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if (data.status == 1) {
+                                    table.draw(false);
+                                    toastr.success(data.message, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.message, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            $('body').on('click', '.add_dncc', function () {
+                var id = $(this).parents('tr').attr('id');
+                if (id) {
                     $.ajax({
-                        url:'{!! route('admin.delivery.sdn.pncc.get.add') !!}',
-                        type:'POST',
+                        url: '{!! route('admin.delivery.sdn.dncc.get.add') !!}',
+                        type: 'POST',
                         data: {
-                            'sdn_id':id,
+                            'sdn_id': id,
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
-                        if(data.status == 1)
-                        {
+                        if (data.status == 1) {
                             html = "";
-                            $.each(data.dn,function (i,v){
+                            $.each(data.dn, function (i, v) {
                                 let dn_id = v.id.toString();
-                                html +=  '<option value="'+dn_id+'">'+dn_id+'</option>';
+                                html += '<option value="' + dn_id + '">' + dn_id.padStart(6, 0) + '</option>';
+                            });
+
+                            $("#sdn_add_dncc #dncc_select").html(html).val("").trigger('change');
+                            $("#sdn_add_dncc #dncc_remarks_input").val("");
+                            $("#sdn_add_dncc #sdn_id_for_add_dncc").val(id);
+                            $("#AddDNCCModal").modal('show');
+                        } else {
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('body').on('click', '.add_pncc', function () {
+                var id = $(this).parents('tr').attr('id');
+                if (id) {
+                    $.ajax({
+                        url: '{!! route('admin.delivery.sdn.pncc.get.add') !!}',
+                        type: 'POST',
+                        data: {
+                            'sdn_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status == 1) {
+                            html = "";
+                            $.each(data.dn, function (i, v) {
+                                let dn_id = v.id.toString();
+                                html += '<option value="' + dn_id + '">' + dn_id + '</option>';
                             });
 
                             $("#sdn_add_pncc #pncc_select").html(html).val("").trigger('change');
                             $("#sdn_add_pncc #pncc_remarks_input").val("");
                             $("#sdn_add_pncc #sdn_id_for_add_pncc").val(id);
                             $("#AddPNCCModal").modal('show');
-                        }
-                        else{
-                            toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        } else {
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
                         }
                     });
                 }
@@ -1427,35 +1613,55 @@
 
             var remove_dncc_table;
             var dncc_selected_rows = [];
-            $('body').on('click','.remove_dncc', function () {
+            $('body').on('click', '.remove_dncc', function () {
                 var id = $(this).parents('tr').attr('id');
-                if(id){
+                if (id) {
                     $.ajax({
-                        url:'{!! route('admin.delivery.sdn.dncc.get.remove') !!}',
-                        type:'POST',
+                        url: '{!! route('admin.delivery.sdn.dncc.get.remove') !!}',
+                        type: 'POST',
                         data: {
-                            'sdn_id':id,
+                            'sdn_id': id,
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
-                        if(data.status == 0){
-                            toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }else{
+                        if (data.status == 0) {
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        } else {
                             $('#RemoveDNCCModal').modal('show');
                             $("#sdn_id_for_remove_dncc").val(id);
                             remove_dncc_table = $('#remove_dncc_table').DataTable({
                                 dom: 'ltipr',
-                                ordering:false,
-                                paging:false,
+                                ordering: false,
+                                paging: false,
                                 columns: [
-                                    {orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {
+                                        orderable: false,
+                                        searchable: false,
+                                        class: 'text-center align-middle select p-1',
+                                        targets: 0,
+                                        render: function (data, type, row) {
+                                            return '';
+                                        }
+                                    },
+                                    {
+                                        orderable: false,
+                                        searchable: false,
+                                        name: 'serial_number',
+                                        class: 'align-middle serial_number',
+                                        targets: 0,
+                                        render: function (data, type, row) {
+                                            return '';
+                                        }
+                                    },
                                     {name: 'dncc', class: 'align-middle dncc form-group'},
                                     {name: 'delivered_shipments', class: 'align-middle delivered_shipments form-group'},
                                     {name: 'amount', class: 'align-middle expense_amount form-group'},
                                 ],
 
-                                rowCallback: function(row, d, index) {
+                                rowCallback: function (row, d, index) {
                                     var info = remove_dncc_table.page.info();
                                     $('td:eq(0)', row).addClass('select-checkbox');
 
@@ -1463,19 +1669,18 @@
 
                                     if ($.inArray(parseInt(d[0]), dncc_selected_rows) !== -1) {
                                         remove_dncc_table.row(row).select();
-                                    }
-                                    else{
+                                    } else {
                                         remove_dncc_table.row(row).deselect();
                                     }
 
                                 },
-                                initComplete: function() {
+                                initComplete: function () {
 
                                 }
                             });
 
                             $.each(data.dncc, function (index, value) {
-                                remove_dncc_table.row.add([value.id,, value.id.toString().padStart(6,0), value.delivered_shipments, value.received_cod_amount]);
+                                remove_dncc_table.row.add([value.id, , value.id.toString().padStart(6, 0), value.delivered_shipments, value.received_cod_amount]);
                                 remove_dncc_table.draw(true);
                             });
                         }
@@ -1483,28 +1688,28 @@
                 }
             });
 
-            $('#RemoveDNCCModal #remove_dncc_table').on('click', 'tbody tr td.select-checkbox', function() {
+            $('#RemoveDNCCModal #remove_dncc_table').on('click', 'tbody tr td.select-checkbox', function () {
 
-                    var id = parseInt(remove_dncc_table.row( $(this).parents('tr') ).data()[0]);
+                var id = parseInt(remove_dncc_table.row($(this).parents('tr')).data()[0]);
 
-                    var index = $.inArray(id, dncc_selected_rows);
+                var index = $.inArray(id, dncc_selected_rows);
 
 
-                    if (index === -1) {
-                        if(dncc_selected_rows.length + 1 != remove_dncc_table.rows().count()) {
-                            dncc_selected_rows.push(id);
-                        }
-                    } else {
-                        dncc_selected_rows.splice(index, 1);
+                if (index === -1) {
+                    if (dncc_selected_rows.length + 1 != remove_dncc_table.rows().count()) {
+                        dncc_selected_rows.push(id);
                     }
+                } else {
+                    dncc_selected_rows.splice(index, 1);
+                }
 
-                    if (dncc_selected_rows.length > 0) {
-                        $("#remove_dncc_btn").prop('disabled', false);
-                    } else {
-                        $("#remove_dncc_btn").prop('disabled', true);
-                    }
+                if (dncc_selected_rows.length > 0) {
+                    $("#remove_dncc_btn").prop('disabled', false);
+                } else {
+                    $("#remove_dncc_btn").prop('disabled', true);
+                }
 
-                    remove_dncc_table.draw(false);
+                remove_dncc_table.draw(false);
 
             });
 
@@ -1516,35 +1721,55 @@
 
             var remove_pncc_table;
             var pncc_selected_rows = [];
-            $('body').on('click','.remove_pncc', function () {
+            $('body').on('click', '.remove_pncc', function () {
                 var id = $(this).parents('tr').attr('id');
-                if(id){
+                if (id) {
                     $.ajax({
-                        url:'{!! route('admin.delivery.sdn.pncc.get.remove') !!}',
-                        type:'POST',
+                        url: '{!! route('admin.delivery.sdn.pncc.get.remove') !!}',
+                        type: 'POST',
                         data: {
-                            'sdn_id':id,
+                            'sdn_id': id,
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
-                        if(data.status == 0){
-                            toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }else{
+                        if (data.status == 0) {
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        } else {
                             $('#RemovePNCCModal').modal('show');
                             $("#sdn_id_for_remove_pncc").val(id);
                             remove_pncc_table = $('#remove_pncc_table').DataTable({
                                 dom: 'ltipr',
-                                ordering:false,
-                                paging:false,
+                                ordering: false,
+                                paging: false,
                                 columns: [
-                                    {orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {
+                                        orderable: false,
+                                        searchable: false,
+                                        class: 'text-center align-middle select p-1',
+                                        targets: 0,
+                                        render: function (data, type, row) {
+                                            return '';
+                                        }
+                                    },
+                                    {
+                                        orderable: false,
+                                        searchable: false,
+                                        name: 'serial_number',
+                                        class: 'align-middle serial_number',
+                                        targets: 0,
+                                        render: function (data, type, row) {
+                                            return '';
+                                        }
+                                    },
                                     {name: 'pncc', class: 'align-middle pncc form-group'},
                                     {name: 'shipments', class: 'align-middle shipments form-group'},
                                     {name: 'amount', class: 'align-middle expense_amount form-group'},
                                 ],
 
-                                rowCallback: function(row, d, index) {
+                                rowCallback: function (row, d, index) {
                                     var info = remove_pncc_table.page.info();
                                     $('td:eq(0)', row).addClass('select-checkbox');
 
@@ -1552,19 +1777,18 @@
 
                                     if ($.inArray(parseInt(d[0]), pncc_selected_rows) !== -1) {
                                         remove_pncc_table.row(row).select();
-                                    }
-                                    else{
+                                    } else {
                                         remove_pncc_table.row(row).deselect();
                                     }
 
                                 },
-                                initComplete: function() {
+                                initComplete: function () {
 
                                 }
                             });
 
                             $.each(data.pncc, function (index, value) {
-                                remove_pncc_table.row.add([value.id,, value.id, value.shipments, value.amount]);
+                                remove_pncc_table.row.add([value.id, , value.id, value.shipments, value.amount]);
                                 remove_pncc_table.draw(true);
                             });
                         }
@@ -1572,15 +1796,15 @@
                 }
             });
 
-            $('#RemovePNCCModal #remove_pncc_table').on('click', 'tbody tr td.select-checkbox', function() {
+            $('#RemovePNCCModal #remove_pncc_table').on('click', 'tbody tr td.select-checkbox', function () {
 
-                var id = parseInt(remove_pncc_table.row( $(this).parents('tr') ).data()[0]);
+                var id = parseInt(remove_pncc_table.row($(this).parents('tr')).data()[0]);
 
                 var index = $.inArray(id, pncc_selected_rows);
 
 
                 if (index === -1) {
-                    if(pncc_selected_rows.length + 1 != remove_pncc_table.rows().count()) {
+                    if (pncc_selected_rows.length + 1 != remove_pncc_table.rows().count()) {
                         pncc_selected_rows.push(id);
                     }
                 } else {
@@ -1617,63 +1841,71 @@
             var sdn_adjustment_table;
             var selected_adjustment_rows = [];
             $('#datatable tbody').on('click', 'button.adjustment_add', function () {
-               var sdn_id = $(this).parents('tr').attr('id');
-               var options_html = "";
-               if(sdn_id){
-                   var adjustment_rows_count = 0;
-                   $.ajax({
-                       url: '{!! route('admin.delivery.sdn.get.petty_cash_statements') !!}',
-                       method: 'POST',
-                       data: {
-                           'id': sdn_id,
-                           '_token': '{{ csrf_token() }}'
-                       }
-                   })
-                       .done(function(data) {
-                            if(data.status == 1)
-                            {
-                                $.each(data.data,function (key,value) {
-                                    options_html += "<option value='"+value.id+"' data-date='"+value.date+"' data-amount='"+value.amount+"' >"+value.id+"</option>";
+                var sdn_id = $(this).parents('tr').attr('id');
+                var options_html = "";
+                if (sdn_id) {
+                    var adjustment_rows_count = 0;
+                    $.ajax({
+                        url: '{!! route('admin.delivery.sdn.get.petty_cash_statements') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': sdn_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                $.each(data.data, function (key, value) {
+                                    options_html += "<option value='" + value.id + "' data-date='" + value.date + "' data-amount='" + value.amount + "' >" + value.id + "</option>";
                                 });
                                 sdn_adjustment_table = $('#sdn_adjustment_table').DataTable({
                                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                                    buttons:[{
+                                    buttons: [{
                                         title: 'Add Row',
                                         className: 'btn btn-primary mb-1',
                                         text: '<i class="la la-plus"></i> Add Row',
-                                        action:function (e) {
+                                        action: function (e) {
                                             add_adjustment_row();
                                         }
                                     }],
-                                    ordering:false,
-                                    paging:false,
+                                    ordering: false,
+                                    paging: false,
                                     columns: [
-                                        {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                        {
+                                            orderable: false,
+                                            searchable: false,
+                                            name: 'serial_number',
+                                            class: 'align-middle serial_number',
+                                            targets: 0,
+                                            render: function (data, type, row) {
+                                                return '';
+                                            }
+                                        },
                                         {name: 'statement', class: 'align-middle statement form-group', width: '20%'},
                                         {name: 'date', class: 'align-middle date form-group'},
                                         {name: 'amount', class: 'align-middle amount form-group'},
                                         {name: 'action', class: 'align-middle action'},
                                     ],
 
-                                    rowCallback: function(row, data, index) {
+                                    rowCallback: function (row, data, index) {
                                         var info = sdn_adjustment_table.page.info();
 
                                         $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
                                     },
-                                    footerCallback: function(row, data, start, end, display) {
+                                    footerCallback: function (row, data, start, end, display) {
                                         var api = this.api();
                                         api.columns('.statement', {
                                             page: 'current'
-                                        }).every(function() {
+                                        }).every(function () {
                                             $(this.footer()).html('Total Amount');
                                         });
                                         api.columns('.amount', {
                                             page: 'current'
-                                        }).every(function() {
+                                        }).every(function () {
                                             amount = this
                                                 .data()
-                                                .reduce(function(a, b) {
+                                                .reduce(function (a, b) {
                                                     var x = parseFloat(a) || 0;
                                                     var y = parseFloat(b) || 0;
                                                     return x + y;
@@ -1689,22 +1921,22 @@
 
                                 function add_adjustment_row() {
                                     adjustment_rows_count++;
-                                    var statement_select = '<select class="form-control statement_select select2 unique_statement" name="statement['+adjustment_rows_count+']" data-rule-required="true" data-msg-required="Statement is required"></select>';
+                                    var statement_select = '<select class="form-control statement_select select2 unique_statement" name="statement[' + adjustment_rows_count + ']" data-rule-required="true" data-msg-required="Statement is required"></select>';
                                     var amount_input = "<div class='amount_input'><div>";
-                                    if(adjustment_rows_count == 1){
+                                    if (adjustment_rows_count == 1) {
                                         var remove = '';
-                                    }else{
+                                    } else {
                                         var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger adjustment_remove_row"><i class="la la-close"></i></a>';
 
                                     }
-                                    sdn_adjustment_table.row.add([0, statement_select,'','',remove]).node().id = adjustment_rows_count;
+                                    sdn_adjustment_table.row.add([0, statement_select, '', '', remove]).node().id = adjustment_rows_count;
                                     sdn_adjustment_table.draw(true);
                                     selected_adjustment_rows.push(adjustment_rows_count);
-                                    $('select[name="statement['+adjustment_rows_count+']"]').prepend('<option value="" selected="selected" data-date="" data-amount=""></option>'+options_html).select2({
-                                        placeholder:'Select Statement',
-                                        width:'100%',
+                                    $('select[name="statement[' + adjustment_rows_count + ']"]').prepend('<option value="" selected="selected" data-date="" data-amount=""></option>' + options_html).select2({
+                                        placeholder: 'Select Statement',
+                                        width: '100%',
                                         dropdownCssClass: 'form-control-sm p-0'
-                                    }).bind('change',function (){
+                                    }).bind('change', function () {
                                         var date = $(this).find("option:selected").attr("data-date");
                                         var amount = $(this).find("option:selected").attr("data-amount");
                                         sdn_adjustment_table.row($(this).closest("tr")).data()[2] = date;
@@ -1717,24 +1949,26 @@
 
 
                                 add_adjustment_row();
+                            } else {
+                                toastr.error(data.message, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
                             }
-                            else{
-                                toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                       });
+                        });
 
 
-               }
+                }
             });
 
-            $('body').on('click', 'a.adjustment_remove_row',function () {
+            $('body').on('click', 'a.adjustment_remove_row', function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, selected_adjustment_rows);
 
                 if (index !== -1) {
                     selected_adjustment_rows.splice(index, 1);
                 }
-                sdn_adjustment_table.row( $(this).parents('tr') ).remove().draw();
+                sdn_adjustment_table.row($(this).parents('tr')).remove().draw();
             });
 
             $('#AddAdjustmentModal').on('hidden.bs.modal', function () {
@@ -1743,7 +1977,7 @@
                 selected_adjustment_rows = [];
             });
 
-            $.validator.addMethod("unique_statement", function(value, element) {
+            $.validator.addMethod("unique_statement", function (value, element) {
                 var parentForm = $(element).closest('form');
                 var timeRepeated = 0;
                 if (value != '') {
@@ -1761,10 +1995,10 @@
             sdn_form = $('#sdn_adjustment_add').validate({
                 errorClass: 'danger',
                 successClass: 'success',
-                errorPlacement: function(error, element) {
+                errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
-                submitHandler: function(form) {
+                submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to Adjust SDN!',
@@ -1799,10 +2033,10 @@
             $("#sdn_add_dncc").validate({
                 errorClass: 'danger',
                 successClass: 'success',
-                errorPlacement: function(error, element) {
+                errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
-                submitHandler: function(form) {
+                submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to Add DNCC To SDN!',
@@ -1836,10 +2070,10 @@
             $("#sdn_add_pncc").validate({
                 errorClass: 'danger',
                 successClass: 'success',
-                errorPlacement: function(error, element) {
+                errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
-                submitHandler: function(form) {
+                submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to Add PNCC To SDN!',
@@ -1873,11 +2107,11 @@
             $("#sdn_remove_dncc").validate({
                 errorClass: 'danger',
                 successClass: 'success',
-                errorPlacement: function(error, element) {
+                errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
-                submitHandler: function(form) {
-                    if(dncc_selected_rows.length > 0) {
+                submitHandler: function (form) {
+                    if (dncc_selected_rows.length > 0) {
                         swal({
                             title: 'Are You Sure?',
                             text: 'Select Yes to Remove DNCC From SDN!',
@@ -1912,11 +2146,11 @@
             $("#sdn_remove_pncc").validate({
                 errorClass: 'danger',
                 successClass: 'success',
-                errorPlacement: function(error, element) {
+                errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
-                submitHandler: function(form) {
-                    if(pncc_selected_rows.length > 0) {
+                submitHandler: function (form) {
+                    if (pncc_selected_rows.length > 0) {
                         swal({
                             title: 'Are You Sure?',
                             text: 'Select Yes to Remove PNCC From SDN!',

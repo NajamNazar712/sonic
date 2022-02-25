@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\City;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
-use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminTraxDirectory extends Controller
 {
@@ -23,46 +22,40 @@ class AdminTraxDirectory extends Controller
         $hubs=City::select('id','name')->where('hub',1)->get();
         return view('admin.trax_directory.index')->with(['hubs'=>$hubs]);
     }
-    public function list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),112);
+
+    public function list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 112);
         }
-        $admin = Admin::join('admin_roles as ar','admins.role_id','=','ar.id')
-            ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
-            ->leftjoin('employees as emp', 'emp.trax_id', '=', 'admins.trax_id')
-            ->leftjoin('employee_designations as ed', 'ed.id', '=', 'emp.designation_id')
-            ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-            ->select('admins.name as name', 'admins.phone_number as phone','ad.name as department', 'admins.email as email', 'admins.created_at as date','h.name as city','admins.official_phone_number as official_phone', 'emp.emergency_contact as emergency_contact', 'emp.emergency_contact_person as emergency_contact_person','ed.name as designation')->
-            where('admins.status',1)->where('ar.id','!=',1);
 
+        $admin = Admin::join('employees as e', 'admins.trax_id', '=', 'e.trax_id')
+            ->join('employee_designations as d', 'd.id', '=', 'admins.designation_id')
+            ->join('admin_departments as ad', 'd.department_id', '=', 'ad.id')
+            ->join('cities as c', 'c.id', '=', 'e.city_id')
+            ->select('e.trax_id as trax_id', 'e.name as name', 'e.official_email as email', 'e.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'c.name as city', 'e.official_phone_number as official_phone_number')
+            ->where('admins.status', 1)
+            ->where('admins.role_id', '!=', 1);
         $datatable = Datatables::of($admin)
-            ->editColumn('role', function($user) {
-                return $user->role . ' - ' . $user->department;
-            })
-        ->editColumn('city',function($user){
-            if($user->city != null){
-                return $user->city;
-            }
-            else{
-                return '-';
-            }
-        })->editColumn('designation',function($user){
-            if($user->designation != null){
-                return $user->designation;
-            }
-            else{
-                return '-';
-            }
-        })
-        ->filterColumn('role', function($query, $keyword) {
-            $keyword = str_replace('-', '', strtolower($keyword));
+            ->addColumn('phone_number', function ($user) {
+                if ($user->official_phone_number != null) {
+                    return $user->official_phone_number;
+                } else {
+                    return $user->phone;
+                }
+            });
 
-            if ($keyword != '') {
-                $query->where('ar.name', 'like', '%' . $keyword . '%')->orWhere('ad.name', 'like', '%' . $keyword . '%');
-            }
-        });
+        if($request->search_name){
+            $datatable->where('e.name', 'like','%' . $request->search_name . '%');
+        }
+        if($request->search_phone){
+            $phone = $request->search_phone;
+            $datatable->where('e.official_phone_number', $phone)->orwhere('e.phone_number', $phone);
+        }
+        if($request->search_trax_id){
+            $datatable->where('e.trax_id', $request->search_trax_id);
+        }
 
-            return $datatable->make(true);
+        return $datatable->make(true);
     }
 }

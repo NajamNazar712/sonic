@@ -577,6 +577,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('update/profile/password','Admins\AdminDashboardController@update_profile_password')->name('update.profile.password');
     Route::post('update/profile/password/submit','Admins\AdminDashboardController@update_profile_password_submit')->name('update.profile.password.submit');
     Route::post('update/profile/submit','Admins\AdminDashboardController@edit_profile_submit')->name('update.profile.submit');
+    Route::prefix('update_one_time_profile')->name('update_one_time_profile.')->group(function () {
+        Route::get('','Admins\AdminDashboardController@get_one_time_profile')->name('index');
+        Route::get('check','Admins\AdminDashboardController@check_profile')->name('check');
+        Route::post('submit','Admins\AdminDashboardController@update_one_time_profile_v2')->name('submit');
+    });
 
 
 
@@ -849,6 +854,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add', 'Admins\AdminTerritoryController@add')->name('add');
             Route::post('/store', 'Admins\AdminTerritoryController@store')->name('store');
             Route::post('/ajax', 'Admins\AdminTerritoryController@edit_territory_ajax')->name('edit');
+            Route::post('/disable_territory', 'Admins\AdminTerritoryController@disable_territory')->name('disable_territory');
+            Route::post('/enable_territory', 'Admins\AdminTerritoryController@enable_territory')->name('enable_territory');
             Route::put('{id}/update', 'Admins\AdminTerritoryController@update')->name('update');
             
         });
@@ -858,6 +865,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add', 'Admins\AdminTerritoryController@area_add')->name('add');
             Route::post('/store', 'Admins\AdminTerritoryController@area_store')->name('store');
             Route::post('/ajax', 'Admins\AdminTerritoryController@area_edit')->name('edit');
+            Route::post('/disable_area_status', 'Admins\AdminTerritoryController@disable_area_status')->name('disable_area_status');
+            Route::post('/enable_area_status', 'Admins\AdminTerritoryController@enable_area_status')->name('enable_area_status');
             Route::put('{id}/update', 'Admins\AdminTerritoryController@area_update')->name('update');
             Route::post('tag', 'Admins\AdminTerritoryController@area_tag')->name('tag');
 
@@ -1427,6 +1436,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\LastMileDebriefingController@caller_agent_view')->name('index');
             Route::post('next','Admins\LastMileDebriefingController@caller_agent_next')->name('next');
             Route::post('skip','Admins\LastMileDebriefingController@caller_agent_skip')->name('skip');
+            Route::post('follow_up/{id}','Admins\LastMileDebriefingController@caller_agent_follow_up')->name('follow_up');
+            Route::post('start','Admins\LastMileDebriefingController@caller_agent_start')->name('start');
+            Route::post('break','Admins\LastMileDebriefingController@caller_agent_break')->name('break');
+            Route::post('end','Admins\LastMileDebriefingController@caller_agent_end')->name('end');
         });
     });
 
@@ -1839,6 +1852,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments/delivered', 'Admins\AdminFinanceController@outstanding_sdn_shipments_delivered')->name('shipments.delivered');
             Route::get('delivery_notes_list', 'Admins\AdminFinanceController@outstanding_sdn_delivery_notes_list')->name('delivery_notes_list');
             Route::post('reconcile_delivery_notes', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes')->name('reconcile_delivery_notes');
+            Route::post('reconcile_delivery_notes_excel', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes_excel')->name('reconcile_delivery_notes_excel');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@outstanding_sdn_export_to_excel')->name('export_to_excel');
             Route::post('deposit_slip_list', 'Admins\AdminFinanceController@outstanding_sdn_edit_deposit_slip')->name('deposit_slip_list');
             Route::post('edit', 'Admins\AdminFinanceController@outstanding_sdn_edit_deposit_slip_submit')->name('edit');
@@ -2280,6 +2294,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('debriefing')->name('debriefing.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@debriefing_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@debriefing_list')->name('list');
+            Route::get('agent-report', 'Admins\AdminReportsController@debriefing_agent_report')->name('agent_index');
+            Route::get('agent-report/list', 'Admins\AdminReportsController@debriefing_agent_report_list')->name('agent_list');
             Route::get('export', 'Admins\AdminReportsController@debriefing_export')->name('export');
         });
         Route::prefix('cargo_returns_shipment')->name('cargo_returns_shipment.')->group(function (){
@@ -2508,6 +2524,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@return_revert_log')->name('index');
             Route::get('list', 'Admins\AdminReportsController@return_revert_list')->name('list');
         });
+
+        Route::prefix('pickup_history_cn_wise')->name('pickup_history_cn_wise.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@pickup_history_cn_wise_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@pickup_history_cn_wise_list')->name('list');
+        });
+        Route::prefix('crm_count')->name('crm_count.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@crm_count_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@crm_count_list')->name('list');    
+        });
         
     });
 
@@ -2677,6 +2702,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@debriefing_report_cut_off_time_store')->name('store');
         });
 
+        Route::prefix('debriefing_break_time')->name('debriefing_break_time.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@debriefing_break_time_setting_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@debriefing_break_time_setting_store')->name('store');
+        });
+
         Route::prefix('fuel_factor')->name('fuel_factor.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@fuel_factor_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@fuel_factor_store')->name('store');
@@ -2802,6 +2832,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('key_accounts')->name('key_accounts.')->group(function () {
                 Route::get('', 'Admins\AdminSalesController@key_accounts_dashboard_index')->name('dashboard');
                 Route::post('details', 'Admins\AdminSalesController@key_accounts_dashboard_details')->name('dashboard.details');
+            });
+
+            Route::prefix('user_restriction')->name('user_restriction.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@sales_user_restriction_index')->name('index');
+                Route::post('store', 'Admins\GlobalSettingsController@sales_user_restriction_store')->name('store');
             });
 
 
@@ -3087,6 +3122,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@rider_shipment_attempt_settings_store')->name('store');
         });
 
+        Route::prefix('bolt_update_version')->name('bolt_update_version.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@bolt_update_version_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@bolt_update_version_store')->name('store');
+        });
+
 		Route::prefix('last_mile_cron')->name('last_mile_cron.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@last_mile_cron_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@last_mile_cron_store')->name('store');
@@ -3144,6 +3184,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('shippers_return_address')->name('shippers_return_address.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shippers_return_address_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@shippers_return_address_store')->name('store');
+        });
+
+        Route::prefix('consignee_sms_expire')->name('consignee_sms_expire.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@consignee_sms_expire_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@consignee_sms_expire_store')->name('store');
+        });
+
+        Route::prefix('return_reason_mandatory')->name('return_reason_mandatory.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_reason_mandatory_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@return_reason_mandatory_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@return_reason_mandatory_store')->name('store');
         });
 
     });
@@ -3454,6 +3505,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\LeadManagementController@index')->name('index');
         Route::get('list', 'Admins\LeadManagementController@list')->name('list');
         Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
+        Route::post('add_bulk_status', 'Admins\LeadManagementController@add_bulk_status')->name('add_bulk_status');
         Route::post('tag_sale_person', 'Admins\LeadManagementController@tag_sale_person_forward_lead')->name('tag_sale_person');
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
         Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
@@ -3703,7 +3755,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
-    Route::prefix('retail')->name('retail.')->group(function () {
+Route::prefix('retail')->name('retail.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('retail.login');
     });

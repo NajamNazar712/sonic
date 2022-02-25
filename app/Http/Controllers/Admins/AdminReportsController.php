@@ -1,6 +1,10 @@
 <?php
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\AgentCallMonitoring;
+use App\Http\Models\Admin\AgentDay;
+use App\Http\Models\Admin\AgentDayLog;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNoteShipment;
@@ -43,7 +47,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\OSAChargesLog;
 use App\Http\Models\Admin\ReturnRevertLog;
-
+use App\Http\Models\CRM\CRMCount;
 
 class AdminReportsController extends Controller
 {
@@ -54,7 +58,7 @@ class AdminReportsController extends Controller
     }
     public function qsr_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),137);
-        if (session('department_id') == 7 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('department_id') == 7 && (in_array(session('id'), session('sale_users_bypass')))) {
             $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status',[3, 4])->select('id','name')->get();
         }
         else {
@@ -128,7 +132,7 @@ class AdminReportsController extends Controller
             });
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(in_array(session('id'), session('sale_users_bypass')) ){
                 $shipments = $shipments->whereIn('shipments.user_id', session('tagged_shippers'));
             }
         }
@@ -242,11 +246,11 @@ class AdminReportsController extends Controller
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
             ->leftjoin('admins as up','up.id','=','return_notes.updated_by')
             ->select(['return_notes.id','return_notes.id as return_note_id','return_notes.id as return_note_link','up.name as updated_by','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.updated_at','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at as created_at','return_notes.image',DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'),DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count_link')])->groupBy('return_notes.id');
-        if (session('role_id') != 1 ||session('role_id') != 75) {
+        if (session('role_id') != 1 ||in_array(session('id'), session('sale_users_bypass'))) {
             $return_note = $return_note->whereIn('return_notes.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(in_array(session('id'), session('sale_users_bypass')) ){
                 $return_note = $return_note->whereIn('shipments.user_id', session('tagged_shippers'));
             }
         }
@@ -374,7 +378,7 @@ class AdminReportsController extends Controller
             $pickup_note = $pickup_note->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(in_array(session('id'), session('sale_users_bypass')) ){
                 $pickup_note = $pickup_note->whereIn('pr.shipper_id', session('tagged_shippers'));
             }
         }
@@ -1127,11 +1131,11 @@ class AdminReportsController extends Controller
 
         $count = DB::connection($connection)->table('delivery_note_shipments');
 
-        if (session('role_id') != 1 || $request->get('hub') || $request->get('search_shipping_mode') ||session('role_id') != 75) {
+        if (session('role_id') != 1 || $request->get('hub') || $request->get('search_shipping_mode') ||in_array(session('id'), session('sale_users_bypass'))) {
             $count = $count->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id');
         }
 
-        if (session('role_id') != 1 || $request->get('hub') ||session('role_id') != 75) {
+        if (session('role_id') != 1 || $request->get('hub') ||in_array(session('id'), session('sale_users_bypass'))) {
             $count = $count->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')->whereIn('dc.hub_id', session('hubs'));
         }
 
@@ -1205,7 +1209,7 @@ class AdminReportsController extends Controller
             ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,11])
             ->where('s.booking_type_id', '!=', 4)
             ->whereIn('sj.shipper_status_id', [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46]);
-        if (session('role_id') != 1 ||session('role_id') != 75) {
+        if (session('role_id') != 1 ||in_array(session('id'), session('sale_users_bypass'))) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
         $datatables = Datatables::of($shipments)
@@ -1544,7 +1548,7 @@ class AdminReportsController extends Controller
                     })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                 }else{
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(in_array(session('id'), session('sale_users_bypass'))){
                         $booked = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
                                 ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1949,7 +1953,7 @@ class AdminReportsController extends Controller
                     if(session('department_id') != 7){
                         $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
                     }else{
-                        if(session('role_id') != 4 && session('role_id') != 75){
+                        if(in_array(session('id'), session('sale_users_bypass'))){
                             $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->whereIn('id', session('tagged_shippers'))->get();
                         }else{
                             $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
@@ -1985,7 +1989,7 @@ class AdminReportsController extends Controller
                             $shippers[$hub->id] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->get();
 //                        }
                         } else {
-                            if (session('role_id') != 4 && session('role_id') != 75) {
+                            if (in_array(session('id'), session('sale_users_bypass'))) {
 
                                 $shippers[$hub->id] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->whereIn('id', session('tagged_shippers'))->get();
 //                            }
@@ -2663,7 +2667,7 @@ class AdminReportsController extends Controller
                 })->get();
 
             }else{
-                if(session('role_id') != 4 && session('role_id') != 75){
+                if(in_array(session('id'), session('sale_users_bypass'))){
                     $shippers = DB::connection('reports')->table('users')->where('status',3)->whereIn('id', session('tagged_shippers'))->whereExists(function ($query) {
                         $query->from('cities')
                             ->where('users.city_id', '=', DB::raw('`cities`.`id`'))
@@ -2756,7 +2760,7 @@ class AdminReportsController extends Controller
                             ->where('hub_id', '=', $c->id);
                     });
                 }else{
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(in_array(session('id'), session('sale_users_bypass'))){
                         $shippers = DB::connection('reports')->table('users')->whereExists(function ($query) use ($c) {
                             $query->from('cities')
                                 ->where('users.city_id', '=', DB::raw('`cities`.`id`'))
@@ -2931,11 +2935,11 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as vb','vb.id','=','delivery_notes.verified_by')
             ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at as created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count','delivery_notes.last_updated_at','vb.name as verified_by','delivery_notes.status_updated_at as status_updated','delivery_notes.status_verified_at as status_verified', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','riders.cnic as cni','rider_categories.name as category'])
             ->where('delivery_notes.status',1)->groupBy('delivery_notes.id');
-        if (session('role_id') != 1 ||session('role_id') != 75) {
+        if (session('role_id') != 1 || !in_array(session('id'), session('sale_users_bypass'))) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(!in_array(session('id'), session('sale_users_bypass')) ){
                 $deliveries = $deliveries->whereIn('shipments.user_id', session('tagged_shippers'));
             }
         }
@@ -3083,7 +3087,7 @@ class AdminReportsController extends Controller
                 })->where('status','>=',3)->get();
                 $hubs = DB::connection('reports')->table('cities')->select('id','name')->whereIn('id',session('hubs'))->get();
             }else{
-                if(session('role_id') != 4 && session('role_id') != 75){
+                if(!in_array(session('id'), session('sale_users_bypass'))){
                     $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->where('status','>=',3)->get();
                     $hubs = DB::connection('reports')->table('cities')->select('id','name')->whereIn('id',session('hubs'))->get();
                 }else{
@@ -3125,7 +3129,7 @@ class AdminReportsController extends Controller
                     $details['e'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->where('city_id',$hub)->count();
                     $details['n'][$month] = DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->where('city_id',$hub)->count();
                 }else{
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $details['s'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$first_date)->where('status',3)->where('city_id',$hub)->whereIn('id', session('tagged_shippers'))->count();
                         $details['e'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->where('city_id',$hub)->whereIn('id', session('tagged_shippers'))->count();
                         $details['n'][$month] = DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->where('city_id',$hub)->whereIn('id', session('tagged_shippers'))->count();
@@ -3141,7 +3145,7 @@ class AdminReportsController extends Controller
                     $details['e'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->count());
                     $details['n'][$month] = number_format(DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->count());
                 }else{
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $details['s'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$first_date)->where('status',3)->whereIn('id', session('tagged_shippers'))->count());
                         $details['e'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->whereIn('id', session('tagged_shippers'))->count());
                         $details['n'][$month] = number_format(DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->whereIn('id', session('tagged_shippers'))->count());
@@ -3163,7 +3167,7 @@ class AdminReportsController extends Controller
         if($hub != null){
             if (session('role_id') == 1 || in_array($hub, session('hubs'))) {
                 if(session('department_id') == 7 ){
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $shippers['shipper'] = DB::connection('reports')->table('users')->where('status','>=',3)->whereIn('id', session('tagged_shippers'))->get();
                     }else{
                         $shippers['shipper'] = DB::connection('reports')->table('users')->whereExists(function ($query) use ($hub) {
@@ -3191,7 +3195,7 @@ class AdminReportsController extends Controller
             }
             else {
                 if(session('department_id') == 7){
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $shippers['shipper'] = DB::connection('reports')->table('users')->where('status','>=',3)->whereIn('id', session('tagged_shippers'))->get();
                     }else{
                         $shippers['shipper'] = DB::connection('reports')->table('users')->whereExists(function ($query) {
@@ -3326,7 +3330,7 @@ class AdminReportsController extends Controller
     }
     public function overall_sales_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),149);
-        if (session('department_id') == 7 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
             $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status',[3, 4])->select('id','name')->get();
         }
         else {
@@ -3452,7 +3456,7 @@ class AdminReportsController extends Controller
 //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
 //        }
 
-        if (session('role_id') != 1 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('role_id') != 1 || !in_array(session('id'), session('sale_users_bypass'))) {
             if (session('department_id') == 7) {
                 $sales = $sales->whereIn('u.id', session('tagged_shippers'));
             }
@@ -3686,7 +3690,7 @@ class AdminReportsController extends Controller
                 $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
                 $hubs = DB::connection('reports')->table('cities')->select('id','name')->whereIn('id',session('hubs'))->get();
             }else{
-                if(session('role_id') != 4 && session('role_id') != 75){
+                if(!in_array(session('id'), session('sale_users_bypass'))){
                     $admins = array();
                     $admins[0] = Auth::id();
                     $tagged_admins =  DB::connection('reports')->table('multiple_sale_leads')->leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')->select('mst.admin_id')->where('multiple_sale_leads.admin_id', Auth::id())->whereNotNull('mst.admin_id')->pluck('mst.admin_id')->toArray();
@@ -3738,7 +3742,7 @@ class AdminReportsController extends Controller
                 if(session('department_id') != 7){
                     $sales_person = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
                 }else{
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $sales_person = DB::connection('reports')->table('admins')->where('id', Auth::id())->get();
                     }else{
                         $sales_person = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
@@ -5322,7 +5326,7 @@ class AdminReportsController extends Controller
         $count = $count->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereNotIn('u.id', [8761, 9358]);
 
-        if (session('role_id') != 1 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
             if (session('department_id') == 7) {
                 $count = $count->whereIn('u.id', session('tagged_shippers'));
             }
@@ -5413,7 +5417,7 @@ class AdminReportsController extends Controller
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereNotIn('u.id', [8761, 9358]);
 
-        if (session('role_id') != 1 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
             if (session('department_id') == 7) {
                 $sales = $sales->whereIn('u.id', session('tagged_shippers'));
             }
@@ -7495,7 +7499,12 @@ class AdminReportsController extends Controller
                     ->where('cps.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1)'));
             })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), 'c.name as hub')
+            ->leftJoin('shipments_journey as us', function ($join) {
+                $join->on('us.shipment_id', '=', 's.id')
+                    ->where('us.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,12,15,18,56) and verification = 1)'));
+            })
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 'c.name as hub')
             ->groupBy('r.id');
 
         $datatables = Datatables::of($route_distribution_summary)
@@ -7508,12 +7517,9 @@ class AdminReportsController extends Controller
                 return '';
             }
         })
-        ->addColumn('undelivered_shipments', function ($entry) {
-            return round($entry->shipments_count - $entry->delivered_shipments);
-        })
         ->addColumn('undelivered_shipments_per', function ($entry) {
             if ($entry->shipments_count) {
-                return round((($entry->shipments_count - $entry->delivered_shipments) / $entry->shipments_count) * 100, 2);
+                return round(($entry->undelivered_shipments / $entry->shipments_count) * 100, 2);
             }
             else {
                 return '';
@@ -7522,6 +7528,22 @@ class AdminReportsController extends Controller
         ->addColumn('confirmation_pending_shipments_per', function ($entry) {
             if ($entry->shipments_count) {
                 return round(($entry->confirmation_pending_shipments / $entry->shipments_count) * 100, 2);
+            }
+            else {
+                return '';
+            }
+        })
+        ->addColumn('pending_shipments', function ($entry) {
+            if ($entry->shipments_count) {
+                return ($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments));
+            }
+            else {
+                return '';
+            }
+        })
+        ->addColumn('pending_shipments_per', function ($entry) {
+            if ($entry->shipments_count) {
+                return round((($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments)) / $entry->shipments_count) * 100, 2);
             }
             else {
                 return '';
@@ -8507,7 +8529,7 @@ class AdminReportsController extends Controller
 
                 }
             }else{
-                if((session('department_id') == 7) && (session('role_id') != 4 && session('role_id') != 75)){
+                if((session('department_id') == 7) && (!in_array(session('id'), session('sale_users_bypass')))){
                     $serial = 1;
                     foreach($shipping_modes as $mode){
 
@@ -9913,7 +9935,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+            $datatable->whereBetween('sj.created_at', [$from,$to]);
         }
         if ($tracking_number = $request->get('tracking_number')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_number));
@@ -9989,6 +10011,350 @@ class AdminReportsController extends Controller
         }
         return $datatable->make(true);
 
+    }
+
+    
+
+    public function pickup_history_cn_wise_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),506);
+        $cities = DB::connection('reports')->table('cities')->get(['id','name']);
+        $riders = DB::connection('reports')->table('riders')->get(['id','name']);
+        $hubs = DB::connection('reports')->table('cities')->where('hub','=',1)->select(['id','name'])->get();
+        return view('admin.reports.pickup_history_cn_wise')->with(['cities'=>$cities,'hubs'=>$hubs,'riders'=>$riders]);
+    }
+
+    public function pickup_history_cn_wise_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 507);
+        }
+        $shipments = DB::connection('reports')->table('shipments')
+            ->join('users as u', 'u.id', '=', 'shipments.user_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities as h', 'oc.hub_id', '=', 'h.id')
+            ->join('v2_pickup_request_shipments as vps', 'vps.shipment_id', '=', 'shipments.id')
+            ->join('v2_pickup_requests as vpr', 'vps.pickup_request_id', '=', 'vpr.id')
+            ->leftjoin('riders as cr', 'cr.id', '=', 'vpr.current_rider_id')
+            ->leftJoin('v2_pickup_note_requests as vpn', function ($join) {
+                $join->on('vpn.pickup_request_id', '=', 'vpr.id')
+                    ->where('vpn.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from v2_pickup_note_requests where v2_pickup_note_requests.pickup_request_id = vpr.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftJoin('v2_rider_pickups as vrp', function ($join) {
+                $join->on('vrp.pickup_request_id', '=', 'vpr.id')
+                    ->where('vrp.id', '=',
+                        DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = vpr.id)'));
+            })
+            ->select('shipments.tracking_number as tracking_number', 'shipments.created_at as booking_date', 'shipments.tracking_number as tracking_number_link', 'usi.pickup_address as pickup_address', 'oc.name as origin', 'h.name as hub', 'vpn.pickup_note_id as pickup_note_id', 'vrp.created_at as pickup_date', 'sj.created_at as arrival_date', 'cr.name as rider', 'u.name as shipper');
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
+        }
+        $pickup_history = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('pickup_note_no_print', function ($shipments) {
+                if ($shipments->pickup_note_id != null) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle print" rel="' . $shipments->pickup_note_id . '"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+                }
+                return '';
+            })
+            ->editColumn('pickup_note_no', function ($shipments) {
+                if ($shipments->pickup_note_id != null) {
+                    return str_pad($shipments->pickup_note_id, 6, '0', STR_PAD_LEFT);
+                }
+                return '';
+            })
+            ->addColumn('arrival_status_badge', function ($shipments) {
+                if ($shipments->arrival_date) {
+                    return '<span class="badge bg-success">Arrival Done</span>';
+                } else {
+                    return '<span class="badge bg-danger">Arrival Not Done</span>';
+                }
+            })
+            ->addColumn('arrival_status', function ($shipments) {
+                if ($shipments->arrival_date) {
+                    return 'Arrival Done';
+                } else {
+                    return 'Arrival Not Done';
+                }
+            });
+        if ($rider = $request->get('search_rider')) {
+            $shipments->where('cr.id', '=', $rider);
+        }
+        if ($origin = $request->get('search_origin')) {
+            $shipments->where('oc.id', '=', $origin);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $shipments->where('h.id', '=', $hub);
+        }
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments->whereBetween('shipments.created_at', [$from, $to]);
+        }
+        return $pickup_history->make(true);
+    }
+    public function crm_count_index(){
+        // dd(Carbon::now()->subDays());
+        // dd(date('D'));
+        
+        
+        
+        // $crm_count_report = CRMCount::all()->groupBy(function($date) {
+        //     return Carbon::parse($date->date)->format('W');
+        // });
+        // foreach ($crm_count_report as $key => $value) {
+        //     dump($key);
+        //     // dump('count');
+        //     // dump($value->count());
+        //     foreach($value as $item){
+        //         dump($item);
+        //     }
+        // }
+        // dd($crm_count_report);
+        // $crm_count_data = array();
+        // $crm_count_records = CRMCount::all()->groupBy(function($date) {
+        //     return Carbon::parse($date->date)->format('W');
+        // });
+        // foreach ($crm_count_records as $key => $value) {
+          
+        //     $crm_count_data[$key]['count_days'] = $value->count();
+        //     $avg_closed = 0;
+        //     $avg_remaining = 0;
+        //     foreach($value as $item){
+        //         $avg_closed += number_format((($item->closed / (($item->pending + $item->new_launched) - $item->closed)) * 100), 2);
+        //         $avg_remaining += number_format(((($item->pending + $item->new_launched) / (($item->pending + $item->new_launched) - $item->closed)) * 100), 2);
+        //         $crm_count_data[$key]['data'][$item->id]['id'] = $item->id;
+        //         $crm_count_data[$key]['data'][$item->id]['pending'] = $item->pending;
+        //         $crm_count_data[$key]['data'][$item->id]['new_launched'] = $item->new_launched;
+        //         $crm_count_data[$key]['data'][$item->id]['closed'] = $item->closed;
+        //         $crm_count_data[$key]['data'][$item->id]['date'] = $item->date;
+        //         $crm_count_data[$key]['data'][$item->id]['remaining'] = ($item->pending + $item->new_launched);
+        //         $crm_count_data[$key]['data'][$item->id]['total'] = (($item->pending + $item->new_launched) - $item->closed);
+        //         $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format((($item->closed / (($item->pending + $item->new_launched) - $item->closed)) * 100), 2);
+        //         $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format(((($item->pending + $item->new_launched) / (($item->pending + $item->new_launched) - $item->closed)) * 100), 2);
+        //     }
+        //     $crm_count_data[$key]['weekly_close'] = $avg_closed/$value->count();
+        //     $crm_count_data[$key]['weekly_remaining'] = $avg_remaining/$value->count();
+        // }
+        // dd($crm_count_data);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),499);
+
+        return view('admin.reports.crm_count');
+
+    }
+    public function crm_count_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),500);
+        }
+        // $crm_count_report = CRMCount::select('pending','new_launched','closed','date');
+
+        // $datatable = Datatables::of($crm_count_report)
+        // ->addColumn('remaining', function ($crm_count_report) {
+            
+        //     return ($crm_count_report->pending + $crm_count_report->new_launched);
+        
+        // })
+        // ->addColumn('total', function ($crm_count_report) {
+           
+        //     return (($crm_count_report->pending + $crm_count_report->new_launched) - $crm_count_report->closed);
+
+        // })
+        // ->addColumn('closure_percent', function ($crm_count_report) {
+           
+        //     return number_format((($crm_count_report->closed / (($crm_count_report->pending + $crm_count_report->new_launched) - $crm_count_report->closed)) * 100), 2);
+
+        // })
+        // ->addColumn('remaining_percent', function ($crm_count_report) {
+           
+        //     return number_format(((($crm_count_report->pending + $crm_count_report->new_launched) / (($crm_count_report->pending + $crm_count_report->new_launched) - $crm_count_report->closed)) * 100), 2);
+
+        // });
+
+        
+        // return $datatable->make(true);
+
+        $from = $request->search_date_from;
+        $to = $request->search_date_to;
+        
+        // $mode = $request->search_shipping_mode;
+        $crm_count_data = array();
+       
+        if ($request->search_date_from && $request->search_date_to) {
+            $crm_count_records = CRMCount::whereBetween('date', [$from,$to])->get();
+            // dd($crm_count_records->get());
+        }else{
+            $crm_count_records = CRMCount::all();
+        }
+
+        $crm_count_records = $crm_count_records->groupBy(function($date) {
+            return Carbon::parse($date->date)->format('W');
+        });
+        // if ($request->search_date_from && $request->search_date_to) {
+        //     $crm_count_records = CRMCount::whereBetween('date', [$from,$to])->groupBy(function($date) {
+        //         return Carbon::parse($date->date)->format('W');
+        //     });
+        //     dd($crm_count_records->get());
+        // }else{
+        //     $crm_count_records = CRMCount::all()->groupBy(function($date) {
+        //         return Carbon::parse($date->date)->format('W');
+        //     });
+        // }
+        
+        foreach ($crm_count_records as $key => $value) {
+          
+            $crm_count_data[$key]['count_days'] = $value->count();
+            $avg_closed = 0;
+            $avg_remaining = 0;
+            foreach($value as $item){
+                if($item->pending + $item->new_launched == 0){
+                    $avg_closed += 0;
+                    $avg_remaining += 0;
+                    $crm_count_data[$key]['data'][$item->id]['closure_percent'] = 0;
+                    $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = 0;
+                }else{
+                    $avg_closed += number_format((($item->closed / ($item->pending + $item->new_launched) ) * 100), 2);
+                    $avg_remaining += number_format( (((($item->pending + $item->new_launched) - $item->closed) / ($item->pending + $item->new_launched)) * 100) , 2  );
+                    $crm_count_data[$key]['data'][$item->id]['closure_percent'] = number_format(( ($item->closed / ($item->pending + $item->new_launched)  ) * 100), 2);
+                    $crm_count_data[$key]['data'][$item->id]['remaining_percent'] = number_format(( ( (($item->pending + $item->new_launched) - $item->closed) / ($item->pending + $item->new_launched) )  * 100), 2);
+                }
+                $crm_count_data[$key]['data'][$item->id]['id'] = $item->id;
+                $crm_count_data[$key]['data'][$item->id]['pending'] = $item->pending;
+                $crm_count_data[$key]['data'][$item->id]['new_launched'] = $item->new_launched;
+                $crm_count_data[$key]['data'][$item->id]['closed'] = $item->closed;
+                $crm_count_data[$key]['data'][$item->id]['date'] = $item->date;
+                $crm_count_data[$key]['data'][$item->id]['remaining'] = (($item->pending + $item->new_launched) - $item->closed);
+                $crm_count_data[$key]['data'][$item->id]['total'] = ($item->pending + $item->new_launched);
+                 $inner_pending = $item->pending;
+            }
+            $crm_count_data[$key]['weekly_close'] = number_format($avg_closed/$value->count() , 2);
+            $crm_count_data[$key]['weekly_remaining'] = number_format($avg_remaining/$value->count() , 2);
+        }
+
+
+        return $crm_count_data;
+    }
+
+	    public function debriefing_agent_report(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),504);
+
+        return view('admin.reports.debriefing_agent_report');
+
+    }
+
+    public function debriefing_agent_report_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),505);
+        }
+
+        $data = AgentDay::leftjoin('admins as agent','agent.id','agent_days.agent_id')
+            ->select(['agent.id as agent_id','agent.name as agent_name','agent_days.date as date','agent_days.id as day_id','agent_days.auto_close as auto_close','agent_days.status as status']);
+
+        $datatables = Datatables::of($data)
+            ->addColumn('assigned_calls_excel', function($calls){
+
+                $next_time = Carbon::createFromFormat('Y-m-d',$calls->date)->endOfDay()->toDateTimeString();
+                $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
+
+                return AgentCallMonitoring::where('agent_id',$calls->agent_id)
+                    ->where('created_at','>=',$prev_time)
+                    ->where('created_at','<=',$next_time)
+                    ->count();
+            })
+            ->addColumn('completed_calls_excel', function($calls) {
+                $next_time = Carbon::createFromFormat('Y-m-d',$calls->date)->endOfDay()->toDateTimeString();
+                $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
+
+                return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])
+                    ->where('created_at','>=',$prev_time)
+                    ->where('created_at','<=',$next_time)
+                    ->count();
+            })
+            ->addColumn('assigned_calls', function($calls) {
+                $next_time = Carbon::createFromFormat('Y-m-d',$calls->date)->endOfDay()->toDateTimeString();
+                $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
+
+                $count = AgentCallMonitoring::where('agent_id',$calls->agent_id)
+                    ->whereBetween('created_at',[$prev_time,$next_time])
+                    ->count();
+
+                if($count != 0)
+                {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="warning">100%</h4>';
+
+                    return $count_cell;
+                }
+                else{
+                    return 0;
+                }
+            })
+            ->addColumn('completed_calls', function($calls) {
+                $next_time = Carbon::createFromFormat('Y-m-d',$calls->date)->endOfDay()->toDateTimeString();
+                $prev_time = Carbon::createFromFormat('Y-m-d',$calls->date)->startOfDay()->toDateTimeString();
+
+                $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)
+                    ->whereBetween('created_at',[$prev_time,$next_time])
+                    ->count();
+                $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])
+                    ->whereBetween('created_at',[$prev_time,$next_time])
+                    ->count();
+                if($count != 0)
+                {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="success">'. round(($count / $total_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
+                }
+                else{
+                    return 0;
+                }
+            })
+            ->addColumn('live_hours', function($calls) {
+                $start = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','asc')->first()->start;
+                $end = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',1)->orderBy('id','desc')->first()->end;
+                $closed = "";
+                if($calls->status == 3) {
+                    $closed = ($calls->auto_close == 1) ? " (Auto Closed)" : " (Self Closed)";
+                }
+                if($end == null)
+                {
+                    return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - *".$closed;
+                }
+                else{
+                    return Carbon::createFromFormat('H:i:s',$start)->format("h:i A")." - ".Carbon::createFromFormat('H:i:s',$end)->format("h:i A").$closed;
+                }
+
+
+            })
+            ->addColumn('break_hours', function($calls) {
+                $logs = AgentDayLog::where('agent_day_id',$calls->day_id)->where('status',2)->get();
+                $break = 0;
+                foreach($logs as $log)
+                {
+                    if($log->end != null)
+                    {
+                        $start = Carbon::parse($log->start);
+                        $end = Carbon::parse($log->end);
+                        $difference = $start->diffInSeconds($end);
+                    }
+                    else{
+                        $difference = 0;
+                    }
+                    $break += $difference;
+                }
+
+                return round($break/60,0).' Minute(s)';
+            });
+
+        return $datatables->make(true);
     }
 }
 

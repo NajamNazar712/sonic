@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AgentCallMonitoring;
+use App\Http\Models\Admin\AgentDay;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
 use Carbon\Carbon;
@@ -27,7 +28,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
      */
     public function __construct(array $booking)
     {
-        //
+        $this->queue = 'agent_call_monitoring';
         $this->booking = $booking;
 
     }
@@ -56,14 +57,22 @@ class ProcessAgentCallMonitoring implements ShouldQueue
                 $time = 0;
             }
 
-           $next_time = Carbon::today()->endOfDay()->addHours($time);
+           $next_time = Carbon::today()->endOfDay()->addHours($time)->toDateTimeString();
           
-           $prev_time = Carbon::today()->addHours($time);
+           $prev_time = Carbon::today()->addHours($time)->toDateTimeString();
 
            if(AgentCallMonitoring::where('delivery_note_id',$delivery_note->id)->where('shipment_id', $shipment_id)->where('created_at','>=',$prev_time)->where('created_at','<=', $next_time)->exists()){
                 return false;
            }
             $admin_ids = AdminHub::where('hub_id',$delivery_note->hub_id)->pluck('admin_id')->toArray();
+
+            $today = Carbon::now()->format('Y-m-d');
+            $admin_ids = AgentDay::where('date',$today)
+                ->where('status',1)
+                ->whereIn('agent_id',$admin_ids)
+                ->pluck('agent_id')
+                ->toArray();
+
             if(count($admin_ids) > 0){
 
               // $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();previous
