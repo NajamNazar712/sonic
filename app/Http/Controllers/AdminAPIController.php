@@ -6455,7 +6455,8 @@ class AdminAPIController extends Controller
 
     public function pick_list_receive(Request $request)
     {
-        return response()->json(['status' => 0,'id' => $request->picklist_id,'barcode_list' => $request->barcode_list]);
+        $barcode_list = json_decode($request->barcode_list, true);
+        return response()->json(['status' => 0,'id' => $request->picklist_id,'barcode_list' => $barcode_list]);
         $rules = [
             'picklist_id' => ['required'],
             'barcode_list' => ['required'],
