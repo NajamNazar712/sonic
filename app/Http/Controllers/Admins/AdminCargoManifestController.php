@@ -2616,6 +2616,17 @@ class AdminCargoManifestController extends Controller
                 ->where('dh.name', '=', $destination);
         }
 
+        if($request->search_filter_origin != null)
+        {
+            $origin = $request->get('search_filter_origin');
+            $datatables->where('oh.name', '=', $origin);
+        }
+        if($request->search_filter_destination != null)
+        {
+            $destination = $request->get('search_filter_destination');
+            $datatables->where('dh.name', '=', $destination);
+        }
+
         return $datatables->make(true);
     }
 

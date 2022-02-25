@@ -292,12 +292,12 @@
             }
 
             $('#search_filter_origin').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search',
+                placeholder:'Origin',
                 width:'100%',
                 allowClear:false
             });
             $('#search_filter_destination').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search',
+                placeholder:'Destination',
                 width:'100%',
                 allowClear:false
             });
@@ -315,7 +315,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Cargo No.');
+                            head.push('Manifest No.');
                             head.push('Bag Quantity');
                             head.push('Short Received Bags');
                             head.push('No. of Shipments');
