@@ -725,7 +725,7 @@
                     </tr>
                     <tr>
                         <th><span class="la la-mobile-phone"></span><strong>Contact</strong></th>
-                        <td style="color: red" id="contact"></td>
+                        <td id="contact"></td>
                     </tr>
                     <tr>
                         <th><span class="la la-th"></span><strong>&nbsp;Department</strong></th>
@@ -741,20 +741,13 @@
                     </tr>
                     <tr>
                         <th><span class="la la-mobile-phone"></span><strong>Emergency Contact Person</strong></th>
-                        <td style="color: red" id="emergency_contact_person"></td>
+                        <td  id="emergency_contact_person"></td>
                     </tr>
                     <tr>
                         <th><span class="la la-mobile-phone"></span><strong>Emergency Contact Number</strong></th>
-                        <td style="color: red" id="emergency_contact_no"></td>
+                        <td id="emergency_contact_no"></td>
                     </tr>
-                    <tr>
-                        <th>
-                            <button type="button" class="btn btn-primary btn-lg">Attendance</button>
-                        </th>
-                        <td>
-                            <button type="button" class="btn btn-primary btn-lg">Home</button>
-                        </td>
-                    </tr>
+
 
                     </thead>
                 </table>
