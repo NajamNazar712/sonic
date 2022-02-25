@@ -2495,7 +2495,7 @@ class ShipperFinanceController extends Controller
                 }
 
                 if (!isset($shipment_counts[$origin])) {
-                    $shipment_counts[$origin] = 1;
+                    $shipment_counts[$origin] = 0;
                 }
 
                 $shipment_counts[$origin]++;
@@ -3130,7 +3130,7 @@ class ShipperFinanceController extends Controller
             }
 
             if (!isset($shipment_counts[$origin])) {
-                $shipment_counts[$origin] = 1;
+                $shipment_counts[$origin] = 0;
             }
 
             $shipment_counts[$origin]++;

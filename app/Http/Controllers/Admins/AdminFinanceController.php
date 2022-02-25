@@ -6273,12 +6273,13 @@ class AdminFinanceController extends Controller
                     }
                 }
                 else if ($user_banking_information->invoicing_cycle_id == 3) {
-                    if ($user_banking_information->generation_date == $current_date->day) {
+                    if (Carbon::now()->endOfMonth()->toDateString() == $current_date_string) {
                         $generate = TRUE;
 
                         /*$billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();*/
-                        $billing_period_from_date = Carbon::now()->subMonth()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
-                        
+                        $billing_period_from_date = Carbon::now()->startOfMonth()->startOfDay()->toDateString();
+                        $current_date_string = Carbon::now()->addDay()->toDateString();
+
                     }
                 }
                 else if ($user_banking_information->invoicing_cycle_id == 4) {
@@ -7863,7 +7864,7 @@ class AdminFinanceController extends Controller
                 }
 
                 if (!isset($shipment_counts[$origin])) {
-                    $shipment_counts[$origin] = 1;
+                    $shipment_counts[$origin] = 0;
                 }
 
                 $shipment_counts[$origin]++;
@@ -8498,7 +8499,7 @@ class AdminFinanceController extends Controller
             }
 
             if (!isset($shipment_counts[$origin])) {
-                $shipment_counts[$origin] = 1;
+                $shipment_counts[$origin] = 0;
             }
 
             $shipment_counts[$origin]++;
