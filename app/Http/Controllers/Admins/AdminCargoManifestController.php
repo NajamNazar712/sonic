@@ -3187,7 +3187,7 @@ class AdminCargoManifestController extends Controller
 
         if(session('role_id') != 1)
         {
-            $users = $users->whereIn('default_hub_id',session('hubs'));
+            $users = $users->whereIn('default_hub_id', Auth::user()->default_hub_id);
         }
 
         $users = $users->get();
@@ -3201,6 +3201,11 @@ class AdminCargoManifestController extends Controller
             ->join('admins as u', 'cargo_manifest_draft_bags.added_by', '=', 'u.id')
             ->select('cargo_manifest_draft_bags.id as id','cargo_manifest_draft_bags.seal_number as seal_number', 'cargo_manifest_draft_bags.shipments_count as shipment_count', 'o.id as origin_id', 'o.name as origin', 'd.id as destination_id', 'd.name as destination', 'u.name as assigned_to', 'cargo_manifest_draft_bags.created_at as created_at');
 
+
+        if(session('role_id') != 1)
+        {
+            $cargo->where('cargo_manifest_draft_bags.origin_id',Auth::user()->default_hub_id);
+        }
 
         $datatables = Datatables::of($cargo);
 
