@@ -6468,7 +6468,7 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $admin_id = $request->admin_id;
-            $picklist_id = $request->picklist_id;
+            $picklist_id = (int)$request->picklist_id;
             $picklist = WmsPicklist::find($picklist_id);
             if ($picklist) {
                 if ($picklist->status == 0) {
