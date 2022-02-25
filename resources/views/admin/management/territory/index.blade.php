@@ -245,7 +245,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'territories.name', class: 'align-middle name'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
-                    {data: 'status', name: 'territories.status', class: 'align-middle status'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'territories.created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'ad.name', class: 'align-middle updated_by'},

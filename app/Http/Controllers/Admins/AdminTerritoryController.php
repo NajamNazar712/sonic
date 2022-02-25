@@ -221,11 +221,11 @@ class AdminTerritoryController extends Controller
             ->filterColumn('area_status', function($query, $keyword) {
                 $keyword = strtolower($keyword);
 
-                if (strpos('Enable', $keyword) !== FALSE) {
-                    $query->where('territories.area_territory_status', '=', 1);
+                if (strpos('enable', $keyword) !== FALSE) {
+                    $query->where('area_territories.area_territory_status', '=', 1);
                 }
-                else if (strpos('Disable', $keyword) !== FALSE) {
-                    $query->where('territories.area_territory_status', '=', 0);
+                else if (strpos('disable', $keyword) !== FALSE) {
+                    $query->where('area_territories.area_territory_status', '=', 0);
                 }
                 else {
                     $query->whereRaw('FALSE');

@@ -445,7 +445,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'area', name: 'area_territories.name', class: 'align-middle area'},
                     {data: 'territory', name: 't.name', class: 'align-middle territory'},
-                    {data: 'area_status', name: 'area_territories.area_territory_status', class: 'align-middle area_status'},
+                    {data: 'area_status', name: 'area_status', class: 'align-middle area_status'},
                     {data: 'created_at', name: 'area_territories.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.created_by', class: 'align-middle created_by'},
                     {data: 'updated_at', name: 'area_territories.updated_at', class: 'align-middle updated_at'},
