@@ -84,7 +84,7 @@
                                             <div class="row">
                                                 <div class="col-8">
                                                     <p class="card-text">With the help of this video you can learn how to install Shopify plugin</p>
-                                                    <a class="white" href="https://www.youtube.com/watch?v=DDffPPkSBMY" target="_blank"><i class="la la-youtube-play align-text-bottom"></i> Shopify Plugin Tutorial</a>
+                                                    <a class="white" href="https://youtu.be/naeczv-jQYM" target="_blank"><i class="la la-youtube-play align-text-bottom"></i> Shopify Plugin Tutorial</a>
                                                 </div>
                                                 <div class="col-4">
                                                     <ul class="list-inline text-right">
@@ -103,7 +103,7 @@
                                         <a class="heading-elements-toggle"><i class="la la-ellipsis-v font-medium-3"></i></a>
                                         <div class="heading-elements">
                                             <ul class="list-inline mb-0">
-                                                <li><a href="{{ asset('file/documents/trax-plugin-wordpress 1.3.zip') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Download</a></li>
+                                                <li><a href="{{ asset('file/documents/trax-plugin-wordpress 1.7.zip') }}" class="btn btn-secondary round btn-min-width mr-1 mb-1"> <i class=" ft-download"></i> Download</a></li>
                                             </ul>
                                         </div>
                                     </div>

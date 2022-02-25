@@ -84,7 +84,7 @@
                                             <div class="row">
                                                 <div class="col-8">
                                                     <p class="card-text">With the help of this video you can learn how to install Shopify plugin</p>
-                                                    <a class="white" href="https://www.youtube.com/watch?v=DDffPPkSBMY" target="_blank"><i class="la la-youtube-play align-text-bottom"></i> Shopify Plugin Tutorial</a>
+                                                    <a class="white" href="https://youtu.be/naeczv-jQYM" target="_blank"><i class="la la-youtube-play align-text-bottom"></i> Shopify Plugin Tutorial</a>
                                                 </div>
                                                 <div class="col-4">
                                                     <ul class="list-inline text-right">
