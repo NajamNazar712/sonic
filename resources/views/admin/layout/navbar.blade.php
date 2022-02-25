@@ -58,7 +58,7 @@
                             <i class="ft-chevron-down"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="#" id="adminprofileshow"><span class="menu-title adminprofile"><i class="ft-user"></i> Profileee</span></a>
+                            <a class="dropdown-item" href="#" id="adminprofileshow"><span class="menu-title adminprofile"><i class="ft-user"></i> Profile</span></a>
                             <a class="dropdown-item" href="http://bit.ly/sonic_manuals" target="_blank"><i class="ft-help-circle"></i> HELP</a>
                             <a class="dropdown-item" href="{{ route('admin.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
                             <a class="dropdown-item" href="#" id="editprofileshow"><span class="menu-title editprofile"><i class="ft-edit-2"></i>Edit Profile</span></a>
