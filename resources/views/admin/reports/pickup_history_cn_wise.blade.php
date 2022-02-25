@@ -77,9 +77,9 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Booking Date/Time</th>
-                        <th class="border-primary border-darken-1">Pickup Date/Time</th>
+{{--                        <th class="border-primary border-darken-1">Pickup Date/Time</th>--}}
                         <th class="border-primary border-darken-1">Arrival Date/Time</th>
-                        <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Status</th>
                     </tr>
                     </thead>
@@ -238,9 +238,9 @@
                             head.push('Origin');
                             head.push('Hub');
                             head.push('Booking Date/Time');
-                            head.push('Pickup Date/Time');
+                            // head.push('Pickup Date/Time');
                             head.push('Arrival Date/Time');
-                            head.push('Rider');
+                            head.push('Rider Name');
                             head.push('Arrival Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -252,7 +252,7 @@
                                 row.push(values.origin);
                                 row.push(values.hub);
                                 row.push(values.booking_date);
-                                row.push(values.pickup_date);
+                                // row.push(values.pickup_date);
                                 row.push(values.arrival_date);
                                 row.push(values.rider);
                                 row.push(values.arrival_status);
@@ -313,7 +313,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin',searchable: false},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub',searchable: false},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date',searchable: false},
-                    {data: 'pickup_date', name: 'vrp.created_at', class: 'align-middle pickup_date',searchable: false},
+                    // {data: 'pickup_date', name: 'vrp.created_at', class: 'align-middle pickup_date',searchable: false},
                     {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date',searchable: false},
                     {data: 'rider', name: 'cr.name', class: 'align-middle rider',searchable: false},
                     {data: 'arrival_status_badge', name: '', class: 'align-middle arrival_status_badge',searchable: false,orderable: false},

@@ -509,9 +509,12 @@ class LastMileDebriefingController extends Controller
                         }
                     }
                 }
-                $where = array(7, 8, 9, 15, 18, 56, 12);
-                $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->where('status', 1)->get();
                 $shipment = Shipment::find($data->shipment_id);
+                $where = array(7, 8, 9, 15, 18, 12);
+                if($shipment->booking_type_id == 2){
+                    array_push($where,56);
+                }
+                $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->where('status', 1)->get();
                 $delivery_note = DeliveryNote::find($data->delivery_note_id);
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $delivery_note->id)->where('shipment_id', $shipment->id)->first();
                 $fake_status = FALSE;
@@ -541,7 +544,7 @@ class LastMileDebriefingController extends Controller
                     ->first();
 
                 $rider_status = ShipmentsJourney::where('shipment_id', $data->shipment_id)
-                    ->whereNotNull('rider_id')
+//                    ->whereNotNull('rider_id')
                     ->orderBy('id', 'desc')
                     ->first();
                 if (!$rider_status) {

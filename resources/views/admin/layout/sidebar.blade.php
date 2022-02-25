@@ -1345,7 +1345,7 @@
 
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([88, 92, 96, 131, 192, 205, 231, 253, 335, 377, 378, 379, 380, 425,443,488,526, 562, 659,680,674, 683], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([88, 92, 96, 131, 192, 205, 231, 253, 335, 377, 378, 379, 380, 425,443,488,526, 562, 659,680,674, 683, 684], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Last Mile</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(192, session('permissions')))
@@ -1448,6 +1448,10 @@
 
                                     @if (session('role_id') == 1 || in_array(683, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.consignee_sms_expire.index')}}">Consignee SMS Expiration Time</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(684, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.return_reason_mandatory.index')}}">Return Reason Mandatory</a></li>
                                     @endif
                                     
                                 </ul>

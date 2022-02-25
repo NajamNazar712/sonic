@@ -7274,7 +7274,7 @@ class AdminCorporateAccountsController extends Controller
 
                 PendingCorporateRateOriginHub::where('user_id', $id)->delete();
                 PendingCorporateRateDestinationHub::where('user_id', $id)->delete();
-                User::where('id', $id)->update(['rate_status' => 0,'agreement_signed' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
+                User::where('id', $id)->update(['rate_status' => 0,'agreement_signed' => 1, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
                     $rate_remark->user_id = $id;
@@ -11267,7 +11267,7 @@ class AdminCorporateAccountsController extends Controller
                 $rate_type_history->admin_id = Auth::id();
                 $rate_type_history->save();
 
-                User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'agreement_signed' => 0,'new_rate_type_id'=> null,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now(),'rate_status' => 0]);
+                User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'agreement_signed' => 1,'new_rate_type_id'=> null,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now(),'rate_status' => 0]);
 
 
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
@@ -17799,7 +17799,7 @@ class AdminCorporateAccountsController extends Controller
                 PendingCorporateRateDestinationHub::where('user_id', $id)->delete();
 
 
-                User::where('id', $id)->update(['rate_status' => 0,'agreement_signed' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
+                User::where('id', $id)->update(['rate_status' => 0,'agreement_signed' => 1, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
                     $rate_remark->user_id = $id;
@@ -21560,7 +21560,7 @@ class AdminCorporateAccountsController extends Controller
                 $rate_type_history->admin_id = Auth::id();
                 $rate_type_history->save();
 
-                User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'new_rate_type_id'=> null,'agreement_signed' => 0,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now(),'rate_status' => 0]);
+                User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'new_rate_type_id'=> null,'agreement_signed' => 1,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now(),'rate_status' => 0]);
 
 
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
@@ -27667,7 +27667,7 @@ class AdminCorporateAccountsController extends Controller
                 PendingCorporateDefaultRateOriginHub::where('user_id', $id)->delete();
                 PendingCorporateDefaultRateDestinationHub::where('user_id', $id)->delete();
 
-                User::where('id', $id)->update(['rate_status' => 0,'agreement_signed' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
+                User::where('id', $id)->update(['rate_status' => 0,'agreement_signed' => 1, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
                     $rate_remark->user_id = $id;
@@ -30060,7 +30060,7 @@ class AdminCorporateAccountsController extends Controller
                $rate_type_history->admin_id = Auth::id();
                $rate_type_history->save();
 
-               User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'agreement_signed' => 0,'new_rate_type_id'=> null,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now(),'rate_status' => 0]);
+               User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'agreement_signed' => 1,'new_rate_type_id'=> null,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now(),'rate_status' => 0]);
 
 
                if($request->has('rate_remarks') && $request->rate_remarks != null){

@@ -1764,15 +1764,19 @@ class DeliveryController extends Controller
                     }
                     if ($flag == true) {
                         if ($deliveries->packaging_material_request == 1 && $deliveries->packaging_material_charges == '') {
-                            $where = array(7, 8, 9, 15, 18, 56);
+                            $where = array(7, 8, 9, 15, 18);
                         } else {
-                            $where = array(7, 8, 9, 12, 15, 18, 56);
+                            $where = array(7, 8, 9, 12, 15, 18);
                         }
                     } else {
                         $where = array(12);
                     }
-                } else {
-                    $where = array(7, 8, 9, 15, 18, 56);
+                    if($deliveries->booking_type_id == 2){
+                        array_push($where,56);
+                    }
+                }
+                else {
+                    $where = array(7, 8, 9, 15, 18);
                 }
 
                 $statuses = ShipmentStatus::whereIn('id', $where)->get();
@@ -1909,6 +1913,7 @@ class DeliveryController extends Controller
         $open_box_ids = array();
         $received_shipments = array();
         $first_attempt_shipments = array();
+        $regular_type_shipments = array();
         $restrict_status_shipments = array();
         $now = Carbon::now();
         $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
@@ -1945,7 +1950,12 @@ class DeliveryController extends Controller
                     if (!in_array($shipment, $restrict_status_shipments)) {
                         array_push($restrict_status_shipments, $shipment);
                     }
-                } elseif (ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 5)->count() == 1) {
+                } elseif ($selected_status == 56 && $shipment_details->booking_type_id != 2){
+                    if (!in_array($shipment_details->tracking_number, $regular_type_shipments)) {
+                        array_push($regular_type_shipments, $shipment_details->tracking_number);
+                    }
+                }
+                elseif (ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 5)->count() == 1) {
 
                     if ($selected_status == 12 && !in_array($selected_reason, $reason_for_first_attempt)) {
                         if (!in_array($shipment_details->tracking_number, $first_attempt_shipments)) {
@@ -2082,9 +2092,9 @@ class DeliveryController extends Controller
                                 $return_assign_log->assigned_by = Auth::id();
                                 $return_assign_log->save();
                             }
-                            if(in_array(session('role_id'),[18,19]) && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
+                           /* if(in_array(session('role_id'),[18,19]) && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
                                 dispatch(new RCPSmsToConsignee($shipment));
-                            }
+                            }*/
 
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
@@ -2159,9 +2169,18 @@ class DeliveryController extends Controller
             $delivery_note_data->status_updated_at = Carbon::now();
             $delivery_note_data->updated_by = Auth::id();
             $delivery_note_data->save();
-
-            if (count($invalid_reason_shipments) > 0) {
-                return response()->json(['status' => 2, 'success' => 'Statuses updated successfully!', 'invalid_shipments' => $invalid_reason_shipments, 'first_attempt_shipments' => $first_attempt_shipments]);
+            $response = array();
+            if(count($invalid_reason_shipments) > 0){
+                $response['invalid_shipments'] = $invalid_reason_shipments;
+            }
+            if(count($regular_type_shipments) > 0){
+                $response['not_replacement_shipments'] = $regular_type_shipments;
+            }
+            if($response){
+                $response['status'] = 2;
+                $response['success'] = 'Statuses updated successfully!';
+                $response['first_attempt_shipments'] = $first_attempt_shipments;
+                return response()->json($response);
             } else {
                 return response()->json(['status' => 1, 'success' => 'Statuses updated successfully!', 'first_attempt_shipments' => $first_attempt_shipments]);
             }
@@ -2269,9 +2288,9 @@ class DeliveryController extends Controller
                                     $return_assign_log->save();
                                 }
                             }
-                            if(in_array(session('role_id'),[18,19]) && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
+                           /* if(in_array(session('role_id'),[18,19]) && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
                                 dispatch(new RCPSmsToConsignee($shipment));
-                            }
+                            }*/
                         }
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
                             if($shipment_status->packaging_material_request == 0){
@@ -2673,12 +2692,18 @@ class DeliveryController extends Controller
                         $where = array(7, 8, 9, 15, 18, 56);
                     } else {
                         if ($deliveries->booking_type_id == 5) {
-                            $where = array(7, 8, 9, 15, 18, 56);
+                            $where = array(7, 8, 9, 15, 18);
                         } else {
                             if ($not_rcp === true) {
-                                $where = array(7, 8, 9, 15, 18, 56);
+                                $where = array(7, 8, 9, 15, 18);
+                                if($deliveries->booking_type_id == 2){
+                                    array_push($where,56);
+                                }
                             } else {
-                                $where = array(7, 8, 9, 12, 15, 18, 56);
+                                $where = array(7, 8, 9, 12, 15, 18);
+                                if($deliveries->booking_type_id == 2){
+                                    array_push($where,56);
+                                }
                             }
 
                         }

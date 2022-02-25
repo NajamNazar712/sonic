@@ -3118,6 +3118,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@rider_shipment_attempt_settings_store')->name('store');
         });
 
+        Route::prefix('bolt_update_version')->name('bolt_update_version.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@bolt_update_version_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@bolt_update_version_store')->name('store');
+        });
+
 		Route::prefix('last_mile_cron')->name('last_mile_cron.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@last_mile_cron_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@last_mile_cron_store')->name('store');
@@ -3180,6 +3185,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('consignee_sms_expire')->name('consignee_sms_expire.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@consignee_sms_expire_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@consignee_sms_expire_store')->name('store');
+        });
+
+        Route::prefix('return_reason_mandatory')->name('return_reason_mandatory.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_reason_mandatory_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@return_reason_mandatory_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@return_reason_mandatory_store')->name('store');
         });
 
     });
