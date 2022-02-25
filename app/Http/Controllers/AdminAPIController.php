@@ -6453,7 +6453,7 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function pick_list_receive(Request $request)
+    public function pick_list_receive12(Request $request)
     {
         $rules = [
             'picklist_id' => ['required'],
@@ -6540,6 +6540,45 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function pick_list_receive(Request $request)
+    {
+        $rules = [
+            'picklist_id' => ['required'],
+            'barcode_list' => ['required'],
+        ];
 
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin_id = $request->admin_id;
+            $picklist_id = (int)$request->picklist_id;
+            $picklist = WmsPicklist::find($picklist_id);
+            if ($picklist) {
+                if ($picklist->status == 0) {
+                    $pending_picking_ids = WmsPicklistItem::where('picklist_id', $picklist->id)->pluck('pending_picking_id')->toArray();
+                    $shipment_ids = WmsPendingPicking::whereIn('id', $pending_picking_ids)->where('courier_id', 1)->pluck('shipment_id')->toArray();
+                    $courier_order_ids = WmsPendingPicking::whereIn('id', $pending_picking_ids)->where('courier_id', '!=', 1)->pluck('shipment_id')->toArray();
+                    Shipment::whereIn('id', $shipment_ids)->where('warehouse_order_status', '=', 10)->update(['warehouse_order_status' => 8]);
+                    WmsCourierOrders::whereIn('id', $courier_order_ids)->where('status', '=' , 7)->update(['status' => 3]);
+                    $picklist->status = 1;
+                    $picklist->save();
+                    foreach ($picklist->items as $item) {
+                        $item->status = 1;
+                        $item->save();
+                    }
+                    $shipment_ids = array_merge($shipment_ids, $courier_order_ids);
+                    WmsOrderProcess::whereIn('shipment_id', $shipment_ids)->update(['picklist_confirmed_at' => Carbon::now(), 'picklist_confirmed_by' => $admin_id]);
+                    return response()->json(['status' => 0, 'message' => 'Picklist successfully updated!']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Picklist already updated']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Invalid Picklist']);
+            }
+        }
+    }
 }
