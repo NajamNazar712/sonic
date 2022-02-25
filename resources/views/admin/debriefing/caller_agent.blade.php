@@ -74,7 +74,13 @@
                                     </div>
                                 </div>
                             </div>
-
+                            @if(isset($fake_status))
+                                @if($fake_status)
+                                        <div class="row">
+                                            <div class="col-6"><h3 class="red">*Status identified as "Fake" by Consignee</h3></div>
+                                        </div>
+                                @endif
+                            @endif
                             <div class="border-primary">
                                 <div class="align-items-center bg-primary">
                                     <div class="d-flex flex-wrap ml-1 mr-1 font-medium-3 white">

@@ -918,7 +918,7 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->join('zones as z','oc.zone_id','=','z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id'])
             ->where('delivery_notes.status', 0);
 
 
@@ -1024,7 +1024,9 @@ class DeliveryController extends Controller
 
 
                     if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-                        $dropdown .= $receive_button;
+                        if(session('role_id') == 1 || ($result->operation_rider_id != 1 && $result->rider_type_id != 1)){
+                            $dropdown .= $receive_button;
+                        }
                     }
 
                     if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
@@ -1570,6 +1572,11 @@ class DeliveryController extends Controller
         $days15fromNow = Carbon::parse($dayAfterTomorrow)->addDays(15)->toDateString();
 
         $note_data = DeliveryNote::where('id', $id)->first();
+
+        $rider = $note_data->rider;
+        if(session('role_id') !== 1 && ($rider->operation_rider_id === 1 && $rider->rider_type_id === 1)){
+            return redirect()->back()->with('error', 'You are not authorized to update this delivery note!');
+        }
         $require_password = false;
         if ($note_data) {
             if ($note_data->password != null) {
@@ -5036,7 +5043,7 @@ class DeliveryController extends Controller
         if ($sdn->sdn_amount >= $total_amount) {
             $sdn->sdn_deposit_amount = $total_amount;
         } else {
-            return redirect()->back()->with(['status' => 0, 'error' => 'Deposit Amount cannot be less than DNCC Amount!']);
+            return redirect()->back()->with(['status' => 0, 'error' => 'Deposit Amount cannot be greater than DNCC Amount!']);
         }
         foreach ($deposit_rows as $row) {
 
@@ -5046,6 +5053,7 @@ class DeliveryController extends Controller
             $deposit_details->deposit_date = $request->date[$row];
             $deposit_details->bank_id = $request->bank[$row];
             $deposit_details->amount = $request->amount[$row];
+            $deposit_details->uploaded_by = Auth::id();
             $image = $request->file($file_name);
 //            $extension = $image->getClientOriginalExtension();
             $extension = 'png';
@@ -6911,8 +6919,10 @@ class DeliveryController extends Controller
                     $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
                     $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;
                     $sorted_array[$slip->id]['amount'] = $slip->amount;
-                    $img_url = 'uploads/sdn/' . $slip->image;
-                    if (file_exists($img_url)) {
+                    $sorted_array[$slip->id]['created_at'] = Carbon::parse($slip->created_at)->toDateTimeString();
+                    $sorted_array[$slip->id]['uploaded_by'] = $slip->uploaded_by_admin->name;
+                    $img_url = 'uploads/sdn/'. $slip->created_at;
+                    if(file_exists($img_url)){
                         $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl('station_deposit_notes/' . $slip->image, now()->addMinutes(5));

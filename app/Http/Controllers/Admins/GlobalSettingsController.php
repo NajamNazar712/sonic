@@ -6091,6 +6091,78 @@ public function sales_incentive()
         return redirect()->back()->with('success','Setting Updated');
     }
 
+    public function consignee_sms_expire_index()
+    {
+        $settings = GlobalSettings::where('type', 'consignee_sms_expire_time')->first();
+
+        if ($settings) {
+            $consignee_sms_expire_time = $settings->setting_value;
+        } else {
+            $consignee_sms_expire_time = 20;
+        }
+
+        return view('admin.settings.last_mile.consignee_sms_expire_time')->with(['consignee_sms_expire_time' => $consignee_sms_expire_time]);
+    }
+
+    public function consignee_sms_expire_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'consignee_sms_expire_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'consignee_sms_expire_time';
+        }
+
+        $settings->setting_value = $request->consignee_sms_expire_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+	public function sales_user_restriction_index()
+    {
+        $user_ids = array();
+
+        $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $user_ids = array_map('intval', explode(',', $settings->text));
+        }
+
+        $sale_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
+
+        return view('admin.settings.sales.sale_person_restriction_bypass')->with(['sale_persons' => $sale_persons, 'user_ids' => $user_ids]);
+    }
+
+    public function sales_user_restriction_store(Request $request)
+    {
+        if ($request->has('users')) {
+            $roles = implode(',', $request->users);
+            $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            } else {
+                $settings = new GlobalSettings();
+
+                $settings->type = 'sales_user_restriction_bypass';
+                $settings->setting_value = 0;
+
+            }
+            $settings->text = $roles;
+            $settings->save();
+        } else {
+            GlobalSettings::where('type', 'sales_user_restriction_bypass')->delete();
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
     public function return_reason_mandatory_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 510);
         $already_added_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
@@ -6148,5 +6220,4 @@ public function sales_incentive()
             return redirect()->route('admin.access_denied');
         }
     }
-
 }

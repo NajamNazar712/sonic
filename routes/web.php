@@ -2830,6 +2830,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('details', 'Admins\AdminSalesController@key_accounts_dashboard_details')->name('dashboard.details');
             });
 
+            Route::prefix('user_restriction')->name('user_restriction.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@sales_user_restriction_index')->name('index');
+                Route::post('store', 'Admins\GlobalSettingsController@sales_user_restriction_store')->name('store');
+            });
+
 
             Route::prefix('projection')->name('projection.')->group(function () {
                 Route::prefix('percentage')->name('percentage.')->group(function () {
@@ -3175,6 +3180,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('shippers_return_address')->name('shippers_return_address.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shippers_return_address_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@shippers_return_address_store')->name('store');
+        });
+
+        Route::prefix('consignee_sms_expire')->name('consignee_sms_expire.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@consignee_sms_expire_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@consignee_sms_expire_store')->name('store');
         });
 
         Route::prefix('return_reason_mandatory')->name('return_reason_mandatory.')->group(function () {
