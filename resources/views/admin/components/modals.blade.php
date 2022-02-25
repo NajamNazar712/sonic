@@ -740,7 +740,7 @@
                         <td id="blood_group"></td>
                     </tr>
                     <tr>
-                        <th><span class="la la-mobile-phone"></span><strong>Emergency Contact Person</strong></th>
+                        <th><span class="la la-user"></span><strong>Emergency Contact Person</strong></th>
                         <td  id="emergency_contact_person"></td>
                     </tr>
                     <tr>
