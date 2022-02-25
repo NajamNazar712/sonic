@@ -8397,7 +8397,7 @@ class AdminDashboardController extends Controller
         }
 
         if(session('department_id') == 7){
-            if(in_array(session('id'), session('sale_users_bypass')) ){
+            if(!in_array(session('id'), session('sale_users_bypass')) ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -8768,7 +8768,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(in_array(session('id'), session('sale_users_bypass')) ){
+            if(!in_array(session('id'), session('sale_users_bypass')) ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -9101,7 +9101,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(in_array(session('id'), session('sale_users_bypass')) ){
+            if(!in_array(session('id'), session('sale_users_bypass')) ){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -11499,7 +11499,7 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(in_array(session('id'), session('sale_users_bypass'))){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
