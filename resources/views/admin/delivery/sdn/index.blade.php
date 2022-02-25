@@ -970,7 +970,7 @@
                 }
             });
             var select = $('#track_form #scan_sdn').selectize({
-                placeholder: 'Scan sdn(s)*',
+                placeholder: 'Multi sdn(s)*',
                 delimiter: ',',
                 createOnBlur: true,
                 persist: false,
