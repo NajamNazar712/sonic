@@ -6471,7 +6471,6 @@ class AdminAPIController extends Controller
             $picklist_id = (int)$request->picklist_id;
             $picklist = WmsPicklist::find($picklist_id);
             if ($picklist) {
-                return response()->json(['status' => 0,'id' => $request->picklist_id]);
                 if ($picklist->status == 0) {
                     $scanned_barcodes = array();
                     $pending_picking_ids = WmsPicklistItem::where('picklist_id', $picklist->id)->pluck('pending_picking_id')->toArray();
