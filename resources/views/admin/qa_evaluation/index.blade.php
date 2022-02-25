@@ -11,6 +11,43 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                </div>
+                                <input type="text" name="evaluation_from_date"
+                                       class="form-control bg-primary border-primary white rounded-right"
+                                       id="evaluation_from_date" placeholder="Evaluation Date From">
+                            </div>
+
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                    <span class="la la-calendar-o small-calender-icon"></span>
+                                                    </span>
+                                </div>
+                                <input type="text" name="evaluation_to_date"
+                                       class="form-control bg-primary border-primary white rounded-right"
+                                       id="evaluation_to_date" placeholder="Evaluation Date To">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="search_filter_btn"
+                                    class="float-right mb-1 btn btn-outline-primary btn-min-width"><i
+                                        class="la la-search" style="margin-right: 10px"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row mb-2 justify-content-center">
                     <div class="col-12 ">
                         <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -41,7 +78,10 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css"
+          href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css"
+          href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
     <style>
@@ -49,28 +89,32 @@
             background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
             background-repeat: repeat-x;
         }
+
         .bg-gradient-directional-return_intransit {
             background-image: linear-gradient(45deg, #ff39aed6, #bb82e7);
             background-repeat: repeat-x;
         }
-        
-        .show_active{
-            -webkit-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
-            -moz-box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
-            box-shadow: 1px 3px 8px 0px rgba(0,0,0,0.8);
+
+        .show_active {
+            -webkit-box-shadow: 1px 3px 8px 0px rgba(0, 0, 0, 0.8);
+            -moz-box-shadow: 1px 3px 8px 0px rgba(0, 0, 0, 0.8);
+            box-shadow: 1px 3px 8px 0px rgba(0, 0, 0, 0.8);
             -webkit-border-radius: 5px;
             -moz-border-radius: 5px;
             border-radius: 5px;
         }
-        span.font-13{
+
+        span.font-13 {
             font-size: 13px;
         }
-        .fatal{
+
+        .fatal {
             background-color: #EF5753;
         }
-        .accurate{
+
+        .accurate {
             background-color: springgreen;
-            
+
 
         }
     </style>
@@ -81,16 +125,54 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
+            type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
+            type="text/javascript"></script>
 
+    {{--    todo date filter field--}}
+    <script>
+        var booking_from_date = $('#evaluation_from_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            max: '{{ Carbon\Carbon::now() }}',
+            // format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd  H:i:s',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                if (context.select) {
+                    $('#evaluation_to_date').pickadate('picker').set('min', $('#evaluation_from_date').pickadate('picker').get('select'));
+                }
+            }
+        });
+        var booking_to_date = $('#evaluation_to_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            max: '{{ Carbon\Carbon::now() }}',
+            // format: 'dd mmmm, yyyy',
+            format: 'yyyy-mm-dd',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd  H:i:s',
+            hiddenSuffix: '_formatted',
+            onSet: function (context) {
+                if (context.select) {
+                    $('#evaluation_from_date').pickadate('picker').set('max', $('#evaluation_to_date').pickadate('picker').get('select'));
+                }
+            }
+        });
+    </script>
+    {{--    todo date filter field end--}}
 
     <script type="text/javascript">
         $(document).ready(function () {
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
@@ -112,7 +194,7 @@
                             head.push('Score');
                             head.push('Remarks');
 
-                            $.each(result.data, function(index, values) {
+                            $.each(result.data, function (index, values) {
                                 row = [];
 
                                 row.push(index + 1);
@@ -131,28 +213,28 @@
                         async: false
                     });
 
-                    return {body: body, header:head};
+                    return {body: body, header: head};
                 }
-            } );
+            });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                
+
                 buttons: [
-                    @if (session('role_id') == 1 || in_array(654, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(654, session('permissions')))
 
                     {
-                    text: '<i class="ft-plus-circle"></i> Add',
-                    className: 'btn btn-primary add',
-                    action: function (e, dt, node, config) {
-                        window.location = '{{ route('admin.qa_evaluation.add') }}';
-                    }
+                        text: '<i class="ft-plus-circle"></i> Add',
+                        className: 'btn btn-primary add',
+                        action: function (e, dt, node, config) {
+                            window.location = '{{ route('admin.qa_evaluation.add') }}';
+                        }
                     },
-                    @endif
+                        @endif
                     {
                         extend: 'excelHtml5',
                         className: 'btn btn-primary',
                         title: 'QA Evaluation',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     }
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -164,29 +246,46 @@
                 },
                 serverSide: true,
                 rowId: 'id',
-                ajax:{
+                ajax: {
                     url: '{{ route('admin.qa_evaluation.list') }}',
+                    data: function (d) {
+                        d.evaluation_from_date = $('#evaluation_from_date').val();
+                        d.evaluation_to_date = $('#evaluation_to_date').val();
+                    }
                 },
                 order: [[4, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'agent_name' ,name: 'ad.name', class: 'align-middle agent_name'},
-                    { data:'campaign' ,name: 'ec.campaign_id', class: 'align-middle campaign'},
-                    { data:'evaluated_by' ,name: 'ev.name', class: 'align-middle evaluated_by'},
-                    { data:'evaluation_date' ,name: 'q_a_evaluations.evaluation_date', class: 'align-middle evaluation_date'},
-                    { data:'nature' ,name: 'en.id', class: 'align-middle nature'},
-                    { data:'date_time' ,name: 'q_a_evaluations.date_time', class: 'align-middle date_time'},
-                    { data:'status' ,name: 'q_a_evaluations.status', class: 'align-middle status'},
-                    { data:'score' ,name: 'q_a_evaluations.score', class: 'align-middle score'},
-                    { data:'remarks' ,name: 'q_a_evaluations.remarks', class: 'align-middle remarks'},
-                    { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
+                    {
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 0,
+                        render: function (data, type, row) {
+                            return '';
+                        }
+                    },
+                    {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
+                    {data: 'campaign', name: 'ec.campaign_id', class: 'align-middle campaign'},
+                    {data: 'evaluated_by', name: 'ev.name', class: 'align-middle evaluated_by'},
+                    {
+                        data: 'evaluation_date',
+                        name: 'q_a_evaluations.evaluation_date',
+                        class: 'align-middle evaluation_date'
+                    },
+                    {data: 'nature', name: 'en.id', class: 'align-middle nature'},
+                    {data: 'date_time', name: 'q_a_evaluations.date_time', class: 'align-middle date_time'},
+                    {data: 'status', name: 'q_a_evaluations.status', class: 'align-middle status'},
+                    {data: 'score', name: 'q_a_evaluations.score', class: 'align-middle score'},
+                    {data: 'remarks', name: 'q_a_evaluations.remarks', class: 'align-middle remarks'},
+                    {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
 
                 ],
-                rowCallback: function(row, data, index) {
+                rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-                initComplete: function() {
+                initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -196,31 +295,29 @@
                     var campaign_search = '<select name="campaign_search" id="campaign_search" class="select2 form-control"></select>';
                     var status_search = '<select name="status_search" id="status_search" class="select2 form-control"><option value="1">Non-Fatal</option><option value="0">Fatal</option><option value="2">Accurate</option></select>';
 
-                    this.api().columns().every(function(column_id) {
+                    this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.evaluation_date') || $(header).is('.date_time') || $(header).is('.score') || $(header).is('.remarks') ) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.evaluation_date') || $(header).is('.date_time') || $(header).is('.score') || $(header).is('.remarks')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.campaign')){
+                        } else if ($(header).is('.campaign')) {
                             $(campaign_search).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.nature')){
+                                }).wrap(td);
+                        } else if ($(header).is('.nature')) {
                             $(nature_search).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else if($(header).is('.status')){
+                                }).wrap(td);
+                        } else if ($(header).is('.status')) {
                             $(status_search).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
+                                }).wrap(td);
+                        } else {
+                            var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
 
@@ -244,47 +341,47 @@
                     });
 
                     $("#nature_search").prepend('<option value="" selected></option>').select2({
-                        data:data1,
+                        data: data1,
                         placeholder: "Select Nature",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     $("#campaign_search").prepend('<option value="" selected></option>').select2({
-                        data:data2,
+                        data: data2,
                         placeholder: "Select Campaign",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     $("#status_search").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }
             });
-            
-            $('body').on('click','button.qa_edit',function () {
+
+            $('body').on('click', 'button.qa_edit', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 var link = '{{ route('admin.qa_evaluation.edit', ["id" => 0]) }}';
-                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
-                
-                
+                window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
+
 
             });
 
-            $('body').on('click','button.qa_view',function () {
+            $('body').on('click', 'button.qa_view', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 var link = '{{ route('admin.qa_evaluation.view', ["id" => 0]) }}';
-                    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
+                window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
 
-                
 
             });
-
+            $('#search_filter_btn').on('click', function () {
+                table.draw(true);
+            });
         });
 
     </script>
