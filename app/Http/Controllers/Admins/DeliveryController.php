@@ -4715,6 +4715,9 @@ class DeliveryController extends Controller
                     }
                 }
             })
+//            ->filterColumn('adjusted_reference_link', function ($query, $keyword) {
+//                return $query->where('station_deposit_notes.adjustment_ref', '=', $keyword);
+//            })
             ->addColumn('adjusted_reference_count', function ($sdn) {
                 if ($sdn->adjustment_ref != null) {
                     return $sdn->adjustment_ref;
