@@ -6455,13 +6455,6 @@ class AdminAPIController extends Controller
 
     public function pick_list_receive(Request $request)
     {
-        $barcode_list = json_decode($request->barcode_list, true);
-        if($barcode_list){
-            return response()->json(['status' => 0,'id' => $request->picklist_id,'barcode_list' => $barcode_list]);
-        }else{
-            return response()->json(['status' => 0,'id11' => $request->picklist_id]);
-        }
-
         $rules = [
             'picklist_id' => ['required'],
             'barcode_list' => ['required'],
@@ -6478,6 +6471,7 @@ class AdminAPIController extends Controller
             $picklist_id = (int)$request->picklist_id;
             $picklist = WmsPicklist::find($picklist_id);
             if ($picklist) {
+                return response()->json(['status' => 0,'id' => $request->picklist_id]);
                 if ($picklist->status == 0) {
                     $scanned_barcodes = array();
                     $pending_picking_ids = WmsPicklistItem::where('picklist_id', $picklist->id)->pluck('pending_picking_id')->toArray();
