@@ -39,7 +39,7 @@ class LeadManagementController extends Controller
         $lead_statuses = LeadStatus::whereNotIn('id', [1, 12])->get();
         $services = DB::table('service_list')->get();
         $today = Carbon::now()->endOfDay();
-        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+        $thirtyDays = Carbon::now()->subDays(58)->startOfDay();
 
         $leads['total'] = Lead::whereBetween('requested_date', [$thirtyDays, $today]);
         $leads['received'] = Lead::whereBetween('requested_date', [$thirtyDays, $today])->where('status_id', 1);
@@ -146,7 +146,7 @@ class LeadManagementController extends Controller
         $cities = City::select('id', 'name')->get();
 
         $dates['current'] = Carbon::now();
-        $dates['old_date'] = Carbon::now()->subDays(29);
+        $dates['old_date'] = Carbon::now()->subDays(58);
         return view('admin.leads.index')->with(['sale_name' => $salesperson, 'services' => $services, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates]);
     }
 
