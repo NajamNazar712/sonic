@@ -13,7 +13,7 @@ class CreateAppUpdatedVersionGlobalSettingsSeeder extends Seeder
     {
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('global_settings')->insert(array(
-            array('type' => 'bolt_updated_version', 'setting_value' => 0, 'created_at' => $timestamp, 'updated_at' => $timestamp,'text' => '0.24'),
+            array('type' => 'bolt_updated_version', 'setting_value' => 24, 'created_at' => $timestamp, 'updated_at' => $timestamp),
         ));
     }
 }

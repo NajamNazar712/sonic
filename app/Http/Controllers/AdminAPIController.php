@@ -6542,12 +6542,12 @@ class AdminAPIController extends Controller
 
     public function check_bolt_version(Request $request)
     {
-        $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('text as setting_value');
+        $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
         if($global_settings->exists()){
             $global_settings = $global_settings->first();
-            return response()->json(['status' => 0, 'app_version' => (float)$global_settings->setting_value]);
+            return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value]);
         }
-        return response()->json(['status' => 0, 'app_version' => (float)'0.00']);
+        return response()->json(['status' => 0, 'app_version' => 24]);
     }
 
 }

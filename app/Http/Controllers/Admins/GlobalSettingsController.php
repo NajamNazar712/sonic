@@ -6129,4 +6129,16 @@ public function sales_incentive()
         return redirect()->back()->with('success', 'Shipper Has Been Added!');
     }
 
+    public function bolt_update_version_index(){
+        $settings = GlobalSettings::where('type', 'bolt_updated_version')->first();
+        return view('admin.settings.bolt_update_version')->with('settings', $settings);
+    }
+
+    public function bolt_update_version_store(Request $request){
+        $settings = GlobalSettings::where('type', 'bolt_updated_version')->first();
+        $settings->setting_value = $request->updated_version;
+        $settings->save();
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
 }
