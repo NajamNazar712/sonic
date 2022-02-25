@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
+use App\Http\Controllers\Admins\LeadTaggingController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
@@ -23,6 +24,7 @@ use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\Lead\LeadRemark;
 use App\Http\Models\Admin\Lead\LeadStatus;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
@@ -58,6 +60,7 @@ use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\HR\EmployeeLeave;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
+use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\StaffCategory;
@@ -78,11 +81,21 @@ use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Models\WMS\WmsCourierOrders;
+use App\Http\Models\WMS\WmsOrderProcess;
+use App\Http\Models\WMS\WmsPendingPicking;
+use App\Http\Models\WMS\WmsPendingPickingShipments;
+use App\Http\Models\WMS\WmsPicklist;
+use App\Http\Models\WMS\WmsPicklistItem;
+use App\Http\Models\WMS\WmsProductBarcode;
+use App\Http\Models\WMS\WmsShipmentProduct;
 use App\Http\Models\Zone;
+use App\Models\Admin\Lead\LeadReason;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -6094,7 +6107,7 @@ class AdminAPIController extends Controller
             $admin_profile = Employee::where('trax_id', $admin->trax_id);
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->first();
-                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id){
+                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id || !$admin_profile->nationality_id){
                     return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
                 }else{
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
@@ -6120,10 +6133,11 @@ class AdminAPIController extends Controller
             $staff_category_list = StaffCategory::all();
             $shift_list = EmployeeShift::all();
             $domecile_list = EmployeeDomicile::all();
+            $nationalities_list = EmployeeNationality::all();
             $admin_profile = Employee::where('trax_id', $admin->trax_id);
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->get();
-                return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'gender_list' => $gender_list, 'religion_list' => $religion_list, 'marital_status_list' => $marital_status_list, 'staff_category_list' => $staff_category_list, 'shift_list' => $shift_list, 'domecile_list' => $domecile_list, 'employee_data' => $admin_profile]);
+                return response()->json(['status' => 0, 'blood_group_list' => $blood_group_list, 'gender_list' => $gender_list, 'religion_list' => $religion_list, 'marital_status_list' => $marital_status_list, 'staff_category_list' => $staff_category_list, 'shift_list' => $shift_list, 'domecile_list' => $domecile_list, 'nationalities_list' => $nationalities_list, 'employee_data' => $admin_profile]);
             } else {
                 return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
             }
@@ -6145,6 +6159,7 @@ class AdminAPIController extends Controller
             'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
             'marital_status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
             'blood_group_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+            'nationality_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
             'address' => ['nullable'],
             'emergency_contact' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
             'emergency_contact_person' => ['required'],
@@ -6161,70 +6176,416 @@ class AdminAPIController extends Controller
         } else {
             $employee_request = Employee::find($request->employee_id);
             if ($employee_request) {
-                $city = City::find($employee_request->city_id);
-                $employee_request->zone_id = $city->zone_id;
-                if ($request->has('employee_gender_id')) {
-                    $employee_request->employee_gender_id = $request->employee_gender_id;
-                }
-                if ($request->has('guardian_name')) {
-                    $employee_request->guardian_name = $request->guardian_name;
-                }
+                $admin = Admin::where('trax_id', $employee_request->trax_id);
+                if($admin->exists()){
+                    $admin = $admin->first();
+                    $city = City::find($employee_request->city_id);
+                    $employee_request->zone_id = $city->zone_id;
+                    if ($request->has('employee_gender_id')) {
+                        $employee_request->employee_gender_id = $request->employee_gender_id;
+                    }
+                    if ($request->has('guardian_name')) {
+                        $employee_request->guardian_name = $request->guardian_name;
+                    }
 
-                if ($request->has('religion_id')) {
-                    $employee_request->religion_id = $request->religion_id;
-                }
+                    if ($request->has('religion_id')) {
+                        $employee_request->religion_id = $request->religion_id;
+                    }
 
-                if ($request->has('domicile_id')) {
-                    $employee_request->domicile_id = $request->domicile_id;
-                }
+                    if ($request->has('domicile_id')) {
+                        $employee_request->domicile_id = $request->domicile_id;
+                    }
 
-                if ($request->has('marital_status_id')) {
-                    $employee_request->marital_status_id = $request->marital_status_id;
-                }
+                    if ($request->has('marital_status_id')) {
+                        $employee_request->marital_status_id = $request->marital_status_id;
+                    }
 
-                if ($request->has('blood_group_id')) {
-                    $employee_request->blood_group = $request->blood_group_id;
-                }
+                    if ($request->has('blood_group_id')) {
+                        $employee_request->blood_group = $request->blood_group_id;
+                    }
 
-                if ($request->has('address')) {
-                    $employee_request->address = $request->address;
-                }
+                    if ($request->has('address')) {
+                        $employee_request->address = $request->address;
+                    }
 
-                if ($request->has('emergency_contact')) {
-                    $employee_request->emergency_contact = $request->emergency_contact;
-                }
+                    if ($request->has('emergency_contact')) {
+                        $employee_request->emergency_contact = $request->emergency_contact;
+                    }
 
-                if ($request->has('emergency_contact_person')) {
-                    $employee_request->emergency_contact_person = $request->emergency_contact_person;
-                }
+                    if ($request->has('emergency_contact_person')) {
+                        $employee_request->emergency_contact_person = $request->emergency_contact_person;
+                    }
 
-                if ($request->has('official_email')) {
-                    $employee_request->official_email = $request->official_email;
-                }
+                    if ($request->has('official_email')) {
+                        $employee_request->official_email = $request->official_email;
+                        $admin->email = $request->official_email;
+                    }
 
-                if ($request->has('date_of_birth')) {
-                    $employee_request->date_of_birth = $request->date_of_birth;
-                }
+                    if ($request->has('date_of_birth')) {
+                        $employee_request->date_of_birth = $request->date_of_birth;
+                    }
 
-                if ($request->has('mother_name')) {
-                    $employee_request->mother_name = $request->mother_name;
-                }
+                    if ($request->has('mother_name')) {
+                        $employee_request->mother_name = $request->mother_name;
+                    }
 
-                if ($request->has('shift_id')) {
-                    $employee_request->shift_id = $request->shift_id;
-                }
+                    if ($request->has('shift_id')) {
+                        $employee_request->shift_id = $request->shift_id;
+                        $admin->shift_id = $request->shift_id;
+                    }
 
-                if ($request->has('staff_category_id')) {
-                    $employee_request->staff_category_id = $request->staff_category_id;
-                }
+                    if ($request->has('staff_category_id')) {
+                        $employee_request->staff_category_id = $request->staff_category_id;
+                    }
+                    if ($request->has('nationality_id')) {
+                        $employee_request->nationality_id = $request->nationality_id;
+                    }
 
-                $employee_request->save();
-                return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
-            } else {
+                    $employee_request->save();
+                    $admin->save();
+                    return response()->json(['status' => 0, 'message' => "Profile update successfully"]);
+                }
+                else {
+                    return response()->json(['status' => 1, 'message' => 'User not found!']);
+                }
+            }
+            else {
                 return response()->json(['status' => 1, 'message' => 'User not found!']);
             }
         }
     }
 
+    public function lead_statuses(Request $request)
+    {
+        $rules = [
+            'status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:lead_statuses,id'],
+        ];
 
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            if(!$request->has('status_id')){
+                $lead_statuses = LeadStatus::wherenotin('id', [1, 12])->select('id', 'name')->get();
+                return response()->json(['status' => 0, 'statuses' => $lead_statuses]);
+            }else{
+                $lead_reason = LeadReason::join('lead_status_reasons as lsr', 'lsr.reason_id', 'lead_reasons.id')
+                    ->select('lead_reasons.id as id', 'lead_reasons.name as name')
+                    ->where('lsr.status_id', $request->status_id);
+                if($lead_reason->exists()){
+                    $lead_reason = $lead_reason->get();
+                    return response()->json(['status' => 0, 'reasons' => $lead_reason]);
+                }else{
+                    return response()->json(['status' => 0, 'reasons' => []]);
+                }
+            }
+        }
+
+    }
+
+    public function lead_status_update(Request $request)
+    {
+        $rules = [
+            'lead_id' => ['required', 'integer', 'digits_between:1,10', 'exists:leads,id'],
+            'status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:lead_statuses,id'],
+            'reason_id' => ['nullable'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $lead = Lead::find($request->lead_id);
+            $admin_id = $request->admin_id;
+            if($lead){
+                if($lead->sale_person_id){
+                    $reason_id = NULL;
+                    if($request->has('reason_id')){
+                        $reason_id = $request->reason_id;
+                    }
+                    $lead_log = new LeadLog();
+                    $lead_log->lead_id = $lead->id;
+                    $lead_log->prev_status_id = $lead->status_id;
+                    $lead_log->status_id = $request->status_id;
+                    $lead_log->reason = $reason_id;
+                    $lead_log->sale_person_id = $lead->sale_person_id;
+                    if ($lead->reference_person_id == NULL) {
+                        $lead_log->reference_person_id = $admin_id;
+                    } else {
+                        $lead_log->reference_person_id = $lead->reference_person_id;
+                    }
+                    $lead_log->updated_by = $admin_id;
+                    $lead_log->save();
+
+                    $lead->status_id = $request->status_id;
+                    $lead->reason = $reason_id;
+                    $lead->updated_by = $admin_id;
+                    $lead->save();
+
+                    if ($request->status_id == 9) {
+                        NotificationsController::send(113, $lead);
+                    } elseif ($request->status_id == 2) {
+                        LeadTaggingController::notification_unresponsive($lead->id);
+                    }
+                    $lead_status = LeadStatus::find($request->status_id);
+                    return response()->json(['status' => 0, 'message' => 'Status updated Successfully!', 'status_name' => $lead_status->name]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Sales Person not Tagged']);
+                }
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Invalid Lead']);
+            }
+        }
+    }
+
+    public function check_permissions(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if ($admin) {
+            $permissions = array();
+            $wms_user_permissions = DB::table('wms_admin_role_module_permissions')->where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
+            $permissions['cargo_user'] = (in_array($admin->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
+            if ($admin->designation_id) {
+                $user_department = $admin->Edesignation->department_id;
+            } else {
+                $user_department = $admin->role->department_id;
+            }
+            $permissions['sales_person'] = ($user_department == 7) ? 1 : 0;
+            $permissions['pick_list_user'] = (in_array(23, $wms_user_permissions)) ? 1 : 0;
+            return response()->json(['status' => 0, 'permissions' => $permissions]);
+
+        }
+    }
+
+    public function pending_pick_list(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $pending_picklist = WmsPicklist::join('admins', 'admins.id', '=', 'wms_picklists.created_by')
+            ->join('wms_pickers as wp', 'wp.id', '=', 'wms_picklists.picker_id')
+            ->select('wms_picklists.id as picklist_id', 'admins.name as created_by', 'wms_picklists.created_at as picking_date', 'wms_picklists.sku_count', 'wms_picklists.tracking_count', 'wms_picklists.quantity')
+            ->where('wms_picklists.status', 0)
+            ->where('wp.admin_id', $admin_id);
+
+        if ($pending_picklist->exists()) {
+            $pending_picklist = $pending_picklist->get();
+            return response()->json(['status' => 0, 'pending_picklist' => $pending_picklist]);
+        } else {
+            return response()->json(['status' => 1, 'message' => "No Picklist Assigned!"]);
+        }
+    }
+
+    public function pick_list_details(Request $request)
+    {
+        $rules = [
+            'picklist_id' => ['required', 'integer', 'digits_between:1,10'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $picklist = WmsPicklist::find($request->picklist_id);
+            if ($picklist) {
+                if ($picklist->status == 0) {
+                    $picklist_data = array();
+                    foreach ($picklist->items as $item) {
+                        $picklist_datum = array();
+                        $pending_picking = WmsPendingPicking::find($item->pending_picking_id);
+                        $picklist_datum['pending_picking_id'] = $pending_picking->id;
+                        $picklist_datum['product_id'] = $pending_picking->product_id;
+                        $picklist_datum['sku_id'] = $pending_picking->product->sku_id;
+                        $picklist_datum['product_name'] = $pending_picking->product->name;
+                        $picklist_datum['shipper_name'] = $pending_picking->product->shipper->name;
+                        $picklist_datum['shipper_id'] = $pending_picking->product->user_id;
+                        $picklist_datum['listed_quantity'] = $item->quantity;
+                        $picklist_datum['item_id'] = $item->id;
+                        $picklist_data[] = $picklist_datum;
+                    }
+                    return response()->json(['status' => 0, 'picklist_id' => $picklist->id, 'picklist_data' => $picklist_data]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Picklist already updated"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "Invalid Picklist"]);
+            }
+        }
+    }
+
+    public function pick_list_barcode_validate(Request $request)
+    {
+        $rules = [
+            'picklist_id' => ['required', 'integer', 'digits_between:1,10'],
+            'barcode' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $barcode = $request->barcode;
+            $product_ids = WmsPicklistItem::join('wms_pending_pickings as wpp', 'wms_picklist_items.pending_picking_id', '=', 'wpp.id')
+                ->where('wms_picklist_items.picklist_id', $request->picklist_id)->pluck('wpp.product_id')->toArray();
+
+            $product = WmsProductBarcode::whereNULL('shipment_id')->where('status', 3)->whereIn('product_id', $product_ids)->where(function ($query) use ($barcode) {
+                $query->where('barcode', '=', $barcode)
+                    ->orWhere('id', '=', $barcode);
+            });
+            if ($product->exists()) {
+                $product = $product->first();
+                return response()->json(['status' => 0, 'message' => "Barcode Valid", 'product_id' => $product->product_id, 'barcode' => $product->barcode, 'barcode_id' => $product->id]);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Barcode Invalid"]);
+            }
+
+        }
+    }
+
+    public function pick_list_receive12(Request $request)
+    {
+        $rules = [
+            'picklist_id' => ['required'],
+            'barcode_list' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin_id = $request->admin_id;
+            $picklist_id = (int)$request->picklist_id;
+            $picklist = WmsPicklist::find($picklist_id);
+            if ($picklist) {
+                if ($picklist->status == 0) {
+                    $scanned_barcodes = array();
+                    $pending_picking_ids = WmsPicklistItem::where('picklist_id', $picklist->id)->pluck('pending_picking_id')->toArray();
+                    $shipment_ids = WmsPendingPickingShipments::whereIn('picking_id', $pending_picking_ids)->where('courier_id', 1)->pluck('shipment_id')->toArray();
+                    $courier_order_ids = WmsPendingPickingShipments::whereIn('picking_id', $pending_picking_ids)->where('courier_id', '!=', 1)->pluck('shipment_id')->toArray();
+                    Shipment::whereIn('id', $shipment_ids)->where('warehouse_order_status', '=', 10)->update(['warehouse_order_status' => 2]);
+                    WmsCourierOrders::whereIn('id', $courier_order_ids)->update(['status' => 3]);
+                    $picklist->status = 1;
+                    $picklist->save();
+                    if ($request->has('barcode_list')) {
+                        $barcode_lists = json_decode($request->barcode_list, true);
+                        foreach ($barcode_lists as $barcode_list) {
+                            array_push($scanned_barcodes,$barcode_list['barcode']);
+                        }
+                    }
+                    foreach ($picklist->items as $item) {
+                        $item->status = 1;
+                        $item->save();
+                    }
+                    foreach ($shipment_ids as $shipment_id) {
+                        $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment_id)->where('courier_id', 1)->get();
+                        foreach ($shipment_products as $shipment_product) {
+                            $product_barcodes = WmsProductBarcode::whereNull('shipment_id')
+                                ->where('wms_product_barcodes.status', 3)
+                                ->whereIn('id', $scanned_barcodes)
+                                ->where('product_id', $shipment_product->product_id)
+                                ->take($shipment_product->quantity);
+                            if ($product_barcodes->exists()) {
+                                $product_barcodes = $product_barcodes->get();
+                                foreach ($product_barcodes as $product_barcode) {
+                                    $product_barcode->shipment_id = $shipment_id;
+                                    $product_barcode->courier_id = 1;
+                                    $product_barcode->picklist_id = $picklist_id;
+                                    $product_barcode->save();
+                                }
+                            }
+                        }
+                    }
+                    foreach ($courier_order_ids as $courier_order_id) {
+                        $courier_products = WmsShipmentProduct::where('shipment_id', $courier_order_id)->where('courier_id', 2)->get();
+                        foreach ($courier_products as $courier_product) {
+                            $product_barcodes = WmsProductBarcode::whereNull('shipment_id')
+                                ->where('wms_product_barcodes.status', 3)
+                                ->WhereIn('id', $scanned_barcodes)
+                                ->where('product_id', $courier_product->product_id)
+                                ->take($courier_product->quantity);
+                            if ($product_barcodes->exists()) {
+                                $product_barcodes = $product_barcodes->get();
+                                foreach ($product_barcodes as $product_barcode) {
+                                    $product_barcode->shipment_id = $shipment_id;
+                                    $product_barcode->courier_id = 2;
+                                    $product_barcode->picklist_id = $picklist_id;
+                                    $product_barcode->save();
+                                }
+                            }
+                        }
+                    }
+                    $shipment_ids = array_merge($shipment_ids, $courier_order_ids);
+                    WmsOrderProcess::whereIn('shipment_id', $shipment_ids)->update(['picklist_confirmed_at' => Carbon::now(), 'picklist_confirmed_by' => $admin_id]);
+                    return response()->json(['status' => 0, 'message' => 'Picklist successfully updated!']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Picklist already updated']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Invalid Picklist']);
+            }
+        }
+    }
+
+    public function pick_list_receive(Request $request)
+    {
+        $rules = [
+            'picklist_id' => ['required'],
+            'barcode_list' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin_id = $request->admin_id;
+            $picklist_id = (int)$request->picklist_id;
+            $picklist = WmsPicklist::find($picklist_id);
+            if ($picklist) {
+                if ($picklist->status == 0) {
+                    $pending_picking_ids = WmsPicklistItem::where('picklist_id', $picklist->id)->pluck('pending_picking_id')->toArray();
+                    $shipment_ids = WmsPendingPicking::whereIn('id', $pending_picking_ids)->where('courier_id', 1)->pluck('shipment_id')->toArray();
+                    $courier_order_ids = WmsPendingPicking::whereIn('id', $pending_picking_ids)->where('courier_id', '!=', 1)->pluck('shipment_id')->toArray();
+                    Shipment::whereIn('id', $shipment_ids)->where('warehouse_order_status', '=', 10)->update(['warehouse_order_status' => 8]);
+                    WmsCourierOrders::whereIn('id', $courier_order_ids)->where('status', '=' , 7)->update(['status' => 3]);
+                    $picklist->status = 1;
+                    $picklist->save();
+                    foreach ($picklist->items as $item) {
+                        $item->status = 1;
+                        $item->save();
+                    }
+                    $shipment_ids = array_merge($shipment_ids, $courier_order_ids);
+                    WmsOrderProcess::whereIn('shipment_id', $shipment_ids)->update(['picklist_confirmed_at' => Carbon::now(), 'picklist_confirmed_by' => $admin_id]);
+                    return response()->json(['status' => 0, 'message' => 'Picklist successfully updated!']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Picklist already updated']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Invalid Picklist']);
+            }
+        }
+    }
+
+    public function check_bolt_version(Request $request)
+    {
+        $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
+        if($global_settings->exists()){
+            $global_settings = $global_settings->first();
+            return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value]);
+        }
+        return response()->json(['status' => 0, 'app_version' => 24]);
+    }
 }
