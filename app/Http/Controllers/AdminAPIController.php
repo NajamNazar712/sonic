@@ -6455,6 +6455,7 @@ class AdminAPIController extends Controller
 
     public function pick_list_receive(Request $request)
     {
+        dd($request->picklist_id);
         $rules = [
             'picklist_id' => ['required'],
             'barcode_list' => ['required'],
