@@ -25,7 +25,16 @@
                             <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-calendar m-0"></i></h2>
                         </div>
                     </a>
+                    @if (session('role_id') == 1)
+                        <a class="nav-link d-inline-flex align-middle p-1" href="{{ route('admin.settings.bolt_update_version.index') }}" target="_blank">
+                            <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
+                                <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Bolt Version Update</span>
+                                <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-cogs m-0"></i></h2>
+                            </div>
+                        </a>
+                    @endif
                 </ul>
+
                 <ul class="nav navbar-nav float-right">
                     <li class="dropdown dropdown-user nav-item">
                         <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('admin.tracking.index') }}" target="_blank">

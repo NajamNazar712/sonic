@@ -914,7 +914,10 @@ class Permission
             'settings.rcp_sms.index' => 680,
 
             'settings.consignee_sms_expire.index' => 683,
+			'settings.sales.user_restriction.index' => 681,
 
+            'settings.return_reason_mandatory.index' => 684,
+            'settings.return_reason_mandatory.list' => 684,
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 

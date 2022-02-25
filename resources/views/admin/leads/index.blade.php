@@ -225,6 +225,25 @@
                         </div>
                     </div>
                 </div>
+                <div class="row justify-content-center">
+                    <div class="col-3" id="dormant_div">
+                        <div class="card bg-gradient-directional-pending_confirmation pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
+                                            <span>Dormant</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -1594,6 +1613,10 @@
             });
             $('#in_process_activation_div').on('click', function () {
                 $('#search_statistics_div').val(6);
+                table.draw();
+            });
+            $('#dormant_div').on('click', function () {
+                $('#search_statistics_div').val(7);
                 table.draw();
             });
         });

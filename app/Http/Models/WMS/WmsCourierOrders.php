@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class WmsCourierOrders extends Model
 {
     public function user() {
-        return $this->belongsTo('App\Http\Models\Customer\User', 'shipper_id');
+        return $this->belongsTo('App\Http\Models\Shipper\User', 'shipper_id');
     }
 
     public function wms_order_packing() {

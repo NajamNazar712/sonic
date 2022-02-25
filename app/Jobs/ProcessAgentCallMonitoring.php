@@ -28,7 +28,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
      */
     public function __construct(array $booking)
     {
-        //
+        $this->queue = 'agent_call_monitoring';
         $this->booking = $booking;
 
     }
