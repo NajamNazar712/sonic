@@ -110,6 +110,7 @@ Route::name('api.')->group(function () {
         Route::post('reset_pin', 'Rider\RiderAPIController@reset_pin')->name('reset_pin');
         Route::get('check_pin', 'Rider\RiderAPIController@check_pin')->name('check_pin');
         Route::get('logout', 'Rider\RiderAPIController@logout')->name('logout');
+        Route::get('check_app_version', 'AdminAPIController@check_bolt_version')->name('check_app_version');
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
@@ -259,6 +260,7 @@ Route::name('api.')->group(function () {
         Route::post('reset_pin', 'AdminAPIController@reset_pin')->name('reset_pin');
         Route::get('check_pin', 'AdminAPIController@check_pin')->name('check_pin');
         Route::get('logout', 'AdminAPIController@logout')->name('logout');
+        Route::get('check_app_version', 'AdminAPIController@check_bolt_version')->name('check_app_version');
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'AdminAPIController@validate_cnic_phone_number')->name('validate_data');
