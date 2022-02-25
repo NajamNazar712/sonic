@@ -4931,6 +4931,7 @@ class AdminAPIController extends Controller
                     $pickup_request = NULL;
                     $pickup_note_id = NULL;
                     $reference_2_id = null;
+                    $rider_id = null;
                      if ($pickup_request_shipment->exists()) {
                         $pickup_request_shipment = $pickup_request_shipment->orderBy('id', 'DESC')->first();
 
