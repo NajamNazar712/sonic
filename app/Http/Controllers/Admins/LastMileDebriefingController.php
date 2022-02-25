@@ -509,9 +509,12 @@ class LastMileDebriefingController extends Controller
                         }
                     }
                 }
-                $where = array(7, 8, 9, 15, 18, 56, 12);
-                $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->where('status', 1)->get();
                 $shipment = Shipment::find($data->shipment_id);
+                $where = array(7, 8, 9, 15, 18, 12);
+                if($shipment->booking_type_id == 2){
+                    array_push($where,56);
+                }
+                $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->where('status', 1)->get();
                 $delivery_note = DeliveryNote::find($data->delivery_note_id);
                 $total_calls = AgentCallMonitoring::where('agent_id', Auth::id())
                     ->where('created_at', '>=', $prev_time)
