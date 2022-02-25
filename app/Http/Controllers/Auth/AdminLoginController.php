@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\Commission\SalesCommissionUser;
@@ -107,7 +108,14 @@ class AdminLoginController extends Controller
                 }
             }
 //mark login end
-            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login, 'id' => $id]);
+            $sale_users_bypass = array();
+            $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                $sale_users_bypass = array_map('intval', explode(',', $settings->text));
+            }
+            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login, 'id' => $id, 'sale_users_bypass' => $sale_users_bypass]);
 
             return redirect()->intended(route('admin.dashboard.index'));
         }

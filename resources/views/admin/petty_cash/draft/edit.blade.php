@@ -877,7 +877,7 @@
                 var employee_designation_input = '<input class="form-control form-control-sm employee_designation" readonly name="employee_designation['+rows_count+']" placeholder="Employee Designation" value="'+employee_designation+'" >';
                 var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount" value="'+ amount +'" data-rule-required="true" data-msg-required="Amount is required">';
                 var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No"  value="'+reference+'">';
-                var remarks_input = '<input class="form-control form-control-sm" name="remarks['+rows_count+']" placeholder="Remarks" value="'+ remarks +'">';
+                var remarks_input = '<textarea class="form-control form-control-sm" cols="10" rows="5"  maxlength="1000"  name="remarks['+rows_count+']" placeholder="Remarks">'+ remarks +'</textarea>';
                 var upload_image = '<div class="text-center">';
                 if(reference_document != ''){
                     upload_image += '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="'+ image_url +'/'+ reference_document +'" target="_blank">View</a></button><input type="hidden" name="image_'+ rows_count +'" value="'+reference_document+'">';

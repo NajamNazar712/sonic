@@ -11,7 +11,7 @@ class WmsProduct extends Model
     }
 	public function shipper()
     {
-        return $this->belongsTo('App\Http\Models\Customer\User', 'user_id', 'id');
+        return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
     }
 
     public function product_picking(){

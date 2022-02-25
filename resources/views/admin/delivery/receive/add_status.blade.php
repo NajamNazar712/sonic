@@ -1865,7 +1865,6 @@
                                             'password': password,
                                         }
                                     }).done(function (data) {
-                                        console.log(data.status);
                                         if (data.status === 1) {
                                             var tracking_numbers = '';
                                             var route = '{!! route('admin.tracking.index') !!}';
@@ -1913,7 +1912,9 @@
                                         }
                                         else if(data.status === 2){
                                             var invalid_shipmet_flag = false;
+                                            var not_replacement_shipment_flag = false;
                                             var html = '';
+                                            var title = '';
                                             var route = '{!! route('admin.tracking.index') !!}';
                                             if(data.invalid_shipments){
                                                 var tracking_numbers = '';
@@ -1925,6 +1926,23 @@
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
                                                 invalid_shipmet_flag = true;
+                                                var title = "Same Consignee Info";
+                                            }
+                                            if(data.not_replacement_shipments){
+                                                var replacement_tracking_numbers = '';
+                                                $.each(data.not_replacement_shipments, function(index, tracking_number) {
+                                                    replacement_tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                                });
+                                                 html += '<p>Following Shipments Cannot be mark as Replacement - Not Collected due to Booking Type:</p><br>';
+                                                html += replacement_tracking_numbers;
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+                                                not_replacement_shipment_flag = true;
+                                                if(title != ''){
+                                                    title += "/Booking Type Except Replacement";
+                                                }else{
+                                                    title = "Booking Type Except Replacement";
+                                                }
                                             }
                                             if(data.first_attempt_shipments.length > 0) {
                                                 var  fa_tracking_number = '';
@@ -1936,10 +1954,15 @@
                                                 content = document.createElement('div');
                                                 content.innerHTML = html;
                                                 invalid_shipmet_flag = true;
+                                                if(title != ''){
+                                                    title += "/RCP First Attempt";
+                                                }else{
+                                                    title = "RCP First Attempt";
+                                                }
                                             }
-                                            if(invalid_shipmet_flag) {
+                                            if(invalid_shipmet_flag || not_replacement_shipment_flag) {
                                                 swal({
-                                                    title: 'RCP First Attempt/Same Consignee Info',
+                                                    title: title,
                                                     content: content,
                                                     icon: 'warning',
                                                     buttons: {
