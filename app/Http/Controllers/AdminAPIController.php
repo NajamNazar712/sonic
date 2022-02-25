@@ -6546,16 +6546,8 @@ class AdminAPIController extends Controller
             'picklist_id' => ['required'],
             'barcode_list' => ['required'],
         ];
-
-<<<<<<< .mine
-
-
-=======
         $validate = Validator::make($request->all(), $rules, $this->messages);
-
->>>>>>> .theirs
         $validate->setAttributeNames($this->names);
-
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
@@ -6587,7 +6579,7 @@ class AdminAPIController extends Controller
         }
     }
 
-public function check_bolt_version(Request $request)
+    public function check_bolt_version(Request $request)
     {
         $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
         if($global_settings->exists()){
