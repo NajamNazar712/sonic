@@ -919,7 +919,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action') || $(header).is('.difference_amount')) {
+                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action') || $(header).is('.difference_amount') || $(header).is('.adjustment_ref')) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.status')) {
                             $(drop_select).appendTo($(search))

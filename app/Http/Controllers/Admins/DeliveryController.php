@@ -4715,9 +4715,7 @@ class DeliveryController extends Controller
                     }
                 }
             })
-//            ->filterColumn('adjusted_reference_link', function ($query, $keyword) {
-//                return $query->where('station_deposit_notes.adjustment_ref', '=', $keyword);
-//            })
+
             ->addColumn('adjusted_reference_count', function ($sdn) {
                 if ($sdn->adjustment_ref != null) {
                     return $sdn->adjustment_ref;
@@ -4726,6 +4724,7 @@ class DeliveryController extends Controller
                     return $adjustment_count;
                 }
             })
+
             ->editColumn('adjustment_date', function ($deliveries) {
                 $date = str_replace('00:00:00', '', $deliveries->adjustment_date_latest);
                 return $date;
