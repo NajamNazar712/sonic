@@ -6130,15 +6130,23 @@ public function sales_incentive()
     }
 
     public function bolt_update_version_index(){
-        $settings = GlobalSettings::where('type', 'bolt_updated_version')->first();
-        return view('admin.settings.bolt_update_version')->with('settings', $settings);
+        if(session('role_id') == 1){
+            $settings = GlobalSettings::where('type', 'bolt_updated_version')->first();
+            return view('admin.settings.bolt_update_version')->with('settings', $settings);
+        }else{
+            return redirect()->route('admin.access_denied');
+        }
     }
 
     public function bolt_update_version_store(Request $request){
+        if(session('role_id') == 1){
         $settings = GlobalSettings::where('type', 'bolt_updated_version')->first();
         $settings->setting_value = $request->updated_version;
         $settings->save();
         return redirect()->back()->with('success', 'Settings Updated!');
+        }else{
+            return redirect()->route('admin.access_denied');
+        }
     }
 
 }
