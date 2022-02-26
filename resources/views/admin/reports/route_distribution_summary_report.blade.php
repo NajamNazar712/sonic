@@ -91,12 +91,14 @@
                             <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Total Out For Delivery</th>
+                            <th class="border-primary border-darken-1">Pending</th>
+                            <th class="border-primary border-darken-1">Pending %</th>
                             <th class="border-primary border-darken-1">Delivered</th>
                             <th class="border-primary border-darken-1">Delivered %</th>
                             <th class="border-primary border-darken-1">Undelivered</th>
                             <th class="border-primary border-darken-1">Undelivered %</th>
-                            <th class="border-primary border-darken-1">Confirmation Pending</th>
-                            <th class="border-primary border-darken-1">Confirmation Pending %</th>
+                            <th class="border-primary border-darken-1">RCP</th>
+                            <th class="border-primary border-darken-1">RCP %</th>
                         </tr>
                         </thead>
                     </table>
@@ -169,6 +171,8 @@
         $(document).ready(function () {
             $('#datatable_wrapper').hide();
             var shipments_count = 0;
+            var pending_shipments = 0;
+            var pending_shipments_per = 0;
             var delivered_shipments = 0;
             var delivered_shipments_per = 0;
             var undelivered_shipments = 0;
@@ -256,27 +260,28 @@
                             head.push('Rider Name');
                             head.push('Hub');
                             head.push('Total Out For Delivery');
+                            head.push('Pending');
+                            head.push('Pending %');
                             head.push('Delivered');
                             head.push('Delivered %');
                             head.push('Undelivered');
                             head.push('Undelivered %');
-                            head.push('Confirmation Pending');
-                            head.push('Confirmation Pending %');
+                            head.push('RCP');
+                            head.push('RCP %');
                             $.each(result.data, function(index, values) {
                                 row = [];
-
-
                                 row.push(index + 1);
                                 row.push(values.courier_name);
                                 row.push(values.hub);
                                 row.push(values.shipments_count);
+                                row.push(values.pending_shipments);
+                                row.push(values.pending_shipments_per);
                                 row.push(values.delivered_shipments);
                                 row.push(values.delivered_shipments_per);
                                 row.push(values.undelivered_shipments);
                                 row.push(values.undelivered_shipments_per);
                                 row.push(values.confirmation_pending_shipments);
                                 row.push(values.confirmation_pending_shipments_per);
-
                                 body.push(row);
                             });
 
@@ -284,6 +289,8 @@
                             footer.push('Total');
                             footer.push('');
                             footer.push(shipments_count.toFixed(2));
+                            footer.push(pending_shipments.toFixed(2));
+                            footer.push(pending_shipments_per.toFixed(2));
                             footer.push(delivered_shipments.toFixed(2));
                             footer.push(delivered_shipments_per.toFixed(2));
                             footer.push(undelivered_shipments.toFixed(2));
@@ -338,6 +345,8 @@
                     { data:'courier_name' ,name: 'r.name', class: 'align-middle text-center courier_name'},
                     { data:'hub' ,name: 'hub', class: 'align-middle text-center hub'},
                     { data:'shipments_count', class: 'align-middle shipments_count', orderable: false, searchable: false},
+                    { data:'pending_shipments', class: 'align-middle pending_shipments', orderable: false, searchable: false},
+                    { data:'pending_shipments_per', class: 'align-middle pending_shipments_per', orderable: false, searchable: false},
                     { data:'delivered_shipments', class: 'align-middle delivered_shipments', orderable: false, searchable: false},
                     { data:'delivered_shipments_per', class: 'align-middle delivered_shipments_per', orderable: false, searchable: false},
                     { data:'undelivered_shipments', class: 'align-middle undelivered_shipments', orderable: false, searchable: false},
@@ -424,6 +433,25 @@
                     }).every(function() {
                         confirmation_pending_shipments_per = (confirmation_pending_shipments/shipments_count)*100;
                         $(this.footer()).html(confirmation_pending_shipments_per.toFixed(2));
+                    });
+
+                    api.columns('.pending_shipments', {
+                        page: 'current'
+                    }).every(function() {
+                        pending_shipments = this
+                            .data()
+                            .reduce(function(a, b) {
+                                var x = parseFloat(a) || 0;
+                                var y = parseFloat(b) || 0;
+                                return x + y;
+                            }, 0);
+                        $(this.footer()).html(pending_shipments.toFixed(2));
+                    });
+                    api.columns('.pending_shipments_per', {
+                        page: 'current'
+                    }).every(function() {
+                        pending_shipments_per = (pending_shipments/shipments_count)*100;
+                        $(this.footer()).html(pending_shipments_per.toFixed(2));
                     });
                 }
             });

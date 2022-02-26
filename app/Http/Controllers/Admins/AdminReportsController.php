@@ -58,7 +58,7 @@ class AdminReportsController extends Controller
     }
     public function qsr_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),137);
-        if (session('department_id') == 7 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('department_id') == 7 && (in_array(session('id'), session('sale_users_bypass')))) {
             $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status',[3, 4])->select('id','name')->get();
         }
         else {
@@ -132,7 +132,7 @@ class AdminReportsController extends Controller
             });
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(in_array(session('id'), session('sale_users_bypass')) ){
                 $shipments = $shipments->whereIn('shipments.user_id', session('tagged_shippers'));
             }
         }
@@ -246,11 +246,11 @@ class AdminReportsController extends Controller
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
             ->leftjoin('admins as up','up.id','=','return_notes.updated_by')
             ->select(['return_notes.id','return_notes.id as return_note_id','return_notes.id as return_note_link','up.name as updated_by','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.updated_at','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at as created_at','return_notes.image',DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'),DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count_link')])->groupBy('return_notes.id');
-        if (session('role_id') != 1 ||session('role_id') != 75) {
+        if (session('role_id') != 1 ||in_array(session('id'), session('sale_users_bypass'))) {
             $return_note = $return_note->whereIn('return_notes.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(in_array(session('id'), session('sale_users_bypass')) ){
                 $return_note = $return_note->whereIn('shipments.user_id', session('tagged_shippers'));
             }
         }
@@ -378,7 +378,7 @@ class AdminReportsController extends Controller
             $pickup_note = $pickup_note->whereIn('cities.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(in_array(session('id'), session('sale_users_bypass')) ){
                 $pickup_note = $pickup_note->whereIn('pr.shipper_id', session('tagged_shippers'));
             }
         }
@@ -1131,11 +1131,11 @@ class AdminReportsController extends Controller
 
         $count = DB::connection($connection)->table('delivery_note_shipments');
 
-        if (session('role_id') != 1 || $request->get('hub') || $request->get('search_shipping_mode') ||session('role_id') != 75) {
+        if (session('role_id') != 1 || $request->get('hub') || $request->get('search_shipping_mode') ||in_array(session('id'), session('sale_users_bypass'))) {
             $count = $count->join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id');
         }
 
-        if (session('role_id') != 1 || $request->get('hub') ||session('role_id') != 75) {
+        if (session('role_id') != 1 || $request->get('hub') ||in_array(session('id'), session('sale_users_bypass'))) {
             $count = $count->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')->whereIn('dc.hub_id', session('hubs'));
         }
 
@@ -1209,7 +1209,7 @@ class AdminReportsController extends Controller
             ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,11])
             ->where('s.booking_type_id', '!=', 4)
             ->whereIn('sj.shipper_status_id', [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46]);
-        if (session('role_id') != 1 ||session('role_id') != 75) {
+        if (session('role_id') != 1 ||in_array(session('id'), session('sale_users_bypass'))) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
         $datatables = Datatables::of($shipments)
@@ -1548,7 +1548,7 @@ class AdminReportsController extends Controller
                     })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->sum(DB::connection('reports')->raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                 }else{
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(in_array(session('id'), session('sale_users_bypass'))){
                         $booked = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {
                             $query->from('user_shipping_infos')
                                 ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
@@ -1953,7 +1953,7 @@ class AdminReportsController extends Controller
                     if(session('department_id') != 7){
                         $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
                     }else{
-                        if(session('role_id') != 4 && session('role_id') != 75){
+                        if(in_array(session('id'), session('sale_users_bypass'))){
                             $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->whereIn('id', session('tagged_shippers'))->get();
                         }else{
                             $shippers[$search_city_hub] = DB::connection('reports')->table('users')->select('id','name')->whereIn('id',$pickup_request_shippers_ids)->whereIn('status',[3, 4])->get();
@@ -1989,7 +1989,7 @@ class AdminReportsController extends Controller
                             $shippers[$hub->id] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->get();
 //                        }
                         } else {
-                            if (session('role_id') != 4 && session('role_id') != 75) {
+                            if (in_array(session('id'), session('sale_users_bypass'))) {
 
                                 $shippers[$hub->id] = DB::connection('reports')->table('users')->select('id', 'name')->whereIn('id', $pickup_request_shippers_ids)->whereIn('status', [3, 4])->whereIn('id', session('tagged_shippers'))->get();
 //                            }
@@ -2667,7 +2667,7 @@ class AdminReportsController extends Controller
                 })->get();
 
             }else{
-                if(session('role_id') != 4 && session('role_id') != 75){
+                if(in_array(session('id'), session('sale_users_bypass'))){
                     $shippers = DB::connection('reports')->table('users')->where('status',3)->whereIn('id', session('tagged_shippers'))->whereExists(function ($query) {
                         $query->from('cities')
                             ->where('users.city_id', '=', DB::raw('`cities`.`id`'))
@@ -2760,7 +2760,7 @@ class AdminReportsController extends Controller
                             ->where('hub_id', '=', $c->id);
                     });
                 }else{
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(in_array(session('id'), session('sale_users_bypass'))){
                         $shippers = DB::connection('reports')->table('users')->whereExists(function ($query) use ($c) {
                             $query->from('cities')
                                 ->where('users.city_id', '=', DB::raw('`cities`.`id`'))
@@ -2935,11 +2935,11 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as vb','vb.id','=','delivery_notes.verified_by')
             ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at as created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count','delivery_notes.last_updated_at','vb.name as verified_by','delivery_notes.status_updated_at as status_updated','delivery_notes.status_verified_at as status_verified', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','riders.cnic as cni','rider_categories.name as category'])
             ->where('delivery_notes.status',1)->groupBy('delivery_notes.id');
-        if (session('role_id') != 1 ||session('role_id') != 75) {
+        if (session('role_id') != 1 || !in_array(session('id'), session('sale_users_bypass'))) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
         if(session('department_id') == 7){
-            if(session('role_id') != 4 && session('role_id') != 75 ){
+            if(!in_array(session('id'), session('sale_users_bypass')) ){
                 $deliveries = $deliveries->whereIn('shipments.user_id', session('tagged_shippers'));
             }
         }
@@ -3087,7 +3087,7 @@ class AdminReportsController extends Controller
                 })->where('status','>=',3)->get();
                 $hubs = DB::connection('reports')->table('cities')->select('id','name')->whereIn('id',session('hubs'))->get();
             }else{
-                if(session('role_id') != 4 && session('role_id') != 75){
+                if(!in_array(session('id'), session('sale_users_bypass'))){
                     $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->where('status','>=',3)->get();
                     $hubs = DB::connection('reports')->table('cities')->select('id','name')->whereIn('id',session('hubs'))->get();
                 }else{
@@ -3129,7 +3129,7 @@ class AdminReportsController extends Controller
                     $details['e'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->where('city_id',$hub)->count();
                     $details['n'][$month] = DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->where('city_id',$hub)->count();
                 }else{
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $details['s'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$first_date)->where('status',3)->where('city_id',$hub)->whereIn('id', session('tagged_shippers'))->count();
                         $details['e'][$month] = DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->where('city_id',$hub)->whereIn('id', session('tagged_shippers'))->count();
                         $details['n'][$month] = DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->where('city_id',$hub)->whereIn('id', session('tagged_shippers'))->count();
@@ -3145,7 +3145,7 @@ class AdminReportsController extends Controller
                     $details['e'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->count());
                     $details['n'][$month] = number_format(DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->count());
                 }else{
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $details['s'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$first_date)->where('status',3)->whereIn('id', session('tagged_shippers'))->count());
                         $details['e'][$month] = number_format(DB::connection('reports')->table('users')->whereDate('activated_at','<=',$last_date)->where('status',3)->whereIn('id', session('tagged_shippers'))->count());
                         $details['n'][$month] = number_format(DB::connection('reports')->table('users')->whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->whereIn('id', session('tagged_shippers'))->count());
@@ -3167,7 +3167,7 @@ class AdminReportsController extends Controller
         if($hub != null){
             if (session('role_id') == 1 || in_array($hub, session('hubs'))) {
                 if(session('department_id') == 7 ){
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $shippers['shipper'] = DB::connection('reports')->table('users')->where('status','>=',3)->whereIn('id', session('tagged_shippers'))->get();
                     }else{
                         $shippers['shipper'] = DB::connection('reports')->table('users')->whereExists(function ($query) use ($hub) {
@@ -3195,7 +3195,7 @@ class AdminReportsController extends Controller
             }
             else {
                 if(session('department_id') == 7){
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $shippers['shipper'] = DB::connection('reports')->table('users')->where('status','>=',3)->whereIn('id', session('tagged_shippers'))->get();
                     }else{
                         $shippers['shipper'] = DB::connection('reports')->table('users')->whereExists(function ($query) {
@@ -3330,7 +3330,7 @@ class AdminReportsController extends Controller
     }
     public function overall_sales_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),149);
-        if (session('department_id') == 7 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
             $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status',[3, 4])->select('id','name')->get();
         }
         else {
@@ -3456,7 +3456,7 @@ class AdminReportsController extends Controller
 //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
 //        }
 
-        if (session('role_id') != 1 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('role_id') != 1 || !in_array(session('id'), session('sale_users_bypass'))) {
             if (session('department_id') == 7) {
                 $sales = $sales->whereIn('u.id', session('tagged_shippers'));
             }
@@ -3690,7 +3690,7 @@ class AdminReportsController extends Controller
                 $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
                 $hubs = DB::connection('reports')->table('cities')->select('id','name')->whereIn('id',session('hubs'))->get();
             }else{
-                if(session('role_id') != 4 && session('role_id') != 75){
+                if(!in_array(session('id'), session('sale_users_bypass'))){
                     $admins = array();
                     $admins[0] = Auth::id();
                     $tagged_admins =  DB::connection('reports')->table('multiple_sale_leads')->leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')->select('mst.admin_id')->where('multiple_sale_leads.admin_id', Auth::id())->whereNotNull('mst.admin_id')->pluck('mst.admin_id')->toArray();
@@ -3742,7 +3742,7 @@ class AdminReportsController extends Controller
                 if(session('department_id') != 7){
                     $sales_person = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
                 }else{
-                    if(session('role_id') != 4 && session('role_id') != 75){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $sales_person = DB::connection('reports')->table('admins')->where('id', Auth::id())->get();
                     }else{
                         $sales_person = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
@@ -5326,7 +5326,7 @@ class AdminReportsController extends Controller
         $count = $count->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereNotIn('u.id', [8761, 9358]);
 
-        if (session('role_id') != 1 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
             if (session('department_id') == 7) {
                 $count = $count->whereIn('u.id', session('tagged_shippers'));
             }
@@ -5417,7 +5417,7 @@ class AdminReportsController extends Controller
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereNotIn('u.id', [8761, 9358]);
 
-        if (session('role_id') != 1 && (session('role_id') != 4 && session('role_id') != 75)) {
+        if (session('role_id') != 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
             if (session('department_id') == 7) {
                 $sales = $sales->whereIn('u.id', session('tagged_shippers'));
             }
@@ -7499,7 +7499,12 @@ class AdminReportsController extends Controller
                     ->where('cps.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id = 12 and verification = 1)'));
             })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), 'c.name as hub')
+            ->leftJoin('shipments_journey as us', function ($join) {
+                $join->on('us.shipment_id', '=', 's.id')
+                    ->where('us.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,12,15,18,56) and verification = 1)'));
+            })
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 'c.name as hub')
             ->groupBy('r.id');
 
         $datatables = Datatables::of($route_distribution_summary)
@@ -7512,12 +7517,9 @@ class AdminReportsController extends Controller
                 return '';
             }
         })
-        ->addColumn('undelivered_shipments', function ($entry) {
-            return round($entry->shipments_count - $entry->delivered_shipments);
-        })
         ->addColumn('undelivered_shipments_per', function ($entry) {
             if ($entry->shipments_count) {
-                return round((($entry->shipments_count - $entry->delivered_shipments) / $entry->shipments_count) * 100, 2);
+                return round(($entry->undelivered_shipments / $entry->shipments_count) * 100, 2);
             }
             else {
                 return '';
@@ -7526,6 +7528,22 @@ class AdminReportsController extends Controller
         ->addColumn('confirmation_pending_shipments_per', function ($entry) {
             if ($entry->shipments_count) {
                 return round(($entry->confirmation_pending_shipments / $entry->shipments_count) * 100, 2);
+            }
+            else {
+                return '';
+            }
+        })
+        ->addColumn('pending_shipments', function ($entry) {
+            if ($entry->shipments_count) {
+                return ($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments));
+            }
+            else {
+                return '';
+            }
+        })
+        ->addColumn('pending_shipments_per', function ($entry) {
+            if ($entry->shipments_count) {
+                return round((($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments)) / $entry->shipments_count) * 100, 2);
             }
             else {
                 return '';
@@ -8511,7 +8529,7 @@ class AdminReportsController extends Controller
 
                 }
             }else{
-                if((session('department_id') == 7) && (session('role_id') != 4 && session('role_id') != 75)){
+                if((session('department_id') == 7) && (!in_array(session('id'), session('sale_users_bypass')))){
                     $serial = 1;
                     foreach($shipping_modes as $mode){
 
@@ -9917,7 +9935,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+            $datatable->whereBetween('sj.created_at', [$from,$to]);
         }
         if ($tracking_number = $request->get('tracking_number')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_number));

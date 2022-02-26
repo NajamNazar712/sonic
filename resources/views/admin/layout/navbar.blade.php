@@ -25,7 +25,16 @@
                             <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-calendar m-0"></i></h2>
                         </div>
                     </a>
+                    @if (session('role_id') == 1)
+                        <a class="nav-link d-inline-flex align-middle p-1" href="{{ route('admin.settings.bolt_update_version.index') }}" target="_blank">
+                            <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
+                                <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Bolt Version Update</span>
+                                <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-cogs m-0"></i></h2>
+                            </div>
+                        </a>
+                    @endif
                 </ul>
+
                 <ul class="nav navbar-nav float-right">
                     <li class="dropdown dropdown-user nav-item">
                         <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('admin.tracking.index') }}" target="_blank">
@@ -97,15 +106,15 @@
                         emergency_contact_person = data.emergency_contact_person;
                         emergency_contact_no = data.emergency_contact_no;
 
-                        $('#adminprofile #admin_profile_body #full_name').html(full_name);
-                        $('#adminprofile #admin_profile_body #department').html(department);
-                        $('#adminprofile #admin_profile_body #employee_id').html(employee_id);
-                        $('#adminprofile #admin_profile_body #email').html(email);
-                        $('#adminprofile #admin_profile_body #contact').html(contact);
-                        $('#adminprofile #admin_profile_body #designation').html(designation);
-                        $('#adminprofile #admin_profile_body #blood_group').html(blood_group);
-                        $('#adminprofile #admin_profile_body #emergency_contact_person').html(emergency_contact_person);
-                        $('#adminprofile #admin_profile_body #emergency_contact_no').html(emergency_contact_no);
+                        $('#adminprofile #admin_profile_body #full_name').html((full_name)? full_name : '--');
+                        $('#adminprofile #admin_profile_body #department').html((department)? department : '--');
+                        $('#adminprofile #admin_profile_body #employee_id').html((employee_id) ? employee_id : '--');
+                        $('#adminprofile #admin_profile_body #email').html((email)? email : '--');
+                        $('#adminprofile #admin_profile_body #contact').html((contact)? contact : '--');
+                        $('#adminprofile #admin_profile_body #designation').html((designation)? designation : '--');
+                        $('#adminprofile #admin_profile_body #blood_group').html((blood_group)? blood_group : '--');
+                        $('#adminprofile #admin_profile_body #emergency_contact_person').html((emergency_contact_person)? emergency_contact_person : '--');
+                        $('#adminprofile #admin_profile_body #emergency_contact_no').html((emergency_contact_no)? emergency_contact_no : '--');
                         $('#adminprofile').modal('show');
                     }
                 });

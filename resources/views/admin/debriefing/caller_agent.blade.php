@@ -74,7 +74,13 @@
                                     </div>
                                 </div>
                             </div>
-
+                            @if(isset($fake_status))
+                                @if($fake_status)
+                                        <div class="row">
+                                            <div class="col-6"><h3 class="red">*Status identified as "Fake" by Consignee</h3></div>
+                                        </div>
+                                @endif
+                            @endif
                             <div class="border-primary">
                                 <div class="align-items-center bg-primary">
                                     <div class="d-flex flex-wrap ml-1 mr-1 font-medium-3 white">
@@ -157,7 +163,7 @@
                                                         @if($shipment->height != null)
                                                             <tr>
                                                                 <td><strong>Weight </strong><small>(Volumetric)</small></td>
-                                                                <td>{{$shipment->weight}}kg</td>
+                                                                <td>{{$shipment->actual_weight}}kg</td>
                                                                 <td><strong>Service Type</strong></td>
                                                                 <td>{{$shipment->booking_type->booking_type}}</td>
                                                                 <td><strong>Collection Amount</strong></td>
@@ -169,7 +175,7 @@
                                                         @else
                                                         <tr>
                                                             <td><strong>Weight </strong><small>(Dense)</small></td>
-                                                            <td>{{$shipment->weight}}kg</td>
+                                                            <td>{{$shipment->actual_weight}}kg</td>
                                                             <td><strong>Service Type</strong></td>
                                                             <td>{{$shipment->booking_type->booking_type}}</td>
                                                             <td><strong>Collection Amount</strong></td>
@@ -182,7 +188,7 @@
                                                         <tr>
                                                             @if ($shipment->length != null)
                                                             <td><strong>Length</strong></td>
-                                                            <td>{{$item->length}}cm</td>
+                                                            <td>{{$shipment->length}}cm</td>
                                                             @endif
                                                             <td><strong>Shipping Mode</strong></td>
                                                             <td>{{$shipment->shipping_mode->mode}}</td>
@@ -200,7 +206,7 @@
                                                         <tr>
                                                             @if ($shipment->height != null)
                                                             <td><strong>Height</strong></td>
-                                                            <td>{{$item->height}}cm</td>
+                                                            <td>{{$shipment->height}}cm</td>
                                                             @endif
                                                         </tr>
                                                     </tbody>
@@ -343,7 +349,7 @@
                         @csrf
                         <div class="container">
                             <div class="form-group">
-                                <label>Follow Up After <span class="text-warning">(hh:mm)</span></label>
+                                <label><b>Follow Up After <span class="text-warning">(hh:mm)</span></b></label>
                                 <div class="input-group">
                                     <input type="text" name="follow_up" class="form-control rounded-right follow_up" id="follow_up"  placeholder="Follow Up Time*" data-rule-required="true" data-msg-required="Follow Up Time is required" >
                                 </div>

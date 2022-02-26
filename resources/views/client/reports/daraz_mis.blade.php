@@ -14,7 +14,7 @@
                 <div id="search_form" class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
-							<input type="text"  id="search_tracking_no" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                            <input type="text"  id="search_tracking_no" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                         </fieldset>
                     </div>
                     <div class="col-3">
@@ -26,7 +26,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    
+
                     <div class="col-3">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -61,17 +61,19 @@
                         <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Clubbed Status</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         {{-- <th class="border-primary border-darken-1">Return Reason</th> --}}
                         <th class="border-primary border-darken-1">Last Reason</th>
                         <th class="border-primary border-darken-1">Attempts</th>
                         <th class="border-primary border-darken-1">Return Attempts</th>
+                        <th class="border-primary border-darken-1">Return Attempt Date/Time</th>
                         <th class="border-primary border-darken-1">Last Remarks</th>
                         <th class="border-primary border-darken-1">Last Attempt Date</th>
                         <th class="border-primary border-darken-1">Delivered Returned Date</th>
                         <th class="border-primary border-darken-1">Received Refused by</th>
                         <th class="border-primary border-darken-1">Sister Account</th>
-                        
+
                     </tr>
                     </thead>
                 </table>
@@ -88,7 +90,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
-	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}"><style>
         table.dataTable {
@@ -150,7 +152,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-	<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
@@ -173,33 +175,33 @@
                 width:'100%',
             });
             var select = $('.tracking_numbers').selectize({
-				placeholder: 'Tracking Number(s)*',
-				delimiter: ',',
-				createOnBlur: true,
-				persist: false,
-				plugins: ['remove_button'],
-				onDropdownOpen: function(dropdown) {
-					dropdown.remove();
-				},
-				onType: function(str) {
-					var regex = /^[0-9,]+$/;
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
 
-					if (!regex.test(str)) {
-						select[0].selectize.setTextboxValue('');
-					}
-				},
-				create: function(input) {
-					if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-						return {
-							value: input,
-							text: input
-						}
-					}
-					else {
-						return false;
-					}
-				}
-			});
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            });
             $('#search_type').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Adjustment Type',
                 width:'100%',
@@ -246,29 +248,34 @@
                             head.push('Tracking Number');
                             head.push('Arrival Date');
                             head.push('Status');
+                            head.push('Clubbed Status');
+
                             head.push('Actual Weight');
                             // head.push('Return Reason');
                             head.push('Last Reason');
                             head.push('Attempts');
                             head.push('Return Attempts');
-                            
+                            head.push('Return Attempt Time');
+
                             head.push('Last Remarks');
                             head.push('Last Attempt Date');
                             head.push('Delivered Returned Date');
                             head.push('Received Refused by');
                             head.push('Sister Account');
-                     
+
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.arrival_date);
+                                row.push(values.status_name);
                                 row.push(values.current_status);
                                 row.push(values.actual_weight);
                                 // row.push(values.return_reason);
                                 row.push(values.last_reason);
                                 row.push(values.attempts);
                                 row.push(values.return_attempts);
+                                row.push(values.return_attempt_time);
                                 row.push(values.rider_remarks);
                                 row.push(values.last_attempt_date);
                                 row.push(values.delivered_or_returned);
@@ -310,22 +317,24 @@
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_user = $('#search_user').val();
-                        
+
                     }
                 },
                 rowId: 'shipment_id',
                 order: [[2, 'desc']],
                 columns: [
-                    
+
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle text-center not_search'},
+                    { data:'status_name' ,name: 'ss.name', class: 'align-middle text-center not_search'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle text-center not_search'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle not_search'},
                     // { data:'return_reason' ,name: 'ssr.name', class: 'align-middle not_search'},
                     { data:'last_reason' ,name: 'last_reason', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'attempts' ,name: 'attempts', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'return_attempts' ,name: 'return_attempts', class: 'align-middle not_search', orderable: false, searchable: false},
+                    { data:'return_attempt_time' ,name: 'return_attempt_time', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'rider_remarks' ,name: 'rider_remarks', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'last_attempt_date' ,name: 'atmpdate.created_at', class: 'align-middle not_search'},
                     { data:'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle not_search'},
@@ -337,48 +346,48 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                // var drop_select = '<select name="shipper_name" id="shipper_name" class="select2 form-control">' +
-                //         '</select>';
-                this.api().columns().every(function(column_id) {
-                    var column = this;
-                    var header = column.header();
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    // var drop_select = '<select name="shipper_name" id="shipper_name" class="select2 form-control">' +
+                    //         '</select>';
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
 
-                    if ($(header).is('.tracking_number') || $(header).is('.serial_number') || $(header).is('.not_search')  || $(header).is('.shipper_name')) {
-                        $(td).appendTo($(search));
-                    }
-                    // else if ($(header).is('.shipper_name')) {
-                    //         $(drop_select).appendTo($(search))
-                    //         .on('change', function () {
-                    //             column.search($(this).val(), false, false, true).draw();
-                    //         }).wrap(td);
-                    // }
-                    else {
-                        var current = $(input).appendTo($(search)).on('change', function() {
-                            column.search($(this).val(), false, false, true).draw();
-                        }).wrap(td).after(icon);
-
-                        if (column.search()) {
-                            current.val(column.search());
+                        if ($(header).is('.tracking_number') || $(header).is('.serial_number') || $(header).is('.not_search')  || $(header).is('.shipper_name')) {
+                            $(td).appendTo($(search));
                         }
-                    }
-                });
-                
-                // var data = $.map({!! $sister_accounts !!}, function (obj) {
-                //         obj.id = obj.id;
+                        // else if ($(header).is('.shipper_name')) {
+                        //         $(drop_select).appendTo($(search))
+                        //         .on('change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         }).wrap(td);
+                        // }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
 
-                //         return obj;
-                //     });
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
 
-                //     var data = $.map({!! $sister_accounts !!}, function (obj) {
-                //         obj.text = obj.name;
+                    // var data = $.map({!! $sister_accounts !!}, function (obj) {
+                    //         obj.id = obj.id;
 
-                //         return obj;
-                //     });
+                    //         return obj;
+                    //     });
+
+                    //     var data = $.map({!! $sister_accounts !!}, function (obj) {
+                    //         obj.text = obj.name;
+
+                    //         return obj;
+                    //     });
 
                     // $('#shipper_name').prepend('<option value="" selected></option>').select2({
                     //     data:data,
@@ -387,8 +396,8 @@
                     //     containerCssClass: 'select-xs',
                     //     dropdownCssClass: 'form-control-sm p-0'
                     // });
-                this.api().table().columns.adjust();
-            }
+                    this.api().table().columns.adjust();
+                }
             });
             $('#search_filter_btn').on('click',function () {
                 table.draw();

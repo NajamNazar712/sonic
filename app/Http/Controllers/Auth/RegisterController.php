@@ -668,7 +668,7 @@ class RegisterController extends Controller
     {
         $city_id = $request->id;
         if ($city_id) {
-            $territory = Territory::where('city_id', $city_id);
+            $territory = Territory::where('city_id', $city_id)->where('territory_status','=','1');
             if ($territory->exists()) {
                 $territory = $territory->get();
                 return response()->json(['status' => 0, 'territory' => $territory]);
