@@ -15,6 +15,14 @@ class Seeder4723ForPermissionActivityTrail extends Seeder
             array('id' => 682, 'name' => 'Cargo Manifest Draft Setting', 'module_id' => 14),
         ));
 
+        DB::table('admin_role_module_permissions')->insert(array(
+            array('permission_id' => 682, 'role_id' => 46),
+            array('permission_id' => 682, 'role_id' => 23),
+            array('permission_id' => 682, 'role_id' => 9),
+            array('permission_id' => 682, 'role_id' => 8),
+            array('permission_id' => 682, 'role_id' => 15),
+        ));
+
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 509, 'screen_name' => 'Cargo Manifest Draft Setting', 'action'=> 'View'),
         ));
