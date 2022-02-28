@@ -586,9 +586,9 @@
                                     @if (session('role_id') == 1 || in_array(232, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.finance.invoice_for_reimbursement.index') }}">Invoice for Reimbursement</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(625, session('permissions')))
+                                 {{--   @if (session('role_id') == 1 || in_array(625, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.finance.invoices.reimbursement.index') }}">Reimbursement Invoices</a></li>
-                                    @endif
+                                    @endif--}}
                                     @if (session('role_id') == 1 || in_array(396, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.finance.make_payments_pickup_wise.index') }}">Pickup Wise Make</a></li>

@@ -6234,7 +6234,7 @@ class AdminFinanceController extends Controller
 
         $current_date = Carbon::now()->startOfDay();
         $current_date_string = $current_date->toDateString();
-
+         // dd($current_date_string);
 //        $cities = City::all();
         $users = User::where('account_type_id', 2)->get();
 
@@ -6295,8 +6295,6 @@ class AdminFinanceController extends Controller
                     $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
                         $query->where('user_id', $user_id);
                     });
-
-
 
                     if ($pending_invoice_shipments->exists()) {
                         $invoice = new Invoice();
@@ -10077,7 +10075,7 @@ class AdminFinanceController extends Controller
                 return '<button class="btn btn-sm btn-outline-info align-middle ">' . $invoice->invoice_number_btn . '</button>';
             })
             ->editColumn('payment_type', function($invoice) {
-                if($invoice->invoice_type == 2) {
+                if($invoice->account_type == 1) {
                     if ($invoice->payment_type == 1) {
                         return "Done";
                     } else {
