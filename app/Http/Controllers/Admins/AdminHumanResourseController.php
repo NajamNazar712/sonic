@@ -1134,7 +1134,6 @@ class AdminHumanResourseController extends Controller
                 $rider->dummy_pin = $employee->pin;
                 $rider->shift_id = $employee->shift_id;
                 $rider->pin = bcrypt($employee->pin);
-                $rider->rider_type_id = $request->rider_type;
                 $rider->rider_main_category_id = $request->rider_main_category;
                 $rider->rider_category_id = $request->rider_sub_category;
                 $rider->operation_rider_id = $request->rider_functional_category;
