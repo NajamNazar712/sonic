@@ -192,7 +192,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[0, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'invoice_number_button', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
