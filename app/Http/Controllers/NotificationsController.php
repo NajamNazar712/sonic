@@ -8163,7 +8163,7 @@ class NotificationsController extends Controller
 
                     $link = route('shipment.status.verify', ['tracking_number' => $tracking_number, 'delivery_note_id' => $delivery_note_id]);
                     $reason = '';
-                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 0)->latest()->first();
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
 
                     if ($shipment_journey) {
                         $current_status = $shipment_journey->shipment_status_consignee->name;
