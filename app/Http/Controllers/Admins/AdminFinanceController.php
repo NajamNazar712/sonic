@@ -3881,7 +3881,7 @@ class AdminFinanceController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),29);
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
-        if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
         }
         else {
@@ -3918,7 +3918,7 @@ class AdminFinanceController extends Controller
             ->groupBy('pending_payments.id');
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $pending_payments = $pending_payments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -4998,7 +4998,7 @@ class AdminFinanceController extends Controller
 
     public function done_payments_index() {
         ActivityTrailController::createActivityTrailLog(Auth::id(),30);
-        if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
         }
         else {
@@ -5025,7 +5025,7 @@ class AdminFinanceController extends Controller
         $count = $count->join('users as u', 'done_payments.user_id', '=', 'u.id');
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $count = $count->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -5097,7 +5097,7 @@ class AdminFinanceController extends Controller
             ->select('done_payments.user_id as user_id','done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at','dpc.wht as total_wht');
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $done_payments = $done_payments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -11450,7 +11450,7 @@ class AdminFinanceController extends Controller
             $pickup_wise_accounts = array();
             $settings = $settings->first();
             $pickup_wise_accounts = array_map('intval', explode(',', $settings->text));
-            if (session('department_id') == 7 && session('role_id') != 4) {
+            if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
                 $sales_person_shippers = array();
                 foreach($pickup_wise_accounts as $account_id){
                     if(in_array($account_id, session('tagged_shippers'))){
@@ -11482,7 +11482,7 @@ class AdminFinanceController extends Controller
         $pickup_wise_accounts = array();
         $shippers = array();
         $pickup_wise_accounts = array_map('intval', explode(',', $settings->text));
-        if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $sales_person_shippers = array();
             foreach($pickup_wise_accounts as $account_id){
                 if(in_array($account_id, session('tagged_shippers'))){
