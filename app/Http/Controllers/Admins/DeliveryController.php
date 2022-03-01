@@ -1199,7 +1199,6 @@ class DeliveryController extends Controller
 
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
-                        return redirect()->route('admin.delivery.receive.index')->with('error', 'All shipments removed and delivery note is cancelled');
                     } else {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                     }
@@ -7202,6 +7201,9 @@ class DeliveryController extends Controller
         if ($shipment) {
             $delivery_note = DeliveryNote::find($delivery_note_id);
             if ($delivery_note) {
+                if($delivery_note->status == 4){
+                    return response()->json(['status' => 1, 'error' => 'Delivery note is cancelled, all shipments removed!']);
+                }
                 $rider = $delivery_note->rider;
                 if ($shipment->payment_mode_id == 2 && $rider->ccd == 0) {
                     return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);
