@@ -1199,7 +1199,7 @@ class DeliveryController extends Controller
 
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
-                        return redirect()->to(route('admin.delivery.receive.index'))->with('error', 'All shipments removed and delivery note is cancelled');
+                        return redirect()->route('admin.delivery.receive.index')->with('error', 'All shipments removed and delivery note is cancelled');
                     } else {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                     }
