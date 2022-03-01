@@ -9676,7 +9676,10 @@ class AdminReportsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),268);
         }
-        $shipments = DB::connection('reports')->table('shipments_journey')->leftjoin('admins as ad', 'shipments_journey.admin_id', '=', 'ad.id')
+        $shipments = DB::connection('reports')->table('shipments_journey')
+            ->leftjoin('admins as ad', 'shipments_journey.admin_id', '=', 'ad.id')
+            ->leftjoin('admin_roles as adr', 'ad.role_id', '=', 'adr.id')
+            ->leftjoin('admin_departments as dpt', 'adr.department_id', '=', 'dpt.id')
             ->join('shipments as sh', 'shipments_journey.shipment_id', '=', 'sh.id')
             ->join('users as su', 'sh.user_id', '=', 'su.id')
             ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
@@ -9684,7 +9687,7 @@ class AdminReportsController extends Controller
             ->leftjoin('delivery_notes as dn', 'shipments_journey.reference_1_id', '=', 'dn.id')
             ->leftjoin('return_notes as rn', 'shipments_journey.reference_1_id', '=', 'rn.id')
             ->leftjoin('riders as r', 'shipments_journey.rider_id', '=', 'r.id')
-            ->select(['shipments_journey.reference_1_id as ref_id','sh.id as shipment_id','sh.tracking_number','sh.tracking_number as tracking_number_link','r.id','r.name as rider_status_marked_by','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id', 'shipments_journey.admin_id', 'shipments_journey.rider_id']);
+            ->select(['shipments_journey.reference_1_id as ref_id','sh.id as shipment_id','sh.tracking_number','sh.tracking_number as tracking_number_link','r.id','r.name as rider_status_marked_by','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id', 'shipments_journey.admin_id', 'shipments_journey.rider_id','dpt.name as status_marked_by_department']);
             
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -9736,7 +9739,7 @@ class AdminReportsController extends Controller
         }
         
         if ($status_marked = $request->get('status_marked')) {
-            $datatable->where('ss.id', $status_marked);
+            $datatable->whereIn('ss.id', $status_marked);
         }
         if ($rider_id = $request->get('search_rider')) {
             $datatable->where('shipments_journey.rider_id', $rider_id);
