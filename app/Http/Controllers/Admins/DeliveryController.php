@@ -1022,7 +1022,7 @@ class DeliveryController extends Controller
 
 
                     if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-                        if(session('role_id') == 1 || ($result->operation_rider_id != 1 && $result->rider_type_id != 1)){
+                        if(session('role_id') == 1 || !($result->operation_rider_id != 1 && $result->rider_type_id != 1)){
                             $dropdown .= $receive_button;
                         }
                     }
