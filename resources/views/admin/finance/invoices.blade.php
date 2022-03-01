@@ -356,7 +356,8 @@
 													closeOnClickOutside: false,
 													closeOnEsc: false
 												});
-
+												selected_rows = [];
+												table.rows().deselect();
 												table.draw();
 											}
 											else{
