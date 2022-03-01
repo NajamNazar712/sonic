@@ -3187,7 +3187,7 @@ class AdminCargoManifestController extends Controller
 
         if(session('role_id') != 1)
         {
-            $users = $users->whereIn('default_hub_id', Auth::user()->default_hub_id);
+            $users = $users->where('default_hub_id', Auth::user()->default_hub_id);
         }
 
         $users = $users->get();
