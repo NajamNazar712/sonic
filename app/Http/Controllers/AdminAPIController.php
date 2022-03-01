@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DailyVisit;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
@@ -44,6 +45,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DailyVisitLeadStatus;
 use App\Http\Models\DwsDetail;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeDeviceToken;
@@ -6588,5 +6590,94 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value]);
         }
         return response()->json(['status' => 0, 'app_version' => 24]);
+    }
+
+    public function daily_visit_index()
+    {
+        $lead_statuses = DailyVisitLeadStatus::get(['id', 'name']);
+        return response()->json(['status' => 1, 'data' => $lead_statuses]);
+    }
+
+    public function daily_visit_store(Request $request)
+    {
+        $rules = [
+            'company_name' => ['required'],
+            'customer_name' => ['required'],
+            'customer_address' => ['required'],
+            'phone_no' => ['required'],
+            'email_address' => ['required'],
+            'lead_status' => ['required'],
+            'feedback' => ['required'],
+            'latitude' => ['required'],
+            'longitude' => ['required'],
+            'business_card_image' => ['required'],
+            'location_image' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }else{
+            try{
+                $daily_visit = new DailyVisit();
+                $daily_visit->company_name = $request->company_name;
+                $daily_visit->customer_name = $request->customer_name;
+                $daily_visit->customer_address = $request->customer_address;
+                $daily_visit->phone_no = $request->phone_no;
+                $daily_visit->email = $request->email_address;
+                $daily_visit->lead_status_id = $request->lead_status;
+                $daily_visit->feedback = $request->feedback;
+                $daily_visit->latitude = $request->latitude;
+                $daily_visit->longitude = $request->longitude;
+                $daily_visit->admin_id = $request->admin_id;
+                $daily_visit->save();
+
+                $picture_path = 'daily_visit/business_card/' . $daily_visit->id . '.png';
+                Storage::disk('public')->put($picture_path, file_get_contents($request->business_card_image));
+                $daily_visit->business_card_image = $picture_path;
+                $daily_visit->save();
+
+                $picture_path = 'daily_visit/location/' . $daily_visit->id . '.png';
+                Storage::disk('public')->put($picture_path, file_get_contents($request->location_image));
+                $daily_visit->location_image = $picture_path;
+                $daily_visit->save();
+
+                if ($request->hasFile('upload_bc_image')) {
+                    $filename = 'daily_visit_bc_' . $daily_visit->id . '.png';
+                    $file = $request->file('upload_bc_image');
+                    Storage::disk('public')->putFileAs('daily_visit\business_card', $file, $filename);
+                    $daily_visit->business_card_image = $filename;
+                    $daily_visit->save();
+                }
+
+                if ($request->hasFile('upload_l_image')) {
+                    $filename = 'daily_visit_l_' . $daily_visit->id . '.png';
+                    $file = $request->file('upload_l_image');
+                    Storage::disk('public')->putFileAs('daily_visit\location', $file, $filename);
+                    $daily_visit->location_image = $filename;
+                    $daily_visit->save();
+                }
+
+                return response()->json(['status' => 0, 'message' => 'Daily Visit Has been Uploaded']);
+            }
+            catch (Exception $ex){
+                return response()->json(['status' => 1, 'message' => 'Error ', 'errors' => $ex]);
+            }
+        }
+    }
+
+    public function daily_visit_report(Request $request)
+    {
+        $daily_visit = DB::connection('reports')->table('daily_visits')
+            ->join('daily_visit_lead_statuses as dvls', 'dvls.id', '=', 'daily_visits.lead_status_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
+            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image')
+            ->orderBy('daily_visits.id', 'DESC');
+        if ($daily_visit->exists()) {
+            $daily_visit = $daily_visit->get();
+            return response()->json(['status' => 0, 'data' => $daily_visit]);
+        }
+        return response()->json(['status' => 1, 'message' => 'No data found!']);
+
     }
 }
