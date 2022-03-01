@@ -164,7 +164,8 @@ class LeadManagementController extends Controller
             ->leftjoin('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'leads.reason as reason_id');
+            ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -224,23 +225,7 @@ class LeadManagementController extends Controller
             })
             ->editColumn('reason_id', function ($lead) {
                 if ($lead->reason_id) {
-                    if ($lead->reason_id == 10) {
-                        return "Others";
-                    } else if ($lead->reason_id == 1) {
-                        return "Prohibited Items";
-                    } else if ($lead->reason_id == 2) {
-                        return "Wrong Contact Details";
-                    } else if ($lead->reason_id == 3) {
-                        return "Duplicate";
-                    } else if ($lead->reason_id == 4) {
-                        return "A/C Query Call";
-                    } else if ($lead->reason_id == 5) {
-                        return "Operational Query";
-                    } else if ($lead->reason_id == 6) {
-                        return "HR Query";
-                    } else if ($lead->reason_id == 7) {
-                        return "Sales Person Already Assigned";
-                    }
+                    return $lead->reason_id;
                 } else {
                     return "-";
                 }
