@@ -8985,12 +8985,7 @@ class NotificationsController extends Controller
                     $to = $reference_2_id;
                     $statuses = ShipmentStatus::whereIn('id',[1,2,3,4,5,8,12,13,14,20,21,22,23,24,25,55])->orderBy('id','asc')->orderBy('name','desc')->get();
                     $shipments_counts = array();
-                    $settings = GlobalSettings::where('type', 'nsa_accounts');
-                    $nsa_accounts = array();
-                    if ($settings->exists()) {
-                        $settings = $settings->first();
-                        $nsa_accounts = array_map('intval', explode(',', $settings->text));
-                    }
+                    $nsa_accounts = [3324];
                     if (count($nsa_accounts) > 0) {
                         foreach ($statuses as $status)
                         {

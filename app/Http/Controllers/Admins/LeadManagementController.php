@@ -39,7 +39,7 @@ class LeadManagementController extends Controller
         $lead_statuses = LeadStatus::whereNotIn('id', [1, 12])->get();
         $services = DB::table('service_list')->get();
         $today = Carbon::now()->endOfDay();
-        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+        $thirtyDays = Carbon::now()->subDays(58)->startOfDay();
 
         $leads['total'] = Lead::whereBetween('requested_date', [$thirtyDays, $today]);
         $leads['received'] = Lead::whereBetween('requested_date', [$thirtyDays, $today])->where('status_id', 1);
@@ -50,13 +50,13 @@ class LeadManagementController extends Controller
         $leads['dormant'] = Lead::where('status_id', 14)->whereBetween('requested_date',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
-            $leads['total'] = $leads['total']->whereIn('city_id', session('hubs'));
-            $leads['received'] = $leads['received']->whereIn('city_id', session('hubs'));
-            $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
-            $leads['in_process_for_activation'] = $leads['in_process_for_activation']->whereIn('city_id', session('hubs'));
-            $leads['dead_leads'] = $leads['dead_leads']->whereIn('city_id', session('hubs'));
-            $leads['accounts_activated'] = $leads['accounts_activated']->whereIn('city_id', session('hubs'));
-            $leads['dormant'] = $leads['dormant']->whereIn('city_id', session('hubs'));
+            $leads['total'] = $leads['total']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['received'] = $leads['received']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['in_process'] = $leads['in_process']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['in_process_for_activation'] = $leads['in_process_for_activation']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['dead_leads'] = $leads['dead_leads']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['accounts_activated'] = $leads['accounts_activated']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['dormant'] = $leads['dormant']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
         }
         if (session('department_id') == 7) {
             if (session('role_id') != 4 && session('role_id') != 44 && session('role_id') != 60) {
@@ -146,7 +146,7 @@ class LeadManagementController extends Controller
         $cities = City::select('id', 'name')->get();
 
         $dates['current'] = Carbon::now();
-        $dates['old_date'] = Carbon::now()->subDays(29);
+        $dates['old_date'] = Carbon::now()->subDays(58);
         return view('admin.leads.index')->with(['sale_name' => $salesperson, 'services' => $services, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates]);
     }
 
@@ -399,12 +399,12 @@ class LeadManagementController extends Controller
             $leads['dormant'] = $leads['dormant']->where('sale_person_id', $sale_person);
         }
         if (session('role_id') != 1) {
-            $leads['total'] = $leads['total']->whereIn('city_id', session('hubs'));
-            $leads['received'] = $leads['received']->whereIn('city_id', session('hubs'));
-            $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
-            $leads['dead_leads'] = $leads['dead_leads']->whereIn('city_id', session('hubs'));
-            $leads['accounts_activated'] = $leads['accounts_activated']->whereIn('city_id', session('hubs'));
-            $leads['dormant'] = $leads['dormant']->whereIn('city_id', session('hubs'));
+            $leads['total'] = $leads['total']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['received'] = $leads['received']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['in_process'] = $leads['in_process']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['dead_leads'] = $leads['dead_leads']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['accounts_activated'] = $leads['accounts_activated']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            $leads['dormant'] = $leads['dormant']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
         }
         if (session('department_id') == 7) {
             if (session('role_id') != 4) {
