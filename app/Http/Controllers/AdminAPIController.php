@@ -14,6 +14,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminAppSlider;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\AdminRoleModulePermission;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
@@ -6354,6 +6355,7 @@ class AdminAPIController extends Controller
         if ($admin) {
             $permissions = array();
             $wms_user_permissions = DB::table('wms_admin_role_module_permissions')->where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
+            $user_permissions = AdminRoleModulePermission::where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
             $permissions['cargo_user'] = (in_array($admin->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
             if ($admin->designation_id) {
                 $user_department = $admin->Edesignation->department_id;
@@ -6362,6 +6364,8 @@ class AdminAPIController extends Controller
             }
             $permissions['sales_person'] = ($user_department == 7) ? 1 : 0;
             $permissions['pick_list_user'] = (in_array(23, $wms_user_permissions)) ? 1 : 0;
+            $permissions['daily_visit_report'] = (in_array(264, $user_permissions)) ? 1 : 0;
+            $permissions['daily_visit_form'] = (in_array(265, $user_permissions)) ? 1 : 0;
             return response()->json(['status' => 0, 'permissions' => $permissions]);
 
         }
@@ -6656,23 +6660,42 @@ class AdminAPIController extends Controller
 
     public function daily_visit_report(Request $request)
     {
-        $admin_id = $request->admin_id;
         if ($request->isMethod('get')){
-            $admins = Admin::where('status, 1')->select('id', 'name')->get();
+            $sale_users_bypass = array();
+            $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                $sale_users_bypass = explode(',', $settings->text);
+            }
+            if(in_array($request->admin_id,$sale_users_bypass)){
+                $admin_list = Admin::where('status, 1')->select('id', 'name')->get();
+                return response()->json(['status' => 0, 'admin_list' => $admin_list]);
+            }
+            return response()->json(['status' => 0, 'admin_list' => []]);
         }
         if ($request->isMethod('post')){
-
+            $daily_visit = DB::connection('reports')->table('daily_visits')
+                ->join('daily_visit_lead_statuses as dvls', 'dvls.id', '=', 'daily_visits.lead_status_id')
+                ->join('admins as a', 'a.id', '=', 'daily_visits.admin_id')
+                ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image')
+                ->orderBy('daily_visits.created_at', 'DESC');
+            if($request->from_date){
+                if($request->to_date){
+                    $daily_visit = $daily_visit->whereBetween('daily_visits.created_at', [$request->from_date, $request->to_date]);
+                }else{
+                    $daily_visit = $daily_visit->whereDate('daily_visits.created_at', $request->from_date);
+                }
+            }
+            if($request->user_id){
+                $daily_visit = $daily_visit->where('a.id', $request->user_id);
+            }else{
+                $daily_visit = $daily_visit->where('a.id', $request->admin_id);
+            }
+            if ($daily_visit->exists()) {
+                $daily_visit = $daily_visit->get();
+                return response()->json(['status' => 0, 'data' => $daily_visit]);
+            }
+            return response()->json(['status' => 1, 'message' => 'No data found!']);
         }
-        $daily_visit = DB::connection('reports')->table('daily_visits')
-            ->join('daily_visit_lead_statuses as dvls', 'dvls.id', '=', 'daily_visits.lead_status_id')
-            ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
-            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image')
-            ->orderBy('daily_visits.id', 'DESC');
-        if ($daily_visit->exists()) {
-            $daily_visit = $daily_visit->get();
-            return response()->json(['status' => 0, 'data' => $daily_visit]);
-        }
-        return response()->json(['status' => 1, 'message' => 'No data found!']);
-
     }
 }
