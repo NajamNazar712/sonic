@@ -6595,7 +6595,7 @@ class AdminAPIController extends Controller
     public function daily_visit_index()
     {
         $lead_statuses = DailyVisitLeadStatus::select('id', 'name')->get();
-        return response()->json(['status' => 1, 'lead_statuses' => $lead_statuses]);
+        return response()->json(['status' => 0, 'lead_statuses' => $lead_statuses]);
     }
 
     public function daily_visit_store(Request $request)
