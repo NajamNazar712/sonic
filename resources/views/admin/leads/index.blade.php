@@ -410,7 +410,7 @@
                             </select>
                         </div>
                         <div id="div_lead_status_reason" class="form-group d-none">
-                            <select name="lead_status_reason" id="lead_status_reason" class="form-control select2" data-msg-required="Reason is required"></select>
+                            <select name="lead_status_reason" id="lead_status_reason" class="form-control select2"></select>
                         </div>
                         <div id="div_lead_status_rejected" class="form-group d-none">
                             <select name="lead_status_rejected" id="lead_status_rejected" class="form-control select2">
@@ -1265,13 +1265,16 @@
                         $("#designation").html('');
                         if(data.status == 1)
                         {
-                            $.each(data.reasons,function (i,value){
+                            $.each(data.lead_reasons,function (i,value){
                                 $("#lead_status_reason").append('<option value='+value.id+'>'+value.name+'</option>');
                             });
                             $('#div_lead_status_reason').removeClass('d-none');
-                            $('#lead_status_reason').addClass('required');
+                            $('#lead_status_reason').attr('data-rule-required',true);
+                            $('#lead_status_reason').attr('data-msg-required',"This field is required");
                         }else{
                             $('#div_lead_status_reason').addClass('d-none');
+                            $('#lead_status_reason').removeAttr('data-rule-required');
+                            $('#lead_status_reason').removeAttr('data-msg-required');
                         }
                     });
 

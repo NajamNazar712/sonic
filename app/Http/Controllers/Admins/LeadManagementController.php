@@ -12,6 +12,7 @@ use App\Http\Models\Admin\Lead\LeadStatus;
 use App\Http\Models\Admin\Lead\PamLead;
 use App\Http\Models\Admin\Lead\PamLeadItem;
 use App\Http\Models\City;
+use App\Models\Admin\Lead\LeadReason;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -722,6 +723,14 @@ class LeadManagementController extends Controller
     }
 
     public function lead_reasons(Request $request){
-        dd(1);
+        $lead_reason = LeadReason::join('lead_status_reasons as lsr', 'lsr.reason_id', 'lead_reasons.id')
+            ->select('lead_reasons.id as id', 'lead_reasons.name as name')
+            ->where('lsr.status_id', $request->status_id);
+        if($lead_reason->exists()) {
+            $lead_reason = $lead_reason->get();
+            return response()->json(['status' => 1, 'lead_reasons' => $lead_reason]);
+        }else{
+            return response()->json(['status' => 0, 'error' => 'Reason not found!']);
+        }
     }
 }
