@@ -1259,12 +1259,12 @@
                         '_token': '{{ csrf_token() }}',
                         'status_id': id
                     }
-                })
-                    .done(function(data) {
+                }).done(function(data) {
                     if(data.status == 1){
                         $.each(data.lead_reasons,function (i,value){
                             $("#lead_status_reason").append('<option value='+value.id+'>'+value.name+'</option>');
                         });
+                        alert(1);
                         $('#div_lead_status_reason').removeClass('d-none');
                     }
                     else{
