@@ -355,6 +355,11 @@ Route::name('api.')->group(function () {
                 Route::post('receive', 'AdminAPIController@pick_list_receive')->name('receive');
             });
 
+            Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
+                Route::get('index', 'AdminAPIController@daily_visit_index')->name('index');
+                Route::post('store', 'AdminAPIController@daily_visit_store')->name('store');
+            });
+
         });
 
     });

@@ -6594,8 +6594,8 @@ class AdminAPIController extends Controller
 
     public function daily_visit_index()
     {
-        $lead_statuses = DailyVisitLeadStatus::get(['id', 'name']);
-        return response()->json(['status' => 1, 'data' => $lead_statuses]);
+        $lead_statuses = DailyVisitLeadStatus::select('id', 'name')->get();
+        return response()->json(['status' => 1, 'lead_statuses' => $lead_statuses]);
     }
 
     public function daily_visit_store(Request $request)
@@ -6641,22 +6641,6 @@ class AdminAPIController extends Controller
                 Storage::disk('public')->put($picture_path, file_get_contents($request->location_image));
                 $daily_visit->location_image = $picture_path;
                 $daily_visit->save();
-
-                if ($request->hasFile('upload_bc_image')) {
-                    $filename = 'daily_visit_bc_' . $daily_visit->id . '.png';
-                    $file = $request->file('upload_bc_image');
-                    Storage::disk('public')->putFileAs('daily_visit\business_card', $file, $filename);
-                    $daily_visit->business_card_image = $filename;
-                    $daily_visit->save();
-                }
-
-                if ($request->hasFile('upload_l_image')) {
-                    $filename = 'daily_visit_l_' . $daily_visit->id . '.png';
-                    $file = $request->file('upload_l_image');
-                    Storage::disk('public')->putFileAs('daily_visit\location', $file, $filename);
-                    $daily_visit->location_image = $filename;
-                    $daily_visit->save();
-                }
 
                 return response()->json(['status' => 0, 'message' => 'Daily Visit Has been Uploaded']);
             }
