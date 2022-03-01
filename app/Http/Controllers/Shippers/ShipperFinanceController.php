@@ -977,8 +977,8 @@ class ShipperFinanceController extends Controller
             ->where('ubi.default_bank',1);
 
         if ($request->get('from_date') && $request->get('to_date')) {
-            $from = Carbon::parse($request->get('from_date'))->format('Y-m-d');
-            $to = Carbon::parse($request->get('to_date'))->format('Y-m-d');
+            $from = $request->get('from_date');
+            $to = $request->get('to_date');
             $invoice->whereBetween('invoices.invoicing_date', [$from,$to]);
         }
 
@@ -989,8 +989,8 @@ class ShipperFinanceController extends Controller
             ->where('invoices.to_show',1);
 
          if ($request->get('from_date') && $request->get('to_date')) {
-             $from = Carbon::parse($request->get('from_date'))->format('Y-m-d');
-             $to = Carbon::parse($request->get('to_date'))->format('Y-m-d');
+             $from = $request->get('from_date');
+             $to = $request->get('to_date');
              $reim_invoice->whereBetween('invoices.invoicing_date', [$from,$to]);
          }
 
