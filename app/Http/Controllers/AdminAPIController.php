@@ -6656,6 +6656,13 @@ class AdminAPIController extends Controller
 
     public function daily_visit_report(Request $request)
     {
+        $admin_id = $request->admin_id;
+        if ($request->isMethod('get')){
+            $admins = Admin::where('status, 1')->select('id', 'name')->get();
+        }
+        if ($request->isMethod('post')){
+
+        }
         $daily_visit = DB::connection('reports')->table('daily_visits')
             ->join('daily_visit_lead_statuses as dvls', 'dvls.id', '=', 'daily_visits.lead_status_id')
             ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
