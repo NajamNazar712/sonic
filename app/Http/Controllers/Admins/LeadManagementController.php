@@ -720,4 +720,8 @@ class LeadManagementController extends Controller
         $url = Storage::url('leads/attachment/' . $file);
         return view('admin.leads.attachment_view')->with(['url' => $url]);
     }
+
+    public function lead_reasons(Request $request){
+        dd(1);
+    }
 }

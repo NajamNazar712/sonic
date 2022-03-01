@@ -409,6 +409,9 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div id="div_lead_status_reason" class="form-group d-none">
+                            <select name="lead_status_reason" id="lead_status_reason" class="form-control select2" data-msg-required="Reason is required"></select>
+                        </div>
                         <div id="div_lead_status_rejected" class="form-group d-none">
                             <select name="lead_status_rejected" id="lead_status_rejected" class="form-control select2">
                                 <option value="1"> Prohibited Items</option>
@@ -1249,7 +1252,32 @@
                 width: '100%',
                 dropdownParent: $('#add_status_modal')
             }).bind('change', function () {
-                $(this).valid();
+                id = $(this).val();
+                $.ajax({
+                    url: '{!! route('admin.leads.lead_reasons') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'status_id': id
+                    }
+                })
+                    .done(function(data) {
+                        $("#designation").html('');
+                        if(data.status == 1)
+                        {
+                            $.each(data.reasons,function (i,value){
+                                $("#lead_status_reason").append('<option value='+value.id+'>'+value.name+'</option>');
+                            });
+                            $('#div_lead_status_reason').removeClass('d-none');
+                            $('#lead_status_reason').addClass('required');
+                        }else{
+                            $('#div_lead_status_reason').addClass('d-none');
+                        }
+                    });
+
+
+
+
                 $('#lead_status_rejected').val('').trigger('change');
                 $('#lead_status_notinterested').val('').trigger('change');
                 $('#lead_status_irrelevant').val('').trigger('change');
