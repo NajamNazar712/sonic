@@ -13,5 +13,6 @@ class DeleteInvoiceNamesFromAdminScreenListSeeder extends Seeder
     {
         DB::table('admins_screen_list')->where('name','Financials  >  Invoices  >  Received Invoices')->delete();
         DB::table('admins_screen_list')->where('name','Financials > COD Payments > Reimbursement Invoice')->delete();
+        DB::table('admins_screen_list')->where('name','Financials  >  Invoices  >  Pending Invoices')->update(['name' => 'Financials  >  Invoices  > Invoices']);
     }
 }
