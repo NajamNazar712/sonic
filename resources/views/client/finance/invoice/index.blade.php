@@ -11,7 +11,34 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('client.inc.messages')
+                <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                      <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                      </span>
+                            </div>
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                            </div>
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To">
+                        </div>
+                    </div>
 
+                    <div class="col-2">
+                        <div class="form-group">
+                            <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                         </div>
+                    </div>
+                </form>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -24,14 +51,7 @@
                         <th class="border-primary border-darken-1">Generation Date</th>
                         <th class="border-primary border-darken-1">Invoicing Cycle</th>
                         <th class="border-primary border-darken-1">Invoicing Date</th>
-                        <th class="border-primary border-darken-1">Due Date</th>
-                        <th class="border-primary border-darken-1">Received Date</th>
-                        <th class="border-primary border-darken-1">Company Bank</th>
-                        <th class="border-primary border-darken-1">Received Amount</th>
-                        <th class="border-primary border-darken-1">Tax Amount</th>
-                        <th class="border-primary border-darken-1">Deposit Date</th>
                         <th class="border-primary border-darken-1">Invoice Type</th>
-                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -66,41 +86,6 @@
 
     <script>
         $(document).ready(function() {
-            $('#mark_as_received form select.company_bank').prepend('<option value="" selected></option>').select2({
-                placeholder: 'Select Company Bank',
-                width:'100%'
-            }).bind('change', function() {
-                if ($(this).hasClass('danger')) {
-                    $(this).valid();
-                }
-            });
-
-            $('#mark_as_received form input.received_amount').inputmask({
-                'alias': 'decimal',
-                'allowMinus': false,
-                'allowPlus': false,
-                'digits': 2
-            });
-
-            $('#mark_as_received form input.tax_amount').inputmask({
-                'alias': 'decimal',
-                'allowMinus': false,
-                'allowPlus': false,
-                'digits': 2
-            });
-
-            $('#mark_as_received form input.deposit_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    $('#mark_as_received input.deposit_date').valid();
-                }
-            });
-
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -123,14 +108,7 @@
                             head.push('Generation Date');
                             head.push('Invoicing Cycle');
                             head.push('Invoicing Date');
-                            head.push('Due Date');
-                            head.push('Received Date');
-                            head.push('Company Bank');
-                            head.push('Received Amount');
-                            head.push('Tax Amount');
-                            head.push('Deposit Date');
                             head.push('Invoice Type');
-                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -144,14 +122,7 @@
                                 row.push(values.created_at);
                                 row.push(values.invoicing_cycle);
                                 row.push(values.invoicing_date);
-                                row.push(values.due_date);
-                                row.push(values.received_date);
-                                row.push(values.company_bank);
-                                row.push(values.received_amount);
-                                row.push(values.tax_amount);
-                                row.push(values.deposit_date);
                                 row.push(values.invoice_type);
-                                row.push(values.status);
 
                                 body.push(row);
                             });
@@ -160,6 +131,38 @@
                     });
 
                     return {body: body, header: head};
+                }
+            });
+
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #to_date').pickadate('picker').set('min', $('#track_form #from_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #from_date').pickadate('picker').set('max', $('#track_form #to_date').pickadate('picker').get('select'));
+                    }
                 }
             });
 
@@ -181,27 +184,26 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('cod.finance.invoice.list') }}',
+                ajax:{
+                    url: '{{ route('cod.finance.invoice.list') }}',
+                    data: function (d) {
+                        d.from_date = $('input[name="from_date_formatted"]').val();
+                        d.to_date = $('input[name="to_date_formatted"]').val();
+                    }
+                },
                 rowId: 'id',
                 order: [[6, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'invoice_number_button', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
-                    {data:'city', name: 'c.name', class: 'align-middle text-center shipper'},
-                    {data:'total_charges', name: 'invoices.total_charges', class: 'align-middle text-center total_charges'},
-                    {data:'total_gst', name: 'invoices.total_gst', class: 'align-middle text-center total_gst'},
-                    {data:'total_invoice_amount', name: 'invoices.total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
-                    {data:'created_at', name: 'invoices.created_at', class: 'align-middle text-center generation_date'},
-                    {data:'invoicing_cycle', name: 'ic.name', class: 'align-middle text-center invoicing_cycle'},
-                    {data:'invoicing_date', name: 'invoices.invoicing_date', class: 'align-middle text-center invoicing_date'},
-                    {data:'due_date', name: 'invoices.due_date', class: 'align-middle text-center due_date'},
-                    {data:'received_date', name: 'invoices.received_date', class: 'align-middle text-center received_date'},
-                    {data:'company_bank', name: 'invoices.company_bank_id', class: 'align-middle text-center company_bank'},
-                    {data:'received_amount', name: 'invoices.received_amount', class: 'align-middle text-center received_amount'},
-                    {data:'tax_amount', name: 'invoices.tax_amount', class: 'align-middle text-center tax_amount'},
-                    {data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},
-                    {data:'invoice_type', name: 'invoices.invoice_type', class: 'align-middle text-center invoice_type'},
-                    {data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},
+                    {data:'city', name: 'city', class: 'align-middle text-center shipper'},
+                    {data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
+                    {data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
+                    {data:'total_invoice_amount', name: 'total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
+                    {data:'created_at', name: 'created_at', class: 'align-middle text-center generation_date'},
+                    {data:'invoicing_cycle', name: 'invoicing_cycle', class: 'align-middle text-center invoicing_cycle'},
+                    {data:'invoicing_date', name: 'invoicing_date', class: 'align-middle text-center invoicing_date'},
+                    {data:'invoice_type', name: 'invoice_type', class: 'align-middle text-center invoice_type'},
                     {data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -215,8 +217,6 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var company_bank_select = '<select name="company_bank_select" id="company_bank_select" class="select2 form-control"></select>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
                     var invoice_type_select = '<select name="invoice_type_select" id="invoice_type_select" class="select2 form-control">' +
                         '<option value="1">Courier Invoice</option>' +
                         '<option value="2">Packaging Invoice</option>' +
@@ -229,18 +229,6 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        }
-                        else if ($(header).is('.company_bank')) {
-                            $(company_bank_select).appendTo($(search))
-                                .on('change', function() {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        }
-                        else if ($(header).is('.status')) {
-                            $(status_select).appendTo($(search))
-                                .on('change', function() {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
                         }
                         else if($(header).is('.invoice_type')){
                             $(invoice_type_select).appendTo($(search))
@@ -260,36 +248,6 @@
                         }
                     });
 
-                    var company_banks = $.map({!! $company_banks !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
-
-                        return obj;
-                    });
-
-                    $('#company_bank_select').prepend('<option value="" selected></option>').select2({
-                        data: company_banks,
-                        placeholder: 'Select Company Bank',
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-
-                    var statuses = $.map({!! $invoice_statuses !!}, function (obj) {
-                        obj.id = obj.id;
-                        obj.text = obj.name;
-
-                        return obj;
-                    });
-
-                    $('#status_select').prepend('<option value="" selected></option>').select2({
-                        data: statuses,
-                        placeholder: 'Select Status',
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-
                     $("#invoice_type_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Invoice Type",
                         width:'100%',
@@ -301,54 +259,59 @@
                 }
             });
 
-            $('#mark_as_received form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                }
-            });
-            $('#datatable tbody').on('click', 'tr td.invoice_number button', function() {
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
+                var type_id = table.row($(this).parents('tr')).data().type_id;
+                console.log(type_id,id);
+                if ($(this).hasClass('detail_print')) {
+                    var url ='';
+                    if(type_id == 2){
+                        url = '{!! route('cod.finance.invoice.detail_print') !!}';
+                    }
+                    else{
+                        url = '{!! route('cod.finance.invoice.reimbursement.detail_print') !!}';
+                    }
 
-                if (id) {
-                    $.ajax({
-                        url: '{!! route('cod.finance.invoice.print') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': id
-                        }
-                    })
-                        .done(function(data) {
-                            var tab = window.open('', '_blank');
+                    if (id) {
+                        $.ajax({
+                            url:url,
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'id': id
+                            }
+                        })
+                            .done(function(data) {
+                                var tab = window.open('', '_blank');
 
-                            if(!tab) {
-                                swal({
-                                    title: 'Popup Blocker Enabled!',
-                                    text: 'Please add this site to your exception list.',
-                                    icon: 'error',
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
-                                });
-                            }
-                            else {
-                                tab.document.write(data);
-                                tab.document.close();
-                                tab.focus();
-                            }
-                        });
+                                if(!tab) {
+                                    swal({
+                                        title: 'Popup Blocker Enabled!',
+                                        text: 'Please add this site to your exception list.',
+                                        icon: 'error',
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                }
+                                else {
+                                    tab.document.write(data);
+                                    tab.document.close();
+                                    tab.focus();
+                                }
+                            });
+                    }
                 }
             });
 
             $('#datatable tbody').on('contextmenu', 'tr td.invoice_number button', function(e) {
                 e.preventDefault();
-
+                console.log(1111);
                 var id = parseInt($(this).parents('tr').attr('id'));
 
                 if (id) {
                     $.ajax({
-                        url: '{!! route('cod.finance.invoice.print') !!}',
+                        url: '{!! route('cod.finance.invoice.detail_print') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
@@ -377,48 +340,21 @@
                 }
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            $('#datatable tbody').on('click', 'tr td.invoice_number', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
-
-                if ($(this).hasClass('export_to_excel')) {
-                    window.open('{!! route('cod.finance.invoice.export_to_excel') !!}?id=' + id, '_blank');
+                var account = table.row($(this).parents('tr')).data().type_id;
+                console.log()
+                var url ='';
+                if(account == 2){
+                    url = '{!! route('cod.finance.invoice.invoices_print') !!}';
                 }
-                else if ($(this).hasClass('email_reminder')) {
+                else{
+                    url = '{!! route('cod.finance.invoice.reimbursement.invoices_print') !!}';
+                }
+
+                if (id) {
                     $.ajax({
-                        url: '{!! route('cod.finance.invoice.email_reminder') !!}',
-                        method: 'PUT',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': id
-                        }
-                    })
-                        .done(function(data) {
-                            if (data.status == 0) {
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-
-                            table.draw('false');
-                        });
-                }
-                else if ($(this).hasClass('mark_as_received')) {
-                    $('#mark_as_received form input.id').val(id);
-
-                    $('#mark_as_received form select.company_bank').val('').change();
-                    $('#mark_as_received form input.received_amount').val('');
-                    $('#mark_as_received form input.tax_amount').val('');
-                    $('#mark_as_received form input.pickadate').val('');
-
-                    $('#mark_as_received form label.danger').remove();
-
-
-                    $('#mark_as_received').modal('show');
-                }
-                else if ($(this).hasClass('print_origin_wise')) {
-                    $.ajax({
-                        url: '{!! route('cod.finance.invoice.print_origin_wise') !!}',
+                        url: url,
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
@@ -446,6 +382,59 @@
                 }
             });
 
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var account_type = parseInt(table.row($(this).parents('tr')).data().type_id);
+
+                if ($(this).hasClass('export_to_excel')) {
+                    if(account_type == 2)
+                    {
+                        window.open('{!! route('cod.finance.invoice.export_to_excel') !!}?id=' + id, '_blank');
+                    }
+                    else if(account_type == 1)
+                    {
+                        window.open('{!! route('cod.finance.invoice.reimbursement.export_to_excel') !!}?id=' + id, '_blank');
+                    }
+                }
+                else if ($(this).hasClass('print_origin_wise')) {
+                    $.ajax({
+                        url: '{!! route('cod.finance.invoice.print_origin_wise') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id,
+                            'account_type': account_type,
+                        }
+                    })
+                        .done(function(data) {
+                            var tab = window.open('', '_blank');
+
+                            if(!tab) {
+                                swal({
+                                    title: 'Popup Blocker Enabled!',
+                                    text: 'Please add this site to your exception list.',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            }
+                            else {
+                                tab.document.write(data);
+                                tab.document.close();
+                                tab.focus();
+                            }
+                        });
+                }
+            });
+            $('#track_form').bind('submit', function (e) {
+                e.preventDefault();
+                var from_date = $('#track_form #from_date').val();
+                var to_date = $('#track_form #to_date').val();
+
+                if ((from_date != '' && to_date != '')) {
+                    table.draw();
+                }
+            });
         });
     </script>
 @endsection

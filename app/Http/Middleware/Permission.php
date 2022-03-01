@@ -222,6 +222,10 @@ class Permission
             'cargo_manifest.history' => 556,
             'cargo_manifest.history.list' => 556,
 
+            'cargo_manifest.draft.setting.list' => 682,
+            'cargo_manifest.draft.setting' => 682,
+            'cargo_manifest.draft.update' => 682,
+
 
 
 
@@ -913,8 +917,11 @@ class Permission
             'settings.shippers_return_address.index' => 668,
             'settings.rcp_sms.index' => 680,
 
+            'settings.consignee_sms_expire.index' => 683,
+			'settings.sales.user_restriction.index' => 681,
 
-
+            'settings.return_reason_mandatory.index' => 684,
+            'settings.return_reason_mandatory.list' => 684,
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
