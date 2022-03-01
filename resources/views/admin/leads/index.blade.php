@@ -1246,6 +1246,11 @@
 
             {{--    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + lead_id;--}}
             {{--});--}}
+            $("#lead_status_reason").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reason",
+                width: '100%',
+                dropdownParent: $('#add_status_modal')
+            })
 
             $("#update_lead_status").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Status",
@@ -1262,16 +1267,16 @@
                     }
                 })
                     .done(function(data) {
-                        $("#designation").html('');
-                        if(data.status == 1)
-                        {
+                        $("#lead_status_reason").html('');
+                        if(data.status == 1){
                             $.each(data.lead_reasons,function (i,value){
                                 $("#lead_status_reason").append('<option value='+value.id+'>'+value.name+'</option>');
                             });
                             $('#div_lead_status_reason').removeClass('d-none');
                             $('#lead_status_reason').attr('data-rule-required',true);
                             $('#lead_status_reason').attr('data-msg-required',"This field is required");
-                        }else{
+                        }
+                        else{
                             $('#div_lead_status_reason').addClass('d-none');
                             $('#lead_status_reason').removeAttr('data-rule-required');
                             $('#lead_status_reason').removeAttr('data-msg-required');
