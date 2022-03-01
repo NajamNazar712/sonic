@@ -862,6 +862,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add', 'Admins\AdminTerritoryController@add')->name('add');
             Route::post('/store', 'Admins\AdminTerritoryController@store')->name('store');
             Route::post('/ajax', 'Admins\AdminTerritoryController@edit_territory_ajax')->name('edit');
+            Route::post('/disable_territory', 'Admins\AdminTerritoryController@disable_territory')->name('disable_territory');
+            Route::post('/enable_territory', 'Admins\AdminTerritoryController@enable_territory')->name('enable_territory');
             Route::put('{id}/update', 'Admins\AdminTerritoryController@update')->name('update');
             
         });
@@ -871,6 +873,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add', 'Admins\AdminTerritoryController@area_add')->name('add');
             Route::post('/store', 'Admins\AdminTerritoryController@area_store')->name('store');
             Route::post('/ajax', 'Admins\AdminTerritoryController@area_edit')->name('edit');
+            Route::post('/disable_area_status', 'Admins\AdminTerritoryController@disable_area_status')->name('disable_area_status');
+            Route::post('/enable_area_status', 'Admins\AdminTerritoryController@enable_area_status')->name('enable_area_status');
             Route::put('{id}/update', 'Admins\AdminTerritoryController@area_update')->name('update');
             Route::post('tag', 'Admins\AdminTerritoryController@area_tag')->name('tag');
 
@@ -2834,6 +2838,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('details', 'Admins\AdminSalesController@key_accounts_dashboard_details')->name('dashboard.details');
             });
 
+            Route::prefix('user_restriction')->name('user_restriction.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@sales_user_restriction_index')->name('index');
+                Route::post('store', 'Admins\GlobalSettingsController@sales_user_restriction_store')->name('store');
+            });
+
 
             Route::prefix('projection')->name('projection.')->group(function () {
                 Route::prefix('percentage')->name('percentage.')->group(function () {
@@ -3117,6 +3126,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@rider_shipment_attempt_settings_store')->name('store');
         });
 
+        Route::prefix('bolt_update_version')->name('bolt_update_version.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@bolt_update_version_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@bolt_update_version_store')->name('store');
+        });
+
 		Route::prefix('last_mile_cron')->name('last_mile_cron.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@last_mile_cron_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@last_mile_cron_store')->name('store');
@@ -3174,6 +3188,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('shippers_return_address')->name('shippers_return_address.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shippers_return_address_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@shippers_return_address_store')->name('store');
+        });
+
+        Route::prefix('consignee_sms_expire')->name('consignee_sms_expire.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@consignee_sms_expire_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@consignee_sms_expire_store')->name('store');
+        });
+
+        Route::prefix('return_reason_mandatory')->name('return_reason_mandatory.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_reason_mandatory_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@return_reason_mandatory_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@return_reason_mandatory_store')->name('store');
         });
 
     });
