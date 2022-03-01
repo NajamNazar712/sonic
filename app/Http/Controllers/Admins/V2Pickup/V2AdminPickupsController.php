@@ -354,6 +354,7 @@ class V2AdminPickupsController extends Controller
 
             }
 //
+
         if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
             $from = $request->get('requested_from_date');
             $to = $request->get('requested_to_date');

@@ -91,7 +91,7 @@ class AdminTrackingController extends Controller
                     }
                 }
                 ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null,null);
-                if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
+                if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && in_array(session('id'), session('sale_users_bypass')))) {
                     $details = array();
 
                     $details['tracking_number'] = $tracking_number;
@@ -599,7 +599,7 @@ class AdminTrackingController extends Controller
                         }
                     }
                 }
-                if ((session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
+                if ((session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && in_array(session('id'), session('sale_users_bypass')))) {
 
                     $details = array();
 
@@ -783,7 +783,7 @@ class AdminTrackingController extends Controller
                     }
                     ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null,null);
 
-                    if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
+                    if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && in_array(session('id'), session('sale_users_bypass')))) {
                         $details = array();
 
                         if($shipment->business_category_id == 2){

@@ -22,6 +22,7 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Created By</th>
                                     <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
@@ -136,6 +137,11 @@
         </div>
 @endsection
 
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+@endsection
+
+
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -176,6 +182,7 @@
                             head.push('S.No');
                             head.push('Name');
                             head.push('City');
+                            head.push('status');
                             head.push('Created By');
                             head.push('Created At');
                             head.push('Updated By');
@@ -187,6 +194,7 @@
                             row.push(index + 1);
                                 row.push(values.name);
                                 row.push(values.city);
+                                row.push(values.status);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
                                 row.push(values.updated_by);
@@ -232,16 +240,17 @@
                 serverSide: true,
                 ajax: '{{ route('admin.management.territory.list') }}',
                 rowId: 'id',
-                order: [[4, 'desc']],
+                order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'territories.name', class: 'align-middle name'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'territories.created_at', class: 'align-middle created_at'},
                     {data: 'updated_by', name: 'ad.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'territories.updated_at', class: 'align-middle updated_at'},
-                    {orderable: false,data: 'action', name: 'action', class: 'align-middle action'},
+                    {orderable: false,data: 'action', name: 'action', class: 'align-middle action',},
                 ],
                 rowCallback: function(row, data, index) {
 
@@ -338,6 +347,66 @@
                         }
 
                     });
+
+                }
+                if ($(this).hasClass('disable_territory')) {
+                    $.ajax({
+                        url: '{!! route('admin.management.territory.disable_territory') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': territory_id,
+                            'status':status
+                        }
+                    })
+                        .done(function(data){
+
+                            if(data.status == 1 )
+                            {
+                                table.draw(false);
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+
+                        });
+
+                }
+                if ($(this).hasClass('enable_territory')) {
+                    $.ajax({
+                        url: '{!! route('admin.management.territory.enable_territory') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': territory_id,
+                            'status':status
+                        }
+                    })
+                        .done(function(data){
+
+                            if(data.status == 1 )
+                            {
+                                table.draw(false);
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+
+                        });
 
                 }
             });

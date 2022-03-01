@@ -23,19 +23,20 @@
                         <th class="border-primary border-darken-1">Total GST</th>
                         <th class="border-primary border-darken-1">Total Invoice Amount</th>
                         <th class="border-primary border-darken-1">Generation Date</th>
-                        <th class="border-primary border-darken-1">Invoicing Cycle</th>
-                        <th class="border-primary border-darken-1">Invoicing Date</th>
-                        <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Due Date</th>
-                        <th class="border-primary border-darken-1">Overdue By</th>
                         <th class="border-primary border-darken-1">Received Date</th>
                         <th class="border-primary border-darken-1">Company Bank</th>
+                        <th class="border-primary border-darken-1">Invoicing Cycle</th>
                         <th class="border-primary border-darken-1">Received Amount</th>
                         <th class="border-primary border-darken-1">Tax Amount</th>
                         <th class="border-primary border-darken-1">Deposit Date</th>
-                        <th class="border-primary border-darken-1">Deposit Slip</th>
+                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Status Id</th>
+                        <th class="border-primary border-darken-1">Invoicing Date</th>
+                        <th class="border-primary border-darken-1">Invoicing Cycle</th>
+                        <th class="border-primary border-darken-1">Invoice Type</th>
+                        <th class="border-primary border-darken-1">Payment Type</th>
                       {{--  <th class="border-primary border-darken-1">Status</th>--}}
-                        <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
                 </table>
@@ -271,29 +272,32 @@
                 serverSide: true,
                 ajax: '{{ route('admin.finance.invoices.received_list') }}',
                 rowId: 'id',
-                order: [[7, 'desc']],
+                order: [[0, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data:'invoice_number_button', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
-                    {data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
-                    {data:'city', name: 'c.name', class: 'align-middle text-center shipper'},
-                    {data:'total_charges', name: 'invoices.total_charges', class: 'align-middle text-center total_charges'},
-                    {data:'total_gst', name: 'invoices.total_gst', class: 'align-middle text-center total_gst'},
-                    {data:'total_invoice_amount', name: 'invoices.total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
-                    {data:'created_at', name: 'invoices.created_at', class: 'align-middle text-center generation_date'},
-                    {data:'invoicing_cycle', name: 'ic.name', class: 'align-middle text-center invoicing_cycle'},
-                    {data:'invoicing_date', name: 'invoices.invoicing_date', class: 'align-middle text-center invoicing_date'},
-                    {data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
-                    {data:'due_date', name: 'invoices.due_date', class: 'align-middle text-center due_date'},
-                    {data:'overdue_by', name: 'overdue_by', class: 'align-middle text-center overdue_by', orderable: false, searchable: false},
-                    {data:'received_date', name: 'invoices.received_date', class: 'align-middle text-center received_date'},
-                    {data:'company_bank', name: 'invoices.company_bank_id', class: 'align-middle text-center company_bank'},
-                    {data:'received_amount', name: 'invoices.received_amount', class: 'align-middle text-center received_amount'},
-                    {data:'tax_amount', name: 'invoices.tax_amount', class: 'align-middle text-center tax_amount'},
-                    {data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},
-                    {data:'upload_slip', name: 'invoices.deposit_date', class: 'align-middle text-center upload_slip', orderable: false, searchable: false},
+                    {data:'invoice_number', name: 'invoice_number', class: 'align-middle text-center invoice_number'},
+                    {data:'shipper', name: 'shipper', class: 'align-middle text-center shipper'},
+                    {data:'city', name: 'city', class: 'align-middle text-center city'},
+                    {data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
+                    {data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
+                    {data:'total_invoice_amount', name: 'total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
+                    {data:'created_at', name: 'created_at', class: 'align-middle text-center created_at'},
+                    {data:'due_date', name: 'due_date', class: 'align-middle text-center due_date'},
+                    {data:'received_date', name: 'received_date', class: 'align-middle text-center received_date'},
+                    {data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
+                    {data:'invoicing_cycle', name: 'invoicing_cycle', class: 'align-middle text-center invoicing_cycle'},
+                    {data:'received_amount', name: 'received_amount', class: 'align-middle text-center received_amount'},
+                    {data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
+                    {data:'deposit_date', name: 'deposit_date', class: 'align-middle text-center deposit_date'},
+                    {data:'status', name: 'status', class: 'align-middle text-center status'},
+                    {data:'status_id', name: 'status_id', class: 'align-middle text-center status_id'},
+                    {data:'invoicing_date', name: 'invoicing_date', class: 'align-middle text-center invoicing_date'},
+                    {data:'invoicing_cycle', name: 'invoicing_cycle', class: 'align-middle text-center invoicing_cycle'},
+                    {data:'invoice_type', name: 'invoice_type', class: 'align-middle text-center invoice_type'},
+                    {data:'payment_type', name: 'payment_type', class: 'align-middle text-center payment_type'},
+                    //{data:'upload_slip', name: 'invoices.deposit_date', class: 'align-middle text-center upload_slip', orderable: false, searchable: false},
                  /*   {data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},*/
-                    {data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                    //{data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

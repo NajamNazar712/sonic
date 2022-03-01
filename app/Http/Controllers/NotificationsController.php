@@ -8163,7 +8163,7 @@ class NotificationsController extends Controller
 
                     $link = route('shipment.status.verify', ['tracking_number' => $tracking_number, 'delivery_note_id' => $delivery_note_id]);
                     $reason = '';
-                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
 
                     if ($shipment_journey) {
                         $current_status = $shipment_journey->shipment_status_consignee->name;
@@ -8466,9 +8466,15 @@ class NotificationsController extends Controller
 
                     foreach ($datas as $data) {
                         $data_set = Rider::find($data->id);
-
                         $data_set->status = 0;
                         $data_set->save();
+                        $employee_directory = Employee::where('trax_id', $data_set->trax_id);
+                        if($employee_directory->exists()){
+                            $employee_directory = $employee_directory->first();
+                            $employee_directory->status_id = 3;
+                            $employee_directory->save();
+                        }
+
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->name . '</td>';
