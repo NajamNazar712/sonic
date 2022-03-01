@@ -17,7 +17,7 @@
 					<tr role="row" class="bg-primary white">
 						<th class="border-primary border-darken-1"></th>
 						<th class="border-primary border-darken-1">S. No.</th>
-						<th class="border-primary border-darken-1">Account</th>
+						<th class="border-primary border-darken-1">Account Type</th>
 						<th class="border-primary border-darken-1">Invoice Number</th>
 						<th class="border-primary border-darken-1">Shipper</th>
 						<th class="border-primary border-darken-1">City</th>
@@ -245,7 +245,7 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('Account');
+                            head.push('Account Type');
                             head.push('Invoice No.');
                             head.push('Shipper');
                             head.push('City');
