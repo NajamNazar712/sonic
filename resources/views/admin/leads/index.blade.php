@@ -1096,6 +1096,11 @@
                 width: '100%',
                 dropdownParent: $('#ForwardLeadModal')
             });
+            $("#lead_status_reason").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Reason",
+                width: '100%',
+                dropdownParent: $('#add_status_modal')
+            });
             $('#salesTagSubmit').on('click', function () {
                 var assign = parseInt($('#saletag').val());
                 swal({
@@ -1240,23 +1245,12 @@
             });
 
 
-            {{--$('body').on('click','#datatable .view_remarks',function(){--}}
-            {{--    var lead_id = parseInt($(this).parents('tr').attr('id'));--}}
-            {{--    var link = '{{ route('admin.leads.view_remarks', ["id" => 0]) }}';--}}
-
-            {{--    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + lead_id;--}}
-            {{--});--}}
-            $("#lead_status_reason").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Reason",
-                width: '100%',
-                dropdownParent: $('#add_status_modal')
-            })
-
             $("#update_lead_status").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Status",
                 width: '100%',
                 dropdownParent: $('#add_status_modal')
             }).bind('change', function () {
+                $("#div_lead_status_reason").html('');
                 id = $(this).val();
                 $.ajax({
                     url: '{!! route('admin.leads.lead_reasons') !!}',
@@ -1267,26 +1261,17 @@
                     }
                 })
                     .done(function(data) {
-                        $("#lead_status_reason").html('');
-                        if(data.status == 1){
-                            $.each(data.lead_reasons,function (i,value){
-                                $("#lead_status_reason").append('<option value='+value.id+'>'+value.name+'</option>');
-                            });
-                            $('#div_lead_status_reason').removeClass('d-none');
-                            $('#lead_status_reason').attr('data-rule-required',true);
-                            $('#lead_status_reason').attr('data-msg-required',"This field is required");
-                        }
-                        else{
-                            $('#div_lead_status_reason').addClass('d-none');
-                            $('#lead_status_reason').removeAttr('data-rule-required');
-                            $('#lead_status_reason').removeAttr('data-msg-required');
-                        }
-                    });
-
-
-
-
-                $('#lead_status_rejected').val('').trigger('change');
+                    if(data.status == 1){
+                        $.each(data.lead_reasons,function (i,value){
+                            $("#lead_status_reason").append('<option value='+value.id+'>'+value.name+'</option>');
+                        });
+                        $('#div_lead_status_reason').removeClass('d-none');
+                    }
+                    else{
+                        $('#div_lead_status_reason').addClass('d-none');
+                    }
+                });
+                /*$('#lead_status_rejected').val('').trigger('change');
                 $('#lead_status_notinterested').val('').trigger('change');
                 $('#lead_status_irrelevant').val('').trigger('change');
                 if (this.value == 10) {
@@ -1305,8 +1290,15 @@
                     $('#div_lead_status_rejected').addClass('d-none');
                     $('#div_lead_status_notinterested').addClass('d-none');
                     $('#div_lead_status_irrelevant').addClass('d-none');
-                }
+                }*/
             });
+
+            {{--$('body').on('click','#datatable .view_remarks',function(){--}}
+            {{--    var lead_id = parseInt($(this).parents('tr').attr('id'));--}}
+            {{--    var link = '{{ route('admin.leads.view_remarks', ["id" => 0]) }}';--}}
+
+            {{--    window.location = link.substr(0, link.lastIndexOf('/')) + '/' + lead_id;--}}
+            {{--});--}}
             //todo sub modal under status
             $("#update_bulk_lead_status").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Status",
