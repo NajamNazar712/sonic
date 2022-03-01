@@ -909,7 +909,7 @@ class ShipperReportsController extends Controller
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
 
-            ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
+            ->select('shipments.tracking_number','shipments.return_address_id','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
 
         $shipment = $shipment->where(function ($query) {
             $query->where('shipments.user_id', 7306)
@@ -984,6 +984,16 @@ class ShipperReportsController extends Controller
                 }else{
                     return '-';
                 }
+            })
+            ->addColumn('return_status', function ($shipment) {
+                if($shipment->return_address_id == 31076 || $shipment->return_address_id == 31078 || $shipment->return_address_id == 31079 || $shipment->return_address_id == 31080 || $shipment->return_address_id == 33761 || $shipment->return_address_id == 31082 || $shipment->return_address_id == 31083 || $shipment->return_address_id == 31084 || $shipment->return_address_id == 31085 || $shipment->return_address_id == 33760 || $shipment->return_address_id == 31086 || $shipment->return_address_id == 31087 || $shipment->return_address_id == 31088 || $shipment->return_address_id == 31089 || $shipment->return_address_id == 33762){
+                    return 'Return to Daraz Warehouse';
+                }else{
+                    return 'Return to Vendor';
+
+                }
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
             ->addColumn('tracking_number_link', function ($shipment) {
                 $route = route('cod.tracking.index');
