@@ -6631,17 +6631,21 @@ class AdminAPIController extends Controller
                 $daily_visit->longitude = $request->longitude;
                 $daily_visit->admin_id = $request->admin_id;
                 $daily_visit->save();
+                if ($request->hasFile('business_card_image')) {
+                    $filename = 'daily_visit_bc_' . $daily_visit->id . '.png';
+                    $file = $request->file('business_card_image');
+                    Storage::disk('public')->putFileAs('daily_visit\business_card', $file, $filename);
+                    $daily_visit->business_card_image = $filename;
+                    $daily_visit->save();
+                }
 
-                $picture_path = 'daily_visit/business_card/' . $daily_visit->id . '.png';
-                Storage::disk('public')->put($picture_path, file_get_contents($request->business_card_image));
-                $daily_visit->business_card_image = $picture_path;
-                $daily_visit->save();
-
-                $picture_path = 'daily_visit/location/' . $daily_visit->id . '.png';
-                Storage::disk('public')->put($picture_path, file_get_contents($request->location_image));
-                $daily_visit->location_image = $picture_path;
-                $daily_visit->save();
-
+                if ($request->hasFile('location_image')) {
+                    $filename = 'daily_visit_l_' . $daily_visit->id . '.png';
+                    $file = $request->file('location_image');
+                    Storage::disk('public')->putFileAs('daily_visit\location', $file, $filename);
+                    $daily_visit->location_image = $filename;
+                    $daily_visit->save();
+                }
                 return response()->json(['status' => 0, 'message' => 'Daily Visit Has been Uploaded']);
             }
             catch (Exception $ex){
