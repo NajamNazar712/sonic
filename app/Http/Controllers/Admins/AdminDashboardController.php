@@ -8398,12 +8398,11 @@ class AdminDashboardController extends Controller
             ->addColumn('days_to_disable', function ($user) {
                 $disable_date = strtotime($user->disable_at);
                 $current_date = strtotime(date('Y-m-d h:i:s'));
-//                $diff = date_diff($disable_date,$current_date);
-//                $diff = $current_date->diff($disable_date);
+
                 $timeDiff = abs($current_date - $disable_date);
                 $numberDays = $timeDiff/86400;
                 $numberDays = intval($numberDays);
-//                dd($numberDays);
+
                 return $numberDays;
             })
             ->addColumn('id_padded', function ($user) {
