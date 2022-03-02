@@ -3911,4 +3911,17 @@ class AdminHumanResourseController extends Controller
         }
         return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
     }
+
+    public function designation_change_logs(Request $request){
+        $designation_logs = EmployeeDesignationLog::join('admins as a', 'a.id','=','employee_designation_logs.updated_by')
+            ->join('employee_designations as ed', 'ed.id', '=', 'employee_designation_logs.designation_id')
+            ->select('a.name as updated_by', 'ed.name as designation', 'employee_designation_logs.created_at as updated_at')
+            ->where('employee_designation_logs.employee_id', $request->employee_id)->orderBy('employee_designation_logs.id', 'DESC');
+        if($designation_logs->exists()){
+            $designation_logs = $designation_logs->get();
+            return response()->json(['status' => 1, 'logs' => $designation_logs]);
+        }else{
+            return response()->json(['status' => 0, 'error' => "Logs not found"]);
+        }
+    }
 }
