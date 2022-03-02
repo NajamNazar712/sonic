@@ -988,7 +988,7 @@ class ShipperReportsController extends Controller
             ->addColumn('return_status', function ($shipment) {
                 if($shipment->shipper_status_id == 25){
 
-                    if($shipment->return_address_id == 31076 || $shipment->return_address_id == 31078 || $shipment->return_address_id == 31079 || $shipment->return_address_id == 31080 || $shipment->return_address_id == 33761 || $shipment->return_address_id == 31082 || $shipment->return_address_id == 31083 || $shipment->return_address_id == 31084 || $shipment->return_address_id == 31085 || $shipment->return_address_id == 33760 || $shipment->return_address_id == 31086 || $shipment->return_address_id == 31087 || $shipment->return_address_id == 31088 || $shipment->return_address_id == 31089 || $shipment->return_address_id == 33762){
+                    if(in_array($shipment->return_address_id, [31076, 31078, 31079, 31080, 33761,  1082, 31083, 31084, 31085, 33760, 31086,  31087, 31088, 31089, 33762])){
                         return 'Return to Daraz Warehouse';
                     }else{
                         return 'Return to Vendor';
