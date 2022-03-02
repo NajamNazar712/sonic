@@ -8396,14 +8396,23 @@ class AdminDashboardController extends Controller
 
         return Datatables::of($users)
             ->addColumn('days_to_disable', function ($user) {
-                $disable_date = strtotime($user->disable_at);
-                $current_date = strtotime(date('Y-m-d h:i:s'));
+                if ($user->disable_at == null)
+                {
+                    $disable_date = 0;
+                      return $disable_date;
+                }
+                elseif ($user->disable_at != null)
+                {
+                    $disable_date = strtotime($user->disable_at);
+                    $current_date = strtotime(date('Y-m-d h:i:s'));
 
-                $timeDiff = abs($current_date - $disable_date);
-                $numberDays = $timeDiff/86400;
-                $numberDays = intval($numberDays);
+                    $timeDiff = abs($current_date - $disable_date);
+                    $numberDays = $timeDiff/86400;
+                    $numberDays = intval($numberDays);
 
-                return $numberDays;
+                    return $numberDays;
+                }
+
             })
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
