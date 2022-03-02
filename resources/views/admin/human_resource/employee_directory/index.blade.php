@@ -357,27 +357,31 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="designationChangeLogModal" data-backdrop="static" tabindex="-1" role="dialog"
-         role="dialog" aria-labelledby="adminprofile"
-         aria-hidden="true">
-
-        <div class="modal-dialog modal-xl" role="document" style="margin-left: 35%!important;">
+    <div class="modal fade text-left" id="designationChangeLogModal" data-backdrop="static" tabindex="-1" role="dialog" role="dialog" aria-labelledby="designationChangeLogModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document" style="margin-left: 35%!important;">
             <div class="modal-content" style="width: 60%!important;">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="admin_profile_heading">Designation Logs<span></span></h4>
+                    <h4 class="modal-title" id="designation_logs_heading">Designation Logs<span></span></h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body admin_profile" id="admin_profile_body">
+                <div class="modal-body designation_logs" id="designation_logs_body">
                     <table class="table table-sm table-bordered border">
                         <thead>
-                        <tr class="bg-primary white">
-                            <th class="border-primary border-darken-1">Designation</th>
-                            <th class="border-primary border-darken-1">Updated By</th>
-                            <th class="border-primary border-darken-1"></th>
-                        </tr>
+                            <tr class="bg-primary white">
+                                <th class="border-primary border-darken-1">Designation</th>
+                                <th class="border-primary border-darken-1">Updated By</th>
+                                <th class="border-primary border-darken-1">Updated At</th>
+                            </tr>
                         </thead>
+                        <tbody>
+                            <tr>
+                                <td id = "logs_designation_name"></td>
+                                <td id = "logs_updated_by"></td>
+                                <td id = "logs_updated_at"></td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
