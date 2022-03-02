@@ -27,6 +27,7 @@ use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDesignationHub;
+use App\Http\Models\HR\EmployeeDesignationLog;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
@@ -1077,6 +1078,12 @@ class AdminHumanResourseController extends Controller
         $employee->joining_date = $request->joining_date_formatted;
         $employee->emergency_contact_person = $request->emergency_contact_person;
         $employee->update();
+        if($employee->designation_id != $request->designation){
+            $designation_logs = new EmployeeDesignationLog();
+            $designation_logs->updated_by = Auth::id();
+            $designation_logs->designation_id = $employee->designation_id;
+            $designation_logs->employee_id = $employee->id;
+        }
 
         if($employee->employee_type_id == 1)
         {
