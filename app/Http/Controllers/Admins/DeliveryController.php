@@ -871,6 +871,10 @@ class DeliveryController extends Controller
                     }
                 }
                 NotificationsController::send(40, $note->id);
+
+                //HBL Konnect Integration
+
+                //HBL Konnect Integration
             }
 
             //rider attendance
