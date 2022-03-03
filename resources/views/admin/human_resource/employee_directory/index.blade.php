@@ -357,7 +357,7 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="designationChangeLogModal" data-backdrop="static" tabindex="-1" role="dialog" role="dialog" aria-labelledby="designationChangeLogModal" aria-hidden="true">
+    <div class="modal fade text-left" id="designationChangeLogModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="designationChangeLogModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document" style="margin-left: 35%!important;">
             <div class="modal-content" style="width: 60%!important;">
                 <div class="modal-header">
@@ -1272,7 +1272,7 @@
                     this.api().table().columns.adjust();
                 }
             });
-            $('body').on('click', '.designation_logs', function (e) {
+            $('body').on('click', '.designation_logs_1', function (e) {
                 var id = $(this).data('target-id');
                 $.ajax({
                     url:'{!! route('admin.human_resource.employee_directory.designation_logs') !!}',
