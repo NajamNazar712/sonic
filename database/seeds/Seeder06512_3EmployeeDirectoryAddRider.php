@@ -13,7 +13,7 @@ class Seeder06512_3EmployeeDirectoryAddRider extends Seeder
      */
     public function run()
     {
-        $riders = Rider::whereIn('trax_id',['Trax06512','Trax06513'])->get();
+        $riders = Rider::whereIn('id',[3386, 3411, 3533, 3592, 3918, 3935, 3954, 4019, 4059, 4096, 4176, 4238, 4270, 4389, 4390, 4424, 4468, 4539, 4586, 4634, 4806, 4822, 4853, 4918, 4951, 4974, 4978, 4979, 4980, 4981, 5002, 5017, 5063, 5119, 5133])->get();
         foreach ($riders as $rider)
         {
             $employee = new Employee();
