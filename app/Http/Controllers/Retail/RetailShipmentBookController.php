@@ -179,6 +179,7 @@ class RetailShipmentBookController extends Controller
         $order_id = $request->input('order_id');
         $package_type = FALSE;
         $special_instructions = NULL;
+        $business_category_id = $request->input('business_category');
 
 
         $shipping_mode_check = $request->input('shipping_mode');
@@ -214,6 +215,7 @@ class RetailShipmentBookController extends Controller
 
         $request->weight_charges = (float)str_replace(',', '', $request->input('weight_charges'));
         $request->fuel_surcharge = (float)str_replace(',', '', $request->input('fuel_surcharge'));
+       /* $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $request->discount, $request->weight);*/
 
         $city = City::find($pickup_city_id);
         $gst = $city->zone->gst;
