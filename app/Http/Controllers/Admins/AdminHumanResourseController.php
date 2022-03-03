@@ -425,7 +425,9 @@ class AdminHumanResourseController extends Controller
                         }
 
                     if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item designation_logs" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
+                        if($result->employee_type_id == 1){
+                            $dropdown .= '<button type="button" class="dropdown-item designation_logs" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
+                        }
                     }
 
                         $dropdown .= '
