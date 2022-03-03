@@ -10390,6 +10390,13 @@ class AdminReportsController extends Controller
             ->addColumn('tracking_number_link', function ($crm_request) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
+            })
+            ->editColumn('approved_by', function ($crm_request) {
+                if($crm_request->adjusted_percentage == null){
+                    return '';
+                }else{
+                    return $crm_request->approved_by;
+                }
             });
         if($tracking = $request->get('search_tracking_no')){
             $tracking_numbers = explode(',', $tracking);

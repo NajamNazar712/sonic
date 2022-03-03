@@ -209,9 +209,7 @@
                                                <tr>
                                                     <th scope="row">Special Request </th>
                                                     <td class="name">
-                                                        @foreach($approvers as $admin)
-                                                            <h5 class="mb-0">{{$admin['admin_name']}} {{$admin['adjusted_percentage'] == '' ? '' : ' ('.$admin['adjusted_percentage'].')'}}</h5>
-                                                        @endforeach
+                                                            <h5 class="mb-0">{{$approvers->admin}} {{$approvers->percentage == '' ? '' : ' ('.$approvers->percentage.')'}}</h5>
                                                     </td>
                                                 </tr>
                                             @endif
@@ -1074,52 +1072,23 @@
                             </thead>
                             <tbody>
                                 @if(!empty($approvers))
-                                   @php
-                                       $special_1 = '';
-                                       $special_2 = '';
-                                       $special_3 = '';
-                                   @endphp
-                                    @foreach($approvers as $admin)
-                                        @if ($admin['admin_id'] == 32)
-                                            @php
-                                                $special_1 = 'checked';
-                                            @endphp
-                                        @elseif($admin['admin_id'] == 372)
-                                            @php
-                                                $special_2 = 'checked';
-                                            @endphp
-                                        @elseif($admin['admin_id'] == 169)
-                                            @php
-                                                $special_3 = 'checked';
-                                            @endphp
-                                        @endif
-                                    @endforeach
-                                                
+                                   
                                 @endif
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="32" name="admin[]" {{$special_1}}>
-                                    </div>
-                                </td>
-                                <td>Waqas Ahmed Dar</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="372" name="admin[]" {{$special_2}}>
-                                    </div>
-                                </td>
-                                <td>Mursaleen Rafiq</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="169" name="admin[]" {{$special_3}}>
-                                    </div>
-                                </td>
-                                <td>Sohaib Jawaid</td>
-                            </tr>
+                                @foreach ($sepcial_request_admins as $special_admin)
+                                    <tr>
+                                        <td>
+                                            <div class="custom-control custom-checkbox">
+                                                @if(!empty($approvers))
+                                                <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" {{$special_admin->id == $approvers->id ? 'checked' : ' '}}>
+                                                @else
+                                                    <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" >
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>{{$special_admin->name}}</td>
+                                    </tr>
+                                @endforeach
+                            
                             </tbody>
                         </table>
 
@@ -1263,14 +1232,15 @@
                 'max': 1000000.00
             });
             $('#adjusted_persentage').inputmask({
-                'alias': 'decimal',
+                'alias': 'percentage',
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false,
                 'digits': 2,
                 'min': 0.00,
-                'max': 1000000.00
+                'max': 100.00
             });
+            
             
             {{--$('#valid').on('click', function (e) {--}}
             {{--e.preventDefault();--}}
