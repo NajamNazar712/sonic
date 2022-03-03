@@ -6626,11 +6626,11 @@ class AdminAPIController extends Controller
                 $daily_visit = new DailyVisit();
                 $daily_visit->company_name = str_replace('"',"",$request->company_name);
                 $daily_visit->customer_name = str_replace('"',"",$request->customer_name);
-                $daily_visit->customer_address = $request->customer_address;
-                $daily_visit->phone_no = $request->phone_no;
-                $daily_visit->email = $request->email_address;
+                $daily_visit->customer_address = str_replace('"',"",$request->customer_address);
+                $daily_visit->phone_no = str_replace('"',"",$request->phone_no);
+                $daily_visit->email = str_replace('"',"",$request->email_address);
                 $daily_visit->lead_status_id = $request->lead_status;
-                $daily_visit->feedback = $request->feedback;
+                $daily_visit->feedback = str_replace('"',"",$request->feedback);
                 $daily_visit->latitude = $request->latitude;
                 $daily_visit->longitude = $request->longitude;
                 $daily_visit->admin_id = $request->admin_id;
