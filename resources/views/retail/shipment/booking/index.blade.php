@@ -160,14 +160,14 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="row border-dashed">
+                                      {{--  <div class="row border-dashed">
                                             <div class="form-group col-6">
                                                 <input type="text" name="weight_charges" id="weight_charges" class="form-control decimal" placeholder="Weight Charges*" data-rule-required="true" data-msg-required="Weight Charges is required">
                                             </div>
                                             <div class="form-group col-6">
                                                 <input type="text" name="fuel_surcharge" id="fuel_surcharge" class="form-control fuel_decimal" placeholder="Fuel Surcharge*" data-rule-required="true" data-msg-required="Fuel Surcharge is required">
                                             </div>
-                                        </div>
+                                        </div>--}}
                                     </div>
                                 </div>
                                 <div id="external_info" class="ml-1 col border">
@@ -743,9 +743,9 @@
                         $('#consignee_name').val('');
                         $('#consignee_cnic').val('');
                         $('#consignee_address').val('');
-                        $('#weight_charges').val('');
+                        //$('#weight_charges').val('');
                         // $('#cash_handling_charges').val('');
-                        $('#fuel_surcharge').val('');
+                        //$('#fuel_surcharge').val('');
                         $('#total_charges_without_gst').val('');
                         $('#gst').val('');
                         $('#total_charges').val('');
@@ -799,7 +799,7 @@
                 }
             });
             var city_id = null;
-            $('#calculate_rates').on('click', function () {
+          /*  $('#calculate_rates').on('click', function () {
                 if($('#weight_charges').val() != '' && $('#fuel_surcharge').val() != ''){
                     var weight_charges = parseFloat($('#weight_charges').val().replace(/,/g, ''));
                     // var cash_handling_charges = parseFloat($('#cash_handling_charges').val());
@@ -823,7 +823,7 @@
                             }
                         });
                 }
-            });
+            });*/
 
             $('#print').on('click', function () {
                 if(shipment_ids.length > 0){

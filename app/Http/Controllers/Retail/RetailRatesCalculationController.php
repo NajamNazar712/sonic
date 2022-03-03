@@ -29,7 +29,7 @@ class RetailRatesCalculationController extends Controller
                 if($weight_charges->exists()){
                     $weight_charges = $weight_charges->first();
                     if($weight_charges->weight_addition == 1){
-                        $multiplier = (intval($weight - $weight_charges->range_up) / $weight_charges->kg_range) + 1;
+                        //$multiplier = (intval($weight - $weight_charges->range_up) / $weight_charges->kg_range) + 1;
                     }
                     else{
                         $multiplier = 1;

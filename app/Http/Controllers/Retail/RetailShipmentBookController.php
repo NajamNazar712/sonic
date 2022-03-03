@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailPaymentMode;
 use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
@@ -163,6 +164,7 @@ class RetailShipmentBookController extends Controller
     }
 
     public function store(Request $request){
+
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $shipper_user_id = $setting->setting_value;
         $user_id = $shipper_user_id;
@@ -170,6 +172,14 @@ class RetailShipmentBookController extends Controller
         $user_shipping_info = UserShippingInfo::find($pickup_address_id);
         $pickup_city_id = $user_shipping_info->city_id;
         $information_display = TRUE;
+        $category = $request->input('category');
+        $discount = 0;
+        if($category == 1){
+            $discount = RetailTraxCenter::find($request->input('category_id'));
+        }
+        else{
+            $discount = RetailFranchise::find($request->input('category_id'));
+        }
 
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
@@ -215,7 +225,7 @@ class RetailShipmentBookController extends Controller
 
         $request->weight_charges = (float)str_replace(',', '', $request->input('weight_charges'));
         $request->fuel_surcharge = (float)str_replace(',', '', $request->input('fuel_surcharge'));
-       /* $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $request->discount, $request->weight);*/
+       /* $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $request->weight);*/
 
         $city = City::find($pickup_city_id);
         $gst = $city->zone->gst;
