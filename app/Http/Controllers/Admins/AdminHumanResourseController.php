@@ -344,11 +344,6 @@ class AdminHumanResourseController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-
-
-                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item designation_logs" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
-                    }
                     if ($result->request_status_id == 1 || $result->request_status_id == 2) {
                             if (session('role_id') == 1 || in_array(652, session('permissions'))) {
 
@@ -428,6 +423,10 @@ class AdminHumanResourseController extends Controller
                             $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
                             $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
                         }
+
+                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item designation_logs" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
+                    }
 
                         $dropdown .= '
                 </div>
