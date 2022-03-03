@@ -6937,7 +6937,7 @@ class DeliveryController extends Controller
                     $sorted_array[$slip->id]['amount'] = $slip->amount;
                     $sorted_array[$slip->id]['created_at'] = Carbon::parse($slip->created_at)->toDateTimeString();
                     $sorted_array[$slip->id]['uploaded_by'] = ($slip->uploaded_by != '') ? $slip->uploaded_by_admin->name : '';
-                    $img_url = 'uploads/sdn/'. $slip->created_at;
+                    $img_url = 'uploads/sdn/'. $slip->image;
                     if(file_exists($img_url)){
                         $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
