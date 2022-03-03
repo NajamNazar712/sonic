@@ -2221,7 +2221,7 @@ class AdminCargoManifestController extends Controller
                     ->where('mb.cargo_manifest_bag_id', $bag->id);
 
                 if ($cargo_bag->exists()) {
-                    $cargo_bag = $cargo_bag->first();
+                    $cargo_bag = $cargo_bag->latest()->first();
 
                     $mapping = V2JunctionMapping::where('id', $bag->junction_mapping_id);
 
@@ -2298,7 +2298,7 @@ class AdminCargoManifestController extends Controller
                     ->where('mb.cargo_manifest_bag_id', $bag->id);
 
                 if ($cargo_bag->exists()) {
-                    $cargo_bag = $cargo_bag->first();
+                    $cargo_bag = $cargo_bag->latest()->first();
                     $mapping = V2JunctionMapping::where('id', $bag->junction_mapping_id);
 
                     if ($mapping->exists()) {
@@ -2363,8 +2363,8 @@ class AdminCargoManifestController extends Controller
                 ->where('mb.cargo_manifest_bag_id', $bag->id);
 
             if ($cargo_bag->exists()) {
-                $cargo_bag = $cargo_bag->first();
-                $manifest_bags = ManifestBag::where('cargo_manifest_id', $cargo_bag->id)->get();
+                $cargo_bag = $cargo_bag->latest()->first();
+                $manifest_bags = ManifestBag::where('cargo_manifest_id',$cargo_bag->id)->where('status',0)->get();
                 $bag_short_received_count = 0;
                 $cargo_short_received = array();
                 foreach ($manifest_bags as $manifest_bag) {
@@ -2410,8 +2410,8 @@ class AdminCargoManifestController extends Controller
                 ->where('mb.cargo_manifest_bag_id', $bag->id);
 
             if ($cargo_bag->exists()) {
-                $cargo_bag = $cargo_bag->first();
-                $manifest_bags = ManifestBag::where('cargo_manifest_id', $cargo_bag->id)->get();
+                $cargo_bag = $cargo_bag->latest()->first();
+                $manifest_bags = ManifestBag::where('cargo_manifest_id',$cargo_bag->id)->where('status',0)->get();
                 $bag_short_received_count = 0;
                 $cargo_short_received = array();
                 foreach ($manifest_bags as $manifest_bag) {
