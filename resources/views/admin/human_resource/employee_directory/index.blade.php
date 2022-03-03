@@ -367,7 +367,7 @@
                     </button>
                 </div>
                 <div class="modal-body designation_logs" id="designation_logs_body">
-                    <table class="table table-sm table-bordered border">
+                    <table class="table table-sm table-bordered border" id="designation_logs_table">
                         <thead>
                             <tr class="bg-primary white">
                                 <th class="border-primary border-darken-1">Designation</th>
@@ -375,13 +375,7 @@
                                 <th class="border-primary border-darken-1">Updated At</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td id = "logs_designation_name"></td>
-                                <td id = "logs_updated_by"></td>
-                                <td id = "logs_updated_at"></td>
-                            </tr>
-                        </tbody>
+                        <tbody id="designation_logs_table_body"></tbody>
                     </table>
                 </div>
             </div>
@@ -1253,6 +1247,40 @@
                             });
                     }
                 });
+            });
+            $('body').on('click', '.designation_logs', function (e) {
+                var id = $(this).data('target-id');
+                $.ajax({
+                    url:'{!! route('admin.human_resource.employee_directory.designation_logs') !!}',
+                    type:'POST',
+                    data: {
+                        'employee_id': id,
+                        '_token':'{!! csrf_token() !!}'
+                    }
+                }).done(function (data) {
+                    var table = document.getElementById('designation_logs_table_body');
+                    if(data.status == 1){
+                        data.logs.forEach(function(object) {
+                            var tr = document.createElement('tr');
+                            tr.innerHTML =
+                                '<td>' + object.designation + '</td>' +
+                                '<td>' + object.updated_by + '</td>' +
+                                '<td>' + object.updated_at + '</td>';
+                            table.appendChild(tr);
+                        });
+                        $('#designationChangeLogModal').modal('show');
+                    }
+                    else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
+
+            $('body').on('hidden.bs.modal', '#designationChangeLogModal', function () {
+                $('#designationChangeLogModal #designation_logs_table #designation_logs_table_body').html('');
             });
 
             function edit_Rider_function(elm,rejoin=false)

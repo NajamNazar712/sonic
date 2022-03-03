@@ -346,7 +346,10 @@ class AdminHumanResourseController extends Controller
             ';
 
 
-                        if ($result->request_status_id == 1 || $result->request_status_id == 2) {
+                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item designation_logs" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
+                    }
+                    if ($result->request_status_id == 1 || $result->request_status_id == 2) {
                             if (session('role_id') == 1 || in_array(652, session('permissions'))) {
 
                                 $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
@@ -1060,6 +1063,15 @@ class AdminHumanResourseController extends Controller
         $employee->cnic = $request->cnic;
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
+
+        if($employee->designation_id != $request->designation){
+            $designation_logs = new EmployeeDesignationLog();
+            $designation_logs->updated_by = Auth::id();
+            $designation_logs->designation_id = $employee->designation_id;
+            $designation_logs->employee_id = $employee->id;
+            $designation_logs->save();
+        }
+
         $employee->designation_id = $request->designation;
         $employee->city_id = $request->city;
         $employee->department_id = ($request->has('department')) ? $request->department : 6;
@@ -1078,12 +1090,6 @@ class AdminHumanResourseController extends Controller
         $employee->joining_date = $request->joining_date_formatted;
         $employee->emergency_contact_person = $request->emergency_contact_person;
         $employee->update();
-        if($employee->designation_id != $request->designation){
-            $designation_logs = new EmployeeDesignationLog();
-            $designation_logs->updated_by = Auth::id();
-            $designation_logs->designation_id = $employee->designation_id;
-            $designation_logs->employee_id = $employee->id;
-        }
 
         if($employee->employee_type_id == 1)
         {
