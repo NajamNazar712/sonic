@@ -1052,7 +1052,9 @@ class LastMileDebriefingController extends Controller
                 }
 
             }
-            if($updated_shipments){
+            return response()->json(['status' => 0, 'success' => 'SMS send successfully!']);
+
+            /*if($updated_shipments){
                 $check_pending_verification_shipment = AgentCallMonitoring::where('delivery_note_id', '=', $delivery_note_id)->where('completed',0)->exists();
                 $check_pending_delivery_note = DeliveryNoteShipment::where('delivery_note_id', '=', $delivery_note_id)->where(function($query) {
                     $query->where('status','>', 1)
@@ -1070,7 +1072,7 @@ class LastMileDebriefingController extends Controller
             }
             else{
                 return response()->json(['status' => 1, 'error' => 'SMS could not send!']);
-            }
+            }*/
         }
         return response()->json(['status' => 1, 'error' => 'Something went wrong, try again!']);
 

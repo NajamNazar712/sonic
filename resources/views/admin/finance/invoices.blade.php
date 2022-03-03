@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Pending Invoices')
+@section('title', 'Invoices')
 
 @section('content')
 	<h1 class="mb-1">
-		Pending Invoices
+		Invoices
 	</h1>
 
 	<div class="card">
@@ -14,31 +14,35 @@
 
 				<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 					<thead>
-						<tr role="row" class="bg-primary white">
-							<th class="border-primary border-darken-1"></th>
-							<th class="border-primary border-darken-1">S. No.</th>
-							<th class="border-primary border-darken-1">Invoice Number</th>
-							<th class="border-primary border-darken-1">Shipper</th>
-							<th class="border-primary border-darken-1">City</th>
-							<th class="border-primary border-darken-1">Total Charges</th>
-							<th class="border-primary border-darken-1">Total GST</th>
-							<th class="border-primary border-darken-1">Total Invoice Amount</th>
-							<th class="border-primary border-darken-1">Generation Date</th>
-							<th class="border-primary border-darken-1">Invoicing Cycle</th>
-							<th class="border-primary border-darken-1">Invoicing Date</th>
-							<th class="border-primary border-darken-1">Aging</th>
-							<th class="border-primary border-darken-1">Due Date</th>
-							<th class="border-primary border-darken-1">Overdue By</th>
-							{{--<th class="border-primary border-darken-1">Received Date</th>--}}
-							{{--<th class="border-primary border-darken-1">Company Bank</th>
-							<th class="border-primary border-darken-1">Received Amount</th>
-							<th class="border-primary border-darken-1">Tax Amount</th>
-							<th class="border-primary border-darken-1">Deposit Date</th>--}}
-							<th class="border-primary border-darken-1">Invocie Type</th>
-							<th class="border-primary border-darken-1">Status</th>
-							<th class="border-primary border-darken-1">Deposit Slip</th>
-							<th class="border-primary border-darken-1"></th>
-						</tr>
+					<tr role="row" class="bg-primary white">
+						<th class="border-primary border-darken-1"></th>
+						<th class="border-primary border-darken-1">S. No.</th>
+						<th class="border-primary border-darken-1">Account Type</th>
+						<th class="border-primary border-darken-1">Invoice Number</th>
+						<th class="border-primary border-darken-1">Shipper</th>
+						<th class="border-primary border-darken-1">City</th>
+						<th class="border-primary border-darken-1">Total Charges</th>
+						<th class="border-primary border-darken-1">Total GST</th>
+						<th class="border-primary border-darken-1">Total Invoice Amount</th>
+						<th class="border-primary border-darken-1">Generation Date</th>
+						<th class="border-primary border-darken-1">Invoicing Date</th>
+						<th class="border-primary border-darken-1">Invoicing Cycle</th>
+						<th class="border-primary border-darken-1">Aging</th>
+						<th class="border-primary border-darken-1">Due Date</th>
+						<th class="border-primary border-darken-1">Overdue By</th>
+						<th class="border-primary border-darken-1">Corporate Invoicing Type</th>
+						<th class="border-primary border-darken-1">Received Date</th>
+						<th class="border-primary border-darken-1">Company Bank</th>
+						<th class="border-primary border-darken-1">Status</th>
+						<th class="border-primary border-darken-1">Deposit Date</th>
+						<th class="border-primary border-darken-1">Deposit Slip</th>
+						<th class="border-primary border-darken-1">Received Amount</th>
+						<th class="border-primary border-darken-1">Tax Amount</th>
+						<th class="border-primary border-darken-1">Payment Type</th>
+						<th class="border-primary border-darken-1"></th>
+						{{--<th class="border-primary border-darken-1">Payment Type</th>--}}
+						{{--  <th class="border-primary border-darken-1">Status</th>--}}
+					</tr>
 					</thead>
 				</table>
 
@@ -241,6 +245,7 @@
                             head = [];
 
                             head.push('S.No');
+                            head.push('Account Type');
                             head.push('Invoice No.');
                             head.push('Shipper');
                             head.push('City');
@@ -248,23 +253,26 @@
                             head.push('Total GST');
                             head.push('Total Invoice Amount');
                             head.push('Generation Date');
-                            head.push('Invoicing Cycle');
-                            head.push('Invoicing Date');
+							head.push('Invoicing Date');
+							head.push('Invoicing Cycle');
                             head.push('Aging');
                             head.push('Due Date');
                             head.push('Overdue By');
-                           /* head.push('Received Date');
+							head.push('Corporate Invoicing Type');
+                            head.push('Received Date');
                             head.push('Company Bank');
-                            head.push('Received Amount');
-                            head.push('Tax Amount');
-                            head.push('Deposit Date');*/
-                            head.push('Invoice Type');
                             head.push('Status');
+                            head.push('Deposit Date');
+							head.push('Received Amount');
+							head.push('Tax Amount');
+                            head.push('Payment Type');
+
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.account);
                                 row.push(values.invoice_number);
                                 row.push(values.shipper);
                                 row.push(values.city);
@@ -272,18 +280,19 @@
                                 row.push(values.total_gst);
                                 row.push(values.total_invoice_amount);
                                 row.push(values.created_at);
-                                row.push(values.invoicing_cycle);
-                                row.push(values.invoicing_date);
+								row.push(values.invoicing_date);
+								row.push(values.invoicing_cycle);
                                 row.push(values.aging);
                                 row.push(values.due_date);
                                 row.push(values.overdue_by);
-                                /*row.push(values.received_date);
+                                row.push(values.invoice_type);
+                                row.push(values.received_date);
                                 row.push(values.company_bank);
+                                row.push(values.status);
+                                row.push(values.deposit_date);
                                 row.push(values.received_amount);
                                 row.push(values.tax_amount);
-                                row.push(values.deposit_date);*/
-                                row.push(values.invoice_type);
-                                row.push(values.status);
+                                row.push(values.payment_type);
 
                                 body.push(row);
                             });
@@ -347,7 +356,8 @@
 													closeOnClickOutside: false,
 													closeOnEsc: false
 												});
-
+												selected_rows = [];
+												table.rows().deselect();
 												table.draw();
 											}
 											else{
@@ -386,6 +396,7 @@
 
 									if (index === -1) {
 										selected_rows.push(id);
+										console.log(selected_rows)
 									}
 
 									table.button('.mark_as_received_all_btn').enable();
@@ -422,7 +433,7 @@
 					},
 					{
 						extend: 'excel',
-						title: 'Pending Invoices',
+						title: 'Invoices',
 						className: 'btn btn-primary',
 						text: '<i class="la la-file-excel-o"></i> Excel',
 					},
@@ -444,39 +455,45 @@
 				serverSide: true,
 				ajax: '{{ route('admin.finance.invoices.list') }}',
 				rowId: 'id',
-				order: [[8, 'desc']],
+				order: [[9, 'desc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data:'invoice_number_button', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
-					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
-					{data:'city', name: 'c.name', class: 'align-middle text-center shipper'},
-					{data:'total_charges', name: 'invoices.total_charges', class: 'align-middle text-center total_charges'},
-					{data:'total_gst', name: 'invoices.total_gst', class: 'align-middle text-center total_gst'},
-					{data:'total_invoice_amount', name: 'invoices.total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
-					{data:'created_at', name: 'invoices.created_at', class: 'align-middle text-center generation_date'},
-					{data:'invoicing_cycle', name: 'ic.name', class: 'align-middle text-center invoicing_cycle'},
-					{data:'invoicing_date', name: 'invoices.invoicing_date', class: 'align-middle text-center invoicing_date'},
+					{data:'account', name: 'account_type', class: 'align-middle text-center account'},
+					{data:'invoice_number_btn', name: 'invoice_number_btn', class: 'align-middle text-center invoice_number_btn'},
+					{data:'shipper', name: 'shipper', class: 'align-middle text-center shipper'},
+					{data:'city', name: 'city', class: 'align-middle text-center city'},
+					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
+					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
+					{data:'total_invoice_amount', name: 'total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
+					{data:'created_at', name: 'created_at', class: 'align-middle text-center created_at'},
+					{data:'invoicing_date', name: 'invoicing_date', class: 'align-middle text-center invoicing_date'},
+					{data:'invoicing_cycle', name: 'invoicing_cycle', class: 'align-middle text-center invoicing_cycle'},
 					{data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
-					{data:'due_date', name: 'invoices.due_date', class: 'align-middle text-center due_date'},
+					{data:'due_date', name: 'due_date', class: 'align-middle text-center due_date'},
 					{data:'overdue_by', name: 'overdue_by', class: 'align-middle text-center overdue_by', orderable: false, searchable: false},
-					/*{data:'received_date', name: 'invoices.received_date', class: 'align-middle text-center received_date'},
-					{data:'company_bank', name: 'invoices.company_bank_id', class: 'align-middle text-center company_bank'},
-					{data:'received_amount', name: 'invoices.received_amount', class: 'align-middle text-center received_amount'},
-					{data:'tax_amount', name: 'invoices.tax_amount', class: 'align-middle text-center tax_amount'},
-					{data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},*/
-					{data:'invoice_type', name: 'invoices.invoice_type', class: 'align-middle text-center invoice_type'},
-					{data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},
-					{data:'upload_slip', name: '', class: 'align-middle text-center upload_slip',orderable:false,searchable:false},
-					{data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+					{data:'invoice_type', name: 'invoice_type', class: 'align-middle text-center invoice_type'},
+					{data:'received_date', name: 'received_date', class: 'align-middle text-center received_date'},
+					{data:'company_bank', name: 'invoices.company_bank', class: 'align-middle text-center company_bank'},
+					{data:'status', name: 'status', class: 'align-middle text-center status'},
+					{data:'deposit_date', name: 'deposit_date', class: 'align-middle text-center deposit_date'},
+					{data:'deposit_slip', name: 'deposit_slip', class: 'align-middle text-center deposit_slip', orderable: false, searchable: false},
+					{data:'received_amount', name: 'received_amount', class: 'align-middle text-center received_amount'},
+					{data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
+					{data:'payment_type', name: 'payment_type', class: 'align-middle text-center payment_type'},
+					{data:'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
 				],
 				rowCallback: function(row, data, index) {
+
+					if (data.account_type == 2 && (data.is_id == 1 || data.is_id == 2)) {
+						$('td:eq(0)', row).addClass('select-checkbox');
+					}
+
 					var info = table.page.info();
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
-					if (data.status_id != 3) {
-						$('td:eq(0)', row).addClass('select-checkbox');
 
+					if (selected_rows.length != 0) {
 						if ($.inArray(data.id, selected_rows) !== -1) {
 							table.row(row).select();
 						}
@@ -494,13 +511,17 @@
 							'<option value="1">Courier Invoice</option>' +
 							'<option value="2">Packaging Invoice</option>' +
 							'</select>';
+				/*	var account = '<select name="account" id="account" class="select2 form-control">' +
+							'<option value="1">Corporate Account</option>' +
+							'<option value="2">Reimbursement Account</option>' +
+							'</select>';*/
 
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip') || $(header).is('.deposit_slip')) {
 							$(td).appendTo($(search));
 						}
 						else if ($(header).is('.company_bank')) {
@@ -515,6 +536,13 @@
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td);
                         }
+						/*else if ($(header).is('.account')) {
+							$(account).appendTo($(search))
+									.on('change', function() {
+										column.search($(this).val(), false, false, true).draw();
+									}).wrap(td);
+						}*/
+
 						else if($(header).is('.invoice_type')){
 							$(invoice_type_select).appendTo($(search))
 									.on( 'change', function () {
@@ -533,7 +561,7 @@
 					});
 
 					var company_banks = $.map({!! $company_banks !!}, function (obj) {
-                        obj.id = obj.id;
+                        obj.id = obj.name;
                         obj.text = obj.name;
 
                         return obj;
@@ -547,6 +575,14 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
+					/*$('#account').prepend('<option value="" selected></option>').select2({
+						data: account,
+						placeholder: 'Select Account Type',
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});*/
+
 					$("#invoice_type_select").prepend('<option value="" selected></option>').select2({
 						placeholder: "Select Invoice Type",
 						width:'100%',
@@ -555,7 +591,7 @@
 					});
 
                     var statuses = $.map({!! $invoice_statuses !!}, function (obj) {
-                        obj.id = obj.id;
+                        obj.id = obj.name;
                         obj.text = obj.name;
 
                         return obj;
@@ -582,12 +618,21 @@
 			});
 
 
-			$('#datatable tbody').on('click', 'tr td.invoice_number button', function() {
+			$('#datatable tbody').on('click', 'tr td.invoice_number_btn button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
+                var account = table.row($(this).parents('tr')).data().account_type;
+
+				var url ='';
+				if(account == 2){
+					url = '{!! route('admin.finance.invoices.invoices_print') !!}';
+				}
+				else{
+					url = '{!! route('admin.finance.invoices.reimbursement.invoices_print') !!}';
+				}
 
                 if (id) {
                     $.ajax({
-						url: '{!! route('admin.finance.invoices.print') !!}',
+						url: url,
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -615,14 +660,14 @@
                 }
             });
 
-            $('#datatable tbody').on('contextmenu', 'tr td.invoice_number button', function(e) {
+           /* $('#datatable tbody').on('contextmenu', 'tr td.invoice_number_btn button', function(e) {
                 e.preventDefault();
 
                 var id = parseInt($(this).parents('tr').attr('id'));
 
                 if (id) {
                     $.ajax({
-                        url: '{!! route('admin.finance.invoices.print') !!}',
+                        url: '{!! route('admin.finance.invoices.reimbursement.detail_print') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
@@ -649,7 +694,7 @@
                         }
                     });
                 }
-            });
+            });*/
 
 			$('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
 				var id = parseInt($(this).parent('tr').attr('id'));
@@ -673,9 +718,16 @@
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
+				var account_type = parseInt(table.row($(this).parents('tr')).data().account_type);
 
 				if ($(this).hasClass('export_to_excel')) {
-					window.open('{!! route('admin.finance.invoices.export_to_excel') !!}?id=' + id, '_blank');
+					if(account_type == 2) {
+						window.open('{!! route('admin.finance.invoices.export_to_excel') !!}?id=' + id, '_blank');
+					}
+					else if(account_type == 1)
+					{
+						window.open('{!! route('admin.finance.invoices.reimbursement.export_to_excel') !!}?id=' + id, '_blank');
+					}
 				}
 				else if ($(this).hasClass('email_reminder')) {
 					$.ajax({
@@ -729,7 +781,8 @@
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
-							'id': id
+							'id': id,
+							'account_type':account_type,
 						}
 					})
 					.done(function(data) {
@@ -757,7 +810,8 @@
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
-							'id': id
+							'id': id,
+							'account_type':account_type,
 						}
 					})
 					.done(function(data) {
@@ -966,6 +1020,53 @@
 				deposit_slip_table.clear();
 				deposit_slip_table.destroy();
 			});
-		});
+
+			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+				var id = parseInt($(this).parents('tr').attr('id'));
+				var account_type = parseInt(table.row($(this).parents('tr')).data().account_type);
+
+				if ($(this).hasClass('detail_print')) {
+					var url ='';
+					if(account_type == 2){
+						url = '{!! route('admin.finance.invoices.invoices_detail_print') !!}';
+					}
+					else{
+						url = '{!! route('admin.finance.invoices.reimbursement.detail_print') !!}';
+					}
+
+					if (id) {
+						$.ajax({
+							url:url,
+							method: 'POST',
+							data: {
+								'_token': '{{ csrf_token() }}',
+								'id': id
+							}
+						})
+								.done(function(data) {
+									var tab = window.open('', '_blank');
+
+									if(!tab) {
+										swal({
+											title: 'Popup Blocker Enabled!',
+											text: 'Please add this site to your exception list.',
+											icon: 'error',
+											closeOnClickOutside: false,
+											closeOnEsc: false
+										});
+									}
+									else {
+										tab.document.write(data);
+										tab.document.close();
+										tab.focus();
+									}
+								});
+					}
+				}
+			});
+
+
+
+			});
 	</script>
 @endsection

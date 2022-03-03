@@ -1411,7 +1411,7 @@ class AdminDashboardController extends Controller
         $segments = Segment::all();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
         $corporate_rate_types = CorporateRateType::all();
-        $territories = Territory::select('id','name')->get();
+        $territories = Territory::select('id','name')->where('territory_status', '=', '1')->get();
         return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'segments'=>$segments,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types,'territories' => $territories]);
     }
     public function activeAccountsList(){
@@ -1424,7 +1424,7 @@ class AdminDashboardController extends Controller
         $ecom_segments = SubCategorySegment::where('segment_id',2)->get();
         $payment_cycles = PaymentCycle::all();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
-        $territories = Territory::select('id','name')->get();
+        $territories = Territory::select('id','name')->where('territory_status', '=', '1')->get();
         return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments,'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments ,'sale_tier_types' => $sale_tier_types,'territories' => $territories]);
 
     }

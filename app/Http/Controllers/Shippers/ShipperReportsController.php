@@ -850,7 +850,7 @@ class ShipperReportsController extends Controller
             ->where('u.id', session('user_id'))
             ->groupBy('shipments.id');
         if (session('department_id') == 7) {
-            if (session('role_id') != 4) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $shipments = $shipments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -909,10 +909,10 @@ class ShipperReportsController extends Controller
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
 
-            ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
+            ->select('shipments.tracking_number','shipments.return_address_id','shipments.shipper_status_id','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
 
         $shipment = $shipment->where(function ($query) {
-            $query->where('shipments.user_id', 7306)
+            $query->where('shipments.user_id', 1091)
                 ->orWhereIn('shipments.user_id', session('sister_users'));
         });
 
@@ -985,12 +985,25 @@ class ShipperReportsController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('return_status', function ($shipment) {
+                if($shipment->shipper_status_id == 25){
+
+                    if(in_array($shipment->return_address_id, [31076, 31078, 31079, 31080, 33761,  1082, 31083, 31084, 31085, 33760, 31086,  31087, 31088, 31089, 33762])){
+                        return 'Return to Daraz Warehouse';
+                    }else{
+                        return 'Return to Vendor';
+    
+                    }
+                }else{
+                    return '-';
+                }
+            })
             ->addColumn('tracking_number_link', function ($shipment) {
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
             ->editColumn('shipper_name', function ($shipment) {
-                if($shipment->shipper_id == 7306){
+                if($shipment->shipper_id == 1091){
                     return '-';
                 }else{
                     return $shipment->shipper_name;

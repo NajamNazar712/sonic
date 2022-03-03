@@ -295,10 +295,18 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('invoice')->name('invoice.')->group(function () {
             Route::get('', 'Shippers\ShipperFinanceController@invoice_index')->name('index');
             Route::get('list', 'Shippers\ShipperFinanceController@invoice_list')->name('list');
-            Route::post('print', 'Shippers\ShipperFinanceController@invoices_print')->name('print');
+            Route::post('detail_print', 'Shippers\ShipperFinanceController@invoices_detail_print')->name('detail_print');
             Route::get('export_to_excel', 'Shippers\ShipperFinanceController@invoices_export_to_excel')->name('export_to_excel');
+            Route::get('reimbursement/export_to_excel', 'Shippers\ShipperFinanceController@reimbursement_invoices_export_to_excel')->name('reimbursement.export_to_excel');
             Route::put('email_reminder', 'Shippers\ShipperFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('print_origin_wise', 'Shippers\ShipperFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
+            Route::post('print', 'Shippers\ShipperFinanceController@corporate_invoice_print')->name('invoices_print');
+
+            Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
+                Route::post('detail_print', 'Shippers\ShipperFinanceController@reimbursement_invoices_print')->name('detail_print');
+                Route::post('print', 'Shippers\ShipperFinanceController@invoice_reimbursement_print')->name('invoices_print');
+            });
+
         });
     });
 
@@ -854,6 +862,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add', 'Admins\AdminTerritoryController@add')->name('add');
             Route::post('/store', 'Admins\AdminTerritoryController@store')->name('store');
             Route::post('/ajax', 'Admins\AdminTerritoryController@edit_territory_ajax')->name('edit');
+            Route::post('/disable_territory', 'Admins\AdminTerritoryController@disable_territory')->name('disable_territory');
+            Route::post('/enable_territory', 'Admins\AdminTerritoryController@enable_territory')->name('enable_territory');
             Route::put('{id}/update', 'Admins\AdminTerritoryController@update')->name('update');
             
         });
@@ -863,6 +873,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add', 'Admins\AdminTerritoryController@area_add')->name('add');
             Route::post('/store', 'Admins\AdminTerritoryController@area_store')->name('store');
             Route::post('/ajax', 'Admins\AdminTerritoryController@area_edit')->name('edit');
+            Route::post('/disable_area_status', 'Admins\AdminTerritoryController@disable_area_status')->name('disable_area_status');
+            Route::post('/enable_area_status', 'Admins\AdminTerritoryController@enable_area_status')->name('enable_area_status');
             Route::put('{id}/update', 'Admins\AdminTerritoryController@area_update')->name('update');
             Route::post('tag', 'Admins\AdminTerritoryController@area_tag')->name('tag');
 
@@ -1721,7 +1733,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('draft')->name('draft.')->group(function () {
             Route::get('/list', 'Admins\AdminCargoManifestController@manifest_draft')->name('list');
             Route::post('/delete', 'Admins\AdminCargoManifestController@manifest_draft_delete')->name('delete');
-
+            Route::get('setting/list', 'Admins\AdminCargoManifestController@manifest_draft_setting_list')->name('setting.list');
+            Route::get('setting', 'Admins\AdminCargoManifestController@manifest_draft_setting')->name('setting');
+            Route::post('update', 'Admins\AdminCargoManifestController@manifest_draft_update')->name('update');
         });
 
     });
@@ -1944,7 +1958,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
             Route::post('slip', 'Admins\AdminFinanceController@invoices_slip')->name('slip');
             Route::post('slip/view', 'Admins\AdminFinanceController@invoices_slip_view')->name('slip_view');
-            Route::post('print', 'Admins\AdminFinanceController@invoices_print')->name('print');
+            Route::post('invoices_detail_print', 'Admins\AdminFinanceController@invoices_detail_print')->name('invoices_detail_print');
+            Route::post('print', 'Admins\AdminFinanceController@corporate_invoice_print')->name('invoices_print');
             Route::post('print_origin_wise', 'Admins\AdminFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
             Route::post('print_gst_wise', 'Admins\AdminFinanceController@invoices_print_gst_wise')->name('print_gst_wise');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@invoices_export_to_excel')->name('export_to_excel');
@@ -1961,8 +1976,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('print_origin_wise', 'Admins\AdminFinanceController@reimbursement_invoices_print_origin_wise')->name('print_origin_wise');
                 Route::post('print_gst_wise', 'Admins\AdminFinanceController@reimbursement_invoices_print_gst_wise')->name('print_gst_wise');
                 Route::get('export_to_excel', 'Admins\AdminFinanceController@reimbursement_invoices_export_to_excel')->name('export_to_excel');
-                Route::post('print', 'Admins\AdminFinanceController@reimbursement_invoices_print')->name('print');
-
+                Route::post('detail_print', 'Admins\AdminFinanceController@reimbursement_detail_invoices_print')->name('detail_print');
+                Route::post('print', 'Admins\AdminFinanceController@reimbursement_invoice_print')->name('invoices_print');
             });
         });
 
@@ -1979,7 +1994,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             
         });
-
 
         Route::prefix('retail')->name('retail.')->group(function () {
 
@@ -2013,10 +2027,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
         });
-
-
-
-
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function() {
@@ -3577,6 +3587,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/education', 'Admins\AdminHumanResourseController@employee_directory_education_update')->name('education.update');
             Route::post('{employee}/employment', 'Admins\AdminHumanResourseController@employee_directory_employment_update')->name('employment.update');
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
+            Route::post('designation_logs', 'Admins\AdminHumanResourseController@designation_change_logs')->name('designation_logs');
             Route::prefix('staff')->name('staff.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');
