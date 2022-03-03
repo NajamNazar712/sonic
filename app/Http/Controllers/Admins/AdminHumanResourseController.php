@@ -3928,7 +3928,7 @@ class AdminHumanResourseController extends Controller
             $designation_logs = $designation_logs->get();
             return response()->json(['status' => 1, 'logs' => $designation_logs]);
         }else{
-            return response()->json(['status' => 0, 'error' => "Logs not found"]);
+            return response()->json(['status' => 0, 'error' => "Designation Change Logs not found"]);
         }
     }
 }
