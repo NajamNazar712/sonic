@@ -356,6 +356,34 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="designationChangeLogModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="designationChangeLogModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document" style="margin-left: 35%!important;">
+            <div class="modal-content" style="width: 60%!important;">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="designation_logs_heading">Designation Change Logs<span></span></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body designation_logs" id="designation_logs_body">
+                    <table class="table table-bordered datatable" id="designation_logs_table">
+                        <thead>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Designation</th>
+                                <th class="border-primary border-darken-1">Updated By</th>
+                                <th class="border-primary border-darken-1">Updated At</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -1222,6 +1250,57 @@
                             });
                     }
                 });
+            });
+            var log_datatable = $('#designation_logs_table').DataTable({
+                dom: 'ltipr',
+                scrollX: false,
+                autoWidth : false,
+                paging:false,
+                columns: [
+                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {name: 'designation', class: 'align-middle', orderable: false, searchable: false},
+                    {name: 'updated_by', class: 'align-middle', orderable: false, searchable: false},
+                    {name: 'updated_at', class: 'align-middle', orderable: false, searchable: false},
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = log_datatable.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                },
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+            $('body').on('click', '.designation_logs_1', function (e) {
+                var id = $(this).data('target-id');
+                $.ajax({
+                    url:'{!! route('admin.human_resource.employee_directory.designation_logs') !!}',
+                    type:'POST',
+                    data: {
+                        'employee_id': id,
+                        '_token':'{!! csrf_token() !!}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        var logs = data.logs;
+                        $.each(logs, function (index, value) {
+                            log_datatable.row.add([0, value.designation, value.updated_by, value.updated_at]);
+                            log_datatable.draw(true);
+                        });
+                        $('#designationChangeLogModal').modal('show');
+                    }
+                    else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
+
+            $('body').on('hidden.bs.modal', '#designationChangeLogModal', function () {
+                log_datatable.clear().draw();
             });
 
             function edit_Rider_function(elm,rejoin=false)

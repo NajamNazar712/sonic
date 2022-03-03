@@ -319,7 +319,7 @@ class DeliveryController extends Controller
     public function check_rider_dncc_status(Request $request)
     {
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-        $delivery_note = DeliveryNote::where([['rider_id', $request->rider_id], ['dncc_status', 0]])->where('status', '!=', 4)
+        $delivery_note = DeliveryNote::where(['rider_id' => $request->rider_id, 'dncc_status' => 0])->where('status', '!=', 4)
             ->whereDate('created_at', '>', $datetime)
             ->whereDate('created_at', '!=', Carbon::today());
 
@@ -646,8 +646,6 @@ class DeliveryController extends Controller
             } else {
                 return ['status' => 1, 'error' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!'];
             }
-
-
         }
     }
 
@@ -918,7 +916,7 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->join('zones as z','oc.zone_id','=','z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.rider_type_id', 'riders.operation_rider_id'])
             ->where('delivery_notes.status', 0);
 
 
@@ -1098,6 +1096,9 @@ class DeliveryController extends Controller
     {
         $delivery_note = DeliveryNote::find($id);
         if ($delivery_note) {
+            if($delivery_note->status == 4){
+                return redirect()->back()->with('error', 'Delivery note is cancelled!');
+            }
             if (($delivery_note->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
                 if (DeliveryNoteShipment::where('delivery_note_id', $id)->where('status', '>', 0)->count() == 0) {
                     $service_type = BookingType::all();
@@ -1191,13 +1192,17 @@ class DeliveryController extends Controller
                     if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                         $cod = $cod - $parcel->amount;
                     }
+
+                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
+                    ShipmentsJourneyController::add($request->shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id(), $request->delivery_note_id);
+
+
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
                     } else {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                     }
-                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
-                    ShipmentsJourneyController::add($request->shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id(), $request->delivery_note_id);
+
                 }
 
                 return ['status' => 0, 'success' => 'Shipment is successfully removed'];
@@ -1579,6 +1584,12 @@ class DeliveryController extends Controller
         }
         $require_password = false;
         if ($note_data) {
+
+            $rider = $note_data->rider;
+            if(session('role_id') !== 1 && ($rider->operation_rider_id === 1 && $rider->rider_type_id === 1)){
+                return redirect()->back()->with('error', 'You are not authorized to update this delivery note!');
+            }
+
             if ($note_data->password != null) {
                 $require_password = true;
             }
@@ -6925,8 +6936,8 @@ class DeliveryController extends Controller
                     $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;
                     $sorted_array[$slip->id]['amount'] = $slip->amount;
                     $sorted_array[$slip->id]['created_at'] = Carbon::parse($slip->created_at)->toDateTimeString();
-                    $sorted_array[$slip->id]['uploaded_by'] = $slip->uploaded_by_admin->name;
-                    $img_url = 'uploads/sdn/'. $slip->created_at;
+                    $sorted_array[$slip->id]['uploaded_by'] = ($slip->uploaded_by != '') ? $slip->uploaded_by_admin->name : '';
+                    $img_url = 'uploads/sdn/'. $slip->image;
                     if(file_exists($img_url)){
                         $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
@@ -7234,6 +7245,9 @@ class DeliveryController extends Controller
         if ($shipment) {
             $delivery_note = DeliveryNote::find($delivery_note_id);
             if ($delivery_note) {
+                if($delivery_note->status == 4){
+                    return response()->json(['status' => 1, 'error' => 'Delivery note is cancelled, all shipments removed!']);
+                }
                 $rider = $delivery_note->rider;
                 if ($shipment->payment_mode_id == 2 && $rider->ccd == 0) {
                     return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);

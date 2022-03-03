@@ -1349,7 +1349,7 @@ class AdminCargoManifestController extends Controller
                         $bag->update();
                         $details = array();
 
-                        $origin = $bag->origin_hub;
+                        $origin = City::find($origin_id);
                         $destination = $bag->destination_hub;
 
                         $details['id'] = $bag->id;

@@ -155,7 +155,7 @@ class AdminShipmentCancelController extends Controller
         ->where('shipments.shipper_status_id', '=', 17);
         
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $shipments = $shipments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });

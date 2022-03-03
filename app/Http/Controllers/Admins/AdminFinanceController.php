@@ -3881,7 +3881,7 @@ class AdminFinanceController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),29);
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
-        if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
         }
         else {
@@ -3918,7 +3918,7 @@ class AdminFinanceController extends Controller
             ->groupBy('pending_payments.id');
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $pending_payments = $pending_payments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -4998,7 +4998,7 @@ class AdminFinanceController extends Controller
 
     public function done_payments_index() {
         ActivityTrailController::createActivityTrailLog(Auth::id(),30);
-        if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
         }
         else {
@@ -5025,7 +5025,7 @@ class AdminFinanceController extends Controller
         $count = $count->join('users as u', 'done_payments.user_id', '=', 'u.id');
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $count = $count->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -5097,7 +5097,7 @@ class AdminFinanceController extends Controller
             ->select('done_payments.user_id as user_id','done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at','dpc.wht as total_wht');
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $done_payments = $done_payments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -8042,7 +8042,7 @@ class AdminFinanceController extends Controller
                         </div>
 
                         <div class="col-4">
-                            <h1 style="text-align:center"><img style="width:50%;height:90px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
+                            <h1 style="text-align:center"><img style="height:90px;"  src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
                 if($invoice->invoice_type == 1) {
@@ -8650,7 +8650,7 @@ class AdminFinanceController extends Controller
                         </div>
 
                         <div class="col-4">
-                            <h1 style="text-align:center"><img style="width:50%;height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
+                            <h1 style="text-align:center"><img style="height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
                 $html .=  '<tr>
@@ -10035,7 +10035,7 @@ class AdminFinanceController extends Controller
             ->select('invoices.id as id', 'invoices.invoice_number as invoice_number','invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date','ic.name as invoicing_cycle','invoices.invoice_type as invoice_type',DB::raw('NULL as payment_type'),DB::raw('2 as account_type'),'is.id as is_id')
             ->where('ubi.default_bank',1);
 
-        if(session('department_id') == 7){
+        if(session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))){
             $invoice->whereIn('invoices.user_id', session('tagged_shippers'));
         }
 
@@ -10044,7 +10044,7 @@ class AdminFinanceController extends Controller
             ->select( 'invoice_for_reimbursements.id as id','invoice_for_reimbursements.invoice_number as invoice_number','invoice_for_reimbursements.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at',DB::raw('NULL as due_date'),DB::raw('NULL as received_date'),DB::raw('NULL as company_bank'),DB::raw('NULL as received_amount'),DB::raw('NULL as tax_amount'),DB::raw('NULL as deposit_date'),DB::raw('NULL as status'),DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date',DB::raw('NULL as invoicing_cycle'),DB::raw('NULL as invoice_type'),'invoice_for_reimbursements.payment_type as payment_type',DB::raw('1 as account_type'),DB::raw('NULL as is_id'))
             ->where('invoice_for_reimbursements.to_show',1);
 
-        if(session('department_id') == 7){
+        if(session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))){
             $reim_invoice->whereIn('invoice_for_reimbursements.user_id', session('tagged_shippers'));
         }
 
@@ -10362,7 +10362,7 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
             ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle')->where('is.id',3)->where('ubi.default_bank',1);
-            if(session('department_id') == 7){
+            if(session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))){
                 $invoices->whereIn('invoices.user_id', session('tagged_shippers'));
             }
         $datatables = Datatables::of($invoices)
@@ -11450,7 +11450,7 @@ class AdminFinanceController extends Controller
             $pickup_wise_accounts = array();
             $settings = $settings->first();
             $pickup_wise_accounts = array_map('intval', explode(',', $settings->text));
-            if (session('department_id') == 7 && session('role_id') != 4) {
+            if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
                 $sales_person_shippers = array();
                 foreach($pickup_wise_accounts as $account_id){
                     if(in_array($account_id, session('tagged_shippers'))){
@@ -11482,7 +11482,7 @@ class AdminFinanceController extends Controller
         $pickup_wise_accounts = array();
         $shippers = array();
         $pickup_wise_accounts = array_map('intval', explode(',', $settings->text));
-        if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $sales_person_shippers = array();
             foreach($pickup_wise_accounts as $account_id){
                 if(in_array($account_id, session('tagged_shippers'))){
@@ -14083,7 +14083,7 @@ class AdminFinanceController extends Controller
                         </div>
 
                         <div class="col-4">
-                            <h1 style="text-align:center"><img style="width:50%;height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
+                            <h1 style="text-align:center"><img style="height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
         $html .=  '<tr>
@@ -14524,7 +14524,7 @@ class AdminFinanceController extends Controller
                         </div>
 
                         <div class="col-4">
-                            <h1 style="text-align:center"><img style="width:50%;height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
+                            <h1 style="text-align:center"><img style="height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
                     if($invoice->invoice_type == 1) {

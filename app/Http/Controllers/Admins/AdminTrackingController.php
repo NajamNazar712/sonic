@@ -84,7 +84,7 @@ class AdminTrackingController extends Controller
                 $check = false;
                 $details['shipment_id'] = $shipment->id;
                 if (session('department_id') == 7) {
-                    if (session('role_id') != 4 ) {
+                    if (!in_array(session('id'), session('sale_users_bypass'))) {
                         if (in_array($shipment->user->id, session('tagged_shippers')) || in_array(273, session('permissions'))) {
                             $check = true;
                         }
@@ -593,7 +593,7 @@ class AdminTrackingController extends Controller
                 $shipment = $shipment->first();
                 $check = false;
                 if (session('department_id') == 7) {
-                    if (session('role_id') != 4) {
+                    if (!in_array(session('id'), session('sale_users_bypass'))) {
                         if (in_array($shipment->user->id, session('tagged_shippers'))) {
                             $check = true;
                         }
@@ -640,7 +640,7 @@ class AdminTrackingController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
-        if (session('department_id') == 7 && session('role_id') != 4) {
+        if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
         }
         else {
@@ -696,7 +696,7 @@ class AdminTrackingController extends Controller
                 $datatable->where('u.id', 'LIKE', '%'. $shipper . '%');
             }
             if($phone_no = $request->get('search_phone_no')){
-                $datatable->where('shipments.consignee_phone_number_1', 'LIKE', '%'. $phone_no . '%');
+                $datatable->where('shipments.consignee_phone_number_1', '=', $phone_no);
             }
             if($order_id = $request->get('search_order_id')){
                 $datatable->where('shipments.order_id', 'LIKE', '%'. $order_id . '%');
@@ -775,7 +775,7 @@ class AdminTrackingController extends Controller
                     $check = false;
 
                     if (session('department_id') == 7) {
-                        if (session('role_id') != 4 ) {
+                        if (!in_array(session('id'), session('sale_users_bypass'))) {
                             if (in_array($shipment->user->id, session('tagged_shippers')) || in_array(273, session('permissions'))) {
                                 $check = true;
                             }
