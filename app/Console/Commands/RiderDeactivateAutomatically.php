@@ -43,7 +43,7 @@ class RiderDeactivateAutomatically extends Command
      */
     public function handle()
     {
-        $date_week_age = Carbon::now()->subDays(7)->toDateTimeString();
+        $date_week_age = Carbon::now()->subDays(3)->toDateTimeString();
         $today = Carbon::now()->toDateTimeString();
         $rider_data = '';
         $rider_ids = Rider::where('status', 1)->whereDate('created_at', '<', $date_week_age)->pluck('id')->toArray();
