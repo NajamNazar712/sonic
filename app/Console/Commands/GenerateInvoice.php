@@ -39,6 +39,6 @@ class GenerateInvoice extends Command
      */
     public function handle()
     {
-        AdminFinanceController::generate_invoice();
+       echo AdminFinanceController::generate_invoice();
     }
 }

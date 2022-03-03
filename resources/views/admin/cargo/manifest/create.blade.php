@@ -65,7 +65,7 @@
                             </table>
 
                             <div class="text-center">
-                                <button type="submit" class="btn btn-primary mr-2" id="master_cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_details" disabled="disabled">Confirm</button>
+                                <button type="submit" class="btn btn-primary mr-2" id="master_cargo_consignment_confirm" disabled="disabled">Confirm</button>
                             </div>
 
                             <div class="modal fade" id="cargo_details" role="dialog" aria-labelledby="cargo_details_title" aria-hidden="true">
@@ -406,6 +406,7 @@
                         if(data.status == 0) {
 
 
+                            $('#cargo_details').modal('show');
                             $('#cargo_details form #bag_ids').val(bag_ids);
 
                             $('#cargo_details form #vehicle_number').html("");
@@ -483,16 +484,18 @@
                             });
 
                             UnblockPagePermanently();
+
                         }
                         else{
-                            $('#cargo_details').modal('hide');
-
                             UnblockPagePermanently();
-
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                     }
                 });
+            });
+
+            $('#cargo_details').on('shown.bs.modal', function (e) {
+                cargo_table.draw(false);
             });
 
             $('#cargo_details form').validate({

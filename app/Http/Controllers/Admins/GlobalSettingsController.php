@@ -2295,7 +2295,7 @@ class GlobalSettingsController extends Controller
         }
         $shipments = BusinessProjectionShipment::join('users as u', 'u.id', '=', 'business_projection_shipments.user_id')->select('u.name as shipper', 'business_projection_shipments.shipment');
         if (session('department_id') == 7) {
-            if (session('role_id') != 4) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $shipments = $shipments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
