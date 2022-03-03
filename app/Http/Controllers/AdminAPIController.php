@@ -6624,8 +6624,8 @@ class AdminAPIController extends Controller
         }else{
             try{
                 $daily_visit = new DailyVisit();
-                $daily_visit->company_name = $request->company_name;
-                $daily_visit->customer_name = $request->customer_name;
+                $daily_visit->company_name = str_replace('"',"",$request->company_name);
+                $daily_visit->customer_name = str_replace('"',"",$request->customer_name);
                 $daily_visit->customer_address = $request->customer_address;
                 $daily_visit->phone_no = $request->phone_no;
                 $daily_visit->email = $request->email_address;
