@@ -8471,7 +8471,7 @@ class NotificationsController extends Controller
                         $employee_directory = Employee::where('trax_id', $data_set->trax_id);
                         if($employee_directory->exists()){
                             $employee_directory = $employee_directory->first();
-                            $employee_directory->status_id = 3;
+                            $employee_directory->status_id = 2;
                             $employee_directory->save();
                         }
 
