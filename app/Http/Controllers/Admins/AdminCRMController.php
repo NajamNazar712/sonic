@@ -528,13 +528,20 @@ class AdminCRMController extends Controller
             $crm_images_count = $crm_request->images->count();
 
             $approvers = array();
+            $special_request_agent = null;
             $special_request = SpecialApprovalRequest::join('admins as a','a.id','=','special_approval_requests.admin_id')
-               ->where('special_approval_requests.crm_request_id',$id)->where('special_approval_requests.status',1)->select('a.name as admin')->get();
+               ->where('special_approval_requests.crm_request_id',$id)->where('special_approval_requests.status',1)->select('a.name as admin','a.id as id','special_approval_requests.adjusted_percentage as percentage')->get();
             foreach($special_request as $admin_request){
-                $approvers[] = $admin_request->admin;
+                array_push($approvers,['admin_id' => $admin_request->id, 'admin_name' => $admin_request->admin, 'adjusted_percentage' => $admin_request->percentage]) ;
+                // array_push($special_request_agents,$admin_request->id) ;
+                // array_push($approvers['admin_id'],$admin_request->id) ;
+                // $approvers['admin_id'] = $admin_request->id;
+                if(Auth::id() == $admin_request->id){
+                    $special_request_agent = Auth::id();
+
+                }
             }
-            
-            return view('admin.crm.request_details')->with(['tagged_kae_name' => $tagged_kae_name, 'tagged_operation_name' => $tagged_operation_name, 'crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $approvers]);
+            return view('admin.crm.request_details')->with(['tagged_kae_name' => $tagged_kae_name, 'tagged_operation_name' => $tagged_operation_name, 'crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $approvers,'special_request_agent' => $special_request_agent]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -4847,6 +4854,7 @@ class AdminCRMController extends Controller
              $approval_request->crm_request_id = $request_id;
              $approval_request->admin_id = $admin;
              $approval_request->status = 1;
+             $approval_request->requested_by = Auth::id();
              $approval_request->save();
 
          }
@@ -4855,6 +4863,17 @@ class AdminCRMController extends Controller
      else{
          return redirect()->back()->with(['error'=> "Select One Admin At-least"]);
      }
+
+    }
+
+    public function special_request_adjusted(Request $request){
+        // dd($request->all());
+        $crm_id = $request->crm_request_id;
+        $admin_id = $request->special_request_agent_id;
+        $adjusted_percentage = $request->adjusted_persentage;
+        $approved_date = Carbon::today();
+        SpecialApprovalRequest::where(['crm_request_id' => $crm_id, 'admin_id' => $admin_id,'status' => 1])->update(['adjusted_percentage' => $adjusted_percentage,'approved_date' => $approved_date]);
+        return redirect()->back()->with(['success'=> "Request Approved"]);
 
     }
 

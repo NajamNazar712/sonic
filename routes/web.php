@@ -2539,6 +2539,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@crm_count_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@crm_count_list')->name('list');    
         });
+        Route::prefix('crm_special_approval')->name('crm_special_approval.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@crm_special_approval_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@crm_special_approval_list')->name('list');    
+        });
         
     });
 
@@ -3265,6 +3269,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('image_delete','Admins\AdminCRMController@crm_image_delete')->name('image_delete');
             Route::post('/lost/claim', 'Admins\AdminCRMController@lost_claim')->name('lost.claim');
             Route::post('request', 'Admins\AdminCRMController@special_request_appvove')->name('special_request_appvove');
+            Route::post('request_adjusted', 'Admins\AdminCRMController@special_request_adjusted')->name('special_request_adjusted');
+            
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');

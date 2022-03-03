@@ -10356,5 +10356,56 @@ class AdminReportsController extends Controller
 
         return $datatables->make(true);
     }
+
+    public function crm_special_approval_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),513);
+        return view('admin.reports.crm_special_approval');
+    }
+
+    public function crm_special_approval_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),514);
+        }
+        $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s','s.id','=','crm_requests.shipment_id')
+            ->leftjoin('special_approval_requests as sar', 'sar.crm_request_id' , '=', 'crm_requests.id')
+            ->leftjoin('admins as sarapproveby' ,'sarapproveby.id', '=' , 'sar.admin_id')
+            ->leftjoin('admins as sarrequestedby' ,'sarrequestedby.id', '=' , 'sar.requested_by')
+            ->leftjoin('admin_roles as ar' ,'ar.id', '=' , 'sarapproveby.role_id')
+            ->leftjoin('admin_departments as ad' ,'ad.id', '=' , 'ar.department_id')
+            ->leftjoin('adjustment_logs as adjustment', function ($join) {
+                $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
+                    ->where('adjustment.created_at','=',DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
+            })
+            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount', 'sarrequestedby.name as requested_by', 'sar.created_at as requested_date','sarapproveby.name as approved_by','ar.name as designation','ad.name as department','sar.approved_date as approved_at','sar.adjusted_percentage as adjusted_percentage','sar.status as status')
+            ->where('sar.status',1);
+
+        $datatable = Datatables::of($crm)
+            ->editColumn('request_number', function ($crm_request) {
+                return str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('id_padded_link', function ($crm_request) {
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $crm_request->request_number]) . ' target="_blank">' . str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT). '</a></u>';
+            })
+            ->addColumn('tracking_number_link', function ($crm_request) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
+            });
+        if($tracking = $request->get('search_tracking_no')){
+            $tracking_numbers = explode(',', $tracking);
+            $datatable->whereIn('s.tracking_number', $tracking_numbers);
+        }
+        if($rnumber = $request->get('search_request_number')){
+            $rnumber = explode(',',$rnumber);
+            $datatable->whereIn('crm_requests.id', $rnumber);
+        }
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatable->whereBetween('sar.created_at', [$from,$to]);
+        }
+
+        return $datatable->make(true);
+    }
 }
 

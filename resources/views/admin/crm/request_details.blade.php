@@ -210,7 +210,7 @@
                                                     <th scope="row">Special Request </th>
                                                     <td class="name">
                                                         @foreach($approvers as $admin)
-                                                            <h5 class="mb-0">{{$admin}}</h5>
+                                                            <h5 class="mb-0">{{$admin['admin_name']}} {{$admin['adjusted_percentage'] == '' ? '' : ' ('.$admin['adjusted_percentage'].')'}}</h5>
                                                         @endforeach
                                                     </td>
                                                 </tr>
@@ -1073,10 +1073,33 @@
                             </tr>
                             </thead>
                             <tbody>
+                                @if(!empty($approvers))
+                                   @php
+                                       $special_1 = '';
+                                       $special_2 = '';
+                                       $special_3 = '';
+                                   @endphp
+                                    @foreach($approvers as $admin)
+                                        @if ($admin['admin_id'] == 32)
+                                            @php
+                                                $special_1 = 'checked';
+                                            @endphp
+                                        @elseif($admin['admin_id'] == 372)
+                                            @php
+                                                $special_2 = 'checked';
+                                            @endphp
+                                        @elseif($admin['admin_id'] == 169)
+                                            @php
+                                                $special_3 = 'checked';
+                                            @endphp
+                                        @endif
+                                    @endforeach
+                                                
+                                @endif
                             <tr>
                                 <td>
                                     <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="32" name="admin[]">
+                                        <input class="form-check-input" type="checkbox" value="32" name="admin[]" {{$special_1}}>
                                     </div>
                                 </td>
                                 <td>Waqas Ahmed Dar</td>
@@ -1084,7 +1107,7 @@
                             <tr>
                                 <td>
                                     <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="372" name="admin[]">
+                                        <input class="form-check-input" type="checkbox" value="372" name="admin[]" {{$special_2}}>
                                     </div>
                                 </td>
                                 <td>Mursaleen Rafiq</td>
@@ -1092,15 +1115,7 @@
                             <tr>
                                 <td>
                                     <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="661" name="admin[]">
-                                    </div>
-                                </td>
-                                <td>Waqas Sheikh</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="169" name="admin[]">
+                                        <input class="form-check-input" type="checkbox" value="169" name="admin[]" {{$special_3}}>
                                     </div>
                                 </td>
                                 <td>Sohaib Jawaid</td>
@@ -1110,10 +1125,28 @@
 
                         <div class="row justify-content-center mt-2 ml-2">
                             <div class="col-4">
-                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Submit</button>
+                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Request</button>
                             </div>
                         </div>
                     </form>
+                    @if ($special_request_agent != null)
+                    <hr>
+                    <form class="mb-2" action="{{route('admin.crm.request.special_request_adjusted')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="special_request_agent_id" value="{{$special_request_agent}}">
+                        <input type="hidden" name="crm_request_id" value="{{$crm_details->id}}">
+
+                        <div class="row justify-content-center mt-2 ml-2">
+                            <div class="col-4">
+                                <input type="text" id="adjusted_persentage" name="adjusted_persentage" class="form-control">
+                            </div>
+                            <div class="col-4">
+                                <button id="special_request_approve_btn" type="submit" class="btn btn-primary btn-block">Approve</button>
+                            </div>
+                        </div>
+                    </form>
+                    <hr>
+                    @endif
                 </div>
 
             </div>
@@ -1229,7 +1262,16 @@
                 'min': 0.00,
                 'max': 1000000.00
             });
-
+            $('#adjusted_persentage').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 1000000.00
+            });
+            
             {{--$('#valid').on('click', function (e) {--}}
             {{--e.preventDefault();--}}
             {{--$.ajax({--}}
