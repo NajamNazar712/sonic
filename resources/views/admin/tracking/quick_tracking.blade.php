@@ -135,6 +135,7 @@
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Tracking Number</th>
+                                        <th class="border-primary border-darken-1">Delivery Note ID</th>
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Reason</th>
                                         <th class="border-primary border-darken-1">Remarks</th>
@@ -297,6 +298,7 @@
                     columns: [
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
                         {name: 'tracking_number', class: 'align-middle tracking_numbers', orderable: false},
+                        {name: 'delivery_note_id', class: 'align-middle delivery_note_id', orderable: false},
                         {name: 'current_status', class: 'align-middle current_status', orderable: false},
                         {name: 'reason', class: 'align-middle reason', orderable: false},
                         {name: 'remarks', class: 'align-middle remarks', orderable: false},
@@ -358,7 +360,7 @@
                                 }else{
                                     var rowNo = table.rows().count();
 
-                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                     table.draw(false);
                                     scan_sound(1);
                                 }
@@ -383,7 +385,7 @@
                                     }else{
                                         var rowNo = table.rows().count();
 
-                                        table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                        table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
