@@ -47,7 +47,7 @@ class RiderDeactivateAutomatically extends Command
         $date_week_age = Carbon::now()->subDays(3)->toDateTimeString();
         $today = Carbon::now()->toDateTimeString();
         $rider_data = '';
-        $rider_ids = Rider::where('status', 0)->whereDate('created_at', '<', $date_week_age)->pluck('id')->toArray();
+        $rider_ids = Rider::where('status', 1)->whereDate('created_at', '<', $date_week_age)->pluck('id')->toArray();
         $deliveries  = DeliveryNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
         $v2_pickups  = V2PickupNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
         $return_notes  = ReturnNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
