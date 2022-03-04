@@ -3045,7 +3045,10 @@ class AdminCargoManifestController extends Controller
 
     public function manifest_draft_setting(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),509);
-        $users = Admin::select(['id','trax_id','name']);
+        $users = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
+            ->select(['admins.id','admins.trax_id','admins.name'])
+            ->where('ar.department_id',6)
+            ->where('admins.status',1);
 
         if(session('role_id') != 1)
         {
