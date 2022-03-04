@@ -92,7 +92,7 @@
                                             <span class="la la-calendar-o small-calender-icon"></span>
                                         </span>
                                                     </div>
-                                                    <input type="text" name="joining_date" class="form-control bg-primary border-primary white rounded-right pickadate" id="joining_date" placeholder="Joining Date" data-rule-required="true" data-msg-required="Joining Date is required">
+                                                    <input type="text" id="joining_date" name="joining_date" class="form-control bg-primary border-primary white rounded-right pickadate" id="joining_date" placeholder="Joining Date" data-rule-required="true" data-msg-required="Joining Date is required">
                                                 </div>
                                             </div>
                                         </div>
@@ -200,6 +200,8 @@
                           $('#designation').val(data.data.designation).trigger('change');
                           $('#department_id').val(data.data.department).trigger('change');
                           $('#city').val(data.data.city);
+                          $('#joining_date').val(data.data.joining_date);
+                          
                        }
                        else{
                            toastr.error(data.error, 'Error!', {
