@@ -17,7 +17,7 @@ use App\Http\Models\EmployeeRequisitionStatus;
 use App\Http\Models\EmployeeRequisitionStatusLog;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
-use App\Models\Admin\AdminPositionTypes;
+use App\Http\Models\Admin\AdminPositionTypes;
 use SnappyImage;
 use SnappyPDF;
 use Carbon\Carbon;
