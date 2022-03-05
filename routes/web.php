@@ -2390,6 +2390,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('destination_delivery_received')->name('destination_delivery_received.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@destination_delivery_received_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@destination_delivery_received_list')->name('list');
+            Route::get('get/dn_no', 'Admins\AdminReportsController@get_dn_no')->name('get.dn_no');
         });
 
         Route::prefix('account_reconciliation')->name('account_reconciliation.')->group(function (){

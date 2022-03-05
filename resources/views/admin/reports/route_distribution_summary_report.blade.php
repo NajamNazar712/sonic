@@ -89,6 +89,9 @@
 
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
+                            <th class="border-primary border-darken-1">Rider Type</th>
+                            <th class="border-primary border-darken-1">Delivery Note</th>
+                            <th class="border-primary border-darken-1">DNCC Amount</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Total Out For Delivery</th>
                             <th class="border-primary border-darken-1">Pending</th>
@@ -102,6 +105,25 @@
                         </tr>
                         </thead>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="dn_no_modal" data-backdrop="static" role="dialog"
+         aria-labelledby="dn_no_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="dn_no_modal">Delivery Notes</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center" id="dn_data">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -343,6 +365,9 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'courier_name' ,name: 'r.name', class: 'align-middle text-center courier_name'},
+                    { data:'rider_type' ,name: 'rt.name', class: 'align-middle text-center rider_type'},
+                    { data:'dn_no' ,name: 'delivery_notes.id', class: 'align-middle text-center dn_no'},
+                    { data:'dncc_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle text-center dncc_amount'},
                     { data:'hub' ,name: 'hub', class: 'align-middle text-center hub'},
                     { data:'shipments_count', class: 'align-middle shipments_count', orderable: false, searchable: false},
                     { data:'pending_shipments', class: 'align-middle pending_shipments', orderable: false, searchable: false},
@@ -461,7 +486,68 @@
                 table.draw();
             });
 
+
+            $('#datatable tbody').on('click', 'tr td.dn_no button', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if (id) {
+                    $.ajax({
+                        url: '{!! route('admin.reports.destination_delivery_received.get.dn_no') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'dn_id': id,
+                        },
+                        success: function (data) {
+                            if (data.status == 1) {
+
+
+                                $('#dn_data').html(data.html);
+
+                            } else {
+                                toastr.error('Something went wrong!', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        }
+                    })
+
+                }
+
+            });
+
+
         });
+
+        function dn_no_pop(id){
+
+            if (id) {
+                $.ajax({
+                    url: '{!! route('admin.reports.destination_delivery_received.get.dn_no') !!}',
+                    method: 'get',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'dn_id': id,
+                    }
+                })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            var notes = '';
+
+                            notes += data.html
+                            $('#dn_no_modal .modal-body').html('');
+                            $('#dn_no_modal').modal('show');
+                            $('#dn_no_modal .modal-body').html(notes);
+                        } else {
+                            toastr.error('Something went wrong!', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+            }
+
+        }
 
     </script>
 @endsection
