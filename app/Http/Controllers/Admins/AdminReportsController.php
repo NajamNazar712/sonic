@@ -7474,19 +7474,19 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('dncc_amount', function ($entry) {
-                $dncc_amount = DB::connection('reports')
-                    ->table('delivery_notes as dn')
-                    ->LeftJoin('delivery_note_station_deposit_notes as dnsdn', 'dn.id', '=', 'dnsdn.delivery_note_id')
-                    ->LeftJoin('station_deposit_notes as sdn', 'dnsdn.station_deposit_note_id', '=', 'sdn.id')
-                    ->where('dn.rider_id', 1)
-                    ->where('sdn.sdn_amount', '>' ,0)
-                     ->select('sdn.sdn_amount','dn.rider_id')
-                    ->orderby('dn.id','desc')
-                    ->groupby('dn.id')
-                    ->get();
-                dd($dncc_amount);
+//                $dncc_amount = DB::connection('reports')
+//                    ->table('delivery_notes as dn')
+//                    ->LeftJoin('delivery_note_station_deposit_notes as dnsdn', 'dn.id', '=', 'dnsdn.delivery_note_id')
+//                    ->LeftJoin('station_deposit_notes as sdn', 'dnsdn.station_deposit_note_id', '=', 'sdn.id')
+//                    ->where('dn.rider_id', 1)
+//                    ->where('sdn.sdn_amount', '>' ,0)
+//                     ->select('sdn.sdn_amount','dn.rider_id')
+//                    ->orderby('dn.id','desc')
+//                    ->groupby('dn.id')
+//                    ->get();
+//                dd($dncc_amount);
 
-                return $dncc_amount;
+                return '-';
 
             })
             ->addColumn('delivered_shipments_per', function ($entry) {
