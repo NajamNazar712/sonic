@@ -22,6 +22,7 @@ class RetailRatesCalculationController extends Controller
         $charges = 0;
         $discount_amount = 0;
         $charges_with_discount = 0;
+        $remaining_weight = 0;
         if($business_category_id == 1){
             $pickup_city = City::find($pickup_city_id);
             if($shipping_mode_id != 5){
@@ -29,36 +30,78 @@ class RetailRatesCalculationController extends Controller
                 if($weight_charges->exists()){
                     $weight_charges = $weight_charges->first();
                     if($weight_charges->weight_addition == 1){
-                        //$multiplier = (intval($weight - $weight_charges->range_up) / $weight_charges->kg_range) + 1;
-                    }
-                    else{
-                        $multiplier = 1;
+                        $charges = RetailStandardRates::where('shipping_mode_id',3)->orderby('id','desc')->skip(1)->take(2)->first();
+                        if($charges){
+                         $remaining_weight = intval($weight - $weight_charges->range_down);
+                        }
                     }
                     if($shipping_mode_id == 1){
                         $zone_class = ZoneClassCity::where('city_id', $pickup_city_id)->where('zone_id', $pickup_city->zone_id)->first();
                         if($zone_class->class == 0){
-                            $charges =  intval($weight_charges->zone_a) * $multiplier;
+                            if($remaining_weight > 0){
+                                $additional_charges = intval($remaining_weight * $weight_charges->zone_a);;
+                                $charges = intval($weight_charges->zone_a) + $additional_charges;
+                            }
+                            else{
+                                $charges = intval($weight_charges->zone_a);
+                            }
                         }
                         elseif ($zone_class->class == 1){
-                            $charges = intval($weight_charges->zone_b) * $multiplier;
+                            if($remaining_weight > 0){
+                                $additional_charges = intval($remaining_weight * $weight_charges->zone_b);
+                                $charges = intval($weight_charges->zone_b) + $additional_charges;
+                            }
+                            else{
+                                $charges = intval($weight_charges->zone_b);
+                            }
                         }
                         elseif ($zone_class->class == 2){
-                            $charges = intval($weight_charges->zone_c) * $multiplier;
+                            if($remaining_weight > 0){
+                                $additional_charges = intval($remaining_weight * $weight_charges->zone_c);
+                                $charges = intval($weight_charges->zone_c) + $additional_charges;
+                            }
+                            else{
+                                $charges = intval($weight_charges->zone_c);
+                            }
                         }
                         elseif ($zone_class->class == 3){
-                            $charges = intval($weight_charges->zone_d) * $multiplier;
+                            if($remaining_weight > 0){
+                                $additional_charges = intval($remaining_weight * $weight_charges->zone_d);
+                                $charges = intval($weight_charges->zone_d) + $additional_charges;
+                            }
+                            else{
+                                $charges = intval($weight_charges->zone_d);
+                            }
                         }
                     }
                     else{
                         $consignee_city = City::find($destination_id);
                         if($pickup_city->id == $consignee_city->id){
-                            $charges = intval($weight_charges->within_city) * $multiplier;
+                            if($remaining_weight > 0){
+                                $additional_charges = intval($remaining_weight * $weight_charges->within_city);
+                                $charges = intval($weight_charges->within_city) + $additional_charges;
+                            }
+                            else{
+                                $charges = intval($weight_charges->within_city);
+                            }
                         }
                         elseif ($pickup_city->zone_id == $consignee_city->zone_id){
-                            $charges = intval($weight_charges->same_zone) * $multiplier;
+                            if($remaining_weight > 0){
+                                $additional_charges = intval($remaining_weight * $weight_charges->same_zone);
+                                $charges = intval($weight_charges->same_zone) + $additional_charges;
+                            }
+                            else{
+                                $charges = intval($weight_charges->same_zone);
+                            }
                         }
                         else{
-                            $charges = intval($weight_charges->different_zone) * $multiplier;
+                            if($remaining_weight > 0){
+                                $additional_charges = intval($remaining_weight * $weight_charges->different_zone);
+                                $charges = intval($weight_charges->different_zone) + $additional_charges;
+                            }
+                            else{
+                                $charges = intval($weight_charges->different_zone);
+                            }
                         }
                     }
                 }
