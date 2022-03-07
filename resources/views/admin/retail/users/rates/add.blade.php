@@ -90,7 +90,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[{{$index_row}}]">
+                                                                       data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -219,7 +219,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="rush_kg_range[{{$index_row}}]">
+                                                                       data-bts-button-up-class="btn btn-success" data-rule-required="true" data-msg-required="This field is required" name="rush_kg_range[{{$index_row}}]">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -331,7 +331,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="cod_kg_range[{{$index_row}}]">
+                                                                       data-bts-button-up-class="btn btn-success" data-rule-required="true" data-msg-required="This field is required"  name="cod_kg_range[{{$index_row}}]">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -554,7 +554,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="flyer_kg_range[{{$index_row}}]">
+                                                                       data-bts-button-up-class="btn btn-success" data-rule-required="true" data-msg-required="This field is required"  name="flyer_kg_range[{{$index_row}}]">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -663,7 +663,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="hdocs_kg_range[{{$index_row}}]">
+                                                                       data-bts-button-up-class="btn btn-success" name="hdocs_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -784,7 +784,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_2_kg_range[{{$index_row}}]">
+                                                                                       data-bts-button-up-class="btn btn-success"  data-rule-required="true" data-msg-required="This field is required"name="trax_box_2_kg_range[{{$index_row}}]">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -889,7 +889,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_5_kg_range[{{$index_row}}]">
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_5_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -995,7 +995,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_10_kg_range[{{$index_row}}]">
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_10_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -1100,7 +1100,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_15_kg_range[{{$index_row}}]">
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_15_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -1205,7 +1205,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_20_kg_range[{{$index_row}}]">
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_20_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -1310,7 +1310,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_30_kg_range[{{$index_row}}]">
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_30_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -1831,7 +1831,7 @@
                 var hdocs_range_down = parseFloat($('#hdocs_range_down' + row_count).val());
                 var hdocs_new_range_down = hdocs_range_down + 0.01;
                 let htmdiv = '<div class="row" id="hdocs_row' + doc_count + '"><div class="col text-center"><fieldset class="form-group"><input type="text" id="hdocs_range_up' + doc_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="hdocs_range_up[' + doc_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="hdocs_range_down' + doc_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="hdocs_range_down[' + doc_count + ']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;">\n' +
-                    '                   <input type="checkbox" id="SwiftSwitch[' + doc_count + ']" class="switchery weightAdditionHdocs' + doc_count + '" data-color="success" data-size="sm" name="swift_switch[' + doc_count + ']">\n' +
+                    '                   <input type="checkbox" id="hdocs_switch[' + doc_count + ']" class="switchery weightAdditionHdocs' + doc_count + '" data-color="success" data-size="sm" name="swift_switch[' + doc_count + ']">\n' +
                     '                </div>\n' +
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +

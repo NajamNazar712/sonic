@@ -796,41 +796,41 @@ class RetailAdminUserManagementController extends Controller
 
         $trax_box_validations = [
 
-            'trax_box_2_range_up' => 'required|numeric',
-            'trax_box_2_range_down' => 'required|numeric',
-            'trax_box_2_wc' => 'required|numeric',
-            'trax_box_2_sz' => 'required|numeric',
-            'trax_box_2_dz' => 'required|numeric',
+            'trax_box_2_range_up.*' => 'required|numeric',
+            'trax_box_2_range_down.*' => 'required|numeric',
+            'trax_box_2_wc.*' => 'required|numeric',
+            'trax_box_2_sz.*' => 'required|numeric',
+            'trax_box_2_dz.*' => 'required|numeric',
 
-            'trax_box_5_range_up' => 'required|numeric',
-            'trax_box_5_range_down' => 'required|numeric',
-            'trax_box_5_wc' => 'required|numeric',
-            'trax_box_5_sz' => 'required|numeric',
-            'trax_box_5_dz' => 'required|numeric',
+            'trax_box_5_range_up.*' => 'required|numeric',
+            'trax_box_5_range_down.*' => 'required|numeric',
+            'trax_box_5_wc.*' => 'required|numeric',
+            'trax_box_5_sz.*' => 'required|numeric',
+            'trax_box_5_dz.*' => 'required|numeric',
 
-            'trax_box_10_range_up' => 'required|numeric',
-            'trax_box_10_range_down' => 'required|numeric',
-            'trax_box_10_wc' => 'required|numeric',
-            'trax_box_10_sz' => 'required|numeric',
-            'trax_box_10_dz' => 'required|numeric',
+            'trax_box_10_range_up.*' => 'required|numeric',
+            'trax_box_10_range_down.*' => 'required|numeric',
+            'trax_box_10_wc.*' => 'required|numeric',
+            'trax_box_10_sz.*' => 'required|numeric',
+            'trax_box_10_dz.*' => 'required|numeric',
 
-            'trax_box_15_range_up' => 'required|numeric',
-            'trax_box_15_range_down' => 'required|numeric',
-            'trax_box_15_wc' => 'required|numeric',
-            'trax_box_15_sz' => 'required|numeric',
-            'trax_box_15_dz' => 'required|numeric',
+            'trax_box_15_range_up.*' => 'required|numeric',
+            'trax_box_15_range_down.*' => 'required|numeric',
+            'trax_box_15_wc.*' => 'required|numeric',
+            'trax_box_15_sz.*' => 'required|numeric',
+            'trax_box_15_dz.*' => 'required|numeric',
 
-            'trax_box_20_range_up' => 'required|numeric',
-            'trax_box_20_range_down' => 'required|numeric',
-            'trax_box_20_wc' => 'required|numeric',
-            'trax_box_20_sz' => 'required|numeric',
-            'trax_box_20_dz' => 'required|numeric',
+            'trax_box_20_range_up.*' => 'required|numeric',
+            'trax_box_20_range_down.*' => 'required|numeric',
+            'trax_box_20_wc.*' => 'required|numeric',
+            'trax_box_20_sz.*' => 'required|numeric',
+            'trax_box_20_dz.*' => 'required|numeric',
 
-            'trax_box_30_range_up' => 'required|numeric',
-            'trax_box_30_range_down' => 'required|numeric',
-            'trax_box_30_wc' => 'required|numeric',
-            'trax_box_30_sz' => 'required|numeric',
-            'trax_box_30_dz' => 'required|numeric',
+            'trax_box_30_range_up.*' => 'required|numeric',
+            'trax_box_30_range_down.*' => 'required|numeric',
+            'trax_box_30_wc.*' => 'required|numeric',
+            'trax_box_30_sz.*' => 'required|numeric',
+            'trax_box_30_dz.*' => 'required|numeric',
         ];
 
 
@@ -949,7 +949,7 @@ class RetailAdminUserManagementController extends Controller
         }
 
 
-        $flyer = RetailStandardRates::where('shipping_mode_id', 5)->get();
+        $flyer = RetailStandardRates::where('shipping_mode_id', 6)->get();
 
         if ($flyer->isEmpty()) {
 
@@ -975,7 +975,7 @@ class RetailAdminUserManagementController extends Controller
         }
 
 
-        $hdocs = RetailStandardRates::where('shipping_mode_id', 6)->get();
+        $hdocs = RetailStandardRates::where('shipping_mode_id', 7)->get();
 
         if ($hdocs->isEmpty()) {
 
@@ -1000,7 +1000,7 @@ class RetailAdminUserManagementController extends Controller
         }
 
 
-        $trax_box = RetailStandardRates::where('shipping_mode_id', 7)->get();
+        $trax_box = RetailStandardRates::where('shipping_mode_id', 5)->get();
 
         if ($trax_box->isEmpty()) {
 
