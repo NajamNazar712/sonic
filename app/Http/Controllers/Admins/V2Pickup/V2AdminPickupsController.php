@@ -358,7 +358,7 @@ class V2AdminPickupsController extends Controller
         if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
             $from = $request->get('requested_from_date');
             $to = $request->get('requested_to_date');
-
+            dd($from);
             $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
             $datatables->whereBetween('v2_pickup_requests.created_at', [$from, $stop_date]);
         }

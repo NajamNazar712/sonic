@@ -51,6 +51,7 @@ use App\Http\Models\Admin\OSAChargesLog;
 use App\Http\Models\Admin\ReturnRevertLog;
 use App\Http\Models\CRM\CRMCount;
 
+
 class AdminReportsController extends Controller
 {
     public function __construct()
@@ -7412,6 +7413,7 @@ class AdminReportsController extends Controller
 
     public function route_distribution_list(Request $request)
     {
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 198);
         }
@@ -7474,6 +7476,7 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('dncc_amount', function ($entry) {
+                $amount = DB::connection('reports')->table('delivery_notes')->where('rider_id', $entry->rider_id)->sum('total_cod_amount');
 //                $dncc_amount = DB::connection('reports')
 //                    ->table('delivery_notes as dn')
 //                    ->LeftJoin('delivery_note_station_deposit_notes as dnsdn', 'dn.id', '=', 'dnsdn.delivery_note_id')
@@ -7486,7 +7489,7 @@ class AdminReportsController extends Controller
 //                    ->get();
 //                dd($dncc_amount);
 
-                return '-';
+                return $amount;
 
             })
             ->addColumn('delivered_shipments_per', function ($entry) {
@@ -7525,6 +7528,7 @@ class AdminReportsController extends Controller
                 }
             });
 
+
         if ($rider = $request->get('search_rider')) {
             $datatables = $datatables->where('r.id', '=', $rider);
         }
@@ -7540,10 +7544,46 @@ class AdminReportsController extends Controller
         if ($search_rider_cat = $request->get('search_rider_cat')) {
             $datatables->where('r.operation_rider_id', $search_rider_cat);
         }
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
+//        if ($request->get('search_from') && $request->get('search_to')) {
+//            $from = $request->get('search_from');
+//            $to = $request->get('search_to');
+//            $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
+//        }
+
+
+        if ($request->get('search_from') && $request->get('search_to') && $request->get('search_cutt_off')) {
+
+            if ($request->get('search_cutt_off') == 1)
+            {
+                $from = $request->get('search_from');
+                $to = $request->get('search_to');
+                $from = $from.' '.'20:00:00';
+                $to = $to.' '.'14:00:00';
+//            $from1 = $from->toDateString();
+//            $to1 = $to->toDateString();
+//            dd($from,$to);
+//            $cut_off_time = Carbon::parse($from)->format('H:i:s');
+//            $d = DeliveryNote::whereBetween('delivery_notes.created_at', [$from, $to])->get();
+//            dd($d);
+//            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+                $datatables = $datatables->whereBetween('delivery_notes.created_at',[$from,$to]);
+            }
+            if ($request->get('search_cutt_off') == 2)
+            {
+
+                $from = $request->get('search_from');
+                $to = $request->get('search_to');
+                $from = $from.' '.'14:01:00';
+                $to = $to.' '.'19:59:00';
+//            $from1 = $from->toDateString();
+//            $to1 = $to->toDateString();
+//            dd($from,$to);
+//            $cut_off_time = Carbon::parse($from)->format('H:i:s');
+//            $d = DeliveryNote::whereBetween('delivery_notes.created_at', [$from, $to])->get();
+//            dd($d);
+//            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+                $datatables = $datatables->whereBetween('delivery_notes.created_at',[$from,$to]);
+            }
         }
 
         return $datatables->make(true);

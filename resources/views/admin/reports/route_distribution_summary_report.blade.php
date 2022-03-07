@@ -58,7 +58,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3 ">
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -68,7 +68,7 @@
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -77,6 +77,14 @@
                             </div>
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_cutt_off" id="search_cutt_off" class="form-control">
+                                <option value="{{'1'}}" selected>8pm to 2pm</option>
+                                <option value="{{'2'}}">2:01pm to 7:59pm</option>
+                            </select>
+                        </fieldset>
                     </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -202,6 +210,11 @@
             var confirmation_pending_shipments = 0;
             var confirmation_pending_shipments_per = 0;
 
+            // $('#search_cutt_off').prepend('<option value="" selected="selected"></option>').select2({
+            //     // placeholder:'Select Zone',
+            //     width:'100%',
+            //     allowClear:true
+            // });
             $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Zone',
                 width:'100%',
@@ -234,7 +247,8 @@
                 firstDay: 1,
                 clear: 'Clear',
                 max: max,
-                format:'dd mmmm, yyyy',
+                // format:'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -250,7 +264,8 @@
                 firstDay: 1,
                 clear: 'Clear',
                 max: max,
-                format:'dd mmmm, yyyy',
+                // format:'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -328,7 +343,7 @@
                 }
             } );
 
-            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -352,12 +367,16 @@
                 ajax:{
                     url: '{{ route('admin.reports.route_distribution.list') }}',
                     data: function (d) {
+                        d.search_cutt_off = $('#search_cutt_off').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_zone = $('#search_zone').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
-                        d.search_from = $('input[name="from_date_formatted"]').val();
-                        d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.search_from = $('#from_date').val();
+                        d.search_to = $('#to_date').val();
+
+                        // d.search_from = $('input[name="from_date_formatted"]').val();
+                        // d.search_to = $('input[name="to_date_formatted"]').val();
                         d.search_rider_cat = $('#search_rider_cat').val();
                     }
                 },
