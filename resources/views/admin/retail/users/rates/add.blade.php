@@ -1047,73 +1047,93 @@
                                                 <div id="trax_box_fifteen_kg" class="card border-success hide" aria-expanded="true">
                                                     <div class="card-content">
                                                         <div class="card-body">
-                                                            <div class="row">
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Weight Addition</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">KG Range</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Within City</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Same Zone</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Different Zone</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row trax_box_fifteen_fields" id="">
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" id="trax_box_15_range_up" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_15_range_up">
-                                                                    </fieldset>
-                                                                </div>
-                                                                <div class="col text-center">
-
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" id="trax_box_15_range_down" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_15_range_down" >
-                                                                    </fieldset>
-                                                                </div>
-
-                                                                <div class="col text-center">
-
-                                                                    <div class="form-group " style="padding-top: 8px;">
-                                                                        <input type="checkbox" id="TraxBoxFifteenSwitch" class="switchery weightAdditionTraxBoxFifteen" data-color="success" data-size="sm" name="trax_box_15_switch">
+                                                            <div class="weight-addition-trax-box-15">
+                                                                <div class="row">
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Range Up</label>
                                                                     </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Range Down</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Weight Addition</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">KG Range</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Within City</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Same Zone</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Different Zone</label>
+                                                                    </div>
+                                                                    <div class="col-1"></div>
                                                                 </div>
-                                                                <div class="col text-center">
-                                                                    <fieldset style="padding-top: 5px;">
 
-                                                                        <div class="input-group input-group-sm form-group">
-                                                                            <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                   data-bts-button-up-class="btn btn-success" name="trax_box_15_weight">
+                                                                @php
+                                                                    $index_row = 1;
+                                                                @endphp
+
+                                                                <div class="row trax_box_15_row" id="">
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" id="trax_box_15_range_up{{$index_row}}" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_15_range_up[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" id="trax_box_15_range_down{{$index_row}}" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_15_range_down[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" id="TraxboxFifteenSwitch{{$index_row}}" class="switchery weightAdditionTraxBoxFifteen" data-color="success" data-size="sm" name="trax_box_15_switch[{{$index_row}}]">
                                                                         </div>
-                                                                    </fieldset>
-                                                                </div>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset style="padding-top: 5px;">
 
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_wc" >
-                                                                    </fieldset>
+                                                                            <div class="input-group input-group-sm form-group">
+                                                                                <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_15_kg_range[{{$index_row}}]">
+                                                                            </div>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_wc[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_sz[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_dz[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col-1">
+                                                                        @if($index_row>1)
+                                                                            <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 trax_box_15_weight_close"><i class="ft-x"></i></span>
+                                                                        @endif
+                                                                    </div>
+
                                                                 </div>
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_sz" >
-                                                                    </fieldset>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_dz" >
-                                                                    </fieldset>
-                                                                </div>
+                                                                @php
+                                                                    $index_row++;
+                                                                @endphp
+
+
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="trax_box_15_waddition_btn"><i class="la la-plus"></i></button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1132,72 +1152,93 @@
                                                 <div id="trax_box_twenty_kg" class="card border-success hide" aria-expanded="true">
                                                     <div class="card-content">
                                                         <div class="card-body">
-                                                            <div class="row">
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Weight Addition</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">KG Range</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Within City</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Same Zone</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Different Zone</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row trax_box_twenty_fields" id="">
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" id="trax_box_20_range_up" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_20_range_up">
-                                                                    </fieldset>
-                                                                </div>
-                                                                <div class="col text-center">
-
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" id="trax_box_20_range_down" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_20_range_down" >
-                                                                    </fieldset>
-                                                                </div>
-
-                                                                <div class="col text-center">
-                                                                    <div class="form-group " style="padding-top: 8px;">
-                                                                        <input type="checkbox" id="TraxBoxTwentySwitch" class="switchery weightAdditionTraxBoxTwenty" data-color="success" data-size="sm" name="trax_box_20_switch">
+                                                            <div class="weight-addition-trax-box-20">
+                                                                <div class="row">
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Range Up</label>
                                                                     </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Range Down</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Weight Addition</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">KG Range</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Within City</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Same Zone</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Different Zone</label>
+                                                                    </div>
+                                                                    <div class="col-1"></div>
                                                                 </div>
-                                                                <div class="col text-center">
-                                                                    <fieldset style="padding-top: 5px;">
 
-                                                                        <div class="input-group input-group-sm form-group">
-                                                                            <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                   data-bts-button-up-class="btn btn-success" name="trax_box_20_weight">
+                                                                @php
+                                                                    $index_row = 1;
+                                                                @endphp
+
+                                                                <div class="row trax_box_20_row" id="">
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" id="trax_box_20_range_up{{$index_row}}" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_20_range_up[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" id="trax_box_20_range_down{{$index_row}}" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_20_range_down[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" id="TraxboxTwentySwitch{{$index_row}}" class="switchery weightAdditionTraxBoxTwenty" data-color="success" data-size="sm" name="trax_box_20_switch[{{$index_row}}]">
                                                                         </div>
-                                                                    </fieldset>
-                                                                </div>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset style="padding-top: 5px;">
 
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_wc" >
-                                                                    </fieldset>
+                                                                            <div class="input-group input-group-sm form-group">
+                                                                                <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_20_kg_range[{{$index_row}}]">
+                                                                            </div>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_wc[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" name="trax_box_20_sz[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_dz[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col-1">
+                                                                        @if($index_row>1)
+                                                                            <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 trax_box_20_weight_close"><i class="ft-x"></i></span>
+                                                                        @endif
+                                                                    </div>
+
                                                                 </div>
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_sz" >
-                                                                    </fieldset>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_dz" >
-                                                                    </fieldset>
-                                                                </div>
+                                                                @php
+                                                                    $index_row++;
+                                                                @endphp
+
+
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="trax_box_20_waddition_btn"><i class="la la-plus"></i></button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1216,72 +1257,93 @@
                                                 <div id="trax_box_thirty_kg" class="card border-success hide" aria-expanded="true">
                                                     <div class="card-content">
                                                         <div class="card-body">
-                                                            <div class="row">
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Range Up</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Range Down</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Weight Addition</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">KG Range</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Within City</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Same Zone</label>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <label class="card-title">Different Zone</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row trax_box_thirty_fields" id="">
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" id="trax_box_30_range_up" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_30_range_up">
-                                                                    </fieldset>
-                                                                </div>
-                                                                <div class="col text-center">
-
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" id="trax_box_30_range_down" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_30_range_down" >
-                                                                    </fieldset>
-                                                                </div>
-                                                                <div class="col text-center">
-
-                                                                    <div class="form-group " style="padding-top: 8px;">
-                                                                        <input type="checkbox" id="TraxBoxThirtySwitch" class="switchery weightAdditionTraxBoxThirty" data-color="success" data-size="sm" name="trax_box_30_switch">
+                                                            <div class="weight-addition-trax-box-30">
+                                                                <div class="row">
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Range Up</label>
                                                                     </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Range Down</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Weight Addition</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">KG Range</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Within City</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Same Zone</label>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <label class="card-title">Different Zone</label>
+                                                                    </div>
+                                                                    <div class="col-1"></div>
                                                                 </div>
-                                                                <div class="col text-center">
-                                                                    <fieldset style="padding-top: 5px;">
 
-                                                                        <div class="input-group input-group-sm form-group">
-                                                                            <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                   data-bts-button-up-class="btn btn-success" name="trax_box_30_weight">
+                                                                @php
+                                                                    $index_row = 1;
+                                                                @endphp
+
+                                                                <div class="row trax_box_30_row" id="">
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" id="trax_box_30_range_up{{$index_row}}" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_30_range_up[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" id="trax_box_30_range_down{{$index_row}}" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="trax_box_30_range_down[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+
+                                                                        <div class="form-group " style="padding-top: 8px;">
+                                                                            <input type="checkbox" id="TraxboxThirtySwitch{{$index_row}}" class="switchery weightAdditionTraxBoxThirty" data-color="success" data-size="sm" name="trax_box_30_switch[{{$index_row}}]">
                                                                         </div>
-                                                                    </fieldset>
-                                                                </div>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset style="padding-top: 5px;">
 
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_wc" >
-                                                                    </fieldset>
+                                                                            <div class="input-group input-group-sm form-group">
+                                                                                <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_30_kg_range[{{$index_row}}]">
+                                                                            </div>
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_wc[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" name="trax_box_30_sz[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col text-center">
+                                                                        <fieldset class="form-group">
+                                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_dz[{{$index_row}}]">
+                                                                        </fieldset>
+                                                                    </div>
+                                                                    <div class="col-1">
+                                                                        @if($index_row>1)
+                                                                            <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 trax_box_30_weight_close"><i class="ft-x"></i></span>
+                                                                        @endif
+                                                                    </div>
+
                                                                 </div>
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_sz" >
-                                                                    </fieldset>
-                                                                </div>
-                                                                <div class="col text-center">
-                                                                    <fieldset class="form-group">
-                                                                        <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_dz" >
-                                                                    </fieldset>
-                                                                </div>
+                                                                @php
+                                                                    $index_row++;
+                                                                @endphp
+
+
+                                                            </div>
+                                                            <div class="mb-2">
+                                                                <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="trax_box_30_waddition_btn"><i class="la la-plus"></i></button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1296,7 +1358,6 @@
 
                             <div class="text-center mt-2">
                                 <div class="form-group">
-
                                     <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Submit</button>
                                 </div>
                             </div>
@@ -1398,28 +1459,28 @@
                     $('input[name="trax_box_10_kg_range[1]"]').prop('disabled', true);
                 }
             });
-            $('#TraxBoxFifteenSwitch').bind('change',function(){
-                if($('#TraxBoxFifteenSwitch').is(":checked")){
-                    $('input[name="trax_box_15_weight"]').prop('disabled', false);
+            $('#TraxboxFifteenSwitch1').bind('change',function(){
+                if($('#TraxboxFifteenSwitch1').is(":checked")){
+                    $('input[name="trax_box_15_kg_range[1]"]').prop('disabled', false);
                 }
                 else{
-                    $('input[name="trax_box_15_weight"]').prop('disabled', true);
+                    $('input[name="trax_box_15_kg_range[1]"]').prop('disabled', true);
                 }
             });
-            $('#TraxBoxTwentySwitch').bind('change',function(){
-                if($('#TraxBoxTwentySwitch').is(":checked")){
-                    $('input[name="trax_box_20_weight"]').prop('disabled', false);
+            $('#TraxboxTwentySwitch1').bind('change',function(){
+                if($('#TraxboxTwentySwitch1').is(":checked")){
+                    $('input[name="trax_box_20_kg_range[1]"]').prop('disabled', false);
                 }
                 else{
-                    $('input[name="trax_box_20_weight"]').prop('disabled', true);
+                    $('input[name="trax_box_20_kg_range[1]"]').prop('disabled', true);
                 }
             });
-            $('#TraxBoxThirtySwitch').bind('change',function(){
-                if($('#TraxBoxThirtySwitch').is(":checked")){
-                    $('input[name="trax_box_30_weight"]').prop('disabled', false);
+            $('#TraxboxThirtySwitch1').bind('change',function(){
+                if($('#TraxboxThirtySwitch1').is(":checked")){
+                    $('input[name="trax_box_30_kg_range[1]"]').prop('disabled', false);
                 }
                 else{
-                    $('input[name="trax_box_30_weight"]').prop('disabled', true);
+                    $('input[name="trax_box_30_kg_range[1]"]').prop('disabled', true);
                 }
             });
 
@@ -1985,6 +2046,168 @@
                 trax_box_10_count++;
             });
             //trax box 10 end
+
+            //trax box 15 kg start
+            $('body').on('click', '.trax_box_15_weight_close', function () {
+                $(this).parent().parent().remove();
+            });
+            var trax_box_15_count = $('.trax_box_15_row').length + 1;
+            $('body').on('click', '#trax_box_15_waddition_btn', function () {
+                var row_count = trax_box_15_count - 1;
+                /*  var hdocs_range_down = parseFloat($('#hdocs_range_down' + row_count).val());
+                  var hdocs_new_range_down = hdocs_range_down + 0.01;*/
+                let htmdiv = '<div class="row" id="trax_box_15_row' + trax_box_15_count + '"><div class="col text-center"><fieldset class="form-group"><input type="text" id="trax_box_15_range_up' + trax_box_15_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="trax_box_15_range_up[' + trax_box_15_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="trax_box_15_range_down' + trax_box_15_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="trax_box_15_range_down[' + trax_box_15_count + ']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;">\n' +
+                    '                   <input type="checkbox" id="TraxboxFifteenSwitch[' + trax_box_15_count + ']" class="switchery weightAdditionTraxBoxFifteen' + trax_box_15_count + '" data-color="success" data-size="sm" name="trax_box_15_switch[' + trax_box_15_count + ']">\n' +
+                    '                </div>\n' +
+                    '       </div><div class="col text-center">\n' +
+                    '                                                        <fieldset style="padding-top: 5px;">\n' +
+                    '                                                            <div class="input-group input-group-sm form-group">\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_15_kg_range[' + trax_box_15_count + ']" disabled>\n' +
+                    '                                                            </div>\n' +
+                    '                                                        </fieldset>\n' +
+                    '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_wc[' + trax_box_15_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_sz[' + trax_box_15_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_dz[' + trax_box_15_count + ']"></fieldset></div><div class="col-1">\n' +
+                    '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 trax_box_15_weight_close"><i class="ft-x"></i></span></div></div>';
+                $('.weight-addition-trax-box-15').append(htmdiv);
+                var switches = document.querySelector('.switchery.weightAdditionTraxBoxFifteen' + trax_box_15_count);
+                var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+                $(".touchspin-color").TouchSpin({
+                    min: 0.5,
+                    max: 100,
+                    step: 0.5,
+                    decimals: 2,
+                    buttondown_class: "btn btn-success",
+                    buttonup_class: "btn btn-success",
+                    buttondown_txt: '<i class="ft-minus"></i>',
+                    buttonup_txt: '<i class="ft-plus"></i>'
+                });
+
+                masks();
+                switches.onchange = function () {
+
+                    if (switches.checked === true) {
+                        $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                    } else if (switches.checked === false) {
+                        $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+                    }
+
+                };
+                $("#trax_box_15_row" + trax_box_15_count + " .validated").each(function () {
+                    $(this).rules("add", {
+                        required: true,
+                    });
+
+                });
+                trax_box_15_count++;
+            });
+            //trax box 15 end
+
+            //trax box 20 kg start
+            $('body').on('click', '.trax_box_20_weight_close', function () {
+                $(this).parent().parent().remove();
+            });
+            var trax_box_20_count = $('.trax_box_20_row').length + 1;
+            $('body').on('click', '#trax_box_20_waddition_btn', function () {
+                var row_count = trax_box_20_count - 1;
+                /*  var hdocs_range_down = parseFloat($('#hdocs_range_down' + row_count).val());
+                  var hdocs_new_range_down = hdocs_range_down + 0.01;*/
+                let htmdiv = '<div class="row" id="trax_box_20_row' + trax_box_20_count + '"><div class="col text-center"><fieldset class="form-group"><input type="text" id="trax_box_20_range_up' + trax_box_20_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="trax_box_20_range_up[' + trax_box_20_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="trax_box_20_range_down' + trax_box_20_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="trax_box_20_range_down[' + trax_box_20_count + ']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;">\n' +
+                    '                   <input type="checkbox" id="TraxboxTwentySwitch[' + trax_box_20_count + ']" class="switchery weightAdditionTraxBoxTwenty' + trax_box_20_count + '" data-color="success" data-size="sm" name="trax_box_20_switch[' + trax_box_20_count + ']">\n' +
+                    '                </div>\n' +
+                    '       </div><div class="col text-center">\n' +
+                    '                                                        <fieldset style="padding-top: 5px;">\n' +
+                    '                                                            <div class="input-group input-group-sm form-group">\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_20_kg_range[' + trax_box_20_count + ']" disabled>\n' +
+                    '                                                            </div>\n' +
+                    '                                                        </fieldset>\n' +
+                    '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_wc[' + trax_box_20_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_sz[' + trax_box_20_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_dz[' + trax_box_20_count + ']"></fieldset></div><div class="col-1">\n' +
+                    '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 trax_box_20_weight_close"><i class="ft-x"></i></span></div></div>';
+                $('.weight-addition-trax-box-20').append(htmdiv);
+                var switches = document.querySelector('.switchery.weightAdditionTraxBoxTwenty' + trax_box_20_count);
+                var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+                $(".touchspin-color").TouchSpin({
+                    min: 0.5,
+                    max: 100,
+                    step: 0.5,
+                    decimals: 2,
+                    buttondown_class: "btn btn-success",
+                    buttonup_class: "btn btn-success",
+                    buttondown_txt: '<i class="ft-minus"></i>',
+                    buttonup_txt: '<i class="ft-plus"></i>'
+                });
+
+                masks();
+                switches.onchange = function () {
+
+                    if (switches.checked === true) {
+                        $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                    } else if (switches.checked === false) {
+                        $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+                    }
+
+                };
+                $("#trax_box_20_row" + trax_box_20_count + " .validated").each(function () {
+                    $(this).rules("add", {
+                        required: true,
+                    });
+                });
+                trax_box_20_count++;
+            });
+            //trax box 20 end
+
+            //trax box 30 kg start
+            $('body').on('click', '.trax_box_30_weight_close', function () {
+                $(this).parent().parent().remove();
+            });
+            var trax_box_30_count = $('.trax_box_30_row').length + 1;
+            $('body').on('click', '#trax_box_30_waddition_btn', function () {
+                var row_count = trax_box_30_count - 1;
+                /*  var hdocs_range_down = parseFloat($('#hdocs_range_down' + row_count).val());
+                  var hdocs_new_range_down = hdocs_range_down + 0.01;*/
+                let htmdiv = '<div class="row" id="trax_box_30_row' + trax_box_30_count + '"><div class="col text-center"><fieldset class="form-group"><input type="text" id="trax_box_30_range_up' + trax_box_30_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="trax_box_30_range_up[' + trax_box_30_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="trax_box_30_range_down' + trax_box_30_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="trax_box_30_range_down[' + trax_box_30_count + ']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;">\n' +
+                    '                   <input type="checkbox" id="TraxboxThirtySwitch[' + trax_box_30_count + ']" class="switchery weightAdditionTraxBoxThirty' + trax_box_30_count + '" data-color="success" data-size="sm" name="trax_box_30_switch[' + trax_box_30_count + ']">\n' +
+                    '                </div>\n' +
+                    '       </div><div class="col text-center">\n' +
+                    '                                                        <fieldset style="padding-top: 5px;">\n' +
+                    '                                                            <div class="input-group input-group-sm form-group">\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_30_kg_range[' + trax_box_30_count + ']" disabled>\n' +
+                    '                                                            </div>\n' +
+                    '                                                        </fieldset>\n' +
+                    '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_wc[' + trax_box_30_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_sz[' + trax_box_30_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_dz[' + trax_box_30_count + ']"></fieldset></div><div class="col-1">\n' +
+                    '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 trax_box_30_weight_close"><i class="ft-x"></i></span></div></div>';
+                $('.weight-addition-trax-box-30').append(htmdiv);
+                var switches = document.querySelector('.switchery.weightAdditionTraxBoxThirty' + trax_box_30_count);
+                var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+                $(".touchspin-color").TouchSpin({
+                    min: 0.5,
+                    max: 100,
+                    step: 0.5,
+                    decimals: 2,
+                    buttondown_class: "btn btn-success",
+                    buttonup_class: "btn btn-success",
+                    buttondown_txt: '<i class="ft-minus"></i>',
+                    buttonup_txt: '<i class="ft-plus"></i>'
+                });
+
+                masks();
+                switches.onchange = function () {
+
+                    if (switches.checked === true) {
+                        $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                    } else if (switches.checked === false) {
+                        $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+                    }
+                };
+                $("#trax_box_30_row" + trax_box_30_count + " .validated").each(function () {
+                    $(this).rules("add", {
+                        required: true,
+                    });
+                });
+                trax_box_30_count++;
+            });
+            //trax box 30 end
 
 
 
