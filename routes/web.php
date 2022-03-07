@@ -1125,6 +1125,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('shipments/delivered','Admins\DeliveryController@cash_collection_shipments_delivered')->name('shipments.delivered');
                 Route::post('shipments/ccd_slip','Admins\DeliveryController@cash_collection_shipments_ccd_slip')->name('shipments.ccd_slip');
                 Route::post('shipments/upload_ccd_receipt','Admins\DeliveryController@cash_collection_upload_receipt')->name('shipments.upload_ccd_receipt');
+                //HBL Konnect
+                Route::post('transactions/information','Admins\DeliveryController@hbl_konnect_transactions_information')->name('transactions.information');
+                //HBL Konnect
 
             });
             Route::prefix('retail')->name('retail.')->group(function(){

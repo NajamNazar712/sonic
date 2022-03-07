@@ -13,7 +13,11 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Admin\Retail\RetailFranchise;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
@@ -4645,6 +4649,63 @@ class APIController extends Controller
         }
         else{
             return ['status' => 0, 'message' => 'Api Token is required'];
+        }
+    }
+
+
+    public function hbl_konnect_transactions(Request $request)
+    {
+        $rules = [
+            'delivery_note_id' => ['required', 'integer', Rule::exists('delivery_notes', 'id')],
+            'amount' => ['required', 'numeric', 'min:0'],
+            'transaction_id' => ['required', 'integer'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $transaction_id = $request->transaction_id;
+            $delivery_note_id = $request->delivery_note_id;
+            $amount = $request->amount;
+            $existing_hbl_konnect_transaction = HblKonnectTransaction::where('transaction_id', $transaction_id);
+            if($existing_hbl_konnect_transaction->exists()){
+                return ['status' => 1, 'message' => 'Request completed successfully!'];
+            }
+            else{
+                $hbl_konnect_transaction = new HblKonnectTransaction();
+                $hbl_konnect_transaction->transaction_id = $transaction_id;
+                $hbl_konnect_transaction->delivery_note_id = $delivery_note_id;
+                $hbl_konnect_transaction->amount = $amount;
+                $hbl_konnect_transaction->save();
+
+
+                $delivery_note = DeliveryNote::where('id', $delivery_note_id);
+                if($delivery_note->exists()){
+                    $delivery_note = $delivery_note->first();
+                }
+                $transaction_amount = $amount;
+
+                $hbl_konnect_transaction_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note_id);
+                if($hbl_konnect_transaction_delivery_note->exists()){
+                    $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+                    $transaction_amount = $hbl_konnect_transaction_delivery_note->transactions_amount + $amount;
+                }
+                else{
+                    $hbl_konnect_transaction_delivery_note = new HblKonnectTransactionDeliveryNote();
+                    $hbl_konnect_transaction_delivery_note->delivery_note_id = $delivery_note_id;
+                }
+
+                $cash_amount = $delivery_note->received_cod_amount - $transaction_amount;
+                $hbl_konnect_transaction_delivery_note->transactions_amount = $transaction_amount;
+                $hbl_konnect_transaction_delivery_note->cash_amount = $cash_amount;
+                $hbl_konnect_transaction_delivery_note->save();
+
+                return ['status' => 1, 'message' => 'Request completed successfully!'];
+            }
         }
     }
 }

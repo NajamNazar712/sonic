@@ -19,6 +19,8 @@ use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\DeliveryShipmentsNotReceivedOperations;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
@@ -873,7 +875,12 @@ class DeliveryController extends Controller
                 NotificationsController::send(40, $note->id);
 
                 //HBL Konnect Integration
-
+                $hbl_konnect_delivery_note = new HblKonnectDeliveryNote();
+                $hbl_konnect_delivery_note->delivery_note_id = $note->id;
+                $hbl_konnect_delivery_note->rider_name = $rider->name;
+                $hbl_konnect_delivery_note->rider_cnic = $rider->cnic;
+                $hbl_konnect_delivery_note->rider_phone_no = $rider->phone;
+                $hbl_konnect_delivery_note->save();
                 //HBL Konnect Integration
             }
 
@@ -4086,7 +4093,8 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone'])
+            ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount'])
             ->where('delivery_notes.cash_collection_status', 0)
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
@@ -4101,6 +4109,22 @@ class DeliveryController extends Controller
             })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
+            })
+            ->editColumn('transactions_amount', function ($shipment) {
+                if($shipment->transactions_amount != null){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment->transactions_amount . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('cash_amount', function ($shipment) {
+                if($shipment->cash_amount != null){
+                    return number_format($shipment->cash_amount);
+                }
+                else{
+                    return number_format($shipment->amount);
+                }
             })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
@@ -4216,6 +4240,29 @@ class DeliveryController extends Controller
 
 
     }
+
+    //HBL Konnect Information
+    public function hbl_konnect_transactions_information(Request $request)
+    {
+        $delivery_note_id = $request->delivery_note_id;
+        $hbl_konnect_transactions = HblKonnectTransaction::where('delivery_note_id', $delivery_note_id);
+        if($hbl_konnect_transactions->exists()){
+            $hbl_konnect_transactions = $hbl_konnect_transactions->get();
+            $details = array();
+            foreach ($hbl_konnect_transactions as $key => $hbl_konnect_transaction){
+                $details[$key]['transaction_id'] = $hbl_konnect_transaction->transaction_id;
+                $details[$key]['amount'] = $hbl_konnect_transaction->amount;
+                $details[$key]['deposited_at'] = Carbon::parse($hbl_konnect_transaction->created_at)->toDateTimeString();
+            }
+            return response()->json(['status' => 1, 'details' => $details]);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Transactions not found!']);
+        }
+
+
+    }
+    //HBL Konnect Information
 
     public function completed_deliveries_index()
     {

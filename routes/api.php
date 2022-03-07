@@ -419,6 +419,10 @@ Route::name('api.')->group(function () {
 
     Route::post('track/google', 'APIController@shipment_google_track')->name('track.google');
     Route::post('live_tracking', 'APIController@live_tracking')->name('live_tracking');
-
+    //Hbl Konnect
+    Route::prefix('banking')->name('banking.')->group(function () {
+        Route::post('transaction_information', 'APIController@hbl_konnect_transactions')->name('transaction_information');
+    });
+    //Hbl Konnect
     
 });
