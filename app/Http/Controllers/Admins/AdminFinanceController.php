@@ -8042,7 +8042,7 @@ class AdminFinanceController extends Controller
                         </div>
 
                         <div class="col-4">
-                            <h1 style="text-align:center"><img style="width:50%;height:90px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
+                            <h1 style="text-align:center"><img style="height:90px;"  src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
                 if($invoice->invoice_type == 1) {
@@ -8650,7 +8650,7 @@ class AdminFinanceController extends Controller
                         </div>
 
                         <div class="col-4">
-                            <h1 style="text-align:center"><img style="width:50%;height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
+                            <h1 style="text-align:center"><img style="height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
                 $html .=  '<tr>
@@ -14083,7 +14083,7 @@ class AdminFinanceController extends Controller
                         </div>
 
                         <div class="col-4">
-                            <h1 style="text-align:center"><img style="width:50%;height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
+                            <h1 style="text-align:center"><img style="height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
         $html .=  '<tr>
@@ -14524,7 +14524,7 @@ class AdminFinanceController extends Controller
                         </div>
 
                         <div class="col-4">
-                            <h1 style="text-align:center"><img style="width:50%;height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
+                            <h1 style="text-align:center"><img style="height:85px" src="' . asset('img/invoice_summary_header_logo.png') . '" class="header"></h1>
                             <table class="table table-sm table-bordered border">
                               <tbody> ';
                     if($invoice->invoice_type == 1) {
