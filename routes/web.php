@@ -3658,6 +3658,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('approve', 'Admins\AdminERFController@approve')->name('approve');
            // Route::get('{id}/documents','Admins\AdminERFController@documents')->name('documents');
             Route::post('documents','Admins\AdminERFController@documents')->name('documents');
+            Route::post('/employee_data', 'Admins\AdminERFController@employee_data')->name('employee_data');
+
+            
 
         });
 

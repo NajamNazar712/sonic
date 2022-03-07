@@ -17,7 +17,7 @@ use App\Http\Models\EmployeeRequisitionStatus;
 use App\Http\Models\EmployeeRequisitionStatusLog;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
-use App\Models\Admin\AdminPositionTypes;
+use App\Http\Models\Admin\AdminPositionTypes;
 use SnappyImage;
 use SnappyPDF;
 use Carbon\Carbon;
@@ -141,7 +141,10 @@ class AdminERFController extends Controller
             $departments = AdminDepartment::where('id', '=', session('department_id'))->select('id', 'name')->get();
         }
         $designations = EmployeeDesignation::where('status',1)->select('id','name')->get();
-        $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58,70])->where('status', 1)->select('id','name')->get();
+        // $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58,70])->where('status', 1)->select('id','name')->get();
+        $department_admins = AdminDepartment::all()->pluck('department_head_id')->toArray();
+        $department_heads = Admin::whereIn('id', $department_admins)->where('status', 1)->select('id','name')->get();
+
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
         $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',2)->get();
@@ -585,5 +588,12 @@ class AdminERFController extends Controller
 
     }
 
+    public function employee_data(Request $request){
+        $department = AdminDepartment::find($request->id);
+        $data['department_head'] = Admin::find($department->department_head_id);
+        $data['designations'] = EmployeeDesignation::where('department_id',$request->id)->select('name','id')->get();
+        return response()->json(['status' => 1,'emplyee_detail' => $data]);
+
+    }
 
 }

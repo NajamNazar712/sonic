@@ -51,9 +51,9 @@
                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                             <div class="form-group">
                                                 <select name="designation" class="select2" id="designation" data-rule-required="true" data-msg-required="Designation is required">
-                                                    @foreach($designations as $designation)
+                                                    {{-- @foreach($designations as $designation)
                                                         <option value="{{ $designation->id }}">{{ $designation->name }}</option>
-                                                    @endforeach
+                                                    @endforeach --}}
                                                 </select>
                                             </div>
                                         </div>
@@ -77,10 +77,10 @@
                                         </div>
                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="departmrnt_div">
                                             <div class="form-group">
-                                                <select name="department_head" class="select2" id="department_head" data-rule-required="true" data-msg-required="Department Head is required">
-                                                    @foreach($department_heads as $head)
+                                                <select name="department_head" class="select2" id="department_head" data-rule-required="true" data-msg-required="Department Head is required" disabled>
+                                                     @foreach($department_heads as $head)
                                                         <option value="{{ $head->id }}">{{ $head->name }}</option>
-                                                    @endforeach
+                                                    @endforeach 
                                                 </select>
                                             </div>
                                         </div>
@@ -206,9 +206,55 @@
 
     <script>
         $(document).ready(function() {
+            $('#designation').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Designation*'
+            });
+ 
+            $('#department_head').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'HOD*'
+            });
+            
             $('#department').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Department*'
+            }).bind('change',function(){
+                var id = $(this).val();
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.erf.employee_data') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 1){
+                            var data1 = $.map(data.emplyee_detail.designations, function (obj) {
+                                obj.id = obj.id;
+                                obj.text = obj.name;
+
+                                return obj;
+                            });
+                            $('#designation').prepend('<option value="" selected="selected"></option>').select2({
+                                width: '100%',
+                                data:data1,
+                                placeholder: 'Select Designation*'
+                            });
+                        $('#department_head').val(data.emplyee_detail.department_head.id).trigger('change');
+
+                            department_head
+                            console.log(data);
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
             });
             $('#hub').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -218,14 +264,7 @@
                 width: '100%',
                 placeholder: 'Select City*'
             });
-            $('#designation').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Select Designation*'
-            });
-            $('#department_head').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Line Manager*'
-            });
+           
             $('#vacancies').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Number Of Vacancies*'
@@ -236,7 +275,7 @@
             });
             $('#allowance').select2({
                 width:'100%',
-                placeholder:"Allowances*",
+                placeholder:"Requirements/Allowances*",
                 allowClear:true,
                 dropdownParent:$('#erf_form')
             });
