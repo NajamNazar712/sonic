@@ -409,9 +409,6 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div id="div_lead_status_reason" class="form-group d-none">
-                            <select name="lead_status_reason" id="lead_status_reason" class="form-control select2"></select>
-                        </div>
                         <div id="div_lead_status_rejected" class="form-group d-none">
                             <select name="lead_status_rejected" id="lead_status_rejected" class="form-control select2">
                                 <option value="1"> Prohibited Items</option>
@@ -434,6 +431,15 @@
                                 <option value="6"> HR Query</option>
                                 <option value="7"> Sales Person Already Assigned</option>
                                 <option value="10"> Others</option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_blocked" class="form-group d-none">
+                            <select name="lead_status_blocked" id="lead_status_blocked" class="form-control select2">
+                                <option value="8"> Unresponsive</option>
+                                <option value="9"> Customer Wants To Be Contacted Later</option>
+                                <option value="11"> Customer Needs More Time</option>
+                                <option value="12"> General Query</option>
+                                <option value="13"> Rates Negotiations</option>
                             </select>
                         </div>
                         <div class="form-group ml-1">
@@ -495,6 +501,15 @@
                                 <option value="6"> HR Query</option>
                                 <option value="7"> Sales Person Already Assigned</option>
                                 <option value="10"> Others</option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_blocked1" class="form-group d-none">
+                            <select name="lead_status_blocked1" id="lead_status_blocked1" class="form-control select2">
+                                <option value="8"> Unresponsive</option>
+                                <option value="9"> Customer Wants To Be Contacted Later</option>
+                                <option value="11"> Customer Needs More Time</option>
+                                <option value="12"> General Query</option>
+                                <option value="13"> Rates Negotiations</option>
                             </select>
                         </div>
                         <div class="form-group ml-1">
@@ -1249,7 +1264,8 @@
                 placeholder: "Select Status",
                 width: '100%',
                 dropdownParent: $('#add_status_modal')
-            }).bind('change', function () {
+            }).
+            bind('change', function () {
                 $("#div_lead_status_reason").html('');
                 id = $(this).val();
                 $.ajax({
@@ -1271,7 +1287,7 @@
                         $('#div_lead_status_reason').addClass('d-none');
                     }
                 });
-                /*$('#lead_status_rejected').val('').trigger('change');
+                $('#lead_status_rejected').val('').trigger('change');
                 $('#lead_status_notinterested').val('').trigger('change');
                 $('#lead_status_irrelevant').val('').trigger('change');
                 if (this.value == 10) {
@@ -1290,7 +1306,7 @@
                     $('#div_lead_status_rejected').addClass('d-none');
                     $('#div_lead_status_notinterested').addClass('d-none');
                     $('#div_lead_status_irrelevant').addClass('d-none');
-                }*/
+                }
             });
 
             {{--$('body').on('click','#datatable .view_remarks',function(){--}}
