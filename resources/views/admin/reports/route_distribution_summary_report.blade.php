@@ -80,10 +80,12 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
+
                             <select name="search_cutt_off" id="search_cutt_off" class="form-control">
                                 <option value="{{'1'}}" selected>8pm to 2pm</option>
                                 <option value="{{'2'}}">2:01pm to 7:59pm</option>
                             </select>
+
                         </fieldset>
                     </div>
                     <div class="col-2">
