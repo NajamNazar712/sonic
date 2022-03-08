@@ -6681,7 +6681,7 @@ class AdminAPIController extends Controller
                 ->orderBy('daily_visits.created_at', 'DESC');
             if($request->from_date){
                 if($request->to_date){
-                    $daily_visit = $daily_visit->whereBetween('daily_visits.created_at', [$request->from_date, $request->to_date]);
+                    $daily_visit = $daily_visit->whereBetween('daily_visits.created_at', [$request->from_date.' 00:00:00', $request->to_date.' 23:59:59']);
                 }else{
                     $daily_visit = $daily_visit->whereDate('daily_visits.created_at', $request->from_date);
                 }
