@@ -958,7 +958,7 @@ class RetailAdminUserManagementController extends Controller
                 $retail = new RetailStandardRates();
                 $retail->range_up = $request->flyer_range_up[$index];
                 $retail->range_down = $request->flyer_range_down[$index];
-                $retail->shipping_mode_id = 5;
+                $retail->shipping_mode_id = 6;
                 if (isset($request->flyer_kg_range[$index])) {
                     $retail->kg_range = $request->flyer_kg_range[$index];
                     $retail->weight_addition = 1;
@@ -984,7 +984,7 @@ class RetailAdminUserManagementController extends Controller
                 $retail = new RetailStandardRates();
                 $retail->range_up = $request->hdocs_range_up[$index];
                 $retail->range_down = $request->hdocs_range_down[$index];
-                $retail->shipping_mode_id = 6;
+                $retail->shipping_mode_id = 7;
                 if (isset($request->hdocs_kg_range[$index])) {
                     $retail->kg_range = $request->hdocs_kg_range[$index];
                     $retail->weight_addition = 1;
@@ -1000,9 +1000,14 @@ class RetailAdminUserManagementController extends Controller
         }
 
 
-        $trax_box = RetailStandardRates::where('shipping_mode_id', 5)->get();
+        $trax_box_2kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',1)->get();
+        $trax_box_5kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',2)->get();
+        $trax_box_10kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',3)->get();
+        $trax_box_15kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',4)->get();
+        $trax_box_20kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',5)->get();
+        $trax_box_30kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',6)->get();
 
-        if ($trax_box->isEmpty()) {
+       /* if ($trax_box->isEmpty()) {
 
             $now = Carbon::now();
             $data = [
@@ -1087,7 +1092,147 @@ class RetailAdminUserManagementController extends Controller
                 ]
             ];
             RetailStandardRates::insert($data);
+        }*/
+
+        if ($trax_box_2kg->isEmpty()) {
+
+            foreach ($request->trax_box_2_range_up as $index => $trax_box_2_range_up) {
+
+                $retail = new RetailStandardRates();
+                $retail->range_up = $request->trax_box_2_range_up[$index];
+                $retail->range_down = $request->trax_box_2_range_down[$index];
+                $retail->shipping_mode_id = 5;
+                if (isset($request->trax_box_2_kg_range[$index])) {
+                    $retail->kg_range = $request->trax_box_2_kg_range[$index];
+                    $retail->weight_addition = 1;
+                } else {
+                    $retail->kg_range = 0;
+                    $retail->weight_addition = 0;
+                }
+                $retail->trax_box_id = 1;
+                $retail->within_city = $request->trax_box_2_wc[$index];
+                $retail->same_zone = $request->trax_box_2_sz[$index];
+                $retail->different_zone = $request->trax_box_2_dz[$index];
+                $retail->save();
+            }
         }
+
+        if ($trax_box_5kg->isEmpty()) {
+
+            foreach ($request->trax_box_5_range_up as $index => $trax_box_5_range_up) {
+
+                $retail = new RetailStandardRates();
+                $retail->range_up = $request->trax_box_5_range_up[$index];
+                $retail->range_down = $request->trax_box_5_range_down[$index];
+                $retail->shipping_mode_id = 5;
+                if (isset($request->trax_box_5_kg_range[$index])) {
+                    $retail->kg_range = $request->trax_box_5_kg_range[$index];
+                    $retail->weight_addition = 1;
+                } else {
+                    $retail->kg_range = 0;
+                    $retail->weight_addition = 0;
+                }
+                $retail->trax_box_id = 2;
+                $retail->within_city = $request->trax_box_5_wc[$index];
+                $retail->same_zone = $request->trax_box_5_sz[$index];
+                $retail->different_zone = $request->trax_box_5_dz[$index];
+                $retail->save();
+            }
+        }
+
+        if ($trax_box_10kg->isEmpty()) {
+
+            foreach ($request->trax_box_10_range_up as $index => $trax_box_10_range_up) {
+
+                $retail = new RetailStandardRates();
+                $retail->range_up = $request->trax_box_10_range_up[$index];
+                $retail->range_down = $request->trax_box_10_range_down[$index];
+                $retail->shipping_mode_id = 5;
+                if (isset($request->trax_box_10_kg_range[$index])) {
+                    $retail->kg_range = $request->trax_box_10_kg_range[$index];
+                    $retail->weight_addition = 1;
+                } else {
+                    $retail->kg_range = 0;
+                    $retail->weight_addition = 0;
+                }
+                $retail->trax_box_id = 3;
+                $retail->within_city = $request->trax_box_10_wc[$index];
+                $retail->same_zone = $request->trax_box_10_sz[$index];
+                $retail->different_zone = $request->trax_box_10_dz[$index];
+                $retail->save();
+            }
+        }
+
+        if ($trax_box_15kg->isEmpty()) {
+
+            foreach ($request->trax_box_15_range_up as $index => $trax_box_15_range_up) {
+
+                $retail = new RetailStandardRates();
+                $retail->range_up = $request->trax_box_15_range_up[$index];
+                $retail->range_down = $request->trax_box_15_range_down[$index];
+                $retail->shipping_mode_id = 5;
+                if (isset($request->trax_box_15_kg_range[$index])) {
+                    $retail->kg_range = $request->trax_box_15_kg_range[$index];
+                    $retail->weight_addition = 1;
+                } else {
+                    $retail->kg_range = 0;
+                    $retail->weight_addition = 0;
+                }
+                $retail->trax_box_id = 4;
+                $retail->within_city = $request->trax_box_15_wc[$index];
+                $retail->same_zone = $request->trax_box_15_sz[$index];
+                $retail->different_zone = $request->trax_box_15_dz[$index];
+                $retail->save();
+            }
+        }
+
+        if ($trax_box_20kg->isEmpty()) {
+
+            foreach ($request->trax_box_20_range_up as $index => $trax_box_20_range_up) {
+
+                $retail = new RetailStandardRates();
+                $retail->range_up = $request->trax_box_20_range_up[$index];
+                $retail->range_down = $request->trax_box_20_range_down[$index];
+                $retail->shipping_mode_id = 5;
+                if (isset($request->trax_box_20_kg_range[$index])) {
+                    $retail->kg_range = $request->trax_box_20_kg_range[$index];
+                    $retail->weight_addition = 1;
+                } else {
+                    $retail->kg_range = 0;
+                    $retail->weight_addition = 0;
+                }
+                $retail->trax_box_id = 5;
+                $retail->within_city = $request->trax_box_20_wc[$index];
+                $retail->same_zone = $request->trax_box_20_sz[$index];
+                $retail->different_zone = $request->trax_box_20_dz[$index];
+                $retail->save();
+            }
+        }
+
+        if ($trax_box_30kg->isEmpty()) {
+
+            foreach ($request->trax_box_30_range_up as $index => $trax_box_30_range_up) {
+
+                $retail = new RetailStandardRates();
+                $retail->range_up = $request->trax_box_30_range_up[$index];
+                $retail->range_down = $request->trax_box_30_range_down[$index];
+                $retail->shipping_mode_id = 5;
+                if (isset($request->trax_box_30_kg_range[$index])) {
+                    $retail->kg_range = $request->trax_box_30_kg_range[$index];
+                    $retail->weight_addition = 1;
+                } else {
+                    $retail->kg_range = 0;
+                    $retail->weight_addition = 0;
+                }
+                $retail->trax_box_id = 6;
+                $retail->within_city = $request->trax_box_30_wc[$index];
+                $retail->same_zone = $request->trax_box_30_sz[$index];
+                $retail->different_zone = $request->trax_box_30_dz[$index];
+                $retail->save();
+            }
+        }
+
+
 
         return redirect()->route('admin.retail.rates.edit')->with('success', 'Rates added');
     }
@@ -1098,11 +1243,17 @@ class RetailAdminUserManagementController extends Controller
         $rush_data = RetailStandardRates::where('shipping_mode_id', 2)->get();
         $cod_data = RetailStandardRates::where('shipping_mode_id', 3)->get();
         $swift = RetailStandardRates::where('shipping_mode_id', 4)->get();
-        $flyers = RetailStandardRates::where('shipping_mode_id', 5)->get();
-        $hard_docs = RetailStandardRates::where('shipping_mode_id', 6)->get();
-        $trax_box = RetailStandardRates::join('retail_trax_boxes as rtb', 'rtb.id', '=', 'retail_standard_rates.trax_box_id')->where('shipping_mode_id', 7)->whereNotNull('retail_standard_rates.trax_box_id')->select(['retail_standard_rates.range_up', 'retail_standard_rates.range_down', 'retail_standard_rates.weight_addition as weight_addition', 'retail_standard_rates.shipping_mode_id', 'retail_standard_rates.trax_box_id', 'retail_standard_rates.kg_range', 'retail_standard_rates.within_city', 'retail_standard_rates.same_zone', 'retail_standard_rates.different_zone', 'rtb.name as weight'])->get();
-        //dd($trax_box);
-        return view('admin.retail.users.rates.edit', compact('saver_plus', 'swift', 'rush_data', 'cod_data', 'flyers', 'hard_docs', 'trax_box'));
+        $flyers = RetailStandardRates::where('shipping_mode_id', 6)->get();
+        $hard_docs = RetailStandardRates::where('shipping_mode_id', 7)->get();
+      /*  $trax_box = RetailStandardRates::join('retail_trax_boxes as rtb', 'rtb.id', '=', 'retail_standard_rates.trax_box_id')->where('shipping_mode_id', 5)->whereNotNull('retail_standard_rates.trax_box_id')->select(['retail_standard_rates.range_up', 'retail_standard_rates.range_down', 'retail_standard_rates.weight_addition as weight_addition', 'retail_standard_rates.shipping_mode_id', 'retail_standard_rates.trax_box_id', 'retail_standard_rates.kg_range', 'retail_standard_rates.within_city', 'retail_standard_rates.same_zone', 'retail_standard_rates.different_zone', 'rtb.name as weight'])->get();*/
+        $trax_box_2kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',1)->get();
+        $trax_box_5kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',2)->get();
+        $trax_box_10kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',3)->get();
+        $trax_box_15kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',4)->get();
+        $trax_box_20kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',5)->get();
+        $trax_box_30kg = RetailStandardRates::where('shipping_mode_id', 5)->where('trax_box_id',6)->get();
+
+        return view('admin.retail.users.rates.edit', compact('saver_plus', 'swift', 'rush_data', 'cod_data', 'flyers', 'hard_docs', 'trax_box_2kg', 'trax_box_5kg', 'trax_box_10kg', 'trax_box_15kg', 'trax_box_20kg', 'trax_box_30kg'));
     }
 
     public function standard_rates_update(Request $request)
@@ -1190,71 +1341,71 @@ class RetailAdminUserManagementController extends Controller
             'hdocs_dz.*.required' => 'The hard docs different zone field is required.',
             'hdocs_dz.*.numeric.*' => 'The hard docs different zone field must be numeric or decimal.',
 
-            'trax_box_2_range_up.required' => 'The trax box for 2kg range up field is required.',
-            'trax_box_2_range_up.numeric.*' => 'The trax box for 2kg range up field must be numeric or decimal.',
-            'trax_box_2_range_down.required' => 'The trax box for 2kg range down field is required.',
-            'trax_box_2_range_down.numeric.*' => 'The trax box for 2kg range down field must be numeric or decimal.',
-            'trax_box_2_wc.required' => 'The trax box for 2kg within city field is required.',
-            'trax_box_2_wc.numeric.*' => 'The trax box for 2kg within city field must be numeric or decimal.',
-            'trax_box_2_sz.required' => 'The trax box for 2kg same zone field is required.',
-            'trax_box_2_sz.numeric.*' => 'The trax box for 2kg same zone field must be numeric or decimal.',
-            'trax_box_2_dz.required' => 'The trax box for 2kg different zone field is required.',
-            'trax_box_2_dz.numeric.*' => 'The trax box for 2kg different zone field must be numeric or decimal.',
+            'trax_box_2_range_up.*.required' => 'The trax box for 2kg range up field is required.',
+            'trax_box_2_range_up.*.numeric.*' => 'The trax box for 2kg range up field must be numeric or decimal.',
+            'trax_box_2_range_down.*.required' => 'The trax box for 2kg range down field is required.',
+            'trax_box_2_range_down.*.numeric.*' => 'The trax box for 2kg range down field must be numeric or decimal.',
+            'trax_box_2_wc.*.required' => 'The trax box for 2kg within city field is required.',
+            'trax_box_2_wc.*.numeric.*' => 'The trax box for 2kg within city field must be numeric or decimal.',
+            'trax_box_2_sz.*.required' => 'The trax box for 2kg same zone field is required.',
+            'trax_box_2_sz.*.numeric.*' => 'The trax box for 2kg same zone field must be numeric or decimal.',
+            'trax_box_2_dz.*.required' => 'The trax box for 2kg different zone field is required.',
+            'trax_box_2_dz.*.numeric.*' => 'The trax box for 2kg different zone field must be numeric or decimal.',
 
-            'trax_box_5_range_up.required' => 'The trax box for 5kg range up field is required.',
-            'trax_box_5_range_up.numeric.*' => 'The trax box for 5kg range up field must be numeric or decimal.',
-            'trax_box_5_range_down.required' => 'The trax box for 5kg range down field is required.',
-            'trax_box_5_range_down.numeric.*' => 'The trax box for 5kg range down field must be numeric or decimal.',
-            'trax_box_5_wc.required' => 'The trax box for 5kg within city field is required.',
-            'trax_box_5_wc.numeric.*' => 'The trax box for 5kg within city field must be numeric or decimal.',
-            'trax_box_5_sz.required' => 'The trax box for 5kg same zone field is required.',
-            'trax_box_5_sz.numeric.*' => 'The trax box for 5kg same zone field must be numeric or decimal.',
-            'trax_box_5_dz.required' => 'The trax box for 5kg different zone field is required.',
-            'trax_box_5_dz.numeric.*' => 'The trax box for 5kg different zone field must be numeric or decimal.',
+            'trax_box_5_range_up.*.required' => 'The trax box for 5kg range up field is required.',
+            'trax_box_5_range_up.*.numeric.*' => 'The trax box for 5kg range up field must be numeric or decimal.',
+            'trax_box_5_range_down.*.required' => 'The trax box for 5kg range down field is required.',
+            'trax_box_5_range_down.*.numeric.*' => 'The trax box for 5kg range down field must be numeric or decimal.',
+            'trax_box_5_wc.*.required' => 'The trax box for 5kg within city field is required.',
+            'trax_box_5_wc.*.numeric.*' => 'The trax box for 5kg within city field must be numeric or decimal.',
+            'trax_box_5_sz.*.required' => 'The trax box for 5kg same zone field is required.',
+            'trax_box_5_sz.*.numeric.*' => 'The trax box for 5kg same zone field must be numeric or decimal.',
+            'trax_box_5_dz.*.required' => 'The trax box for 5kg different zone field is required.',
+            'trax_box_5_dz.*.numeric.*' => 'The trax box for 5kg different zone field must be numeric or decimal.',
 
-            'trax_box_10_range_up.required' => 'The trax box for 10kg range up field is required.',
-            'trax_box_10_range_up.numeric.*' => 'The trax box for 10kg range up field must be numeric or decimal.',
-            'trax_box_10_range_down.required' => 'The trax box for 10kg range down field is required.',
-            'trax_box_10_range_down.numeric.*' => 'The trax box for 10kg range down field must be numeric or decimal.',
-            'trax_box_10_wc.required' => 'The trax box for 10kg within city field is required.',
-            'trax_box_10_wc.numeric.*' => 'The trax box for 10kg within city field must be numeric or decimal.',
-            'trax_box_10_sz.required' => 'The trax box for 10kg same zone field is required.',
-            'trax_box_10_sz.numeric.*' => 'The trax box for 10kg same zone field must be numeric or decimal.',
-            'trax_box_10_dz.required' => 'The trax box for 10kg different zone field is required.',
-            'trax_box_10_dz.numeric.*' => 'The trax box for 10kg different zone field must be numeric or decimal.',
+            'trax_box_10_range_up.*.required' => 'The trax box for 10kg range up field is required.',
+            'trax_box_10_range_up.*.numeric.*' => 'The trax box for 10kg range up field must be numeric or decimal.',
+            'trax_box_10_range_down.*.required' => 'The trax box for 10kg range down field is required.',
+            'trax_box_10_range_down.*.numeric.*' => 'The trax box for 10kg range down field must be numeric or decimal.',
+            'trax_box_10_wc.*.required' => 'The trax box for 10kg within city field is required.',
+            'trax_box_10_wc.*.numeric.*' => 'The trax box for 10kg within city field must be numeric or decimal.',
+            'trax_box_10_sz.*.required' => 'The trax box for 10kg same zone field is required.',
+            'trax_box_10_sz.*.numeric.*' => 'The trax box for 10kg same zone field must be numeric or decimal.',
+            'trax_box_10_dz.*.required' => 'The trax box for 10kg different zone field is required.',
+            'trax_box_10_dz.*.numeric.*' => 'The trax box for 10kg different zone field must be numeric or decimal.',
 
-            'trax_box_15_range_up.required' => 'The trax box for 15kg range up field is required.',
-            'trax_box_15_range_up.numeric.*' => 'The trax box for 15kg range up field must be numeric or decimal.',
-            'trax_box_15_range_down.required' => 'The trax box for 15kg range down field is required.',
-            'trax_box_15_range_down.numeric.*' => 'The trax box for 15kg range down field must be numeric or decimal.',
-            'trax_box_15_wc.required' => 'The trax box for 15kg within city field is required.',
-            'trax_box_15_wc.numeric.*' => 'The trax box for 15kg within city field must be numeric or decimal.',
-            'trax_box_15_sz.required' => 'The trax box for 15kg same zone field is required.',
-            'trax_box_15_sz.numeric.*' => 'The trax box for 15kg same zone field must be numeric or decimal.',
-            'trax_box_15_dz.required' => 'The trax box for 15kg different zone field is required.',
-            'trax_box_15_dz.numeric.*' => 'The trax box for 15kg different zone field must be numeric or decimal.',
+            'trax_box_15_range_up.*.required' => 'The trax box for 15kg range up field is required.',
+            'trax_box_15_range_up.*.numeric.*' => 'The trax box for 15kg range up field must be numeric or decimal.',
+            'trax_box_15_range_down.*.required' => 'The trax box for 15kg range down field is required.',
+            'trax_box_15_range_down.*.numeric.*' => 'The trax box for 15kg range down field must be numeric or decimal.',
+            'trax_box_15_wc.*.required' => 'The trax box for 15kg within city field is required.',
+            'trax_box_15_wc.*.numeric.*' => 'The trax box for 15kg within city field must be numeric or decimal.',
+            'trax_box_15_sz.*.required' => 'The trax box for 15kg same zone field is required.',
+            'trax_box_15_sz.*.numeric.*' => 'The trax box for 15kg same zone field must be numeric or decimal.',
+            'trax_box_15_dz.*.required' => 'The trax box for 15kg different zone field is required.',
+            'trax_box_15_dz.*.numeric.*' => 'The trax box for 15kg different zone field must be numeric or decimal.',
 
-            'trax_box_20_range_up.required' => 'The trax box for 20kg range up field is required.',
-            'trax_box_20_range_up.numeric.*' => 'The trax box for 20kg range up field must be numeric or decimal.',
-            'trax_box_20_range_down.required' => 'The trax box for 20kg range down field is required.',
-            'trax_box_20_range_down.numeric.*' => 'The trax box for 20kg range down field must be numeric or decimal.',
-            'trax_box_20_wc.required' => 'The trax box for 20kg within city field is required.',
-            'trax_box_20_wc.numeric.*' => 'The trax box for 20kg within city field must be numeric or decimal.',
-            'trax_box_20_sz.required' => 'The trax box for 20kg same zone field is required.',
-            'trax_box_20_sz.numeric.*' => 'The trax box for 20kg same zone field must be numeric or decimal.',
-            'trax_box_20_dz.required' => 'The trax box for 20kg different zone field is required.',
-            'trax_box_20_dz.numeric.*' => 'The trax box for 20kg different zone field must be numeric or decimal.',
+            'trax_box_20_range_up.*.required' => 'The trax box for 20kg range up field is required.',
+            'trax_box_20_range_up.*.numeric.*' => 'The trax box for 20kg range up field must be numeric or decimal.',
+            'trax_box_20_range_down.*.required' => 'The trax box for 20kg range down field is required.',
+            'trax_box_20_range_down.*.numeric.*' => 'The trax box for 20kg range down field must be numeric or decimal.',
+            'trax_box_20_wc.*.required' => 'The trax box for 20kg within city field is required.',
+            'trax_box_20_wc.*.numeric.*' => 'The trax box for 20kg within city field must be numeric or decimal.',
+            'trax_box_20_sz.*.required' => 'The trax box for 20kg same zone field is required.',
+            'trax_box_20_sz.*.numeric.*' => 'The trax box for 20kg same zone field must be numeric or decimal.',
+            'trax_box_20_dz.*.required' => 'The trax box for 20kg different zone field is required.',
+            'trax_box_20_dz.*.numeric.*' => 'The trax box for 20kg different zone field must be numeric or decimal.',
 
-            'trax_box_30_range_up.required' => 'The trax box for 30kg range up field is required.',
-            'trax_box_30_range_up.numeric.*' => 'The trax box for 30kg range up field must be numeric or decimal.',
-            'trax_box_30_range_down.required' => 'The trax box for 30kg range down field is required.',
-            'trax_box_30_range_down.numeric.*' => 'The trax box for 30kg range down field must be numeric or decimal.',
-            'trax_box_30_wc.required' => 'The trax box for 30kg within city field is required.',
-            'trax_box_30_wc.numeric.*' => 'The trax box for 30kg within city field must be numeric or decimal.',
-            'trax_box_30_sz.required' => 'The trax box for 30kg same zone field is required.',
-            'trax_box_30_sz.numeric.*' => 'The trax box for 30kg same zone field must be numeric or decimal.',
-            'trax_box_30_dz.required' => 'The trax box for 30kg different zone field is required.',
-            'trax_box_30_dz.numeric.*' => 'The trax box for 30kg different zone field must be numeric or decimal.',
+            'trax_box_30_range_up.*.required' => 'The trax box for 30kg range up field is required.',
+            'trax_box_30_range_up.*.numeric.*' => 'The trax box for 30kg range up field must be numeric or decimal.',
+            'trax_box_30_range_down.*.required' => 'The trax box for 30kg range down field is required.',
+            'trax_box_30_range_down.*.numeric.*' => 'The trax box for 30kg range down field must be numeric or decimal.',
+            'trax_box_30_wc.*.required' => 'The trax box for 30kg within city field is required.',
+            'trax_box_30_wc.*.numeric.*' => 'The trax box for 30kg within city field must be numeric or decimal.',
+            'trax_box_30_sz.*.required' => 'The trax box for 30kg same zone field is required.',
+            'trax_box_30_sz.*.numeric.*' => 'The trax box for 30kg same zone field must be numeric or decimal.',
+            'trax_box_30_dz.*.required' => 'The trax box for 30kg different zone field is required.',
+            'trax_box_30_dz.*.numeric.*' => 'The trax box for 30kg different zone field must be numeric or decimal.',
         ];
 
         $validations = array();
@@ -1336,45 +1487,43 @@ class RetailAdminUserManagementController extends Controller
 
         $trax_box_validations = [
 
-            'trax_box_2kg_range_up' => 'required|numeric',
-            'trax_box_2kg_range_down' => 'required|numeric',
-            'trax_box_2kg_wc' => 'required|numeric',
-            'trax_box_2kg_sz' => 'required|numeric',
-            'trax_box_2kg_dz' => 'required|numeric',
+            'trax_box_2kg_range_up.*' => 'required|numeric',
+            'trax_box_2kg_range_down.*' => 'required|numeric',
+            'trax_box_2kg_wc.*' => 'required|numeric',
+            'trax_box_2kg_sz.*' => 'required|numeric',
+            'trax_box_2kg_dz.*' => 'required|numeric',
 
-            'trax_box_5kg_range_up' => 'required|numeric',
-            'trax_box_5kg_range_down' => 'required|numeric',
-            'trax_box_5kg_wc' => 'required|numeric',
-            'trax_box_5kg_sz' => 'required|numeric',
-            'trax_box_5kg_dz' => 'required|numeric',
+            'trax_box_5kg_range_up.*' => 'required|numeric',
+            'trax_box_5kg_range_down.*' => 'required|numeric',
+            'trax_box_5kg_wc.*' => 'required|numeric',
+            'trax_box_5kg_sz.*' => 'required|numeric',
+            'trax_box_5kg_dz.*' => 'required|numeric',
 
-            'trax_box_10kg_range_up' => 'required|numeric',
-            'trax_box_10kg_range_down' => 'required|numeric',
-            'trax_box_10kg_wc' => 'required|numeric',
-            'trax_box_10kg_sz' => 'required|numeric',
-            'trax_box_10kg_dz' => 'required|numeric',
+            'trax_box_10kg_range_up.*' => 'required|numeric',
+            'trax_box_10kg_range_down.*' => 'required|numeric',
+            'trax_box_10kg_wc.*' => 'required|numeric',
+            'trax_box_10kg_sz.*' => 'required|numeric',
+            'trax_box_10kg_dz.*' => 'required|numeric',
 
-            'trax_box_15kg_range_up' => 'required|numeric',
-            'trax_box_15kg_range_down' => 'required|numeric',
-            'trax_box_15kg_wc' => 'required|numeric',
-            'trax_box_15kg_sz' => 'required|numeric',
-            'trax_box_15kg_dz' => 'required|numeric',
+            'trax_box_15kg_range_up.*' => 'required|numeric',
+            'trax_box_15kg_range_down.*' => 'required|numeric',
+            'trax_box_15kg_wc.*' => 'required|numeric',
+            'trax_box_15kg_sz.*' => 'required|numeric',
+            'trax_box_15kg_dz.*' => 'required|numeric',
 
-            'trax_box_20kg_range_up' => 'required|numeric',
-            'trax_box_20kg_range_down' => 'required|numeric',
-            'trax_box_20kg_wc' => 'required|numeric',
-            'trax_box_20kg_sz' => 'required|numeric',
-            'trax_box_20kg_dz' => 'required|numeric',
+            'trax_box_20kg_range_up.*' => 'required|numeric',
+            'trax_box_20kg_range_down.*' => 'required|numeric',
+            'trax_box_20kg_wc.*' => 'required|numeric',
+            'trax_box_20kg_sz.*' => 'required|numeric',
+            'trax_box_20kg_dz.*' => 'required|numeric',
 
-            'trax_box_30kg_range_up' => 'required|numeric',
-            'trax_box_30kg_range_down' => 'required|numeric',
-            'trax_box_30kg_wc' => 'required|numeric',
-            'trax_box_30kg_sz' => 'required|numeric',
-            'trax_box_30kg_dz' => 'required|numeric',
+            'trax_box_30kg_range_up.*' => 'required|numeric',
+            'trax_box_30kg_range_down.*' => 'required|numeric',
+            'trax_box_30kg_wc.*' => 'required|numeric',
+            'trax_box_30kg_sz.*' => 'required|numeric',
+            'trax_box_30kg_dz.*' => 'required|numeric',
         ];
         //}
-
-
         $validations = array_merge($saver_plus_validations, $rush_validations, $cod_validations, $swift_validations, $flyer_validations, $hdocs_validations, $trax_box_validations);
 
         $validate = Validator::make($request->all(), $validations, $messages);
@@ -1471,7 +1620,7 @@ class RetailAdminUserManagementController extends Controller
             $retail->save();
         }
 
-        RetailStandardRates::where('shipping_mode_id', 5)->delete();
+        RetailStandardRates::where('shipping_mode_id', 6)->delete();
 
 
         foreach ($request->flyer_range_up as $index => $flyer_range_up) {
@@ -1479,7 +1628,7 @@ class RetailAdminUserManagementController extends Controller
             $retail = new RetailStandardRates();
             $retail->range_up = $request->flyer_range_up[$index];
             $retail->range_down = $request->flyer_range_down[$index];
-            $retail->shipping_mode_id = 5;
+            $retail->shipping_mode_id = 6;
             if (isset($request->flyer_kg_range[$index])) {
                 $retail->kg_range = $request->flyer_kg_range[$index];
                 $retail->weight_addition = 1;
@@ -1493,14 +1642,14 @@ class RetailAdminUserManagementController extends Controller
             $retail->save();
         }
 
-        RetailStandardRates::where('shipping_mode_id', 6)->delete();
+        RetailStandardRates::where('shipping_mode_id', 7)->delete();
 
-        foreach ($request->flyer_range_up as $index => $flyer_range_up) {
+        foreach ($request->hdocs_range_up as $index => $hdocs_range_up) {
 
             $retail = new RetailStandardRates();
             $retail->range_up = $request->hdocs_range_up[$index];
             $retail->range_down = $request->hdocs_range_down[$index];
-            $retail->shipping_mode_id = 6;
+            $retail->shipping_mode_id = 7;
             if (isset($request->hdocs_kg_range[$index])) {
                 $retail->kg_range = $request->hdocs_kg_range[$index];
                 $retail->weight_addition = 1;
@@ -1514,7 +1663,7 @@ class RetailAdminUserManagementController extends Controller
             $retail->save();
         }
 
-        RetailStandardRates::where('shipping_mode_id', 7)->delete();
+        RetailStandardRates::where('shipping_mode_id', 5)->delete();
 
         $now = Carbon::now();
         $data = [
