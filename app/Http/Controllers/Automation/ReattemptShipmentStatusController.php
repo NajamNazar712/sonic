@@ -36,19 +36,25 @@ class ReattemptShipmentStatusController extends Controller
                 if($percentage < $percentage_limit){
                     return true;
                 }
+                $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
+                if($journey){
+                    if(in_array($journey->status_reason_id, [50, 67, 69, 75])){
+                        return true;
+                    }
+                }
                 $shipment->shipper_status_id = 13;
                 $shipment->consignee_status_id = 13;
                 $shipment->save();
 
-                $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
 
-                if ($journey && ($journey->status_reason_id == 12)) {
+
+                /*if ($journey && ($journey->status_reason_id == 12)) {
                     $shipment->nsa_osa_status = 1;
 
                     $shipment->save();
 
                     ShipmentChargesController::nsa_osa_charges($shipment_id);
-                }
+                }*/
 
                 ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, 'Auto re-attempt status due to better Delivery Ratio', NULL, $global_admin);
 
