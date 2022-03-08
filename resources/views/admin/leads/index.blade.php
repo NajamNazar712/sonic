@@ -1327,7 +1327,7 @@
                     $('#div_lead_status_notinterested1').addClass('d-none');
                     $('#div_lead_status_irrelevant1').removeClass('d-none');
                     $('#div_lead_status_blocked1').addClass('d-none');
-                } else if (this.value == 3) {
+                } else if (this.value == 11) {
                     $('#div_lead_status_rejected1').addClass('d-none');
                     $('#div_lead_status_notinterested1').addClass('d-none');
                     $('#div_lead_status_irrelevant1').addClass('d-none');
