@@ -1111,11 +1111,6 @@
                 width: '100%',
                 dropdownParent: $('#ForwardLeadModal')
             });
-            $("#lead_status_reason").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Reason",
-                width: '100%',
-                dropdownParent: $('#add_status_modal')
-            });
             $('#salesTagSubmit').on('click', function () {
                 var assign = parseInt($('#saletag').val());
                 swal({
@@ -1266,46 +1261,37 @@
                 dropdownParent: $('#add_status_modal')
             }).
             bind('change', function () {
-                $("#div_lead_status_reason").html('');
-                id = $(this).val();
-                $.ajax({
-                    url: '{!! route('admin.leads.lead_reasons') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'status_id': id
-                    }
-                }).done(function(data) {
-                    if(data.status == 1){
-                        $.each(data.lead_reasons,function (i,value){
-                            $("#lead_status_reason").append('<option value='+value.id+'>'+value.name+'</option>');
-                        });
-                        alert(1);
-                        $('#div_lead_status_reason').removeClass('d-none');
-                    }
-                    else{
-                        $('#div_lead_status_reason').addClass('d-none');
-                    }
-                });
+                $(this).valid();
                 $('#lead_status_rejected').val('').trigger('change');
                 $('#lead_status_notinterested').val('').trigger('change');
                 $('#lead_status_irrelevant').val('').trigger('change');
+                $('#lead_status_blocked').val('').trigger('change');
                 if (this.value == 10) {
                     $('#div_lead_status_rejected').removeClass('d-none');
                     $('#div_lead_status_notinterested').addClass('d-none');
                     $('#div_lead_status_irrelevant').addClass('d-none');
+                    $('#div_lead_status_blocked').addClass('d-none');
                 } else if (this.value == 4) {
                     $('#div_lead_status_rejected').addClass('d-none');
                     $('#div_lead_status_notinterested').removeClass('d-none');
                     $('#div_lead_status_irrelevant').addClass('d-none');
+                    $('#div_lead_status_blocked').addClass('d-none');
                 } else if (this.value == 3) {
                     $('#div_lead_status_rejected').addClass('d-none');
                     $('#div_lead_status_notinterested').addClass('d-none');
                     $('#div_lead_status_irrelevant').removeClass('d-none');
-                } else {
+                    $('#div_lead_status_blocked').addClass('d-none');
+                } else if(this.value == 11){
                     $('#div_lead_status_rejected').addClass('d-none');
                     $('#div_lead_status_notinterested').addClass('d-none');
                     $('#div_lead_status_irrelevant').addClass('d-none');
+                    $('#div_lead_status_blocked').removeClass('d-none');
+                }
+                else {
+                    $('#div_lead_status_rejected').addClass('d-none');
+                    $('#div_lead_status_notinterested').addClass('d-none');
+                    $('#div_lead_status_irrelevant').addClass('d-none');
+                    $('#div_lead_status_blocked').addClass('d-none');
                 }
             });
 
@@ -1325,22 +1311,33 @@
                 $('#lead_status_rejected1').val('').trigger('change');
                 $('#lead_status_notinterested1').val('').trigger('change');
                 $('#lead_status_irrelevant1').val('').trigger('change');
+                $('#lead_status_blocked1').val('').trigger('change');
                 if (this.value == 10) {
                     $('#div_lead_status_rejected1').removeClass('d-none');
                     $('#div_lead_status_notinterested1').addClass('d-none');
                     $('#div_lead_status_irrelevant1').addClass('d-none');
+                    $('#div_lead_status_blocked1').addClass('d-none');
                 } else if (this.value == 4) {
                     $('#div_lead_status_rejected1').addClass('d-none');
                     $('#div_lead_status_notinterested1').removeClass('d-none');
                     $('#div_lead_status_irrelevant1').addClass('d-none');
+                    $('#div_lead_status_blocked1').addClass('d-none');
                 } else if (this.value == 3) {
                     $('#div_lead_status_rejected1').addClass('d-none');
                     $('#div_lead_status_notinterested1').addClass('d-none');
                     $('#div_lead_status_irrelevant1').removeClass('d-none');
-                } else {
+                    $('#div_lead_status_blocked1').addClass('d-none');
+                } else if (this.value == 3) {
                     $('#div_lead_status_rejected1').addClass('d-none');
                     $('#div_lead_status_notinterested1').addClass('d-none');
                     $('#div_lead_status_irrelevant1').addClass('d-none');
+                    $('#div_lead_status_blocked1').removeClass('d-none');
+                }
+                else {
+                    $('#div_lead_status_rejected1').addClass('d-none');
+                    $('#div_lead_status_notinterested1').addClass('d-none');
+                    $('#div_lead_status_irrelevant1').addClass('d-none');
+                    $('#div_lead_status_blocked1').addClass('d-none');
                 }
             });
             //todo sub modal under status end
@@ -1375,6 +1372,16 @@
                 width: '100%',
                 dropdownParent: $('#add_bulk_status_modal')
             });
+            $("#lead_status_blocked").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Block Reason",
+                width: '100%',
+                dropdownParent: $('#add_status_modal')
+            });
+            $("#lead_status_blocked1").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Block Reason",
+                width: '100%',
+                dropdownParent: $('#add_bulk_status_modal')
+            });
             $('body').on('click', '#datatable .update', function () {
                 status_lead_id = parseInt($(this).parents('tr').attr('id'));
                 $('#add_status_modal').modal('show');
@@ -1395,8 +1402,9 @@
                     var lead_status_rejected = $('#lead_status_rejected').val();
                     var lead_status_notinterested = $('#lead_status_notinterested').val();
                     var lead_status_irrelevant = $('#lead_status_irrelevant').val();
+                    var lead_status_blocked = $('#lead_status_blocked').val();
                     var check = 1;
-                    if ((lead_status_rejected == "" && new_status == 10) || (lead_status_notinterested == "" && new_status == 4) || (lead_status_irrelevant == "" && new_status == 3)) {
+                    if ((lead_status_rejected == "" && new_status == 10) || (lead_status_notinterested == "" && new_status == 4) || (lead_status_irrelevant == "" && new_status == 3) || (lead_status_blocked == "" && new_status == 11)) {
                         check = 0;
                         var error = 'Reason  not Selected!';
                         toastr.error(error, 'Error!', {
@@ -1414,6 +1422,9 @@
 
                         else if (lead_status_irrelevant)
                             reason = lead_status_irrelevant;
+
+                        else if (lead_status_blocked)
+                            reason = lead_status_blocked;
 
                         blockPagePermanently();
                         $.ajax({
@@ -1472,8 +1483,9 @@
                     var lead_status_rejected = $('#lead_status_rejected1').val();
                     var lead_status_notinterested = $('#lead_status_notinterested1').val();
                     var lead_status_irrelevant = $('#lead_status_irrelevant1').val();
+                    var lead_status_blocked = $('#lead_status_blocked1').val();
                     var check = 1;
-                    if ((lead_status_rejected == "" && new_status == 10) || (lead_status_notinterested == "" && new_status == 4) || (lead_status_irrelevant == "" && new_status == 3)) {
+                    if ((lead_status_rejected == "" && new_status == 10) || (lead_status_notinterested == "" && new_status == 4) || (lead_status_irrelevant == "" && new_status == 3) || (lead_status_blocked == "" && new_status == 11)) {
                         check = 0;
                         var error = 'Reason  not Selected!';
                         toastr.error(error, 'Error!', {
@@ -1491,6 +1503,9 @@
 
                         else if (lead_status_irrelevant)
                             reason = lead_status_irrelevant;
+
+                        else if (lead_status_blocked)
+                            reason = lead_status_blocked;
 
                         blockPagePermanently();
                         $.ajax({
