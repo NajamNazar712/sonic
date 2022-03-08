@@ -6668,7 +6668,7 @@ class AdminAPIController extends Controller
                 $sale_users_bypass = explode(',', $settings->text);
             }
             if(in_array($request->admin_id,$sale_users_bypass)){
-                $admin_list = Admin::where('status, 1')->select('id', 'name')->get();
+                $admin_list = Admin::where('status', 1)->select('id', 'name')->get();
                 return response()->json(['status' => 0, 'admin_list' => $admin_list]);
             }
             return response()->json(['status' => 0, 'admin_list' => []]);
