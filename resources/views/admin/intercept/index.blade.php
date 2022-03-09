@@ -112,6 +112,9 @@
         $(document).ready(function () {
             var consignee_name = @json($shipment['consignee_name']);
             var city = @json($shipment['consignee_city_id']);
+            var email = @json($shipment['consignee_email']);
+            var amount = @json($shipment['amount']);
+
             $('#consignee_city').select2({
                 width: '100%',
                 placeholder: 'City*'
@@ -129,7 +132,9 @@
                       .prop({'name' : 'new_consignee_city'  , disabled : true}); //change name and disbale
                   $( "#consignee_name" ).val(consignee_name);
                   $( "#consignee_name" ).prop('readonly', true);
+                  $( "#consignee_email" ).val(email);
                   $( "#consignee_email" ).prop('readonly', true);
+                  $( "#amount" ).val(amount);
                   $( "#amount" ).prop('readonly', true);
               }
               else{
