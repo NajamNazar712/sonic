@@ -2,8 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Models\Admin\GlobalSettings;
 use Illuminate\Support\Facades\Auth;
-
+use Session;
 use Closure;
 
 class Permission
@@ -1300,6 +1301,27 @@ class Permission
     public function handle($request, Closure $next) {
         if (Auth::guard('admin')->check()) {
             $action = str_replace('admin.', '', $request->route()->getName());
+            if(session('department_id') == 7){
+                if(!Session::has('sale_users_bypass')){
+                    $sale_users_bypass = array();
+                    $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+
+                    if ($settings->exists()) {
+                        $settings = $settings->first();
+                        $sale_users_bypass = array_map('intval', explode(',', $settings->text));
+                        session(['sale_users_bypass' => $sale_users_bypass]);
+
+                    }
+                    else{
+                        session(['sale_users_bypass' => []]);
+                    }
+                }
+
+            }
+            else{
+                session(['sale_users_bypass' => []]);
+            }
+
 
             if (session('role_id') == 1 || !isset($this->actions['admin'][$action]) || in_array($this->actions['admin'][$action], session('permissions')) || (substr($action, 0, 4) == 'crm.' && session('role_id') == 6)) {
                 return $next($request);

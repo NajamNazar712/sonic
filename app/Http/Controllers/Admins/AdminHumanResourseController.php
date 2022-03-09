@@ -27,6 +27,7 @@ use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeDesignationHub;
+use App\Http\Models\HR\EmployeeDesignationLog;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
@@ -343,9 +344,7 @@ class AdminHumanResourseController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-
-
-                        if ($result->request_status_id == 1 || $result->request_status_id == 2) {
+                    if ($result->request_status_id == 1 || $result->request_status_id == 2) {
                             if (session('role_id') == 1 || in_array(652, session('permissions'))) {
 
                                 $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
@@ -424,6 +423,12 @@ class AdminHumanResourseController extends Controller
                             $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
                             $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
                         }
+
+                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                        if($result->employee_type_id == 1){
+                            $dropdown .= '<button type="button" class="dropdown-item designation_logs_1" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
+                        }
+                    }
 
                         $dropdown .= '
                 </div>
@@ -1059,6 +1064,15 @@ class AdminHumanResourseController extends Controller
         $employee->cnic = $request->cnic;
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
+
+        if($employee->designation_id != $request->designation){
+            $designation_logs = new EmployeeDesignationLog();
+            $designation_logs->updated_by = Auth::id();
+            $designation_logs->designation_id = $employee->designation_id;
+            $designation_logs->employee_id = $employee->id;
+            $designation_logs->save();
+        }
+
         $employee->designation_id = $request->designation;
         $employee->city_id = $request->city;
         $employee->department_id = ($request->has('department')) ? $request->department : 6;
@@ -1134,7 +1148,6 @@ class AdminHumanResourseController extends Controller
                 $rider->dummy_pin = $employee->pin;
                 $rider->shift_id = $employee->shift_id;
                 $rider->pin = bcrypt($employee->pin);
-                $rider->rider_type_id = $request->rider_type;
                 $rider->rider_main_category_id = $request->rider_main_category;
                 $rider->rider_category_id = $request->rider_sub_category;
                 $rider->operation_rider_id = $request->rider_functional_category;
@@ -3903,5 +3916,18 @@ class AdminHumanResourseController extends Controller
             return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
         }
         return response()->json(['status' => 1, 'error' => 'Employee Not Found']);
+    }
+
+    public function designation_change_logs(Request $request){
+        $designation_logs = EmployeeDesignationLog::join('admins as a', 'a.id','=','employee_designation_logs.updated_by')
+            ->join('employee_designations as ed', 'ed.id', '=', 'employee_designation_logs.designation_id')
+            ->select('a.name as updated_by', 'ed.name as designation', 'employee_designation_logs.created_at as updated_at')
+            ->where('employee_designation_logs.employee_id', $request->employee_id)->orderBy('employee_designation_logs.id', 'DESC');
+        if($designation_logs->exists()){
+            $designation_logs = $designation_logs->get();
+            return response()->json(['status' => 1, 'logs' => $designation_logs]);
+        }else{
+            return response()->json(['status' => 0, 'error' => "Designation Change Logs not found"]);
+        }
     }
 }

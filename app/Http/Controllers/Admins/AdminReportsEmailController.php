@@ -1594,8 +1594,8 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($retail_done_payment_array, NULL, 'A2', true);
             $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
             $sheet->getStyle("A7:E7")->applyFromArray($cell_st);
-            $date_file_name = $date;
-            $sheet->setTitle('Retail Done Payments ' . $date_file_name);
+            $date_file_name = Carbon::now()->format('Y_m_d_s');
+            $sheet->setTitle('Retail Done Payments');
             $writer = new Xlsx($spreadsheet);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="retail_done_payment_report.xlsx"');

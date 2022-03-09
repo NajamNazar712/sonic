@@ -1348,7 +1348,7 @@ class AdminReportsController extends Controller
                 $query->from('admin_roles')
                     ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
                     ->where('department_id', '=', 7);
-            })->select('id', 'name')->get();
+            })->where('status', 1)->select('id', 'name')->get();
         }
         $shipping_mode = ShippingMode::select('id','mode')->get();
         return view('admin.reports.daily_pickup_sales_report')->with(['cities'=>$cities, 'sales_persons' => $sales ,'shipping_mode' => $shipping_mode]);
@@ -3456,8 +3456,8 @@ class AdminReportsController extends Controller
 //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
 //        }
 
-        if (session('role_id') != 1 || !in_array(session('id'), session('sale_users_bypass'))) {
-            if (session('department_id') == 7) {
+        if (session('role_id') != 1) {
+            if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
                 $sales = $sales->whereIn('u.id', session('tagged_shippers'));
             }
             else {
@@ -3742,7 +3742,7 @@ class AdminReportsController extends Controller
                 if(session('department_id') != 7){
                     $sales_person = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
                 }else{
-                    if(in_array(session('id'), session('sale_users_bypass'))){
+                    if(!in_array(session('id'), session('sale_users_bypass'))){
                         $sales_person = DB::connection('reports')->table('admins')->where('id', Auth::id())->get();
                     }else{
                         $sales_person = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
