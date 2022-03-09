@@ -1006,7 +1006,7 @@
                                                                             <div class="col text-center">
                                                                                 <div class="input-group input-group-sm form-group">
                                                                                     <input type="text" class="touchspin-color input-sm spkg" data-bts-button-down-class="btn btn-success"
-                                                                                           data-bts-button-up-class="btn btn-success" name="trax_box_2_kg_range[0]" >
+                                                                                           data-bts-button-up-class="btn btn-success" name="trax_box_2_kg_range[0]" disabled>
                                                                                 </div>
                                                                             </div>
 

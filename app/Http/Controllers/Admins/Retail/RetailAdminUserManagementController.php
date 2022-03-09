@@ -1665,89 +1665,128 @@ class RetailAdminUserManagementController extends Controller
 
         RetailStandardRates::where('shipping_mode_id', 5)->delete();
 
-        $now = Carbon::now();
-        $data = [
-            [
-                'range_up' => $request->trax_box_2kg_range_up,
-                'range_down' => $request->trax_box_2kg_range_down,
-                'shipping_mode_id' => 7,
-                'kg_range' => ($request->trax_box_2kg_weight) ? $request->trax_box_2_weight : 0,
-                'weight_addition' => ($request->trax_box_2kg_switch == 'on') ? 1 : 0,
-                'within_city' => $request->trax_box_2kg_wc,
-                'same_zone' => $request->trax_box_2kg_sz,
-                'different_zone' => $request->trax_box_2kg_dz,
-                'trax_box_id' => 1,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'range_up' => $request->trax_box_5kg_range_up,
-                'range_down' => $request->trax_box_5kg_range_down,
-                'shipping_mode_id' => 7,
-                'kg_range' => ($request->trax_box_5kg_weight) ? $request->trax_box_2_weight : 0,
-                'weight_addition' => ($request->trax_box_5kg_switch == 'on') ? 1 : 0,
-                'within_city' => $request->trax_box_5kg_wc,
-                'same_zone' => $request->trax_box_5kg_sz,
-                'different_zone' => $request->trax_box_5kg_dz,
-                'trax_box_id' => 2,
-                'created_at' => $now,
-                'updated_at' => $now,
+        foreach ($request->trax_box_2_range_up as $index => $trax_box_2_range_up) {
 
-            ],
-            [
-                'range_up' => $request->trax_box_10kg_range_up,
-                'range_down' => $request->trax_box_10kg_range_down,
-                'shipping_mode_id' => 7,
-                'kg_range' => ($request->trax_box_10kg_weight) ? $request->trax_box_2_weight : 0,
-                'weight_addition' => ($request->trax_box_10kg_switch == 'on') ? 1 : 0,
-                'within_city' => $request->trax_box_10kg_wc,
-                'same_zone' => $request->trax_box_10kg_sz,
-                'different_zone' => $request->trax_box_10kg_dz,
-                'trax_box_id' => 3,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'range_up' => $request->trax_box_15kg_range_up,
-                'range_down' => $request->trax_box_15kg_range_down,
-                'shipping_mode_id' => 7,
-                'kg_range' => ($request->trax_box_15kg_weight) ? $request->trax_box_2_weight : 0,
-                'weight_addition' => ($request->trax_box_15kg_switch == 'on') ? 1 : 0,
-                'within_city' => $request->trax_box_15kg_wc,
-                'same_zone' => $request->trax_box_15kg_sz,
-                'different_zone' => $request->trax_box_15kg_dz,
-                'trax_box_id' => 4,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'range_up' => $request->trax_box_20kg_range_up,
-                'range_down' => $request->trax_box_20kg_range_down,
-                'shipping_mode_id' => 7,
-                'kg_range' => ($request->trax_box_20kg_weight) ? $request->trax_box_2_weight : 0,
-                'weight_addition' => ($request->trax_box_20kg_switch == 'on') ? 1 : 0,
-                'within_city' => $request->trax_box_20kg_wc,
-                'same_zone' => $request->trax_box_20kg_sz,
-                'different_zone' => $request->trax_box_20kg_dz,
-                'trax_box_id' => 5,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ],
-            [
-                'range_up' => $request->trax_box_30kg_range_up,
-                'range_down' => $request->trax_box_30kg_range_down,
-                'shipping_mode_id' => 7,
-                'kg_range' => ($request->trax_box_30kg_weight) ? $request->trax_box_2_weight : 0,
-                'weight_addition' => ($request->trax_box_30kg_switch == 'on') ? 1 : 0,
-                'within_city' => $request->trax_box_30kg_wc,
-                'same_zone' => $request->trax_box_30kg_sz,
-                'different_zone' => $request->trax_box_30kg_dz,
-                'trax_box_id' => 6,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]
-        ];
-        RetailStandardRates::insert($data);
+            $retail = new RetailStandardRates();
+            $retail->range_up = $request->$trax_box_2_range_up[$index];
+            $retail->range_down = $request->trax_box_2_range_down[$index];
+            $retail->shipping_mode_id = 5;
+            if (isset($request->trax_box_2_kg_range[$index])) {
+                $retail->kg_range = $request->trax_box_2_kg_range[$index];
+                $retail->weight_addition = 1;
+            } else {
+                $retail->kg_range = 0;
+                $retail->weight_addition = 0;
+            }
+            $retail->trax_box_id = 1;
+            $retail->within_city = $request->trax_box_2_wc[$index];
+            $retail->same_zone = $request->trax_box_2_sz[$index];
+            $retail->different_zone = $request->trax_box_2_dz[$index];
+            $retail->save();
+        }
+
+        foreach ($request->trax_box_2_range_up as $index => $trax_box_2_range_up) {
+
+            $retail = new RetailStandardRates();
+            $retail->range_up = $request->trax_box_5_range_up[$index];
+            $retail->range_down = $request->trax_box_5_range_down[$index];
+            $retail->shipping_mode_id = 5;
+            if (isset($request->trax_box_5_kg_range[$index])) {
+                $retail->kg_range = $request->trax_box_5_kg_range[$index];
+                $retail->weight_addition = 1;
+            } else {
+                $retail->kg_range = 0;
+                $retail->weight_addition = 0;
+            }
+            $retail->trax_box_id = 2;
+            $retail->within_city = $request->trax_box_5_wc[$index];
+            $retail->same_zone = $request->trax_box_5_sz[$index];
+            $retail->different_zone = $request->trax_box_5_dz[$index];
+            $retail->save();
+        }
+
+        foreach ($request->trax_box_10_range_up as $index => $trax_box_10_range_up) {
+
+            $retail = new RetailStandardRates();
+            $retail->range_up = $request->trax_box_10_range_up[$index];
+            $retail->range_down = $request->trax_box_10_range_down[$index];
+            $retail->shipping_mode_id = 5;
+            if (isset($request->trax_box_10_kg_range[$index])) {
+                $retail->kg_range = $request->trax_box_10_kg_range[$index];
+                $retail->weight_addition = 1;
+            } else {
+                $retail->kg_range = 0;
+                $retail->weight_addition = 0;
+            }
+            $retail->trax_box_id = 3;
+            $retail->within_city = $request->trax_box_10_wc[$index];
+            $retail->same_zone = $request->trax_box_10_sz[$index];
+            $retail->different_zone = $request->trax_box_10_dz[$index];
+            $retail->save();
+        }
+
+
+        foreach ($request->trax_box_15_range_up as $index => $trax_box_15_range_up) {
+
+            $retail = new RetailStandardRates();
+            $retail->range_up = $request->trax_box_15_range_up[$index];
+            $retail->range_down = $request->trax_box_15_range_down[$index];
+            $retail->shipping_mode_id = 5;
+            if (isset($request->trax_box_15_kg_range[$index])) {
+                $retail->kg_range = $request->trax_box_15_kg_range[$index];
+                $retail->weight_addition = 1;
+            } else {
+                $retail->kg_range = 0;
+                $retail->weight_addition = 0;
+            }
+            $retail->trax_box_id = 4;
+            $retail->within_city = $request->trax_box_15_wc[$index];
+            $retail->same_zone = $request->trax_box_15_sz[$index];
+            $retail->different_zone = $request->trax_box_15_dz[$index];
+            $retail->save();
+        }
+
+        foreach ($request->trax_box_20_range_up as $index => $trax_box_20_range_up) {
+
+            $retail = new RetailStandardRates();
+            $retail->range_up = $request->trax_box_20_range_up[$index];
+            $retail->range_down = $request->trax_box_20_range_down[$index];
+            $retail->shipping_mode_id = 5;
+            if (isset($request->trax_box_20_kg_range[$index])) {
+                $retail->kg_range = $request->trax_box_20_kg_range[$index];
+                $retail->weight_addition = 1;
+            } else {
+                $retail->kg_range = 0;
+                $retail->weight_addition = 0;
+            }
+            $retail->trax_box_id = 5;
+            $retail->within_city = $request->trax_box_20_wc[$index];
+            $retail->same_zone = $request->trax_box_20_sz[$index];
+            $retail->different_zone = $request->trax_box_20_dz[$index];
+            $retail->save();
+        }
+
+        foreach ($request->trax_box_30_range_up as $index => $trax_box_30_range_up) {
+
+            $retail = new RetailStandardRates();
+            $retail->range_up = $request->trax_box_30_range_up[$index];
+            $retail->range_down = $request->trax_box_30_range_down[$index];
+            $retail->shipping_mode_id = 5;
+            if (isset($request->trax_box_30_kg_range[$index])) {
+                $retail->kg_range = $request->trax_box_30_kg_range[$index];
+                $retail->weight_addition = 1;
+            } else {
+                $retail->kg_range = 0;
+                $retail->weight_addition = 0;
+            }
+            $retail->trax_box_id = 6;
+            $retail->within_city = $request->trax_box_30_wc[$index];
+            $retail->same_zone = $request->trax_box_30_sz[$index];
+            $retail->different_zone = $request->trax_box_30_dz[$index];
+            $retail->save();
+        }
+
+
 
         return redirect()->route('admin.retail.rates.edit')->with('success', 'Rates Updated');
 
