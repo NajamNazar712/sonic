@@ -90,7 +90,8 @@ class AdminFnfController extends Controller
 
                  }
                  if (session('role_id') == 1 || in_array(576, session('permissions'))) {
-                     $dropdown .= '<button type="button" class="dropdown-item hr_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">HR View</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item hr_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">HR View</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item hr_print" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">HR Print</div></button>';
 
                  }
                  if ((session('role_id') == 1 || $result->reporting_manager == Auth::id() || in_array(577, session('permissions'))) && $result->status_id != 4 ) {
@@ -696,5 +697,265 @@ class AdminFnfController extends Controller
 
         $datatable = Datatables::of($fnf);
         return $datatable->make(true);
+    }
+
+    public function hr_print(Request $request){
+        $id = $request->id;
+        ActivityTrailController::createActivityTrailLog(Auth::id(),515);
+        $fnf = FnfSectionEmployee::find($id);
+        if($fnf){
+            $hr = FnfSectionHr::where('fnf_id',$id);
+            if(!$hr->exists()){
+                $hr = Null;
+            }
+            else{
+                $hr = $hr->first();
+            }
+           
+           
+            $html = '<!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <link rel="stylesheet" type="text/css" href="' . asset('app-assets/fonts/line-awesome/css/line-awesome.min.css') . '">
+
+                <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                <title>Digital Sales Performa</title>
+
+            <style>
+              @page {
+                size: A4 portrait;
+              }
+
+              * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+
+              body {
+                background: none !important;
+                color: #09262e !important;
+                font-size: 0.9rem !important;
+              }
+
+              hr {
+                border-top: 1px dashed #000000;
+              }
+
+              table.table-bordered {
+                page-break-inside: avoid;
+              }
+
+              table.table-bordered tbody tr td {
+                width: 12.5% !important;
+                border: 1px solid #09262e !important;
+              }
+
+              .color.primary {
+                background: #c8c8c8 !important;
+              }
+
+              .color.secondary {
+                background: #ebebeb !important;
+              }
+
+              .border {
+                border: 1px solid #09262e !important;
+              }
+
+              .border.twice {
+                border-width: 2px !important;
+              }
+
+              .border.twice-top {
+                border-top-width: 2px !important;
+              }
+
+              .border.twice-bottom {
+                border-bottom-width: 2px !important;
+              }
+
+              .border.twice-left {
+                border-left-width: 2px !important;
+              }
+
+              .border.twice-right {
+                border-right-width: 2px !important;
+              }
+
+              td.replacement span {
+                width: 22px;
+              }
+
+              td.replacement span img {
+                display: block;
+                width: 100%;
+                margin: auto;
+                background: #c8c8c8;
+                border-radius: 25px;
+              }
+
+              .void {
+                top: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                height: 80px;
+                font-size: 5rem;
+                line-height: 3.5rem;
+                opacity: 0.25;
+              }
+               div.page
+                {
+                    page-break-after: always;
+                    page-break-inside: avoid;
+                }
+                .piece_number{
+                    font-size: 2.5rem;
+                }
+            </style>
+              </head>
+              <body>
+                <div>';
+
+        $html .= '<div class="container-fluid text-center p-3">
+                        <div class="row justify-content-end mb-2">
+                            <div class="col">
+                                <img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">
+                            </div>
+                            <div class="col">
+                                <h2>FNF Request Details</h2>
+                            </div>
+                        </div>
+                        <div class="row justify-content-end mb-2">
+                            <div class="col">
+                                    <table class="table table-bordered border">
+                                        <tbody>
+                                        <tr><td class="color primary w-50">Employee ID:</td><td class=" w-50">'. $fnf->employee->trax_id .'</td> <td class="color primary w-50">Employee Name:</td><td class=" w-50">'. $fnf->employee->name .'</td></tr>
+                                        <tr><td class="color primary w-50">Designation:</td><td class=" w-50">'. $fnf->employee->designation->name .'</td> <td class="color primary w-50">Department:</td><td class=" w-50">'. $fnf->employee->department->name .'</td></tr>
+                                        <tr><td class="color primary w-50">Date of Joining:</td><td class=" w-50">'. $fnf->joining_date .'</td> <td class="color primary w-50">Date of Resign:</td><td class=" w-50">'. $fnf->resign_date .'</td></tr>
+                                        <tr><td class="color primary w-50">Line Manager Email:</td><td class=" w-50">'. $fnf->reporting_manager->email .'</td> <td class="color primary w-50">HOD Email:</td><td class=" w-50">'. $fnf->department_head->email .'</td></tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                           
+                        </div>
+                        <div class="col border mb-2">
+                                <div class="row justify-content-center m-1">
+                                    <h5><b>FNF Status</b></h5>
+                                </div>
+                                <table class="table table-bordered border">
+                                    <tbody>
+                                        <tr>
+                                            <td class="color primary"><b>Heads</b></td>
+                                            <td class="color primary"><b>Status</b></td>
+                                            <td class="color primary"><b>Comments</b></td>
+                                        </tr>';
+
+                               
+                                    $html .= '
+                                        <tr>
+                                            <td style="border-bottom: none !important;"><b>Reporting Manager</b></td>';
+                                            if($fnf->manager){
+
+                                                $html .='
+                                                <td>Inprocess</td><td>'.$fnf->manager->comments.'</td>';
+                                            }else{
+                                                $html .='
+                                                <td>Pending</td><td></td>';
+                                            }
+                                    $html .=' </tr>';
+
+                                    $html .= '
+                                        <tr>
+                                            <td style="border-bottom: none !important;"><b>Customer Experience</b></td>';
+                                            if($fnf->customer_experience){
+
+                                                $html .='
+                                                <td>Inprocess</td><td>'.$fnf->customer_experience->comments.'</td>';
+                                            }else{
+                                                $html .='
+                                                <td>Pending</td><td></td>';
+                                            }
+                                    $html .=' </tr>';
+
+                                    $html .= '
+                                        <tr>
+                                            <td style="border-bottom: none !important;"><b>Administration</b></td>';
+                                            if($fnf->administration){
+
+                                                $html .='
+                                                <td>Inprocess</td><td>'.$fnf->administration->comments.'</td>';
+                                            }else{
+                                                $html .='
+                                                <td>Pending</td><td></td>';
+                                            }
+                                    $html .=' </tr>';
+
+                                    $html .= '
+                                        <tr>
+                                            <td style="border-bottom: none !important;"><b>IT Support</b></td>';
+                                            if($fnf->it_support){
+
+                                                $html .='
+                                                <td>Inprocess</td><td>'.$fnf->it_support->comments.'</td>';
+                                            }else{
+                                                $html .='
+                                                <td>Pending</td><td></td>';
+                                            }
+                                    $html .=' </tr>';
+
+                                    $html .= '
+                                        <tr>
+                                            <td style="border-bottom: none !important;"><b>Finance</b></td>';
+                                            if($fnf->finance){
+
+                                                $html .='
+                                                <td>Inprocess</td><td>'.$fnf->finance->comments.'</td>';
+                                            }else{
+                                                $html .='
+                                                <td>Pending</td><td></td>';
+                                            }
+                                    $html .=' </tr>';
+
+                                    $html .= '
+                                        <tr>
+                                            <td style="border-bottom: none !important;"><b>HOD</b></td>';
+                                            if($fnf->hod_approval){
+
+                                                $html .='
+                                                <td>Inprocess</td><td>'.$fnf->hod_approval->comments.'</td>';
+                                            }else{
+                                                $html .='
+                                                <td>Pending</td><td></td>';
+                                            }
+                                    $html .=' </tr>';
+                                
+      
+
+        $html .= '
+                                    </tbody>
+                                </table>
+                              
+                        </div>';
+
+        $html .= '
+                        </div>';
+        $html .= '
+            <script>
+              window.onload = function() {
+                window.print();
+              }
+            </script>
+            ';
+
+        $html .= '
+              </body>
+            </html>
+        ';
+    return $html;
+        }
     }
 }

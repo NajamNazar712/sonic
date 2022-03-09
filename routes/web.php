@@ -3681,6 +3681,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/finance', 'Admins\AdminFnfController@finance_index')->name('finance.index');
             Route::post('finance/submit', 'Admins\AdminFnfController@finance_submit')->name('finance.submit');
             Route::get('{id}/hr', 'Admins\AdminFnfController@hr_index')->name('hr.index');
+            Route::post('hr_print', 'Admins\AdminFnfController@hr_print')->name('hr.print');
             Route::post('hr/submit', 'Admins\AdminFnfController@hr_submit')->name('hr.submit');
             Route::post('rm_status_edit', 'Admins\AdminFnfController@rm_status_edit')->name('rm_status_edit');
             Route::post('cs_status_edit', 'Admins\AdminFnfController@cs_status_edit')->name('cs_status_edit');
