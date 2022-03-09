@@ -162,7 +162,7 @@
                     url: '{{ route('admin.pam_leads.list') }}',
                 },
                 rowId: 'id',
-                order: [[1, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'lead_id', name: 'pam_leads.lead_id', class: 'align-middle lead_id'},
