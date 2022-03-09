@@ -1668,7 +1668,7 @@ class RetailAdminUserManagementController extends Controller
         foreach ($request->trax_box_2_range_up as $index => $trax_box_2_range_up) {
 
             $retail = new RetailStandardRates();
-            $retail->range_up = $request->$trax_box_2_range_up[$index];
+            $retail->range_up = $request->trax_box_2_range_up[$index];
             $retail->range_down = $request->trax_box_2_range_down[$index];
             $retail->shipping_mode_id = 5;
             if (isset($request->trax_box_2_kg_range[$index])) {
