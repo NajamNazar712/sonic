@@ -181,6 +181,10 @@
                         @if(session('user_type') == 1)
                             <li><a class="menu-item" href="{{route('cod.settings.final_charges_subscription.index')}}">Final Charges Subscription</a></li>
                         @endif
+
+                        @if(session('user_type') == 1)
+                            <li><a class="menu-item" href="{{route('cod.settings.receiving_sheet.index')}}">Receiving Sheet (Shipment Description)</a></li>
+                        @endif
                     </ul>
 
                 </li>

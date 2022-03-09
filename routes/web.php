@@ -461,6 +461,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@payment_subscription_submit')->name('store');
         });
 
+        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@receiving_sheet_description_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@receiving_sheet_description_submit')->name('store');
+        });
+
     });
 	Route::prefix('consolidation')->name('consolidation.')->group(function () {
         Route::prefix('history')->name('history.')->group(function () {
