@@ -1164,7 +1164,7 @@ class ShipmentReturnAddressController extends Controller
             'tracking_number' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id, $allowed_statuses) {
                 $query->where('user_id', $user_id)->whereIn('shipper_status_id', $allowed_statuses)->whereNotNull('return_address_id');
             }), 'return_status_check'],
-            'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
+            'return_address_id' => ['required', 'integer', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                 $query->where('user_id', $user_id)->where('hidden', 0);
             }), 'return_destination_check'],
         ];
