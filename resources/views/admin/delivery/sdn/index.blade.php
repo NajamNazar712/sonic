@@ -2210,8 +2210,7 @@
             $('#datatable tbody').on('click', 'tr td button.view_logs', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
 
-                $('#status_logs_modal .modal-body').html('');
-                $('#status_logs_modal').modal('show');
+
 
                 $.ajax({
                     url: '{!! route('admin.delivery.sdn.status_logs') !!}',
@@ -2224,6 +2223,8 @@
                     .done(function (data) {
 
                         if (data.status == 1) {
+                            $('#status_logs_modal .modal-body').html('');
+                            $('#status_logs_modal').modal('show');
                             $('#status_logs_modal_title span').text(data.sdn_id);
                             var html = '<div class="row"><div class="col-12"><table class="table table-sm table-bordered border"><thead><tr><th class="color primary text-center">Status</th><th class="color primary">Updated By</th><th class="color primary">Updated At</th></tr></thead><tbody>';
 

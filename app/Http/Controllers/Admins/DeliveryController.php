@@ -7729,10 +7729,10 @@ class DeliveryController extends Controller
             if($logs->exists()){
                 $logs = $logs->get();
                 foreach ($logs as $log){
-                    if($log->status == 0){
+                    if($log->status_id == 0){
                         $status_logs[$log->id]['status'] = 'Created';
                     }
-                    else if($log->status == 1){
+                    else if($log->status_id == 1){
                         $status_logs[$log->id]['status'] = 'Deposited';
                     }
                     else{
@@ -7742,7 +7742,7 @@ class DeliveryController extends Controller
                     $status_logs[$log->id]['date'] = Carbon::parse($log->created_at)->toDateTimeString();
                 }
 
-                return response()->json(['status' => 1, 'sdn_id' => $sdn_id, 'logs' => $status_logs]);
+                return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $status_logs]);
             }
             return response()->json(['status' => 0, 'message' => 'No logs found!']);
         }
