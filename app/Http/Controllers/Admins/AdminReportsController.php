@@ -7476,7 +7476,11 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('dncc_amount', function ($entry) {
-                $amount = DB::connection('reports')->table('delivery_notes')->where('rider_id', $entry->rider_id)->sum('total_cod_amount');
+                $amount = DB::connection('reports')
+                    ->table('delivery_notes')
+                    ->where('rider_id', $entry->rider_id)
+                    ->where('delivery_notes.cash_collection_status','!=',0)
+                    ->sum('total_cod_amount');
 //                $dncc_amount = DB::connection('reports')
 //                    ->table('delivery_notes as dn')
 //                    ->LeftJoin('delivery_note_station_deposit_notes as dnsdn', 'dn.id', '=', 'dnsdn.delivery_note_id')
@@ -7558,7 +7562,7 @@ class AdminReportsController extends Controller
                 $from = $request->get('search_from');
                 $to = $request->get('search_to');
                 $from = $from.' '.'20:00:00';
-                $to = $to.' '.'14:00:00';
+                $to = $to.' '.'13:59:59';
 //            $from1 = $from->toDateString();
 //            $to1 = $to->toDateString();
 //            dd($from,$to);
