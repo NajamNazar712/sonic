@@ -12,6 +12,8 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\CRM\CrmRequestFeedback;
+use App\Http\Models\CRM\CrmRequestRating;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DonePayment;
@@ -199,8 +201,24 @@ class ShipperCRMController extends Controller
                     $insurance = 'No';
                 }
 
+                $ratings = CrmRequestRating::all();
 
-                return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'shipment_status' => $shipment_status, 'reopen_check' => $reopen_check,'insurance' => $insurance]);
+                if($crm_request->status_id == 4){
+                    $give_feedback = TRUE;
+                    $feedback = CrmRequestFeedback::where('crm_request_id', $crm_request->id);
+                    if($feedback->exists()){
+                        $feedback = $feedback->first();
+                        if($feedback->reopen == $crm_request->reopen_count){
+                            $give_feedback = false;
+                        }
+                    }
+                }
+                else{
+                    $give_feedback = FALSE;
+                }
+
+
+                return view('client.crm.details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'shipment_status' => $shipment_status, 'reopen_check' => $reopen_check,'insurance' => $insurance, 'ratings' => $ratings, 'give_feedback' => $give_feedback]);
             }else{
                 return redirect()->back()->with('danger', 'CRM Request Not found!');
             }
@@ -561,4 +579,41 @@ class ShipperCRMController extends Controller
         return response()->json(['status' => 0,'error'=>'No Shipments Found']);
     }
 
+    public function customer_feedback(Request $request){
+        $rating_id = $request->rating_id;
+        $request_id = $request->request_id;
+
+        if($request_id && $rating_id){
+            $crm_request = CrmRequest::find($request_id);
+            if($crm_request && $crm_request->status_id == 4){
+                $crm_request_rating = CrmRequestFeedback::where('crm_request_id', $request_id)->where('user_id', session('user_id'));
+                if($crm_request_rating->exists()){
+                    $crm_request_rating = $crm_request_rating->latest()->first();
+
+                    if($crm_request->reopen_count > $crm_request_rating->reopen){
+
+                        $crm_request_rating->rating_id = $rating_id;
+                        $crm_request_rating->reopen = $crm_request->reopen_count;
+                        $crm_request_rating->save();
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'message' => 'Feedback already received!']);
+                    }
+                }
+                else{
+                    $crm_request_rating = new CrmRequestFeedback();
+                    $crm_request_rating->crm_request_id = $request_id;
+                    $crm_request_rating->user_id = session('user_id');
+                    $crm_request_rating->rating_id = $rating_id;
+                    $crm_request_rating->save();
+                }
+                return response()->json(['status' => 0, 'message' => 'Feedback Received!']);
+            }
+            return response()->json(['status' => 1, 'message' => 'Request not found!']);
+
+        }
+        else{
+            return response()->json(['status' => 1, 'message' => 'Something went wrong!']);
+        }
+    }
 }

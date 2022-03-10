@@ -408,6 +408,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('add', 'Shippers\ShipperCRMController@add_request')->name('add');
             Route::post('re_open', 'Shippers\ShipperCRMController@re_open_request')->name('re_open');
             Route::post('/lost/claim', 'Shippers\ShipperCRMController@lost_claim')->name('lost.claim');
+            Route::post('feedback', 'Shippers\ShipperCRMController@customer_feedback')->name('feedback');
+
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Shippers\ShipperCRMController@add_feedback')->name('add');
@@ -416,6 +418,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('add', 'Shippers\ShipperCRMController@add_comment')->name('add');
             Route::post('get', 'Shippers\ShipperCRMController@get_latest_comment')->name('get');
         });
+
     });
 
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
