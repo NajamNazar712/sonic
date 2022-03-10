@@ -442,6 +442,15 @@
                                 <option value="13"> Rates Negotiations</option>
                             </select>
                         </div>
+                        <div id="div_lead_status_dormant" class="form-group d-none">
+                            <select name="lead_status_dormant" id="lead_status_dormant" class="form-control select2">
+                                <option value="8"> Unresponsive</option>
+                                <option value="9"> Customer Wants To Be Contacted Later</option>
+                                <option value="11"> Customer Needs More Time</option>
+                                <option value="12"> General Query</option>
+                                <option value="13"> Rates Negotiations</option>
+                            </select>
+                        </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="add" class="btn btn-primary add" value="Add">Update</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
@@ -505,6 +514,15 @@
                         </div>
                         <div id="div_lead_status_blocked1" class="form-group d-none">
                             <select name="lead_status_blocked1" id="lead_status_blocked1" class="form-control select2">
+                                <option value="8"> Unresponsive</option>
+                                <option value="9"> Customer Wants To Be Contacted Later</option>
+                                <option value="11"> Customer Needs More Time</option>
+                                <option value="12"> General Query</option>
+                                <option value="13"> Rates Negotiations</option>
+                            </select>
+                        </div>
+                        <div id="div_lead_status_dormant1" class="form-group d-none">
+                            <select name="lead_status_dormant1" id="lead_status_dormant1" class="form-control select2">
                                 <option value="8"> Unresponsive</option>
                                 <option value="9"> Customer Wants To Be Contacted Later</option>
                                 <option value="11"> Customer Needs More Time</option>
@@ -1266,32 +1284,44 @@
                 $('#lead_status_notinterested').val('').trigger('change');
                 $('#lead_status_irrelevant').val('').trigger('change');
                 $('#lead_status_blocked').val('').trigger('change');
+                $('#lead_status_dormant').val('').trigger('change');
                 if (this.value == 10) {
                     $('#div_lead_status_rejected').removeClass('d-none');
                     $('#div_lead_status_notinterested').addClass('d-none');
                     $('#div_lead_status_irrelevant').addClass('d-none');
                     $('#div_lead_status_blocked').addClass('d-none');
+                    $('#div_lead_status_dormant').addClass('d-none');
                 } else if (this.value == 4) {
                     $('#div_lead_status_rejected').addClass('d-none');
                     $('#div_lead_status_notinterested').removeClass('d-none');
                     $('#div_lead_status_irrelevant').addClass('d-none');
                     $('#div_lead_status_blocked').addClass('d-none');
+                    $('#div_lead_status_dormant').addClass('d-none');
                 } else if (this.value == 3) {
                     $('#div_lead_status_rejected').addClass('d-none');
                     $('#div_lead_status_notinterested').addClass('d-none');
                     $('#div_lead_status_irrelevant').removeClass('d-none');
                     $('#div_lead_status_blocked').addClass('d-none');
+                    $('#div_lead_status_dormant').addClass('d-none');
                 } else if(this.value == 11){
                     $('#div_lead_status_rejected').addClass('d-none');
                     $('#div_lead_status_notinterested').addClass('d-none');
                     $('#div_lead_status_irrelevant').addClass('d-none');
                     $('#div_lead_status_blocked').removeClass('d-none');
+                    $('#div_lead_status_dormant').addClass('d-none');
+                } else if(this.value == 14){
+                    $('#div_lead_status_rejected').addClass('d-none');
+                    $('#div_lead_status_notinterested').addClass('d-none');
+                    $('#div_lead_status_irrelevant').addClass('d-none');
+                    $('#div_lead_status_blocked').addClass('d-none');
+                    $('#div_lead_status_dormant').removeClass('d-none');
                 }
                 else {
                     $('#div_lead_status_rejected').addClass('d-none');
                     $('#div_lead_status_notinterested').addClass('d-none');
                     $('#div_lead_status_irrelevant').addClass('d-none');
                     $('#div_lead_status_blocked').addClass('d-none');
+                    $('#div_lead_status_dormant').addClass('d-none');
                 }
             });
 
@@ -1312,32 +1342,44 @@
                 $('#lead_status_notinterested1').val('').trigger('change');
                 $('#lead_status_irrelevant1').val('').trigger('change');
                 $('#lead_status_blocked1').val('').trigger('change');
+                $('#lead_status_dormant1').val('').trigger('change');
                 if (this.value == 10) {
                     $('#div_lead_status_rejected1').removeClass('d-none');
                     $('#div_lead_status_notinterested1').addClass('d-none');
                     $('#div_lead_status_irrelevant1').addClass('d-none');
                     $('#div_lead_status_blocked1').addClass('d-none');
+                    $('#div_lead_status_dormant1').addClass('d-none');
                 } else if (this.value == 4) {
                     $('#div_lead_status_rejected1').addClass('d-none');
                     $('#div_lead_status_notinterested1').removeClass('d-none');
                     $('#div_lead_status_irrelevant1').addClass('d-none');
                     $('#div_lead_status_blocked1').addClass('d-none');
+                    $('#div_lead_status_dormant1').addClass('d-none');
                 } else if (this.value == 3) {
                     $('#div_lead_status_rejected1').addClass('d-none');
                     $('#div_lead_status_notinterested1').addClass('d-none');
                     $('#div_lead_status_irrelevant1').removeClass('d-none');
                     $('#div_lead_status_blocked1').addClass('d-none');
+                    $('#div_lead_status_dormant1').addClass('d-none');
                 } else if (this.value == 11) {
                     $('#div_lead_status_rejected1').addClass('d-none');
                     $('#div_lead_status_notinterested1').addClass('d-none');
                     $('#div_lead_status_irrelevant1').addClass('d-none');
                     $('#div_lead_status_blocked1').removeClass('d-none');
+                    $('#div_lead_status_dormant1').addClass('d-none');
+                } else if (this.value == 14) {
+                    $('#div_lead_status_rejected1').addClass('d-none');
+                    $('#div_lead_status_notinterested1').addClass('d-none');
+                    $('#div_lead_status_irrelevant1').addClass('d-none');
+                    $('#div_lead_status_blocked1').addClass('d-none');
+                    $('#div_lead_status_dormant1').removeClass('d-none');
                 }
                 else {
                     $('#div_lead_status_rejected1').addClass('d-none');
                     $('#div_lead_status_notinterested1').addClass('d-none');
                     $('#div_lead_status_irrelevant1').addClass('d-none');
                     $('#div_lead_status_blocked1').addClass('d-none');
+                    $('#div_lead_status_dormant1').addClass('d-none');
                 }
             });
             //todo sub modal under status end
@@ -1382,6 +1424,16 @@
                 width: '100%',
                 dropdownParent: $('#add_bulk_status_modal')
             });
+            $("#lead_status_dormant").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Dormant Reason",
+                width: '100%',
+                dropdownParent: $('#add_status_modal')
+            });
+            $("#lead_status_dormant1").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Dormant Reason",
+                width: '100%',
+                dropdownParent: $('#add_bulk_status_modal')
+            });
             $('body').on('click', '#datatable .update', function () {
                 status_lead_id = parseInt($(this).parents('tr').attr('id'));
                 $('#add_status_modal').modal('show');
@@ -1403,8 +1455,9 @@
                     var lead_status_notinterested = $('#lead_status_notinterested').val();
                     var lead_status_irrelevant = $('#lead_status_irrelevant').val();
                     var lead_status_blocked = $('#lead_status_blocked').val();
+                    var lead_status_dormant = $('#lead_status_dormant').val();
                     var check = 1;
-                    if ((lead_status_rejected == "" && new_status == 10) || (lead_status_notinterested == "" && new_status == 4) || (lead_status_irrelevant == "" && new_status == 3) || (lead_status_blocked == "" && new_status == 11)) {
+                    if ((lead_status_rejected == "" && new_status == 10) || (lead_status_notinterested == "" && new_status == 4) || (lead_status_irrelevant == "" && new_status == 3) || (lead_status_blocked == "" && new_status == 11) || (lead_status_dormant == "" && new_status == 14)) {
                         check = 0;
                         var error = 'Reason  not Selected!';
                         toastr.error(error, 'Error!', {
@@ -1425,6 +1478,9 @@
 
                         else if (lead_status_blocked)
                             reason = lead_status_blocked;
+
+                        else if (lead_status_dormant)
+                            reason = lead_status_dormant;
 
                         blockPagePermanently();
                         $.ajax({
@@ -1484,8 +1540,9 @@
                     var lead_status_notinterested = $('#lead_status_notinterested1').val();
                     var lead_status_irrelevant = $('#lead_status_irrelevant1').val();
                     var lead_status_blocked = $('#lead_status_blocked1').val();
+                    var lead_status_dormant = $('#lead_status_dormant1').val();
                     var check = 1;
-                    if ((lead_status_rejected == "" && new_status == 10) || (lead_status_notinterested == "" && new_status == 4) || (lead_status_irrelevant == "" && new_status == 3) || (lead_status_blocked == "" && new_status == 11)) {
+                    if ((lead_status_rejected == "" && new_status == 10) || (lead_status_notinterested == "" && new_status == 4) || (lead_status_irrelevant == "" && new_status == 3) || (lead_status_blocked == "" && new_status == 11) || (lead_status_dormant == "" && new_status == 14)) {
                         check = 0;
                         var error = 'Reason  not Selected!';
                         toastr.error(error, 'Error!', {
@@ -1506,6 +1563,9 @@
 
                         else if (lead_status_blocked)
                             reason = lead_status_blocked;
+
+                        else if (lead_status_dormant)
+                            reason = lead_status_dormant;
 
                         blockPagePermanently();
                         $.ajax({
@@ -1557,12 +1617,16 @@
                 $('#lead_status_rejected').val('').trigger('change');
                 $('#lead_status_notinterested').val('').trigger('change');
                 $('#lead_status_irrelevant').val('').trigger('change');
+                $('#lead_status_blocked').val('').trigger('change');
+                $('#lead_status_dormant').val('').trigger('change');
             });
             $('#add_bulk_status_modal').on('hide.bs.modal', function () {
                 $('#update_bulk_lead_status').val('').trigger('change');
                 $('#lead_status_rejected1').val('').trigger('change');
                 $('#lead_status_notinterested1').val('').trigger('change');
                 $('#lead_status_irrelevant1').val('').trigger('change');
+                $('#lead_status_blocked1').val('').trigger('change');
+                $('#lead_status_dormant1').val('').trigger('change');
             });
 
             $('body').on('click', '#datatable .add_remarks', function () {
