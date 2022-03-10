@@ -32,7 +32,7 @@ class RetailRatesCalculationController extends Controller
                     if($weight_charges->weight_addition == 1){
                         $charges = RetailStandardRates::where('shipping_mode_id',$shipping_mode_id)->orderby('id','desc')->skip(1)->take(2)->first();
                         if($charges){
-                         $remaining_weight = intval($weight - $weight_charges->range_down);
+                         $remaining_weight = intval($weight - $charges->range_down);
                         }
                     }
                     if($shipping_mode_id == 1){
@@ -110,12 +110,11 @@ class RetailRatesCalculationController extends Controller
                 $weight_charges = RetailStandardRates::where('shipping_mode_id', $shipping_mode_id)->where('trax_box_id', $trax_box_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                 if($weight_charges->exists()){
                     $weight_charges = $weight_charges->first();
-
                     if($weight_charges->weight_addition == 1){
                         // = (intval($weight - $weight_charges->range_up) / $weight_charges->kg_range) + 1;
                         $charges = RetailStandardRates::where('shipping_mode_id',$shipping_mode_id)->where('trax_box_id', $trax_box_id)->orderby('id','desc')->skip(1)->take(2)->first();
                         if($charges){
-                            $remaining_weight = intval($weight - $weight_charges->range_down);
+                            $remaining_weight = intval($weight - $charges->range_down);
                         }
                     }
                     $consignee_city = City::find($destination_id);

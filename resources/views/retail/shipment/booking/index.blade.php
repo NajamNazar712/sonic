@@ -195,10 +195,10 @@
 {{--                                    </div>--}}
                                     <div class="col pt-5">
                                         <div class="form-group">
-                                            <input type="text" name="total_charges_without_gst" id="total_charges_without_gst" class="form-control" placeholder="Charges" disabled>
+                                            <input type="text" name="charges" id="charges" class="form-control" placeholder="Charges" disabled>
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" name="gst" id="gst" class="form-control" placeholder="GST" disabled>
+                                            <input type="text" name="discount" id="discount" class="form-control" placeholder="Discount" disabled>
                                         </div>
                                         <div class="form-group">
                                             <input type="text" name="total_charges" id="total_charges" class="form-control" placeholder="Total Charges" disabled>
@@ -746,8 +746,8 @@
                         //$('#weight_charges').val('');
                         // $('#cash_handling_charges').val('');
                         //$('#fuel_surcharge').val('');
-                        $('#total_charges_without_gst').val('');
-                        $('#gst').val('');
+                        $('#charges').val('');
+                        $('#discount').val('');
                         $('#total_charges').val('');
                         $('#insurance_amount').val('');
                         $('#cod').val('');
@@ -799,31 +799,52 @@
                 }
             });
             var city_id = null;
-          /*  $('#calculate_rates').on('click', function () {
-                if($('#weight_charges').val() != '' && $('#fuel_surcharge').val() != ''){
-                    var weight_charges = parseFloat($('#weight_charges').val().replace(/,/g, ''));
-                    // var cash_handling_charges = parseFloat($('#cash_handling_charges').val());
-                    var fuel_surcharge = parseFloat($('#fuel_surcharge').val().replace(/,/g, ''));
+            var trax_box = null;
+            $('#calculate_rates').on('click', function () {
+                   
+                var shipping_mode_id = $('#shipping_mode').val();
+                var business_category = $('#business_category').val();
+                var destination = $('#domestic_destination').val();
+                var weight = $('#weight').val();
+                var trax_box = $('#trax_box').val();
 
-                    // var total_charges_without_gst = weight_charges + cash_handling_charges + fuel_surcharge;
-                    var total_charges_without_gst = weight_charges + fuel_surcharge;
+                if(shipping_mode_id != '' && business_category != '' &&  destination != '' && weight != ''){
+                    if(shipping_mode_id == 5 && trax_box == ''){
+                        var error = 'Trax Box field is required';
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
                     $.ajax({
                         url: '{!! route('retail.shipment.book.calculate_rates') !!}',
                         method: 'POST',
                         data: {
-                            'total_charges_without_gst': total_charges_without_gst,
+                            'shipping_mode_id': shipping_mode_id,
+                            'business_category_id': business_category,
+                            'consignee_city_id': destination,
+                            'weight': weight,
+                            'trax_box': trax_box,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
                         .done(function (data) {
                             if(data.status){
-                                $('#total_charges_without_gst').val(data.details.total_charges_without_gst);
-                                $('#gst').val(data.details.gst);
-                                $('#total_charges').val(data.details.total_charges);
+                                $('#charges').val(data.details.charges);
+                                $('#discount').val(data.details.discount_amount);
+                                $('#total_charges').val(data.details.charges_with_discount);
                             }
                         });
                 }
-            });*/
+                else{
+                    var error = 'Shipping Mode,Business Category,Destination and Weight should not be empty';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+
+            });
 
             $('#print').on('click', function () {
                 if(shipment_ids.length > 0){

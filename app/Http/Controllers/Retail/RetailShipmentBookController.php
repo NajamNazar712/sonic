@@ -223,27 +223,27 @@ class RetailShipmentBookController extends Controller
         }
         $same_day_timing_id = NULL;
 
-        $request->weight_charges = (float)str_replace(',', '', $request->input('weight_charges'));
-        $request->fuel_surcharge = (float)str_replace(',', '', $request->input('fuel_surcharge'));
-       /* $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $request->weight);*/
-
+      /*  $request->weight_charges = (float)str_replace(',', '', $request->input('weight_charges'));
+        $request->fuel_surcharge = (float)str_replace(',', '', $request->input('fuel_surcharge'));*/
+        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $request->weight);
+       
         $city = City::find($pickup_city_id);
-        $gst = $city->zone->gst;
-        $total_charges_without_gst = $request->weight_charges + $request->fuel_surcharge;
-        $gst = $gst * $total_charges_without_gst;
-        $total_charges = $total_charges_without_gst + $gst;
+        //$gst = $city->zone->gst;
+       // $total_charges_without_gst = $request->weight_charges + $request->fuel_surcharge;
+        //$gst = $gst * $total_charges_without_gst;
+        //$total_charges = $total_charges_without_gst + $gst;
         $charges_mode_id = $request->input('charges_mode');
         if($shipping_mode_check == 3){
             $amount = str_replace(',', '', $request->input('cod'));
             $r_amount = 0;
             if($charges_mode_id == 2){
-                $amount = $amount + $total_charges;
+                $amount = $amount + $rates['charges_with_discount'];
             }
         }
         else{
             $amount = 0;
             if($charges_mode_id == 2){
-                $amount = $total_charges;
+                $amount = $rates['charges_with_discount'];
             }
             $r_amount = 0;
         }
@@ -377,12 +377,12 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->shipper_cnic = $request->shipper_cnic;
         $retail_shipment->shipper_address = $request->shipper_address;
         $retail_shipment->trax_box_id = $request->trax_box;
-        $retail_shipment->total_charges_without_gst = $total_charges_without_gst;
-        $retail_shipment->gst = $gst;
-        $retail_shipment->total_charges = $total_charges;
-        $retail_shipment->weight_charges = $request->weight_charges;
+      /*  $retail_shipment->total_charges_without_gst = ;
+        $retail_shipment->gst = $gst;*/
+        $retail_shipment->total_charges = $amount;
+        //$retail_shipment->weight_charges = $request->weight_charges;
 //        $retail_shipment->cash_handling_charges = $request->cash_handling_charges;
-        $retail_shipment->fuel_surcharge = $request->fuel_surcharge;
+        //$retail_shipment->fuel_surcharge = $request->fuel_surcharge;
         $retail_shipment->shipper_account_no = $shipper_info->id;
         $retail_shipment->weight = $estimated_weight;
         $retail_shipment->length = $length;
@@ -398,7 +398,7 @@ class RetailShipmentBookController extends Controller
             if($cash_deposit->exists()){
                 $cash_deposit = $cash_deposit->first();
                 $total_shipments = $cash_deposit->total_cn + 1;
-                $total_cash = $cash_deposit->total_cash + $total_charges;
+                $total_cash = $cash_deposit->total_cash + $amount;
                 $cash_deposit->total_cn = $total_shipments;
                 $cash_deposit->total_cash = $total_cash;
                 $cash_deposit->save();
@@ -408,7 +408,7 @@ class RetailShipmentBookController extends Controller
                 $cash_deposit->category = Auth::user()->category;
                 $cash_deposit->retail_user_id = Auth::id();
                 $cash_deposit->total_cn = 1;
-                $cash_deposit->total_cash = $total_charges;
+                $cash_deposit->total_cash = $amount;
                 $cash_deposit->save();
             }
 
@@ -432,22 +432,10 @@ class RetailShipmentBookController extends Controller
         }
     }
     public function calculate_rates(Request $request){
-        if($request->has('total_charges_without_gst')){
-            $pickup_address_id = session('pickup_address_id');
-            $user_shipping_info = UserShippingInfo::find($pickup_address_id);
-            $pickup_city_id = $user_shipping_info->city_id;
-            $city = City::find($pickup_city_id);
-            $total_charges_without_gst = $request->total_charges_without_gst;
-            $gst = $city->zone->gst;
-            $gst = $gst * $total_charges_without_gst;
-            $total_charges = $gst + $total_charges_without_gst;
-            $details = array();
-
-            $details['total_charges_without_gst'] = number_format(ROUND($total_charges_without_gst, 0, PHP_ROUND_HALF_DOWN));
-            $details['gst'] = number_format(ROUND($gst, 0, PHP_ROUND_HALF_DOWN));
-            $details['total_charges'] = number_format(ROUND($total_charges, 0, PHP_ROUND_HALF_DOWN));
-            return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
-        }
+        $pickup_city_id = Auth::user()->store->pickup_address->city_id;
+        $discount =  Auth::user()->store->discount;
+        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $request->weight);
+        return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
     }
 
     public function shipper_info(Request $request){
