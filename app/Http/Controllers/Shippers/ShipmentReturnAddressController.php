@@ -1075,7 +1075,7 @@ class ShipmentReturnAddressController extends Controller
             }
             if ($value) {
 
-                $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $user_id)->whereIn('shipper_status_id', $allowed_statuses);
+                $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $user_id)->whereIn('shipper_status_id', $allowed_statuses)->whereNotNull('return_address_id');
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
                     if($shipment->shipper_status_id == 20){
@@ -1116,7 +1116,7 @@ class ShipmentReturnAddressController extends Controller
             }
             if ($value) {
 
-                $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $user_id);
+                $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $user_id)->whereNotNull('return_address_id');
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
                     if($shipment->return_address_id == null){
