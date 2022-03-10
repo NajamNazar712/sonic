@@ -42,7 +42,7 @@ class ShortOfBusinessShippers extends Command
     public function handle()
     {
         $to = Carbon::now()->format("Y-m-d");
-        if(Carbon::today()->format('D') == 'Sun' || Carbon::yesterday()->format('D') != 'Sun' || Carbon::now()->subDays(3)->format('D') != 'Sun'){
+        if(Carbon::today()->format('D') == 'Sun' || Carbon::yesterday()->format('D') == 'Sun' || Carbon::now()->subDays(3)->format('D') == 'Sun'){
             $from = Carbon::now()->subDays(4)->format("Y-m-d");
         } else{
             $from = Carbon::now()->subDays(3)->format("Y-m-d");
