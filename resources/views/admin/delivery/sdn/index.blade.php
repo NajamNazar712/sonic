@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
-@section('title','Station Deposit Notes')
+@section('title','Outstanding Station Deposit Notes')
 
 @section('content')
     <h1 class="mb-1">
-        Station Deposit Notes
+        Outstanding Station Deposit Notes
     </h1>
 
     <div class="card">

@@ -312,7 +312,7 @@
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 44, 47, 48, 49, 126, 262, 441,464,495,496,497,531, 566,675], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 105, 44, 47, 48, 49, 126, 262, 441,464,495,496,497,531, 566,675], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-motorcycle"></i>Last Mile</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 262, 441,464,531], session('permissions'))) !== 0)
@@ -375,10 +375,7 @@
                                             </li>
                                         @endif
 
-                                    @if (session('role_id') == 1 || in_array(42, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.delivery.sdn.index') }}">Station Deposit
-                                                Notes</a></li>
-                                    @endif
+
 
                                     @if (session('role_id') == 1 || in_array(203, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.delivery.fake_status.index') }}">Remove Fake Status</a></li>
@@ -466,7 +463,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243,454,455,509,625], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([42, 52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243,454,455,509,625], session('permissions'))) !== 0)
 
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-money"></i>Financials</span></a>
                     <ul class="menu-content">
@@ -532,12 +529,17 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([52, 54, 167], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([42, 52, 54, 167], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Recovery</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(52, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.finance.outstanding_sdn.index') }}">SDN</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(42, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.delivery.sdn.index') }}">Station Deposit
+                                                Notes</a></li>
                                     @endif
 
                                     @if (session('role_id') == 1 || in_array(54, session('permissions')))
