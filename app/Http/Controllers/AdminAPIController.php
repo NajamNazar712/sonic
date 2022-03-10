@@ -6589,12 +6589,30 @@ class AdminAPIController extends Controller
 
     public function check_bolt_version(Request $request)
     {
-        $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
-        if($global_settings->exists()){
-            $global_settings = $global_settings->first();
-            return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value]);
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if ($admin) {
+            $permissions = array();
+            $wms_user_permissions = DB::table('wms_admin_role_module_permissions')->where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
+            $user_permissions = AdminRoleModulePermission::where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
+            $permissions['cargo_user'] = (in_array($admin->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
+            if ($admin->designation_id) {
+                $user_department = $admin->Edesignation->department_id;
+            } else {
+                $user_department = $admin->role->department_id;
+            }
+            $permissions['sales_person'] = ($user_department == 7) ? 1 : 0;
+            $permissions['pick_list_user'] = (in_array(23, $wms_user_permissions)) ? 1 : 0;
+            $permissions['daily_visit_report'] = (in_array(264, $user_permissions)) ? 1 : 0;
+            $permissions['daily_visit_form'] = (in_array(265, $user_permissions)) ? 1 : 0;
+            $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
+            if($global_settings->exists()){
+                $global_settings = $global_settings->first();
+                return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value,'permissions' => $permissions]);
+            }else{
+                return response()->json(['status' => 0, 'app_version' => 24,'permissions' => $permissions]);
+            }
         }
-        return response()->json(['status' => 0, 'app_version' => 24]);
     }
 
     public function daily_visit_index()
@@ -6651,7 +6669,7 @@ class AdminAPIController extends Controller
                     $daily_visit->location_image = $filename;
                     $daily_visit->save();
                 }
-                return response()->json(['status' => 0, 'message' => 'Daily Visit Has been Uploaded']);
+                return response()->json(['status' => 0, 'message' => 'Daily Visit Has been Submitted']);
             }
             catch (Exception $ex){
                 return response()->json(['status' => 1, 'message' => 'Error ', 'errors' => $ex]);
