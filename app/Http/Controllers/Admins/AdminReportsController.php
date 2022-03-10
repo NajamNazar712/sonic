@@ -7479,6 +7479,18 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('dn_no_excel', function ($entry) {
+
+                $dn_no = DB::connection('reports')
+                    ->table('delivery_notes')
+                    ->where('rider_id', $entry->rider_id)
+                    ->count();
+                if ($dn_no > 0) {
+                    return $dn_no;
+                } else {
+                    return 0;
+                }
+            })
             ->addColumn('dncc_amount', function ($entry) {
                 $amount = DB::connection('reports')
                     ->table('delivery_notes')
@@ -7562,6 +7574,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to') && $request->get('search_cutt_off')) {
 
             if ($request->get('search_cutt_off') == 1) {
+
                 $from = $request->get('search_from');
                 $to = $request->get('search_to');
                 $from = $from . ' ' . '20:00:00';

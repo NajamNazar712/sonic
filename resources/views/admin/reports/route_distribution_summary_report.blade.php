@@ -82,8 +82,8 @@
                         <fieldset class="form-group">
 
                             <select name="search_cutt_off" id="search_cutt_off" class="form-control">
-                                <option value="{{'1'}}" selected>8pm to 2pm</option>
-                                <option value="{{'2'}}">2:01pm to 7:59pm</option>
+{{--                                <option value="{{'1'}}" selected>8pm to 2pm</option>--}}
+{{--                                <option value="{{'2'}}">2:01pm to 7:59pm</option>--}}
                             </select>
 
                         </fieldset>
@@ -212,11 +212,11 @@
             var confirmation_pending_shipments = 0;
             var confirmation_pending_shipments_per = 0;
 
-            // $('#search_cutt_off').prepend('<option value="" selected="selected"></option>').select2({
-            //     // placeholder:'Select Zone',
-            //     width:'100%',
-            //     allowClear:true
-            // });
+            $('#search_cutt_off').prepend('<option value="1">8pm to 2pm</option><br><option value="2">2:01pm to 7:59pm</option>').select2({
+                // placeholder:'Select Zone',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Zone',
                 width:'100%',
@@ -315,7 +315,7 @@
                                 row.push(index + 1);
                                 row.push(values.courier_name);
                                 row.push(values.rider_type);
-                                row.push(values.dn_no);
+                                row.push(values.dn_no_excel);
                                 row.push(values.dncc_amount);
                                 row.push(values.hub);
                                 row.push(values.shipments_count);
