@@ -86,6 +86,11 @@
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{route('cod.return.confirmed.index')}}">Confirmed</a></li>
                     </ul>
+                    @if(session('shipment_return_address_change') == 1)
+                        <ul class="menu-content">
+                            <li><a class="menu-item" href="{{ route('cod.shipment.return_address_change.index') }}">Return Address Change</a></li>
+                        </ul>
+                    @endif
                     <ul class="menu-content">
                         <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Return Sheet</span></a>
                             <ul class="menu-content">
@@ -95,9 +100,7 @@
                             </ul>
                         </li>
                     </ul>
-                    @if(session('shipment_return_address_change') == 1)
-                        <li><a class="menu-item" href="{{ route('cod.shipment.return_address_change.index') }}">Return Address Change</a></li>
-                    @endif
+
                 </li>
             @endif
 
