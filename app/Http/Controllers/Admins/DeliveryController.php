@@ -21,6 +21,7 @@ use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectDeliveryNote;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionDeliveryNote;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
 use App\Http\Models\Admin\ReplacementToRegularLog;
@@ -1514,6 +1515,19 @@ class DeliveryController extends Controller
             }
             $category = $rider->rider_category->name;
             $route_name = $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )';
+
+            //HBL Konnect Integration
+            $hbl_transactions_amount = 0;
+            $hbl_transactions_delivery_note = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $request->id);
+            if($hbl_transactions_delivery_note->exists()){
+                $hbl_transactions_delivery_note = $hbl_transactions_delivery_note->first();
+                $hbl_transactions_amount = $hbl_transactions_delivery_note->transactions_amount;
+                $cash_amount = $hbl_transactions_delivery_note->cash_amount;
+            }
+            else{
+                $cash_amount = $delivery_note->recived_cod_amount;
+            }
+            //HBL Konnect Integration
             $main_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -1526,7 +1540,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
-                            <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
+                            <td colspan="2" rowspan="9" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
@@ -1550,6 +1564,14 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Total Collection Amount</strong></td>
                             <td>Rs ' . number_format($total_cod_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>HBL Transactions Amount</strong></td>
+                            <td>Rs ' . number_format($hbl_transactions_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Cash Amount</strong></td>
+                            <td>Rs ' . number_format($cash_amount) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Total Shipments</strong></td>
