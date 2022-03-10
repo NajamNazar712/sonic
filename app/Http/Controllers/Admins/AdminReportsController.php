@@ -7468,7 +7468,11 @@ class AdminReportsController extends Controller
         $datatables = Datatables::of($route_distribution_summary)
             ->setTotalRecords($count)
             ->addColumn('dn_no', function ($entry) {
-                $dn_no = DB::connection('reports')->table('delivery_notes')->where('rider_id', $entry->rider_id)->count();
+
+                $dn_no = DB::connection('reports')
+                    ->table('delivery_notes')
+                    ->where('rider_id', $entry->rider_id)
+                    ->count();
                 if ($dn_no > 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no . '</button>';
                 } else {
@@ -7479,7 +7483,7 @@ class AdminReportsController extends Controller
                 $amount = DB::connection('reports')
                     ->table('delivery_notes')
                     ->where('rider_id', $entry->rider_id)
-                    ->where('delivery_notes.cash_collection_status','!=',0)
+                    ->where('delivery_notes.received_cod_amount', '!=', 0)
                     ->sum('total_cod_amount');
 //                $dncc_amount = DB::connection('reports')
 //                    ->table('delivery_notes as dn')
@@ -7557,12 +7561,11 @@ class AdminReportsController extends Controller
 
         if ($request->get('search_from') && $request->get('search_to') && $request->get('search_cutt_off')) {
 
-            if ($request->get('search_cutt_off') == 1)
-            {
+            if ($request->get('search_cutt_off') == 1) {
                 $from = $request->get('search_from');
                 $to = $request->get('search_to');
-                $from = $from.' '.'20:00:00';
-                $to = $to.' '.'13:59:59';
+                $from = $from . ' ' . '20:00:00';
+                $to = $to . ' ' . '14:00:00';
 //            $from1 = $from->toDateString();
 //            $to1 = $to->toDateString();
 //            dd($from,$to);
@@ -7570,15 +7573,14 @@ class AdminReportsController extends Controller
 //            $d = DeliveryNote::whereBetween('delivery_notes.created_at', [$from, $to])->get();
 //            dd($d);
 //            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
-                $datatables = $datatables->whereBetween('delivery_notes.created_at',[$from,$to]);
+                $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
             }
-            if ($request->get('search_cutt_off') == 2)
-            {
+            if ($request->get('search_cutt_off') == 2) {
 
                 $from = $request->get('search_from');
                 $to = $request->get('search_to');
-                $from = $from.' '.'14:01:00';
-                $to = $to.' '.'19:59:00';
+                $from = $from . ' ' . '14:01:00';
+                $to = $to . ' ' . '19:59:00';
 //            $from1 = $from->toDateString();
 //            $to1 = $to->toDateString();
 //            dd($from,$to);
@@ -7586,7 +7588,7 @@ class AdminReportsController extends Controller
 //            $d = DeliveryNote::whereBetween('delivery_notes.created_at', [$from, $to])->get();
 //            dd($d);
 //            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
-                $datatables = $datatables->whereBetween('delivery_notes.created_at',[$from,$to]);
+                $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
             }
         }
 
