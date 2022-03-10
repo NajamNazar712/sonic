@@ -10990,6 +10990,17 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function check_bolt_version(Request $request)
+    {
+        $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
+        if($global_settings->exists()){
+            $global_settings = $global_settings->first();
+            return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value]);
+        }else{
+            return response()->json(['status' => 0, 'app_version' => 24]);
+        }
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){

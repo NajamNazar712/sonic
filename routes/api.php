@@ -126,7 +126,7 @@ Route::name('api.')->group(function () {
         });
 
 		Route::middleware('RiderAPIToken')->group(function () {
-            Route::get('check_app_version', 'AdminAPIController@check_bolt_version')->name('check_app_version');
+            Route::get('check_app_version', 'Rider\RiderAPIController@check_bolt_version')->name('check_app_version');
             Route::prefix('pickup')->name('pickup.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@pickup_summary')->name('pickup_summary');
                 Route::post('pick', 'Rider\RiderAPIController@pickup_pick')->name('pickup_pick');
