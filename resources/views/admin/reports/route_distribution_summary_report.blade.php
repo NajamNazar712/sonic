@@ -297,6 +297,9 @@
 
                             head.push('S.No');
                             head.push('Rider Name');
+                            head.push('Rider Type');
+                            head.push('Delivery Note');
+                            head.push('DNCC Amount');
                             head.push('Hub');
                             head.push('Total Out For Delivery');
                             head.push('Pending');
@@ -311,6 +314,9 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.courier_name);
+                                row.push(values.rider_type);
+                                row.push(values.dn_no);
+                                row.push(values.dncc_amount);
                                 row.push(values.hub);
                                 row.push(values.shipments_count);
                                 row.push(values.pending_shipments);
@@ -326,6 +332,9 @@
 
                             footer.push('-');
                             footer.push('Total');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
                             footer.push('');
                             footer.push(shipments_count.toFixed(2));
                             footer.push(pending_shipments.toFixed(2));

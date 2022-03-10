@@ -7566,28 +7566,16 @@ class AdminReportsController extends Controller
                 $to = $request->get('search_to');
                 $from = $from . ' ' . '20:00:00';
                 $to = $to . ' ' . '14:00:00';
-//            $from1 = $from->toDateString();
-//            $to1 = $to->toDateString();
-//            dd($from,$to);
-//            $cut_off_time = Carbon::parse($from)->format('H:i:s');
-//            $d = DeliveryNote::whereBetween('delivery_notes.created_at', [$from, $to])->get();
-//            dd($d);
-//            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+
                 $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
             }
-            if ($request->get('search_cutt_off') == 2) {
+            elseif ($request->get('search_cutt_off') == 2) {
 
                 $from = $request->get('search_from');
                 $to = $request->get('search_to');
                 $from = $from . ' ' . '14:01:00';
                 $to = $to . ' ' . '19:59:00';
-//            $from1 = $from->toDateString();
-//            $to1 = $to->toDateString();
-//            dd($from,$to);
-//            $cut_off_time = Carbon::parse($from)->format('H:i:s');
-//            $d = DeliveryNote::whereBetween('delivery_notes.created_at', [$from, $to])->get();
-//            dd($d);
-//            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+
                 $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
             }
         }
