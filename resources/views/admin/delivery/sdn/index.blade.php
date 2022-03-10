@@ -554,6 +554,25 @@
         </div>
     </div>
 
+    <div class="modal fade" id="status_logs_modal" data-backdrop="static" role="dialog"
+         aria-labelledby="status_logs_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="status_logs_modal_title">SDN <span></span></h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -1156,50 +1175,51 @@
             $('#datatable tbody').on('click', 'tr td.dncc_link button', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 if (id) {
-                }
-                $.ajax({
-                    url: '{!! route('admin.delivery.sdn.dn') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'sdn_id': id,
-                    }
-                })
-                    .done(function (data) {
-                        if (data.status == 1) {
-                            var notes = '<div>PNCC Number(s) :</div>';
-
-                            if (data.pickup_notes) {
-                                $.each(data.pickup_notes, function (index, value) {
-                                    notes += '<u><a href="javascript:void(0);" class="pncc_print" dnid="' + value + '">' + value + '</a></u><br>';
-                                });
-                            }
-                            $('#pncc_modal .modal-body').html('');
-                            $('#pncc_modal').modal('show');
-                            $('#pncc_modal .modal-body').html(notes);
-                        } else if (data.status == 2) {
-                            var notes = '<div>DNCC Number(s) :</div>';
-
-                            if (data.delivery_notes) {
-                                $.each(data.delivery_notes, function (index, value) {
-                                    notes += '<u><a href="javascript:void(0);" class="dncc_print" dnid="' + value + '">' + value + '</a></u><br>';
-                                });
-                            }
-                            $('#dncc_modal .modal-body').html('');
-                            $('#dncc_modal').modal('show');
-                            $('#dncc_modal .modal-body').html(notes);
-                        } else if (data.status == 0) {
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        } else {
-                            toastr.error('Something went wrong!', 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
+                    $.ajax({
+                        url: '{!! route('admin.delivery.sdn.dn') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'sdn_id': id,
                         }
-                    });
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                var notes = '<div>PNCC Number(s) :</div>';
+
+                                if (data.pickup_notes) {
+                                    $.each(data.pickup_notes, function (index, value) {
+                                        notes += '<u><a href="javascript:void(0);" class="pncc_print" dnid="' + value + '">' + value + '</a></u><br>';
+                                    });
+                                }
+                                $('#pncc_modal .modal-body').html('');
+                                $('#pncc_modal').modal('show');
+                                $('#pncc_modal .modal-body').html(notes);
+                            } else if (data.status == 2) {
+                                var notes = '<div>DNCC Number(s) :</div>';
+
+                                if (data.delivery_notes) {
+                                    $.each(data.delivery_notes, function (index, value) {
+                                        notes += '<u><a href="javascript:void(0);" class="dncc_print" dnid="' + value + '">' + value + '</a></u><br>';
+                                    });
+                                }
+                                $('#dncc_modal .modal-body').html('');
+                                $('#dncc_modal').modal('show');
+                                $('#dncc_modal .modal-body').html(notes);
+                            } else if (data.status == 0) {
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } else {
+                                toastr.error('Something went wrong!', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                }
+
 
             });
             $('#datatable tbody').on('click', 'tr td.adjustment_ref button', function () {
@@ -2185,6 +2205,45 @@
             $('#track_form').bind('submit', function (e) {
                 e.preventDefault();
                 table.draw();
+            });
+
+            $('#datatable tbody').on('click', 'tr td button.view_logs', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+                $('#status_logs_modal .modal-body').html('');
+                $('#status_logs_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.sdn.status_logs') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'sdn_id': id
+                    }
+                })
+                    .done(function (data) {
+
+                        if (data.status == 1) {
+                            $('#status_logs_modal_title span').text(data.sdn_id);
+                            var html = '<div class="row"><div class="col-12"><table class="table table-sm table-bordered border"><thead><tr><th class="color primary text-center">Status</th><th class="color primary">Updated By</th><th class="color primary">Updated At</th></tr></thead><tbody>';
+
+
+                            if (data.logs) {
+                                $.each(data.logs, function (index, value) {
+                                    html += '<tr><td>'+ value.status +'</td><td>'+ value.updated_by +'</td><td>'+ value.date +'</td></tr>';
+                                });
+                            }
+                            html += '</tbody></table></div></div>';
+                            $('#status_logs_modal .modal-body').html(html);
+                        }
+                        else{
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
             });
         });
     </script>

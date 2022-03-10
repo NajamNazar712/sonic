@@ -1234,6 +1234,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('adjustment/add','Admins\DeliveryController@sdn_adjustment_add')->name('adjustment.add');
             Route::get('petty_cash_detail','Admins\DeliveryController@sdn_petty_cash_detail')->name('petty_cash_detail');
 
+            Route::post('status_logs','Admins\DeliveryController@sdn_status_logs')->name('status_logs');
+
             Route::prefix('retail')->name('retail.')->group(function() {
                 Route::get('{id}/details','Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
                 Route::get('{id}/ajax','Admins\Retail\RetailCompletedDeliveries@sdn_details_ajax')->name('ajax');
