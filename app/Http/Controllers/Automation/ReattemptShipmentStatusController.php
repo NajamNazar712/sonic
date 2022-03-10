@@ -38,7 +38,7 @@ class ReattemptShipmentStatusController extends Controller
                 }
                 $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
                 if($journey){
-                    if(in_array($journey->status_reason_id, [50, 67, 69, 75])){
+                    if(in_array($journey->status_reason_id, [12, 50, 67, 69, 75])){
                         return true;
                     }
                 }
