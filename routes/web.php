@@ -174,6 +174,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('', 'Shippers\ShipmentOriginChangeController@shipments_origin_index')->name('index');
             Route::post('store', 'Shippers\ShipmentOriginChangeController@shipments_origin_store')->name('store');
         });
+
+        Route::prefix('return_address_change')->name('return_address_change.')->group(function () {
+            Route::get('', 'Shippers\ShipmentReturnAddressController@return_address_change_excel_index')->name('index');
+            Route::post('', 'Shippers\ShipmentReturnAddressController@return_address_change_excel_store')->name('store');
+        });
     });
 
     Route::prefix('dispute')->name('dispute.')->group(function (){
@@ -3208,6 +3213,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_reason_mandatory_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@return_reason_mandatory_list')->name('list');
             Route::post('store', 'Admins\GlobalSettingsController@return_reason_mandatory_store')->name('store');
+        });
+
+        Route::prefix('return_shipments_address')->name('return_shipments_address.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_shipments_address_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@return_shipments_address_store')->name('store');
         });
 
     });

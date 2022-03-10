@@ -52,6 +52,11 @@
                         @if(session('shipper_return_address') == 1)
                             <li><a class="menu-item" href="{{ route('cod.shipment.book.return_address.excel.index') }}">Return Address</a></li>
                         @endif
+
+                        @if(session('shipment_return_address_change') == 1)
+                            <li><a class="menu-item" href="{{ route('cod.shipment.return_address_change.index') }}">Return Address Change</a></li>
+                        @endif
+
                         {{--						<li><a class="menu-item" href="{{ route('cod.consolidation.history.index') }}">Consolidation History</a></li>--}}
                     </ul>
                 </li>
