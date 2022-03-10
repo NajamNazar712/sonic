@@ -1079,8 +1079,15 @@ class ShipmentReturnAddressController extends Controller
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
                     if($shipment->shipper_status_id == 20){
+                        $return_city = NULL;
                         $current_return_city = $shipment->return_address->city_id;
-                        $return_city = UserShippingInfo::find($return_address_id)->city_id;
+                        $return_address = UserShippingInfo::find($return_address_id);
+                        if($return_address){
+                            $return_city = $return_address->city_id;
+                        }
+                        else{
+                            return false;
+                        }
                         if($current_return_city == $return_city){
                             return true;
                         }
@@ -1117,7 +1124,10 @@ class ShipmentReturnAddressController extends Controller
                     }
                     $current_return_city = $shipment->return_address->city_id;
 
-                    $return_city = UserShippingInfo::find($return_address_id)->city_id;
+                    $return_city = UserShippingInfo::find($return_address_id);
+                    if($return_city){
+                        $return_city = $return_city->city_id;
+                    }
                     if($current_return_city == $return_city){
                         return true;
                     }
