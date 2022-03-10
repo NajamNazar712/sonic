@@ -6942,6 +6942,7 @@ class DeliveryController extends Controller
                 foreach ($slips as $slip) {
                     $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
                     $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;
+                    $sorted_array[$slip->id]['code'] = $slip->id;
                     $sorted_array[$slip->id]['amount'] = $slip->amount;
                     $sorted_array[$slip->id]['created_at'] = Carbon::parse($slip->created_at)->toDateTimeString();
                     $sorted_array[$slip->id]['uploaded_by'] = ($slip->uploaded_by != '') ? $slip->uploaded_by_admin->name : '';

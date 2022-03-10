@@ -291,6 +291,7 @@
                         <tr role="row" class="bg-primary white">
 
                             <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Slip Code</th>
                             <th class="border-primary border-darken-1">Date</th>
                             <th class="border-primary border-darken-1">Bank Name</th>
                             <th class="border-primary border-darken-1">Amount</th>
@@ -1488,6 +1489,7 @@
                                             return '';
                                         }
                                     },
+                                    {name: 'code', class: 'align-middle code form-group'},
                                     {name: 'date', class: 'align-middle date date-col-width form-group'},
                                     {name: 'bank_name', class: 'align-middle bank_name form-group'},
                                     {name: 'amount', class: 'align-middle expense_amount form-group'},
@@ -1508,7 +1510,7 @@
                             });
 
                             $.each(data.slips, function (index, value) {
-                                deposit_slip_table.row.add([0, value.date, value.bank, value.amount, value.created_at, value.uploaded_by, value.image]);
+                                deposit_slip_table.row.add([0, value.code ,value.date, value.bank, value.amount, value.created_at, value.uploaded_by, value.image]);
                                 deposit_slip_table.draw(true);
                             });
                         }
