@@ -212,7 +212,23 @@
                                                             <h5 class="mb-0">{{$approvers->admin}} {{$approvers->percentage == '' ? '' : ' ('.$approvers->percentage.')'}}</h5>
                                                     </td>
                                                 </tr>
+                                                @if($approvers->percentage != '')
+                                                    <tr>
+                                                        <th scope="row">Approval Percentage</th>
+                                                        <td class="name">
+                                                                <h5 class="mb-0">{{$approvers->percentage}}</h5>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Approve Status</th>
+                                                        <td class="name">
+                                                                <h5 class="mb-0">Approved</h5>
+                                                        </td>
+                                                    </tr>
+                                                
                                             @endif
+                                            @endif
+                                            
                                             </tbody>
                                         </table>
                                         <div class="row justify-content-center">
@@ -1061,6 +1077,7 @@
                 </div>
 
                 <div class="modal-body  text-center">
+                    @if ($special_request_agent == null || $special_request_agent != session('user_id'))
                     <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
                         @csrf
                         <input type="hidden" name="request_id" value="{{$crm_details->id}}">
@@ -1100,6 +1117,8 @@
                             </div>
                         </div>
                     </form>
+                    @endif
+
                     @if ($special_request_agent != null)
                     <hr>
                     <form class="mb-2" action="{{route('admin.crm.request.special_request_adjusted')}}" method="post">
