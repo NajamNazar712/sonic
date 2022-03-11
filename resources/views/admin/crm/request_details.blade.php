@@ -214,7 +214,7 @@
                                                 </tr>
                                                 @if($approvers->percentage != '')
                                                     <tr>
-                                                        <th scope="row">Approval Percentage</th>
+                                                        <th scope="row">Adjusted Percentage</th>
                                                         <td class="name">
                                                                 <h5 class="mb-0">{{$approvers->percentage}}</h5>
                                                         </td>
