@@ -291,8 +291,10 @@
                                                     </form>
                                                 </div>
                                             @endif
-                                            @if (session('role_id') == 1 || in_array(523, session('permissions')))
-                                                <button id="special_request" class="btn btn-primary ml-1"><span class="d-none d-lg-block">Special Request</span></button>
+                                            @if ($crm_details['case_nature_id'] == 4)
+                                                @if (session('role_id') == 1 || in_array(523, session('permissions')))
+                                                    <button id="special_request" class="btn btn-primary ml-1"><span class="d-none d-lg-block">Special Request</span></button>
+                                                @endif
                                             @endif
 
                                         </div>
