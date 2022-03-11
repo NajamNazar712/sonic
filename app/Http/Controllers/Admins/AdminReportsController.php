@@ -7407,12 +7407,19 @@ class AdminReportsController extends Controller
         $zones = DB::connection('reports')->table('zones')->select('id', 'name')->get();
         $riders_cat = OperationRidersCategory::all();
         $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
-//        dd();
+
         return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders, 'riders_cat' => $riders_cat]);
     }
 
     public function route_distribution_list(Request $request)
     {
+        $from = $request->get('search_from');
+        $to = $request->get('search_to');
+        $from = $from.' '.'20:00:00';
+        $to = $to.' '.'14:00:00';
+        $to = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+//        dd($to,$from);
+        $cutt_off = $request->get('search_cutt_off');
 
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 198);
@@ -7467,23 +7474,49 @@ class AdminReportsController extends Controller
 
         $datatables = Datatables::of($route_distribution_summary)
             ->setTotalRecords($count)
-            ->addColumn('dn_no', function ($entry) {
+            ->addColumn('dn_no', function ($entry) use ($from,$to,$cutt_off) {
+                if ($cutt_off == 1) {
+                    $cut_off_time_start = '20:00:00';
+                    $cut_off_time_end = '14:00:00';
+                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
+                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
 
                 $dn_no = DB::connection('reports')
                     ->table('delivery_notes')
                     ->where('rider_id', $entry->rider_id)
-                    ->count();
-                if ($dn_no > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no . '</button>';
+                    ->whereBetween('delivery_notes.created_at', [$from, $to])
+                    ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start);
+
+                $dn_no1 = DB::connection('reports')
+                    ->table('delivery_notes')
+                    ->where('rider_id', $entry->rider_id)
+                    ->whereBetween('delivery_notes.created_at', [$from, $to])
+                    ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
+                    ->union($dn_no)
+                    ->get();
+                $dn_no_count = count($dn_no1);
+                if ($dn_no_count > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no_count . '</button>';
                 } else {
                     return 0;
                 }
+            }
             })
-            ->addColumn('dn_no_excel', function ($entry) {
+            ->addColumn('dn_no_excel', function ($entry) use ($from,$to,$cutt_off) {
+                if ($cutt_off== 1) {
 
+                    $from = $from . ' ' . '20:00:00';
+                    $to = $to . ' ' . '14:00:00';
+                }
+                elseif ($cutt_off== 2)
+                {
+                    $from = $from . ' ' . '14:01:00';
+                    $to = $to . ' ' . '19:59:00';
+                }
                 $dn_no = DB::connection('reports')
                     ->table('delivery_notes')
                     ->where('rider_id', $entry->rider_id)
+                    ->whereBetween('delivery_notes.created_at', [$from, $to])
                     ->count();
                 if ($dn_no > 0) {
                     return $dn_no;
@@ -7491,23 +7524,23 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             })
-            ->addColumn('dncc_amount', function ($entry) {
+            ->addColumn('dncc_amount', function ($entry) use ($from,$to,$cutt_off) {
+                if ($cutt_off== 1) {
+
+                    $from = $from . ' ' . '20:00:00';
+                    $to = $to . ' ' . '14:00:00';
+                }
+                elseif ($cutt_off== 2)
+                {
+                    $from = $from . ' ' . '14:01:00';
+                    $to = $to . ' ' . '19:59:00';
+                }
                 $amount = DB::connection('reports')
                     ->table('delivery_notes')
                     ->where('rider_id', $entry->rider_id)
                     ->where('delivery_notes.received_cod_amount', '!=', 0)
+                    ->whereBetween('delivery_notes.created_at', [$from, $to])
                     ->sum('total_cod_amount');
-//                $dncc_amount = DB::connection('reports')
-//                    ->table('delivery_notes as dn')
-//                    ->LeftJoin('delivery_note_station_deposit_notes as dnsdn', 'dn.id', '=', 'dnsdn.delivery_note_id')
-//                    ->LeftJoin('station_deposit_notes as sdn', 'dnsdn.station_deposit_note_id', '=', 'sdn.id')
-//                    ->where('dn.rider_id', 1)
-//                    ->where('sdn.sdn_amount', '>' ,0)
-//                     ->select('sdn.sdn_amount','dn.rider_id')
-//                    ->orderby('dn.id','desc')
-//                    ->groupby('dn.id')
-//                    ->get();
-//                dd($dncc_amount);
 
                 return $amount;
 
@@ -7564,11 +7597,6 @@ class AdminReportsController extends Controller
         if ($search_rider_cat = $request->get('search_rider_cat')) {
             $datatables->where('r.operation_rider_id', $search_rider_cat);
         }
-//        if ($request->get('search_from') && $request->get('search_to')) {
-//            $from = $request->get('search_from');
-//            $to = $request->get('search_to');
-//            $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
-//        }
 
 
         if ($request->get('search_from') && $request->get('search_to') && $request->get('search_cutt_off')) {
