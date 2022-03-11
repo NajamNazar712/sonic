@@ -7501,6 +7501,21 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             }
+                if ($cutt_off == 2) {
+                    $cut_off_time_start = '14:01:00';
+                    $cut_off_time_end = '19:59:00';
+                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
+                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
+
+                    $dn_no = DB::connection('reports')
+                        ->table('delivery_notes')
+                        ->where('rider_id', $entry->rider_id)
+                        ->whereBetween('delivery_notes.created_at', [$from, $to])
+                        ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start)
+                        ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
+                        ->get();
+                    dd($dn_no);
+                }
             })
             ->addColumn('dn_no_excel', function ($entry) use ($from,$to,$cutt_off) {
                 if ($cutt_off== 1) {
