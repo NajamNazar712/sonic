@@ -111,7 +111,7 @@ class Kernel extends ConsoleKernel
         
         'App\Console\Commands\RCPSMSToConsigneeReattempt',
         'App\Console\Commands\CRMCount',
-//        '\App\Console\Commands\ReattemptRatioCalculate',
+        '\App\Console\Commands\ReattemptRatioCalculate',
     ];
 
     /**

@@ -112,10 +112,6 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            var con_city = $('#consignee_city').val();
-
-
-           
 
             var city = @json($shipment['consignee_city_id']);
             var name = @json($shipment['consignee_name']);
@@ -131,10 +127,9 @@
                 placeholder: 'Consignee*'
             }).bind('change', function () {
                 if(this.value == 2){
-
+                    $('#consignee_city').val(city).trigger('change');
                     var hiddenInput = $('<input/>' , {type : 'hidden' , name: 'consignee_city' , value : $('#consignee_city').val(), id : 'new_city' });
                     $('#intercept_form').append( hiddenInput );  //append the hidden field with same name and value from the dropdown field
-                    $('#consignee_city').val(city).trigger('change');
                     $('#consignee_city').addClass('disabled')  //disable class
                         .prop({'name' : 'new_consignee_city'  , disabled : true}); //change name and disbale
                     $( "#consignee_name" ).val(name);

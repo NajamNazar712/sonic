@@ -154,8 +154,8 @@ class ShipmentsJourneyController extends Controller
             ShipperShipmentsSubscription::where('shipment_id', $shipment_id)->delete();
         }
 
-        /*if($shipper_status_id == 52){
+        if($shipper_status_id == 52){
             ReattemptShipmentStatusController::auto_reattempt_status_for_max_delivery_ratio($shipment_id);
-        }*/
+        }
     }
 }
