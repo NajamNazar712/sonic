@@ -220,7 +220,7 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th scope="row">Approve Status</th>
+                                                        <th scope="row">Special Request Status</th>
                                                         <td class="name">
                                                                 <h5 class="mb-0">Approved</h5>
                                                         </td>
@@ -1077,7 +1077,47 @@
                 </div>
 
                 <div class="modal-body  text-center">
-                    @if ($special_request_agent == null || $special_request_agent != session('user_id'))
+                    @if ($special_request_agent == null)
+                    <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="request_id" value="{{$crm_details->id}}">
+
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Admin</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @if(!empty($approvers))
+                                   
+                                @endif
+                                @foreach ($sepcial_request_admins as $special_admin)
+                                    <tr>
+                                        <td>
+                                            <div class="custom-control custom-checkbox">
+                                                @if(!empty($approvers))
+                                                <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" {{$special_admin->id == $approvers->id ? 'checked' : ' '}}>
+                                                @else
+                                                    <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" >
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>{{$special_admin->name}}</td>
+                                    </tr>
+                                @endforeach
+                            
+                            </tbody>
+                        </table>
+
+                        <div class="row justify-content-center mt-2 ml-2">
+                            <div class="col-4">
+                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Request</button>
+                            </div>
+                        </div>
+                    </form>
+                    @elseif($special_request_agent != session('id'))
                     <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
                         @csrf
                         <input type="hidden" name="request_id" value="{{$crm_details->id}}">
