@@ -7649,14 +7649,11 @@ class AdminReportsController extends Controller
 //    delivery_note fetching
     public function get_dn_no(Request $request)
     {
-//        $delivery_notes = deliverynote::where('rider_id', $request->dn_id)->get();
-//        $dn_no = $request->dn_no;
         $dn_no = $request->input('dn_no');
-//        dd($dn_no);
+
         $html = "";
         foreach ($dn_no as $dn) {
-//            $html .= '<table><tr>ID<th></th></tr><tbody><TR><td>'.$dn->id.'</td></TR></tbody></table>';
-
+            
             $html .= '<u>' . $dn . '</u><br>';
         }
 
