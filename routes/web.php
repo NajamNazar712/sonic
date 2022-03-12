@@ -174,6 +174,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('', 'Shippers\ShipmentOriginChangeController@shipments_origin_index')->name('index');
             Route::post('store', 'Shippers\ShipmentOriginChangeController@shipments_origin_store')->name('store');
         });
+
+        Route::prefix('return_address_change')->name('return_address_change.')->group(function () {
+            Route::get('', 'Shippers\ShipmentReturnAddressController@return_address_change_excel_index')->name('index');
+            Route::post('', 'Shippers\ShipmentReturnAddressController@return_address_change_excel_store')->name('store');
+        });
     });
 
     Route::prefix('dispute')->name('dispute.')->group(function (){
@@ -403,6 +408,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('add', 'Shippers\ShipperCRMController@add_request')->name('add');
             Route::post('re_open', 'Shippers\ShipperCRMController@re_open_request')->name('re_open');
             Route::post('/lost/claim', 'Shippers\ShipperCRMController@lost_claim')->name('lost.claim');
+            Route::post('feedback', 'Shippers\ShipperCRMController@customer_feedback')->name('feedback');
+
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Shippers\ShipperCRMController@add_feedback')->name('add');
@@ -411,6 +418,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('add', 'Shippers\ShipperCRMController@add_comment')->name('add');
             Route::post('get', 'Shippers\ShipperCRMController@get_latest_comment')->name('get');
         });
+
     });
 
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
@@ -459,6 +467,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('payment_subscription')->name('payment_subscription.')->group(function () {
             Route::get('', 'Shippers\ShipperGlobalSettingsController@payment_subscription_index')->name('index');
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@payment_subscription_submit')->name('store');
+        });
+
+        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@receiving_sheet_description_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@receiving_sheet_description_submit')->name('store');
         });
 
     });
@@ -1228,6 +1241,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('slip_view','Admins\DeliveryController@sdn_slip_view')->name('slip_view');
             Route::post('adjustment/add','Admins\DeliveryController@sdn_adjustment_add')->name('adjustment.add');
             Route::get('petty_cash_detail','Admins\DeliveryController@sdn_petty_cash_detail')->name('petty_cash_detail');
+
+            Route::post('status_logs','Admins\DeliveryController@sdn_status_logs')->name('status_logs');
 
             Route::prefix('retail')->name('retail.')->group(function() {
                 Route::get('{id}/details','Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
@@ -3201,6 +3216,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_reason_mandatory_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@return_reason_mandatory_list')->name('list');
             Route::post('store', 'Admins\GlobalSettingsController@return_reason_mandatory_store')->name('store');
+        });
+
+        Route::prefix('return_shipments_address')->name('return_shipments_address.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_shipments_address_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@return_shipments_address_store')->name('store');
         });
 
     });
