@@ -503,14 +503,14 @@ class V2AdminPickupsController extends Controller
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
             }
-            if ($previous_rider_id != NULL) {
+            /*if ($previous_rider_id != NULL) {
                 NotificationsController::app_notification(2, $previous_rider_id, 2, $pickup_request->current_rider_id, $pickup_request->shipper_id);
             }
             if ($rider_id != NULL && $previous_rider_id == NULL) {
                 NotificationsController::app_notification(3, $rider_id, 2, $pickup_request->shipper_id);
             } elseif ($rider_id != NULL && $previous_rider_id != NULL) {
                 NotificationsController::app_notification(1, $rider_id, 2, $previous_rider_id, $pickup_request->shipper_id);
-            }
+            }*/
         }
         if (count($allowed_pickup_requests) > 0) {
             $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
