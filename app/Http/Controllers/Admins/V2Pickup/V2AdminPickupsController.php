@@ -99,7 +99,6 @@ class V2AdminPickupsController extends Controller
 
     public function pending_list(Request $request)
     {
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
         }

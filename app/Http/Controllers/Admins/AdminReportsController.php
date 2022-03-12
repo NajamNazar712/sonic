@@ -7496,7 +7496,7 @@ class AdminReportsController extends Controller
                     ->get();
                 $dn_no_count = count($dn_no1);
                 if ($dn_no_count > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no_count . '</button>';
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $dn_no1->pluck('id') . ')" >' . $dn_no_count . '</button>';
                 } else {
                     return 0;
                 }
@@ -7514,7 +7514,14 @@ class AdminReportsController extends Controller
                         ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start)
                         ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
                         ->get();
-                    dd($dn_no);
+
+                    $dn_no_count = count($dn_no);
+                    if ($dn_no_count > 0) {
+//                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no_count . '</button>';
+                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $dn_no->pluck('id') . ')" >' . $dn_no_count . '</button>';
+                    } else {
+                        return 0;
+                    }
                 }
             })
             ->addColumn('dn_no_excel', function ($entry) use ($from,$to,$cutt_off) {
@@ -7642,12 +7649,15 @@ class AdminReportsController extends Controller
 //    delivery_note fetching
     public function get_dn_no(Request $request)
     {
-        $delivery_notes = deliverynote::where('rider_id', $request->dn_id)->get();
+//        $delivery_notes = deliverynote::where('rider_id', $request->dn_id)->get();
+//        $dn_no = $request->dn_no;
+        $dn_no = $request->input('dn_no');
+//        dd($dn_no);
         $html = "";
-        foreach ($delivery_notes as $dn) {
+        foreach ($dn_no as $dn) {
 //            $html .= '<table><tr>ID<th></th></tr><tbody><TR><td>'.$dn->id.'</td></TR></tbody></table>';
 
-            $html .= '<u>' . $dn->id . '</u><br>';
+            $html .= '<u>' . $dn . '</u><br>';
         }
 
         return response()->json(['status' => 1, 'html' => $html]);

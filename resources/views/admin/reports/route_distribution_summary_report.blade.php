@@ -517,47 +517,46 @@
             });
 
 
-            $('#datatable tbody').on('click', 'tr td.dn_no button', function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                if (id) {
-                    $.ajax({
-                        url: '{!! route('admin.reports.destination_delivery_received.get.dn_no') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'dn_id': id,
-                        },
-                        success: function (data) {
-                            if (data.status == 1) {
+            {{--$('#datatable tbody').on('click', 'tr td.dn_no button', function () {--}}
+            {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
+            {{--    if (id) {--}}
+            {{--        $.ajax({--}}
+            {{--            url: '{!! route('admin.reports.destination_delivery_received.get.dn_no') !!}',--}}
+            {{--            method: 'POST',--}}
+            {{--            data: {--}}
+            {{--                '_token': '{{ csrf_token() }}',--}}
+            {{--                'dn_id': id,--}}
+            {{--            },--}}
+            {{--            success: function (data) {--}}
+            {{--                if (data.status == 1) {--}}
 
 
-                                $('#dn_data').html(data.html);
+            {{--                    $('#dn_data').html(data.html);--}}
 
-                            } else {
-                                toastr.error('Something went wrong!', 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                        }
-                    })
+            {{--                } else {--}}
+            {{--                    toastr.error('Something went wrong!', 'Error!', {--}}
+            {{--                        positionClass: 'toast-top-center',--}}
+            {{--                        containerId: 'toast-top-center'--}}
+            {{--                    });--}}
+            {{--                }--}}
+            {{--            }--}}
+            {{--        })--}}
 
-                }
+            {{--    }--}}
 
-            });
+            {{--});--}}
 
 
         });
 
-        function dn_no_pop(id){
-
+        function dn_no_pop(id) {
             if (id) {
                 $.ajax({
                     url: '{!! route('admin.reports.destination_delivery_received.get.dn_no') !!}',
                     method: 'get',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'dn_id': id,
+                        'dn_no': id,
                     }
                 })
                     .done(function (data) {
@@ -576,7 +575,6 @@
                         }
                     });
             }
-
         }
 
     </script>
