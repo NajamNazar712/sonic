@@ -1733,7 +1733,7 @@ class AdminFinanceController extends Controller
                     if($journey){
                         $start = $journey->created_at;
                         $difference = $start->diffInDays($now);
-                        if($difference <= 2 || (session('role_id') == 1)){
+                        if($difference <= 2 || (session('role_id') == 1 || in_array(346, session('permissions')))){
 
                             $delivery_note_shipment->status = 8;
 
