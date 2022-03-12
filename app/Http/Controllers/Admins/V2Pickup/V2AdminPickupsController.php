@@ -460,7 +460,11 @@ class V2AdminPickupsController extends Controller
             else {
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if ($pickup_request->current_rider_id == $rider_id) {
-                    continue;
+
+                    if (!in_array($pickup_request_id, $allowed_pickup_requests)) {
+                        $allowed_pickup_requests[] = $pickup_request_id;
+                    }
+
                 } else {
                     $previous_rider_id = $pickup_request->current_rider_id;
                     $riders['old_rider_id'] = $pickup_request->current_rider_id;
