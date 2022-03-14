@@ -838,10 +838,17 @@
                         }
                     })
                         .done(function (data) {
+                            var total_charges = '';
                             if(data.status){
                                 $('#charges').val(data.details.charges);
                                 $('#discount').val(data.details.discount_amount);
-                                $('#total_charges').val(data.details.charges_with_discount);
+                                if(shipping_mode_id == 3){
+                                   total_charges = data.details.charges_with_discount + $('#cod').val();
+                                }
+                                else{
+                                    total_charges = data.details.charges_with_discount;
+                                }
+                                $('#total_charges').val(total_charges);
                             }
                         });
                 }

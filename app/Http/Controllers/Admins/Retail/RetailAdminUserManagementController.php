@@ -1685,7 +1685,7 @@ class RetailAdminUserManagementController extends Controller
             $retail->save();
         }
 
-        foreach ($request->trax_box_2_range_up as $index => $trax_box_2_range_up) {
+        foreach ($request->trax_box_5_range_up as $index => $trax_box_5_range_up) {
 
             $retail = new RetailStandardRates();
             $retail->range_up = $request->trax_box_5_range_up[$index];
