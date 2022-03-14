@@ -137,9 +137,9 @@ class AdminFnfController extends Controller
         $trax_id = $request->trax_id;
         if($trax_id){
             
-            $line_manager = Employee::where('official_email',$request->line_manager)->where('department_id',$request->department_id);
+            $line_manager = Employee::where('official_email',$request->line_manager)->where('employee_type_id',1)->where('department_id',$request->department_id);
            
-            $hod = Employee::where('official_email',$request->hod)->where('department_id',$request->department_id);
+            $hod = Employee::where('official_email',$request->hod)->where('employee_type_id',1)->where('department_id',$request->department_id);
 
            
             if($line_manager->exists()){
@@ -842,7 +842,7 @@ class AdminFnfController extends Controller
                                         <tr><td class="color primary w-50">Employee ID:</td><td class=" w-50">'. $fnf->employee->trax_id .'</td> <td class="color primary w-50">Employee Name:</td><td class=" w-50">'. $fnf->employee->name .'</td></tr>
                                         <tr><td class="color primary w-50">Designation:</td><td class=" w-50">'. $fnf->employee->designation->name .'</td> <td class="color primary w-50">Department:</td><td class=" w-50">'. $fnf->employee->department->name .'</td></tr>
                                         <tr><td class="color primary w-50">Date of Joining:</td><td class=" w-50">'. $fnf->joining_date .'</td> <td class="color primary w-50">Date of Resign:</td><td class=" w-50">'. $fnf->resign_date .'</td></tr>
-                                        <tr><td class="color primary w-50">Line Manager Email:</td><td class=" w-50">'. $fnf->reporting_manager->email .'</td> <td class="color primary w-50">HOD Email:</td><td class=" w-50">'. $fnf->department_head->email .'</td></tr>
+                                        <tr><td class="color primary w-50">Line Manager Email:</td><td class=" w-50">'. $fnf->reporting_manager->official_email .'</td> <td class="color primary w-50">HOD Email:</td><td class=" w-50">'. $fnf->department_head->official_email .'</td></tr>
                                         </tbody>
                                     </table>
                             </div>

@@ -110,7 +110,7 @@
                                                     <span class="danger">*</span>
                                                 </label>
                                                 <div>
-                                                    <input type="email" class="form-control required"  name="line_manager" placeholder="Line Manager Email" data-rule-required="true" data-msg-required="Email is required" value="{{$fnf->reporting_manager->email}}">
+                                                    <input type="email" class="form-control required"  name="line_manager" placeholder="Line Manager Email" data-rule-required="true" data-msg-required="Email is required" value="{{$fnf->reporting_manager->official_email}}">
                                                 </div>
                                             </div>
                                         </div>
@@ -120,7 +120,7 @@
                                                     <span class="danger">*</span>
                                                 </label>
                                                 <div>
-                                                    <input type="text" class="form-control required"  name="hod" placeholder="HOD Email" data-rule-required="true" data-msg-required="Email is required" value="{{$fnf->department_head->email}}">
+                                                    <input type="text" class="form-control required"  name="hod" placeholder="HOD Email" data-rule-required="true" data-msg-required="Email is required" value="{{$fnf->department_head->official_email}}">
                                                 </div>
                                             </div>
                                         </div>
