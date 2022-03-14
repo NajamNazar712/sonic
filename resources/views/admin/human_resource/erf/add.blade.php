@@ -237,6 +237,7 @@
 
                                 return obj;
                             });
+                            $('#designation').empty().trigger("change");
                             $('#designation').prepend('<option value="" selected="selected"></option>').select2({
                                 width: '100%',
                                 data:data1,
@@ -578,6 +579,8 @@
                 error.addClass('w-100').appendTo(element.parents('.form-group'));
             },
             submitHandler: function(form) {
+                $('#department_head').removeAttr('disabled');
+
                 $('#EmailModal').modal('show');
                 if($('#email').val() !== '' && $('#email').val() !== null ){
                     swal({
