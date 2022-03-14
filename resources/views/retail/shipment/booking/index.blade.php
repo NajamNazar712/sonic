@@ -804,10 +804,10 @@
                    
                 var shipping_mode_id = $('#shipping_mode').val();
                 var business_category = $('#business_category').val();
-                var destination = $('#domestic_destination').val();
+                var destination = $('#domestic_overland_destination').val();
                 var weight = $('#weight').val();
                 var trax_box = $('#trax_box').val();
-
+              
                 if(shipping_mode_id != '' && business_category != '' &&  destination != '' && weight != ''){
                     if(shipping_mode_id == 5 && trax_box == ''){
                         var error = 'Trax Box field is required';
