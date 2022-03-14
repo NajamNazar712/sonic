@@ -11710,7 +11710,7 @@ class AdminDashboardController extends Controller
         }
     }
 
-    public function update_one_time_profile_v2(Request $request)
+    public function update_one_time_profile(Request $request)
     {
         $employee_request = Employee::find($request->employee_id);
         if ($employee_request) {

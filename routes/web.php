@@ -588,7 +588,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('update_one_time_profile')->name('update_one_time_profile.')->group(function () {
         Route::get('','Admins\AdminDashboardController@get_one_time_profile')->name('index');
         Route::get('check','Admins\AdminDashboardController@check_profile')->name('check');
-        Route::post('submit','Admins\AdminDashboardController@update_one_time_profile_v2')->name('submit');
+        Route::post('submit','Admins\AdminDashboardController@update_one_time_profile')->name('submit');
     });
 
 
