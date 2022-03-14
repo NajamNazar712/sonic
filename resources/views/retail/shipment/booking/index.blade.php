@@ -801,14 +801,23 @@
             var city_id = null;
             var trax_box = null;
             $('#calculate_rates').on('click', function () {
-                   
+                var destination = ''
                 var shipping_mode_id = $('#shipping_mode').val();
                 var business_category = $('#business_category').val();
-                var destination = $('#domestic_overland_destination').val();
+                if(shipping_mode_id == 1){
+                    destination = $('#domestic_overland_destination').val();
+                }
+                else if (shipping_mode_id == 2){
+                    destination = $('#domestic_destination').val();
+                }
+                else{
+                    destination = $('#domestic_destination').val();
+                }
+                
                 var weight = $('#weight').val();
                 var trax_box = $('#trax_box').val();
               
-                if(shipping_mode_id != '' && business_category != '' &&  destination != '' && weight != ''){
+                if(shipping_mode_id != '' && business_category != '' && weight != ''){
                     if(shipping_mode_id == 5 && trax_box == ''){
                         var error = 'Trax Box field is required';
                         toastr.error(error, 'Error!', {
