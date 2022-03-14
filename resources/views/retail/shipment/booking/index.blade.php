@@ -801,7 +801,7 @@
             var city_id = null;
             var trax_box = null;
             $('#calculate_rates').on('click', function () {
-                var destination = ''
+                var destination = '';
                 var shipping_mode_id = $('#shipping_mode').val();
                 var business_category = $('#business_category').val();
                 if(shipping_mode_id == 1){
@@ -817,7 +817,7 @@
                 var weight = $('#weight').val();
                 var trax_box = $('#trax_box').val();
               
-                if(shipping_mode_id != '' && business_category != '' && weight != ''){
+                if(shipping_mode_id != '' && business_category != '' && destination != ''  && weight != ''){
                     if(shipping_mode_id == 5 && trax_box == ''){
                         var error = 'Trax Box field is required';
                         toastr.error(error, 'Error!', {
