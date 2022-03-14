@@ -153,7 +153,7 @@ class ShipperReportsController extends Controller
             });
         }
 
-        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name', 'si.description as description', 'shipments.tracking_number', 'shipments.order_id as order_id', 'u.id as account_no', 'u.name as shipper', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.charges as p_total_charges','pps.amount as p_total_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'dps.amount as d_collection_amount', 'sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status', 'shipments.chargeable_weight', 'shipments.insurance_charges', 'shipments.packaging_material_charges', 'shipments.fuel_surcharge', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.nsa_osa_charges', 'shipments.gst', 'shipments.intercept_charges', 'shipments.packaging_charges', 'pps.payable as p_net_payable', 'dps.charges as d_total_charges','dps.payable as d_net_payable', 'pps.gst as p_gst', 'dps.gst as d_gst','u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst')
+        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name', 'si.description as description', 'shipments.tracking_number', 'shipments.order_id as order_id', 'u.id as account_no', 'u.name as shipper', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.charges as p_total_charges','pps.amount as p_total_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'dps.amount as d_collection_amount', 'sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status', 'shipments.chargeable_weight', 'shipments.insurance_charges', 'shipments.packaging_material_charges', 'shipments.fuel_surcharge', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.try_and_buy_charges', 'shipments.nsa_osa_charges', 'shipments.gst', 'shipments.intercept_charges', 'shipments.packaging_charges', 'pps.payable as p_net_payable', 'dps.charges as d_total_charges','dps.payable as d_net_payable', 'pps.gst as p_gst', 'dps.gst as d_gst','u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst','usi.pickup_address as pickup_address')
             ->whereNotIn('shipments.shipper_status_id', [1, 17]);
 
         if (session('user_type') == 2) {
@@ -850,7 +850,7 @@ class ShipperReportsController extends Controller
             ->where('u.id', session('user_id'))
             ->groupBy('shipments.id');
         if (session('department_id') == 7) {
-            if (session('role_id') != 4) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $shipments = $shipments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -909,7 +909,7 @@ class ShipperReportsController extends Controller
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
 
-            ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
+            ->select('shipments.tracking_number','shipments.return_address_id','shipments.shipper_status_id','sj.created_at as arrival_date','ss.name as status_name','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id','shipments.shipper_status_id as status_id');
 
         $shipment = $shipment->where(function ($query) {
             $query->where('shipments.user_id', 7306)
@@ -985,12 +985,25 @@ class ShipperReportsController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('return_status', function ($shipment) {
+                if($shipment->shipper_status_id == 25){
+
+                    if(in_array($shipment->return_address_id, [31076, 31078, 31079, 31080, 33761,  1082, 31083, 31084, 31085, 33760, 31086,  31087, 31088, 31089, 33762])){
+                        return 'Return to Daraz Warehouse';
+                    }else{
+                        return 'Return to Vendor';
+    
+                    }
+                }else{
+                    return '-';
+                }
+            })
             ->addColumn('tracking_number_link', function ($shipment) {
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
             ->editColumn('shipper_name', function ($shipment) {
-                if($shipment->shipper_id == 7306){
+                if($shipment->shipper_id == 1091){
                     return '-';
                 }else{
                     return $shipment->shipper_name;

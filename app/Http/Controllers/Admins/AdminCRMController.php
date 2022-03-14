@@ -28,6 +28,7 @@ use App\Http\Models\CRM\CrmRequestAgentHistory;
 use App\Http\Models\CRM\CrmRequestCaseNatureAndTypeHistory;
 use App\Http\Models\CRM\CrmRequestEscalationTagging;
 use App\Http\Models\CRM\CrmRequestImage;
+use App\Http\Models\CRM\CrmRequestRating;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
@@ -694,7 +695,7 @@ class AdminCRMController extends Controller
                 });
         }
         else if (session('department_id') == 7){
-            if(session('role_id') != 4){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $launched_request = $launched_request->where('spt.admin_id', Auth::id());
             }
         }
@@ -1119,7 +1120,7 @@ class AdminCRMController extends Controller
             $in_process_request = $in_process_request->where('at.id', Auth::id());
         }
         else if (session('department_id') == 7){
-            if(session('role_id') != 4){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $in_process_request = $in_process_request->where('spt.admin_id', Auth::id());
             }
         }
@@ -1644,7 +1645,7 @@ class AdminCRMController extends Controller
             $resolved_request = $resolved_request->where('at.id', Auth::id());
         }
         else if (session('department_id') == 7){
-            if(session('role_id') != 4){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $resolved_request = $resolved_request->where('spt.admin_id', Auth::id());
             }
         }
@@ -2042,7 +2043,7 @@ class AdminCRMController extends Controller
             });
         }
         else if (session('department_id') == 7){
-            if(session('role_id') != 4){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $closed_request = $closed_request->where('spt.admin_id', Auth::id());
             }
         }
@@ -3426,7 +3427,7 @@ class AdminCRMController extends Controller
             });
         }
         else if (session('department_id') == 7){
-            if(session('role_id') != 4){
+            if(!in_array(session('id'), session('sale_users_bypass'))){
                 $consignee_info_request = $consignee_info_request->where('spt.admin_id', Auth::id());
             }
         }

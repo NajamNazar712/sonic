@@ -974,6 +974,38 @@
             </div>
         </div>
 
+
+            <div class="card">
+                <div class="card-body text-center">
+                    <h2>Feedback</h2>
+                    @if(isset($crm_details->feedback))
+                    <div class="feedback">
+                        @foreach($ratings as $rating)
+                            @if($crm_details->feedback->rating_id === $rating->id)
+                                <div class="item">
+                                    <label for="{{ $rating->id }}" title="{{ $rating->name }}">
+                                        <input class="radio" type="radio" name="feedback" id="{{ $rating->id }}" value="{{ $rating->id }}" checked="checked" alt="{{ $rating->name }}" disabled>
+                                        <span>{{$rating->code}}</span>
+                                    </label>
+                                </div>
+                            @else
+                                <div class="item">
+                                    <label for="{{ $rating->id }}" title="{{ $rating->name }}">
+                                        <input class="radio" type="radio" name="feedback" id="{{ $rating->id }}" value="{{ $rating->id }}" disabled>
+                                        <span>{{$rating->code}}</span>
+                                    </label>
+                                </div>
+                            @endif
+                        @endforeach
+
+                    </div>
+                    @else
+                        <h3>No ratings yet.</h3>
+                    @endif
+                </div>
+            </div>
+
+
         @if($escalation_log_flag == true)
             <div class="modal fade text-left" id="escalateModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="escalateModal" aria-hidden="true">
                 <div class="modal-dialog modal-md" role="document">
@@ -1267,6 +1299,39 @@
 
         .chat-application .chats .admin.rider .chat-body .chat-content:before {
             border-left-color: #18374A;
+        }
+
+        .feedback {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .feedback .item {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+        .feedback .radio {
+            display: none;
+        }
+        .feedback .radio ~ span {
+            font-size: 3rem;
+            filter: grayscale(100);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .feedback .radio:checked ~ span {
+            filter: grayscale(0);
+            font-size: 4rem;
+        }
+        .feedback .radio:hover ~ span {
+            filter: grayscale(0);
+            font-size: 4rem;
         }
     </style>
 @endsection

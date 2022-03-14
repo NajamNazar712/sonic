@@ -109,6 +109,7 @@ use App\Http\Models\Admin\StandardReturnCharge;
 use App\Http\Models\Admin\StandardPackagingCharge;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\Admin\StandardBookingTypeCharge;
+use App\Http\Models\Admin\UserCheckStatus;
 use App\Http\Models\BookingType;
 use App\Http\Models\Rates\PendingCashHandlingCharge;
 use App\Http\Models\CashHandlingCharge;
@@ -183,7 +184,8 @@ class AdminDashboardController extends Controller
         $this->middleware('Permission');
     }
 
-    public function index(){
+    public function index()
+    {
         /*$stats = array();
         $graph = array();
         $sales=array();
@@ -484,7 +486,9 @@ class AdminDashboardController extends Controller
 //        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'sales'=>$sales]);
         return view('admin.simple_dashboard');
     }
-    public function statistics_search(Request $request){
+
+    public function statistics_search(Request $request)
+    {
 //        return $request;
         $graph = array();
         $destination_id = $request->destination;
@@ -499,7 +503,7 @@ class AdminDashboardController extends Controller
             $dates[] = $date;
         }
 
-        if(($destination_id != '') && ($shipper != '')){
+        if (($destination_id != '') && ($shipper != '')) {
             foreach ($dates as $this_date) {
                 $comparison_date = $this_date;
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
@@ -508,20 +512,20 @@ class AdminDashboardController extends Controller
                 $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 2);
                 $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 17);
-                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id',4);
-                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id',5);
-                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id',20);
-                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id',25);
-                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6,7,8,9,13,15,18,51,52,56]);
-                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
-                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12,54,55]);
+                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 4);
+                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 5);
+                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 20);
+                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 25);
+                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6, 7, 8, 9, 13, 15, 18, 51, 52, 56]);
+                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21, 22, 23, 24, 26, 27, 28, 29, 57, 60]);
+                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12, 54, 55]);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
 //                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_closed = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 4)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_rejected = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 7)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
                 if (session('role_id') != 1) {
-                    $booked = $booked->where(function($query) {
+                    $booked = $booked->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -529,7 +533,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $arrived = $arrived->where(function($query) {
+                    $arrived = $arrived->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -537,7 +541,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $in_transit = $in_transit->where(function($query) {
+                    $in_transit = $in_transit->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -545,7 +549,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $canceled = $canceled->where(function($query) {
+                    $canceled = $canceled->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -553,7 +557,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $delivered = $delivered->where(function($query) {
+                    $delivered = $delivered->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -561,49 +565,49 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $destination = $destination->where(function($query) {
+                    $destination = $destination->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $out_for_delivery = $out_for_delivery->where(function($query) {
+                    $out_for_delivery = $out_for_delivery->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $return_confirm = $return_confirm->where(function($query) {
+                    $return_confirm = $return_confirm->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $return_delivered = $return_delivered->where(function($query) {
+                    $return_delivered = $return_delivered->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $pending_shipments = $pending_shipments->where(function($query) {
+                    $pending_shipments = $pending_shipments->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $confirmation_pending = $confirmation_pending->where(function($query) {
+                    $confirmation_pending = $confirmation_pending->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $pending_return = $pending_return->where(function($query) {
+                    $pending_return = $pending_return->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -629,22 +633,22 @@ class AdminDashboardController extends Controller
 //                $graph['complaints_closed'][] = $complaints_closed->count();
 //                $graph['complaints_rejected'][] = $complaints_rejected->count();
             }
-        }else if(($destination_id == '') && ($shipper != '')){
+        } else if (($destination_id == '') && ($shipper != '')) {
             foreach ($dates as $this_date) {
                 $comparison_date = $this_date;
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                $booked = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id',1);
+                $booked = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 1);
                 $arrived = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 2);
                 $in_transit = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 17);
-                $destination = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id',4);
-                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id',5);
-                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id',20);
-                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id',25);
-                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [6,7,8,9,13,15,18,51,52,56]);
-                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
-                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [12,54,55]);
+                $destination = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 4);
+                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 5);
+                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 20);
+                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id', 25);
+                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [6, 7, 8, 9, 13, 15, 18, 51, 52, 56]);
+                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [21, 22, 23, 24, 26, 27, 28, 29, 57, 60]);
+                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [12, 54, 55]);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
 //                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
@@ -652,7 +656,7 @@ class AdminDashboardController extends Controller
 //                $complaints_rejected = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 7)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 
                 if (session('role_id') != 1) {
-                    $booked = $booked->where(function($query) {
+                    $booked = $booked->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -660,7 +664,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $arrived = $arrived->where(function($query) {
+                    $arrived = $arrived->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -668,7 +672,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $in_transit = $in_transit->where(function($query) {
+                    $in_transit = $in_transit->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -676,7 +680,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $canceled = $canceled->where(function($query) {
+                    $canceled = $canceled->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -684,7 +688,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $delivered = $delivered->where(function($query) {
+                    $delivered = $delivered->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -692,49 +696,49 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $destination = $destination->where(function($query) {
+                    $destination = $destination->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $out_for_delivery = $out_for_delivery->where(function($query) {
+                    $out_for_delivery = $out_for_delivery->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $return_confirm = $return_confirm->where(function($query) {
+                    $return_confirm = $return_confirm->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $return_delivered = $return_delivered->where(function($query) {
+                    $return_delivered = $return_delivered->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $pending_shipments = $pending_shipments->where(function($query) {
+                    $pending_shipments = $pending_shipments->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $confirmation_pending = $confirmation_pending->where(function($query) {
+                    $confirmation_pending = $confirmation_pending->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $pending_return = $pending_return->where(function($query) {
+                    $pending_return = $pending_return->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -760,22 +764,22 @@ class AdminDashboardController extends Controller
 //                $graph['complaints_closed'][] = $complaints_closed->count();
 //                $graph['complaints_rejected'][] = $complaints_rejected->count();
             }
-        }else if(($destination_id != '') && ($shipper == '')){
+        } else if (($destination_id != '') && ($shipper == '')) {
             foreach ($dates as $this_date) {
                 $comparison_date = $this_date;
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                $booked = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id',1);
+                $booked = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 1);
                 $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 2);
                 $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 17);
-                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id',4);
-                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id',5);
-                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id',20);
-                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id',25);
-                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6,7,8,9,13,15,18,51,52,56]);
-                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
-                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12,54,55]);
+                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 4);
+                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 5);
+                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 20);
+                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->where('shipper_status_id', 25);
+                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6, 7, 8, 9, 13, 15, 18, 51, 52, 56]);
+                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21, 22, 23, 24, 26, 27, 28, 29, 57, 60]);
+                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12, 54, 55]);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
 //                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->whereDate('crm_request_status_histories.created_at', $comparison_date);
@@ -783,7 +787,7 @@ class AdminDashboardController extends Controller
 //                $complaints_rejected = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 7)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 
                 if (session('role_id') != 1) {
-                    $booked = $booked->where(function($query) {
+                    $booked = $booked->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -791,7 +795,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $arrived = $arrived->where(function($query) {
+                    $arrived = $arrived->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -799,7 +803,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $in_transit = $in_transit->where(function($query) {
+                    $in_transit = $in_transit->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -807,7 +811,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $canceled = $canceled->where(function($query) {
+                    $canceled = $canceled->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -815,7 +819,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $delivered = $delivered->where(function($query) {
+                    $delivered = $delivered->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -823,49 +827,49 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $destination = $destination->where(function($query) {
+                    $destination = $destination->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $out_for_delivery = $out_for_delivery->where(function($query) {
+                    $out_for_delivery = $out_for_delivery->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $return_confirm = $return_confirm->where(function($query) {
+                    $return_confirm = $return_confirm->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $return_delivered = $return_delivered->where(function($query) {
+                    $return_delivered = $return_delivered->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $pending_shipments = $pending_shipments->where(function($query) {
+                    $pending_shipments = $pending_shipments->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $confirmation_pending = $confirmation_pending->where(function($query) {
+                    $confirmation_pending = $confirmation_pending->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $pending_return = $pending_return->where(function($query) {
+                    $pending_return = $pending_return->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -891,22 +895,22 @@ class AdminDashboardController extends Controller
 //                $graph['complaints_closed'][] = $complaints_closed->count();
 //                $graph['complaints_rejected'][] = $complaints_rejected->count();
             }
-        }else{
+        } else {
             foreach ($dates as $this_date) {
                 $comparison_date = $this_date;
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',1);
+                $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 1);
                 $arrived = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 2);
                 $in_transit = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 3);
                 $canceled = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 17);
-                $destination = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',4);
-                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',5);
-                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',20);
-                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',25);
-                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [6,7,8,9,13,15,18,51,52,56]);
-                $pending_return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [21,22,23,24,26,27,28,29,57,60]);
-                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [12,54,55]);
+                $destination = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 4);
+                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 5);
+                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 20);
+                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id', 25);
+                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [6, 7, 8, 9, 13, 15, 18, 51, 52, 56]);
+                $pending_return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [21, 22, 23, 24, 26, 27, 28, 29, 57, 60]);
+                $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [12, 54, 55]);
                 $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
 //                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->whereDate('crm_request_status_histories.created_at', $comparison_date);
@@ -914,7 +918,7 @@ class AdminDashboardController extends Controller
 //                $complaints_rejected = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 7)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 
                 if (session('role_id') != 1) {
-                    $booked = $booked->where(function($query) {
+                    $booked = $booked->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -922,7 +926,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $arrived = $arrived->where(function($query) {
+                    $arrived = $arrived->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -930,7 +934,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $in_transit = $in_transit->where(function($query) {
+                    $in_transit = $in_transit->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -938,7 +942,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $canceled = $canceled->where(function($query) {
+                    $canceled = $canceled->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -946,7 +950,7 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $delivered = $delivered->where(function($query) {
+                    $delivered = $delivered->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -954,49 +958,49 @@ class AdminDashboardController extends Controller
                         });
                     });
 
-                    $destination = $destination->where(function($query) {
+                    $destination = $destination->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $out_for_delivery = $out_for_delivery->where(function($query) {
+                    $out_for_delivery = $out_for_delivery->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $return_confirm = $return_confirm->where(function($query) {
+                    $return_confirm = $return_confirm->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $return_delivered = $return_delivered->where(function($query) {
+                    $return_delivered = $return_delivered->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $pending_shipments = $pending_shipments->where(function($query) {
+                    $pending_shipments = $pending_shipments->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $confirmation_pending = $confirmation_pending->where(function($query) {
+                    $confirmation_pending = $confirmation_pending->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         });
                     });
-                    $pending_return = $pending_return->where(function($query) {
+                    $pending_return = $pending_return->where(function ($query) {
                         $query->whereHas('pickup_address.city', function ($sub_query) {
                             $sub_query->whereIn('hub_id', session('hubs'));
                         })->orWhereHas('consignee_city', function ($sub_query) {
@@ -1025,69 +1029,64 @@ class AdminDashboardController extends Controller
         }
 
 
-        return response()->json(['status'=>1,'graph'=>$graph]);
+        return response()->json(['status' => 1, 'graph' => $graph]);
     }
 
 
-    public function operation_forecast_search(Request $request){
-        if(($request->get('search_date_from') && $request->get('search_date_to'))){
+    public function operation_forecast_search(Request $request)
+    {
+        if (($request->get('search_date_from') && $request->get('search_date_to'))) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-        }
-        else{
+        } else {
             $from = Carbon::now()->subDays(29);
             $to = Carbon::now();
         }
-        if($request->get('search_hub')){
+        if ($request->get('search_hub')) {
             $hub = $request->get('search_hub');
-        }
-        else{
+        } else {
             $admin = Admin::where('id', Auth::id())->first();
             $hub = $admin->default_hub_id;
         }
-        if($request->get('search_service_type')){
+        if ($request->get('search_service_type')) {
             $service_type_id = $request->get('search_service_type');
-        }
-        else{
+        } else {
             $service_type_id = 1;
         }
 
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
         //incoming
-        $doughnut_chart_shipments_count['booked'] = OperationForecast::where('shipper_status_id', 1)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['arrived_at_origin'] = OperationForecast::where('shipper_status_id', 2)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['in_transit'] = OperationForecast::where('shipper_status_id', 3)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['arrived_at_destination'] = OperationForecast::where('shipper_status_id', 4)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['not_attempted'] = OperationForecast::where('shipper_status_id', 7)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['delivery_unsuccessful'] = OperationForecast::where('shipper_status_id', 8)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->sum('operation_forecasts.count');
-        $doughnut_chart_shipments_count['on_hold'] = OperationForecast::where('shipper_status_id', 9)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['booked'] = OperationForecast::where('shipper_status_id', 1)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['arrived_at_origin'] = OperationForecast::where('shipper_status_id', 2)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['in_transit'] = OperationForecast::where('shipper_status_id', 3)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['arrived_at_destination'] = OperationForecast::where('shipper_status_id', 4)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['not_attempted'] = OperationForecast::where('shipper_status_id', 7)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['delivery_unsuccessful'] = OperationForecast::where('shipper_status_id', 8)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->sum('operation_forecasts.count');
+        $doughnut_chart_shipments_count['on_hold'] = OperationForecast::where('shipper_status_id', 9)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->sum('operation_forecasts.count');
         $doughnut_chart_shipments_count['total'] = $doughnut_chart_shipments_count['booked'] + $doughnut_chart_shipments_count['arrived_at_origin'] + $doughnut_chart_shipments_count['in_transit'] + $doughnut_chart_shipments_count['arrived_at_destination'] + $doughnut_chart_shipments_count['not_attempted'] + $doughnut_chart_shipments_count['delivery_unsuccessful'] + $doughnut_chart_shipments_count['on_hold'];
 
-        $incoming_bar_chart_shipments['one'] = OperationForecastShipments::where('weight_range_id',1)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->count();
-        $incoming_bar_chart_shipments['two'] = OperationForecastShipments::where('weight_range_id',2)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->count();
-        $incoming_bar_chart_shipments['three'] = OperationForecastShipments::where('weight_range_id',3)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->count();
-        $incoming_bar_chart_shipments['four'] = OperationForecastShipments::where('weight_range_id',4)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->count();
-
+        $incoming_bar_chart_shipments['one'] = OperationForecastShipments::where('weight_range_id', 1)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->count();
+        $incoming_bar_chart_shipments['two'] = OperationForecastShipments::where('weight_range_id', 2)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->count();
+        $incoming_bar_chart_shipments['three'] = OperationForecastShipments::where('weight_range_id', 3)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->count();
+        $incoming_bar_chart_shipments['four'] = OperationForecastShipments::where('weight_range_id', 4)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->count();
 
 
         $riders_count = Rider::where('status', 1)->where('city_id', $hub)->count();
         $sixtyDays = Carbon::now()->subDays(58)->startOfDay();
-        if($riders_count == 0){
+        if ($riders_count == 0) {
             $per_rider_loads = ceil(($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two'] + $incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']));
-        }
-        else{
+        } else {
             $per_rider_loads = ceil(($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two'] + $incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']) / $riders_count);
         }
         $light_deliveries = ($incoming_bar_chart_shipments['one'] + $incoming_bar_chart_shipments['two']);
         $heavy_deliveries = ($incoming_bar_chart_shipments['three'] + $incoming_bar_chart_shipments['four']);
 
-        $day_wise_growth_thirty = OperationForecast::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$thirtyDays,$today])->sum('operation_forecasts.count');
-        $day_wise_growth_sixty = OperationForecast::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$sixtyDays,$thirtyDays])->sum('operation_forecasts.count');
-        if($day_wise_growth_sixty == 0){
+        $day_wise_growth_thirty = OperationForecast::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$thirtyDays, $today])->sum('operation_forecasts.count');
+        $day_wise_growth_sixty = OperationForecast::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$sixtyDays, $thirtyDays])->sum('operation_forecasts.count');
+        if ($day_wise_growth_sixty == 0) {
             $day_wise_growth_percentage = 0;
-        }
-        else{
+        } else {
             $day_wise_growth = ($day_wise_growth_thirty - $day_wise_growth_sixty) / $day_wise_growth_sixty;
             $day_wise_growth_percentage = number_format($day_wise_growth * 100, 1);
         }
@@ -1097,76 +1096,69 @@ class AdminDashboardController extends Controller
         $operation_incoming['light_deliveries'] = $light_deliveries;
 
         //outgoing
-        $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-        $operation_outgoing_pickups['pickups_count'] = OperationsOutgoingPickupRequests::select(DB::raw('count(operations_outgoing_pickup_requests.id) as count'))->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$thirtyDays,$today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->get();
+        $operation_outgoing_pickups['no_of_shipments'] = OperationsOutgoingPickupRequests::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$thirtyDays, $today])->sum('operations_outgoing_pickup_requests.shipments_count');
+        $operation_outgoing_pickups['pickups_count'] = OperationsOutgoingPickupRequests::select(DB::raw('count(operations_outgoing_pickup_requests.id) as count'))->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$thirtyDays, $today])->groupBy('operations_outgoing_pickup_requests.pickup_request_id')->get();
         $operation_outgoing_pickups['pickups'] = 0;
-        foreach ($operation_outgoing_pickups['pickups_count'] as $pickups_count){
+        foreach ($operation_outgoing_pickups['pickups_count'] as $pickups_count) {
             $operation_outgoing_pickups['pickups'] = $operation_outgoing_pickups['pickups'] + $pickups_count->count;
         }
 
-        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('u.name as name', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
-            ->whereBetween('operations_outgoing_top_customers.created_at',[$from,$to])
+        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('u.name as name', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "' . $from . '" AND "' . $to . '") AS count'))
+            ->whereBetween('operations_outgoing_top_customers.created_at', [$from, $to])
             ->orderBy('count', 'desc')
             ->groupBy('u.id')
             ->take(5)->get()->toArray();
-        if(array_key_exists(0, $outgoing_top_five_customers)){
+        if (array_key_exists(0, $outgoing_top_five_customers)) {
             $outgoing_doughnut_top_five_customers['first'] = $outgoing_top_five_customers[0];
-        }
-        else{
+        } else {
             $outgoing_doughnut_top_five_customers['first']['name'] = '-';
             $outgoing_doughnut_top_five_customers['first']['count'] = 0;
         }
-        if(array_key_exists(1, $outgoing_top_five_customers)){
+        if (array_key_exists(1, $outgoing_top_five_customers)) {
             $outgoing_doughnut_top_five_customers['second'] = $outgoing_top_five_customers[1];
-        }
-        else{
+        } else {
             $outgoing_doughnut_top_five_customers['second']['name'] = '-';
             $outgoing_doughnut_top_five_customers['second']['count'] = 0;
         }
-        if(array_key_exists(2, $outgoing_top_five_customers)){
+        if (array_key_exists(2, $outgoing_top_five_customers)) {
             $outgoing_doughnut_top_five_customers['third'] = $outgoing_top_five_customers[2];
-        }
-        else{
+        } else {
             $outgoing_doughnut_top_five_customers['third']['name'] = '-';
             $outgoing_doughnut_top_five_customers['third']['count'] = 0;
         }
-        if(array_key_exists(3, $outgoing_top_five_customers)){
+        if (array_key_exists(3, $outgoing_top_five_customers)) {
             $outgoing_doughnut_top_five_customers['fourth'] = $outgoing_top_five_customers[3];
-        }
-        else{
+        } else {
             $outgoing_doughnut_top_five_customers['fourth']['name'] = '-';
             $outgoing_doughnut_top_five_customers['fourth']['count'] = 0;
         }
-        if(array_key_exists(4, $outgoing_top_five_customers)){
+        if (array_key_exists(4, $outgoing_top_five_customers)) {
             $outgoing_doughnut_top_five_customers['fifth'] = $outgoing_top_five_customers[4];
-        }
-        else{
+        } else {
             $outgoing_doughnut_top_five_customers['fifth']['name'] = '-';
             $outgoing_doughnut_top_five_customers['fifth']['count'] = 0;
         }
         $outgoing_doughnut_top_five_customers['total'] = $outgoing_doughnut_top_five_customers['first']['count'] + $outgoing_doughnut_top_five_customers['second']['count'] + $outgoing_doughnut_top_five_customers['third']['count'] + $outgoing_doughnut_top_five_customers['fourth']['count'] + $outgoing_doughnut_top_five_customers['fifth']['count'];
 
-        $outgoing_bar_chart_shipments['one'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',1)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->count();
-        $outgoing_bar_chart_shipments['two'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',2)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->count();
-        $outgoing_bar_chart_shipments['three'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',3)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->count();
-        $outgoing_bar_chart_shipments['four'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id',4)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$from,$to])->count();
+        $outgoing_bar_chart_shipments['one'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id', 1)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->count();
+        $outgoing_bar_chart_shipments['two'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id', 2)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->count();
+        $outgoing_bar_chart_shipments['three'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id', 3)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->count();
+        $outgoing_bar_chart_shipments['four'] = OperationsOutgoingPickupRequestShipments::where('weight_range_id', 4)->where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$from, $to])->count();
 
 
-        if($riders_count == 0){
+        if ($riders_count == 0) {
             $outgoing_per_rider_loads = ceil(($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two'] + $outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']));
-        }
-        else{
+        } else {
             $outgoing_per_rider_loads = ceil(($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two'] + $outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']) / $riders_count);
         }
         $outgoing_light_deliveries = ($outgoing_bar_chart_shipments['one'] + $outgoing_bar_chart_shipments['two']);
         $outgoing_heavy_deliveries = ($outgoing_bar_chart_shipments['three'] + $outgoing_bar_chart_shipments['four']);
 
-        $outgoing_day_wise_growth_thirty = OperationsOutgoingPickupRequests::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$thirtyDays,$today])->sum('operations_outgoing_pickup_requests.shipments_count');
-        $outgoing_day_wise_growth_sixty = OperationsOutgoingPickupRequests::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at',[$sixtyDays,$thirtyDays])->sum('operations_outgoing_pickup_requests.shipments_count');
-        if($outgoing_day_wise_growth_sixty == 0){
+        $outgoing_day_wise_growth_thirty = OperationsOutgoingPickupRequests::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$thirtyDays, $today])->sum('operations_outgoing_pickup_requests.shipments_count');
+        $outgoing_day_wise_growth_sixty = OperationsOutgoingPickupRequests::where('hub_id', $hub)->where('booking_type_id', $service_type_id)->whereBetween('created_at', [$sixtyDays, $thirtyDays])->sum('operations_outgoing_pickup_requests.shipments_count');
+        if ($outgoing_day_wise_growth_sixty == 0) {
             $outgoing_day_wise_growth_percentage = 0;
-        }
-        else{
+        } else {
             $outgoing_day_wise_growth = ($outgoing_day_wise_growth_thirty - $outgoing_day_wise_growth_sixty) / $outgoing_day_wise_growth_sixty;
             $outgoing_day_wise_growth_percentage = number_format($outgoing_day_wise_growth * 100, 1);
         }
@@ -1175,32 +1167,31 @@ class AdminDashboardController extends Controller
         $operation_outgoing['heavy_deliveries'] = $outgoing_heavy_deliveries;
         $operation_outgoing['light_deliveries'] = $outgoing_light_deliveries;
 
-        return response()->json(['status'=>1, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_incoming' => $operation_incoming, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing]);
+        return response()->json(['status' => 1, 'doughnut_chart_shipments_count' => $doughnut_chart_shipments_count, 'incoming_bar_chart_shipments' => $incoming_bar_chart_shipments, 'operation_incoming' => $operation_incoming, 'operation_outgoing_pickups' => $operation_outgoing_pickups, 'outgoing_doughnut_top_five_customers' => $outgoing_doughnut_top_five_customers, 'outgoing_bar_chart_shipments' => $outgoing_bar_chart_shipments, 'operation_outgoing' => $operation_outgoing]);
     }
-    public function incoming_list(Request $request){
-        if($request->get('search_date_from') && $request->get('search_date_to')){
+
+    public function incoming_list(Request $request)
+    {
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-        }
-        else{
+        } else {
             $from = Carbon::now()->subDays(29);
             $to = Carbon::now()->endOfDay();
         }
-        if($request->get('search_hub')){
+        if ($request->get('search_hub')) {
             $hub = $request->get('search_hub');
-        }
-        else{
+        } else {
             $admin = Admin::where('id', Auth::id())->first();
             $hub = $admin->default_hub_id;
         }
-        if($request->get('search_service_type')){
+        if ($request->get('search_service_type')) {
             $service_type_id = $request->get('search_service_type');
-        }
-        else{
+        } else {
             $service_type_id = 1;
         }
         $operation_incoming = OperationForecast::leftjoin('shipment_status as ss', 'ss.id', '=', 'operation_forecasts.shipper_status_id')
-            ->select('operation_forecasts.id as opfs_id', 'ss.id as shipper_status_id', 'ss.name as status', DB::raw('(SELECT SUM(count) FROM operation_forecasts AS opfs WHERE opfs.shipper_status_id = operation_forecasts.shipper_status_id AND opfs.hub_id = "' . $hub . '" AND opfs.booking_type_id = "' . $service_type_id . '" AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
+            ->select('operation_forecasts.id as opfs_id', 'ss.id as shipper_status_id', 'ss.name as status', DB::raw('(SELECT SUM(count) FROM operation_forecasts AS opfs WHERE opfs.shipper_status_id = operation_forecasts.shipper_status_id AND opfs.hub_id = "' . $hub . '" AND opfs.booking_type_id = "' . $service_type_id . '" AND updated_at BETWEEN "' . $from . '" AND "' . $to . '") AS count'))
             ->whereIn('shipper_status_id', [1, 2, 3, 4, 5, 7, 8, 9])
             ->where('operation_forecasts.hub_id', $hub)
             ->where('operation_forecasts.booking_type_id', $service_type_id)
@@ -1212,62 +1203,54 @@ class AdminDashboardController extends Controller
                 'class' => function ($statuses) {
                     if ($statuses->shipper_status_id == 1) {
                         return 'statusBooked';
-                    }
-                    else if ($statuses->shipper_status_id == 2){
+                    } else if ($statuses->shipper_status_id == 2) {
                         return 'statusOrigin';
-                    }
-                    else if ($statuses->shipper_status_id == 3){
+                    } else if ($statuses->shipper_status_id == 3) {
                         return 'statusIntransit';
-                    }
-                    else if ($statuses->shipper_status_id == 4){
+                    } else if ($statuses->shipper_status_id == 4) {
                         return 'statusDestination';
-                    }
-                    else if ($statuses->shipper_status_id == 7){
+                    } else if ($statuses->shipper_status_id == 7) {
                         return 'statusNotattempted';
-                    }
-                    else if ($statuses->shipper_status_id == 8){
+                    } else if ($statuses->shipper_status_id == 8) {
                         return 'statusDeliveryunsuccessful';
-                    }
-                    else if ($statuses->shipper_status_id == 9){
+                    } else if ($statuses->shipper_status_id == 9) {
                         return 'statusOnhold';
                     }
                 }
             ])
-            ->editColumn('count_link', function ($shipments) use($from, $to, $service_type_id, $hub) {
-                if($shipments->count > 0){
+            ->editColumn('count_link', function ($shipments) use ($from, $to, $service_type_id, $hub) {
+                if ($shipments->count > 0) {
                     $route = route('admin.operation_forecasting.incoming.shipments_list');
                     return "<u><a href='{$route}/$from/$to/$service_type_id/$hub/$shipments->shipper_status_id' class='white' target='_blank'>$shipments->count</a></u>";
-                }
-                else{
+                } else {
                     return 0;
                 }
             });
         return $datatable->make(true);
     }
-    public function delivered_returned_list(Request $request){
-        if($request->get('search_date_from') && $request->get('search_date_to')){
+
+    public function delivered_returned_list(Request $request)
+    {
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-        }
-        else{
+        } else {
             $from = Carbon::now()->subDays(29);
             $to = Carbon::now()->endOfDay();
         }
-        if($request->get('search_hub')){
+        if ($request->get('search_hub')) {
             $hub = $request->get('search_hub');
-        }
-        else{
+        } else {
             $admin = Admin::where('id', Auth::id())->first();
             $hub = $admin->default_hub_id;
         }
-        if($request->get('search_service_type')){
+        if ($request->get('search_service_type')) {
             $service_type_id = $request->get('search_service_type');
-        }
-        else{
+        } else {
             $service_type_id = 1;
         }
         $operation_incoming_delivered_returned = OperationForecast::leftjoin('shipment_status as ss', 'ss.id', '=', 'operation_forecasts.shipper_status_id')
-            ->select('operation_forecasts.id as opfs_id', 'ss.id as shipper_status_id', 'ss.name as status', DB::raw('(SELECT SUM(count) FROM operation_forecasts AS opfs WHERE opfs.shipper_status_id = operation_forecasts.shipper_status_id AND opfs.hub_id = "' . $hub . '" AND opfs.booking_type_id = "' . $service_type_id . '" AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
+            ->select('operation_forecasts.id as opfs_id', 'ss.id as shipper_status_id', 'ss.name as status', DB::raw('(SELECT SUM(count) FROM operation_forecasts AS opfs WHERE opfs.shipper_status_id = operation_forecasts.shipper_status_id AND opfs.hub_id = "' . $hub . '" AND opfs.booking_type_id = "' . $service_type_id . '" AND updated_at BETWEEN "' . $from . '" AND "' . $to . '") AS count'))
             ->whereIn('shipper_status_id', [14, 25, 30, 31])
             ->where('operation_forecasts.hub_id', $hub)
             ->where('operation_forecasts.booking_type_id', $service_type_id)
@@ -1275,101 +1258,100 @@ class AdminDashboardController extends Controller
             ->groupBy('shipper_status_id')
             ->orderBy('shipper_status_id', 'asc');
         $datatable = Datatables::of($operation_incoming_delivered_returned)
-            ->editColumn('count_link', function ($shipments) use($from, $to, $service_type_id, $hub) {
-                if($shipments->count > 0){
+            ->editColumn('count_link', function ($shipments) use ($from, $to, $service_type_id, $hub) {
+                if ($shipments->count > 0) {
                     $route = route('admin.operation_forecasting.incoming.shipments_list');
                     return "<u><a href='{$route}/$from/$to/$service_type_id/$hub/$shipments->shipper_status_id' target='_blank'>$shipments->count</a></u>";
-                }
-                else{
+                } else {
                     return 0;
                 }
             });
         return $datatable->make(true);
     }
-    public function outgoing_top_customers_list(Request $request){
-        if($request->get('search_date_from') && $request->get('search_date_to')){
+
+    public function outgoing_top_customers_list(Request $request)
+    {
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-        }
-        else{
+        } else {
             $from = Carbon::now()->subDays(29);
             $to = Carbon::now()->endOfDay();
         }
 
-        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('operations_outgoing_top_customers.id as id', 'u.name as name', 'u.id as user_id', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))
-            ->whereBetween('operations_outgoing_top_customers.created_at',[$from,$to])
+        $outgoing_top_five_customers = OperationsOutgoingTopCustomers::leftjoin('users as u', 'u.id', '=', 'operations_outgoing_top_customers.user_id')->select('operations_outgoing_top_customers.id as id', 'u.name as name', 'u.id as user_id', DB::raw('(SELECT SUM(shipments_count) FROM operations_outgoing_top_customers AS ootc WHERE ootc.user_id = operations_outgoing_top_customers.user_id AND updated_at BETWEEN "' . $from . '" AND "' . $to . '") AS count'))
+            ->whereBetween('operations_outgoing_top_customers.created_at', [$from, $to])
             ->orderBy('count', 'desc')
             ->groupBy('u.id')
             ->take(5);
         $datatable = Datatables::of($outgoing_top_five_customers)
-            ->editColumn('count', function ($shipments) use($from, $to) {
-                if($shipments->count > 0){
+            ->editColumn('count', function ($shipments) use ($from, $to) {
+                if ($shipments->count > 0) {
                     $route = route('admin.operation_forecasting.outgoing.shipments_list');
                     return "<u><a href='{$route}/$from/$to/$shipments->user_id' class='white' target='_blank'>$shipments->count</a></u>";
-                }
-                else{
+                } else {
                     return 0;
                 }
             });
         return $datatable->make(true);
     }
-    public function incoming_weight_range_list(Request $request){
-        if($request->get('search_date_from') && $request->get('search_date_to')){
+
+    public function incoming_weight_range_list(Request $request)
+    {
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-        }
-        else{
+        } else {
             $from = Carbon::now()->subDays(29);
             $to = Carbon::now()->endOfDay();
         }
 
-        if($request->get('search_hub')){
+        if ($request->get('search_hub')) {
             $hub = $request->get('search_hub');
-        }
-        else{
+        } else {
             $admin = Admin::where('id', Auth::id())->first();
             $hub = $admin->default_hub_id;
         }
-        if($request->get('search_service_type')){
+        if ($request->get('search_service_type')) {
             $service_type_id = $request->get('search_service_type');
-        }
-        else{
+        } else {
             $service_type_id = 1;
         }
         $operation_incoming = OperationForecastWeightRange::leftjoin('operation_forecast_shipments as ofss', 'ofss.weight_range_id', '=', 'operation_forecast_weight_ranges.id')
-            ->select('operation_forecast_weight_ranges.name as range', DB::raw('(SELECT count(id) FROM operation_forecast_shipments AS ofs WHERE ofs.weight_range_id = ofss.weight_range_id AND ofs.hub_id = "' . $hub . '"  AND ofs.booking_type_id = "' . $service_type_id . '" AND ofs.updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))->groupBy('operation_forecast_weight_ranges.id');
+            ->select('operation_forecast_weight_ranges.name as range', DB::raw('(SELECT count(id) FROM operation_forecast_shipments AS ofs WHERE ofs.weight_range_id = ofss.weight_range_id AND ofs.hub_id = "' . $hub . '"  AND ofs.booking_type_id = "' . $service_type_id . '" AND ofs.updated_at BETWEEN "' . $from . '" AND "' . $to . '") AS count'))->groupBy('operation_forecast_weight_ranges.id');
         $datatable = Datatables::of($operation_incoming);
         return $datatable->make(true);
     }
-    public function outgoing_weight_range_list(Request $request){
-        if($request->get('search_date_from') && $request->get('search_date_to')){
+
+    public function outgoing_weight_range_list(Request $request)
+    {
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-        }
-        else{
+        } else {
             $from = Carbon::now()->subDays(29);
             $to = Carbon::now()->endOfDay();
         }
 
-        if($request->get('search_hub')){
+        if ($request->get('search_hub')) {
             $hub = $request->get('search_hub');
-        }
-        else{
+        } else {
             $admin = Admin::where('id', Auth::id())->first();
             $hub = $admin->default_hub_id;
         }
-        if($request->get('search_service_type')){
+        if ($request->get('search_service_type')) {
             $service_type_id = $request->get('search_service_type');
-        }
-        else{
+        } else {
             $service_type_id = 1;
         }
         $operation_outgoing = OperationForecastWeightRange::leftjoin('operations_outgoing_pickup_request_shipments as ooprs', 'ooprs.weight_range_id', '=', 'operation_forecast_weight_ranges.id')
-            ->select('operation_forecast_weight_ranges.name as range', DB::raw('(SELECT count(id) FROM operations_outgoing_pickup_request_shipments AS oopr WHERE oopr.weight_range_id = ooprs.weight_range_id AND oopr.hub_id = "' . $hub . '"  AND oopr.booking_type_id = "' . $service_type_id . '" AND oopr.updated_at BETWEEN "'. $from .'" AND "'. $to .'") AS count'))->groupBy('operation_forecast_weight_ranges.id');
+            ->select('operation_forecast_weight_ranges.name as range', DB::raw('(SELECT count(id) FROM operations_outgoing_pickup_request_shipments AS oopr WHERE oopr.weight_range_id = ooprs.weight_range_id AND oopr.hub_id = "' . $hub . '"  AND oopr.booking_type_id = "' . $service_type_id . '" AND oopr.updated_at BETWEEN "' . $from . '" AND "' . $to . '") AS count'))->groupBy('operation_forecast_weight_ranges.id');
         $datatable = Datatables::of($operation_outgoing);
         return $datatable->make(true);
     }
-    public function shipments_list($from, $to, $service_type_id , $hub, $shipper_status_id){
+
+    public function shipments_list($from, $to, $service_type_id, $hub, $shipper_status_id)
+    {
         $operation_forecasting_ids = OperationForecast::select('operation_forecasts.id as id')
             ->where('operation_forecasts.shipper_status_id', $shipper_status_id)
             ->where('operation_forecasts.hub_id', $hub)
@@ -1382,72 +1364,83 @@ class AdminDashboardController extends Controller
             ->whereBetween('operation_forecast_shipments.updated_at', [$from, $to])
             ->groupBy('s.id')
             ->get();
-        if(!empty($operation_forecasting_shipments_list)){
-            return view('admin.operation_forecasting.index')->with(['shipments'=>$operation_forecasting_shipments_list]);
+        if (!empty($operation_forecasting_shipments_list)) {
+            return view('admin.operation_forecasting.index')->with(['shipments' => $operation_forecasting_shipments_list]);
         }
     }
-    public function outgoing_shipments_list($from, $to, $user_id){
+
+    public function outgoing_shipments_list($from, $to, $user_id)
+    {
         $top_customers = OperationsOutgoingTopCustomers::select('operations_outgoing_top_customers.id as id')
             ->where('operations_outgoing_top_customers.user_id', $user_id)
             ->whereBetween('operations_outgoing_top_customers.updated_at', [$from, $to])
             ->pluck('id')->toArray();
         $operation_outgoing_top_customer = OperationsOutgoingTopCustomersShipments::leftjoin('shipments as s', 's.id', '=', 'operations_outgoing_top_customers_shipments.shipment_id')
             ->whereIn('operations_outgoing_top_customers_shipments.customer_id', $top_customers)
-            ->whereBetween('operations_outgoing_top_customers_shipments.updated_at', [$from,$to])
+            ->whereBetween('operations_outgoing_top_customers_shipments.updated_at', [$from, $to])
             ->groupBy('s.id')
             ->get();
-        if(!empty($operation_outgoing_top_customer)) {
+        if (!empty($operation_outgoing_top_customer)) {
             return view('admin.operation_forecasting.outgoing_index')->with('shipments', $operation_outgoing_top_customer);
         }
     }
 
-    public function orderPending(){
+    public function orderPending()
+    {
         return view('admin.pending_booked_orders');
     }
-    public function pendingAccountsList(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),1);
-        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
-        $products = Product::select('id','product_name')->get();
+
+    public function pendingAccountsList()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 1);
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
+        $products = Product::select('id', 'product_name')->get();
         $segments = Segment::all();
-        $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
+        $sale_tier_types = Admin::where('admins.status', 1)->where('role_id', '!=', 1)->get();
         $corporate_rate_types = CorporateRateType::all();
-        $territories = Territory::select('id','name')->where('territory_status', '=', '1')->get();
-        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'segments'=>$segments,'sale_name'=>$salesperson ,'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types,'territories' => $territories]);
+        $territories = Territory::select('id', 'name')->where('territory_status', '=', '1')->get();
+        return view('admin.accounts.pending_accounts_list')->with(['products' => $products, 'segments' => $segments, 'sale_name' => $salesperson, 'sale_tier_types' => $sale_tier_types, 'corporate_rate_types' => $corporate_rate_types, 'territories' => $territories]);
     }
-    public function activeAccountsList(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),2);
+
+    public function activeAccountsList()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 2);
         $shippers = User::whereIn('status', [3, 4])->get();
-        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
-        $products = Product::select('id','product_name')->get();
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
+        $products = Product::select('id', 'product_name')->get();
         $segments = Segment::all();
-        $general_segments = SubCategorySegment::where('segment_id',1)->get();
-        $ecom_segments = SubCategorySegment::where('segment_id',2)->get();
+        $general_segments = SubCategorySegment::where('segment_id', 1)->get();
+        $ecom_segments = SubCategorySegment::where('segment_id', 2)->get();
         $payment_cycles = PaymentCycle::all();
-        $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
-        $territories = Territory::select('id','name')->where('territory_status', '=', '1')->get();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments,'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments ,'sale_tier_types' => $sale_tier_types,'territories' => $territories]);
+        $sale_tier_types = Admin::where('admins.status', 1)->where('role_id', '!=', 1)->get();
+        $territories = Territory::select('id', 'name')->where('territory_status', '=', '1')->get();
+        return view('admin.accounts.active_accounts_list')->with(['products' => $products, 'sale_name' => $salesperson, 'shippers' => $shippers, 'payment_cycles' => $payment_cycles, 'segments' => $segments, 'ecom_segments' => $ecom_segments, 'general_segments' => $general_segments, 'sale_tier_types' => $sale_tier_types, 'territories' => $territories]);
 
     }
-    public function blockAccountsList(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),275);
-        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
-        $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
-        return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson,'sale_tier_types' => $sale_tier_types]);
+
+    public function blockAccountsList()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 275);
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('ar.department_id', 7)->get();
+        $sale_tier_types = Admin::where('admins.status', 1)->where('role_id', '!=', 1)->get();
+        return view('admin.accounts.block_accounts_list')->with(['sale_name' => $salesperson, 'sale_tier_types' => $sale_tier_types]);
     }
-    public function UserStatus(Request $request){
+
+    public function UserStatus(Request $request)
+    {
 
         $id = $request->shid; //shipper id
         $status = $request->status;
         $user = User::find($id);
-        if(!$user){
+        if (!$user) {
             return back()->with('danger', 'User not found.');
         }
-        if($status == 'activate'){
+        if ($status == 'activate') {
 
-            if($user->status == 2){
+            if ($user->status == 2) {
                 $now = Carbon::now();
-                $action = User::where('id',$user->id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now ,'reactivated_at'=>$now ]);
-                if($user->lead_id != null){
+                $action = User::where('id', $user->id)->update(['status' => 3, 'account_activated_by' => Auth::id(), 'activated_at' => $now, 'reactivated_at' => $now]);
+                if ($user->lead_id != null) {
                     $lead = Lead::find($user->lead_id);
                     $lead_log = new LeadLog();
                     $lead_log->lead_id = $lead->id;
@@ -1462,20 +1455,22 @@ class AdminDashboardController extends Controller
                     $lead->updated_by = Auth::id();
                     $lead->save();
                 }
-                if($action == 1){
+                if ($action == 1) {
                     NotificationsController::send(1, $user->id);
 
                     return redirect()->route('admin.accounts.active')->with('success', 'User is activated.');
-                }else{
+                } else {
                     return back()->with('danger', 'There is some problem please try again.');
                 }
-            }else{
+            } else {
                 return back()->with('danger', 'This user\'s rates are not set.');
             }
         }
 
     }
-    public function tagSubmit(Request $request){
+
+    public function tagSubmit(Request $request)
+    {
         $tag_id = $request->admin_id;
         $shipper_id = $request->shipper_id;
         $user = User::find($shipper_id);
@@ -1483,58 +1478,57 @@ class AdminDashboardController extends Controller
         $sale_persons = array();
         $old_sale_person = '';
         $new_sale_person = '';
-        if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()){
-            if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){
+        if (AdminHub::where('admin_id', $tag_id)->where('hub_id', $shipper_hub_id)->exists()) {
+            if (!SalePersonTag::where(['admin_id' => $tag_id, 'user_id' => $shipper_id, 'status' => 0])->exists()) {
                 $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
                 $old_sale_person_date = $old_sale_person->created_at;
-                if($old_sale_person){
+                if ($old_sale_person) {
                     $old_sale_person = $old_sale_person->sales_person;
-                }
-                else{
+                } else {
                     $old_sale_person = null;
                 }
                 $new_sale_person = Admin::find($tag_id);
-                $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->get();
-                if($shipper_data->count() > 0){
-                    SalePersonTag::where('user_id',$shipper_id)->where('status',0)->update(['status' => 1]);
+                $shipper_data = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->get();
+                if ($shipper_data->count() > 0) {
+                    SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->update(['status' => 1]);
                 }
                 $shipper = User::find($shipper_id);
                 $sale_person_tag = new SalePersonTag();
-                $sale_person_tag->admin_id=$tag_id;
-                $sale_person_tag->user_id=$shipper_id;
+                $sale_person_tag->admin_id = $tag_id;
+                $sale_person_tag->user_id = $shipper_id;
                 $sale_person_tag->save();
-                $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date ];
+                $sale_persons[$shipper_id] = ['old_sale_person' => $old_sale_person, 'new_sale_person' => $new_sale_person, 'old_sale_person_date' => $old_sale_person_date];
                 NotificationsController::send(81, $sale_persons, Auth::id());
                 NotificationsController::send(119, $sale_persons, Auth::id());
 
 
-            }
-            else{
-                return ['status'=>0,'error'=>"Shipper is already tagged to  Sales Person!"];
+            } else {
+                return ['status' => 0, 'error' => "Shipper is already tagged to  Sales Person!"];
             }
 
-            return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
-        }
-        else{
-            return ['status'=>0,'error'=>"Shipper is not tagged to Sales Person!"];
+            return ['status' => 1, 'success' => "Shipper is tagged to Sales Person!"];
+        } else {
+            return ['status' => 0, 'error' => "Shipper is not tagged to Sales Person!"];
 
         }
 
     }
-    public function tagSubmitBulk(Request $request){
+
+    public function tagSubmitBulk(Request $request)
+    {
         $tag_id = $request->admin_id;
         $shipper_ids = $request->shipper_ids;
         $sale_persons = array();
-        if($shipper_ids){
-            foreach ($shipper_ids as $shipper_id){
+        if ($shipper_ids) {
+            foreach ($shipper_ids as $shipper_id) {
                 $old_sale_person_data = '';
                 $old_sale_person_date = '';
                 $user = User::find($shipper_id);
                 $shipper_hub_id = $user->city->hub_id;
-                if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()) {
-                    if(!SalePersonTag::where(['admin_id' => $tag_id, 'user_id' => $shipper_id,'status' => 0])->exists()) {
+                if (AdminHub::where('admin_id', $tag_id)->where('hub_id', $shipper_hub_id)->exists()) {
+                    if (!SalePersonTag::where(['admin_id' => $tag_id, 'user_id' => $shipper_id, 'status' => 0])->exists()) {
                         $old_sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->latest()->first();
-                        if($old_sale_person){
+                        if ($old_sale_person) {
                             $old_sale_person_date = $old_sale_person->created_at;
                             $old_sale_person->status = 1;
                             $old_sale_person->save();
@@ -1552,12 +1546,11 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            NotificationsController::send(81,$sale_persons ,Auth::id());
-            NotificationsController::send(119,$sale_persons ,Auth::id());
-            return ['status'=>1,'success'=>"Shipper is tagged to Sales Person!"];
-        }
-        else{
-            return ['status'=>0,'error'=>"Shipper is not tagged to Sales Person!"];
+            NotificationsController::send(81, $sale_persons, Auth::id());
+            NotificationsController::send(119, $sale_persons, Auth::id());
+            return ['status' => 1, 'success' => "Shipper is tagged to Sales Person!"];
+        } else {
+            return ['status' => 0, 'error' => "Shipper is not tagged to Sales Person!"];
         }
     }
 
@@ -1566,10 +1559,10 @@ class AdminDashboardController extends Controller
         $shipper_id = $request->shipper_id;
         $reject_reason = $request->rejected_reason;
         $user = User::find($shipper_id);
-        if($user->status != 3){
+        if ($user->status != 3) {
             $user->status = 5;
         }
-        if($user->rate_type_id_status == 1){
+        if ($user->rate_type_id_status == 1) {
             $user->rate_type_id_status = 2;
         }
         $user->rejected_reason = $reject_reason;
@@ -1577,17 +1570,19 @@ class AdminDashboardController extends Controller
         $user->rates_rejected_by = Auth::id();
         $user->rates_rejected_at = Carbon::now();
         $user->save();
-        NotificationsController::send(64, $shipper_id );
+        NotificationsController::send(64, $shipper_id);
         return ['success' => 'Rates has been rejected!'];
     }
-    public function UserStatusBlock(Request $request){
+
+    public function UserStatusBlock(Request $request)
+    {
         $user_id = $request->id;
         $reason = $request->reason;
         $status = $request->status;
-        $user = User::where('id',$user_id);
-        if($user->exists()){
+        $user = User::where('id', $user_id);
+        if ($user->exists()) {
             $user = $user->first();
-            if($status == 'block'){
+            if ($status == 'block') {
                 $negative_balance_status = false;
                 $merged_account = MergedSisterAccount::where('user_id', $user_id);
                 if ($merged_account->exists()) {
@@ -1603,8 +1598,7 @@ class AdminDashboardController extends Controller
                             }
                         }
                     }
-                }
-                else{
+                } else {
                     $pending_payment_shipper = PendingPayment::where('user_id', $user_id);
                     if ($pending_payment_shipper->exists()) {
                         $pending_payment_shipper = $pending_payment_shipper->first();
@@ -1614,79 +1608,100 @@ class AdminDashboardController extends Controller
                         }
                     }
                 }
-                if($negative_balance_status == false){
-                    if($user->blacklist == 0){
+                if ($negative_balance_status == false) {
+                    if ($user->blacklist == 0) {
                         $user->blacklist = 1;
                         $user->blacklist_reason = $reason;
                         $user->save();
-                        return response()->json(['status'=>1,'success'=>"User added to the blacklist!"]);
-                    }else{
-                        return response()->json(['status'=>0,'error'=>"User is already in blacklist!"]);
+                        return response()->json(['status' => 1, 'success' => "User added to the blacklist!"]);
+                    } else {
+                        return response()->json(['status' => 0, 'error' => "User is already in blacklist!"]);
                     }
+                } else {
+                    return response()->json(['status' => 0, 'error' => "Negative balance found!"]);
                 }
-                else{
-                    return response()->json(['status'=>0,'error'=>"Negative balance found!"]);
-                }
-            }else if($status == 'unblock'){
-                if($user->blacklist == 1){
+            } else if ($status == 'unblock') {
+                if ($user->blacklist == 1) {
                     $user->blacklist = 0;
                     $user->save();
-                    return response()->json(['status'=>1,'success'=>"User removed from the blacklist!"]);
-                }else{
-                    return response()->json(['status'=>0,'error'=>"User is not in the blacklist!"]);
+                    return response()->json(['status' => 1, 'success' => "User removed from the blacklist!"]);
+                } else {
+                    return response()->json(['status' => 0, 'error' => "User is not in the blacklist!"]);
                 }
             }
 
-        }else{
-            return response()->json(['status'=>0,'error'=>"User doesn\'t exist!"]);
+        } else {
+            return response()->json(['status' => 0, 'error' => "User doesn\'t exist!"]);
         }
     }
-    public function UserStatusChange(Request $request){
+
+    public function UserStatusChange(Request $request)
+    {
         $user_id = $request->id;
         $status = $request->status;
-        $user = User::where('id',$user_id);
-        if($user->exists()){
+        $user = User::where('id', $user_id);
+        if ($user->exists()) {
             $user = $user->first();
-            if($status == 'enable'){
-                if($user->status == 4){
+            if ($status == 'enable') {
+                if ($user->status == 4) {
                     $user->status = 3;
                     $user->disable_remarks = null;
                     $user->reactivated_at = Carbon::now();
-                    $user->disable_at = null;
+//                    $user->disable_at = null;
 
                     $user->save();
-                    return response()->json(['status'=>1,'success'=>"User is now enabled!"]);
-                }else{
-                    return response()->json(['status'=>0,'error'=>"User is already enabled!"]);
+                    return response()->json(['status' => 1, 'success' => "User is now enabled!"]);
+                } else {
+                    return response()->json(['status' => 0, 'error' => "User is already enabled!"]);
                 }
-            }else if($status == 'disable'){
-                if($user->status == 3){
+            } else if ($status == 'disable') {
+                if ($user->status == 3) {
                     $user->disable_at = Carbon::now();
 
                     $user->status = 4;
                     $user->save();
-                    return response()->json(['status'=>1,'success'=>"User is now disabled!"]);
-                }else{
-                    return response()->json(['status'=>0,'error'=>"User is already disabled!"]);
+
+                    //                    add row in user_check_status table
+                    $userstatus = UserCheckStatus::where('user_id', $user_id)->count();
+
+                    if ($userstatus == 1) {
+//                        dd('exist');
+                        $userstatus = UserCheckStatus::where('user_id', $user_id)->first();
+                        $count = $userstatus->status_count + 1;
+                        $userstatus->status_count = $count;
+                        $userstatus->save();
+                    } elseif ($userstatus == 0) {
+//                        dd('not exist');
+                        $userstatus = new UserCheckStatus();
+                        $userstatus->user_id = $user_id;
+                        $userstatus->status = $user->status;
+                        $userstatus->status_count =$userstatus->status_count + 1;
+                        $userstatus->save();
+                    }
+                    //                    add row in user_status table end
+
+                    return response()->json(['status' => 1, 'success' => "User is now disabled!"]);
+                } else {
+                    return response()->json(['status' => 0, 'error' => "User is already disabled!"]);
 
                 }
             }
-        }else{
-            return response()->json(['status'=>0,'error'=>"User doesn\'t exist!"]);
+        } else {
+            return response()->json(['status' => 0, 'error' => "User doesn\'t exist!"]);
         }
     }
 
 
-
     /**
      * @return \Illuminate\Http\JsonResponse
      * @throws \Throwable
      */
-    public function viewBankInfo($id){
+    public function viewBankInfo($id)
+    {
         $user = User::find($id);
         $banks = $user->bank;
 //        return $banks;
-        $returnHTML = view('admin/components/bank')->with(['banks'=>$banks,'user'=>$user])->render();
+        $returnHTML = view('admin/components/bank')->with(['banks' => $banks, 'user' => $user])->render();
         return response()->json($returnHTML);
     }
 
@@ -1695,10 +1710,11 @@ class AdminDashboardController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Throwable
      */
-    public function viewShippingInfo($id){
+    public function viewShippingInfo($id)
+    {
         $user = User::find($id);
-        $shipping = $user->shipping()->where('hidden',0)->get();
-        $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
+        $shipping = $user->shipping()->where('hidden', 0)->get();
+        $returnHTML = view('admin.components.shipping')->with(['shipping' => $shipping, 'user' => $user])->render();
         return response()->json($returnHTML);
     }
 
@@ -1707,16 +1723,18 @@ class AdminDashboardController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Throwable
      */
-    public function viewShipperRates($id){
+    public function viewShipperRates($id)
+    {
         $user = User::find($id);
         $shipping = $user->shipping;
-        $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
+        $returnHTML = view('admin.components.shipping')->with(['shipping' => $shipping, 'user' => $user])->render();
         return response()->json($returnHTML);
     }
 
-    public function addRatesView($id){
+    public function addRatesView($id)
+    {
         $user = User::find($id);
-        if(!RateStatus::where('user_id', $user->id)->exists()) {
+        if (!RateStatus::where('user_id', $user->id)->exists()) {
             $sale_person = SalePersonTag::where('user_id', $id)->first();
             $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
             $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
@@ -1779,7 +1797,7 @@ class AdminDashboardController extends Controller
             $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
             return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities]);
         }
-        return redirect()->back()->with('error','User rates not found!');
+        return redirect()->back()->with('error', 'User rates not found!');
     }
 //    public function salesTag(Request $name)
 //    {
@@ -1787,230 +1805,219 @@ class AdminDashboardController extends Controller
 //            ->join('admin_roles as ar', 'ar.department_id', '=', 7)->get();
 //    }
 
-    public function viewRates($id,$date = null){
+    public function viewRates($id, $date = null)
+    {
 
-            $user = User::find($id);
-            $dws_weight = PendingDwsWeightCharges::where('user_id',$id);
-
-            $on_dws_charges = null;
-            $ol_dws_charges = null;
-            $detain_dws_charges = null;
-            $sameday_dws_charges = null;
-    
-            if($dws_weight->exists()){
-                $dws_weight = $dws_weight->get();
-                foreach ($dws_weight as $value) {
-                    if($value->shipping_mode_id == 1){
-                        $on_dws_charges = $value->dws_weight_status;
-    
-                    }elseif($value->shipping_mode_id == 2){
-                        $ol_dws_charges = $value->dws_weight_status;
-    
-                    }elseif($value->shipping_mode_id == 3){
-                        $detain_dws_charges = $value->dws_weight_status;
-                        
-                    }elseif($value->shipping_mode_id == 4){
-                        $sameday_dws_charges = $value->dws_weight_status;
-                        
-                    }
-                }
-            }
-            if($date == null){
-                $cash = CashHandlingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-                $insurance = InsuranceCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-                $return = ReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-                $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-                $weight = WeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-                $bookingType = BookingTypeCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-                $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-                $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-                $rate_origin_hubs = RateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-                $rate_destination_hubs = RateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-
-            }
-            else{
-                $tomorrow = Carbon::parse($date)->addDay(1);
-                $cash = HistoryCashHandlingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
-                $insurance = HistoryInsuranceCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
-                $return = HistoryReturnCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
-                $fuel = HistoryFuelSurcharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
-                $weight = HistoryWeightCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
-                $bookingType = HistoryBookingTypeCharges::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
-                $switches = HistoryRateStatus::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
-                $discount = HistoryDiscountCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
-                $rate_origin_hubs = HistoryRateOriginHub::all()->where('user_id',$id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
-                $rate_destination_hubs = HistoryRateDestinationHub::all()->where('user_id',$id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
-
-            }
-
-
-            $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
-            $packaging = PackagingCharge::all()->where('user_id', $id);
-            $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
-
-            $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
-            $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
-            $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
-            $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
-            $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
-            $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
-            $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
-            $storage_types = WmsStorageType::all()->where('status', 1);
-            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
-            $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
-            $packaging_charges = array();
-            if(count($packaging) > 0){
-
-                foreach($packaging as $charge){
-                    $packaging_charges[$charge->type_id][] = $charge;
-                }
-            }
-
-            $sales_commission = SalesCommission::where('shipper_id', $id)->first();
-
-            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
-
-            $overnight_origins = [];
-            $overland_origins = [];
-            $detain_origins = [];
-            $sameday_origins = [];
-            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
-                foreach($rate_origin_hubs as $index => $origin){
-
-                    if($index == 1){
-                        foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->city_id;
-                        }
-                    }
-                    else if($index == 2){
-                        foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->city_id;
-                        }
-                    }
-                    else if($index == 3){
-                        foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->city_id;
-                        }
-                    }
-                    else if($index == 4){
-                        foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->city_id;
-                        }
-                    }
-
-                }
-            }
-            $overnight_destinations = [];
-            $overland_destinations = [];
-            $detain_destinations = [];
-            $sameday_destinations = [];
-            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
-                foreach($rate_destination_hubs as $index => $destination){
-
-                    if($index == 1){
-                        foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->city_id;
-                        }
-                    }
-                    else if($index == 2){
-                        foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->city_id;
-                        }
-                    }
-                    else if($index == 3){
-                        foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->city_id;
-                        }
-                    }
-                    else if($index == 4){
-                        foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->city_id;
-                        }
-                    }
-
-                }
-            }
-
-
-
-            if(session('department_id') == 7){
-                if($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))){
-                    return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
-                }
-                else{
-                    return view('admin.access_denied');
-                }
-            }
-            else{
-                return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks,'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
-            }
-    }
-
-
-    public function editRatesView($id){
-        $dws_weight = PendingDwsWeightCharges::where('user_id',$id);
+        $user = User::find($id);
+        $dws_weight = PendingDwsWeightCharges::where('user_id', $id);
 
         $on_dws_charges = null;
         $ol_dws_charges = null;
         $detain_dws_charges = null;
         $sameday_dws_charges = null;
 
-        if($dws_weight->exists()){
+        if ($dws_weight->exists()) {
             $dws_weight = $dws_weight->get();
             foreach ($dws_weight as $value) {
-                if($value->shipping_mode_id == 1){
+                if ($value->shipping_mode_id == 1) {
                     $on_dws_charges = $value->dws_weight_status;
 
-                }elseif($value->shipping_mode_id == 2){
+                } elseif ($value->shipping_mode_id == 2) {
                     $ol_dws_charges = $value->dws_weight_status;
 
-                }elseif($value->shipping_mode_id == 3){
+                } elseif ($value->shipping_mode_id == 3) {
                     $detain_dws_charges = $value->dws_weight_status;
-                    
-                }elseif($value->shipping_mode_id == 4){
+
+                } elseif ($value->shipping_mode_id == 4) {
                     $sameday_dws_charges = $value->dws_weight_status;
-                    
+
+                }
+            }
+        }
+        if ($date == null) {
+            $cash = CashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $insurance = InsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $return = ReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $fuel = FuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $bookingType = BookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $rate_origin_hubs = RateOriginHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = RateDestinationHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
+        } else {
+            $tomorrow = Carbon::parse($date)->addDay(1);
+            $cash = HistoryCashHandlingCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $insurance = HistoryInsuranceCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $return = HistoryReturnCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $fuel = HistoryFuelSurcharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $weight = HistoryWeightCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $bookingType = HistoryBookingTypeCharges::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $switches = HistoryRateStatus::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $discount = HistoryDiscountCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $rate_origin_hubs = HistoryRateOriginHub::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = HistoryRateDestinationHub::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+
+        }
+
+
+        $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
+        $packaging = PackagingCharge::all()->where('user_id', $id);
+        $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
+
+        $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
+        $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
+        $wms_product_charges = WmsPerProductCharge::where('user_id', $id)->first();
+        $wms_square_foot_charges = WmsPerSquareFootCharge::where('user_id', $id)->first();
+        $wms_packing_charges = WmsPackingCharge::where('user_id', $id)->get();
+        $wms_labelling_charges = WmsLabellingCharge::where('user_id', $id)->first();
+        $wms_storage_charges = WmsStorageTypeCharge::where('user_id', $id)->get();
+        $storage_types = WmsStorageType::all()->where('status', 1);
+        $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
+        $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at', 'desc')->get();
+        $packaging_charges = array();
+        if (count($packaging) > 0) {
+
+            foreach ($packaging as $charge) {
+                $packaging_charges[$charge->type_id][] = $charge;
+            }
+        }
+
+        $sales_commission = SalesCommission::where('shipper_id', $id)->first();
+
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+        $overnight_origins = [];
+        $overland_origins = [];
+        $detain_origins = [];
+        $sameday_origins = [];
+        if ($rate_origin_hubs || count($rate_origin_hubs) > 0) {
+            foreach ($rate_origin_hubs as $index => $origin) {
+
+                if ($index == 1) {
+                    foreach ($origin as $origin_data) {
+                        $overnight_origins[] = $origin_data->city_id;
+                    }
+                } else if ($index == 2) {
+                    foreach ($origin as $origin_data) {
+                        $overland_origins[] = $origin_data->city_id;
+                    }
+                } else if ($index == 3) {
+                    foreach ($origin as $origin_data) {
+                        $detain_origins[] = $origin_data->city_id;
+                    }
+                } else if ($index == 4) {
+                    foreach ($origin as $origin_data) {
+                        $sameday_origins[] = $origin_data->city_id;
+                    }
+                }
+
+            }
+        }
+        $overnight_destinations = [];
+        $overland_destinations = [];
+        $detain_destinations = [];
+        $sameday_destinations = [];
+        if ($rate_destination_hubs || count($rate_destination_hubs) > 0) {
+            foreach ($rate_destination_hubs as $index => $destination) {
+
+                if ($index == 1) {
+                    foreach ($destination as $destination_data) {
+                        $overnight_destinations[] = $destination_data->city_id;
+                    }
+                } else if ($index == 2) {
+                    foreach ($destination as $destination_data) {
+                        $overland_destinations[] = $destination_data->city_id;
+                    }
+                } else if ($index == 3) {
+                    foreach ($destination as $destination_data) {
+                        $detain_destinations[] = $destination_data->city_id;
+                    }
+                } else if ($index == 4) {
+                    foreach ($destination as $destination_data) {
+                        $sameday_destinations[] = $destination_data->city_id;
+                    }
+                }
+
+            }
+        }
+
+
+        if (session('department_id') == 7) {
+            if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
+                return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+            } else {
+                return view('admin.access_denied');
+            }
+        } else {
+            return view('admin.accounts.view_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+        }
+    }
+
+
+    public function editRatesView($id)
+    {
+        $dws_weight = PendingDwsWeightCharges::where('user_id', $id);
+
+        $on_dws_charges = null;
+        $ol_dws_charges = null;
+        $detain_dws_charges = null;
+        $sameday_dws_charges = null;
+
+        if ($dws_weight->exists()) {
+            $dws_weight = $dws_weight->get();
+            foreach ($dws_weight as $value) {
+                if ($value->shipping_mode_id == 1) {
+                    $on_dws_charges = $value->dws_weight_status;
+
+                } elseif ($value->shipping_mode_id == 2) {
+                    $ol_dws_charges = $value->dws_weight_status;
+
+                } elseif ($value->shipping_mode_id == 3) {
+                    $detain_dws_charges = $value->dws_weight_status;
+
+                } elseif ($value->shipping_mode_id == 4) {
+                    $sameday_dws_charges = $value->dws_weight_status;
+
                 }
             }
         }
         $user = User::find($id);
-        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
+        $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
         $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
         $on = null;
         $ol = null;
         $det = null;
         $same_day = null;
-        foreach($minimum_chargeable_weights as $minimum_chargeable_weight){
-            if($minimum_chargeable_weight->shipping_mode_id == 1){
+        foreach ($minimum_chargeable_weights as $minimum_chargeable_weight) {
+            if ($minimum_chargeable_weight->shipping_mode_id == 1) {
                 $on = $minimum_chargeable_weight->weight;
-            }
-            elseif($minimum_chargeable_weight->shipping_mode_id == 2){
+            } elseif ($minimum_chargeable_weight->shipping_mode_id == 2) {
                 $ol = $minimum_chargeable_weight->weight;
-            }
-            elseif($minimum_chargeable_weight->shipping_mode_id == 3){
+            } elseif ($minimum_chargeable_weight->shipping_mode_id == 3) {
                 $det = $minimum_chargeable_weight->weight;
-            }
-            else{
+            } else {
                 $same_day = $minimum_chargeable_weight->weight;
             }
         }
 
         $commission_percentage = '';
         $settings = GlobalSettings::where('type', 'commission_percentage');
-        if($settings->exists()){
+        if ($settings->exists()) {
             $settings = $settings->first();
             $commission_percentage = $settings->text;
         }
-        $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission','sales_status']);
-        $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id'])->where('admins.status', 1)->get();
+        $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission', 'sales_status']);
+        $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name', 'ar.department_id'])->where('admins.status', 1)->get();
         $users = array();
         $sales = array();
         $all_users = array();
-        foreach ($admin_users as $admin_user){
+        foreach ($admin_users as $admin_user) {
 
-            if($admin_user->department_id != 7){
+            if ($admin_user->department_id != 7) {
                 $users[] = array('id' => $admin_user->id, 'text' => $admin_user->name);
-            }else{
+            } else {
                 $sales[] = array('id' => $admin_user->id, 'text' => $admin_user->name);
             }
         }
@@ -2022,21 +2029,21 @@ class AdminDashboardController extends Controller
 
         $existing_commission_array = array();
         $sale_commission = SalesCommission::where('shipper_id', $user->id)->first();
-        if($sale_commission){
+        if ($sale_commission) {
             $sale_commission_users = SalesCommissionUser::where('sales_commission_id', $sale_commission->id)->get();
-            if($sale_commission_users){
-                foreach($sale_commission_users as $index => $sale_commission_user){
+            if ($sale_commission_users) {
+                foreach ($sale_commission_users as $index => $sale_commission_user) {
                     $sales_tier = SalesTier::find($sale_commission_user->tier_id);
-                    if($sales_tier){
+                    if ($sales_tier) {
                         $existing_commission_array[$index]['sales_commission_id'] = $sale_commission_user->sales_commission_id;
                         $existing_commission_array[$index]['tier_type_id'] = $sales_tier->tier_type;
                         $existing_commission_array[$index]['tier_id'] = $sale_commission_user->tier_id;
                         $existing_commission_array[$index]['tier_name'] = $sales_tier->tier_name;
-                        if($sales_tier->tier_type == 1){
+                        if ($sales_tier->tier_type == 1) {
                             $com_admin = Admin::find($sale_commission_user->user_id);
                             $existing_commission_array[$index]['user_name'] = $com_admin->name;
                             $existing_commission_array[$index]['user_id'] = $com_admin->id;
-                        }else if($sales_tier->tier_type == 2){
+                        } else if ($sales_tier->tier_type == 2) {
                             $external_user = SalesCommissionExternalUser::find($sale_commission_user->user_id);
                             $existing_commission_array[$index]['user_name'] = $external_user->name;
                         }
@@ -2046,7 +2053,7 @@ class AdminDashboardController extends Controller
             }
         }
 
-        if ((($user['rate_status']>=0) && ($user['status']==1 || $user['status']==5)) || (($user['rate_status']==0) && $user['status']==3)) {
+        if ((($user['rate_status'] >= 0) && ($user['status'] == 1 || $user['status'] == 5)) || (($user['rate_status'] == 0) && $user['status'] == 3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
             $weight = WeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -2069,19 +2076,19 @@ class AdminDashboardController extends Controller
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
             $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
-            $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
+            $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at', 'desc')->get();
             $packaging_sizes = array();
-            if(count($packaging_material_types) > 0){
+            if (count($packaging_material_types) > 0) {
 
-                foreach($packaging_material_types as $type){
+                foreach ($packaging_material_types as $type) {
                     $packaging_sizes[$type->id] = $type->sizes;
                 }
             }
 
             $packaging_charges = array();
-            if(count($packaging) > 0){
+            if (count($packaging) > 0) {
 
-                foreach($packaging as $charge){
+                foreach ($packaging as $charge) {
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
@@ -2090,33 +2097,30 @@ class AdminDashboardController extends Controller
 
             $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
-            $rate_origin_hubs = RateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-            $rate_destination_hubs = RateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $rate_origin_hubs = RateOriginHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = RateDestinationHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
             $overnight_origins = [];
             $overland_origins = [];
             $detain_origins = [];
             $sameday_origins = [];
-            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
-                foreach($rate_origin_hubs as $index => $origin){
+            if ($rate_origin_hubs || count($rate_origin_hubs) > 0) {
+                foreach ($rate_origin_hubs as $index => $origin) {
 
-                    if($index == 1){
-                        foreach($origin as $origin_data){
+                    if ($index == 1) {
+                        foreach ($origin as $origin_data) {
                             $overnight_origins[] = $origin_data->city_id;
                         }
-                    }
-                    else if($index == 2){
-                        foreach($origin as $origin_data){
+                    } else if ($index == 2) {
+                        foreach ($origin as $origin_data) {
                             $overland_origins[] = $origin_data->city_id;
                         }
-                    }
-                    else if($index == 3){
-                        foreach($origin as $origin_data){
+                    } else if ($index == 3) {
+                        foreach ($origin as $origin_data) {
                             $detain_origins[] = $origin_data->city_id;
                         }
-                    }
-                    else if($index == 4){
-                        foreach($origin as $origin_data){
+                    } else if ($index == 4) {
+                        foreach ($origin as $origin_data) {
                             $sameday_origins[] = $origin_data->city_id;
                         }
                     }
@@ -2127,46 +2131,40 @@ class AdminDashboardController extends Controller
             $overland_destinations = [];
             $detain_destinations = [];
             $sameday_destinations = [];
-            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
-                foreach($rate_destination_hubs as $index => $destination){
+            if ($rate_destination_hubs || count($rate_destination_hubs) > 0) {
+                foreach ($rate_destination_hubs as $index => $destination) {
 
-                    if($index == 1){
-                        foreach($destination as $destination_data){
+                    if ($index == 1) {
+                        foreach ($destination as $destination_data) {
                             $overnight_destinations[] = $destination_data->city_id;
                         }
-                    }
-                    else if($index == 2){
-                        foreach($destination as $destination_data){
+                    } else if ($index == 2) {
+                        foreach ($destination as $destination_data) {
                             $overland_destinations[] = $destination_data->city_id;
                         }
-                    }
-                    else if($index == 3){
-                        foreach($destination as $destination_data){
+                    } else if ($index == 3) {
+                        foreach ($destination as $destination_data) {
                             $detain_destinations[] = $destination_data->city_id;
                         }
-                    }
-                    else if($index == 4){
-                        foreach($destination as $destination_data){
+                    } else if ($index == 4) {
+                        foreach ($destination as $destination_data) {
                             $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
                 }
             }
-            if(session('department_id') == 7){
-                if($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))){
-                    return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
-                }
-                else{
+            if (session('department_id') == 7) {
+                if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
+                    return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                } else {
                     return view('admin.access_denied');
                 }
-            }
-            else{
-                return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+            } else {
+                return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
             }
 
-        }
-        elseif(($user['rate_status']>=1) && ($user['status']==3)){
+        } elseif (($user['rate_status'] >= 1) && ($user['status'] == 3)) {
             $e_switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();
@@ -2192,9 +2190,9 @@ class AdminDashboardController extends Controller
             $e_packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
 
             $e_packaging_charges = array();
-            if(count($e_packaging) > 0){
+            if (count($e_packaging) > 0) {
 
-                foreach($e_packaging as $e_charge){
+                foreach ($e_packaging as $e_charge) {
                     $e_packaging_charges[$e_charge->type_id][] = $e_charge;
                 }
             }
@@ -2221,50 +2219,47 @@ class AdminDashboardController extends Controller
             $wms_storage_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
-            $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
+            $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at', 'desc')->get();
             $packaging_charges = array();
             $packaging_sizes = array();
-            if(count($packaging_material_types) > 0){
+            if (count($packaging_material_types) > 0) {
 
-                foreach($packaging_material_types as $type){
+                foreach ($packaging_material_types as $type) {
                     $packaging_sizes[$type->id] = $type->sizes;
                 }
             }
-            if(count($packaging) > 0){
+            if (count($packaging) > 0) {
 
-                foreach($packaging as $charge){
+                foreach ($packaging as $charge) {
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
             $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
-            $rate_origin_hubs = PendingRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-            $rate_destination_hubs = PendingRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $rate_origin_hubs = PendingRateOriginHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = PendingRateDestinationHub::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
             $overnight_origins = [];
             $overland_origins = [];
             $detain_origins = [];
             $sameday_origins = [];
-            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
-                foreach($rate_origin_hubs as $index => $origin){
+            if ($rate_origin_hubs || count($rate_origin_hubs) > 0) {
+                foreach ($rate_origin_hubs as $index => $origin) {
 
-                    if($index == 1){
-                        foreach($origin as $origin_data){
+                    if ($index == 1) {
+                        foreach ($origin as $origin_data) {
                             $overnight_origins[] = $origin_data->city_id;
                         }
-                    }
-                    else if($index == 2){
-                        foreach($origin as $origin_data){
+                    } else if ($index == 2) {
+                        foreach ($origin as $origin_data) {
                             $overland_origins[] = $origin_data->city_id;
                         }
-                    }
-                    else if($index == 3){
-                        foreach($origin as $origin_data){
+                    } else if ($index == 3) {
+                        foreach ($origin as $origin_data) {
                             $detain_origins[] = $origin_data->city_id;
                         }
-                    }
-                    else if($index == 4){
-                        foreach($origin as $origin_data){
+                    } else if ($index == 4) {
+                        foreach ($origin as $origin_data) {
                             $sameday_origins[] = $origin_data->city_id;
                         }
                     }
@@ -2275,26 +2270,23 @@ class AdminDashboardController extends Controller
             $overland_destinations = [];
             $detain_destinations = [];
             $sameday_destinations = [];
-            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
-                foreach($rate_destination_hubs as $index => $destination){
+            if ($rate_destination_hubs || count($rate_destination_hubs) > 0) {
+                foreach ($rate_destination_hubs as $index => $destination) {
 
-                    if($index == 1){
-                        foreach($destination as $destination_data){
+                    if ($index == 1) {
+                        foreach ($destination as $destination_data) {
                             $overnight_destinations[] = $destination_data->city_id;
                         }
-                    }
-                    else if($index == 2){
-                        foreach($destination as $destination_data){
+                    } else if ($index == 2) {
+                        foreach ($destination as $destination_data) {
                             $overland_destinations[] = $destination_data->city_id;
                         }
-                    }
-                    else if($index == 3){
-                        foreach($destination as $destination_data){
+                    } else if ($index == 3) {
+                        foreach ($destination as $destination_data) {
                             $detain_destinations[] = $destination_data->city_id;
                         }
-                    }
-                    else if($index == 4){
-                        foreach($destination as $destination_data){
+                    } else if ($index == 4) {
+                        foreach ($destination as $destination_data) {
                             $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
@@ -2302,27 +2294,25 @@ class AdminDashboardController extends Controller
                 }
             }
             $existing = 1;
-            if(session('department_id') == 7){
-                if($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))){
-                    return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
-                }
-                else{
+            if (session('department_id') == 7) {
+                if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
+                    return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
+                } else {
                     return view('admin.access_denied');
                 }
+            } else {
+                return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges, 'detain_dws_charges' => $detain_dws_charges, 'ol_dws_charges' => $ol_dws_charges, 'on_dws_charges' => $on_dws_charges, 'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'e_switches' => $e_switches, 'e_weight' => $e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling' => $e_cash, 'e_insuranceCharges' => $e_insurance, 'e_returnCharges' => $e_return, 'e_fuelCharges' => $e_fuel, 'e_discountCharges' => $e_discount, 'e_rate_status' => $e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins, 'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
             }
-            else{
-                return view('admin.accounts.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
-            }
-        }
-        else {
+        } else {
             return redirect(route('admin.accounts.pending'));
         }
     }
 
-    public function editRates(Request $request, $id){
+    public function editRates(Request $request, $id)
+    {
         $user = User::find($id);
-        
-        if ($user['status']!=3) {
+
+        if ($user['status'] != 3) {
             $messages = [
                 'on_wa_range_up.*.required' => 'The overnight range up field is required.',
                 'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -2557,10 +2547,10 @@ class AdminDashboardController extends Controller
                     'on_ins_range_down.*' => 'required_if:on_insurance_charges_switch,==,on|numeric',
                     'on_ins_charges.*' => 'required_if:on_insurance_charges_switch,==,on',
                     'on_return_local_charges.*' => 'required_if:on_return_switch,==,on|numeric',
-                    'on_return_class_0_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                    'on_return_class_1_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                    'on_return_class_2_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                    'on_return_class_3_charges.*'=>'required_if:on_return_switch,==,on|numeric',
+                    'on_return_class_0_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                    'on_return_class_1_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                    'on_return_class_2_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                    'on_return_class_3_charges.*' => 'required_if:on_return_switch,==,on|numeric',
                     'overnight_fuel_surcharge' => 'required_if:overnight_fuel_switch,==,on|numeric',
 
                     'on_discount_title' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
@@ -2592,10 +2582,10 @@ class AdminDashboardController extends Controller
                     'ol_ins_range_down.*' => 'required_if:ol_insurance_charges_switch,==,on|numeric',
                     'ol_ins_charges.*' => 'required_if:ol_insurance_charges_switch,==,on',
                     'ol_return_local_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
-                    'ol_return_class_0_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                    'ol_return_class_1_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                    'ol_return_class_2_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                    'ol_return_class_3_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
+                    'ol_return_class_0_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                    'ol_return_class_1_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                    'ol_return_class_2_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                    'ol_return_class_3_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
                     'overland_fuel_surcharge' => 'required_if:overland_fuel_switch,==,on|numeric',
 
                     'ol_discount_title' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
@@ -2627,10 +2617,10 @@ class AdminDashboardController extends Controller
                     'detain_ins_range_down.*' => 'required_if:detain_insurance_charges_switch,==,on|numeric',
                     'detain_ins_charges.*' => 'required_if:detain_insurance_charges_switch,==,on',
                     'detain_return_local_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
-                    'detain_return_class_0_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                    'detain_return_class_1_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                    'detain_return_class_2_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                    'detain_return_class_3_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
+                    'detain_return_class_0_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                    'detain_return_class_1_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                    'detain_return_class_2_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                    'detain_return_class_3_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
                     'detain_fuel_surcharge' => 'required_if:detain_fuel_switch,==,on|numeric',
 
                     'detain_discount_title' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
@@ -2659,10 +2649,10 @@ class AdminDashboardController extends Controller
                     'sameday_ins_range_down.*' => 'required_if:sameday_insurance_charges_switch,==,on|numeric',
                     'sameday_ins_charges.*' => 'required_if:sameday_insurance_charges_switch,==,on',
                     'sameday_return_local_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_return_class_0_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_return_class_1_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_return_class_2charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_return_class_3_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_return_class_0_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_return_class_1_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_return_class_2charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_return_class_3_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
                     'sameday_fuel_surcharge' => 'required_if:sameday_fuel_switch,==,on|numeric',
 
                     'sameday_discount_title' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
@@ -2675,14 +2665,14 @@ class AdminDashboardController extends Controller
                 ];
             }
 
-            if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+            if ($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on') {
                 $warehouse_validations = [
                     'invoicing_cycle' => 'required|numeric',
                     'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
-                    'ppc_charges'=>'required_if:ppc_switch,==,on',
-                    'psf_charges'=>'required_if:psf_switch,==,on',
-                    'storage_type.*'=>'required_if:storage_charges_switch,==,on',
-                    'storage_type_charges.*'=>'required_if:storage_charges_switch,==,on|numeric',
+                    'ppc_charges' => 'required_if:ppc_switch,==,on',
+                    'psf_charges' => 'required_if:psf_switch,==,on',
+                    'storage_type.*' => 'required_if:storage_charges_switch,==,on',
+                    'storage_type_charges.*' => 'required_if:storage_charges_switch,==,on|numeric',
                     'packing_type.*' => 'required_if:packing_charges_switch,==,on',
                     'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
                     'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
@@ -2810,7 +2800,7 @@ class AdminDashboardController extends Controller
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
 
-                if($request->has('on_default') && $request->on_default == 'on'){
+                if ($request->has('on_default') && $request->on_default == 'on') {
                     $default_shipping_mode = User::where('id', $id)->update([
                         'default_shipping_mode' => 1
                     ]);
@@ -2820,8 +2810,8 @@ class AdminDashboardController extends Controller
 
                 if (!$ONRateAlready->isEmpty()) {
                     RateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 1])->delete();
-                    if($request->has('on_origin_hubs')) {
-                        foreach($request->on_origin_hubs as $origin_id){
+                    if ($request->has('on_origin_hubs')) {
+                        foreach ($request->on_origin_hubs as $origin_id) {
                             $rate_origin_hub = new RateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
@@ -2830,8 +2820,8 @@ class AdminDashboardController extends Controller
                         }
                     }
                     RateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 1])->delete();
-                    if($request->has('on_destination_hubs')) {
-                        foreach($request->on_destination_hubs as $destination_id){
+                    if ($request->has('on_destination_hubs')) {
+                        foreach ($request->on_destination_hubs as $destination_id) {
                             $rate_destination_hub = new RateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
@@ -2972,20 +2962,20 @@ class AdminDashboardController extends Controller
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'local' => $request->on_return_local_charges,
-                                'national_charges_class_0'=> $request->on_return_class_0_charges,
-                                'national_charges_class_1'=> $request->on_return_class_1_charges,
-                                'national_charges_class_2'=> $request->on_return_class_2_charges,
-                                'national_charges_class_3'=> $request->on_return_class_3_charges
+                                'national_charges_class_0' => $request->on_return_class_0_charges,
+                                'national_charges_class_1' => $request->on_return_class_1_charges,
+                                'national_charges_class_2' => $request->on_return_class_2_charges,
+                                'national_charges_class_3' => $request->on_return_class_3_charges
                             ]);
                         } elseif ($request->on_return_record == null) {
                             ReturnCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'local' => $request->on_return_local_charges,
-                                'national_charges_class_0'=> $request->on_return_class_0_charges,
-                                'national_charges_class_1'=> $request->on_return_class_1_charges,
-                                'national_charges_class_2'=> $request->on_return_class_2_charges,
-                                'national_charges_class_3'=> $request->on_return_class_3_charges
+                                'national_charges_class_0' => $request->on_return_class_0_charges,
+                                'national_charges_class_1' => $request->on_return_class_1_charges,
+                                'national_charges_class_2' => $request->on_return_class_2_charges,
+                                'national_charges_class_3' => $request->on_return_class_3_charges
                             ]);
                         }
 
@@ -3077,15 +3067,15 @@ class AdminDashboardController extends Controller
                 //dd($weightAlready);
 
                 //shipping_mode 1 //weight_charges 0
-                
+
                 if ($request->has('on_dws_weight')) {
-                    if($request->on_dws_weight == 2){
-                        DwsWeightChargesController::edit($id, 1, 2,Auth::id());
-                    }else{
-                        DwsWeightChargesController::edit($id, 1, 1,Auth::id());
+                    if ($request->on_dws_weight == 2) {
+                        DwsWeightChargesController::edit($id, 1, 2, Auth::id());
+                    } else {
+                        DwsWeightChargesController::edit($id, 1, 1, Auth::id());
 
                     }
-                }else{
+                } else {
                     DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
@@ -3093,7 +3083,7 @@ class AdminDashboardController extends Controller
             //overland
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
 
-                if($request->has('ol_default') && $request->ol_default == 'on'){
+                if ($request->has('ol_default') && $request->ol_default == 'on') {
                     $default_shipping_mode = User::where('id', $id)->update([
                         'default_shipping_mode' => 2
                     ]);
@@ -3103,8 +3093,8 @@ class AdminDashboardController extends Controller
 
                 if (!$ONRateAlready->isEmpty()) {
                     RateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 2])->delete();
-                    if($request->has('ol_origin_hubs')) {
-                        foreach($request->ol_origin_hubs as $origin_id){
+                    if ($request->has('ol_origin_hubs')) {
+                        foreach ($request->ol_origin_hubs as $origin_id) {
                             $rate_origin_hub = new RateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
@@ -3113,8 +3103,8 @@ class AdminDashboardController extends Controller
                         }
                     }
                     RateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 2])->delete();
-                    if($request->has('ol_destination_hubs')) {
-                        foreach($request->ol_destination_hubs as $destination_id){
+                    if ($request->has('ol_destination_hubs')) {
+                        foreach ($request->ol_destination_hubs as $destination_id) {
                             $rate_destination_hub = new RateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
@@ -3254,20 +3244,20 @@ class AdminDashboardController extends Controller
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'local' => $request->ol_return_local_charges,
-                                'national_charges_class_0'=> $request->ol_return_class_0_charges,
-                                'national_charges_class_1'=> $request->ol_return_class_1_charges,
-                                'national_charges_class_2'=> $request->ol_return_class_2_charges,
-                                'national_charges_class_3'=> $request->ol_return_class_3_charges
+                                'national_charges_class_0' => $request->ol_return_class_0_charges,
+                                'national_charges_class_1' => $request->ol_return_class_1_charges,
+                                'national_charges_class_2' => $request->ol_return_class_2_charges,
+                                'national_charges_class_3' => $request->ol_return_class_3_charges
                             ]);
                         } elseif ($request->ol_return_record == null) {
                             ReturnCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'local' => $request->ol_return_local_charges,
-                                'national_charges_class_0'=> $request->ol_return_class_0_charges,
-                                'national_charges_class_1'=> $request->ol_return_class_1_charges,
-                                'national_charges_class_2'=> $request->ol_return_class_2_charges,
-                                'national_charges_class_3'=> $request->ol_return_class_3_charges
+                                'national_charges_class_0' => $request->ol_return_class_0_charges,
+                                'national_charges_class_1' => $request->ol_return_class_1_charges,
+                                'national_charges_class_2' => $request->ol_return_class_2_charges,
+                                'national_charges_class_3' => $request->ol_return_class_3_charges
                             ]);
                         }
 
@@ -3357,15 +3347,15 @@ class AdminDashboardController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('ol_dws_weight')) {
-                    if($request->ol_dws_weight == 2){
-                        DwsWeightChargesController::edit($id, 2, 2,Auth::id());
+                    if ($request->ol_dws_weight == 2) {
+                        DwsWeightChargesController::edit($id, 2, 2, Auth::id());
 
-                    }else{
-                        
-                        DwsWeightChargesController::edit($id, 2, 1,Auth::id());
+                    } else {
+
+                        DwsWeightChargesController::edit($id, 2, 1, Auth::id());
                     }
-        
-                }else{
+
+                } else {
                     DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
             }
@@ -3373,7 +3363,7 @@ class AdminDashboardController extends Controller
             //detain
             if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
 
-                if($request->has('det_default') && $request->det_default == 'on'){
+                if ($request->has('det_default') && $request->det_default == 'on') {
                     $default_shipping_mode = User::where('id', $id)->update([
                         'default_shipping_mode' => 3
                     ]);
@@ -3382,8 +3372,8 @@ class AdminDashboardController extends Controller
 
                 if (!$ONRateAlready->isEmpty()) {
                     RateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 3])->delete();
-                    if($request->has('detain_origin_hubs')) {
-                        foreach($request->detain_origin_hubs as $origin_id){
+                    if ($request->has('detain_origin_hubs')) {
+                        foreach ($request->detain_origin_hubs as $origin_id) {
                             $rate_origin_hub = new RateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
@@ -3392,8 +3382,8 @@ class AdminDashboardController extends Controller
                         }
                     }
                     RateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 3])->delete();
-                    if($request->has('detain_destination_hubs')) {
-                        foreach($request->detain_destination_hubs as $destination_id){
+                    if ($request->has('detain_destination_hubs')) {
+                        foreach ($request->detain_destination_hubs as $destination_id) {
                             $rate_destination_hub = new RateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
@@ -3533,20 +3523,20 @@ class AdminDashboardController extends Controller
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'local' => $request->detain_return_local_charges,
-                                'national_charges_class_0'=> $request->detain_return_class_0_charges,
-                                'national_charges_class_1'=> $request->detain_return_class_1_charges,
-                                'national_charges_class_2'=> $request->detain_return_class_2_charges,
-                                'national_charges_class_3'=> $request->detain_return_class_3_charges
+                                'national_charges_class_0' => $request->detain_return_class_0_charges,
+                                'national_charges_class_1' => $request->detain_return_class_1_charges,
+                                'national_charges_class_2' => $request->detain_return_class_2_charges,
+                                'national_charges_class_3' => $request->detain_return_class_3_charges
                             ]);
                         } elseif ($request->detain_return_record == null) {
                             ReturnCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'local' => $request->detain_return_local_charges,
-                                'national_charges_class_0'=> $request->detain_return_class_0_charges,
-                                'national_charges_class_1'=> $request->detain_return_class_1_charges,
-                                'national_charges_class_2'=> $request->detain_return_class_2_charges,
-                                'national_charges_class_3'=> $request->detain_return_class_3_charges
+                                'national_charges_class_0' => $request->detain_return_class_0_charges,
+                                'national_charges_class_1' => $request->detain_return_class_1_charges,
+                                'national_charges_class_2' => $request->detain_return_class_2_charges,
+                                'national_charges_class_3' => $request->detain_return_class_3_charges
                             ]);
                         }
 
@@ -3636,15 +3626,15 @@ class AdminDashboardController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('detain_dws_weight')) {
-                    if($request->detain_dws_weight == 2){
-                        DwsWeightChargesController::edit($id, 3, 2,Auth::id());
+                    if ($request->detain_dws_weight == 2) {
+                        DwsWeightChargesController::edit($id, 3, 2, Auth::id());
 
 
-                    }else{
-                        DwsWeightChargesController::edit($id, 3, 1,Auth::id());
+                    } else {
+                        DwsWeightChargesController::edit($id, 3, 1, Auth::id());
                     }
-        
-                }else{
+
+                } else {
                     DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
             }
@@ -3652,7 +3642,7 @@ class AdminDashboardController extends Controller
             //sameday
             if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
 
-                if($request->has('sameday_default') && $request->sameday_default == 'on'){
+                if ($request->has('sameday_default') && $request->sameday_default == 'on') {
                     $default_shipping_mode = User::where('id', $id)->update([
                         'default_shipping_mode' => 4
                     ]);
@@ -3662,8 +3652,8 @@ class AdminDashboardController extends Controller
 
                 if (!$ONRateAlready->isEmpty()) {
                     RateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 4])->delete();
-                    if($request->has('sameday_origin_hubs')) {
-                        foreach($request->sameday_origin_hubs as $origin_id){
+                    if ($request->has('sameday_origin_hubs')) {
+                        foreach ($request->sameday_origin_hubs as $origin_id) {
                             $rate_origin_hub = new RateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
@@ -3672,8 +3662,8 @@ class AdminDashboardController extends Controller
                         }
                     }
                     RateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 4])->delete();
-                    if($request->has('sameday_destination_hubs')) {
-                        foreach($request->sameday_destination_hubs as $destination_id){
+                    if ($request->has('sameday_destination_hubs')) {
+                        foreach ($request->sameday_destination_hubs as $destination_id) {
                             $rate_destination_hub = new RateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
@@ -3813,20 +3803,20 @@ class AdminDashboardController extends Controller
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'local' => $request->sameday_return_local_charges,
-                                'national_charges_class_0'=> $request->sameday_return_class_0_charges,
-                                'national_charges_class_1'=> 0,
-                                'national_charges_class_2'=> 0,
-                                'national_charges_class_3'=> 0
+                                'national_charges_class_0' => $request->sameday_return_class_0_charges,
+                                'national_charges_class_1' => 0,
+                                'national_charges_class_2' => 0,
+                                'national_charges_class_3' => 0
                             ]);
                         } elseif ($request->sameday_return_record == null) {
                             ReturnCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'local' => $request->sameday_return_local_charges,
-                                'national_charges_class_0'=> $request->sameday_return_class_0_charges,
-                                'national_charges_class_1'=> 0,
-                                'national_charges_class_2'=> 0,
-                                'national_charges_class_3'=> 0
+                                'national_charges_class_0' => $request->sameday_return_class_0_charges,
+                                'national_charges_class_1' => 0,
+                                'national_charges_class_2' => 0,
+                                'national_charges_class_3' => 0
                             ]);
                         }
 
@@ -3916,62 +3906,62 @@ class AdminDashboardController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 2){
-                        DwsWeightChargesController::edit($id, 4, 2,Auth::id());
-                    }else{
-                        DwsWeightChargesController::edit($id, 4, 1,Auth::id());
+                    if ($request->sameday_dws_weight == 2) {
+                        DwsWeightChargesController::edit($id, 4, 2, Auth::id());
+                    } else {
+                        DwsWeightChargesController::edit($id, 4, 1, Auth::id());
                     }
-        
-                }else{
+
+                } else {
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
-            if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+            if ($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on') {
                 $wms_user_info = WmsUserInformation::where('user_id', $id);
-                if($wms_user_info->exists()){
+                if ($wms_user_info->exists()) {
                     $wms_user_info = $wms_user_info->first();
                     $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
                     $wms_user_info->invoicing_date = 1;
-                    $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
-                    $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
-                    $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
-                    $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
-                    $wms_user_info->storage_charges = ($request->has('storage_charges_switch'))? 1:0;
-                }else{
+                    $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
+                    $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
+                    $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
+                    $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch')) ? 1 : 0;
+                    $wms_user_info->storage_charges = ($request->has('storage_charges_switch')) ? 1 : 0;
+                } else {
                     $wms_user_info = new WmsUserInformation();
                     $wms_user_info->user_id = $id;
                     $wms_user_info->warehousing = 1;
                     $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
                     $wms_user_info->invoicing_date = 1;
-                    $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
-                    $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
-                    $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
-                    $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
-                    $wms_user_info->storage_charges = ($request->has('storage_charges_switch'))? 1:0;
+                    $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
+                    $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
+                    $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
+                    $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch')) ? 1 : 0;
+                    $wms_user_info->storage_charges = ($request->has('storage_charges_switch')) ? 1 : 0;
 
                 }
                 $wms_user_info->save();
 
-                if($request->has('ppc_switch')){
+                if ($request->has('ppc_switch')) {
                     $ppc = WmsPerProductCharge::where('user_id', $id);
-                    if($ppc->exists()){
+                    if ($ppc->exists()) {
                         $ppc = $ppc->first();
                         $ppc->charges = $request->ppc_charges;
-                    }else{
+                    } else {
                         $ppc = new WmsPerProductCharge();
                         $ppc->user_id = $id;
                         $ppc->charges = $request->ppc_charges;
                     }
                     $ppc->save();
-                }else{
+                } else {
                     WmsPerProductCharge::where('user_id', $id)->delete();
                 }
-                if($request->has('psf_switch')){
+                if ($request->has('psf_switch')) {
                     $psf = WmsPerSquareFootCharge::where('user_id', $id);
-                    if($psf->exists()){
+                    if ($psf->exists()) {
                         $psf = $psf->first();
                         $psf->charges = $request->psf_charges;
-                    }else{
+                    } else {
                         $psf = new WmsPerSquareFootCharge();
                         $psf->user_id = $id;
                         $psf->charges = $request->psf_charges;
@@ -3979,7 +3969,7 @@ class AdminDashboardController extends Controller
                     $psf->save();
 
                 }
-                if($request->has('storage_charges_switch')){
+                if ($request->has('storage_charges_switch')) {
                     WmsStorageTypeCharge::where('user_id', $id)->delete();
                     foreach ($request->storage_type as $key => $storage_type) {
                         $storage_charges = new WmsStorageTypeCharge();
@@ -3988,11 +3978,11 @@ class AdminDashboardController extends Controller
                         $storage_charges->charges = $request->storage_type_charges[$key];
                         $storage_charges->save();
                     }
-                }else{
+                } else {
                     WmsStorageTypeCharge::where('user_id', $id)->delete();
                 }
 
-                if($request->has('packing_charges_switch')){
+                if ($request->has('packing_charges_switch')) {
                     WmsPackingCharge::where('user_id', $id)->delete();
                     foreach ($request->packing_type as $key => $packing) {
                         $ptype = new WmsPackingCharge();
@@ -4002,35 +3992,35 @@ class AdminDashboardController extends Controller
                         $ptype->charges = $request->packing_charges[$key];
                         $ptype->save();
                     }
-                }else{
+                } else {
                     WmsPackingCharge::where('user_id', $id)->delete();
                 }
 
-                if($request->has('labelling_charges_switch')){
-                    $labelling = WmsLabellingCharge::where('user_id',$id);
-                    if($labelling->exists()){
+                if ($request->has('labelling_charges_switch')) {
+                    $labelling = WmsLabellingCharge::where('user_id', $id);
+                    if ($labelling->exists()) {
                         $labelling = $labelling->first();
                         $labelling->charges = $request->labelling_charges;
-                    }else{
+                    } else {
                         $labelling = new WmsLabellingCharge();
                         $labelling->user_id = $id;
                         $labelling->charges = $request->labelling_charges;
                     }
                     $labelling->save();
 
-                }else{
+                } else {
                     WmsLabellingCharge::where('user_id', $id)->delete();
                 }
-            }else{
+            } else {
                 $wms_user_info = WmsUserInformation::where('user_id', $id);
-                if($wms_user_info->exists()){
+                if ($wms_user_info->exists()) {
                     $wms_user_info = $wms_user_info->first();
                     $wms_user_info->warehousing = 0;
                     $wms_user_info->save();
                 }
             }
-            User::where('id',$id)->update(['rate_status'=>1]);
-            if($request->has('rate_remarks') && $request->rate_remarks != null){
+            User::where('id', $id)->update(['rate_status' => 1]);
+            if ($request->has('rate_remarks') && $request->rate_remarks != null) {
                 $rate_remark = new RateRemark();
                 $rate_remark->user_id = $id;
                 $rate_remark->remarks = $request->rate_remarks;
@@ -4039,12 +4029,12 @@ class AdminDashboardController extends Controller
 
             }
 
-            if($request->has('edit_commission') && $request->edit_commission == 1){
-                if($request->total_commission > 0){
+            if ($request->has('edit_commission') && $request->edit_commission == 1) {
+                if ($request->total_commission > 0) {
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    if($existing_sale_commission){
+                    if ($existing_sale_commission) {
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
                     $total_commission = $request->total_commission;
@@ -4058,16 +4048,16 @@ class AdminDashboardController extends Controller
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
-                    foreach($request->tier_id as $row_id => $tier){
+                    foreach ($request->tier_id as $row_id => $tier) {
                         $sales_tier = SalesTier::find($tier);
-                        if($sales_tier){
+                        if ($sales_tier) {
                             $sales_commission_user = new SalesCommissionUser();
                             $sales_commission_user->sales_commission_id = $sales_commission_id;
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
-                            if($sales_tier->tier_type == 1){
+                            if ($sales_tier->tier_type == 1) {
                                 $sales_commission_user->user_id = $request->user_id[$row_id];
-                            }else if($sales_tier->tier_type == 2){
+                            } else if ($sales_tier->tier_type == 2) {
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
                                 $external_user->shipper_id = $id;
@@ -4081,20 +4071,19 @@ class AdminDashboardController extends Controller
                     }
                     $sales_commission->commission = $actual_commission;
                     $sales_commission->save();
-                }
-                else{
+                } else {
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    if($existing_sale_commission){
+                    if ($existing_sale_commission) {
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
             }
-            if($request->authorize == 1){
+            if ($request->authorize == 1) {
                 DwsWeightChargesController::approve($id);
-                User::where('id',$id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id(),'rates_approved_at'=>Carbon::now()]);
-                return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
+                User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => Auth::id(), 'rates_approved_at' => Carbon::now()]);
+                return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
 
             return redirect()->back()->with('success', 'All Rates are updated');
@@ -4361,10 +4350,10 @@ class AdminDashboardController extends Controller
                     'on_ins_range_down.*' => 'required_if:on_insurance_charges_switch,==,on|numeric',
                     'on_ins_charges.*' => 'required_if:on_insurance_charges_switch,==,on',
                     'on_return_local_charges.*' => 'required_if:on_return_switch,==,on|numeric',
-                    'on_return_class_0_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                    'on_return_class_1_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                    'on_return_class_2_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                    'on_return_class_3_charges.*'=>'required_if:on_return_switch,==,on|numeric',
+                    'on_return_class_0_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                    'on_return_class_1_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                    'on_return_class_2_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                    'on_return_class_3_charges.*' => 'required_if:on_return_switch,==,on|numeric',
                     'overnight_fuel_surcharge' => 'required_if:overnight_fuel_switch,==,on|numeric',
 
                     'on_discount_title' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
@@ -4396,10 +4385,10 @@ class AdminDashboardController extends Controller
                     'ol_ins_range_down.*' => 'required_if:ol_insurance_charges_switch,==,on|numeric',
                     'ol_ins_charges.*' => 'required_if:ol_insurance_charges_switch,==,on',
                     'ol_return_local_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
-                    'ol_return_class_0_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                    'ol_return_class_1_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                    'ol_return_class_2_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                    'ol_return_class_3_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
+                    'ol_return_class_0_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                    'ol_return_class_1_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                    'ol_return_class_2_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                    'ol_return_class_3_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
                     'overland_fuel_surcharge' => 'required_if:overland_fuel_switch,==,on|numeric',
 
                     'ol_discount_title' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
@@ -4431,10 +4420,10 @@ class AdminDashboardController extends Controller
                     'detain_ins_range_down.*' => 'required_if:detain_insurance_charges_switch,==,on|numeric',
                     'detain_ins_charges.*' => 'required_if:detain_insurance_charges_switch,==,on',
                     'detain_return_local_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
-                    'detain_return_class_0_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                    'detain_return_class_1_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                    'detain_return_class_2_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                    'detain_return_class_3_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
+                    'detain_return_class_0_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                    'detain_return_class_1_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                    'detain_return_class_2_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                    'detain_return_class_3_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
                     'detain_fuel_surcharge' => 'required_if:detain_fuel_switch,==,on|numeric',
 
                     'detain_discount_title' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
@@ -4463,10 +4452,10 @@ class AdminDashboardController extends Controller
                     'sameday_ins_range_down.*' => 'required_if:sameday_insurance_charges_switch,==,on|numeric',
                     'sameday_ins_charges.*' => 'required_if:sameday_insurance_charges_switch,==,on',
                     'sameday_return_local_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_return_class_0_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_return_class_1_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_return_class_2_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_return_class_3_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_return_class_0_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_return_class_1_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_return_class_2_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_return_class_3_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
                     'sameday_fuel_surcharge' => 'required_if:sameday_fuel_switch,==,on|numeric',
 
                     'sameday_discount_title' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
@@ -4479,14 +4468,14 @@ class AdminDashboardController extends Controller
                 ];
             }
 
-            if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+            if ($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on') {
                 $warehouse_validations = [
                     'invoicing_cycle' => 'required|numeric',
                     'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
-                    'ppc_charges'=>'required_if:ppc_switch,==,on',
-                    'psf_charges'=>'required_if:psf_switch,==,on',
-                    'storage_type.*'=>'required_if:storage_charges_switch,==,on',
-                    'storage_type_charges.*'=>'required_if:storage_charges_switch,==,on|numeric',
+                    'ppc_charges' => 'required_if:ppc_switch,==,on',
+                    'psf_charges' => 'required_if:psf_switch,==,on',
+                    'storage_type.*' => 'required_if:storage_charges_switch,==,on',
+                    'storage_type_charges.*' => 'required_if:storage_charges_switch,==,on|numeric',
                     'packing_type.*' => 'required_if:packing_charges_switch,==,on',
                     'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
                     'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
@@ -4503,22 +4492,22 @@ class AdminDashboardController extends Controller
                     ->withInput();
             }
 
-            if($request->has('on_default') && $request->on_default == 'on'){
+            if ($request->has('on_default') && $request->on_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
                     'default_shipping_mode' => 1
                 ]);
             }
-            if($request->has('ol_default') && $request->ol_default == 'on'){
+            if ($request->has('ol_default') && $request->ol_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
                     'default_shipping_mode' => 2
                 ]);
             }
-            if($request->has('det_default') && $request->det_default == 'on'){
+            if ($request->has('det_default') && $request->det_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
                     'default_shipping_mode' => 3
                 ]);
             }
-            if($request->has('sameday_default') && $request->sameday_default == 'on'){
+            if ($request->has('sameday_default') && $request->sameday_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
                     'default_shipping_mode' => 4
                 ]);
@@ -4553,8 +4542,8 @@ class AdminDashboardController extends Controller
                     ]);
 
 
-                    if($request->has('on_origin_hubs')) {
-                        foreach($request->on_origin_hubs as $origin_id){
+                    if ($request->has('on_origin_hubs')) {
+                        foreach ($request->on_origin_hubs as $origin_id) {
                             $rate_origin_hub = new PendingRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
@@ -4563,8 +4552,8 @@ class AdminDashboardController extends Controller
                         }
                     }
 
-                    if($request->has('on_destination_hubs')) {
-                        foreach($request->on_destination_hubs as $destination_id){
+                    if ($request->has('on_destination_hubs')) {
+                        foreach ($request->on_destination_hubs as $destination_id) {
                             $rate_destination_hub = new PendingRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
@@ -4646,10 +4635,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
                             'local' => $request->on_return_local_charges,
-                            'national_charges_class_0'=> $request->on_return_class_0_charges,
-                            'national_charges_class_1'=> $request->on_return_class_1_charges,
-                            'national_charges_class_2'=> $request->on_return_class_2_charges,
-                            'national_charges_class_3'=> $request->on_return_class_3_charges
+                            'national_charges_class_0' => $request->on_return_class_0_charges,
+                            'national_charges_class_1' => $request->on_return_class_1_charges,
+                            'national_charges_class_2' => $request->on_return_class_2_charges,
+                            'national_charges_class_3' => $request->on_return_class_3_charges
                         ]);
                     }
                     //Return Charges
@@ -4712,14 +4701,14 @@ class AdminDashboardController extends Controller
                 }
                 //dd($weightAlready);
                 if ($request->has('on_dws_weight')) {
-                    if($request->on_dws_weight == 2){
-                        DwsWeightChargesController::edit($id, 1, 2,Auth::id());
-                        
-                    }else{
-                        DwsWeightChargesController::edit($id, 1, 1,Auth::id());
+                    if ($request->on_dws_weight == 2) {
+                        DwsWeightChargesController::edit($id, 1, 2, Auth::id());
+
+                    } else {
+                        DwsWeightChargesController::edit($id, 1, 1, Auth::id());
                     }
-        
-                }else{
+
+                } else {
                     DwsWeightChargesController::delete_dws_rate($id, 1);
                 }
             }
@@ -4740,8 +4729,8 @@ class AdminDashboardController extends Controller
 
                     ]);
 
-                    if($request->has('ol_origin_hubs')) {
-                        foreach($request->ol_origin_hubs as $origin_id){
+                    if ($request->has('ol_origin_hubs')) {
+                        foreach ($request->ol_origin_hubs as $origin_id) {
                             $rate_origin_hub = new PendingRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
@@ -4750,8 +4739,8 @@ class AdminDashboardController extends Controller
                         }
                     }
 
-                    if($request->has('ol_destination_hubs')) {
-                        foreach($request->ol_destination_hubs as $destination_id){
+                    if ($request->has('ol_destination_hubs')) {
+                        foreach ($request->ol_destination_hubs as $destination_id) {
                             $rate_destination_hub = new PendingRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
@@ -4833,10 +4822,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 2,
                             'local' => $request->ol_return_local_charges,
-                            'national_charges_class_0'=> $request->ol_return_class_0_charges,
-                            'national_charges_class_1'=> $request->ol_return_class_1_charges,
-                            'national_charges_class_2'=> $request->ol_return_class_2_charges,
-                            'national_charges_class_3'=> $request->ol_return_class_3_charges
+                            'national_charges_class_0' => $request->ol_return_class_0_charges,
+                            'national_charges_class_1' => $request->ol_return_class_1_charges,
+                            'national_charges_class_2' => $request->ol_return_class_2_charges,
+                            'national_charges_class_3' => $request->ol_return_class_3_charges
                         ]);
                     }
                     if ($request->has('overland_fuel_switch') && $request->overland_fuel_switch == 'on') {
@@ -4897,13 +4886,13 @@ class AdminDashboardController extends Controller
 
                 }
                 if ($request->has('ol_dws_weight')) {
-                    if($request->ol_dws_weight == 2){
-                        DwsWeightChargesController::edit($id, 2, 2,Auth::id());
-                    }else{
-                        DwsWeightChargesController::edit($id, 2, 1,Auth::id());
+                    if ($request->ol_dws_weight == 2) {
+                        DwsWeightChargesController::edit($id, 2, 2, Auth::id());
+                    } else {
+                        DwsWeightChargesController::edit($id, 2, 1, Auth::id());
                     }
-        
-                }else{
+
+                } else {
                     DwsWeightChargesController::delete_dws_rate($id, 2);
                 }
 
@@ -4925,8 +4914,8 @@ class AdminDashboardController extends Controller
 
                     ]);
 
-                    if($request->has('detain_origin_hubs')) {
-                        foreach($request->detain_origin_hubs as $origin_id){
+                    if ($request->has('detain_origin_hubs')) {
+                        foreach ($request->detain_origin_hubs as $origin_id) {
                             $rate_origin_hub = new PendingRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
@@ -4935,8 +4924,8 @@ class AdminDashboardController extends Controller
                         }
                     }
 
-                    if($request->has('detain_destination_hubs')) {
-                        foreach($request->detain_destination_hubs as $destination_id){
+                    if ($request->has('detain_destination_hubs')) {
+                        foreach ($request->detain_destination_hubs as $destination_id) {
                             $rate_destination_hub = new PendingRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
@@ -5018,10 +5007,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 3,
                             'local' => $request->detain_return_local_charges,
-                            'national_charges_class_0'=> $request->detain_return_class_0_charges,
-                            'national_charges_class_1'=> $request->detain_return_class_1_charges,
-                            'national_charges_class_2'=> $request->detain_return_class_2_charges,
-                            'national_charges_class_3'=> $request->detain_return_class_3_charges
+                            'national_charges_class_0' => $request->detain_return_class_0_charges,
+                            'national_charges_class_1' => $request->detain_return_class_1_charges,
+                            'national_charges_class_2' => $request->detain_return_class_2_charges,
+                            'national_charges_class_3' => $request->detain_return_class_3_charges
                         ]);
                     }
                     if ($request->has('detain_fuel_switch') && $request->detain_fuel_switch == 'on') {
@@ -5082,16 +5071,16 @@ class AdminDashboardController extends Controller
 
                 }
                 if ($request->has('detain_dws_weight')) {
-                    if($request->detain_dws_weight == 2){
-                        DwsWeightChargesController::edit($id, 3, 2,Auth::id());
-                        
-                    }else{
-                        DwsWeightChargesController::edit($id, 3, 1,Auth::id());
-                        
+                    if ($request->detain_dws_weight == 2) {
+                        DwsWeightChargesController::edit($id, 3, 2, Auth::id());
+
+                    } else {
+                        DwsWeightChargesController::edit($id, 3, 1, Auth::id());
+
 
                     }
-        
-                }else{
+
+                } else {
                     DwsWeightChargesController::delete_dws_rate($id, 3);
                 }
             }
@@ -5110,8 +5099,8 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0
                     ]);
 
-                    if($request->has('sameday_origin_hubs')) {
-                        foreach($request->sameday_origin_hubs as $origin_id){
+                    if ($request->has('sameday_origin_hubs')) {
+                        foreach ($request->sameday_origin_hubs as $origin_id) {
                             $rate_origin_hub = new PendingRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
@@ -5121,8 +5110,8 @@ class AdminDashboardController extends Controller
                     }
 
 
-                    if($request->has('sameday_destination_hubs')) {
-                        foreach($request->sameday_destination_hubs as $destination_id){
+                    if ($request->has('sameday_destination_hubs')) {
+                        foreach ($request->sameday_destination_hubs as $destination_id) {
                             $rate_destination_hub = new PendingRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
@@ -5204,10 +5193,10 @@ class AdminDashboardController extends Controller
                             'user_id' => $id,
                             'shipping_mode_id' => 4,
                             'local' => $request->sameday_return_local_charges,
-                            'national_charges_class_0'=> $request->sameday_return_class_0_charges,
-                            'national_charges_class_1'=> 0,
-                            'national_charges_class_2'=> 0,
-                            'national_charges_class_3'=> 0
+                            'national_charges_class_0' => $request->sameday_return_class_0_charges,
+                            'national_charges_class_1' => 0,
+                            'national_charges_class_2' => 0,
+                            'national_charges_class_3' => 0
                         ]);
                     }
                     if ($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on') {
@@ -5268,13 +5257,13 @@ class AdminDashboardController extends Controller
 
                 }
                 if ($request->has('sameday_dws_weight')) {
-                    if($request->sameday_dws_weight == 2){
-                        DwsWeightChargesController::edit($id, 4, 2,Auth::id());
-                    }else{
-                        DwsWeightChargesController::edit($id, 4, 1,Auth::id());
+                    if ($request->sameday_dws_weight == 2) {
+                        DwsWeightChargesController::edit($id, 4, 2, Auth::id());
+                    } else {
+                        DwsWeightChargesController::edit($id, 4, 1, Auth::id());
                     }
-        
-                }else{
+
+                } else {
                     DwsWeightChargesController::delete_dws_rate($id, 4);
                 }
             }
@@ -5285,33 +5274,33 @@ class AdminDashboardController extends Controller
             WmsPendingStorageTypeCharge::where('user_id', $id)->delete();
             WmsPendingPackingCharge::where('user_id', $id)->delete();
             WmsPendingLabellingCharge::where('user_id', $id)->delete();
-            if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+            if ($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on') {
 
                 $wms_user_info = new WmsPendingUserInformation();
                 $wms_user_info->user_id = $id;
                 $wms_user_info->warehousing = 1;
                 $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
                 $wms_user_info->invoicing_date = 1;
-                $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
-                $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
-                $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
-                $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
-                $wms_user_info->storage_charges = ($request->has('storage_charges_switch'))? 1:0;
+                $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
+                $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
+                $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
+                $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch')) ? 1 : 0;
+                $wms_user_info->storage_charges = ($request->has('storage_charges_switch')) ? 1 : 0;
                 $wms_user_info->save();
 
-                if($request->has('ppc_switch')){
+                if ($request->has('ppc_switch')) {
                     $ppc = new WmsPendingPerProductCharge();
                     $ppc->user_id = $id;
                     $ppc->charges = $request->ppc_charges;
                     $ppc->save();
                 }
-                if($request->has('psf_switch')){
+                if ($request->has('psf_switch')) {
                     $psf = new WmsPendingPerSquareFootCharge();
                     $psf->user_id = $id;
                     $psf->charges = $request->psf_charges;
                     $psf->save();
                 }
-                if($request->has('storage_charges_switch')){
+                if ($request->has('storage_charges_switch')) {
                     foreach ($request->storage_type as $key => $storage_type) {
                         $storage_charges = new WmsPendingStorageTypeCharge();
                         $storage_charges->user_id = $id;
@@ -5321,7 +5310,7 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                if($request->has('packing_charges_switch')){
+                if ($request->has('packing_charges_switch')) {
                     foreach ($request->packing_type as $key => $packing) {
                         $ptype = new WmsPendingPackingCharge();
                         $ptype->user_id = $id;
@@ -5332,7 +5321,7 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                if($request->has('labelling_charges_switch')){
+                if ($request->has('labelling_charges_switch')) {
                     $labelling = new WmsPendingLabellingCharge();
                     $labelling->user_id = $id;
                     $labelling->charges = $request->labelling_charges;
@@ -5344,10 +5333,10 @@ class AdminDashboardController extends Controller
 
             if ($request->approve == 1) {
                 $user = User::find($id);
-                
+
                 DwsWeightChargesController::approve($id);
 
-                if($rate_origin_hubs = RateOriginHub::where('user_id', $id)->get()) {
+                if ($rate_origin_hubs = RateOriginHub::where('user_id', $id)->get()) {
                     foreach ($rate_origin_hubs as $rate_origin_hub) {
                         $history_rate_origin_hub = new HistoryRateOriginHub();
                         $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
@@ -5356,7 +5345,7 @@ class AdminDashboardController extends Controller
                         $history_rate_origin_hub->save();
                     }
                 }
-                if($rate_destination_hubs = RateDestinationHub::where('user_id', $id)->get()) {
+                if ($rate_destination_hubs = RateDestinationHub::where('user_id', $id)->get()) {
                     foreach ($rate_destination_hubs as $rate_destination_hub) {
                         $history_rate_destination_hub = new HistoryRateDestinationHub();
                         $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
@@ -5365,7 +5354,7 @@ class AdminDashboardController extends Controller
                         $history_rate_destination_hub->save();
                     }
                 }
-                if($switches = RateStatus::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
+                if ($switches = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
                     HistoryRateStatus::create([
                         'user_id' => $id,
@@ -5377,7 +5366,7 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($switches = RateStatus::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
+                if ($switches = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->first()) {
                     HistoryRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
@@ -5388,7 +5377,7 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($switches = RateStatus::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
+                if ($switches = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->first()) {
                     HistoryRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
@@ -5399,7 +5388,7 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($switches = RateStatus::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
+                if ($switches = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->first()) {
                     HistoryRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 4,
@@ -5410,7 +5399,7 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($weights = WeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($weights as $weight) {
                         HistoryWeightCharge::create([
                             'user_id' => $id,
@@ -5427,7 +5416,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($weights = WeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($weights as $weight) {
                         HistoryWeightCharge::create([
                             'user_id' => $id,
@@ -5444,7 +5433,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($weights = WeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($weights as $weight) {
                         HistoryWeightCharge::create([
                             'user_id' => $id,
@@ -5461,7 +5450,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($weights = WeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($weights as $weight) {
                         HistoryWeightCharge::create([
                             'user_id' => $id,
@@ -5478,7 +5467,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($bookingTypes = BookingTypeCharges::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($bookingTypes as $bookingType) {
                         HistoryBookingTypeCharges::create([
                             'user_id' => $id,
@@ -5488,7 +5477,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($bookingTypes = BookingTypeCharges::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($bookingTypes as $bookingType) {
                         HistoryBookingTypeCharges::create([
                             'user_id' => $id,
@@ -5498,7 +5487,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($bookingTypes = BookingTypeCharges::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($bookingTypes as $bookingType) {
                         HistoryBookingTypeCharges::create([
                             'user_id' => $id,
@@ -5508,7 +5497,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($bookingTypes = BookingTypeCharges::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($bookingTypes as $bookingType) {
                         HistoryBookingTypeCharges::create([
                             'user_id' => $id,
@@ -5519,7 +5508,7 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($cashs = CashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($cashs as $cash) {
                         HistoryCashHandlingCharge::create([
                             'user_id' => $id,
@@ -5530,7 +5519,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($cashs = CashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($cashs as $cash) {
                         HistoryCashHandlingCharge::create([
                             'user_id' => $id,
@@ -5541,7 +5530,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($cashs = CashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($cashs as $cash) {
                         HistoryCashHandlingCharge::create([
                             'user_id' => $id,
@@ -5552,7 +5541,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($cashs = CashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($cashs as $cash) {
                         HistoryCashHandlingCharge::create([
                             'user_id' => $id,
@@ -5563,7 +5552,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($insurances = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($insurances = InsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($insurances as $insurance) {
                         HistoryInsuranceCharge::create([
                             'user_id' => $id,
@@ -5574,7 +5563,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($insurances = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($insurances = InsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($insurances as $insurance) {
                         HistoryInsuranceCharge::create([
                             'user_id' => $id,
@@ -5585,7 +5574,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($insurances = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($insurances = InsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($insurances as $insurance) {
                         HistoryInsuranceCharge::create([
                             'user_id' => $id,
@@ -5596,7 +5585,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($insurances = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($insurances = InsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($insurances as $insurance) {
                         HistoryInsuranceCharge::create([
                             'user_id' => $id,
@@ -5607,7 +5596,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($returns = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($returns = ReturnCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($returns as $return) {
                         HistoryReturnCharge::create([
                             'user_id' => $id,
@@ -5620,7 +5609,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($returns = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($returns = ReturnCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($returns as $return) {
                         HistoryReturnCharge::create([
                             'user_id' => $id,
@@ -5633,7 +5622,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($returns = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($returns = ReturnCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($returns as $return) {
                         HistoryReturnCharge::create([
                             'user_id' => $id,
@@ -5646,7 +5635,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($returns = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($returns = ReturnCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($returns as $return) {
                         HistoryReturnCharge::create([
                             'user_id' => $id,
@@ -5659,7 +5648,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($fuels = FuelSurcharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($fuels as $fuel) {
                         HistoryFuelSurcharge::create([
                             'user_id' => $id,
@@ -5668,7 +5657,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($fuels = FuelSurcharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($fuels as $fuel) {
                         HistoryFuelSurcharge::create([
                             'user_id' => $id,
@@ -5677,7 +5666,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($fuels = FuelSurcharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($fuels as $fuel) {
                         HistoryFuelSurcharge::create([
                             'user_id' => $id,
@@ -5686,7 +5675,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($fuels = FuelSurcharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($fuels as $fuel) {
                         HistoryFuelSurcharge::create([
                             'user_id' => $id,
@@ -5695,7 +5684,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
+                if ($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($packagings as $packaging) {
                         $packaging_charges = new HistoryPackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -5705,7 +5694,7 @@ class AdminDashboardController extends Controller
                         $packaging_charges->save();
                     }
                 }
-                if($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
+                if ($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($packagings as $packaging) {
                         $packaging_charges = new HistoryPackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -5715,7 +5704,7 @@ class AdminDashboardController extends Controller
                         $packaging_charges->save();
                     }
                 }
-                if($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
+                if ($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($packagings as $packaging) {
                         $packaging_charges = new HistoryPackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -5725,7 +5714,7 @@ class AdminDashboardController extends Controller
                         $packaging_charges->save();
                     }
                 }
-                if($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
+                if ($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($packagings as $packaging) {
                         $packaging_charges = new HistoryPackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -5735,7 +5724,7 @@ class AdminDashboardController extends Controller
                         $packaging_charges->save();
                     }
                 }
-                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($discounts = DiscountCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($discounts as $discount) {
                         HistoryDiscountCharge::create([
                             'user_id' => $id,
@@ -5752,7 +5741,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($discounts = DiscountCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($discounts as $discount) {
                         HistoryDiscountCharge::create([
                             'user_id' => $id,
@@ -5769,7 +5758,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($discounts = DiscountCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($discounts as $discount) {
                         HistoryDiscountCharge::create([
                             'user_id' => $id,
@@ -5786,7 +5775,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($discounts = DiscountCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($discounts as $discount) {
                         HistoryDiscountCharge::create([
                             'user_id' => $id,
@@ -5803,7 +5792,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                $s = RateStatus::where(['user_id' => $id ])->first();
+                $s = RateStatus::where(['user_id' => $id])->first();
                 RateHistory::create([
                     'user_id' => $id,
                     'updated_by' => $user['rates_updated_by'],
@@ -5812,7 +5801,7 @@ class AdminDashboardController extends Controller
                     'to_date' => Carbon::now()
                 ]);
 
-                if($wms_user_info = WmsUserInformation::where('user_id', $id)->first()){
+                if ($wms_user_info = WmsUserInformation::where('user_id', $id)->first()) {
                     $wms_user_information = new WmsHistoryUserInformation();
                     $wms_user_information->user_id = $id;
                     $wms_user_information->warehousing = $wms_user_info['warehousing'];
@@ -5825,20 +5814,20 @@ class AdminDashboardController extends Controller
                     $wms_user_information->storage_charges = $wms_user_info['storage_charges'];
                     $wms_user_information->save();
                 }
-                if($ppc = WmsPerProductCharge::where('user_id', $id)->first()){
+                if ($ppc = WmsPerProductCharge::where('user_id', $id)->first()) {
                     $ppc_history = new WmsHistoryPerProductCharge();
                     $ppc_history->user_id = $ppc['user_id'];
                     $ppc_history->charges = $ppc['charges'];
                     $ppc_history->save();
                 }
-                if($psf = WmsPerSquareFootCharge::where('user_id', $id)->first()){
+                if ($psf = WmsPerSquareFootCharge::where('user_id', $id)->first()) {
                     $psf_history = new WmsHistoryPerSquareFootCharge();
                     $psf_history->user_id = $psf['user_id'];
                     $psf_history->charges = $psf['charges'];
                     $psf_history->save();
                 }
 
-                if($storage_type_charges = WmsStorageTypeCharge::where('user_id', $id)->get()){
+                if ($storage_type_charges = WmsStorageTypeCharge::where('user_id', $id)->get()) {
                     foreach ($storage_type_charges as $storage_charges) {
                         $history_storage_charge = new WmsHistoryStorageTypeCharge();
                         $history_storage_charge->user_id = $id;
@@ -5848,7 +5837,7 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                if($packing_charges = WmsPackingCharge::where('user_id', $id)->get()){
+                if ($packing_charges = WmsPackingCharge::where('user_id', $id)->get()) {
                     foreach ($packing_charges as $packing_charges) {
                         $history_packing_charge = new WmsHistoryPackingCharge();
                         $history_packing_charge->user_id = $id;
@@ -5859,7 +5848,7 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                if($labelling = WmsLabellingCharge::where('user_id', $id)->first()){
+                if ($labelling = WmsLabellingCharge::where('user_id', $id)->first()) {
                     $labelling_history = new WmsHistoryLabellingCharge();
                     $labelling_history->user_id = $labelling['user_id'];
                     $labelling_history->charges = $labelling['charges'];
@@ -5886,7 +5875,7 @@ class AdminDashboardController extends Controller
                 RateOriginHub::where('user_id', $id)->delete();
                 RateDestinationHub::where('user_id', $id)->delete();
 
-                if($pending_rate_origin_hubs = PendingRateOriginHub::where('user_id', $id)->get()) {
+                if ($pending_rate_origin_hubs = PendingRateOriginHub::where('user_id', $id)->get()) {
                     foreach ($pending_rate_origin_hubs as $pending_rate_origin_hub) {
                         $rate_origin_hub = new RateOriginHub();
                         $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
@@ -5895,7 +5884,7 @@ class AdminDashboardController extends Controller
                         $rate_origin_hub->save();
                     }
                 }
-                if($pending_rate_destination_hubs = PendingRateDestinationHub::where('user_id', $id)->get()) {
+                if ($pending_rate_destination_hubs = PendingRateDestinationHub::where('user_id', $id)->get()) {
                     foreach ($pending_rate_destination_hubs as $pending_rate_destination_hub) {
                         $rate_destination_hub = new RateDestinationHub();
                         $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
@@ -5904,7 +5893,7 @@ class AdminDashboardController extends Controller
                         $rate_destination_hub->save();
                     }
                 }
-                if($pendingswitchs = PendingRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
+                if ($pendingswitchs = PendingRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
                     RateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -5915,7 +5904,7 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $pendingswitchs['fuel_charges']
                     ]);
                 }
-                if($pendingswitchs = PendingRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
+                if ($pendingswitchs = PendingRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->first()) {
                     RateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
@@ -5926,7 +5915,7 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $pendingswitchs['fuel_charges']
                     ]);
                 }
-                if($pendingswitchs = PendingRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
+                if ($pendingswitchs = PendingRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->first()) {
                     RateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
@@ -5937,7 +5926,7 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $pendingswitchs['fuel_charges']
                     ]);
                 }
-                if($pendingswitchs = PendingRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
+                if ($pendingswitchs = PendingRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->first()) {
                     RateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 4,
@@ -5948,7 +5937,7 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $pendingswitchs['fuel_charges']
                     ]);
                 }
-                if($pendingweights = PendingWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($pendingweights = PendingWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingweights as $pendingweight) {
                         WeightCharge::create([
                             'user_id' => $id,
@@ -5965,7 +5954,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingweights = PendingWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($pendingweights = PendingWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingweights as $pendingweight) {
                         WeightCharge::create([
                             'user_id' => $id,
@@ -5982,7 +5971,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingweights = PendingWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($pendingweights = PendingWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingweights as $pendingweight) {
                         WeightCharge::create([
                             'user_id' => $id,
@@ -5999,7 +5988,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingweights = PendingWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($pendingweights = PendingWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingweights as $pendingweight) {
                         WeightCharge::create([
                             'user_id' => $id,
@@ -6016,7 +6005,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingbookingTypes as $pendingbookingType) {
                         BookingTypeCharges::create([
                             'user_id' => $id,
@@ -6026,7 +6015,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingbookingTypes as $pendingbookingType) {
                         BookingTypeCharges::create([
                             'user_id' => $id,
@@ -6036,7 +6025,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingbookingTypes as $pendingbookingType) {
                         BookingTypeCharges::create([
                             'user_id' => $id,
@@ -6046,7 +6035,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingbookingTypes as $pendingbookingType) {
                         BookingTypeCharges::create([
                             'user_id' => $id,
@@ -6056,7 +6045,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
                         CashHandlingCharge::create([
                             'user_id' => $id,
@@ -6067,7 +6056,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
                         CashHandlingCharge::create([
                             'user_id' => $id,
@@ -6078,7 +6067,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
                         CashHandlingCharge::create([
                             'user_id' => $id,
@@ -6089,7 +6078,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingcashs as $pendingcash) {
                         CashHandlingCharge::create([
                             'user_id' => $id,
@@ -6100,7 +6089,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendinginsurances as $pendinginsurance) {
                         InsuranceCharge::create([
                             'user_id' => $id,
@@ -6111,7 +6100,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendinginsurances as $pendinginsurance) {
                         InsuranceCharge::create([
                             'user_id' => $id,
@@ -6122,7 +6111,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendinginsurances as $pendinginsurance) {
                         InsuranceCharge::create([
                             'user_id' => $id,
@@ -6133,7 +6122,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendinginsurances as $pendinginsurance) {
                         InsuranceCharge::create([
                             'user_id' => $id,
@@ -6144,7 +6133,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingreturns = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($pendingreturns = PendingReturnCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingreturns as $pendingreturn) {
                         ReturnCharge::create([
                             'user_id' => $id,
@@ -6157,7 +6146,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingreturns = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($pendingreturns = PendingReturnCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingreturns as $pendingreturn) {
                         ReturnCharge::create([
                             'user_id' => $id,
@@ -6170,7 +6159,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingreturns = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($pendingreturns = PendingReturnCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingreturns as $pendingreturn) {
                         ReturnCharge::create([
                             'user_id' => $id,
@@ -6183,7 +6172,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingreturns = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($pendingreturns = PendingReturnCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingreturns as $pendingreturn) {
                         ReturnCharge::create([
                             'user_id' => $id,
@@ -6196,7 +6185,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingfuels as $pendingfuel) {
                         FuelSurcharge::create([
                             'user_id' => $id,
@@ -6205,7 +6194,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingfuels as $pendingfuel) {
                         FuelSurcharge::create([
                             'user_id' => $id,
@@ -6214,7 +6203,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingfuels as $pendingfuel) {
                         FuelSurcharge::create([
                             'user_id' => $id,
@@ -6223,7 +6212,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingfuels as $pendingfuel) {
                         FuelSurcharge::create([
                             'user_id' => $id,
@@ -6232,7 +6221,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
+                if ($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($pendingpackagings as $pendingpackaging) {
                         $packaging_charges = new PackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -6242,7 +6231,7 @@ class AdminDashboardController extends Controller
                         $packaging_charges->save();
                     }
                 }
-                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                if ($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingdiscounts as $pendingdiscount) {
                         DiscountCharge::create([
                             'user_id' => $id,
@@ -6259,7 +6248,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                if ($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
                     foreach ($pendingdiscounts as $pendingdiscount) {
                         DiscountCharge::create([
                             'user_id' => $id,
@@ -6276,7 +6265,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                if ($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
                     foreach ($pendingdiscounts as $pendingdiscount) {
                         DiscountCharge::create([
                             'user_id' => $id,
@@ -6293,7 +6282,7 @@ class AdminDashboardController extends Controller
                         ]);
                     }
                 }
-                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                if ($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
                     foreach ($pendingdiscounts as $pendingdiscount) {
                         DiscountCharge::create([
                             'user_id' => $id,
@@ -6311,7 +6300,7 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                if($wms_user_info = WmsPendingUserInformation::where('user_id', $id)->first()){
+                if ($wms_user_info = WmsPendingUserInformation::where('user_id', $id)->first()) {
                     $wms_user_information = new WmsUserInformation();
                     $wms_user_information->user_id = $id;
                     $wms_user_information->warehousing = $wms_user_info['warehousing'];
@@ -6324,20 +6313,20 @@ class AdminDashboardController extends Controller
                     $wms_user_information->storage_charges = $wms_user_info['storage_charges'];
                     $wms_user_information->save();
                 }
-                if($ppc = WmsPendingPerProductCharge::where('user_id', $id)->first()){
+                if ($ppc = WmsPendingPerProductCharge::where('user_id', $id)->first()) {
                     $ppc_history = new WmsPerProductCharge();
                     $ppc_history->user_id = $ppc['user_id'];
                     $ppc_history->charges = $ppc['charges'];
                     $ppc_history->save();
                 }
-                if($psf = WmsPendingPerSquareFootCharge::where('user_id', $id)->first()){
+                if ($psf = WmsPendingPerSquareFootCharge::where('user_id', $id)->first()) {
                     $psf_history = new WmsPerSquareFootCharge();
                     $psf_history->user_id = $psf['user_id'];
                     $psf_history->charges = $psf['charges'];
                     $psf_history->save();
                 }
 
-                if($storage_type_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get()){
+                if ($storage_type_charges = WmsPendingStorageTypeCharge::where('user_id', $id)->get()) {
                     foreach ($storage_type_charges as $storage_charges) {
                         $history_storage_charge = new WmsStorageTypeCharge();
                         $history_storage_charge->user_id = $id;
@@ -6347,7 +6336,7 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                if($packing_charges = WmsPendingPackingCharge::where('user_id', $id)->get()){
+                if ($packing_charges = WmsPendingPackingCharge::where('user_id', $id)->get()) {
                     foreach ($packing_charges as $packing_charges) {
                         $history_packing_charge = new WmsPackingCharge();
                         $history_packing_charge->user_id = $id;
@@ -6358,7 +6347,7 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                if($labelling = WmsPendingLabellingCharge::where('user_id', $id)->first()){
+                if ($labelling = WmsPendingLabellingCharge::where('user_id', $id)->first()) {
                     $labelling_history = new WmsLabellingCharge();
                     $labelling_history->user_id = $labelling['user_id'];
                     $labelling_history->charges = $labelling['charges'];
@@ -6383,8 +6372,8 @@ class AdminDashboardController extends Controller
                 PendingDiscountCharge::where('user_id', $id)->delete();
                 PendingRateOriginHub::where('user_id', $id)->delete();
                 PendingRateDestinationHub::where('user_id', $id)->delete();
-                User::where('id', $id)->update(['rate_status' => 0,'agreement_signed' => 1, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
-                if($request->has('rate_remarks') && $request->rate_remarks != null){
+                User::where('id', $id)->update(['rate_status' => 0, 'agreement_signed' => 1, 'rates_authorized_by' => Auth::id(), 'rates_approved_at' => Carbon::now()]);
+                if ($request->has('rate_remarks') && $request->rate_remarks != null) {
                     $rate_remark = new RateRemark();
                     $rate_remark->user_id = $id;
                     $rate_remark->remarks = $request->rate_remarks;
@@ -6394,12 +6383,11 @@ class AdminDashboardController extends Controller
                 }
 
 
-
-                if($request->total_commission == 1){
+                if ($request->total_commission == 1) {
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    if($existing_sale_commission){
+                    if ($existing_sale_commission) {
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
                     $total_commission = $request->total_commission;
@@ -6413,16 +6401,16 @@ class AdminDashboardController extends Controller
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
-                    foreach($request->tier_id as $row_id => $tier){
+                    foreach ($request->tier_id as $row_id => $tier) {
                         $sales_tier = SalesTier::find($tier);
-                        if($sales_tier){
+                        if ($sales_tier) {
                             $sales_commission_user = new SalesCommissionUser();
                             $sales_commission_user->sales_commission_id = $sales_commission_id;
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
-                            if($sales_tier->tier_type == 1){
+                            if ($sales_tier->tier_type == 1) {
                                 $sales_commission_user->user_id = $request->user_id[$row_id];
-                            }else if($sales_tier->tier_type == 2){
+                            } else if ($sales_tier->tier_type == 2) {
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
                                 $external_user->shipper_id = $id;
@@ -6436,19 +6424,18 @@ class AdminDashboardController extends Controller
                     }
                     $sales_commission->commission = $actual_commission;
                     $sales_commission->save();
-                }
-                else{
+                } else {
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    if($existing_sale_commission){
+                    if ($existing_sale_commission) {
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
                 return redirect(route('admin.accounts.active'))->with('success', 'User Rates is now approved.');
             }
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
-            if($request->has('rate_remarks') && $request->rate_remarks != null){
+            if ($request->has('rate_remarks') && $request->rate_remarks != null) {
                 $rate_remark = new RateRemark();
                 $rate_remark->user_id = $id;
                 $rate_remark->remarks = $request->rate_remarks;
@@ -6456,12 +6443,12 @@ class AdminDashboardController extends Controller
                 $rate_remark->save();
             }
 
-            if($request->has('edit_commission') && $request->edit_commission == 1){
-                if($request->total_commission > 0){
+            if ($request->has('edit_commission') && $request->edit_commission == 1) {
+                if ($request->total_commission > 0) {
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    if($existing_sale_commission){
+                    if ($existing_sale_commission) {
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
                     $total_commission = $request->total_commission;
@@ -6475,16 +6462,16 @@ class AdminDashboardController extends Controller
                     $sales_commission->save();
                     $sales_commission_id = $sales_commission->id;
                     $actual_commission = 0;
-                    foreach($request->tier_id as $row_id => $tier){
+                    foreach ($request->tier_id as $row_id => $tier) {
                         $sales_tier = SalesTier::find($tier);
-                        if($sales_tier){
+                        if ($sales_tier) {
                             $sales_commission_user = new SalesCommissionUser();
                             $sales_commission_user->sales_commission_id = $sales_commission_id;
                             $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                             $sales_commission_user->tier_id = $tier;
-                            if($sales_tier->tier_type == 1){
+                            if ($sales_tier->tier_type == 1) {
                                 $sales_commission_user->user_id = $request->user_id[$row_id];
-                            }else if($sales_tier->tier_type == 2){
+                            } else if ($sales_tier->tier_type == 2) {
                                 $external_user = new SalesCommissionExternalUser();
                                 $external_user->name = $request->user_id[$row_id];
                                 $external_user->shipper_id = $id;
@@ -6498,12 +6485,11 @@ class AdminDashboardController extends Controller
                     }
                     $sales_commission->commission = $actual_commission;
                     $sales_commission->save();
-                }
-                else{
+                } else {
                     $existing_sale_commission = SalesCommission::where('shipper_id', $id)->first();
-                    if($existing_sale_commission){
+                    if ($existing_sale_commission) {
                         SalesCommissionUser::where('sales_commission_id', $existing_sale_commission->id)->delete();
-                        SalesCommissionExternalUser::where('shipper_id',$id)->delete();
+                        SalesCommissionExternalUser::where('shipper_id', $id)->delete();
                         SalesCommission::where('shipper_id', $id)->delete();
                     }
                 }
@@ -6514,12 +6500,14 @@ class AdminDashboardController extends Controller
             return redirect()->back()->with('success', 'All Rates are updated');
         }
     }
+
     /**
      * @param Request $request
      * @param $id
      * @return int
      */
-    public function addRates(Request $request, $id){
+    public function addRates(Request $request, $id)
+    {
 
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
@@ -6576,8 +6564,8 @@ class AdminDashboardController extends Controller
 //            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
             'on_discount_packaging_rate.required_if' => 'The overnight discount packaging field must be required',
 //            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
-            'on_discount_title.required_with'=>'The overnight discount title field is required',
-            'on_daterange.required_with'=>'The overnight discount date field is required',
+            'on_discount_title.required_with' => 'The overnight discount title field is required',
+            'on_daterange.required_with' => 'The overnight discount date field is required',
             //overland starts
             'ol_wa_range_up.*.required' => 'The overland range up field is required.',
             'ol_wa_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
@@ -6630,8 +6618,8 @@ class AdminDashboardController extends Controller
 //            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
             'ol_discount_packaging_rate.required_if' => 'The overland discount packaging field must be required',
 //            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
-            'ol_discount_title.required_with'=>'The overland discount title field is required',
-            'ol_daterange.required_with'=>'The overland discount date field is required',
+            'ol_discount_title.required_with' => 'The overland discount title field is required',
+            'ol_daterange.required_with' => 'The overland discount date field is required',
             //overland end and detain starts
             'detain_wa_range_up.*.required' => 'The detain range up field is required.',
             'detain_wa_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
@@ -6684,8 +6672,8 @@ class AdminDashboardController extends Controller
 //            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
             'detain_discount_packaging_rate.required_if' => 'The detain discount packaging field must be required',
 //            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
-            'detain_discount_title.required_with'=>'The detain discount title field is required',
-            'detain_daterange.required_with'=>'The detain discount date field is required',
+            'detain_discount_title.required_with' => 'The detain discount title field is required',
+            'detain_daterange.required_with' => 'The detain discount date field is required',
             //detain ends and sameday starts
             'sameday_wa_range_up.*.required' => 'The sameday range up field is required.',
             'sameday_wa_range_up.*.numeric' => 'The sameday range up field must be numeric or decimal.',
@@ -6735,8 +6723,8 @@ class AdminDashboardController extends Controller
 //            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
             'sameday_discount_packaging_rate.required_if' => 'The sameday discount packaging field must be required',
 //            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
-            'sameday_discount_title.required_with'=>'The sameday discount title field is required',
-            'sameday_daterange.required_with'=>'The sameday discount date field is required',
+            'sameday_discount_title.required_with' => 'The sameday discount title field is required',
+            'sameday_daterange.required_with' => 'The sameday discount date field is required',
             //sameday ends
 
             //warehouse starts
@@ -6764,7 +6752,7 @@ class AdminDashboardController extends Controller
         $sameday_validations = array();
 
         $shipper_id = $id;
-        if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
+        if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             $on_validations = [
                 'on_wa_range_up.*' => 'required|numeric|between:0,100000',
                 'on_wa_range_down.*' => 'required|numeric|between:0,100000',
@@ -6773,33 +6761,33 @@ class AdminDashboardController extends Controller
                 'on_class_1_charges.*' => 'required',
                 'on_class_2_charges.*' => 'required',
                 'on_class_3_charges.*' => 'required',
-                'on_wa_spkg.*'=>'numeric',
-                'on_replacement_charges'=>'required|numeric',
-                'on_tnb_charges'=>'required|numeric',
-                'on_cash_range_up.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
-                'on_cash_range_down.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
-                'on_cash_charges.*'=>'required_if:on_cash_handling_switch,==,on',
-                'on_ins_range_up.*'=>'required_if:on_insurance_charges_switch,==,on|numeric',
-                'on_ins_range_down.*'=>'required_if:on_insurance_charges_switch,==,on|numeric',
-                'on_ins_charges.*'=>'required_if:on_insurance_charges_switch,==,on',
-                'on_return_local_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                'on_return_class_0_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                'on_return_class_1_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                'on_return_class_2_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                'on_return_class_3_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                'overnight_fuel_surcharge'=>'required_if:overnight_fuel_switch,==,on|numeric',
+                'on_wa_spkg.*' => 'numeric',
+                'on_replacement_charges' => 'required|numeric',
+                'on_tnb_charges' => 'required|numeric',
+                'on_cash_range_up.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
+                'on_cash_range_down.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
+                'on_cash_charges.*' => 'required_if:on_cash_handling_switch,==,on',
+                'on_ins_range_up.*' => 'required_if:on_insurance_charges_switch,==,on|numeric',
+                'on_ins_range_down.*' => 'required_if:on_insurance_charges_switch,==,on|numeric',
+                'on_ins_charges.*' => 'required_if:on_insurance_charges_switch,==,on',
+                'on_return_local_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                'on_return_class_0_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                'on_return_class_1_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                'on_return_class_2_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                'on_return_class_3_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                'overnight_fuel_surcharge' => 'required_if:overnight_fuel_switch,==,on|numeric',
 
-                'on_discount_title'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
-                'on_daterange'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
-                'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on',
-                'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on',
-                'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on',
-                'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on',
-                'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on'
+                'on_discount_title' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
+                'on_daterange' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
+                'on_discount_weight_rate' => 'required_if:on_discount_weight_switch,==,on',
+                'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
+                'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
+                'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
+                'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on'
             ];
         }
         //overland
-        if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
+        if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
             $ol_validations = [
                 'ol_wa_range_up.*' => 'required|numeric|between:0,100000',
                 'ol_wa_range_down.*' => 'required|numeric|between:0,100000',
@@ -6808,33 +6796,33 @@ class AdminDashboardController extends Controller
                 'ol_class_1_charges.*' => 'required',
                 'ol_class_2_charges.*' => 'required',
                 'ol_class_3_charges.*' => 'required',
-                'ol_wa_spkg.*'=>'numeric',
-                'ol_replacement_charges'=>'required|numeric',
-                'ol_tnb_charges'=>'required|numeric',
-                'ol_cash_range_up.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
-                'ol_cash_range_down.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
-                'ol_cash_charges.*'=>'required_if:ol_cash_handling_switch,==,on',
-                'ol_ins_range_up.*'=>'required_if:ol_insurance_charges_switch,==,on|numeric',
-                'ol_ins_range_down.*'=>'required_if:ol_insurance_charges_switch,==,on|numeric',
-                'ol_ins_charges.*'=>'required_if:ol_insurance_charges_switch,==,on',
-                'ol_return_local_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                'ol_return_class_0_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                'ol_return_class_1_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                'ol_return_class_2_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                'ol_return_class_3_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                'overland_fuel_surcharge'=>'required_if:overland_fuel_switch,==,on|numeric',
+                'ol_wa_spkg.*' => 'numeric',
+                'ol_replacement_charges' => 'required|numeric',
+                'ol_tnb_charges' => 'required|numeric',
+                'ol_cash_range_up.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
+                'ol_cash_range_down.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
+                'ol_cash_charges.*' => 'required_if:ol_cash_handling_switch,==,on',
+                'ol_ins_range_up.*' => 'required_if:ol_insurance_charges_switch,==,on|numeric',
+                'ol_ins_range_down.*' => 'required_if:ol_insurance_charges_switch,==,on|numeric',
+                'ol_ins_charges.*' => 'required_if:ol_insurance_charges_switch,==,on',
+                'ol_return_local_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                'ol_return_class_0_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                'ol_return_class_1_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                'ol_return_class_2_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                'ol_return_class_3_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                'overland_fuel_surcharge' => 'required_if:overland_fuel_switch,==,on|numeric',
 
-                'ol_discount_title'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
-                'ol_daterange'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
-                'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on',
-                'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on',
-                'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on',
-                'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on',
-                'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on',
+                'ol_discount_title' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
+                'ol_daterange' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
+                'ol_discount_weight_rate' => 'required_if:ol_discount_weight_switch,==,on',
+                'ol_discount_cash_rate' => 'required_if:ol_discount_cash_switch,==,on',
+                'ol_discount_insurance_rate' => 'required_if:ol_discount_insurance_switch,==,on',
+                'ol_discount_return_rate' => 'required_if:ol_discount_return_switch,==,on',
+                'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
             ];
         }
         //overland
-        if($request->has('detain_main_switch') && $request->detain_main_switch == 'on'){
+        if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
             $detain_validations = [
                 'detain_wa_range_up.*' => 'required|numeric|between:0,100000',
                 'detain_wa_range_down.*' => 'required|numeric|between:0,100000',
@@ -6843,72 +6831,72 @@ class AdminDashboardController extends Controller
                 'detain_class_1_charges.*' => 'required',
                 'detain_class_2_charges.*' => 'required',
                 'detain_class_3_charges.*' => 'required',
-                'detain_wa_spkg.*'=>'numeric',
-                'detain_replacement_charges'=>'required|numeric',
-                'detain_tnb_charges'=>'required|numeric',
-                'detain_cash_range_up.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
-                'detain_cash_range_down.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
-                'detain_cash_charges.*'=>'required_if:detain_cash_handling_switch,==,on',
-                'detain_ins_range_up.*'=>'required_if:detain_insurance_charges_switch,==,on|numeric',
-                'detain_ins_range_down.*'=>'required_if:detain_insurance_charges_switch,==,on|numeric',
-                'detain_ins_charges.*'=>'required_if:detain_insurance_charges_switch,==,on',
-                'detain_return_local_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                'detain_return_class_0_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                'detain_return_class_1_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                'detain_return_class_2_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                'detain_return_class_3_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                'detain_fuel_surcharge'=>'required_if:detain_fuel_switch,==,on|numeric',
+                'detain_wa_spkg.*' => 'numeric',
+                'detain_replacement_charges' => 'required|numeric',
+                'detain_tnb_charges' => 'required|numeric',
+                'detain_cash_range_up.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
+                'detain_cash_range_down.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
+                'detain_cash_charges.*' => 'required_if:detain_cash_handling_switch,==,on',
+                'detain_ins_range_up.*' => 'required_if:detain_insurance_charges_switch,==,on|numeric',
+                'detain_ins_range_down.*' => 'required_if:detain_insurance_charges_switch,==,on|numeric',
+                'detain_ins_charges.*' => 'required_if:detain_insurance_charges_switch,==,on',
+                'detain_return_local_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                'detain_return_class_0_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                'detain_return_class_1_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                'detain_return_class_2_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                'detain_return_class_3_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                'detain_fuel_surcharge' => 'required_if:detain_fuel_switch,==,on|numeric',
 
-                'detain_discount_title'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
-                'detain_daterange'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
-                'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on',
-                'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on',
-                'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on',
-                'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on',
-                'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on',
+                'detain_discount_title' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
+                'detain_daterange' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
+                'detain_discount_weight_rate' => 'required_if:detain_discount_weight_switch,==,on',
+                'detain_discount_cash_rate' => 'required_if:detain_discount_cash_switch,==,on',
+                'detain_discount_insurance_rate' => 'required_if:detain_discount_insurance_switch,==,on',
+                'detain_discount_return_rate' => 'required_if:detain_discount_return_switch,==,on',
+                'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
             ];
         }
         //sameday
-        if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
+        if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
             $sameday_validations = [
                 'sameday_wa_range_up.*' => 'required|numeric|between:0,100000',
                 'sameday_wa_range_down.*' => 'required|numeric|between:0,100000',
                 'sameday_wa_local_charges.*' => 'required|numeric',
                 'sameday_class_0_charges.*' => 'required|numeric',
-                'sameday_wa_spkg.*'=>'numeric',
-                'sameday_replacement_charges'=>'required|numeric',
-                'sameday_tnb_charges'=>'required|numeric',
-                'sameday_cash_range_up.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
-                'sameday_cash_range_down.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
-                'sameday_cash_charges.*'=>'required_if:sameday_cash_handling_switch,==,on',
-                'sameday_ins_range_up.*'=>'required_if:sameday_insurance_charges_switch,==,on|numeric',
-                'sameday_ins_range_down.*'=>'required_if:sameday_insurance_charges_switch,==,on|numeric',
-                'sameday_ins_charges.*'=>'required_if:sameday_insurance_charges_switch,==,on',
-                'sameday_return_local_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                'sameday_return_class_0_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                'sameday_return_class_1_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                'sameday_return_class_2charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                'sameday_return_class_3_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                'sameday_fuel_surcharge'=>'required_if:sameday_fuel_switch,==,on|numeric',
+                'sameday_wa_spkg.*' => 'numeric',
+                'sameday_replacement_charges' => 'required|numeric',
+                'sameday_tnb_charges' => 'required|numeric',
+                'sameday_cash_range_up.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
+                'sameday_cash_range_down.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
+                'sameday_cash_charges.*' => 'required_if:sameday_cash_handling_switch,==,on',
+                'sameday_ins_range_up.*' => 'required_if:sameday_insurance_charges_switch,==,on|numeric',
+                'sameday_ins_range_down.*' => 'required_if:sameday_insurance_charges_switch,==,on|numeric',
+                'sameday_ins_charges.*' => 'required_if:sameday_insurance_charges_switch,==,on',
+                'sameday_return_local_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                'sameday_return_class_0_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                'sameday_return_class_1_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                'sameday_return_class_2charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                'sameday_return_class_3_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                'sameday_fuel_surcharge' => 'required_if:sameday_fuel_switch,==,on|numeric',
 
-                'sameday_discount_title'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
-                'sameday_daterange'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
-                'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on',
-                'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on',
-                'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on',
-                'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on',
-                'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on',
+                'sameday_discount_title' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
+                'sameday_daterange' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
+                'sameday_discount_weight_rate' => 'required_if:sameday_discount_weight_switch,==,on',
+                'sameday_discount_cash_rate' => 'required_if:sameday_discount_cash_switch,==,on',
+                'sameday_discount_insurance_rate' => 'required_if:sameday_discount_insurance_switch,==,on',
+                'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
+                'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
             ];
         }
 
-        if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+        if ($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on') {
             $warehouse_validations = [
                 'invoicing_cycle' => 'required|numeric',
                 'invoicing_date.*' => 'required_if:invoicing_cycle,1,3',
-                'ppc_charges'=>'required_if:ppc_switch,==,on',
-                'psf_charges'=>'required_if:psf_switch,==,on',
-                'storage_type.*'=>'required_if:storage_charges_switch,==,on',
-                'storage_type_charges.*'=>'required_if:storage_charges_switch,==,on|numeric',
+                'ppc_charges' => 'required_if:ppc_switch,==,on',
+                'psf_charges' => 'required_if:psf_switch,==,on',
+                'storage_type.*' => 'required_if:storage_charges_switch,==,on',
+                'storage_type_charges.*' => 'required_if:storage_charges_switch,==,on|numeric',
                 'packing_type.*' => 'required_if:packing_charges_switch,==,on',
                 'packing_charges.*' => 'required_if:packing_charges_switch,==,on|numeric',
                 'labelling_charges.*' => 'required_if:labelling_charges_switch,==,on|numeric',
@@ -6926,18 +6914,18 @@ class AdminDashboardController extends Controller
         }
 
 
-        if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
-            if($request->has('on_default') && $request->on_default == 'on'){
+        if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
+            if ($request->has('on_default') && $request->on_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
                     'default_shipping_mode' => 1
                 ]);
             }
-            $ONRateAlready = RateStatus::where('user_id',$id)->where('shipping_mode_id',1)->get();
+            $ONRateAlready = RateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
 
-            if($ONRateAlready->isEmpty()) {
+            if ($ONRateAlready->isEmpty()) {
 
-                if($request->has('on_origin_hubs')) {
-                    foreach($request->on_origin_hubs as $origin_id){
+                if ($request->has('on_origin_hubs')) {
+                    foreach ($request->on_origin_hubs as $origin_id) {
                         $rate_origin_hub = new RateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 1;
@@ -6945,8 +6933,8 @@ class AdminDashboardController extends Controller
                         $rate_origin_hub->save();
                     }
                 }
-                if($request->has('on_destination_hubs')) {
-                    foreach($request->on_destination_hubs as $destination_id){
+                if ($request->has('on_destination_hubs')) {
+                    foreach ($request->on_destination_hubs as $destination_id) {
                         $rate_destination_hub = new RateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 1;
@@ -6955,33 +6943,33 @@ class AdminDashboardController extends Controller
                     }
                 }
                 RateStatus::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>1,
-                    'status'=> ($request->has('on_main_switch'))? 1:0,
-                    'cash_handling_charges'=> ($request->has('on_cash_handling_switch'))? 1:0,
-                    'insurance_charges'=> ($request->has('on_insurance_charges_switch'))? 1:0,
-                    'return_charges'=> ($request->has('on_return_switch'))? 1:0,
-                    'fuel_charges'=> ($request->has('overnight_fuel_switch'))? 1:0
+                    'user_id' => $id,
+                    'shipping_mode_id' => 1,
+                    'status' => ($request->has('on_main_switch')) ? 1 : 0,
+                    'cash_handling_charges' => ($request->has('on_cash_handling_switch')) ? 1 : 0,
+                    'insurance_charges' => ($request->has('on_insurance_charges_switch')) ? 1 : 0,
+                    'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
+                    'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0
                 ]);
                 $wa_switch = array();
                 $wa_spkg = array();
                 foreach ($request->on_wa_range_up as $index => $on_wa_range_up) {
-                    if($request->has('on_wa_switch')) {
+                    if ($request->has('on_wa_switch')) {
                         if (array_key_exists($index, $request->on_wa_switch)) {
                             $wa_switch[$index] = 1;
                         } else {
                             $wa_switch[$index] = 0;
                         };
-                    }else{
+                    } else {
                         $wa_switch[$index] = 0;
                     }
-                    if($request->has('on_wa_spkg')) {
+                    if ($request->has('on_wa_spkg')) {
                         if (array_key_exists($index, $request->on_wa_spkg)) {
                             $wa_spkg[$index] = $request->on_wa_spkg[$index];
                         } else {
                             $wa_spkg[$index] = 0.5;
                         };
-                    }else{
+                    } else {
                         $wa_spkg[$index] = 0.5;
                     }
                     WeightCharge::create([
@@ -7002,53 +6990,53 @@ class AdminDashboardController extends Controller
 
                 //Replacement and Try and Buy charges
                 BookingTypeCharges::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>1,
-                    'replacement_charges'=>$request->on_replacement_charges,
-                    'try_and_buy_charges'=>$request->on_tnb_charges
+                    'user_id' => $id,
+                    'shipping_mode_id' => 1,
+                    'replacement_charges' => $request->on_replacement_charges,
+                    'try_and_buy_charges' => $request->on_tnb_charges
                 ]);
                 //Cash handling Charges
-                if($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on'){
-                    foreach ($request->on_cash_range_up as $ind => $on_cash_range_up){
+                if ($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on') {
+                    foreach ($request->on_cash_range_up as $ind => $on_cash_range_up) {
                         CashHandlingCharge::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>1,
-                            'range_up'=> $request->on_cash_range_up[$ind],
-                            'range_down'=> $request->on_cash_range_down[$ind],
-                            'charges'=> $request->on_cash_charges[$ind]
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'range_up' => $request->on_cash_range_up[$ind],
+                            'range_down' => $request->on_cash_range_down[$ind],
+                            'charges' => $request->on_cash_charges[$ind]
                         ]);
                     }
                 }
                 //insurance charges
-                if($request->has('on_insurance_charges_switch') && $request->on_insurance_charges_switch == 'on'){
-                    foreach ($request->on_ins_range_up as $insurance => $on_ins_range_up){
+                if ($request->has('on_insurance_charges_switch') && $request->on_insurance_charges_switch == 'on') {
+                    foreach ($request->on_ins_range_up as $insurance => $on_ins_range_up) {
                         InsuranceCharge::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>1,
-                            'range_up'=> $request->on_ins_range_up[$insurance],
-                            'range_down'=> $request->on_ins_range_down[$insurance],
-                            'charges'=> $request->on_ins_charges[$insurance]
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'range_up' => $request->on_ins_range_up[$insurance],
+                            'range_down' => $request->on_ins_range_down[$insurance],
+                            'charges' => $request->on_ins_charges[$insurance]
                         ]);
                     }
                 }
                 //Return Charges
-                if($request->has('on_return_switch') && $request->on_return_switch == 'on'){
+                if ($request->has('on_return_switch') && $request->on_return_switch == 'on') {
                     ReturnCharge::create([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>1,
-                        'local'=> $request->on_return_local_charges,
-                        'national_charges_class_0'=> $request->on_return_class_0_charges,
-                        'national_charges_class_1'=> $request->on_return_class_1_charges,
-                        'national_charges_class_2'=> $request->on_return_class_2_charges,
-                        'national_charges_class_3'=> $request->on_return_class_3_charges
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'local' => $request->on_return_local_charges,
+                        'national_charges_class_0' => $request->on_return_class_0_charges,
+                        'national_charges_class_1' => $request->on_return_class_1_charges,
+                        'national_charges_class_2' => $request->on_return_class_2_charges,
+                        'national_charges_class_3' => $request->on_return_class_3_charges
                     ]);
                 }
                 //Return Charges
-                if($request->has('overnight_fuel_switch') && $request->overnight_fuel_switch == 'on'){
+                if ($request->has('overnight_fuel_switch') && $request->overnight_fuel_switch == 'on') {
                     FuelSurcharge::create([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>1,
-                        'fuel_surcharge'=> $request->overnight_fuel_surcharge
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'fuel_surcharge' => $request->overnight_fuel_surcharge
                     ]);
                 }
 
@@ -7058,37 +7046,37 @@ class AdminDashboardController extends Controller
                 $discount_return = null;
                 $discount_packaging = null;
 
-                if($request->has('on_discount_weight_switch') && $request->on_discount_weight_switch == 'on'){
+                if ($request->has('on_discount_weight_switch') && $request->on_discount_weight_switch == 'on') {
                     $discount_weight = $request->on_discount_weight_rate != null ? $request->on_discount_weight_rate : null;
 //                    $discount_weight = $request->on_discount_weight_rate;
                 }
-                if($request->has('on_discount_cash_switch') && $request->on_discount_cash_switch == 'on'){
+                if ($request->has('on_discount_cash_switch') && $request->on_discount_cash_switch == 'on') {
                     $discount_cash = $request->on_discount_cash_rate != null ? $request->on_discount_cash_rate : null;
                 }
-                if($request->has('on_discount_insurance_switch') && $request->on_discount_insurance_switch == 'on'){
+                if ($request->has('on_discount_insurance_switch') && $request->on_discount_insurance_switch == 'on') {
                     $discount_insurance = $request->on_discount_insurance_rate != null ? $request->on_discount_insurance_rate : null;
                 }
-                if($request->has('on_discount_return_switch') && $request->on_discount_return_switch == 'on'){
+                if ($request->has('on_discount_return_switch') && $request->on_discount_return_switch == 'on') {
                     $discount_return = $request->on_discount_return_rate != null ? $request->on_discount_insurance_rate : null;
                 }
-                if($request->has('on_discount_packaging_switch') && $request->on_discount_packaging_switch == 'on'){
+                if ($request->has('on_discount_packaging_switch') && $request->on_discount_packaging_switch == 'on') {
                     $discount_packaging = $request->on_discount_packaging_rate != null ? $request->on_discount_packaging_rate : null;
                 }
-                if($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+                if ($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
 
 
                     $date_str = $request->on_daterange;
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+                    $to = Carbon::create($date_to[2], $date_to[0], $date_to[1], 0, 0, 0, 'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
 
                     DiscountCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
-                        'title'=> $request->on_discount_title,
+                        'title' => $request->on_discount_title,
                         'weight' => $discount_weight,
                         'cash' => $discount_cash,
                         'insurance' => $discount_insurance,
@@ -7096,36 +7084,36 @@ class AdminDashboardController extends Controller
                         'packaging' => $discount_packaging,
                         'to' => $to,
                         'from' => $from,
-                        'added_by'=>Auth::id()
+                        'added_by' => Auth::id()
                     ]);
                 }
 
             }
             //dd($weightAlready);
             if ($request->has('on_dws_weight')) {
-                if($request->on_dws_weight == 2){
+                if ($request->on_dws_weight == 2) {
                     DwsWeightChargesController::add($id, 1, 2, Auth::id());
 
-                }else{
+                } else {
                     DwsWeightChargesController::add($id, 1, 1, Auth::id());
                 }
-    
+
             }
         }
         //Overland
-        if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
-            if($request->has('ol_default') && $request->ol_default == 'on'){
+        if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
+            if ($request->has('ol_default') && $request->ol_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
                     'default_shipping_mode' => 2
                 ]);
             }
 
-            $OLRatePresent = RateStatus::where('user_id',$id)->where('shipping_mode_id',2)->get();
+            $OLRatePresent = RateStatus::where('user_id', $id)->where('shipping_mode_id', 2)->get();
 
-            if($OLRatePresent->isEmpty()) {
+            if ($OLRatePresent->isEmpty()) {
 
-                if($request->has('ol_origin_hubs')) {
-                    foreach($request->ol_origin_hubs as $origin_id){
+                if ($request->has('ol_origin_hubs')) {
+                    foreach ($request->ol_origin_hubs as $origin_id) {
                         $rate_origin_hub = new RateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 2;
@@ -7133,8 +7121,8 @@ class AdminDashboardController extends Controller
                         $rate_origin_hub->save();
                     }
                 }
-                if($request->has('ol_destination_hubs')) {
-                    foreach($request->ol_destination_hubs as $destination_id){
+                if ($request->has('ol_destination_hubs')) {
+                    foreach ($request->ol_destination_hubs as $destination_id) {
                         $rate_destination_hub = new RateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 2;
@@ -7144,35 +7132,35 @@ class AdminDashboardController extends Controller
                 }
 
                 RateStatus::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>2,
-                    'status'=> ($request->has('ol_main_switch'))? 1:0,
-                    'cash_handling_charges'=> ($request->has('ol_cash_handling_switch'))? 1:0,
-                    'insurance_charges'=> ($request->has('ol_insurance_charges_switch'))? 1:0,
-                    'return_charges'=> ($request->has('ol_return_switch'))? 1:0,
-                    'fuel_charges'=> ($request->has('overland_fuel_switch'))? 1:0
+                    'user_id' => $id,
+                    'shipping_mode_id' => 2,
+                    'status' => ($request->has('ol_main_switch')) ? 1 : 0,
+                    'cash_handling_charges' => ($request->has('ol_cash_handling_switch')) ? 1 : 0,
+                    'insurance_charges' => ($request->has('ol_insurance_charges_switch')) ? 1 : 0,
+                    'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
+                    'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0
                 ]);
                 $wa_switch_overland = array();
                 $wa_spkg_overland = array();
-                $standard_weight = StandardWeightCharge::where('shipping_mode_id',2)->pluck('kg_range')->toArray();
+                $standard_weight = StandardWeightCharge::where('shipping_mode_id', 2)->pluck('kg_range')->toArray();
                 foreach ($request->ol_wa_range_up as $index => $ol_wa_range_up) {
-                    if($request->has('ol_wa_switch')) {
+                    if ($request->has('ol_wa_switch')) {
                         if (array_key_exists($index, $request->ol_wa_switch)) {
                             $wa_switch_overland[$index] = 1;
                         } else {
                             $wa_switch_overland[$index] = 0;
                         };
-                    }else{
+                    } else {
                         $wa_switch_overland[$index] = 0;
                     }
-                    if($request->has('ol_wa_spkg')) {
+                    if ($request->has('ol_wa_spkg')) {
                         if (array_key_exists($index, $request->ol_wa_spkg)) {
                             $wa_spkg_overland[$index] = $request->ol_wa_spkg[$index];
                         } else {
                             $wa_spkg_overland[$index] = isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
                         };
-                    }else{
-                        $wa_spkg_overland[$index] =  isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
+                    } else {
+                        $wa_spkg_overland[$index] = isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
                     }
                     WeightCharge::create([
                         'user_id' => $id,
@@ -7192,52 +7180,52 @@ class AdminDashboardController extends Controller
 
                 //Replacement and Try and Buy charges
                 BookingTypeCharges::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>2,
-                    'replacement_charges'=>$request->ol_replacement_charges,
-                    'try_and_buy_charges'=>$request->ol_tnb_charges
+                    'user_id' => $id,
+                    'shipping_mode_id' => 2,
+                    'replacement_charges' => $request->ol_replacement_charges,
+                    'try_and_buy_charges' => $request->ol_tnb_charges
                 ]);
                 //Cash handling Charges
-                if($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on'){
-                    foreach ($request->ol_cash_range_up as $ind => $ol_cash_range_up){
+                if ($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on') {
+                    foreach ($request->ol_cash_range_up as $ind => $ol_cash_range_up) {
                         CashHandlingCharge::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>2,
-                            'range_up'=> $request->ol_cash_range_up[$ind],
-                            'range_down'=> $request->ol_cash_range_down[$ind],
-                            'charges'=> $request->ol_cash_charges[$ind]
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'range_up' => $request->ol_cash_range_up[$ind],
+                            'range_down' => $request->ol_cash_range_down[$ind],
+                            'charges' => $request->ol_cash_charges[$ind]
                         ]);
                     }
                 }
                 //insurance charges
-                if($request->has('ol_insurance_charges_switch') && $request->ol_insurance_charges_switch == 'on'){
-                    foreach ($request->ol_ins_range_up as $insurance => $ol_ins_range_up){
+                if ($request->has('ol_insurance_charges_switch') && $request->ol_insurance_charges_switch == 'on') {
+                    foreach ($request->ol_ins_range_up as $insurance => $ol_ins_range_up) {
                         InsuranceCharge::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>2,
-                            'range_up'=> $request->ol_ins_range_up[$insurance],
-                            'range_down'=> $request->ol_ins_range_down[$insurance],
-                            'charges'=> $request->ol_ins_charges[$insurance]
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'range_up' => $request->ol_ins_range_up[$insurance],
+                            'range_down' => $request->ol_ins_range_down[$insurance],
+                            'charges' => $request->ol_ins_charges[$insurance]
                         ]);
                     }
                 }
                 //Return Charges
-                if($request->has('ol_return_switch') && $request->ol_return_switch == 'on'){
+                if ($request->has('ol_return_switch') && $request->ol_return_switch == 'on') {
                     ReturnCharge::create([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>2,
-                        'local'=> $request->ol_return_local_charges,
-                        'national_charges_class_0'=> $request->ol_return_class_0_charges,
-                        'national_charges_class_1'=> $request->ol_return_class_1_charges,
-                        'national_charges_class_2'=> $request->ol_return_class_2_charges,
-                        'national_charges_class_3'=> $request->ol_return_class_3_charges
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'local' => $request->ol_return_local_charges,
+                        'national_charges_class_0' => $request->ol_return_class_0_charges,
+                        'national_charges_class_1' => $request->ol_return_class_1_charges,
+                        'national_charges_class_2' => $request->ol_return_class_2_charges,
+                        'national_charges_class_3' => $request->ol_return_class_3_charges
                     ]);
                 }
-                if($request->has('overland_fuel_switch') && $request->overland_fuel_switch == 'on'){
+                if ($request->has('overland_fuel_switch') && $request->overland_fuel_switch == 'on') {
                     FuelSurcharge::create([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>2,
-                        'fuel_surcharge'=> $request->overland_fuel_surcharge
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'fuel_surcharge' => $request->overland_fuel_surcharge
                     ]);
                 }
 
@@ -7247,37 +7235,37 @@ class AdminDashboardController extends Controller
                 $discount_return = null;
                 $discount_packaging = null;
 
-                if($request->has('ol_discount_weight_switch') && $request->ol_discount_weight_switch == 'on'){
+                if ($request->has('ol_discount_weight_switch') && $request->ol_discount_weight_switch == 'on') {
                     $discount_weight = $request->ol_discount_weight_rate != null ? $request->ol_discount_weight_rate : null;
 //                    $discount_weight = $request->ol_discount_weight_rate;
                 }
-                if($request->has('ol_discount_cash_switch') && $request->ol_discount_cash_switch == 'on'){
+                if ($request->has('ol_discount_cash_switch') && $request->ol_discount_cash_switch == 'on') {
                     $discount_cash = $request->ol_discount_cash_rate != null ? $request->ol_discount_cash_rate : null;
                 }
-                if($request->has('ol_discount_insurance_switch') && $request->ol_discount_insurance_switch == 'on'){
+                if ($request->has('ol_discount_insurance_switch') && $request->ol_discount_insurance_switch == 'on') {
                     $discount_insurance = $request->ol_discount_insurance_rate != null ? $request->ol_discount_insurance_rate : null;
                 }
-                if($request->has('ol_discount_return_switch') && $request->ol_discount_return_switch == 'on'){
+                if ($request->has('ol_discount_return_switch') && $request->ol_discount_return_switch == 'on') {
                     $discount_return = $request->ol_discount_return_rate != null ? $request->ol_discount_insurance_rate : null;
                 }
-                if($request->has('ol_discount_packaging_switch') && $request->ol_discount_packaging_switch == 'on'){
+                if ($request->has('ol_discount_packaging_switch') && $request->ol_discount_packaging_switch == 'on') {
                     $discount_packaging = $request->ol_discount_packaging_rate != null ? $request->ol_discount_packaging_rate : null;
                 }
-                if($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+                if ($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
 
 
                     $date_str = $request->ol_daterange;
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+                    $to = Carbon::create($date_to[2], $date_to[0], $date_to[1], 0, 0, 0, 'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
 
                     DiscountCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
-                        'title'=> $request->ol_discount_title,
+                        'title' => $request->ol_discount_title,
                         'weight' => $discount_weight,
                         'cash' => $discount_cash,
                         'insurance' => $discount_insurance,
@@ -7285,25 +7273,25 @@ class AdminDashboardController extends Controller
                         'packaging' => $discount_packaging,
                         'to' => $to,
                         'from' => $from,
-                        'added_by'=>Auth::id()
+                        'added_by' => Auth::id()
                     ]);
                 }
 
             }
             if ($request->has('ol_dws_weight')) {
-                if($request->ol_dws_weight == 2){
+                if ($request->ol_dws_weight == 2) {
                     DwsWeightChargesController::add($id, 2, 2, Auth::id());
-                    
-                }else{
+
+                } else {
                     DwsWeightChargesController::add($id, 2, 1, Auth::id());
 
                 }
-    
+
             }
         }
         //Detain
-        if($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
-            if($request->has('det_default') && $request->det_default == 'on'){
+        if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
+            if ($request->has('det_default') && $request->det_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
                     'default_shipping_mode' => 3
                 ]);
@@ -7313,8 +7301,8 @@ class AdminDashboardController extends Controller
 
             if ($DetainRatePresent->isEmpty()) {
 
-                if($request->has('detain_origin_hubs')) {
-                    foreach($request->detain_origin_hubs as $origin_id){
+                if ($request->has('detain_origin_hubs')) {
+                    foreach ($request->detain_origin_hubs as $origin_id) {
                         $rate_origin_hub = new RateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 3;
@@ -7322,8 +7310,8 @@ class AdminDashboardController extends Controller
                         $rate_origin_hub->save();
                     }
                 }
-                if($request->has('detain_destination_hubs')) {
-                    foreach($request->detain_destination_hubs as $destination_id){
+                if ($request->has('detain_destination_hubs')) {
+                    foreach ($request->detain_destination_hubs as $destination_id) {
                         $rate_destination_hub = new RateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 3;
@@ -7339,11 +7327,11 @@ class AdminDashboardController extends Controller
                     'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
                     'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
                     'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
-                    'fuel_charges'=> ($request->has('detain_fuel_switch'))? 1:0
+                    'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0
                 ]);
                 $wa_switch_detain = array();
                 $wa_spkg_detain = array();
-                $standard_weight = StandardWeightCharge::where('shipping_mode_id',3)->pluck('kg_range')->toArray();
+                $standard_weight = StandardWeightCharge::where('shipping_mode_id', 3)->pluck('kg_range')->toArray();
                 foreach ($request->detain_wa_range_up as $index => $detain_wa_range_up) {
                     if ($request->has('detain_wa_switch')) {
                         if (array_key_exists($index, $request->detain_wa_switch)) {
@@ -7416,17 +7404,17 @@ class AdminDashboardController extends Controller
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
                         'local' => $request->detain_return_local_charges,
-                        'national_charges_class_0'=> $request->detain_return_class_0_charges,
-                        'national_charges_class_1'=> $request->detain_return_class_1_charges,
-                        'national_charges_class_2'=> $request->detain_return_class_2_charges,
-                        'national_charges_class_3'=> $request->detain_return_class_3_charges
+                        'national_charges_class_0' => $request->detain_return_class_0_charges,
+                        'national_charges_class_1' => $request->detain_return_class_1_charges,
+                        'national_charges_class_2' => $request->detain_return_class_2_charges,
+                        'national_charges_class_3' => $request->detain_return_class_3_charges
                     ]);
                 }
-                if($request->has('detain_fuel_switch') && $request->detain_fuel_switch == 'on'){
+                if ($request->has('detain_fuel_switch') && $request->detain_fuel_switch == 'on') {
                     FuelSurcharge::create([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>3,
-                        'fuel_surcharge'=> $request->detain_fuel_surcharge
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'fuel_surcharge' => $request->detain_fuel_surcharge
                     ]);
                 }
 
@@ -7459,8 +7447,8 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+                    $to = Carbon::create($date_to[2], $date_to[0], $date_to[1], 0, 0, 0, 'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
 
                     DiscountCharge::create([
@@ -7480,30 +7468,30 @@ class AdminDashboardController extends Controller
 
             }
             if ($request->has('detain_dws_weight')) {
-                if($request->detain_dws_weight == 2){
-                    
+                if ($request->detain_dws_weight == 2) {
+
                     DwsWeightChargesController::add($id, 3, 2, Auth::id());
 
-                }else{
+                } else {
                     DwsWeightChargesController::add($id, 3, 1, Auth::id());
 
                 }
-    
+
             }
         }
         //Sameday
-        if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
-            if($request->has('sameday_default') && $request->sameday_default == 'on'){
+        if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
+            if ($request->has('sameday_default') && $request->sameday_default == 'on') {
                 $default_shipping_mode = User::where('id', $id)->update([
                     'default_shipping_mode' => 4
                 ]);
             }
 
-            $SamedayRatePresent = RateStatus::where('user_id',$id)->where('shipping_mode_id',4)->get();
-            if($SamedayRatePresent->isEmpty()) {
+            $SamedayRatePresent = RateStatus::where('user_id', $id)->where('shipping_mode_id', 4)->get();
+            if ($SamedayRatePresent->isEmpty()) {
 
-                if($request->has('sameday_origin_hubs')) {
-                    foreach($request->sameday_origin_hubs as $origin_id){
+                if ($request->has('sameday_origin_hubs')) {
+                    foreach ($request->sameday_origin_hubs as $origin_id) {
                         $rate_origin_hub = new RateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 4;
@@ -7511,8 +7499,8 @@ class AdminDashboardController extends Controller
                         $rate_origin_hub->save();
                     }
                 }
-                if($request->has('sameday_destination_hubs')) {
-                    foreach($request->sameday_destination_hubs as $destination_id){
+                if ($request->has('sameday_destination_hubs')) {
+                    foreach ($request->sameday_destination_hubs as $destination_id) {
                         $rate_destination_hub = new RateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 4;
@@ -7522,34 +7510,34 @@ class AdminDashboardController extends Controller
                 }
 
                 RateStatus::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>4,
-                    'status'=> ($request->has('sameday_main_switch'))? 1:0,
-                    'cash_handling_charges'=> ($request->has('sameday_cash_handling_switch'))? 1:0,
-                    'insurance_charges'=> ($request->has('sameday_insurance_charges_switch'))? 1:0,
-                    'return_charges'=> ($request->has('sameday_return_switch'))? 1:0,
-                    'fuel_charges'=> ($request->has('sameday_fuel_switch'))? 1:0
+                    'user_id' => $id,
+                    'shipping_mode_id' => 4,
+                    'status' => ($request->has('sameday_main_switch')) ? 1 : 0,
+                    'cash_handling_charges' => ($request->has('sameday_cash_handling_switch')) ? 1 : 0,
+                    'insurance_charges' => ($request->has('sameday_insurance_charges_switch')) ? 1 : 0,
+                    'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
+                    'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0
                 ]);
                 $wa_switch_sameday = array();
                 $wa_spkg_sameday = array();
-                $standard_weight = StandardWeightCharge::where('shipping_mode_id',4)->pluck('kg_range')->toArray();
+                $standard_weight = StandardWeightCharge::where('shipping_mode_id', 4)->pluck('kg_range')->toArray();
                 foreach ($request->sameday_wa_range_up as $index => $sameday_wa_range_up) {
-                    if($request->has('sameday_wa_switch')) {
+                    if ($request->has('sameday_wa_switch')) {
                         if (array_key_exists($index, $request->sameday_wa_switch)) {
                             $wa_switch_sameday[$index] = 1;
                         } else {
                             $wa_switch_sameday[$index] = 0;
                         };
-                    }else{
+                    } else {
                         $wa_switch_sameday[$index] = 0;
                     }
-                    if($request->has('sameday_wa_spkg')) {
+                    if ($request->has('sameday_wa_spkg')) {
                         if (array_key_exists($index, $request->sameday_wa_spkg)) {
                             $wa_spkg_sameday[$index] = $request->sameday_wa_spkg[$index];
                         } else {
                             $wa_spkg_sameday[$index] = isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
                         };
-                    }else{
+                    } else {
                         $wa_spkg_sameday[$index] = isset($standard_weight[$index]) ? $standard_weight[$index] : 0;
                     }
                     WeightCharge::create([
@@ -7570,52 +7558,52 @@ class AdminDashboardController extends Controller
 
                 //Replacement and Try and Buy charges
                 BookingTypeCharges::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>4,
-                    'replacement_charges'=>$request->sameday_replacement_charges,
-                    'try_and_buy_charges'=>$request->sameday_tnb_charges
+                    'user_id' => $id,
+                    'shipping_mode_id' => 4,
+                    'replacement_charges' => $request->sameday_replacement_charges,
+                    'try_and_buy_charges' => $request->sameday_tnb_charges
                 ]);
                 //Cash handling Charges
-                if($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on'){
-                    foreach ($request->sameday_cash_range_up as $ind => $sameday_cash_range_up){
+                if ($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on') {
+                    foreach ($request->sameday_cash_range_up as $ind => $sameday_cash_range_up) {
                         CashHandlingCharge::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>4,
-                            'range_up'=> $request->sameday_cash_range_up[$ind],
-                            'range_down'=> $request->sameday_cash_range_down[$ind],
-                            'charges'=> $request->sameday_cash_charges[$ind]
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'range_up' => $request->sameday_cash_range_up[$ind],
+                            'range_down' => $request->sameday_cash_range_down[$ind],
+                            'charges' => $request->sameday_cash_charges[$ind]
                         ]);
                     }
                 }
                 //insurance charges
-                if($request->has('sameday_insurance_charges_switch') && $request->sameday_insurance_charges_switch == 'on'){
-                    foreach ($request->sameday_ins_range_up as $insurance => $sameday_ins_range_up){
+                if ($request->has('sameday_insurance_charges_switch') && $request->sameday_insurance_charges_switch == 'on') {
+                    foreach ($request->sameday_ins_range_up as $insurance => $sameday_ins_range_up) {
                         InsuranceCharge::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>4,
-                            'range_up'=> $request->sameday_ins_range_up[$insurance],
-                            'range_down'=> $request->sameday_ins_range_down[$insurance],
-                            'charges'=> $request->sameday_ins_charges[$insurance]
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'range_up' => $request->sameday_ins_range_up[$insurance],
+                            'range_down' => $request->sameday_ins_range_down[$insurance],
+                            'charges' => $request->sameday_ins_charges[$insurance]
                         ]);
                     }
                 }
                 //Return Charges
-                if($request->has('sameday_return_switch') && $request->sameday_return_switch == 'on'){
+                if ($request->has('sameday_return_switch') && $request->sameday_return_switch == 'on') {
                     ReturnCharge::create([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>4,
-                        'local'=> $request->sameday_return_local_charges,
-                        'national_charges_class_0'=> $request->sameday_return_class_0_charges,
-                        'national_charges_class_1'=> '0%',
-                        'national_charges_class_2'=> '0%',
-                        'national_charges_class_3'=> '0%'
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'local' => $request->sameday_return_local_charges,
+                        'national_charges_class_0' => $request->sameday_return_class_0_charges,
+                        'national_charges_class_1' => '0%',
+                        'national_charges_class_2' => '0%',
+                        'national_charges_class_3' => '0%'
                     ]);
                 }
-                if($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on'){
+                if ($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on') {
                     FuelSurcharge::create([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>4,
-                        'fuel_surcharge'=> $request->sameday_fuel_surcharge
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'fuel_surcharge' => $request->sameday_fuel_surcharge
                     ]);
                 }
 
@@ -7625,37 +7613,37 @@ class AdminDashboardController extends Controller
                 $discount_return = null;
                 $discount_packaging = null;
 
-                if($request->has('sameday_discount_weight_switch') && $request->sameday_discount_weight_switch == 'on'){
+                if ($request->has('sameday_discount_weight_switch') && $request->sameday_discount_weight_switch == 'on') {
                     $discount_weight = $request->sameday_discount_weight_rate != null ? $request->sameday_discount_weight_rate : null;
 //                    $discount_weight = $request->sameday_discount_weight_rate;
                 }
-                if($request->has('sameday_discount_cash_switch') && $request->sameday_discount_cash_switch == 'on'){
+                if ($request->has('sameday_discount_cash_switch') && $request->sameday_discount_cash_switch == 'on') {
                     $discount_cash = $request->sameday_discount_cash_rate != null ? $request->sameday_discount_cash_rate : null;
                 }
-                if($request->has('sameday_discount_insurance_switch') && $request->sameday_discount_insurance_switch == 'on'){
+                if ($request->has('sameday_discount_insurance_switch') && $request->sameday_discount_insurance_switch == 'on') {
                     $discount_insurance = $request->sameday_discount_insurance_rate != null ? $request->sameday_discount_insurance_rate : null;
                 }
-                if($request->has('sameday_discount_return_switch') && $request->sameday_discount_return_switch == 'on'){
+                if ($request->has('sameday_discount_return_switch') && $request->sameday_discount_return_switch == 'on') {
                     $discount_return = $request->sameday_discount_return_rate != null ? $request->sameday_discount_insurance_rate : null;
                 }
-                if($request->has('sameday_discount_packaging_switch') && $request->sameday_discount_packaging_switch == 'on'){
+                if ($request->has('sameday_discount_packaging_switch') && $request->sameday_discount_packaging_switch == 'on') {
                     $discount_packaging = $request->sameday_discount_packaging_rate != null ? $request->sameday_discount_packaging_rate : null;
                 }
-                if($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+                if ($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
 
 
                     $date_str = $request->sameday_daterange;
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+                    $to = Carbon::create($date_to[2], $date_to[0], $date_to[1], 0, 0, 0, 'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
 
                     DiscountCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 4,
-                        'title'=> $request->sameday_discount_title,
+                        'title' => $request->sameday_discount_title,
                         'weight' => $discount_weight,
                         'cash' => $discount_cash,
                         'insurance' => $discount_insurance,
@@ -7663,25 +7651,25 @@ class AdminDashboardController extends Controller
                         'packaging' => $discount_packaging,
                         'to' => $to,
                         'from' => $from,
-                        'added_by'=>Auth::id()
+                        'added_by' => Auth::id()
                     ]);
                 }
 
             }
             if ($request->has('sameday_dws_weight')) {
-                if($request->sameday_dws_weight == 2){
+                if ($request->sameday_dws_weight == 2) {
                     DwsWeightChargesController::add($id, 4, 2, Auth::id());
 
-                }else{
+                } else {
                     DwsWeightChargesController::add($id, 4, 1, Auth::id());
 
                 }
-    
+
             }
         }
 
         $warehouse_charges = 0;
-        if($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on'){
+        if ($request->has('warehouse_main_switch') && $request->warehouse_main_switch == 'on') {
             $warehouse_charges = 1;
 
             $wms_user_info = new WmsUserInformation();
@@ -7689,26 +7677,26 @@ class AdminDashboardController extends Controller
             $wms_user_info->warehousing = 1;
             $wms_user_info->invoicing_cycle = $request->invoicing_cycle;
             $wms_user_info->invoicing_date = 1;
-            $wms_user_info->per_product_charges = ($request->has('ppc_switch'))? 1:0;
-            $wms_user_info->per_square_foot_charges = ($request->has('psf_switch'))? 1:0;
-            $wms_user_info->packing_charges = ($request->has('packing_charges_switch'))? 1:0;
-            $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch'))? 1:0;
-            $wms_user_info->storage_charges = ($request->has('storage_charges_switch'))? 1:0;
+            $wms_user_info->per_product_charges = ($request->has('ppc_switch')) ? 1 : 0;
+            $wms_user_info->per_square_foot_charges = ($request->has('psf_switch')) ? 1 : 0;
+            $wms_user_info->packing_charges = ($request->has('packing_charges_switch')) ? 1 : 0;
+            $wms_user_info->labelling_charges = ($request->has('labelling_charges_switch')) ? 1 : 0;
+            $wms_user_info->storage_charges = ($request->has('storage_charges_switch')) ? 1 : 0;
             $wms_user_info->save();
 
-            if($request->has('ppc_switch')){
+            if ($request->has('ppc_switch')) {
                 $ppc = new WmsPerProductCharge();
                 $ppc->user_id = $id;
                 $ppc->charges = $request->ppc_charges;
                 $ppc->save();
             }
-            if($request->has('psf_switch')){
+            if ($request->has('psf_switch')) {
                 $psf = new WmsPerSquareFootCharge();
                 $psf->user_id = $id;
                 $psf->charges = $request->psf_charges;
                 $psf->save();
             }
-            if($request->has('storage_charges_switch')){
+            if ($request->has('storage_charges_switch')) {
                 foreach ($request->storage_type as $key => $storage_type) {
                     $storage_charges = new WmsStorageTypeCharge();
                     $storage_charges->user_id = $id;
@@ -7719,7 +7707,7 @@ class AdminDashboardController extends Controller
             }
 
 
-            if($request->has('packing_charges_switch')){
+            if ($request->has('packing_charges_switch')) {
                 foreach ($request->packing_type as $key => $packing) {
                     $ptype = new WmsPackingCharge();
                     $ptype->user_id = $id;
@@ -7730,7 +7718,7 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            if($request->has('labelling_charges_switch')){
+            if ($request->has('labelling_charges_switch')) {
                 $labelling = new WmsLabellingCharge();
                 $labelling->user_id = $id;
                 $labelling->charges = $request->labelling_charges;
@@ -7739,8 +7727,8 @@ class AdminDashboardController extends Controller
         }
 
 
-        User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id(),'rates_added_at'=>Carbon::now()]);
-        if($request->has('rate_remarks') && $request->rate_remarks != null){
+        User::where('id', $id)->update(['status' => 1, 'rates_added_by' => Auth::id(), 'rates_added_at' => Carbon::now()]);
+        if ($request->has('rate_remarks') && $request->rate_remarks != null) {
             $rate_remark = new RateRemark();
             $rate_remark->user_id = $id;
             $rate_remark->remarks = $request->rate_remarks;
@@ -7752,529 +7740,509 @@ class AdminDashboardController extends Controller
 
         //overnight
 
-        $weight_charges = WeightCharge::where('user_id',$id)->where('shipping_mode_id',1);
-        $standard_charges = StandardWeightCharge::where('shipping_mode_id',1);
+        $weight_charges = WeightCharge::where('user_id', $id)->where('shipping_mode_id', 1);
+        $standard_charges = StandardWeightCharge::where('shipping_mode_id', 1);
         $overnight_changes = 0;
-        if($weight_charges->exists()){
+        if ($weight_charges->exists()) {
             $standard_range_up = $standard_charges->pluck('range_up')->toArray();
             $weight_range_up = $weight_charges->pluck('range_up')->toArray();
-            $weight_range_up_diff = $this->compare_data($weight_range_up,$standard_range_up);
+            $weight_range_up_diff = $this->compare_data($weight_range_up, $standard_range_up);
 
             $standard_range_down = $standard_charges->pluck('range_down')->toArray();
             $weight_range_down = $weight_charges->pluck('range_down')->toArray();
-            $weight_range_down_diff = $this->compare_data($weight_range_down,$standard_range_down);
+            $weight_range_down_diff = $this->compare_data($weight_range_down, $standard_range_down);
 
             $standard_kg_range = $standard_charges->pluck('kg_range')->toArray();
             $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
-            $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
+            $kg_range_diff = $this->compare_data($weight_kg_range, $standard_kg_range);
 
             $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
             $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
-            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
+            $weight_addition_diff = $this->compare_data($standard_weight_addition, $weight_addition);
             //dd($weight_addition,$standard_weight_addition,$weight_addition_diff);
 
             $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
             $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
-            $local_diff = $this->compare_data($weight_local,$standard_local);
+            $local_diff = $this->compare_data($weight_local, $standard_local);
 
             $standard_national_0 = $standard_charges->pluck('national_charges_class_0')->toArray();
             $weight_national_0 = $weight_charges->pluck('national_charges_class_0')->toArray();
-            $national_charges_0_diff = $this->compare_data($weight_national_0,$standard_national_0);
+            $national_charges_0_diff = $this->compare_data($weight_national_0, $standard_national_0);
 
             $standard_national_1 = $standard_charges->pluck('national_charges_class_1')->toArray();
             $weight_national_1 = $weight_charges->pluck('national_charges_class_1')->toArray();
-            $national_charges_1_diff = $this->compare_data($weight_national_1,$standard_national_1);
+            $national_charges_1_diff = $this->compare_data($weight_national_1, $standard_national_1);
 
             $standard_national_2 = $standard_charges->pluck('national_charges_class_2')->toArray();
             $weight_national_2 = $weight_charges->pluck('national_charges_class_2')->toArray();
-            $national_charges_2_diff = $this->compare_data($weight_national_2,$standard_national_2);
+            $national_charges_2_diff = $this->compare_data($weight_national_2, $standard_national_2);
 
             $standard_national_3 = $standard_charges->pluck('national_charges_class_3')->toArray();
             $weight_national_3 = $weight_charges->pluck('national_charges_class_3')->toArray();
-            $national_charges_3_diff = $this->compare_data($weight_national_3,$standard_national_3);
+            $national_charges_3_diff = $this->compare_data($weight_national_3, $standard_national_3);
 
-            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id',1)->first();
-            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id',1)->where('user_id',$id)->first();
+            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id', 1)->first();
+            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id', 1)->where('user_id', $id)->first();
 
             $booking_type_charges_diff = 0;
-            if($booking_type_charges){
-                if($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges ||  $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges){
+            if ($booking_type_charges) {
+                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges) {
                     $booking_type_charges_diff = 1;
                 }
             }
 
 
-            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id',1)->where('user_id',$id);
+            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id', 1)->where('user_id', $id);
             $cash_handling_charges_change = 0;
-            if($cash_handling_charges->exists()){
-                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id',1);
+            if ($cash_handling_charges->exists()) {
+                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id', 1);
 
                 $cash_handling_charges_range_up = $cash_handling_charges->pluck('range_up')->toArray();
                 $standard_cash_handling_charges_range_up = $standard_cash_handling_charges->pluck('range_up')->toArray();
-                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up,$standard_cash_handling_charges_range_up);
+                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up, $standard_cash_handling_charges_range_up);
 
                 $cash_handling_charges_range_down = $cash_handling_charges->pluck('range_down')->toArray();
                 $standard_cash_handling_charges_range_down = $standard_cash_handling_charges->pluck('range_down')->toArray();
-                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down,$standard_cash_handling_charges_range_down);
+                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down, $standard_cash_handling_charges_range_down);
 
                 $cash_handling_charges = $cash_handling_charges->pluck('charges')->toArray();
                 $standard_cash_handling_charges = $standard_cash_handling_charges->pluck('charges')->toArray();
-                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges,$standard_cash_handling_charges);
+                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges, $standard_cash_handling_charges);
 
-                if(($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)){
+                if (($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)) {
                     $cash_handling_charges_change = 1;
                 }
 
-            }
-            else{
+            } else {
                 $cash_handling_charges_change = 1;
             }
 
-            $return_charges = ReturnCharge::where('shipping_mode_id',1)->where('user_id',$id);
+            $return_charges = ReturnCharge::where('shipping_mode_id', 1)->where('user_id', $id);
             $return_charges_diff = 0;
 
-            if($return_charges->exists()){
-                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id',1)->first();
+            if ($return_charges->exists()) {
+                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id', 1)->first();
                 $return_charges = $return_charges->first();
 
 
-                if($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3)
-                {
+                if ($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3) {
                     $return_charges_diff = 1;
                 }
-            }
-            else{
+            } else {
                 $return_charges_diff = 1;
             }
 
-            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id',1)->where('user_id',$id);
+            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id', 1)->where('user_id', $id);
             $fuel_surcharge_diff = 0;
-            if($fuel_surcharge->exists()){
-                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id',1)->first();
+            if ($fuel_surcharge->exists()) {
+                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id', 1)->first();
                 $fuel_surcharge = $fuel_surcharge->first();
 
-                if($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge){
+                if ($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge) {
                     $fuel_surcharge_diff = 1;
                 }
-            }
-            else{
+            } else {
                 $fuel_surcharge_diff = 1;
             }
 
-            $insurance_charge = InsuranceCharge::where('shipping_mode_id',1)->where('user_id',$id);
+            $insurance_charge = InsuranceCharge::where('shipping_mode_id', 1)->where('user_id', $id);
             $insurance_charges_diff = 0;
-            if($insurance_charge->exists()){
+            if ($insurance_charge->exists()) {
                 $insurance_charges_diff = 1;
             }
             $on_dws_weight_diff = 0;
             if ($request->has('on_dws_weight')) {
-                if($request->on_dws_weight == 0){
+                if ($request->on_dws_weight == 0) {
                     $on_dws_weight_diff = 1;
                 }
             }
 
 
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $on_dws_weight_diff == 1)
-            {
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $on_dws_weight_diff == 1) {
                 $overnight_changes = 1;
-                
+
             }
 //            dd($weight_range_up_diff,$weight_range_down_diff,$kg_range_diff,$local_diff,$national_charges_0_diff,$national_charges_1_diff, $national_charges_2_diff,$national_charges_3_diff,$booking_type_charges_diff,$cash_handling_charges_change,$return_charges_diff,$fuel_surcharge_diff,$weight_addition_diff,$insurance_charges_diff,$overnight_changes);
         }
 
         //overland
-        $weight_charges = WeightCharge::where('user_id',$id)->where('shipping_mode_id',2);
-        $standard_charges = StandardWeightCharge::where('shipping_mode_id',2);
+        $weight_charges = WeightCharge::where('user_id', $id)->where('shipping_mode_id', 2);
+        $standard_charges = StandardWeightCharge::where('shipping_mode_id', 2);
         $overland_changes = 0;
-        if($weight_charges->exists()){
+        if ($weight_charges->exists()) {
             $standard_range_up = $standard_charges->pluck('range_up')->toArray();
             $weight_range_up = $weight_charges->pluck('range_up')->toArray();
-            $weight_range_up_diff = $this->compare_data($weight_range_up,$standard_range_up);
+            $weight_range_up_diff = $this->compare_data($weight_range_up, $standard_range_up);
 
             $standard_range_down = $standard_charges->pluck('range_down')->toArray();
             $weight_range_down = $weight_charges->pluck('range_down')->toArray();
-            $weight_range_down_diff = $this->compare_data($weight_range_down,$standard_range_down);
+            $weight_range_down_diff = $this->compare_data($weight_range_down, $standard_range_down);
 
             $standard_kg_range = $standard_charges->pluck('kg_range')->toArray();
             $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
-            $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
+            $kg_range_diff = $this->compare_data($weight_kg_range, $standard_kg_range);
 
             $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
             $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
-            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
+            $weight_addition_diff = $this->compare_data($standard_weight_addition, $weight_addition);
 
             $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
             $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
-            $local_diff = $this->compare_data($weight_local,$standard_local);
+            $local_diff = $this->compare_data($weight_local, $standard_local);
 
             $standard_national_0 = $standard_charges->pluck('national_charges_class_0')->toArray();
             $weight_national_0 = $weight_charges->pluck('national_charges_class_0')->toArray();
-            $national_charges_0_diff = $this->compare_data($weight_national_0,$standard_national_0);
+            $national_charges_0_diff = $this->compare_data($weight_national_0, $standard_national_0);
 
             $standard_national_1 = $standard_charges->pluck('national_charges_class_1')->toArray();
             $weight_national_1 = $weight_charges->pluck('national_charges_class_1')->toArray();
-            $national_charges_1_diff = $this->compare_data($weight_national_1,$standard_national_1);
+            $national_charges_1_diff = $this->compare_data($weight_national_1, $standard_national_1);
 
             $standard_national_2 = $standard_charges->pluck('national_charges_class_2')->toArray();
             $weight_national_2 = $weight_charges->pluck('national_charges_class_2')->toArray();
-            $national_charges_2_diff = $this->compare_data($weight_national_2,$standard_national_2);
+            $national_charges_2_diff = $this->compare_data($weight_national_2, $standard_national_2);
 
             $standard_national_3 = $standard_charges->pluck('national_charges_class_3')->toArray();
             $weight_national_3 = $weight_charges->pluck('national_charges_class_3')->toArray();
-            $national_charges_3_diff = $this->compare_data($weight_national_3,$standard_national_3);
+            $national_charges_3_diff = $this->compare_data($weight_national_3, $standard_national_3);
 
-            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id',2)->first();
-            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id',2)->where('user_id',$id)->first();
+            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id', 2)->first();
+            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id', 2)->where('user_id', $id)->first();
 
             $booking_type_charges_diff = 0;
-            if($booking_type_charges){
-                if($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges ||  $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges){
+            if ($booking_type_charges) {
+                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges) {
                     $booking_type_charges_diff = 1;
                 }
             }
 
-            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id',2)->where('user_id',$id);
+            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id', 2)->where('user_id', $id);
             $cash_handling_charges_change = 0;
-            if($cash_handling_charges->exists()){
-                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id',2);
+            if ($cash_handling_charges->exists()) {
+                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id', 2);
 
                 $cash_handling_charges_range_up = $cash_handling_charges->pluck('range_up')->toArray();
                 $standard_cash_handling_charges_range_up = $standard_cash_handling_charges->pluck('range_up')->toArray();
-                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up,$standard_cash_handling_charges_range_up);
+                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up, $standard_cash_handling_charges_range_up);
 
                 $cash_handling_charges_range_down = $cash_handling_charges->pluck('range_down')->toArray();
                 $standard_cash_handling_charges_range_down = $standard_cash_handling_charges->pluck('range_down')->toArray();
-                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down,$standard_cash_handling_charges_range_down);
+                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down, $standard_cash_handling_charges_range_down);
 
                 $cash_handling_charges = $cash_handling_charges->pluck('charges')->toArray();
                 $standard_cash_handling_charges = $standard_cash_handling_charges->pluck('charges')->toArray();
-                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges,$standard_cash_handling_charges);
+                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges, $standard_cash_handling_charges);
 
-                if(($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)){
+                if (($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)) {
                     $cash_handling_charges_change = 1;
                 }
 
-            }
-            else{
+            } else {
                 //for toggle close
                 $cash_handling_charges_change = 1;
             }
 
-            $return_charges = ReturnCharge::where('shipping_mode_id',2)->where('user_id',$id);
+            $return_charges = ReturnCharge::where('shipping_mode_id', 2)->where('user_id', $id);
             $return_charges_diff = 0;
 
-            if($return_charges->exists()){
-                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id',2)->first();
+            if ($return_charges->exists()) {
+                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id', 2)->first();
                 $return_charges = $return_charges->first();
 
 
-                if($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3)
-                {
+                if ($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3) {
                     $return_charges_diff = 1;
                 }
-            }
-            else{
+            } else {
                 $return_charges_diff = 1;
             }
 
-            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id',2)->where('user_id',$id);
+            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id', 2)->where('user_id', $id);
             $fuel_surcharge_diff = 0;
-            if($fuel_surcharge->exists()){
-                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id',2)->first();
+            if ($fuel_surcharge->exists()) {
+                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id', 2)->first();
                 $fuel_surcharge = $fuel_surcharge->first();
 
-                if($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge){
+                if ($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge) {
                     $fuel_surcharge_diff = 1;
                 }
-            }
-            else{
+            } else {
                 $fuel_surcharge_diff = 1;
             }
 
-            $insurance_charge = InsuranceCharge::where('shipping_mode_id',2)->where('user_id',$id);
+            $insurance_charge = InsuranceCharge::where('shipping_mode_id', 2)->where('user_id', $id);
             $insurance_charges_diff = 0;
-            if($insurance_charge->exists()){
+            if ($insurance_charge->exists()) {
                 $insurance_charges_diff = 1;
             }
             $ol_dws_weight_diff = 0;
             if ($request->has('ol_dws_weight')) {
-                if($request->ol_dws_weight == 0){
+                if ($request->ol_dws_weight == 0) {
                     $ol_dws_weight_diff = 1;
                 }
             }
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $ol_dws_weight_diff == 1)
-            {
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $ol_dws_weight_diff == 1) {
                 $overland_changes = 1;
             }
         }
 
         //detain
-        $weight_charges = WeightCharge::where('user_id',$id)->where('shipping_mode_id',3);
-        $standard_charges = StandardWeightCharge::where('shipping_mode_id',3);
+        $weight_charges = WeightCharge::where('user_id', $id)->where('shipping_mode_id', 3);
+        $standard_charges = StandardWeightCharge::where('shipping_mode_id', 3);
         $detain_changes = 0;
-        if($weight_charges->exists()){
+        if ($weight_charges->exists()) {
             $standard_range_up = $standard_charges->pluck('range_up')->toArray();
             $weight_range_up = $weight_charges->pluck('range_up')->toArray();
-            $weight_range_up_diff = $this->compare_data($weight_range_up,$standard_range_up);
+            $weight_range_up_diff = $this->compare_data($weight_range_up, $standard_range_up);
 
             $standard_range_down = $standard_charges->pluck('range_down')->toArray();
             $weight_range_down = $weight_charges->pluck('range_down')->toArray();
-            $weight_range_down_diff = $this->compare_data($weight_range_down,$standard_range_down);
+            $weight_range_down_diff = $this->compare_data($weight_range_down, $standard_range_down);
 
             $standard_kg_range = $standard_charges->pluck('kg_range')->toArray();
             $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
-            $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
+            $kg_range_diff = $this->compare_data($weight_kg_range, $standard_kg_range);
 
             $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
             $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
-            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
+            $weight_addition_diff = $this->compare_data($standard_weight_addition, $weight_addition);
 
             $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
             $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
-            $local_diff = $this->compare_data($weight_local,$standard_local);
+            $local_diff = $this->compare_data($weight_local, $standard_local);
 
             $standard_national_0 = $standard_charges->pluck('national_charges_class_0')->toArray();
             $weight_national_0 = $weight_charges->pluck('national_charges_class_0')->toArray();
-            $national_charges_0_diff = $this->compare_data($weight_national_0,$standard_national_0);
+            $national_charges_0_diff = $this->compare_data($weight_national_0, $standard_national_0);
 
             $standard_national_1 = $standard_charges->pluck('national_charges_class_1')->toArray();
             $weight_national_1 = $weight_charges->pluck('national_charges_class_1')->toArray();
-            $national_charges_1_diff = $this->compare_data($weight_national_1,$standard_national_1);
+            $national_charges_1_diff = $this->compare_data($weight_national_1, $standard_national_1);
 
             $standard_national_2 = $standard_charges->pluck('national_charges_class_2')->toArray();
             $weight_national_2 = $weight_charges->pluck('national_charges_class_2')->toArray();
-            $national_charges_2_diff = $this->compare_data($weight_national_2,$standard_national_2);
+            $national_charges_2_diff = $this->compare_data($weight_national_2, $standard_national_2);
 
             $standard_national_3 = $standard_charges->pluck('national_charges_class_3')->toArray();
             $weight_national_3 = $weight_charges->pluck('national_charges_class_3')->toArray();
-            $national_charges_3_diff = $this->compare_data($weight_national_3,$standard_national_3);
+            $national_charges_3_diff = $this->compare_data($weight_national_3, $standard_national_3);
 
-            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id',3)->first();
-            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id',3)->where('user_id',$id)->first();
+            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id', 3)->first();
+            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id', 3)->where('user_id', $id)->first();
 
             $booking_type_charges_diff = 0;
-            if($booking_type_charges){
-                if($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges ||  $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges){
+            if ($booking_type_charges) {
+                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges) {
                     $booking_type_charges_diff = 1;
                 }
             }
 
-            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id',3)->where('user_id',$id);
+            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id', 3)->where('user_id', $id);
             $cash_handling_charges_change = 0;
-            if($cash_handling_charges->exists()){
-                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id',3);
+            if ($cash_handling_charges->exists()) {
+                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id', 3);
 
                 $cash_handling_charges_range_up = $cash_handling_charges->pluck('range_up')->toArray();
                 $standard_cash_handling_charges_range_up = $standard_cash_handling_charges->pluck('range_up')->toArray();
-                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up,$standard_cash_handling_charges_range_up);
+                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up, $standard_cash_handling_charges_range_up);
 
                 $cash_handling_charges_range_down = $cash_handling_charges->pluck('range_down')->toArray();
                 $standard_cash_handling_charges_range_down = $standard_cash_handling_charges->pluck('range_down')->toArray();
-                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down,$standard_cash_handling_charges_range_down);
+                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down, $standard_cash_handling_charges_range_down);
 
                 $cash_handling_charges = $cash_handling_charges->pluck('charges')->toArray();
                 $standard_cash_handling_charges = $standard_cash_handling_charges->pluck('charges')->toArray();
-                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges,$standard_cash_handling_charges);
+                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges, $standard_cash_handling_charges);
 
-                if(($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)){
+                if (($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)) {
                     $cash_handling_charges_change = 1;
                 }
 
-            }
-            else{
+            } else {
                 $cash_handling_charges_change = 1;
             }
 
-            $return_charges = ReturnCharge::where('shipping_mode_id',3)->where('user_id',$id);
+            $return_charges = ReturnCharge::where('shipping_mode_id', 3)->where('user_id', $id);
             $return_charges_diff = 0;
 
-            if($return_charges->exists()){
-                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id',3)->first();
+            if ($return_charges->exists()) {
+                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id', 3)->first();
                 $return_charges = $return_charges->first();
 
 
-                if($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3)
-                {
+                if ($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3) {
                     $return_charges_diff = 1;
                 }
-            }
-            else{
+            } else {
                 $return_charges_diff = 1;
             }
 
-            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id',3)->where('user_id',$id);
+            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id', 3)->where('user_id', $id);
             $fuel_surcharge_diff = 0;
-            if($fuel_surcharge->exists()){
-                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id',3)->first();
+            if ($fuel_surcharge->exists()) {
+                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id', 3)->first();
                 $fuel_surcharge = $fuel_surcharge->first();
 
-                if($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge){
+                if ($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge) {
                     $fuel_surcharge_diff = 1;
                 }
-            }
-            else{
+            } else {
                 $fuel_surcharge_diff = 1;
             }
 
-            $insurance_charge = InsuranceCharge::where('shipping_mode_id',3)->where('user_id',$id);
+            $insurance_charge = InsuranceCharge::where('shipping_mode_id', 3)->where('user_id', $id);
             $insurance_charges_diff = 0;
-            if($insurance_charge->exists()){
+            if ($insurance_charge->exists()) {
                 $insurance_charges_diff = 1;
             }
             $detain_dws_weight_diff = 0;
             if ($request->has('detain_dws_weight')) {
-                if($request->detain_dws_weight == 0){
+                if ($request->detain_dws_weight == 0) {
                     $detain_dws_weight_diff = 1;
                 }
             }
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $detain_dws_weight_diff == 1)
-            {
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $detain_dws_weight_diff == 1) {
                 $detain_changes = 1;
             }
         }
 
         //sameday
-        $weight_charges = WeightCharge::where('user_id',$id)->where('shipping_mode_id',4);
-        $standard_charges = StandardWeightCharge::where('shipping_mode_id',4);
+        $weight_charges = WeightCharge::where('user_id', $id)->where('shipping_mode_id', 4);
+        $standard_charges = StandardWeightCharge::where('shipping_mode_id', 4);
         $sameday_changes = 0;
-        if($weight_charges->exists()){
+        if ($weight_charges->exists()) {
             $standard_range_up = $standard_charges->pluck('range_up')->toArray();
             $weight_range_up = $weight_charges->pluck('range_up')->toArray();
-            $weight_range_up_diff = $this->compare_data($weight_range_up,$standard_range_up);
+            $weight_range_up_diff = $this->compare_data($weight_range_up, $standard_range_up);
 
             $standard_range_down = $standard_charges->pluck('range_down')->toArray();
             $weight_range_down = $weight_charges->pluck('range_down')->toArray();
-            $weight_range_down_diff = $this->compare_data($weight_range_down,$standard_range_down);
+            $weight_range_down_diff = $this->compare_data($weight_range_down, $standard_range_down);
 
             $standard_kg_range = $standard_charges->pluck('kg_range')->toArray();
             $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
-            $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
+            $kg_range_diff = $this->compare_data($weight_kg_range, $standard_kg_range);
 
             $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
             $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
-            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
+            $weight_addition_diff = $this->compare_data($standard_weight_addition, $weight_addition);
 
             $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
             $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
-            $local_diff = $this->compare_data($weight_local,$standard_local);
+            $local_diff = $this->compare_data($weight_local, $standard_local);
 
             $standard_national_0 = $standard_charges->pluck('national_charges_class_0')->toArray();
             $weight_national_0 = $weight_charges->pluck('national_charges_class_0')->toArray();
-            $national_charges_0_diff = $this->compare_data($weight_national_0,$standard_national_0);
+            $national_charges_0_diff = $this->compare_data($weight_national_0, $standard_national_0);
 
             $standard_national_1 = $standard_charges->pluck('national_charges_class_1')->toArray();
             $weight_national_1 = $weight_charges->pluck('national_charges_class_1')->toArray();
-            $national_charges_1_diff = $this->compare_data($weight_national_1,$standard_national_1);
+            $national_charges_1_diff = $this->compare_data($weight_national_1, $standard_national_1);
 
             $standard_national_2 = $standard_charges->pluck('national_charges_class_2')->toArray();
             $weight_national_2 = $weight_charges->pluck('national_charges_class_2')->toArray();
-            $national_charges_2_diff = $this->compare_data($weight_national_2,$standard_national_2);
+            $national_charges_2_diff = $this->compare_data($weight_national_2, $standard_national_2);
 
             $standard_national_3 = $standard_charges->pluck('national_charges_class_3')->toArray();
             $weight_national_3 = $weight_charges->pluck('national_charges_class_3')->toArray();
-            $national_charges_3_diff = $this->compare_data($weight_national_3,$standard_national_3);
+            $national_charges_3_diff = $this->compare_data($weight_national_3, $standard_national_3);
 
-            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id',4)->first();
-            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id',4)->where('user_id',$id)->first();
+            $standard_booking_type_charges = StandardBookingTypeCharge::where('shipping_mode_id', 4)->first();
+            $booking_type_charges = BookingTypeCharges::where('shipping_mode_id', 4)->where('user_id', $id)->first();
 
             $booking_type_charges_diff = 0;
-            if($booking_type_charges){
-                if($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges ||  $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges){
+            if ($booking_type_charges) {
+                if ($standard_booking_type_charges->replacement_charges != $booking_type_charges->replacement_charges || $standard_booking_type_charges->try_and_buy_charges != $booking_type_charges->try_and_buy_charges) {
                     $booking_type_charges_diff = 1;
                 }
             }
 
 
-            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id',4)->where('user_id',$id);
+            $cash_handling_charges = CashHandlingCharge::where('shipping_mode_id', 4)->where('user_id', $id);
             $cash_handling_charges_change = 0;
-            if($cash_handling_charges->exists()){
-                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id',4);
+            if ($cash_handling_charges->exists()) {
+                $standard_cash_handling_charges = StandardCashHandlingCharge::where('shipping_mode_id', 4);
 
                 $cash_handling_charges_range_up = $cash_handling_charges->pluck('range_up')->toArray();
                 $standard_cash_handling_charges_range_up = $standard_cash_handling_charges->pluck('range_up')->toArray();
-                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up,$standard_cash_handling_charges_range_up);
+                $cash_handling_range_up_diff = $this->compare_data($cash_handling_charges_range_up, $standard_cash_handling_charges_range_up);
 
                 $cash_handling_charges_range_down = $cash_handling_charges->pluck('range_down')->toArray();
                 $standard_cash_handling_charges_range_down = $standard_cash_handling_charges->pluck('range_down')->toArray();
-                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down,$standard_cash_handling_charges_range_down);
+                $cash_handling_range_down_diff = $this->compare_data($cash_handling_charges_range_down, $standard_cash_handling_charges_range_down);
 
                 $cash_handling_charges = $cash_handling_charges->pluck('charges')->toArray();
                 $standard_cash_handling_charges = $standard_cash_handling_charges->pluck('charges')->toArray();
-                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges,$standard_cash_handling_charges);
+                $cash_handling_charges_diff = $this->compare_data($cash_handling_charges, $standard_cash_handling_charges);
 
-                if(($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)){
+                if (($cash_handling_range_up_diff == 1) || ($cash_handling_range_down_diff == 1) || ($cash_handling_charges_diff == 1)) {
                     $cash_handling_charges_change = 1;
                 }
 
-            }
-            else{
+            } else {
                 $cash_handling_charges_change = 1;
             }
 
-            $return_charges = ReturnCharge::where('shipping_mode_id',4)->where('user_id',$id);
+            $return_charges = ReturnCharge::where('shipping_mode_id', 4)->where('user_id', $id);
             $return_charges_diff = 0;
 
-            if($return_charges->exists()){
-                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id',4)->first();
+            if ($return_charges->exists()) {
+                $standard_return_charges = StandardReturnCharge::where('shipping_mode_id', 4)->first();
                 $return_charges = $return_charges->first();
 
 
-                if($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3)
-                {
+                if ($return_charges->local != $standard_return_charges->local || $return_charges->national_charges_class_0 != $standard_return_charges->national_charges_class_0 || $return_charges->national_charges_class_1 != $standard_return_charges->national_charges_class_1 || $return_charges->national_charges_class_2 != $standard_return_charges->national_charges_class_2 || $return_charges->national_charges_class_3 != $standard_return_charges->national_charges_class_3) {
                     $return_charges_diff = 1;
                 }
-            }
-            else{
+            } else {
                 $return_charges_diff = 1;
             }
 
-            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id',4)->where('user_id',$id);
+            $fuel_surcharge = FuelSurcharge::where('shipping_mode_id', 4)->where('user_id', $id);
             $fuel_surcharge_diff = 0;
-            if($fuel_surcharge->exists()){
-                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id',4)->first();
+            if ($fuel_surcharge->exists()) {
+                $standard_fuel_surcharge = StandardFuelSurcharge::where('shipping_mode_id', 4)->first();
                 $fuel_surcharge = $fuel_surcharge->first();
 
-                if($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge){
+                if ($standard_fuel_surcharge->fuel_surcharge != $fuel_surcharge->fuel_surcharge) {
                     $fuel_surcharge_diff = 1;
                 }
-            }
-            else{
+            } else {
                 $fuel_surcharge_diff = 1;
             }
 
-            $insurance_charge = InsuranceCharge::where('shipping_mode_id',4)->where('user_id',$id);
+            $insurance_charge = InsuranceCharge::where('shipping_mode_id', 4)->where('user_id', $id);
             $insurance_charges_diff = 0;
-            if($insurance_charge->exists()){
+            if ($insurance_charge->exists()) {
                 $insurance_charges_diff = 1;
             }
             $sameday_dws_weight_diff = 0;
             if ($request->has('sameday_dws_weight')) {
-                if($request->sameday_dws_weight == 0){
+                if ($request->sameday_dws_weight == 0) {
                     $sameday_dws_weight_diff = 1;
                 }
             }
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $sameday_dws_weight_diff == 1)
-            {
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $sameday_dws_weight_diff == 1) {
                 $sameday_changes = 1;
             }
         }
 
         //dd($overnight_changes,$overland_changes,$detain_changes,$sameday_changes,$warehouse_charges);
 
-        if($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0){
+        if ($overnight_changes == 0 && $overland_changes == 0 && $detain_changes == 0 && $sameday_changes == 0 && $warehouse_charges == 0) {
             DwsWeightChargesController::approve($id);
-            User::where('id',$id)->update(['rate_status'=> 0,'status' => 2,'rates_authorized_by'=> 32, 'rates_approved_at'=> Carbon::now()]);
+            User::where('id', $id)->update(['rate_status' => 0, 'status' => 2, 'rates_authorized_by' => 32, 'rates_approved_at' => Carbon::now()]);
         }
-        
+
 
         //Sales Commisssion
 
-        if($request->has('user_id')){
+        if ($request->has('user_id')) {
             $total_commission = $request->total_commission;
             $users_count = count($request->user_id);
 
             $sales_commission = SalesCommission::where('shipper_id', $shipper_id);
-            if($sales_commission->exists()){
+            if ($sales_commission->exists()) {
                 $sales_commission = $sales_commission->first();
                 $sales_commission->commission_users_count = $users_count;
                 $sales_commission->commission = $total_commission;
@@ -8283,16 +8251,16 @@ class AdminDashboardController extends Controller
                 $sales_commission_id = $sales_commission->id;
                 $actual_commission = 0;
                 SalesCommissionUser::where('sales_commission_id', $sales_commission_id)->delete();
-                foreach($request->tier_id as $row_id => $tier){
+                foreach ($request->tier_id as $row_id => $tier) {
                     $sales_tier = SalesTier::find($tier);
-                    if($sales_tier){
+                    if ($sales_tier) {
                         $sales_commission_user = new SalesCommissionUser();
                         $sales_commission_user->sales_commission_id = $sales_commission_id;
                         $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                         $sales_commission_user->tier_id = $tier;
-                        if($sales_tier->tier_type == 1){
+                        if ($sales_tier->tier_type == 1) {
                             $sales_commission_user->user_id = $request->user_id[$row_id];
-                        }else if($sales_tier->tier_type == 2){
+                        } else if ($sales_tier->tier_type == 2) {
                             $external_user = new SalesCommissionExternalUser();
                             $external_user->name = $request->user_id[$row_id];
                             $external_user->shipper_id = $shipper_id;
@@ -8307,7 +8275,7 @@ class AdminDashboardController extends Controller
                 $sales_commission->commission = $actual_commission;
                 $sales_commission->save();
 
-            }else{
+            } else {
                 $sales_commission = new SalesCommission();
                 $sales_commission->shipper_id = $shipper_id;
                 $sales_commission->commission_users_count = $users_count;
@@ -8316,16 +8284,16 @@ class AdminDashboardController extends Controller
                 $sales_commission->save();
                 $sales_commission_id = $sales_commission->id;
                 $actual_commission = 0;
-                foreach($request->tier_id as $row_id => $tier){
+                foreach ($request->tier_id as $row_id => $tier) {
                     $sales_tier = SalesTier::find($tier);
-                    if($sales_tier){
+                    if ($sales_tier) {
                         $sales_commission_user = new SalesCommissionUser();
                         $sales_commission_user->sales_commission_id = $sales_commission_id;
                         $sales_commission_user->tier_type_id = $sales_tier->tier_type;
                         $sales_commission_user->tier_id = $tier;
-                        if($sales_tier->tier_type == 1){
+                        if ($sales_tier->tier_type == 1) {
                             $sales_commission_user->user_id = $request->user_id[$row_id];
-                        }else if($sales_tier->tier_type == 2){
+                        } else if ($sales_tier->tier_type == 2) {
                             $external_user = new SalesCommissionExternalUser();
                             $external_user->name = $request->user_id[$row_id];
                             $external_user->shipper_id = $shipper_id;
@@ -8348,272 +8316,279 @@ class AdminDashboardController extends Controller
 
         NotificationsController::send(38, $id);
 
-        return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
+        return redirect(route('admin.accounts.pending'))->with('success', 'All Rates are added');
     }
 
-    public function duplicate_info(Request $request){
+    public function duplicate_info(Request $request)
+    {
         $shipper_id = $request->shipper_id;
         $duplicate = DuplicateUser::where('user_id', $shipper_id)->first();
         $data = array();
-        $data['phone'] = ($duplicate->phone) ? $duplicate->phone:'';
-        $data['cnic'] = ($duplicate->cnic) ? $duplicate->cnic:'';
-        $data['iban'] = ($duplicate->iban) ? $duplicate->iban:'';
-        $data['name'] = ($duplicate->name) ? $duplicate->name:'';
+        $data['phone'] = ($duplicate->phone) ? $duplicate->phone : '';
+        $data['cnic'] = ($duplicate->cnic) ? $duplicate->cnic : '';
+        $data['iban'] = ($duplicate->iban) ? $duplicate->iban : '';
+        $data['name'] = ($duplicate->name) ? $duplicate->name : '';
         return response()->json(['status' => 1, 'info' => $data]);
     }
-    public function activeAccountListAjax(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),62);
+
+    public function activeAccountListAjax(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 62);
         }
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->leftjoin('products as p','p.id','=','users.product_id')
-            ->leftjoin('sub_category_segments as seg_sub','seg_sub.id','=','users.sub_segment_id')
-            ->leftjoin('segments as seg','seg.id','=','users.segment_id')
-            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
-            ->leftjoin('admins as rabna','rabna.id','=','users.rates_updated_by')
-            ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
-            ->leftjoin('admins as rrb','rrb.id','=','users.rates_rejected_by')
-            ->leftjoin('admins as rabba','rabba.id','=','users.account_activated_by')
-            ->leftjoin('account_types as at','at.id','=','users.account_type_id')
+            ->leftjoin('products as p', 'p.id', '=', 'users.product_id')
+            ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
+            ->leftjoin('segments as seg', 'seg.id', '=', 'users.segment_id')
+            ->leftjoin('admins as rab', 'rab.id', '=', 'users.rates_added_by')
+            ->leftjoin('admins as rabna', 'rabna.id', '=', 'users.rates_updated_by')
+            ->leftjoin('admins as rabb', 'rabb.id', '=', 'users.rates_authorized_by')
+            ->leftjoin('admins as rrb', 'rrb.id', '=', 'users.rates_rejected_by')
+            ->leftjoin('admins as rabba', 'rabba.id', '=', 'users.account_activated_by')
+            ->leftjoin('account_types as at', 'at.id', '=', 'users.account_type_id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
                 $join->on('spt.user_id', '=', 'users.id')
-                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
-                    ->where('spt.status','=',0);
+                    ->leftjoin('admins as ad', 'ad.id', '=', 'spt.admin_id')
+                    ->where('spt.status', '=', 0);
             })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
             ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
-            ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
-            ->leftjoin('admins as dab','dab.id','=','uda.approved_by')
-            ->leftjoin('admins as drb','drb.id','=','uda.rejected_by')
-            ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
-            ->leftjoin('admins as poc','poc.id','=','st.poc')
-            ->leftjoin('admins as k','k.id','=','st.kam')
-            ->leftjoin('admins as r','r.id','=','st.ref')
-            ->leftjoin('territories as t','t.id','=','users.territory_id')
-			->select(['users.auto_shipment_cancellation_days','rrb.name as rates_rejected_by','users.disable_at as disable_at','users.rates_added_at as rates_added_at','users.rates_approved_at as rates_approved_at','users.rates_rejected_at as rates_rejected_at','users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','dab.name as documents_approved_by','drb.name as documents_rejected_by','uda.rejected_at as documents_rejected_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address','users.email','t.name as territory','users.corporate_rate_type_id as corporate_rate_type_id','users.new_rate_type_id as new_rate_type_id','seg.name as segment','seg_sub.name as sub_segment'])->whereIn('users.status',[3,4])->where('blacklist',0);
+            ->leftjoin('user_document_attachments as uda', 'uda.user_id', '=', 'users.id')
+            ->leftjoin('admins as dab', 'dab.id', '=', 'uda.approved_by')
+            ->leftjoin('admins as drb', 'drb.id', '=', 'uda.rejected_by')
+            ->leftjoin('sale_tier_tags as st', 'st.user_id', '=', 'users.id')
+            ->leftjoin('admins as poc', 'poc.id', '=', 'st.poc')
+            ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
+            ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
+            ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
+            ->leftjoin('user_check_statuses as ucs', 'ucs.user_id', '=', 'users.id')
+            ->select(['users.auto_shipment_cancellation_days', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_remarks as disable_remarks', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment','ucs.status_count as status_count'])->whereIn('users.status', [3, 4])->where('blacklist', 0);
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
 
-        if(session('department_id') == 7){
-            if(!in_array(session('id'), session('sale_users_bypass')) ){
+        if (session('department_id') == 7) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
 
-        if($sale_persons = $request->get('sale_persons')){
+        if ($sale_persons = $request->get('sale_persons')) {
             $users = $users->where('ad.id', $sale_persons);
         }
 
-        if($search_cnic = $request->get('search_cnic')){
+        if ($search_cnic = $request->get('search_cnic')) {
             $users = $users->where('users.cnic', $search_cnic);
         }
-        if($search_shipper = $request->get('search_shipper')){
+        if ($search_shipper = $request->get('search_shipper')) {
             $users = $users->where('users.id', $search_shipper);
         }
 
-        if($search_iban = $request->get('search_iban')){
-            $users = $users->leftjoin('user_bank_infos as ubi', function($join) use ($search_iban){
+        if ($search_iban = $request->get('search_iban')) {
+            $users = $users->leftjoin('user_bank_infos as ubi', function ($join) use ($search_iban) {
                 $join->on('ubi.user_id', '=', 'users.id')
                     ->where('ubi.iban', $search_iban);
             });
         }
-        if($search_email = $request->get('search_email')){
-            $users = $users->where('users.email',$search_email);
+        if ($search_email = $request->get('search_email')) {
+            $users = $users->where('users.email', $search_email);
         }
 
         return Datatables::of($users)
+            ->addColumn('days_to_disable', function ($user) {
+                if ($user->disable_at == null)
+                {
+                    $disable_date = 0;
+                      return $disable_date;
+                }
+                elseif ($user->disable_at != null)
+                {
+                    $disable_date = strtotime($user->disable_at);
+                    $current_date = strtotime(date('Y-m-d h:i:s'));
+
+                    $timeDiff = abs($current_date - $disable_date);
+                    $numberDays = $timeDiff/86400;
+                    $numberDays = intval($numberDays);
+
+                    return $numberDays;
+                }
+
+            })
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
-            ->editColumn('rate_status',function ($users){
-                if($users->rate_status == 0){
+            ->editColumn('rate_status', function ($users) {
+                if ($users->rate_status == 0) {
                     return "Approved";
-                }elseif($users->rate_status == 1){
+                } elseif ($users->rate_status == 1) {
                     return "Requested";
-                }
-                else{
+                } else {
                     return "Rejected";
                 }
-            })->editColumn('disable_remarks',function ($users){
-                if($users->disable_remarks != null){
+            })->editColumn('disable_remarks', function ($users) {
+                if ($users->disable_remarks != null) {
                     return $users->disable_remarks;
-                }
-                else{
+                } else {
                     return "-";
                 }
             })
             ->filterColumn('users.id', function ($query, $keyword) {
                 return $query->where('users.id', '=', $keyword);
             })
-            ->editColumn('status',function ($users){
-                if($users->status == 3){
+            ->editColumn('status', function ($users) {
+                if ($users->status == 3) {
                     return "Enable";
-                }else{
+                } else {
                     return "Disable";
                 }
             })
-            ->editColumn('documents_status',function ($users){
-                if($users->documents_status == 0){
+            ->editColumn('documents_status', function ($users) {
+                if ($users->documents_status == 0) {
                     return "Incomplete";
-                }
-                elseif($users->documents_status == 1){
+                } elseif ($users->documents_status == 1) {
                     return "Pending for Approval";
-                }
-                elseif($users->documents_status == 2){
+                } elseif ($users->documents_status == 2) {
                     return "Approved";
-                }
-                elseif($users->documents_status == 3){
+                } elseif ($users->documents_status == 3) {
                     return "Rejected";
                 }
             })
-            ->editColumn('rejected_reason',function ($users){
-                if($users->rejected_reason != null && $users->rate_status==2){
+            ->editColumn('rejected_reason', function ($users) {
+                if ($users->rejected_reason != null && $users->rate_status == 2) {
                     return $users->rejected_reason;
-                }else{
+                } else {
                     return "-";
                 }
             })
-            ->filterColumn('status', function($query, $keyword) {
+            ->filterColumn('status', function ($query, $keyword) {
                 if ($keyword == 3 || $keyword == 4) {
                     $query->where('users.status', '=', $keyword);
-                }
-                else {
+                } else {
                     $query->whereRaw('false');
                 }
             })
-            ->editColumn('product_type', function($user){
-                if($user->product_type == 'Other'){
+            ->editColumn('product_type', function ($user) {
+                if ($user->product_type == 'Other') {
                     return $user->other_product_name;
-                }else{
+                } else {
                     return $user->product_type;
                 }
             })
-            ->filterColumn('product_type',function ($query,$keyword){
+            ->filterColumn('product_type', function ($query, $keyword) {
 
                 if ($keyword != '' || $keyword != 24) {
-                    $query->where('p.id',$keyword);
-                }
-                else {
+                    $query->where('p.id', $keyword);
+                } else {
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('duplication', function($users){
+            ->addColumn('duplication', function ($users) {
                 $count = 0;
-                if($users->duplicate_phone != null){
+                if ($users->duplicate_phone != null) {
                     $count++;
                 }
-                if($users->duplicate_cnic != null){
+                if ($users->duplicate_cnic != null) {
                     $count++;
                 }
-                if($users->duplicate_iban != null){
+                if ($users->duplicate_iban != null) {
                     $count++;
                 }
-                if($users->duplicate_name != null){
+                if ($users->duplicate_name != null) {
                     $count++;
                 }
-                if($count > 0){
+                if ($count > 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $count . '</button>';
-                }else{
+                } else {
                     return $count;
                 }
             })
-            ->editColumn('international_rate_status',function ($users){
-                if($users->international_rate_status != null){
-                    if($users->international_rate_status == 1){
+            ->editColumn('international_rate_status', function ($users) {
+                if ($users->international_rate_status != null) {
+                    if ($users->international_rate_status == 1) {
                         return "Approved";
-                    }elseif($users->international_rate_status == 2){
+                    } elseif ($users->international_rate_status == 2) {
                         return "Requested";
-                    }elseif($users->international_rate_status == 3){
+                    } elseif ($users->international_rate_status == 3) {
                         return "Rejected";
-                    }elseif($users->international_rate_status == 4){
+                    } elseif ($users->international_rate_status == 4) {
                         return "Requested";
-                    }elseif($users->international_rate_status == 5){
+                    } elseif ($users->international_rate_status == 5) {
                         return "Rejected";
                     }
-                }
-                else{
+                } else {
                     return "International Rates are not set";
                 }
             })
-            ->editColumn('international_rejected_reason',function ($users){
-                if($users->international_rejected_reason != null && $users->international_rate_status == 3){
+            ->editColumn('international_rejected_reason', function ($users) {
+                if ($users->international_rejected_reason != null && $users->international_rate_status == 3) {
                     return $users->international_rejected_reason;
-                }else{
+                } else {
                     return "-";
                 }
             })
             ->addColumn("action", function ($result) {
-                if($result->id != 8761 && $result->id != 9358){
-                    if(in_array($result->id, session('tagged_shippers'))){
+                if ($result->id != 8761 && $result->id != 9358) {
+                    if (in_array($result->id, session('tagged_shippers'))) {
                         $multiple_sale_check = true;
-                    }
-                    else{
+                    } else {
                         $multiple_sale_check = false;
                     }
 
-                    $sale_check= SalePersonTag::where('user_id',$result->id)->first();
+                    $sale_check = SalePersonTag::where('user_id', $result->id)->first();
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm accounts">
                 ';
 
-                    if(session('role_id') == 1 || in_array(361, session('permissions'))){
+                    if (session('role_id') == 1 || in_array(361, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item remove_sales_tier"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Remove Sales Tier Tagging</div></button>';
                     }
 
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
-                    if($result->status == 3 && (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass'))))
-                    {
+                    if ($result->status == 3 && (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')))) {
                         $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                     }
-                    if($result->account_type_id == 1){
+                    if ($result->account_type_id == 1) {
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
-                            if($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || session('role_id') == 2 || session('role_id') == 7 || in_array(session('id'), session('sale_users_bypass'))) {
+                            if ($result->rate_status == 0 || $result->rate_status == 2 || session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || session('role_id') == 2 || session('role_id') == 7 || in_array(session('id'), session('sale_users_bypass'))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         }
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                         }
                         if ((session('role_id') == 1 || in_array(115, session('permissions')))) {
                             $dropdown .= '<button type="button" class="dropdown-item rates_history" data-target-id=' . $result->id . ' rel="rates_history" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates History</div></button>';
                         }
 
-                    }
-                    else{
-                        if($result->corporate_rate_type_id != 3 && $result->new_rate_type_id == null) {
+                    } else {
+                        if ($result->corporate_rate_type_id != 3 && $result->new_rate_type_id == null) {
                             if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
-                        }
-                        else if ($result->corporate_rate_type_id == 3 && $result->new_rate_type_id == null){
+                        } else if ($result->corporate_rate_type_id == 3 && $result->new_rate_type_id == null) {
                             if (CorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
-                        }
-                        else if($result->corporate_rate_type_id != null && ($result->new_rate_type_id == 1 || $result->new_rate_type_id == 2)){
+                        } else if ($result->corporate_rate_type_id != null && ($result->new_rate_type_id == 1 || $result->new_rate_type_id == 2)) {
                             if (PendingCorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
-                        }
-                        else{
+                        } else {
                             if (PendingCorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         }
-                        if($result->corporate_rate_type_id == 3){
+                        if ($result->corporate_rate_type_id == 3) {
                             if (CorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
-                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.rates.view', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.rates.view', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                             }
-                        }
-                        else{
+                        } else {
                             if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
-                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                             }
                         }
 
@@ -8632,7 +8607,7 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item view_invoice_log" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">View Packaging Invoice Log</div></button>';
                         }
                     }
-                    
+
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
                     }
@@ -8641,73 +8616,68 @@ class AdminDashboardController extends Controller
                         if ($result->status == 3) {
                             $dropdown .= '<button type="button" class="dropdown-item userdisable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-minus"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
-                        }
-                        else {
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item userenable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Enable</div></button>';
 
                         }
                     }
                     if (session('role_id') == 1 || in_array(244, session('permissions'))) {
-                        if($result->status > 0){
+                        if ($result->status > 0) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view_crf_agreement', ['id' => $result->id]) . '\')" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
                         }
                     }
 
-                    if(session('role_id') == 1 || in_array(110, session('permissions')))
-                    {
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view.profile', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                    if (session('role_id') == 1 || in_array(110, session('permissions'))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                     }
 
                     $merged = MergedSisterAccount::where('user_id', $result->id);
-                    if(!$merged->exists()){
-                        if(session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions'))))
-                        {
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
+                    if (!$merged->exists()) {
+                        if (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions')))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
                     }
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
-                    if (session('role_id') == 1 || in_array(149, session('permissions'))){
+                    if (session('role_id') == 1 || in_array(149, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item shipment_days_button"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Auto Shipment Cancel Days</div></button>';
                     }
-                    if($sale_check){
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
+                    if ($sale_check) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
                     }
-                    if(session('role_id') == 1 || in_array(365, session('permissions'))){
+                    if (session('role_id') == 1 || in_array(365, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item payment_cycle"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Payment Cycle</div></button>';
                     }
-                    if((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))){
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
-                    }
-                    else{
-                        if(session('role_id') == 1 || in_array(439, session('permissions'))){
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                    if ((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    } else {
+                        if (session('role_id') == 1 || in_array(439, session('permissions'))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
                         }
-                        if(session('role_id') == 1 || in_array(440, session('permissions'))){
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        if (session('role_id') == 1 || in_array(440, session('permissions'))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
                         }
-                        if((session('role_id') == 1 || in_array(590, session('permissions'))) && $result->account_type_id == 2) {
+                        if ((session('role_id') == 1 || in_array(590, session('permissions'))) && $result->account_type_id == 2) {
                             $dropdown .= '<button type="button" class="dropdown-item credit_limit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Credit Limit</div></button>';
                         }
                     }
 
                     if (InternationalEconomyRateStatus::where('user_id', $result->id)->doesntExist()) {
-                        if(session('role_id') == 1 || in_array(528, session('permissions'))) {
+                        if (session('role_id') == 1 || in_array(528, session('permissions'))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Economy Rates</div></button>';
                         }
                     } else {
-                        if((session('role_id') == 1 || in_array(528, session('permissions')))) {
+                        if ((session('role_id') == 1 || in_array(528, session('permissions')))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Economy Rates</div></button>';
                         }
                     }
 
-                    if(InternationalEconomyRate::where('user_id',$result->id)->count() > 0)
-                    {
-                        if(session('role_id') == 1 || in_array(530, session('permissions'))) {
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id,'view'=>'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
+                    if (InternationalEconomyRate::where('user_id', $result->id)->count() > 0) {
+                        if (session('role_id') == 1 || in_array(530, session('permissions'))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id, 'view' => 'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
                         }
                     }
 
-                    if($result->account_type_id == 2 && (session('role_id') == 1 || count(array_intersect([598, 599], session('permissions'))) !== 0)) {
+                    if ($result->account_type_id == 2 && (session('role_id') == 1 || count(array_intersect([598, 599], session('permissions'))) !== 0)) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.reimbursement_setting.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Corporate Reimbursement Setting</div></button>';
                     }
 
@@ -8715,7 +8685,7 @@ class AdminDashboardController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
                     }
 
-                    if(session('role_id') == 1 || in_array(660, session('permissions'))){
+                    if (session('role_id') == 1 || in_array(660, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item auto_cancel_days_setting"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Auto Cancel Days</div></button>';
                     }
 
@@ -8733,64 +8703,64 @@ class AdminDashboardController extends Controller
     }
 
 
-    public function pendingAccountListAjax(Request $request){
+    public function pendingAccountListAjax(Request $request)
+    {
 
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),61);
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 61);
         }
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->leftjoin('products','products.id','=','users.product_id')
-            ->leftjoin('sub_category_segments as seg_sub','seg_sub.id','=','users.sub_segment_id')
-            ->leftjoin('segments as seg','seg.id','=','users.segment_id')
-            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
-            ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
-            ->leftjoin('admins as rrb','rrb.id','=','users.rates_rejected_by')
-            ->leftjoin('account_types as at','at.id','=','users.account_type_id')
+            ->leftjoin('products', 'products.id', '=', 'users.product_id')
+            ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
+            ->leftjoin('segments as seg', 'seg.id', '=', 'users.segment_id')
+            ->leftjoin('admins as rab', 'rab.id', '=', 'users.rates_added_by')
+            ->leftjoin('admins as rabb', 'rabb.id', '=', 'users.rates_authorized_by')
+            ->leftjoin('admins as rrb', 'rrb.id', '=', 'users.rates_rejected_by')
+            ->leftjoin('account_types as at', 'at.id', '=', 'users.account_type_id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
                 $join->on('spt.user_id', '=', 'users.id')
-                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
-                    ->where('spt.status','=',0);
+                    ->leftjoin('admins as ad', 'ad.id', '=', 'spt.admin_id')
+                    ->where('spt.status', '=', 0);
             })
             ->leftjoin('duplicate_users as du', 'du.user_id', '=', 'users.id')
-            ->leftjoin('user_document_attachments as uda','uda.user_id','=','users.id')
-            ->leftjoin('admins as dab','dab.id','=','uda.approved_by')
-            ->leftjoin('admins as drb','drb.id','=','uda.rejected_by')
+            ->leftjoin('user_document_attachments as uda', 'uda.user_id', '=', 'users.id')
+            ->leftjoin('admins as dab', 'dab.id', '=', 'uda.approved_by')
+            ->leftjoin('admins as drb', 'drb.id', '=', 'uda.rejected_by')
             ->leftjoin('international_users_informations as iui', 'iui.user_id', '=', 'users.id')
-            ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
-            ->leftjoin('admins as p','p.id','=','st.poc')
-            ->leftjoin('admins as k','k.id','=','st.kam')
-            ->leftjoin('admins as r','r.id','=','st.ref')
-			->leftjoin('territories as t','t.id','=','users.territory_id')
-            ->select(['rrb.name as rates_rejected_by','users.rates_added_at as rates_added_at','users.rates_approved_at as rates_approved_at','users.rates_rejected_at as rates_rejected_at','users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc', 'users.cnic','users.status', 'users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name' ,'uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','dab.name as documents_approved_by','drb.name as documents_rejected_by','uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','p.name as tagged_poc','k.name as kam','r.name as ref', 'users.corporate_rate_type_id','users.email','t.name as territory','users.address as address','seg.name as segment','seg_sub.name as sub_segment'])->whereIn('users.status',[0,1,2,5])->where('blacklist',0)->where('users.email_verified',1);
+            ->leftjoin('sale_tier_tags as st', 'st.user_id', '=', 'users.id')
+            ->leftjoin('admins as p', 'p.id', '=', 'st.poc')
+            ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
+            ->leftjoin('admins as r', 'r.id', '=', 'st.ref')
+            ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
+            ->select(['rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment'])->whereIn('users.status', [0, 1, 2, 5])->where('blacklist', 0)->where('users.email_verified', 1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
-        if(session('department_id') == 7){
-            if(!in_array(session('id'), session('sale_users_bypass')) ){
+        if (session('department_id') == 7) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
-        if($sale_persons = $request->get('sale_persons')){
+        if ($sale_persons = $request->get('sale_persons')) {
             $users = $users->whereIn('ad.id', $sale_persons);
         }
 
-        if($search_cnic = $request->get('search_cnic')){
+        if ($search_cnic = $request->get('search_cnic')) {
             $users = $users->where('users.cnic', $search_cnic);
         }
-        if($search_shipper = $request->get('search_shipper')){
+        if ($search_shipper = $request->get('search_shipper')) {
             $users = $users->where('users.name', 'like', '%' . $search_shipper . '%');
         }
 
-        if($search_iban = $request->get('search_iban')){
-            $users = $users->join('user_bank_infos as ubi', function($join) use ($search_iban){
+        if ($search_iban = $request->get('search_iban')) {
+            $users = $users->join('user_bank_infos as ubi', function ($join) use ($search_iban) {
                 $join->on('ubi.user_id', '=', 'users.id')
                     ->where('ubi.iban', $search_iban);
             });
         }
 
-        if($search_email = $request->get('search_email')){
+        if ($search_email = $request->get('search_email')) {
             $users = $users->where('users.email', $search_email);
         }
         return Datatables::of($users)
@@ -8800,149 +8770,137 @@ class AdminDashboardController extends Controller
             ->filterColumn('users.id', function ($query, $keyword) {
                 return $query->where('users.id', '=', $keyword);
             })
-            ->editColumn('rejected_reason',function ($users){
-                if($users->rejected_reason != null && $users->rate_status==2){
+            ->editColumn('rejected_reason', function ($users) {
+                if ($users->rejected_reason != null && $users->rate_status == 2) {
                     return $users->rejected_reason;
-                }else{
+                } else {
                     return "-";
                 }
             })
-            ->editColumn('rate_status',function ($users){
-                if($users->rate_status == 2) {
+            ->editColumn('rate_status', function ($users) {
+                if ($users->rate_status == 2) {
                     return "Rejected";
-                }
-                else if($users->rate_status == 1) {
+                } else if ($users->rate_status == 1) {
                     return "Requested";
-                }
-                else if($users->rate_status == 0 && $users->status==2){
+                } else if ($users->rate_status == 0 && $users->status == 2) {
                     return "Authorized";
-                }
-                else if($users->rate_status == 0 && $users->status==1) {
+                } else if ($users->rate_status == 0 && $users->status == 1) {
                     return "Requested";
                 }
             })
-            ->editColumn('documents_status',function ($users){
-                if($users->documents_status == 0){
+            ->editColumn('documents_status', function ($users) {
+                if ($users->documents_status == 0) {
                     return "Incomplete";
-                }
-                elseif($users->documents_status == 1){
+                } elseif ($users->documents_status == 1) {
                     return "Pending for Approval";
-                }
-                elseif($users->documents_status == 2){
+                } elseif ($users->documents_status == 2) {
                     return "Approved";
-                }
-                elseif($users->documents_status == 3){
+                } elseif ($users->documents_status == 3) {
                     return "Rejected";
                 }
             })
-
             ->editColumn('status', function ($users) {
-                return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation': ($users->status == 5? 'Rates Rejected':'')));
+                return $users->status == 0 ? 'Request Received' : ($users->status == 1 ? 'Rates Added' : ($users->status == 2 ? 'Pending for Activation' : ($users->status == 5 ? 'Rates Rejected' : '')));
             })
-            ->filterColumn('status', function($query, $keyword) {
+            ->filterColumn('status', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
                 if ($keyword == 0 || $keyword == 1 || $keyword == 2 || $keyword == 5) {
                     $query->where('users.status', '=', $keyword);
-                }
-                else {
+                } else {
                     $query->whereRaw('false');
                 }
             })
-            ->editColumn('product_type', function($user){
-                if($user->product_type == 'Other'){
+            ->editColumn('product_type', function ($user) {
+                if ($user->product_type == 'Other') {
                     return $user->other_product_name;
-                }else{
+                } else {
                     return $user->product_type;
                 }
             })
-            ->filterColumn('product_type',function ($query,$keyword){
+            ->filterColumn('product_type', function ($query, $keyword) {
 
                 if ($keyword != '' || $keyword != 24) {
-                    $query->where('products.id',$keyword);
-                }
-                else {
+                    $query->where('products.id', $keyword);
+                } else {
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('duplication', function($users){
+            ->addColumn('duplication', function ($users) {
                 $count = 0;
-                if($users->duplicate_phone != null){
+                if ($users->duplicate_phone != null) {
                     $count++;
                 }
-                if($users->duplicate_cnic != null){
+                if ($users->duplicate_cnic != null) {
                     $count++;
                 }
-                if($users->duplicate_iban != null){
+                if ($users->duplicate_iban != null) {
                     $count++;
                 }
-                if($users->duplicate_name != null){
+                if ($users->duplicate_name != null) {
                     $count++;
                 }
-                if($count > 0){
+                if ($count > 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $count . '</button>';
-                }else{
+                } else {
                     return $count;
                 }
             })
-            ->editColumn('international_rate_status',function ($users){
-                if($users->international_rate_status != null){
-                    if($users->international_rate_status == 1){
+            ->editColumn('international_rate_status', function ($users) {
+                if ($users->international_rate_status != null) {
+                    if ($users->international_rate_status == 1) {
                         return "Approved";
-                    }elseif($users->international_rate_status == 2){
+                    } elseif ($users->international_rate_status == 2) {
                         return "Requested";
-                    }elseif($users->international_rate_status == 3){
+                    } elseif ($users->international_rate_status == 3) {
                         return "Rejected";
-                    }elseif($users->international_rate_status == 4){
+                    } elseif ($users->international_rate_status == 4) {
                         return "Requested";
-                    }elseif($users->international_rate_status == 5){
+                    } elseif ($users->international_rate_status == 5) {
                         return "Rejected";
                     }
-                }
-                else{
+                } else {
                     return "International Rates are not set";
                 }
             })
-            ->editColumn('international_rejected_reason',function ($users){
-                if($users->international_rejected_reason != null && $users->international_rate_status == 3){
+            ->editColumn('international_rejected_reason', function ($users) {
+                if ($users->international_rejected_reason != null && $users->international_rate_status == 3) {
                     return $users->international_rejected_reason;
-                }else{
+                } else {
                     return "-";
                 }
             })
             ->addColumn("action", function ($result) {
-                if(in_array($result->id, session('tagged_shippers'))){
+                if (in_array($result->id, session('tagged_shippers'))) {
                     $multiple_sale_check = true;
-                }
-                else{
+                } else {
                     $multiple_sale_check = false;
                 }
-                $sale_check= SalePersonTag::where('user_id',$result->id)->first();
+                $sale_check = SalePersonTag::where('user_id', $result->id)->first();
                 $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm accounts">
                 ';
 
-                if(session('role_id') == 1 || in_array(361, session('permissions'))){
+                if (session('role_id') == 1 || in_array(361, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item remove_sales_tier"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Remove Sales Tier Tagging</div></button>';
                 }
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
-                if(session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')))
-                {
+                if (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass'))) {
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
                 }
-                if(($result->status == 2 || $result->international_status == 1) && $result->documents_status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
+                if (($result->status == 2 || $result->international_status == 1) && $result->documents_status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
                     $dropdown .= '<button type="button" class="dropdown-item active_account" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
 
                 }
-                if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
-                    if($result->account_type_id == 1){
+                if (($sale_check != null || $multiple_sale_check) && $result->status != 2) {
+                    if ($result->account_type_id == 1) {
                         if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
-                            if($result->status != 2 && ($result->rate_status == 0 || $result->rate_status == 2 || $result->status == 5 || session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || session('role_id') == 2 || session('role_id') == 7 || in_array(session('id'), session('sale_users_bypass')))) {
+                            if ($result->status != 2 && ($result->rate_status == 0 || $result->rate_status == 2 || $result->status == 5 || session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || session('role_id') == 2 || session('role_id') == 7 || in_array(session('id'), session('sale_users_bypass')))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         } else {
@@ -8950,24 +8908,20 @@ class AdminDashboardController extends Controller
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.add.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
                             }
                         }
-                    }else{
-                        if($result->corporate_rate_type_id == null){
+                    } else {
+                        if ($result->corporate_rate_type_id == null) {
                             $dropdown .= '<button type="button" class="dropdown-item rate_type"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart-2"></i></div><div class="col-9 offset-1">Add Rate Type</div></button>';
-                        }
-                        else{
-                            if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions'))) && ($result->corporate_rate_type_id == 1 || $result->corporate_rate_type_id ==2)) {
-                               
-                                if($result->status != 2) {
+                        } else {
+                            if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions'))) && ($result->corporate_rate_type_id == 1 || $result->corporate_rate_type_id == 2)) {
+
+                                if ($result->status != 2) {
                                     $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                                 }
-                            }
-
-                            else if (CorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions'))) && $result->corporate_rate_type_id == 3) {
-                                if($result->status != 2) {
+                            } else if (CorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions'))) && $result->corporate_rate_type_id == 3) {
+                                if ($result->status != 2) {
                                     $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                                 }
-                            }
-                            else {
+                            } else {
 
                                 if (session('role_id') == 1 || in_array(6, session('permissions'))) {
                                     $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.add.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
@@ -8981,87 +8935,83 @@ class AdminDashboardController extends Controller
                 }
 
 //                if($result->account_type_id == 1){
-                    if(($result->rate_status == 0 && $result->status == 2) && (InternationalUsersInformation::where('user_id', $result->id)->exists() == false) && (session('role_id') == 1 || in_array(8, session('permissions')))){
-                        $dropdown .= '<button type="button" class="dropdown-item reject_rates" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject Rates</div></button>';
-                    }
+                if (($result->rate_status == 0 && $result->status == 2) && (InternationalUsersInformation::where('user_id', $result->id)->exists() == false) && (session('role_id') == 1 || in_array(8, session('permissions')))) {
+                    $dropdown .= '<button type="button" class="dropdown-item reject_rates" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject Rates</div></button>';
+                }
 //                }
 
-                if($result->account_type_id == 1){
+                if ($result->account_type_id == 1) {
                     if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions')))) {
-                        if($result->status != 0) {
+                        if ($result->status != 0) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.view.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                         }
                     }
-                }else{
-                    if($result->status != 0) {
-                        if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions'))) && ($result->corporate_rate_type_id == 1 || $result->corporate_rate_type_id ==2)) {
+                } else {
+                    if ($result->status != 0) {
+                        if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions'))) && ($result->corporate_rate_type_id == 1 || $result->corporate_rate_type_id == 2)) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
-                        }
-                        else if(CorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions'))) && $result->corporate_rate_type_id == 3){
+                        } else if (CorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(114, session('permissions'))) && $result->corporate_rate_type_id == 3) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.rates.view', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
                         }
                     }
                 }
-                if($result->blacklist == 0 && (session('role_id') == 1 || in_array(10, session('permissions')))) {
+                if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(10, session('permissions')))) {
                     $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
                 }
 
 
-                if(session('role_id') == 1 || in_array(110, session('permissions')))
-                {
+                if (session('role_id') == 1 || in_array(110, session('permissions'))) {
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
                 $merged = MergedSisterAccount::where('user_id', $result->id);
-                if($sale_check != null) {
+                if ($sale_check != null) {
                     if (!$merged->exists()) {
                         if (session('role_id') == 1 || in_array(session('id'), session('sale_users_bypass')) || (($multiple_sale_check == true) || (($sale_check) && ($sale_check->admin_id == Auth::id())) || in_array(241, session('permissions')))) {
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
                     }
                 }
                 if (session('role_id') == 1 || in_array(244, session('permissions'))) {
-                    if($result->status > 0){
+                    if ($result->status > 0) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view_crf_agreement', ['id' => $result->id]) . '\')" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
                     }
                 }
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
 
-                if($sale_check){
-                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
+                if ($sale_check) {
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.add_contacts', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Contacts</div></button>';
                 }
-                if(($sale_check != null || $multiple_sale_check) && $result->status != 2) {
+                if (($sale_check != null || $multiple_sale_check) && $result->status != 2) {
 
-                    if((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))){
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
-                    }
-                    else{
-                        if(session('role_id') == 1 || in_array(439, session('permissions'))){
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
+                    if ((!InternationalUsersInformation::where('user_id', $result->id)->exists()) && (session('role_id') == 1 || in_array(439, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Rates</div></button>';
+                    } else {
+                        if (session('role_id') == 1 || in_array(439, session('permissions'))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.update.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Rates</div></button>';
                         }
-                        if(session('role_id') == 1 || in_array(440, session('permissions'))){
-                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
+                        if (session('role_id') == 1 || in_array(440, session('permissions'))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
                         }
                     }
                 }
 
                 if (InternationalEconomyRateStatus::where('user_id', $result->id)->doesntExist()) {
-                    if(session('role_id') == 1 || in_array(528, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(528, session('permissions'))) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Economy Rates</div></button>';
                     }
                 } else {
-                    if((session('role_id') == 1 || in_array(528, session('permissions')))) {
+                    if ((session('role_id') == 1 || in_array(528, session('permissions')))) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Economy Rates</div></button>';
                     }
                 }
 
-                if(InternationalEconomyRate::where('user_id',$result->id)->count() > 0)
-                {
-                    if(session('role_id') == 1 || in_array(530, session('permissions'))) {
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id,'view'=>'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
+                if (InternationalEconomyRate::where('user_id', $result->id)->count() > 0) {
+                    if (session('role_id') == 1 || in_array(530, session('permissions'))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id, 'view' => 'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
                     }
                 }
 
-                if($result->account_type_id == 2 && (session('role_id') == 1 || count(array_intersect([598, 599], session('permissions'))) !== 0)) {
+                if ($result->account_type_id == 2 && (session('role_id') == 1 || count(array_intersect([598, 599], session('permissions'))) !== 0)) {
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.reimbursement_setting.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Corporate Reimbursement Setting</div></button>';
                 }
 
@@ -9079,37 +9029,37 @@ class AdminDashboardController extends Controller
             ->make(true);
 
     }
-    public function blockAccountListAjax(Request $request){
 
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),276);
+    public function blockAccountListAjax(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 276);
         }
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
                 $join->on('spt.user_id', '=', 'users.id')
-                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
-                    ->where('spt.status','=',0);
+                    ->leftjoin('admins as ad', 'ad.id', '=', 'spt.admin_id')
+                    ->where('spt.status', '=', 0);
             })
-            ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
-            ->leftjoin('admins as a','a.id','=','st.poc')
-            ->leftjoin('admins as d','d.id','=','st.kam')
-            ->leftjoin('admins as h','h.id','=','st.ref')
-            ->select(['users.id', 'users.name','users.disable_at as disable_at', 'cities.name as city' ,'users.poc','users.blacklist_reason as reason','ad.name as admin_tag_id','a.name as poc_tagged','d.name as kam','h.name as ref'])->where('blacklist',1);
+            ->leftjoin('sale_tier_tags as st', 'st.user_id', '=', 'users.id')
+            ->leftjoin('admins as a', 'a.id', '=', 'st.poc')
+            ->leftjoin('admins as d', 'd.id', '=', 'st.kam')
+            ->leftjoin('admins as h', 'h.id', '=', 'st.ref')
+            ->select(['users.id', 'users.name', 'users.disable_at as disable_at', 'cities.name as city', 'users.poc', 'users.blacklist_reason as reason', 'ad.name as admin_tag_id', 'a.name as poc_tagged', 'd.name as kam', 'h.name as ref'])->where('blacklist', 1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
-        if(session('department_id') == 7){
-            if(!in_array(session('id'), session('sale_users_bypass')) ){
+        if (session('department_id') == 7) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
-        if($sale_persons = $request->get('sale_persons')){
+        if ($sale_persons = $request->get('sale_persons')) {
             $users = $users->whereIn('ad.id', $sale_persons);
         }
-        if($search_email = $request->get('search_email')){
-            $users = $users->where('users.email',$search_email);
+        if ($search_email = $request->get('search_email')) {
+            $users = $users->where('users.email', $search_email);
         }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
@@ -9134,12 +9084,11 @@ class AdminDashboardController extends Controller
                 }
 
 
-                if(session('role_id') == 1 || in_array(110, session('permissions')))
-                {
+                if (session('role_id') == 1 || in_array(110, session('permissions'))) {
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
                 if (session('role_id') == 1 || in_array(244, session('permissions'))) {
-                    if($result->status > 0){
+                    if ($result->status > 0) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.view_crf_agreement', ['id' => $result->id]) . '\')" type="button" class="dropdown-item view_crf" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View CRF</div></button>';
                     }
                 }
@@ -9159,22 +9108,22 @@ class AdminDashboardController extends Controller
     public function userProfile($id)
     {
         $user = User::find($id);
-        
+
         $product = Product::find($user->product_id);
         $products = Product::all();
         $banks = BanksList::all();
         $invoicing_cycle = InvoicingCycle::all();
         $city_list = City::all();
-        $emails = ShipperNotificationEmail::where('user_id',$user->id)->select('email')->get();
-        $email_ids = ShipperNotificationEmail::where('user_id',$user->id)->pluck('email')->toArray();
+        $emails = ShipperNotificationEmail::where('user_id', $user->id)->select('email')->get();
+        $email_ids = ShipperNotificationEmail::where('user_id', $user->id)->pluck('email')->toArray();
         $email_ids = implode(',', $email_ids);
         $reference = Reference::where('id', $user->reference_id)->first();
         $segments = Segment::all();
-        $sub_segments = SubCategorySegment::where('segment_id',$user->segment->id)->get();
+        $sub_segments = SubCategorySegment::where('segment_id', $user->segment->id)->get();
         $average_shipment_duration = AverageShipmentCycle::where('id', $user->average_shipment_duration_id)->first();
         $user_bank_default = UserBankInfo::where('user_id', $user->id)->where('default_bank', 1)->first();
-        $territories = Territory::select('id','name')->get();
-        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products,'invoicing_cycle' => $invoicing_cycle , 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default,'segments' => $segments,'sub_segments' => $sub_segments,'territories' => $territories]);
+        $territories = Territory::select('id', 'name')->get();
+        return view('admin.accounts.profile')->with(['user' => $user, 'product_name' => $product->product_name, 'banks' => $banks, 'all_cities' => $city_list, 'products' => $products, 'invoicing_cycle' => $invoicing_cycle, 'emails' => $emails, 'email_ids' => $email_ids, 'reference' => $reference, 'average_shipment_duration' => $average_shipment_duration, 'user_bank_default' => $user_bank_default, 'segments' => $segments, 'sub_segments' => $sub_segments, 'territories' => $territories]);
     }
 
     public function updateProfile(Request $request)
@@ -9186,47 +9135,43 @@ class AdminDashboardController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255',
-            'address'=>'required|string|max:255',
-            'poc'=>'required|string|max:255',
-            'phone'=>'required|string|max:255',
-            'cnic'=>'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'poc' => 'required|string|max:255',
+            'phone' => 'required|string|max:255',
+            'cnic' => 'required|string|max:255',
             'segment_id' => 'required',
             'sub_segment_id' => 'required'
-            
+
         ]);
 
 
         $flag = true;
         $users = User::where('email', $request->email)->orWhere('phone', $request->phone)->get();
-        if($users){
-            foreach($users as $user){
-                if($user_id != $user->id) {
+        if ($users) {
+            foreach ($users as $user) {
+                if ($user_id != $user->id) {
                     $flag = false;
                 }
             }
         }
 
-        if($flag == true){
-            if($request->password=="" || $request->password==null)
-            {
-                User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                    'ntn_no'=>$request->ntn_no,'strn_no'=>$request->strn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id, 'segment_id'=>$request->segment_id, 'sub_segment_id'=>$request->sub_segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'other_product_name' => $request->has('product_name')? $request->product_name:null, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+        if ($flag == true) {
+            if ($request->password == "" || $request->password == null) {
+                User::where('id', $user_id)->update(['name' => $request->name, 'poc' => $request->poc, 'email' => $request->email, 'address' => $request->address, 'phone' => $request->phone, 'phone2' => $request->phone2, 'cnic' => $request->cnic,
+                    'ntn_no' => $request->ntn_no, 'strn_no' => $request->strn_no, 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'other_product_name' => $request->has('product_name') ? $request->product_name : null, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null]);
                 AdminLogs::create([
-                    'admin_id'=>Auth::id(),
-                    'user_id'=>$user_id
+                    'admin_id' => Auth::id(),
+                    'user_id' => $user_id
 
                 ]);
-            }
-            else
-            {
-                User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                    'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,'segment_id' => $request->segment_id, 'sub_segment_id'=>$request->sub_segment_id, 'url'=>$request->url,'product_id'=>$request->product_id, 'brand_name' => $request->has('brand_name')? $request->brand_name:null]);
+            } else {
+                User::where('id', $user_id)->update(['name' => $request->name, 'poc' => $request->poc, 'email' => $request->email, 'address' => $request->address, 'phone' => $request->phone, 'phone2' => $request->phone2, 'cnic' => $request->cnic,
+                    'ntn_no' => $request->ntn_no, "password" => Hash::make($request->password), 'updated_by_type' => 1, 'updated_by_id' => Auth::id(), 'city_id' => $request->city_id, 'segment_id' => $request->segment_id, 'sub_segment_id' => $request->sub_segment_id, 'url' => $request->url, 'product_id' => $request->product_id, 'brand_name' => $request->has('brand_name') ? $request->brand_name : null]);
             }
 
-            return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
-        }
-        else{
-            return redirect()->back()->with(['error'=>"Email Address and Phone Number must be unique"]);
+            return redirect()->back()->with(['success' => "Profile Information Successfully Updated"]);
+        } else {
+            return redirect()->back()->with(['error' => "Email Address and Phone Number must be unique"]);
         }
     }
 
@@ -9238,32 +9183,32 @@ class AdminDashboardController extends Controller
         //1 for Admin, 0 for User
 
         $request->validate([
-            'bank_name'=>'required|max:255',
-            'bank_branch'=>'required|string|max:255',
-            'account_no'=>'required|string|max:255',
-            'account_title'=>'required|string|max:255',
-            'iban'=>'required|string|max:255',
+            'bank_name' => 'required|max:255',
+            'bank_branch' => 'required|string|max:255',
+            'account_no' => 'required|string|max:255',
+            'account_title' => 'required|string|max:255',
+            'iban' => 'required|string|max:255',
         ]);
-        $old_bank_detail = UserBankInfo::where('user_id',$user_id)->select('bank_name')->first();
+        $old_bank_detail = UserBankInfo::where('user_id', $user_id)->select('bank_name')->first();
 
-        if($user->account_type_id == 1){
-            UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
-                'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city]);
+        if ($user->account_type_id == 1) {
+            UserBankInfo::where('user_id', $user_id)->update(['bank_branch' => $request->bank_branch, 'bank_name' => $request->bank_name, 'account_no' => $request->account_no,
+                'account_title' => $request->account_title, 'iban' => $request->iban, 'city_id' => $request->bank_city]);
 
-        }else{
+        } else {
             $generation_date = null;
-            if($request->invoicing_cycle_id == 2 || $request->invoicing_cycle_id == 4 ){
+            if ($request->invoicing_cycle_id == 2 || $request->invoicing_cycle_id == 4) {
                 $generation_date = null;
-            }else{
+            } else {
                 $generation_date = $request->generation_date;
             }
-            UserBankInfo::where('user_id',$user_id)->update([
-                'bank_branch'=>$request->bank_branch,
-                'bank_name'=>$request->bank_name,
-                'account_no'=>$request->account_no,
-                'account_title'=>$request->account_title,
-                'iban'=>$request->iban,
-                'city_id'=>$request->bank_city,
+            UserBankInfo::where('user_id', $user_id)->update([
+                'bank_branch' => $request->bank_branch,
+                'bank_name' => $request->bank_name,
+                'account_no' => $request->account_no,
+                'account_title' => $request->account_title,
+                'iban' => $request->iban,
+                'city_id' => $request->bank_city,
                 'invoicing_cycle_id' => $request->invoicing_cycle_id,
                 'generation_date' => $generation_date,
                 'billing_person_name' => $request->billing_person_name,
@@ -9272,7 +9217,7 @@ class AdminDashboardController extends Controller
                 'billing_address' => $request->billing_address
             ]);
         }
-        if($old_bank_detail->bank_name != $request->bank_name){
+        if ($old_bank_detail->bank_name != $request->bank_name) {
             $bank_history = new HistoryShipperBankAccount();
             $bank_history->user_id = $user_id;
             $bank_history->bank_id = $old_bank_detail->bank_name;
@@ -9283,41 +9228,35 @@ class AdminDashboardController extends Controller
             'admin_id' => Auth::id(),
             'user_id' => $user_id
         ]);
-        return redirect()->back()->with(['success'=>"Bank Information Successfully Updated"]);
+        return redirect()->back()->with(['success' => "Bank Information Successfully Updated"]);
     }
 
     public function getPickups(Request $request)
     {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
-            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor'])
-            ->where('user_id',$request->user_id)
+            ->select(['user_shipping_infos.id as id', 'user_shipping_infos.pickup_brand_name as pickup_brand_name', 'user_shipping_infos.pickup_address as pickup_address', 'user_shipping_infos.poc as poc', 'user_shipping_infos.phone as phone', 'user_shipping_infos.email as email', 'user_shipping_infos.status as status', 'user_shipping_infos.default_address as default_address', 'user_shipping_infos.user_id as user_id', 'c.name as city_name', 'user_shipping_infos.vendor'])
+            ->where('user_id', $request->user_id)
             ->where('hidden', 0);
 
         return Datatables::of($pickups)
             ->addColumn("status", function ($result) {
-                if($result->default_address==1)
-                {
-                    $status =  "Default Address";
-                }
-                elseif($result->status==1)
-                {
-                    $status =  "Enabled";
-                }
-                elseif($result->status==0)
-                {
-                    $status =  "Disabled";
+                if ($result->default_address == 1) {
+                    $status = "Default Address";
+                } elseif ($result->status == 1) {
+                    $status = "Enabled";
+                } elseif ($result->status == 0) {
+                    $status = "Disabled";
                 }
                 return $status;
             })
-            ->filterColumn('status',function($query,$keyword){
+            ->filterColumn('status', function ($query, $keyword) {
                 if ($keyword != '') {
-                    if($keyword == 2){
-                        $query->where('user_shipping_infos.default_address',1);
-                    }else{
-                        $query->where('user_shipping_infos.status',$keyword);
+                    if ($keyword == 2) {
+                        $query->where('user_shipping_infos.default_address', 1);
+                    } else {
+                        $query->where('user_shipping_infos.status', $keyword);
                     }
-                }
-                else {
+                } else {
                     $query->whereRaw('false');
                 }
             })
@@ -9325,7 +9264,8 @@ class AdminDashboardController extends Controller
     }
 
 
-    public function cityView(Request $request){
+    public function cityView(Request $request)
+    {
 //        $req = $request->route();
 //        $uri_path = $req->getPath();
 //        $uri_parts = explode('/', $uri_path);
@@ -9333,61 +9273,61 @@ class AdminDashboardController extends Controller
 //        return $uri_tail;
 //        $hubs = City::where('hub',1)->get();
 //        return $hubs[0]->id;
-        ActivityTrailController::createActivityTrailLog(Auth::id(),348);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 348);
 
         $business_categories = BusinessCategory::all();
         return view('admin.management.city_management')->with(['business_categories' => $business_categories]);
     }
-    public function cityListAjax(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),349);
+
+    public function cityListAjax(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 349);
         }
 
-        $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
-            ->leftjoin('city_histories as ch',function($join){
+        $cities = City::join('cities as h', 'cities.hub_id', '=', 'h.id')
+            ->leftjoin('city_histories as ch', function ($join) {
                 $join->on('ch.city_id', '=', 'cities.id')
-                    ->where('ch.created_at','=',
+                    ->where('ch.created_at', '=',
                         DB::raw('(select max(created_at) from city_histories where city_histories.city_id = cities.id)'));
             })
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.city_code as city_code','cities.id as id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category','cities.hub_location_latitude','cities.hub_location_longitude']);
+            ->select(['cities.id as city_id', 'cities.city_code as city_code', 'cities.id as id', 'cities.name as name', 'h.name as hub', 'cities.hub_id', 'z.name as zone', 'cities.hub as isHub', 'cities.status as status', 'ch.created_at as updated_at', 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat', 'cities.location_latitude', 'cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category', 'cities.hub_location_latitude', 'cities.hub_location_longitude']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
-                return ($cities->status == 1)? 'Active': 'Inactive';
+                return ($cities->status == 1) ? 'Active' : 'Inactive';
             })
             ->editColumn('gc_area', function ($cities) {
-                return ($cities->gc_area == 1)? 'Yes': 'No';
+                return ($cities->gc_area == 1) ? 'Yes' : 'No';
             })
-            ->filterColumn('modes',function ($query,$keyword){
+            ->filterColumn('modes', function ($query, $keyword) {
 
                 if ($keyword != '') {
-                    $query->where('sm.id',$keyword);
-                }
-                else {
+                    $query->where('sm.id', $keyword);
+                } else {
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('location', function ($result){
+            ->addColumn('location', function ($result) {
                 $location = '<div class="text-center">';
-                if($result->location_latitude != null && $result->location_longitude != null) {
+                if ($result->location_latitude != null && $result->location_longitude != null) {
                     $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->location_latitude . ',' . $result->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
                     $location .= '</div>';
                     return $location;
-                }else{
+                } else {
                     return '-';
                 }
             })
-            ->addColumn('hub_location', function ($result){
+            ->addColumn('hub_location', function ($result) {
                 $location = '<div class="text-center">';
-                if($result->hub_location_latitude != null && $result->hub_location_longitude != null) {
+                if ($result->hub_location_latitude != null && $result->hub_location_longitude != null) {
                     $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->hub_location_latitude . ',' . $result->hub_location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
                     $location .= '</div>';
                     return $location;
-                }else{
+                } else {
                     return '-';
                 }
             })
@@ -9400,10 +9340,9 @@ class AdminDashboardController extends Controller
                 ';
 
                     if (session('role_id') == 1 || in_array(90, session('permissions'))) {
-                        if($result->business_category_id == 1){
+                        if ($result->business_category_id == 1) {
                             $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
-                        }
-                        else{
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editinternationalcity" data-toggle="modal" data-target="#editInternationalCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update International City Status</div></button>';
                         }
                     }
@@ -9411,8 +9350,7 @@ class AdminDashboardController extends Controller
                     if (session('role_id') == 1 || in_array(91, session('permissions'))) {
                         if ($result->status == 1) {
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityInactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate City</div></button>';
-                        }
-                        else {
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate City</div></button>';
                         }
                     }
@@ -9423,148 +9361,83 @@ class AdminDashboardController extends Controller
                 ';
 
                     return $dropdown;
-                }
-                else {
+                } else {
                     return '';
                 }
             })
-            ->addColumn('osa_list', function ($result){
-                $osa_count = CityOsaRate::where('city_id',$result->city_id);
-                if($osa_count->exists()){
+            ->addColumn('osa_list', function ($result) {
+                $osa_count = CityOsaRate::where('city_id', $result->city_id);
+                if ($osa_count->exists()) {
                     $btn = '<div class="text-center">';
-                    $btn .= '<button type="button" class="btn btn-primary btn-sm">'.$osa_count->count().'</button>';
+                    $btn .= '<button type="button" class="btn btn-primary btn-sm">' . $osa_count->count() . '</button>';
                     $btn .= '</div>';
                     return $btn;
-                }else{
+                } else {
                     return '-';
                 }
             })
             ->make(true);
     }
 
-    public function getCityForm(){
-        $hubs = City::where('hub',1)->where('business_category_id', 1)->where('status',1)->get();
+    public function getCityForm()
+    {
+        $hubs = City::where('hub', 1)->where('business_category_id', 1)->where('status', 1)->get();
         $zones = Zone::where('business_category_id', 1)->get();
         $shippingMode = ShippingMode::all();
-        $booking = BookingType::where('id','!=',4)->get();
-        return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking]);
+        $booking = BookingType::where('id', '!=', 4)->get();
+        return view('admin.management.add_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking]);
     }
-    public function getEditCityForm($id){
+
+    public function getEditCityForm($id)
+    {
         $city = City::find($id);
-        if($city->hub == 1){
+        if ($city->hub == 1) {
             $cityhub = '';
             $isHub = 1;
-        }else{
-            $cityhub = City::select(['id','name'])->where('id',$city->hub_id)->get();
+        } else {
+            $cityhub = City::select(['id', 'name'])->where('id', $city->hub_id)->get();
             $isHub = 0;
 
         }
-        $delivery_array = CityDelivery::where('city_id',$city->id)->select(['booking_type_id','shipping_mode_id'])->get();
+        $delivery_array = CityDelivery::where('city_id', $city->id)->select(['booking_type_id', 'shipping_mode_id'])->get();
         $delivery = array();
         foreach ($delivery_array as $delivery_details) {
             $delivery[$delivery_details['booking_type_id']][] = $delivery_details['shipping_mode_id'];
         }
 
 
-        $hubs = City::where('hub',1)->where('business_category_id', 1)->where('status',1)->get();
+        $hubs = City::where('hub', 1)->where('business_category_id', 1)->where('status', 1)->get();
         $zones = Zone::where('business_category_id', 1)->get();
         $shippingMode = ShippingMode::all();
-        $booking = BookingType::where('id','!=',4)->get();
-        $walk_in_city = WalkInCities::where('city_id',$city['id'])->get();
+        $booking = BookingType::where('id', '!=', 4)->get();
+        $walk_in_city = WalkInCities::where('city_id', $city['id'])->get();
         $walk_in_delivery = array();
-        $osa_list = CityOsaRate::where('city_id',$city->id)->get();
+        $osa_list = CityOsaRate::where('city_id', $city->id)->get();
 
-        foreach ($walk_in_city as $walk_in_detail){
+        foreach ($walk_in_city as $walk_in_detail) {
             $walk_in_delivery[$walk_in_detail['delivery']] = $walk_in_detail['delivery'];
         }
-        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs, 'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list]);
+        return view('admin.management.edit_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'shippingMode' => $shippingMode, 'bookings' => $booking, 'isHub' => $isHub, 'city' => $city, 'delivery' => $delivery, 'cityhub' => $cityhub, 'walk_in_city' => $walk_in_delivery, 'osa_list' => $osa_list]);
 
     }
 
-    public function updateCity(Request $request,$id){
-        CityOsaRate::where('city_id',$id)->delete();
+    public function updateCity(Request $request, $id)
+    {
+        CityOsaRate::where('city_id', $id)->delete();
 
-        $city_id = City::where('id',$id)->first();
-        if($city_id){
-            if($request->has('updatedelivery') && count($request->updatedelivery) > 0){
-                if($request->postType == 'city'){
-                    City::where('id',$id)->update([
-                        'name'=>$request->cityName,
-                        'city_code'=>$request->city_code,
-                        'hub'=>0,
-                        'hub_id'=>$request->hubs,
-                        'zone_id'=>City::find($request->hubs)->zone_id,
-                        'pickup'=>($request->has('pickup'))? 1:0,
-                        'gc_area'=>($request->has('gc_area'))? 1:0,
-                        'attempt_tat'=>$request->attempt_tat,
-                        'location_latitude' => $request->latitude,
-                        'location_longitude' => $request->longitude,
-                        'hub_location_latitude' => $request->hub_latitude,
-                        'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
-                    ]);
-                    CityHistory::create([
-                        'city_id'=> $id,
+        $city_id = City::where('id', $id)->first();
+        if ($city_id) {
+            if ($request->has('updatedelivery') && count($request->updatedelivery) > 0) {
+                if ($request->postType == 'city') {
+                    City::where('id', $id)->update([
+                        'name' => $request->cityName,
+                        'city_code' => $request->city_code,
                         'hub' => 0,
-                        'hub_id'=> $request->hubs,
-                        'zone_id'=> City::find($request->hubs)->zone_id,
-                        'pickup'=> ($request->has('pickup'))? 1:0,
-                        'status' => $city_id->status,
-                        'gc_area'=>($request->has('gc_area'))? 1:0,
-                        'attempt_tat'=>$request->attempt_tat,
-                        'updated_by' => Auth::id(),
-                        'location_latitude' => $request->latitude,
-                        'location_longitude' => $request->longitude,
-                        'hub_location_latitude' => $request->hub_latitude,
-                        'hub_location_longitude' => $request->hub_longitude,
-                        'address' => $request->address
-                    ]);
-                    WalkInCities::where('city_id',$id)->delete();
-                    if(!empty($request->walk_in_delivery)) {
-                        foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
-                            WalkInCities::create([
-                                'city_id' => $id,
-                                'pickup' => ($request->has('pickup')) ? 1 : 0,
-                                'delivery' => $index,
-                            ]);
-                        }
-                    }
-
-                    CityDelivery::where('city_id',$id)->delete();
-
-                    foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
-                        foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
-                            CityDelivery::create([
-                                'city_id'=>$id,
-                                'booking_type_id'=>$booking_type_id,
-                                'shipping_mode_id'=>$shipping_mode_id,
-                            ]);
-                        }
-                    }
-                    if($request->osa_name != null){
-
-                        foreach ($request->osa_name as $key => $value) {
-    
-                            $osa_charges = new CityOsaRate();
-                            $osa_charges->city_id = $id;
-                            $osa_charges->osa_name = $value;
-                            $osa_charges->osa_rate = $request->osa_rate[$key];
-                            $osa_charges->admin_id = Auth::id();
-                            $osa_charges->save();
-                        }
-                    }
-                    return redirect()->back()->with('success','City updated successfully');
-                }
-                elseif($request->postType == 'hub'){
-                    City::where('id',$id)->update([
-                        'name'=>$request->cityName,
-                        'city_code'=>$request->city_code,
-                        'hub'=>1,
-                        'hub_id'=>$id,
-                        'zone_id'=>$request->zone_id,
-                        'pickup'=>($request->has('pickup'))? 1:0,
-                        'gc_area'=>($request->has('gc_area'))? 1:0,
-                        'attempt_tat'=>$request->attempt_tat,
+                        'hub_id' => $request->hubs,
+                        'zone_id' => City::find($request->hubs)->zone_id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'gc_area' => ($request->has('gc_area')) ? 1 : 0,
+                        'attempt_tat' => $request->attempt_tat,
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
                         'hub_location_latitude' => $request->hub_latitude,
@@ -9572,14 +9445,14 @@ class AdminDashboardController extends Controller
                         'address' => $request->address
                     ]);
                     CityHistory::create([
-                        'city_id'=> $id,
-                        'hub'=>1,
-                        'hub_id'=>$id,
-                        'zone_id'=>$request->zone_id,
-                        'pickup'=>($request->has('pickup'))? 1:0,
+                        'city_id' => $id,
+                        'hub' => 0,
+                        'hub_id' => $request->hubs,
+                        'zone_id' => City::find($request->hubs)->zone_id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
                         'status' => $city_id->status,
-                        'gc_area'=>($request->has('gc_area'))? 1:0,
-                        'attempt_tat'=>$request->attempt_tat,
+                        'gc_area' => ($request->has('gc_area')) ? 1 : 0,
+                        'attempt_tat' => $request->attempt_tat,
                         'updated_by' => Auth::id(),
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
@@ -9587,8 +9460,8 @@ class AdminDashboardController extends Controller
                         'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
-                    WalkInCities::where('city_id',$id)->delete();
-                    if(!empty($request->walk_in_delivery)) {
+                    WalkInCities::where('city_id', $id)->delete();
+                    if (!empty($request->walk_in_delivery)) {
                         foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
                             WalkInCities::create([
                                 'city_id' => $id,
@@ -9598,21 +9471,21 @@ class AdminDashboardController extends Controller
                         }
                     }
 
-                    CityDelivery::where('city_id',$id)->delete();
+                    CityDelivery::where('city_id', $id)->delete();
 
                     foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
                         foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
                             CityDelivery::create([
-                                'city_id'=>$id,
-                                'booking_type_id'=>$booking_type_id,
-                                'shipping_mode_id'=>$shipping_mode_id,
+                                'city_id' => $id,
+                                'booking_type_id' => $booking_type_id,
+                                'shipping_mode_id' => $shipping_mode_id,
                             ]);
                         }
                     }
-                    if($request->osa_name != null){
-                    
+                    if ($request->osa_name != null) {
+
                         foreach ($request->osa_name as $key => $value) {
-    
+
                             $osa_charges = new CityOsaRate();
                             $osa_charges->city_id = $id;
                             $osa_charges->osa_name = $value;
@@ -9621,31 +9494,99 @@ class AdminDashboardController extends Controller
                             $osa_charges->save();
                         }
                     }
-                    return redirect()->back()->with('success','Hub/city updated successfully');
+                    return redirect()->back()->with('success', 'City updated successfully');
+                } elseif ($request->postType == 'hub') {
+                    City::where('id', $id)->update([
+                        'name' => $request->cityName,
+                        'city_code' => $request->city_code,
+                        'hub' => 1,
+                        'hub_id' => $id,
+                        'zone_id' => $request->zone_id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'gc_area' => ($request->has('gc_area')) ? 1 : 0,
+                        'attempt_tat' => $request->attempt_tat,
+                        'location_latitude' => $request->latitude,
+                        'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
+                        'address' => $request->address
+                    ]);
+                    CityHistory::create([
+                        'city_id' => $id,
+                        'hub' => 1,
+                        'hub_id' => $id,
+                        'zone_id' => $request->zone_id,
+                        'pickup' => ($request->has('pickup')) ? 1 : 0,
+                        'status' => $city_id->status,
+                        'gc_area' => ($request->has('gc_area')) ? 1 : 0,
+                        'attempt_tat' => $request->attempt_tat,
+                        'updated_by' => Auth::id(),
+                        'location_latitude' => $request->latitude,
+                        'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
+                        'address' => $request->address
+                    ]);
+                    WalkInCities::where('city_id', $id)->delete();
+                    if (!empty($request->walk_in_delivery)) {
+                        foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
+                            WalkInCities::create([
+                                'city_id' => $id,
+                                'pickup' => ($request->has('pickup')) ? 1 : 0,
+                                'delivery' => $index,
+                            ]);
+                        }
+                    }
+
+                    CityDelivery::where('city_id', $id)->delete();
+
+                    foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
+                        foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+                            CityDelivery::create([
+                                'city_id' => $id,
+                                'booking_type_id' => $booking_type_id,
+                                'shipping_mode_id' => $shipping_mode_id,
+                            ]);
+                        }
+                    }
+                    if ($request->osa_name != null) {
+
+                        foreach ($request->osa_name as $key => $value) {
+
+                            $osa_charges = new CityOsaRate();
+                            $osa_charges->city_id = $id;
+                            $osa_charges->osa_name = $value;
+                            $osa_charges->osa_rate = $request->osa_rate[$key];
+                            $osa_charges->admin_id = Auth::id();
+                            $osa_charges->save();
+                        }
+                    }
+                    return redirect()->back()->with('success', 'Hub/city updated successfully');
                 }
-            }
-            else{
+            } else {
                 return redirect()->back()->with('error', 'Please select atleast one shipping mode!');
             }
         }
 
     }
+
     //update city end
-    public function addCityHub(Request $request){
-      
-        if($request->postType == 'city'){
+    public function addCityHub(Request $request)
+    {
+
+        if ($request->postType == 'city') {
             $zone_id = City::find($request->hubs)->zone_id;
 
             $city = City::create([
-                'name'=>$request->cityName,
-                'city_code'=>$request->city_code,
-                'hub'=>0,
-                'hub_id'=>$request->hubs,
-                'zone_id'=> $zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'gc_area'=>($request->has('gc_area'))? 1:0,
-                'attempt_tat'=>$request->attempt_tat,
-                'status'=>1,
+                'name' => $request->cityName,
+                'city_code' => $request->city_code,
+                'hub' => 0,
+                'hub_id' => $request->hubs,
+                'zone_id' => $zone_id,
+                'pickup' => ($request->has('pickup')) ? 1 : 0,
+                'gc_area' => ($request->has('gc_area')) ? 1 : 0,
+                'attempt_tat' => $request->attempt_tat,
+                'status' => 1,
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
@@ -9654,14 +9595,14 @@ class AdminDashboardController extends Controller
             ]);
 
             CityHistory::create([
-                'city_id'=> $city->id,
-                'hub'=>0,
-                'hub_id'=>$request->hubs,
-                'zone_id'=> $zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'status'=>1,
-                'gc_area'=>($request->has('gc_area'))? 1:0,
-                'attempt_tat'=>$request->attempt_tat,
+                'city_id' => $city->id,
+                'hub' => 0,
+                'hub_id' => $request->hubs,
+                'zone_id' => $zone_id,
+                'pickup' => ($request->has('pickup')) ? 1 : 0,
+                'status' => 1,
+                'gc_area' => ($request->has('gc_area')) ? 1 : 0,
+                'attempt_tat' => $request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
@@ -9670,7 +9611,7 @@ class AdminDashboardController extends Controller
                 'address' => $request->address
             ]);
 
-            if(!empty($request->walk_in_delivery)) {
+            if (!empty($request->walk_in_delivery)) {
                 foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
                     WalkInCities::create([
                         'city_id' => $city->id,
@@ -9683,15 +9624,15 @@ class AdminDashboardController extends Controller
             foreach ($request->delivery as $booking_type_id => $shipping_modes) {
                 foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
                     CityDelivery::create([
-                        'city_id'=>$city->id,
-                        'booking_type_id'=>$booking_type_id,
-                        'shipping_mode_id'=>$shipping_mode_id,
+                        'city_id' => $city->id,
+                        'booking_type_id' => $booking_type_id,
+                        'shipping_mode_id' => $shipping_mode_id,
                     ]);
                 }
             }
 
             $zones = Zone::where('business_category_id', 1)->get();
-            foreach ($zones as $zone){
+            foreach ($zones as $zone) {
                 $zone_class_city = new ZoneClassCity();
 
                 $zone_class_city->zone_id = $zone->id;
@@ -9710,10 +9651,10 @@ class AdminDashboardController extends Controller
 
                 $zone_class_city->save();
             }
-            if($request->osa_name != null){
-            
+            if ($request->osa_name != null) {
+
                 foreach ($request->osa_name as $key => $value) {
-    
+
                     $osa_charges = new CityOsaRate();
                     $osa_charges->city_id = $city->id;
                     $osa_charges->osa_name = $value;
@@ -9723,17 +9664,17 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success','City added successfully');
-        }elseif($request->postType == 'hub'){
+            return redirect()->back()->with('success', 'City added successfully');
+        } elseif ($request->postType == 'hub') {
             $city = City::create([
-                'name'=>$request->cityName,
-                'city_code'=>$request->city_code,
-                'hub'=>1,
-                'zone_id'=>$request->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'gc_area'=>($request->has('gc_area'))? 1:0,
-                'attempt_tat'=>$request->attempt_tat,
-                'status'=>1,
+                'name' => $request->cityName,
+                'city_code' => $request->city_code,
+                'hub' => 1,
+                'zone_id' => $request->zone_id,
+                'pickup' => ($request->has('pickup')) ? 1 : 0,
+                'gc_area' => ($request->has('gc_area')) ? 1 : 0,
+                'attempt_tat' => $request->attempt_tat,
+                'status' => 1,
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
@@ -9742,13 +9683,13 @@ class AdminDashboardController extends Controller
             ]);
 
             CityHistory::create([
-                'city_id'=> $city->id,
-                'hub'=>1,
-                'zone_id'=>$request->zone_id,
-                'pickup'=>($request->has('pickup'))? 1:0,
-                'status'=>1,
-                'gc_area'=>($request->has('gc_area'))? 1:0,
-                'attempt_tat'=>$request->attempt_tat,
+                'city_id' => $city->id,
+                'hub' => 1,
+                'zone_id' => $request->zone_id,
+                'pickup' => ($request->has('pickup')) ? 1 : 0,
+                'status' => 1,
+                'gc_area' => ($request->has('gc_area')) ? 1 : 0,
+                'attempt_tat' => $request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
@@ -9757,7 +9698,7 @@ class AdminDashboardController extends Controller
                 'address' => $request->address
             ]);
 
-            if(!empty($request->walk_in_delivery)) {
+            if (!empty($request->walk_in_delivery)) {
                 foreach ($request->walk_in_delivery as $index => $delivery_walk_in) {
                     WalkInCities::create([
                         'city_id' => $city->id,
@@ -9767,20 +9708,20 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            City::where('id',$city->id)->update(['hub_id'=>$city->id]);
+            City::where('id', $city->id)->update(['hub_id' => $city->id]);
 
             foreach ($request->delivery as $booking_type_id => $shipping_modes) {
                 foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
                     CityDelivery::create([
-                        'city_id'=>$city->id,
-                        'booking_type_id'=>$booking_type_id,
-                        'shipping_mode_id'=>$shipping_mode_id,
+                        'city_id' => $city->id,
+                        'booking_type_id' => $booking_type_id,
+                        'shipping_mode_id' => $shipping_mode_id,
                     ]);
                 }
             }
 
             $zones = Zone::where('business_category_id', 1)->get();
-            foreach ($zones as $zone){
+            foreach ($zones as $zone) {
                 $zone_class_city = new ZoneClassCity();
 
                 $zone_class_city->zone_id = $zone->id;
@@ -9799,10 +9740,10 @@ class AdminDashboardController extends Controller
 
                 $zone_class_city->save();
             }
-            if($request->osa_name != null){
-            
+            if ($request->osa_name != null) {
+
                 foreach ($request->osa_name as $key => $value) {
-    
+
                     $osa_charges = new CityOsaRate();
                     $osa_charges->city_id = $city->id;
                     $osa_charges->osa_name = $value;
@@ -9811,69 +9752,69 @@ class AdminDashboardController extends Controller
                     $osa_charges->save();
                 }
             }
-            return redirect()->back()->with('success','Hub city added successfully');
+            return redirect()->back()->with('success', 'Hub city added successfully');
         }
     }
 
-    public function CityStatus(Request $request){
+    public function CityStatus(Request $request)
+    {
         $id = $request->cid; //city id
         $status = $request->status;
-        if($status == 'cityInactive'){
+        if ($status == 'cityInactive') {
             $city = City::find($id);
-            if($city->status == 1 && $city->hub == 1){
-                $citylist = City::where('hub_id',$id)->where('id','!=',$id)->where('status', 1)->count();
-                if($citylist == 0){
-                    City::where('id',$city->id)->update(['status'=>0]);
+            if ($city->status == 1 && $city->hub == 1) {
+                $citylist = City::where('hub_id', $id)->where('id', '!=', $id)->where('status', 1)->count();
+                if ($citylist == 0) {
+                    City::where('id', $city->id)->update(['status' => 0]);
                     $zone_cities = City::where('zone_id', $city->zone_id)->where('status', 1)->count();
-                    if($zone_cities == 0){
+                    if ($zone_cities == 0) {
                         $zone = Zone::find($city->zone_id);
                         $zone->status = 0;
                         $zone->save();
                     }
                     return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
-                }else{
+                } else {
                     return redirect()->route('admin.management.city')->with('error', 'There are some active cities in hub, please deactivate those cities first!');
                 }
-            }elseif ($city->status == 1){
+            } elseif ($city->status == 1) {
                 $city->status = 0;
                 $city->save();
                 return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
             }
-        }elseif($status == 'cityactive'){
+        } elseif ($status == 'cityactive') {
             $city = City::find($id);
             $zone = Zone::find($city->zone_id);
-            if($zone->status != 1){
+            if ($zone->status != 1) {
                 return redirect()->route('admin.management.city')->with('error', 'Please, activate or change Zone for city first!');
             }
-            if($city->hub == 1){
-                if($city->status == 0){
+            if ($city->hub == 1) {
+                if ($city->status == 0) {
                     $city->status = 1;
                     $city->save();
                     return redirect()->route('admin.management.city')->with('success', 'City is active now.');
                 }
-            }else{
-                $hub = City::where('id', $city->hub_id)->where('status','=', 1);
-                if($hub->exists()){
+            } else {
+                $hub = City::where('id', $city->hub_id)->where('status', '=', 1);
+                if ($hub->exists()) {
                     $city->status = 1;
                     $city->save();
                     return redirect()->route('admin.management.city')->with('success', 'City is active now.');
 
-                }else{
+                } else {
                     return redirect()->route('admin.management.city')->with('error', 'Please, activate or change hub for city first!');
 
                 }
             }
 
 
-
-            if($city->status == 0){
-                $action = City::where('id',$city->id)->update(['status'=>1]);
-                if($action == 1){
+            if ($city->status == 0) {
+                $action = City::where('id', $city->id)->update(['status' => 1]);
+                if ($action == 1) {
                     return redirect()->route('admin.management.city')->with('success', 'City is active now.');
-                }else{
+                } else {
                     return redirect()->route('admin.management.city')->with('danger', 'There is some problem please try again.');
                 }
-            }else{
+            } else {
                 return redirect()->route('admin.management.city')->with('danger', 'This city is already inactive.');
 
             }
@@ -9881,22 +9822,27 @@ class AdminDashboardController extends Controller
         return redirect()->route('admin.management.city')->with('danger', 'This city is already inactive.');
     }
 
-    public function CityStatusCheck($id){
-        $hubs = City::select('name')->where('hub_id',$id)->where('id','!=',$id)->where('status', 1)->get();
+    public function CityStatusCheck($id)
+    {
+        $hubs = City::select('name')->where('hub_id', $id)->where('id', '!=', $id)->where('status', 1)->get();
 
         return response()->json($hubs);
     }
+
     //route management
-    public function routeView(){
+    public function routeView()
+    {
         $route_type = RouteType::all();
-        $users = User::join('user_shipping_infos as usi','usi.user_id','=','users.id')->select('users.id','pickup_address','users.name','usi.id as address_id')->where('usi.status',1)->get();
-        return view('admin.management.route_management')->with(['users' => $users ,'route_type' =>$route_type]);
+        $users = User::join('user_shipping_infos as usi', 'usi.user_id', '=', 'users.id')->select('users.id', 'pickup_address', 'users.name', 'usi.id as address_id')->where('usi.status', 1)->get();
+        return view('admin.management.route_management')->with(['users' => $users, 'route_type' => $route_type]);
     }
-    public function routeListAjax(){
-        $routes = Route::join('cities','routes.city_id','=','cities.id')
-            ->leftjoin('route_types as rt','rt.id','=','routes.route_type_id')
-            ->leftjoin('riders','riders.route_id','=','routes.id')
-            ->select(['cities.name as city','routes.id as id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at','rt.id as route_type_id ','rt.name as route_type','riders.name as rider']);
+
+    public function routeListAjax()
+    {
+        $routes = Route::join('cities', 'routes.city_id', '=', 'cities.id')
+            ->leftjoin('route_types as rt', 'rt.id', '=', 'routes.route_type_id')
+            ->leftjoin('riders', 'riders.route_id', '=', 'routes.id')
+            ->select(['cities.name as city', 'routes.id as id', 'routes.code as code', 'routes.start', 'routes.end', 'routes.junction', 'routes.status as status', 'routes.created_at', 'rt.id as route_type_id ', 'rt.name as route_type', 'riders.name as rider']);
 
         if (session('role_id') != 1) {
             $routes = $routes->whereIn('cities.hub_id', session('hubs'));
@@ -9904,18 +9850,16 @@ class AdminDashboardController extends Controller
 
         return Datatables::of($routes)
             ->editColumn('status', function ($routes) {
-                return ($routes->status == 0)? 'Inactive': 'Active';
+                return ($routes->status == 0) ? 'Inactive' : 'Active';
             })
-            ->filterColumn('status', function($query, $keyword) {
+            ->filterColumn('status', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
                 if (strpos('active', $keyword) !== FALSE) {
                     $query->where('routes.status', '=', 1);
-                }
-                else if (strpos('inactive', $keyword) !== FALSE) {
+                } else if (strpos('inactive', $keyword) !== FALSE) {
                     $query->where('routes.status', '=', 0);
-                }
-                else {
+                } else {
                     $query->whereRaw('false');
                 }
             })
@@ -9934,8 +9878,7 @@ class AdminDashboardController extends Controller
                     if (session('role_id') == 1 || in_array(95, session('permissions'))) {
                         if ($result->status == 1) {
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Route</div></button>';
-                        }
-                        else {
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Route</div></button>';
                         }
                     }
@@ -9952,29 +9895,32 @@ class AdminDashboardController extends Controller
                     ';
 
                     return $dropdown;
-                }
-                else {
+                } else {
                     return '';
                 }
             })
             ->make(true);
     }
-    public function addRouteView(){
+
+    public function addRouteView()
+    {
         $route_types = RouteType::all();
-        $cities = City::where('business_category_id', 1)->select(['id','name'])->get();
-        $riders = Rider::where('status', 1)->select(['id','name'])->get();
-        return view('admin.management.add_route_form')->with(['cities'=>$cities,'riders' => $riders ,'route_types' => $route_types]);
+        $cities = City::where('business_category_id', 1)->select(['id', 'name'])->get();
+        $riders = Rider::where('status', 1)->select(['id', 'name'])->get();
+        return view('admin.management.add_route_form')->with(['cities' => $cities, 'riders' => $riders, 'route_types' => $route_types]);
     }
-    public function addRouteDetails(Request $request){
+
+    public function addRouteDetails(Request $request)
+    {
 
         //dd($request);
         $validations = [
-            'city_id'=>'required|numeric',
-            'route_code'=>'required',
-            'start'=>'required',
-            'route_type_id'=>'required',
-            'end'=>'required',
-            'junction'=>'required'
+            'city_id' => 'required|numeric',
+            'route_code' => 'required',
+            'start' => 'required',
+            'route_type_id' => 'required',
+            'end' => 'required',
+            'junction' => 'required'
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -9983,52 +9929,54 @@ class AdminDashboardController extends Controller
                 ->withErrors($validate);
         }
         $route = Route::create([
-            'city_id'=>$request->city_id,
-            'code'=>$request->route_code,
-            'start'=>$request->start,
-            'route_type_id'=>$request->route_type_id,
-            'end'=>$request->end,
-            'junction'=>$request->junction,
-            'status'=>1
+            'city_id' => $request->city_id,
+            'code' => $request->route_code,
+            'start' => $request->start,
+            'route_type_id' => $request->route_type_id,
+            'end' => $request->end,
+            'junction' => $request->junction,
+            'status' => 1
         ]);
-        if(Rider::where('route_id','=',$route->id)->exists()){
+        if (Rider::where('route_id', '=', $route->id)->exists()) {
             return redirect()->back()->with('error', 'Route id already exists !');
-        }
-        else{
+        } else {
             $rider_id = $request->rider_id;
             $rider = Rider::find($rider_id);
-            if($rider){
+            if ($rider) {
                 $rider->route_id = $route->id;
                 $rider->save();
             }
         }
-        return redirect()->back()->with('success','Route added successfully');
+        return redirect()->back()->with('success', 'Route added successfully');
     }
-    public function editRouteView($id){
-        $citylist = City::select(['id','name'])->get();
-        $riders = Rider::where('status',1)->select(['id','name'])->get();
+
+    public function editRouteView($id)
+    {
+        $citylist = City::select(['id', 'name'])->get();
+        $riders = Rider::where('status', 1)->select(['id', 'name'])->get();
         $route_types = RouteType::all();
-        $current_rider = Rider::where('route_id',$id);
-        if($current_rider->exists()){
+        $current_rider = Rider::where('route_id', $id);
+        if ($current_rider->exists()) {
             $current_rider = $current_rider->select('id')->first();
             $current_rider_id = $current_rider->id;
-        }
-        else{
+        } else {
             $current_rider_id = NULL;
         }
         $route = Route::find($id);
         $route_type_id = $route->route_type_id;
         $current_route_type_id = RouteType::find($route_type_id)->id;
-        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route,'riders' => $riders ,'current_rider_id' => $current_rider_id,'route_types' => $route_types,'current_route_type_id' => $current_route_type_id]);
+        return view('admin.management.edit_route_form')->with(['route_id' => $id, 'cities' => $citylist, 'route' => $route, 'riders' => $riders, 'current_rider_id' => $current_rider_id, 'route_types' => $route_types, 'current_route_type_id' => $current_route_type_id]);
     }
-    public function editRouteDetails(Request $request, $id){
+
+    public function editRouteDetails(Request $request, $id)
+    {
         $validations = [
-            'city_id'=>'required|numeric',
-            'route_code'=>'required',
-            'start'=>'required',
-            'end'=>'required',
-            'route_type_id'=>'required',
-            'junction'=>'required'
+            'city_id' => 'required|numeric',
+            'route_code' => 'required',
+            'start' => 'required',
+            'end' => 'required',
+            'route_type_id' => 'required',
+            'junction' => 'required'
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -10036,19 +9984,19 @@ class AdminDashboardController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
-        $route = Route::where('id',$id)->update([
-            'city_id'=>$request->city_id,
-            'code'=>$request->route_code,
-            'start'=>$request->start,
-            'end'=>$request->end,
-            'route_type_id'=>$request->route_type_id,
-            'junction'=>$request->junction,
+        $route = Route::where('id', $id)->update([
+            'city_id' => $request->city_id,
+            'code' => $request->route_code,
+            'start' => $request->start,
+            'end' => $request->end,
+            'route_type_id' => $request->route_type_id,
+            'junction' => $request->junction,
         ]);
 
         $existing_riders = Rider::where('route_id', $id);
-        if($existing_riders->exists()){
-            $existing_riders= $existing_riders->get();
-            foreach ($existing_riders as $existing_rider){
+        if ($existing_riders->exists()) {
+            $existing_riders = $existing_riders->get();
+            foreach ($existing_riders as $existing_rider) {
                 $existing_rider->route_id = null;
                 $existing_rider->save();
             }
@@ -10058,45 +10006,51 @@ class AdminDashboardController extends Controller
 //            return redirect()->back()->with('success', 'Details Updated !');
 //        }
 //        else{
-            $rider_id = $request->rider_id;
-            $rider = Rider::find($rider_id);
-            if($rider){
-                $rider->route_id = $id;
-                $rider->save();
-            }
+        $rider_id = $request->rider_id;
+        $rider = Rider::find($rider_id);
+        if ($rider) {
+            $rider->route_id = $id;
+            $rider->save();
+        }
 //        }
-        return redirect()->back()->with('success','Route updated successfully');
+        return redirect()->back()->with('success', 'Route updated successfully');
     }
-    public function routeStatus(Request $request){
+
+    public function routeStatus(Request $request)
+    {
         $id = $request->cid;
         $status = $request->status;
 //        return $id;
-        if($status == 'routeActive'){
-            $route = Route::where('id',$id)->update(['status'=>1]);
-            if($route){
-                return redirect()->back()->with('success','Route is activated successfully');
+        if ($status == 'routeActive') {
+            $route = Route::where('id', $id)->update(['status' => 1]);
+            if ($route) {
+                return redirect()->back()->with('success', 'Route is activated successfully');
             }
-        }else if($status == 'routeInactive'){
-            Route::where('id',$id)->update(['status'=>0]);
-            return redirect()->back()->with('success','Route is now inactive');
+        } else if ($status == 'routeInactive') {
+            Route::where('id', $id)->update(['status' => 0]);
+            return redirect()->back()->with('success', 'Route is now inactive');
 
         }
 
     }
-    public function riderView(){
+
+    public function riderView()
+    {
         //$route_types = RouteType::all();
         $category = RiderCategory::all();
-        return view('admin.management.rider_management')->with(['categories'=>$category/*,'route_types' =>$route_types*/]);
+        return view('admin.management.rider_management')->with(['categories' => $category/*,'route_types' =>$route_types*/]);
     }
-    public function riderListAjax(){
 
-        $rider = Rider::join('cities','riders.city_id','=','cities.id')
-            ->join('cities as c','cities.hub_id','=','c.id')
-            ->join('routes','routes.id','=','riders.route_id')
-            ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
+    public function riderListAjax()
+    {
+
+        $rider = Rider::join('cities', 'riders.city_id', '=', 'cities.id')
+            ->join('cities as c', 'cities.hub_id', '=', 'c.id')
+            ->join('routes', 'routes.id', '=', 'riders.route_id')
+            ->join('rider_categories', 'rider_categories.id', '=', 'riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
-            ->select(['cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic',                'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as                           status','riders.created_at','cb.name as created_by', 'ub.name as updated_by']);
+            ->select(['cities.name as city', 'c.name as hub', 'riders.id as rider_id', 'riders.id', 'riders.name as rider', 'riders.trax_id', 'riders.phone', 'riders.cnic', 'riders.address', 'routes.code as route', 'routes.start', 'routes.end', 'rider_categories.name as category', 'riders.status as                           status', 'riders.created_at', 'cb.name as created_by', 'ub.name as updated_by']);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
@@ -10104,27 +10058,24 @@ class AdminDashboardController extends Controller
 
         return Datatables::of($rider)
             ->editColumn('status', function ($rider) {
-                return ($rider->status == 0)? 'Inactive': 'Active';
+                return ($rider->status == 0) ? 'Inactive' : 'Active';
             })
             ->editColumn('trax_id', function ($rider) {
-                if($rider->trax_id != null){
+                if ($rider->trax_id != null) {
                     return $rider->trax_id;
-                }
-                else{
+                } else {
                     return '-';
                 }
 
             })
             ->editColumn('route', function ($rider) {
-                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+                return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
             })
-            ->filterColumn('route',function($query, $keyword){
+            ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
-                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
-                }
-
-                else {
+                    $query->where('routes.code', 'like', '%' . $keyword . '%')->orWhere('routes.start', 'like', '%' . $keyword . '%')->orWhere('routes.end', 'like', '%' . $keyword . '%');
+                } else {
                     $query->whereRaw('false');
                 }
             })
@@ -10143,8 +10094,7 @@ class AdminDashboardController extends Controller
                     if (session('role_id') == 1 || in_array(99, session('permissions'))) {
                         if ($rider->status == 1) {
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
-                        }
-                        else {
+                        } else {
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
                         }
                     }
@@ -10155,22 +10105,25 @@ class AdminDashboardController extends Controller
                     ';
 
                     return $dropdown;
-                }
-                else {
+                } else {
                     return '';
                 }
             })
             ->make(true);
     }
-    public function addRiderView(){
-        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
+
+    public function addRiderView()
+    {
+        $city = City::where('business_category_id', 1)->select(['id', 'name'])->get();
         $route_types = RouteType::all();
         $category = RiderCategory::all();
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types]);
+        return view('admin.management.add_rider_form')->with(['cities' => $city, 'categories' => $category, 'route_types' => $route_types]);
     }
-    public function categoryListAjax(Request $request){
+
+    public function categoryListAjax(Request $request)
+    {
         $city_id = $request->id;
-        $route = Route::select(['id','code','start','end'])->where('city_id',$city_id)->where('status',1);
+        $route = Route::select(['id', 'code', 'start', 'end'])->where('city_id', $city_id)->where('status', 1);
 
         if (session('role_id') != 1) {
             $route = $route->whereHas('city', function ($query) {
@@ -10182,16 +10135,18 @@ class AdminDashboardController extends Controller
 
         return response()->json($route);
     }
-    public function addRiderDetails(Request $request){
+
+    public function addRiderDetails(Request $request)
+    {
 
         $validations = [
-            'city_id'=>'required|numeric',
-            'rider_name'=>'required|max:255',
-            'phone'=>'required|max:255',
-            'cnic'=>'required|max:255',
-            'address'=>'required|max:255',
-            'route_id'=>'required|numeric',
-            'rider_category'=>'required|numeric',
+            'city_id' => 'required|numeric',
+            'rider_name' => 'required|max:255',
+            'phone' => 'required|max:255',
+            'cnic' => 'required|max:255',
+            'address' => 'required|max:255',
+            'route_id' => 'required|numeric',
+            'rider_category' => 'required|numeric',
             'pin' => 'required|numeric',
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -10202,54 +10157,57 @@ class AdminDashboardController extends Controller
         }
         $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-        if($global_setting->exists()){
+        if ($global_setting->exists()) {
             $global_setting = $global_setting->first();
             $trax_id = $global_setting->setting_value + 1;
             $global_setting->setting_value = $trax_id;
             $global_setting->save();
-            $trax_id = 'Trax'. str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-        }
-        else{
+            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+        } else {
             $trax_id = null;
         }
         $rider = Rider::create([
-            'city_id'=>$request->city_id,
-            'name'=>$request->rider_name,
-            'phone'=>$request->phone,
-            'cnic'=>$request->cnic,
-            'address'=>$request->address,
-            'route_id'=>$request->route_id,
-            'rider_category_id'=>$request->rider_category,
-            'status'=>1,
-            'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
-            'pin'=> bcrypt($request->pin),
+            'city_id' => $request->city_id,
+            'name' => $request->rider_name,
+            'phone' => $request->phone,
+            'cnic' => $request->cnic,
+            'address' => $request->address,
+            'route_id' => $request->route_id,
+            'rider_category_id' => $request->rider_category,
+            'status' => 1,
+            'special_rider' => ($request->has('special_rider_checkbox') ? 1 : 0),
+            'pin' => bcrypt($request->pin),
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
         ]);
-        if($rider){
+        if ($rider) {
             NotificationsController::send(61, $rider->id, $request->pin);
-            return redirect()->back()->with('success','Rider added successfully');
+            return redirect()->back()->with('success', 'Rider added successfully');
         }
 
     }
-    public function editRiderView($id){
-        $city = City::where('business_category_id', 1)->select(['id','name'])->get();
+
+    public function editRiderView($id)
+    {
+        $city = City::where('business_category_id', 1)->select(['id', 'name'])->get();
         $category = RiderCategory::all();
         $rider = Rider::find($id);
         $route_types = RouteType::all();
-        $route = Route::where('city_id',$rider->city_id)->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types]);
+        $route = Route::where('city_id', $rider->city_id)->get();
+        return view('admin.management.edit_rider_form')->with(['rider_id' => $id, 'cities' => $city, 'categories' => $category, 'rider' => $rider, 'routes' => $route, 'route_types' => $route_types]);
     }
-    public function editRiderDetails(Request $request,$id){
+
+    public function editRiderDetails(Request $request, $id)
+    {
 
         $validations = [
-            'city_id'=>'required|numeric',
-            'rider_name'=>'required|max:255',
-            'phone'=>'required|max:255',
-            'cnic'=>'required|max:255',
-            'address'=>'required|max:255',
-            'route_id'=>'required|numeric',
-            'rider_category'=>'required|numeric'
+            'city_id' => 'required|numeric',
+            'rider_name' => 'required|max:255',
+            'phone' => 'required|max:255',
+            'cnic' => 'required|max:255',
+            'address' => 'required|max:255',
+            'route_id' => 'required|numeric',
+            'rider_category' => 'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -10279,14 +10237,14 @@ class AdminDashboardController extends Controller
 
         $rider->rider_category_id = $request->rider_category;
 
-        if($request->has('special_rider_checkbox')){
+        if ($request->has('special_rider_checkbox')) {
             $rider->special_rider = 1;
-        }else{
+        } else {
             $rider->special_rider = 0;
         }
 
-        if($request->pin != '') {
-            if($rider->dummy_pin != $request->pin) {
+        if ($request->pin != '') {
+            if ($rider->dummy_pin != $request->pin) {
                 $rider->pin = bcrypt($request->pin);
                 $rider->dummy_pin = $request->pin;
 
@@ -10296,35 +10254,36 @@ class AdminDashboardController extends Controller
         $rider->updated_by = Auth::id();
         $rider->save();
 
-        if($rider){
-            return redirect()->back()->with('success','Rider updated successfully');
+        if ($rider) {
+            return redirect()->back()->with('success', 'Rider updated successfully');
         }
     }
 
-    public function riderStatus(Request $request){
+    public function riderStatus(Request $request)
+    {
         $id = $request->cid;
         $status = $request->status;
-        if($status == 'riderActive'){
-            $rider = Rider::where('id',$id)->update(['status'=>1,'updated_by'=>Auth::id()]);
-            if($rider){
-                return redirect()->back()->with('success','Rider is activated successfully');
+        if ($status == 'riderActive') {
+            $rider = Rider::where('id', $id)->update(['status' => 1, 'updated_by' => Auth::id()]);
+            if ($rider) {
+                return redirect()->back()->with('success', 'Rider is activated successfully');
             }
-        }else if($status == 'riderInactive'){
-            $rider =Rider::where('id',$id)->update(['status'=>0, 'route_id' => null,'updated_by'=>Auth::id()]);
-            if($rider){
-                return redirect()->back()->with('success','Rider is now inactive');
+        } else if ($status == 'riderInactive') {
+            $rider = Rider::where('id', $id)->update(['status' => 0, 'route_id' => null, 'updated_by' => Auth::id()]);
+            if ($rider) {
+                return redirect()->back()->with('success', 'Rider is now inactive');
             }
 
         }
 
     }
 
-    public function rider_phone_unique(Request $request) {
+    public function rider_phone_unique(Request $request)
+    {
         if ($request->filled('phone')) {
             if ($request->input('phone') == '0213-8772222') {
                 return 'true';
-            }
-            else {
+            } else {
                 $rider = Rider::where('phone', $request->input('phone'));
 
                 if ($request->has('id')) {
@@ -10333,24 +10292,23 @@ class AdminDashboardController extends Controller
 
                 if (!$rider->exists()) {
                     return 'true';
-                }
-                else {
+                } else {
                     return 'false';
                 }
             }
-        }
-        else {
+        } else {
             return 'true';
         }
     }
 
-    public function add_notification_emails(Request $request){
+    public function add_notification_emails(Request $request)
+    {
         $emails = $request->email_address;
-        if($emails != ''){
+        if ($emails != '') {
             $email_address = explode(',', $emails);
             $user = $request->add_shipper_id;
-            ShipperNotificationEmail::where('user_id',$user)->delete();
-            foreach ($email_address as $email){
+            ShipperNotificationEmail::where('user_id', $user)->delete();
+            foreach ($email_address as $email) {
 
                 $shipper_notification_email = new ShipperNotificationEmail();
                 $shipper_notification_email->user_id = $user;
@@ -10360,35 +10318,36 @@ class AdminDashboardController extends Controller
             }
             return redirect()->back()->with('success', 'Email Address Added.');
 
-        }
-        else{
+        } else {
             return back()->with('danger', 'There is no email selected!');
         }
     }
-    public function edit_notification_emails(Request $request){
+
+    public function edit_notification_emails(Request $request)
+    {
 
         $emails = $request->email_address;
-        if($emails != ''){
+        if ($emails != '') {
             $email_address = explode(',', $emails);
             $user = $request->edit_shipper_id;
-            foreach ($email_address as $email){
-                if(!ShipperNotificationEmail::where('user_id',$user)->where('email','=',$email)->exists()){
+            foreach ($email_address as $email) {
+                if (!ShipperNotificationEmail::where('user_id', $user)->where('email', '=', $email)->exists()) {
                     $shipper_notification_email = new ShipperNotificationEmail();
                     $shipper_notification_email->user_id = $user;
                     $shipper_notification_email->email = $email;
                     $shipper_notification_email->save();
                 }
             }
-            ShipperNotificationEmail::where('user_id',$user)->whereNotIn('email',$email_address)->delete();
+            ShipperNotificationEmail::where('user_id', $user)->whereNotIn('email', $email_address)->delete();
             return redirect()->back()->with('success', 'Email Address updated.');
 
-        }
-        else{
+        } else {
             return back()->with('danger', 'There is no email selected!');
         }
     }
 
-    public function walk_in_city_list(){
+    public function walk_in_city_list()
+    {
         $cities = City::select('id', 'name')->get();
         $walk_in_cities = WalkInCities::all();
         $shipping_modes = ShippingMode::where('id', '<', 4)->get();
@@ -10397,8 +10356,9 @@ class AdminDashboardController extends Controller
         return view('admin.management.walk_in_city_list')->with(['cities' => $cities, 'walk_in_cities' => $walk_in_cities, 'shipping_modes' => $shipping_modes, 'pickup_cities' => $pickup_cities, 'delivery_types' => $delivery_types]);
     }
 
-    public function check_min_charges(Request $request){
-        if($request->pickup_city != null && $request->consignee_city != null) {
+    public function check_min_charges(Request $request)
+    {
+        if ($request->pickup_city != null && $request->consignee_city != null) {
             $min_charges = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
             if ($request->pickup_city == $request->consignee_city) {
                 $min_charges = $min_charges['chargeable_weight_local'];
@@ -10419,95 +10379,93 @@ class AdminDashboardController extends Controller
         }
     }
 
-    public function add_sister_account_view(Request $request){
+    public function add_sister_account_view(Request $request)
+    {
         $user = User::leftjoin('cities as c', 'c.id', '=', 'users.city_id')->leftjoin('products as p', 'p.id', '=', 'users.product_id')->leftjoin('sale_person_tags as spt', 'spt.user_id', '=', 'users.id')->leftjoin('admins as a', 'a.id', '=', 'spt.admin_id')->select('users.id as id', 'users.name as company_name', 'c.name as city', 'users.poc as contact_name', 'users.phone as phone', 'users.address as address', 'users.email as email', 'users.status as status', 'p.product_name as product_type', 'a.name as tagged_to')->where('users.id', $request->id)->first();
         return view('admin.accounts.sister_accounts.add')->with(['first_account' => $user]);
     }
 
-    public function get_account_info(Request $request){
+    public function get_account_info(Request $request)
+    {
         $user_id = $request->id;
         $check_user = User::where('id', $user_id);
-        if($check_user->exists()){
+        if ($check_user->exists()) {
             $check_user = $check_user->first();
-            if($check_user->blacklist == 0){
+            if ($check_user->blacklist == 0) {
                 $check_merged_accounts = MergedSisterAccount::where('user_id', $user_id);
 
-                if(!$check_merged_accounts->exists()){
+                if (!$check_merged_accounts->exists()) {
                     $user = User::leftjoin('cities as c', 'c.id', '=', 'users.city_id')->leftjoin('products as p', 'p.id', '=', 'users.product_id')->leftjoin('sale_person_tags as spt', 'spt.user_id', '=', 'users.id')->leftjoin('admins as a', 'a.id', '=', 'spt.admin_id')->select('users.id as id', 'users.name as company_name', 'c.name as city', 'users.poc as contact_name', 'users.phone as phone', 'users.address as address', 'users.email as email', 'users.status as status', 'p.product_name as product_type', 'a.name as tagged_to')->where('users.id', $request->id)->first();
 
                     return ['status' => 0, 'info' => $user];
-                }
-                else{
+                } else {
                     return ['status' => 1, 'error' => "Already registered as a sister account"];
                 }
-            }
-            else{
+            } else {
                 return ['status' => 1, 'error' => "Account ID is blocked!"];
             }
-        }
-        else{
+        } else {
             return ['status' => 1, 'error' => "Account ID does'nt exists!"];
         }
     }
 
-    public function add_sister_account_submit(Request $request){
-        $account_ids = explode(',',$request->account_ids);
-        if(count($account_ids) > 1){
+    public function add_sister_account_submit(Request $request)
+    {
+        $account_ids = explode(',', $request->account_ids);
+        if (count($account_ids) > 1) {
             $merge_account_head = new MergedAccountHead();
             $merge_account_head->name = $request->group_name;
             $merge_account_head->created_by = Auth::id();
             $merge_account_head->save();
-            foreach ($account_ids as $index => $account_id){
+            foreach ($account_ids as $index => $account_id) {
                 $sister_account = new MergedSisterAccount();
                 $sister_account->merged_head_id = $merge_account_head->id;
                 $sister_account->user_id = $account_id;
                 $sister_account->save();
 
-                foreach ($account_ids as $notify_index => $notify_account_id){
-                    if($index != $notify_index){
+                foreach ($account_ids as $notify_index => $notify_account_id) {
+                    if ($index != $notify_index) {
                         NotificationsController::send(36, $notify_account_id, $account_id);
                     }
                 }
             }
-            return redirect()->route('admin.accounts.merged_account.index')->with(['success'=>"Accounts merged successfully."]);
-        }
-        else{
+            return redirect()->route('admin.accounts.merged_account.index')->with(['success' => "Accounts merged successfully."]);
+        } else {
             return redirect()->back()->with('error', "Sister accounts are not selected!");
         }
     }
 
-    public function merged_accounts_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),277);
+    public function merged_accounts_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 277);
         return view('admin.accounts.sister_accounts.merged_accounts.index');
     }
-    public function merged_accounts_list(Request $request){
 
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),278);
+    public function merged_accounts_list(Request $request)
+    {
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 278);
         }
 
         $merged_accounts = MergedAccountHead::leftjoin('admins as ac', 'ac.id', '=', 'merged_account_heads.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'merged_account_heads.updated_by')
             ->select('merged_account_heads.id as id', 'merged_account_heads.name as name', 'merged_account_heads.created_at as created_at', 'merged_account_heads.updated_at as updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('(select count(id) from merged_sister_accounts where merged_sister_accounts.merged_head_id = merged_account_heads.id) as accounts'));
         return Datatables::of($merged_accounts)
-
-            ->editColumn('accounts_button', function ($users){
+            ->editColumn('accounts_button', function ($users) {
                 return '<div class="text-center"><button type="button" class="btn btn-sm btn-outline-info accounts_button">' . $users->accounts . '</button></div>';
             })
-            ->editColumn('updated_by', function($users){
-                if($users->updated_by != null){
+            ->editColumn('updated_by', function ($users) {
+                if ($users->updated_by != null) {
                     return $users->updated_by;
-                }
-                else{
+                } else {
                     return "-";
                 }
             })
-            ->editColumn('updated_at', function($users){
-                if($users->updated_by != null){
+            ->editColumn('updated_at', function ($users) {
+                if ($users->updated_by != null) {
                     return $users->updated_at;
-                }
-                else{
+                } else {
                     return "-";
                 }
             })
@@ -10535,7 +10493,8 @@ class AdminDashboardController extends Controller
 
     }
 
-    public function merged_accounts_info(Request $request){
+    public function merged_accounts_info(Request $request)
+    {
         $merged_head_id = $request->id;
         $accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')
             ->leftjoin('cities as c', 'c.id', '=', 'u.city_id')
@@ -10545,59 +10504,64 @@ class AdminDashboardController extends Controller
         return response(['accounts' => $accounts]);
     }
 
-    public function edit_sister_account_view(Request $request){
+    public function edit_sister_account_view(Request $request)
+    {
         $group_name = MergedAccountHead::where('id', $request->id)->first();
         $merged_accounts = MergedAccountHead::leftjoin('merged_sister_accounts as msa', 'msa.merged_head_id', '=', 'merged_account_heads.id')->leftjoin('users as u', 'u.id', '=', 'msa.user_id')->leftjoin('cities as c', 'c.id', '=', 'u.city_id')->leftjoin('products as p', 'p.id', '=', 'u.product_id')->leftjoin('sale_person_tags as spt', 'spt.user_id', '=', 'u.id')->leftjoin('admins as a', 'a.id', '=', 'spt.admin_id')->select('u.id as id', 'u.name as company_name', 'c.name as city', 'u.poc as contact_name', 'u.phone as phone', 'u.address as address', 'u.email as email', 'u.status as status', 'p.product_name as product_type', 'a.name as tagged_to')->where('merged_account_heads.id', $request->id)->groupBy('u.id')->get();
         return view('admin.accounts.sister_accounts.edit')->with(['merged_accounts' => $merged_accounts, 'group_name' => $group_name]);
     }
-    public function edit_sister_account_submit(Request $request){
-        $account_ids = explode(',',$request->account_ids);
+
+    public function edit_sister_account_submit(Request $request)
+    {
+        $account_ids = explode(',', $request->account_ids);
         $merged_accounts = MergedSisterAccount::where('merged_head_id', $request->merged_id)->pluck('user_id')->toArray();
         $new_merged = array_diff($account_ids, $merged_accounts);
         $remove_merged = array_diff($merged_accounts, $account_ids);
         $previous_accounts = array_diff($merged_accounts, $new_merged, $remove_merged);
-        if(count($account_ids) > 1){
+        if (count($account_ids) > 1) {
             $merge_account_head = MergedAccountHead::where('id', $request->merged_id)->first();
             $merge_account_head->name = $request->group_name;
             $merge_account_head->updated_by = Auth::id();
             $merge_account_head->save();
             MergedSisterAccount::where('merged_head_id', $merge_account_head->id)->whereIn('user_id', $remove_merged)->delete();
-            foreach($remove_merged as $remove_account_id){
-                foreach ($previous_accounts as $previous){
+            foreach ($remove_merged as $remove_account_id) {
+                foreach ($previous_accounts as $previous) {
                     NotificationsController::send(37, $previous, $remove_account_id);
                 }
             }
-            foreach ($new_merged as $account_id){
+            foreach ($new_merged as $account_id) {
                 $sister_account = new MergedSisterAccount();
                 $sister_account->merged_head_id = $merge_account_head->id;
                 $sister_account->user_id = $account_id;
                 $sister_account->save();
-                foreach ($previous_accounts as $previous){
+                foreach ($previous_accounts as $previous) {
                     NotificationsController::send(36, $previous, $account_id);
                 }
             }
 
             return redirect()->route('admin.accounts.merged_account.index')->with('success', "Sister accounts updated successfully!");
-        }
-        else{
+        } else {
             return redirect()->back()->with('error', "Sister accounts are not selected!");
         }
     }
 
-    public function merged_accounts_mapping_info(Request $request){
+    public function merged_accounts_mapping_info(Request $request)
+    {
         $merged_accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')->select('u.id as id', 'u.name as company_name')->where('merged_sister_accounts.merged_head_id', $request->id)->get();
         $merged_mapping = MergedSisterAccountMapping::where('merged_head_id', $request->id)->select('head_user_id', 'sister_user_id')->get();
         return response(['merged_accounts' => $merged_accounts, 'merged_mapping' => $merged_mapping]);
     }
-    public function merged_accounts_mapping_submit(Request $request){
+
+    public function merged_accounts_mapping_submit(Request $request)
+    {
         $merged_account = MergedAccountHead::where('id', $request->id)->first();
         $merged_account->updated_by = Auth::id();
         $merged_account->save();
         MergedSisterAccountMapping::where('merged_head_id', $merged_account->id)->delete();
-        if($request->has('sister_account')){
-            foreach ($request->sister_account as $index => $account){
+        if ($request->has('sister_account')) {
+            foreach ($request->sister_account as $index => $account) {
                 foreach ($request->sister_account[$index] as $sub_index => $switch) {
-                    if($switch == "on"){
+                    if ($switch == "on") {
                         $new_mapping = new MergedSisterAccountMapping();
                         $new_mapping->merged_head_id = $merged_account->id;
                         $new_mapping->head_user_id = $index;
@@ -10607,52 +10571,55 @@ class AdminDashboardController extends Controller
                 }
             }
             return redirect()->back()->with('success', "Mapping updated successfully!");
-        }
-        else{
+        } else {
             return redirect()->back()->with('success', "Mapping updated successfully!");
         }
     }
 
-    public function warehousing_active(Request $request){
+    public function warehousing_active(Request $request)
+    {
         $shipper = User::find($request->id);
-        if($shipper && ($shipper->warehousing == 0)){
+        if ($shipper && ($shipper->warehousing == 0)) {
             $shipper->warehousing = 1;
             $shipper->save();
 
             return response()->json(['status' => 1, 'success' => 'Warehousing activated successfully!']);
-        }else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Warehousing already activated!']);
         }
     }
-    public function warehousing_inactive(Request $request){
+
+    public function warehousing_inactive(Request $request)
+    {
         $shipper = User::find($request->id);
-        if($shipper && ($shipper->warehousing == 1)){
+        if ($shipper && ($shipper->warehousing == 1)) {
             $shipper->warehousing = 0;
             $shipper->save();
 
             return response()->json(['status' => 1, 'success' => 'Warehousing deactivated successfully!']);
-        }else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'Warehousing already deactivated!']);
         }
     }
 
-    public function update_profile_password(Request $request){
+    public function update_profile_password(Request $request)
+    {
         return view('admin.profile.change_password');
     }
 
-    public function update_profile_password_submit(Request $request){
+    public function update_profile_password_submit(Request $request)
+    {
         $request->validate([
             'password' => 'required|string|min:4',
         ]);
-        if($request->password == $request->confirm_password){
-            $admin = Admin::where('id',Auth::id());
+        if ($request->password == $request->confirm_password) {
+            $admin = Admin::where('id', Auth::id());
 
-            $admin->update(['password' => Hash::make($request->password),'dummy_pin' => $request->password , 'updated_by' => Auth::id()]);
+            $admin->update(['password' => Hash::make($request->password), 'dummy_pin' => $request->password, 'updated_by' => Auth::id()]);
 
             $admin = $admin->first();
-            $employee = Employee::where('trax_id',$admin->trax_id)->where('trax_id','!=',null);
-            if($employee->exists())
-            {
+            $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);
+            if ($employee->exists()) {
                 $employee = $employee->first();
                 $employee->pin = $admin->dummy_pin;
                 $employee->update();
@@ -10662,54 +10629,51 @@ class AdminDashboardController extends Controller
 //                session(['first_login' => 1]);
 //                Admin::where('id',Auth::id())->update(['first_login' => 1]);
 //            }
-            return redirect()->back()->with(['success'=>"Pin Updated Successfully!"]);
-        }
-        else{
-            return redirect()->back()->with(['error'=>"The pin and confirmation pin do not match!"]);
+            return redirect()->back()->with(['success' => "Pin Updated Successfully!"]);
+        } else {
+            return redirect()->back()->with(['error' => "The pin and confirmation pin do not match!"]);
         }
     }
 
-    public function userDocuments($id){
+    public function userDocuments($id)
+    {
         $documents = UserDocumentAttachment::where('user_id', $id)->first();
 
         $user = User::find($id);
-        if($documents == null){
+        if ($documents == null) {
             $documents = false;
         }
         return view('admin.profile.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status, 'shipper' => $user->name]);
     }
 
-    public function viewUserDocuments($id, $check, $pdf){
+    public function viewUserDocuments($id, $check, $pdf)
+    {
         $user_documents = UserDocumentAttachment::where('user_id', $id)->first();
-        if($check == 'filled_and_signed_pdf'){
+        if ($check == 'filled_and_signed_pdf') {
             $file = $user_documents->filled_and_signed_pdf;
-        }
-        elseif ($check == 'signed_acknowledgement_pdf'){
+        } elseif ($check == 'signed_acknowledgement_pdf') {
             $file = $user_documents->signed_acknowledgement_pdf;
-        }
-        elseif ($check == 'cnic_front_image'){
+        } elseif ($check == 'cnic_front_image') {
             $file = $user_documents->cnic_front_image;
-        }
-        elseif ($check == 'cnic_back_image'){
+        } elseif ($check == 'cnic_back_image') {
             $file = $user_documents->cnic_back_image;
-        }
-        elseif ($check == 'blank_cheque_image'){
+        } elseif ($check == 'blank_cheque_image') {
             $file = $user_documents->blank_cheque_image;
-        }
-        elseif ($check == 'e_sign_image'){
+        } elseif ($check == 'e_sign_image') {
             $file = $user_documents->e_sign_image;
-        }
-        else{
+        } else {
             return redirect()->back()->with('error', 'File not found!');
         }
-        $url = Storage::url('users_attached_documents/' . $id . '/'. $file);
+        $url = Storage::url('users_attached_documents/' . $id . '/' . $file);
         return view('admin.profile.documents_view')->with(['url' => $url, 'pdf' => $pdf]);
     }
-    public function approveDocuments($id, $approve, $reason){
+
+    public function approveDocuments($id, $approve, $reason)
+    {
 
         $user = User::find($id);
-        $user_document = UserDocumentAttachment::where('user_id',$id)->first();
-        if($approve == 1){
+        $user_document = UserDocumentAttachment::where('user_id', $id)->first();
+        if ($approve == 1) {
             $user->documents_status = 2;
             $user->documents_status_reason = null;
             $user->save();
@@ -10718,8 +10682,7 @@ class AdminDashboardController extends Controller
             $user_document->save();
             return redirect()->back()->with(['success' => 'Files approved successfully']);
 
-        }
-        else if($approve == 0){
+        } else if ($approve == 0) {
             $user->documents_status = 3;
             $user->documents_status_reason = $reason;
             $user->save();
@@ -10727,22 +10690,24 @@ class AdminDashboardController extends Controller
             $user_document->rejected_by = Auth::id();
             $user_document->save();
             return redirect()->back()->with(['success' => 'Files rejected successfully']);
-        }
-        else{
+        } else {
             return redirect()->back()->with(['error' => 'Something went wrong']);
         }
 
     }
-    public function userDocumentsEdit(Request $request){
+
+    public function userDocumentsEdit(Request $request)
+    {
         $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
-        if($user_attachment){
+        if ($user_attachment) {
             return response()->json(['status' => 1, 'user_attachment' => $user_attachment]);
-        }
-        else{
+        } else {
             return response()->json(['status' => 0]);
         }
     }
-    public function uploadDocuments(Request $request){
+
+    public function uploadDocuments(Request $request)
+    {
         $validation = [
             'filled_and_signed_pdf' => 'mimes:pdf|max:5120',
             'signed_acknowledgement_pdf' => 'mimes:pdf|max:5120',
@@ -10757,91 +10722,90 @@ class AdminDashboardController extends Controller
         }
         $date = Carbon::now()->format('Y_m_d');
         $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
-        if($user_attachment){
+        if ($user_attachment) {
             if ($request->hasFile('filled_and_signed_pdf')) {
-                if($user_attachment->filled_and_signed_pdf != NULL) {
+                if ($user_attachment->filled_and_signed_pdf != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
                 }
-                $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
+                $filename = 'filled_and_signed_pdf_' . $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('filled_and_signed_pdf');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $user_attachment->filled_and_signed_pdf = $filename;
             }
             if ($request->hasFile('signed_acknowledgement_pdf')) {
-                if($user_attachment->signed_acknowledgement_pdf != NULL) {
+                if ($user_attachment->signed_acknowledgement_pdf != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->signed_acknowledgement_pdf);
                 }
-                $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
+                $filename = 'signed_acknowledgement_pdf_' . $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $user_attachment->signed_acknowledgement_pdf = $filename;
             }
             if ($request->hasFile('cnic_front_image')) {
-                if($user_attachment->cnic_front_image != NULL) {
+                if ($user_attachment->cnic_front_image != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_front_image);
                 }
-                $filename = 'cnic_front_image_'. $date . '_' . $request->user_id . '.png';
+                $filename = 'cnic_front_image_' . $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_front_image');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $user_attachment->cnic_front_image = $filename;
             }
             if ($request->hasFile('cnic_back_image')) {
-                if($user_attachment->cnic_back_image != NULL) {
+                if ($user_attachment->cnic_back_image != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_back_image);
                 }
-                $filename = 'cnic_back_image_'. $date . '_' . $request->user_id . '.png';
+                $filename = 'cnic_back_image_' . $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_back_image');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $user_attachment->cnic_back_image = $filename;
             }
             if ($request->hasFile('blank_cheque_image')) {
-                if($user_attachment->blank_cheque_image != NULL) {
+                if ($user_attachment->blank_cheque_image != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->blank_cheque_image);
                 }
-                $filename = 'blank_cheque_image_'. $date . '_' . $request->user_id . '.png';
+                $filename = 'blank_cheque_image_' . $date . '_' . $request->user_id . '.png';
                 $file = $request->file('blank_cheque_image');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $user_attachment->blank_cheque_image = $filename;
             }
             $user_attachment->uploaded_at = Carbon::now();
             $user_attachment->uploaded_by = Auth::id();
             $user_attachment->save();
-        }
-        else{
+        } else {
 
             $new_user_attachment = new UserDocumentAttachment();
             if ($request->hasFile('filled_and_signed_pdf')) {
-                $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
+                $filename = 'filled_and_signed_pdf_' . $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('filled_and_signed_pdf');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $new_user_attachment->filled_and_signed_pdf = $filename;
             }
 
             if ($request->hasFile('signed_acknowledgement_pdf')) {
-                $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
+                $filename = 'signed_acknowledgement_pdf_' . $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $new_user_attachment->signed_acknowledgement_pdf = $filename;
             }
 
             if ($request->hasFile('cnic_front_image')) {
-                $filename = 'cnic_front_image_'. $date . '_' . $request->user_id . '.png';
+                $filename = 'cnic_front_image_' . $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_front_image');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $new_user_attachment->cnic_front_image = $filename;
             }
 
             if ($request->hasFile('cnic_back_image')) {
-                $filename = 'cnic_back_image_'. $date . '_' . $request->user_id . '.png';
+                $filename = 'cnic_back_image_' . $date . '_' . $request->user_id . '.png';
                 $file = $request->file('cnic_back_image');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $new_user_attachment->cnic_back_image = $filename;
             }
 
             if ($request->hasFile('blank_cheque_image')) {
-                $filename = 'blank_cheque_image_'. $date . '_' . $request->user_id . '.png';
+                $filename = 'blank_cheque_image_' . $date . '_' . $request->user_id . '.png';
                 $file = $request->file('blank_cheque_image');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $new_user_attachment->blank_cheque_image = $filename;
             }
 
@@ -10860,56 +10824,58 @@ class AdminDashboardController extends Controller
         return redirect()->back()->with(['success' => 'Files uploaded successfully']);
     }
 
-    public function userDocumentsConfirm(Request $request){
+    public function userDocumentsConfirm(Request $request)
+    {
         $user = User::find($request->user_id);
-        if($user){
+        if ($user) {
             $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
-            if($user_attachment->filled_and_signed_pdf != null && $user_attachment->signed_acknowledgement_pdf != null  && $user_attachment->cnic_front_image != null  && $user_attachment->cnic_back_image != null  && $user_attachment->blank_cheque_image != null){
+            if ($user_attachment->filled_and_signed_pdf != null && $user_attachment->signed_acknowledgement_pdf != null && $user_attachment->cnic_front_image != null && $user_attachment->cnic_back_image != null && $user_attachment->blank_cheque_image != null) {
                 $user->documents_status = 1;
                 $user->save();
             }
 
-            return response()->json(['status' => 1,'success' => 'Files confirmed successfully']);
+            return response()->json(['status' => 1, 'success' => 'Files confirmed successfully']);
         }
         return response()->json(['error' => 'User not found!']);
     }
-    public function edit_rates_user_documents(Request $request){
+
+    public function edit_rates_user_documents(Request $request)
+    {
         $date = Carbon::now();
         $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
-        if($user_attachment){
+        if ($user_attachment) {
             if ($request->hasFile('filled_and_signed_pdf')) {
-                if($user_attachment->filled_and_signed_pdf != NULL) {
+                if ($user_attachment->filled_and_signed_pdf != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
                 }
-                $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
+                $filename = 'filled_and_signed_pdf_' . $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('filled_and_signed_pdf');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $user_attachment->filled_and_signed_pdf = $filename;
             }
             if ($request->hasFile('signed_acknowledgement_pdf')) {
-                if($user_attachment->signed_acknowledgement_pdf != NULL) {
+                if ($user_attachment->signed_acknowledgement_pdf != NULL) {
                     Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->signed_acknowledgement_pdf);
                 }
-                $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
+                $filename = 'signed_acknowledgement_pdf_' . $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $user_attachment->signed_acknowledgement_pdf = $filename;
             }
             $user_attachment->save();
-        }
-        else{
+        } else {
             $new_user_attachment = new UserDocumentAttachment();
             if ($request->hasFile('filled_and_signed_pdf')) {
-                $filename = 'filled_and_signed_pdf_'. $date . '_' . $request->user_id . '.pdf';
+                $filename = 'filled_and_signed_pdf_' . $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('filled_and_signed_pdf');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $new_user_attachment->filled_and_signed_pdf = $filename;
             }
 
             if ($request->hasFile('signed_acknowledgement_pdf')) {
-                $filename = 'signed_acknowledgement_pdf_'. $date . '_' . $request->user_id . '.pdf';
+                $filename = 'signed_acknowledgement_pdf_' . $date . '_' . $request->user_id . '.pdf';
                 $file = $request->file('signed_acknowledgement_pdf');
-                Storage::disk('public')->putFileAs('users_attached_documents/'. $request->user_id .'', $file, $filename);
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
                 $new_user_attachment->signed_acknowledgement_pdf = $filename;
             }
             $new_user_attachment->user_id = $request->user_id;
@@ -10922,23 +10888,25 @@ class AdminDashboardController extends Controller
         return ['success' => 'User Document Uploaded!'];
     }
 
-    public function add_contacts($id){
+    public function add_contacts($id)
+    {
         $shipper = User::find($id);
-        $sale_person = SalePersonTag::where('user_id',$id)->where('status', 0)->first();
+        $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
         $admin = Admin::find($sale_person->admin_id);
         $contacts = ShipperContact::where('shipper_id', $id);
-        if($contacts->exists()){
+        if ($contacts->exists()) {
             $contacts = $contacts->get();
-        }else{
+        } else {
             $contacts = null;
         }
         return view('admin.accounts.multiple_poc')->with(['sale_person' => $admin, 'contacts' => $contacts, 'shipper' => $shipper]);
     }
 
-    public function add_contacts_store(Request $request){
+    public function add_contacts_store(Request $request)
+    {
         ShipperContact::where('shipper_id', $request->shipper_id)->delete();
-        if($request->has('poc')){
-            foreach($request->poc as $index => $poc){
+        if ($request->has('poc')) {
+            foreach ($request->poc as $index => $poc) {
                 $shipper_contact = new ShipperContact();
                 $shipper_contact->shipper_id = $request->shipper_id;
                 $shipper_contact->poc = $poc;
@@ -10950,35 +10918,38 @@ class AdminDashboardController extends Controller
         return redirect()->back()->with(['success' => 'Contacts updated successfully']);
     }
 
-    public function payment_cycle_info(Request $request){
+    public function payment_cycle_info(Request $request)
+    {
         $user_id = $request->shipper_id;
-        if($user_id){
+        if ($user_id) {
             $user = User::find($user_id);
-            if($user){
+            if ($user) {
                 $details = ['payment_cycle_id' => $user->payment_cycle_id, 'payment_day' => $user->payment_day];
                 return response()->json(['status' => 0, 'details' => $details]);
 
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'error' => 'User not found!']);
             }
         }
     }
-    public function payment_cycle_submit(Request $request){
+
+    public function payment_cycle_submit(Request $request)
+    {
         $payment_cycle_id = $request->payment_cycle_select;
-        if($payment_cycle_id){
-            if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+        if ($payment_cycle_id) {
+            if ($payment_cycle_id == 2 || $payment_cycle_id == 3) {
                 $payment_day = $request->payment_day;
             }
-            if($request->has('shipper_ids')){
-                $shipper_ids = explode(',' , $request->shipper_ids);
-                if(count($shipper_ids) > 0){
-                    foreach ($shipper_ids as $shipper_id){
+            if ($request->has('shipper_ids')) {
+                $shipper_ids = explode(',', $request->shipper_ids);
+                if (count($shipper_ids) > 0) {
+                    foreach ($shipper_ids as $shipper_id) {
                         $shipper = User::find($shipper_id);
-                        if($shipper){
+                        if ($shipper) {
                             $shipper->payment_cycle_id = $payment_cycle_id;
-                            if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                            if ($payment_cycle_id == 2 || $payment_cycle_id == 3) {
                                 $shipper->payment_day = $payment_day;
-                            }else{
+                            } else {
                                 $shipper->payment_day = NULL;
                             }
                             $shipper->save();
@@ -10986,14 +10957,14 @@ class AdminDashboardController extends Controller
                     }
                     return redirect()->back()->with('success', 'Payment Cycle successfully updated!');
                 }
-            }else{
+            } else {
                 $shipper_id = $request->shipper_id;
                 $shipper = User::find($shipper_id);
-                if($shipper){
+                if ($shipper) {
                     $shipper->payment_cycle_id = $payment_cycle_id;
-                    if($payment_cycle_id == 2 || $payment_cycle_id == 3){
+                    if ($payment_cycle_id == 2 || $payment_cycle_id == 3) {
                         $shipper->payment_day = $payment_day;
-                    }else{
+                    } else {
                         $shipper->payment_day = NULL;
                     }
                     $shipper->save();
@@ -11007,120 +10978,124 @@ class AdminDashboardController extends Controller
     }
 
 
-
-    public function getInternationalCityForm(){
-        $hubs = City::where('hub',1)->where('business_category_id', 2)->where('status',1)->get();
+    public function getInternationalCityForm()
+    {
+        $hubs = City::where('hub', 1)->where('business_category_id', 2)->where('status', 1)->get();
         $zones = Zone::where('business_category_id', 2)->get();
-        return view('admin.management.add_international_city_form')->with(['hubs'=>$hubs,'zones' => $zones]);
+        return view('admin.management.add_international_city_form')->with(['hubs' => $hubs, 'zones' => $zones]);
     }
-    public function getEditInternationalCityForm($id){
+
+    public function getEditInternationalCityForm($id)
+    {
         $city = City::find($id);
-        if($city->hub == 1){
+        if ($city->hub == 1) {
             $cityhub = '';
             $isHub = 1;
-        }else{
-            $cityhub = City::select(['id','name'])->where('id',$city->hub_id)->get();
+        } else {
+            $cityhub = City::select(['id', 'name'])->where('id', $city->hub_id)->get();
             $isHub = 0;
 
         }
-        $delivery_array = CityDelivery::where('city_id',$city->id)->select(['booking_type_id','shipping_mode_id'])->get();
+        $delivery_array = CityDelivery::where('city_id', $city->id)->select(['booking_type_id', 'shipping_mode_id'])->get();
         $delivery = array();
         foreach ($delivery_array as $delivery_details) {
             $delivery[$delivery_details['booking_type_id']][] = $delivery_details['shipping_mode_id'];
         }
 
 
-        $hubs = City::where('hub',1)->where('business_category_id', 2)->where('status',1)->get();
+        $hubs = City::where('hub', 1)->where('business_category_id', 2)->where('status', 1)->get();
         $zones = Zone::where('business_category_id', 2)->get();
-        return view('admin.management.edit_international_city_form')->with(['hubs'=>$hubs, 'zones' => $zones,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
+        return view('admin.management.edit_international_city_form')->with(['hubs' => $hubs, 'zones' => $zones, 'isHub' => $isHub, 'city' => $city, 'delivery' => $delivery, 'cityhub' => $cityhub]);
 
     }
 
-    public function updateInternationalCity(Request $request,$id){
-        $city_id = City::where('id',$id)->first();
-        if($request->postType == 'city'){
-            City::where('id',$id)->update([
-                'name'=>$request->cityName,
-                'city_code'=>$request->city_code,
-                'hub'=>0,
-                'hub_id'=>$request->hubs,
-                'zone_id'=>City::find($request->hubs)->zone_id,
-                'pickup'=>0,
-                'gc_area'=>0,
-                'attempt_tat'=>$request->attempt_tat,
+    public function updateInternationalCity(Request $request, $id)
+    {
+        $city_id = City::where('id', $id)->first();
+        if ($request->postType == 'city') {
+            City::where('id', $id)->update([
+                'name' => $request->cityName,
+                'city_code' => $request->city_code,
+                'hub' => 0,
+                'hub_id' => $request->hubs,
+                'zone_id' => City::find($request->hubs)->zone_id,
+                'pickup' => 0,
+                'gc_area' => 0,
+                'attempt_tat' => $request->attempt_tat,
                 'location_latitude' => NULL,
                 'location_longitude' => NULL,
                 'address' => NULL
             ]);
             CityHistory::create([
-                'city_id'=> $id,
+                'city_id' => $id,
                 'hub' => 0,
-                'hub_id'=> $request->hubs,
-                'zone_id'=> City::find($request->hubs)->zone_id,
-                'pickup'=> 0,
+                'hub_id' => $request->hubs,
+                'zone_id' => City::find($request->hubs)->zone_id,
+                'pickup' => 0,
                 'status' => $city_id->status,
-                'gc_area'=>0,
-                'attempt_tat'=>$request->attempt_tat,
+                'gc_area' => 0,
+                'attempt_tat' => $request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => NULL,
                 'location_longitude' => NULL,
                 'address' => NULL
             ]);
 
-            return redirect()->back()->with('success','City updated successfully');
-        }elseif($request->postType == 'hub'){
-            $city = City::where('id',$id)->first();
-            if($city->zone_id != $request->zone_id)
-            {
+            return redirect()->back()->with('success', 'City updated successfully');
+        } elseif ($request->postType == 'hub') {
+            $city = City::where('id', $id)->first();
+            if ($city->zone_id != $request->zone_id) {
                 $city->hub_cities()->update([
-                    'zone_id'=>$request->zone_id,
+                    'zone_id' => $request->zone_id,
                 ]);
             }
             $city->update([
-                'name'=>$request->countryName,
-                'city_code'=>$request->city_code,
-                'hub'=>1,
-                'hub_id'=>$id,
-                'zone_id'=>$request->zone_id,
-                'pickup'=>0,
-                'gc_area'=>0,
-                'attempt_tat'=>$request->attempt_tat,
+                'name' => $request->countryName,
+                'city_code' => $request->city_code,
+                'hub' => 1,
+                'hub_id' => $id,
+                'zone_id' => $request->zone_id,
+                'pickup' => 0,
+                'gc_area' => 0,
+                'attempt_tat' => $request->attempt_tat,
                 'location_latitude' => NULL,
                 'location_longitude' => NULL,
                 'address' => NULL
             ]);
             CityHistory::create([
-                'city_id'=> $id,
-                'hub'=>1,
-                'hub_id'=>$id,
-                'zone_id'=>$request->zone_id,
-                'pickup'=>0,
+                'city_id' => $id,
+                'hub' => 1,
+                'hub_id' => $id,
+                'zone_id' => $request->zone_id,
+                'pickup' => 0,
                 'status' => $city_id->status,
-                'gc_area'=>0,
-                'attempt_tat'=>$request->attempt_tat,
+                'gc_area' => 0,
+                'attempt_tat' => $request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => NULL,
                 'location_longitude' => NULL,
                 'address' => NULL
             ]);
-            return redirect()->back()->with('success','Hub/city updated successfully');
+            return redirect()->back()->with('success', 'Hub/city updated successfully');
         }
     }
+
     //update international city end
-    public function addInternationalCityHub(Request $request){
-        if($request->postType == 'city'){
+    public function addInternationalCityHub(Request $request)
+    {
+        if ($request->postType == 'city') {
             $zone_id = City::find($request->hubs)->zone_id;
 
             $city = City::create([
-                'name'=>$request->cityName,
-                'city_code'=>$request->city_code,
-                'hub'=>0,
-                'hub_id'=>$request->hubs,
-                'zone_id'=> $zone_id,
-                'pickup'=>0,
-                'gc_area'=>0,
-                'attempt_tat'=>$request->attempt_tat,
-                'status'=>1,
+                'name' => $request->cityName,
+                'city_code' => $request->city_code,
+                'hub' => 0,
+                'hub_id' => $request->hubs,
+                'zone_id' => $zone_id,
+                'pickup' => 0,
+                'gc_area' => 0,
+                'attempt_tat' => $request->attempt_tat,
+                'status' => 1,
                 'location_latitude' => NULL,
                 'location_longitude' => NULL,
                 'address' => NULL,
@@ -11128,31 +11103,31 @@ class AdminDashboardController extends Controller
             ]);
 
             CityHistory::create([
-                'city_id'=> $city->id,
-                'hub'=>0,
-                'hub_id'=>$request->hubs,
-                'zone_id'=> $zone_id,
-                'pickup'=>0,
-                'status'=>1,
-                'gc_area'=>0,
-                'attempt_tat'=>$request->attempt_tat,
+                'city_id' => $city->id,
+                'hub' => 0,
+                'hub_id' => $request->hubs,
+                'zone_id' => $zone_id,
+                'pickup' => 0,
+                'status' => 1,
+                'gc_area' => 0,
+                'attempt_tat' => $request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => NULL,
                 'location_longitude' => NULL,
                 'address' => NULL
             ]);
 
-            return redirect()->back()->with('success','City added successfully');
-        }elseif($request->postType == 'hub'){
+            return redirect()->back()->with('success', 'City added successfully');
+        } elseif ($request->postType == 'hub') {
             $city = City::create([
-                'name'=>$request->countryName,
-                'city_code'=>$request->city_code,
-                'hub'=>1,
-                'zone_id'=>$request->zone_id,
-                'pickup'=>0,
-                'gc_area'=>0,
-                'attempt_tat'=>$request->attempt_tat,
-                'status'=>1,
+                'name' => $request->countryName,
+                'city_code' => $request->city_code,
+                'hub' => 1,
+                'zone_id' => $request->zone_id,
+                'pickup' => 0,
+                'gc_area' => 0,
+                'attempt_tat' => $request->attempt_tat,
+                'status' => 1,
                 'location_latitude' => NULL,
                 'location_longitude' => NULL,
                 'address' => NULL,
@@ -11160,97 +11135,99 @@ class AdminDashboardController extends Controller
             ]);
 
             CityHistory::create([
-                'city_id'=> $city->id,
-                'hub'=>1,
-                'zone_id'=>$request->zone_id,
-                'pickup'=>0,
-                'status'=>1,
-                'gc_area'=>0,
-                'attempt_tat'=>$request->attempt_tat,
+                'city_id' => $city->id,
+                'hub' => 1,
+                'zone_id' => $request->zone_id,
+                'pickup' => 0,
+                'status' => 1,
+                'gc_area' => 0,
+                'attempt_tat' => $request->attempt_tat,
                 'updated_by' => Auth::id(),
                 'location_latitude' => NULL,
                 'location_longitude' => NULL,
                 'address' => NULL
             ]);
-            City::where('id',$city->id)->update(['hub_id'=>$city->id]);
-            return redirect()->back()->with('success','Hub city added successfully');
+            City::where('id', $city->id)->update(['hub_id' => $city->id]);
+            return redirect()->back()->with('success', 'Hub city added successfully');
         }
     }
 
-    public function assign_locations_submit(Request $request){
+    public function assign_locations_submit(Request $request)
+    {
         $route_id = $request->route_id;
-        $pickup_address_ids = explode(',',$request->pickup_address_id);
+        $pickup_address_ids = explode(',', $request->pickup_address_id);
 //        RouteLocations::where('route_id',$route_id)->delete();
 
-        if($route_id){
-            RouteLocations::whereIn('pickup_address_id',$pickup_address_ids)->delete();
-            foreach($pickup_address_ids as $pickup_address){
+        if ($route_id) {
+            RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->delete();
+            foreach ($pickup_address_ids as $pickup_address) {
                 $location = new RouteLocations();
                 $location->route_id = $route_id;
                 $location->pickup_address_id = $pickup_address;
                 $location->save();
             }
         }
-        return redirect()->back()->with(['success'=>"Location has been Assigned successfully!"]);
+        return redirect()->back()->with(['success' => "Location has been Assigned successfully!"]);
     }
 
-    public function user_address(Request $request){
+    public function user_address(Request $request)
+    {
 
         $user_id = $request->user_id;
-        if($user_id != null){
-            $addresses = UserShippingInfo::select('id','pickup_address')->where('user_id',$user_id)->where('user_shipping_infos.hidden',0)->get();
-            if($addresses)
-            {
-                return response()->json(['status'=> 1,'addresses' => $addresses]);
-            }
-            else{
-                return response()->json(['status'=> 0,'error' => 'Address Not Found']);
+        if ($user_id != null) {
+            $addresses = UserShippingInfo::select('id', 'pickup_address')->where('user_id', $user_id)->where('user_shipping_infos.hidden', 0)->get();
+            if ($addresses) {
+                return response()->json(['status' => 1, 'addresses' => $addresses]);
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Address Not Found']);
             }
         }
     }
 
 
-     public function assign_locations_view(Request $request){
+    public function assign_locations_view(Request $request)
+    {
         $route_id = $request->route_id;
         $data = array();
-        if($route_id){
-            $locations = RouteLocations::join('user_shipping_infos as usi','usi.id','=','route_locations.pickup_address_id')
-                ->join('users as u','u.id','=','usi.user_id')->where('route_locations.route_id',$route_id)->select('u.name as shipper','usi.pickup_address as address')->get();
-            foreach($locations as $location){
+        if ($route_id) {
+            $locations = RouteLocations::join('user_shipping_infos as usi', 'usi.id', '=', 'route_locations.pickup_address_id')
+                ->join('users as u', 'u.id', '=', 'usi.user_id')->where('route_locations.route_id', $route_id)->select('u.name as shipper', 'usi.pickup_address as address')->get();
+            foreach ($locations as $location) {
                 $data[] = $location->shipper . ' - ' . $location->address;
             }
             return response()->json(['locations' => $data]);
         }
-     }
+    }
 
-     public function set_as_pickup_route(Request $request){
-         foreach ($request->route_id as $id) {
-             if ($id) {
-                 $route = Route::find($id);
-                 if ($route) {
-                     if ($route->route_type_id == 2) {
-                         $route->route_type_id = 1;
-                         $route->save();
-                     }
-                 }
-             }
-         }
-         return response()->json(['status' => 1, 'success' => 'Route type has been updated !']);
-     }
+    public function set_as_pickup_route(Request $request)
+    {
+        foreach ($request->route_id as $id) {
+            if ($id) {
+                $route = Route::find($id);
+                if ($route) {
+                    if ($route->route_type_id == 2) {
+                        $route->route_type_id = 1;
+                        $route->save();
+                    }
+                }
+            }
+        }
+        return response()->json(['status' => 1, 'success' => 'Route type has been updated !']);
+    }
 
-     public function kam_poc_ref_tag(Request $request){
+    public function kam_poc_ref_tag(Request $request)
+    {
         $poc = $request->poc;
         $kam = $request->kam;
         $ref = $request->ref;
         $shipper_ids = $request->shipper_ids;
-         if($kam == null && $poc == null && $ref == null){
-             return response()->json(['status'=>0,'error'=>"One field is mandatory!"]);
-         }
-         else{
-         if($shipper_ids) {
+        if ($kam == null && $poc == null && $ref == null) {
+            return response()->json(['status' => 0, 'error' => "One field is mandatory!"]);
+        } else {
+            if ($shipper_ids) {
                 foreach ($shipper_ids as $shipper_id) {
-                    $sale_tier =  SaleTierTag::where('user_id',$shipper_id);
-                    if($sale_tier->exists()){
+                    $sale_tier = SaleTierTag::where('user_id', $shipper_id);
+                    if ($sale_tier->exists()) {
                         $sale_tier = $sale_tier->first();
 
                         $sale_tier_history = new SaleTierTagHistory();
@@ -11266,9 +11243,8 @@ class AdminDashboardController extends Controller
                         $sale_tier->kam = $kam;
                         $sale_tier->ref = $ref;
                         $sale_tier->save();
-                       // return response()->json(['status'=>1,'success'=>"Updated!"]);
-                    }
-                    else{
+                        // return response()->json(['status'=>1,'success'=>"Updated!"]);
+                    } else {
                         $sale_tier = new SaleTierTag();
                         $sale_tier->user_id = $shipper_id;
                         $sale_tier->poc = $poc;
@@ -11277,129 +11253,119 @@ class AdminDashboardController extends Controller
                         $sale_tier->save();
                     }
                 }
-                return response()->json(['status'=>1,'success'=>"Updated!"]);
-            }
-            else{
-                return ['status' => 0 ,'error'=>"Select One Shipper!"];
+                return response()->json(['status' => 1, 'success' => "Updated!"]);
+            } else {
+                return ['status' => 0, 'error' => "Select One Shipper!"];
             }
         }
-     }
+    }
 
-     public function kam_poc_ref_tag_info(Request $request){
+    public function kam_poc_ref_tag_info(Request $request)
+    {
         $shipper_id = $request->shipper_id;
-         if($shipper_id) {
-             $info = array();
-             $sale_tier = SaleTierTag::where('user_id', $shipper_id);
-             if($sale_tier->exists()){
-                 $flag = false;
-                 $sale_tier = $sale_tier->first();
-                 if($sale_tier->poc != null){
-                     $info['poc'] = $sale_tier->poc_admin->name;
-                     $flag = true;
-                 }
-                 else{
-                     $info['poc'] = '-';
-                 }
-                 if($sale_tier->kam != null){
-                     $info['kam'] = $sale_tier->kam_admin->name;
-                     $flag = true;
-                 }
-                 else{
-                     $info['kam'] = '-';
-                 }
-                 if($sale_tier->ref != null){
-                     $info['ref'] = $sale_tier->ref_admin->name;
-                     $flag = true;
-                 }
-                 else{
-                     $info['ref'] = '-';
-                 }
-                 if($flag){
-                     return response()->json(['status'=>1,'info'=>$info]);
-                 }
-                 else{
-                     return response()->json(['status'=>0,'error'=> 'No Sales tier found!']);
-                 }
-             }
-             else{
-                 return response()->json(['status'=>0,'error'=> 'No Sales tier found!']);
-             }
+        if ($shipper_id) {
+            $info = array();
+            $sale_tier = SaleTierTag::where('user_id', $shipper_id);
+            if ($sale_tier->exists()) {
+                $flag = false;
+                $sale_tier = $sale_tier->first();
+                if ($sale_tier->poc != null) {
+                    $info['poc'] = $sale_tier->poc_admin->name;
+                    $flag = true;
+                } else {
+                    $info['poc'] = '-';
+                }
+                if ($sale_tier->kam != null) {
+                    $info['kam'] = $sale_tier->kam_admin->name;
+                    $flag = true;
+                } else {
+                    $info['kam'] = '-';
+                }
+                if ($sale_tier->ref != null) {
+                    $info['ref'] = $sale_tier->ref_admin->name;
+                    $flag = true;
+                } else {
+                    $info['ref'] = '-';
+                }
+                if ($flag) {
+                    return response()->json(['status' => 1, 'info' => $info]);
+                } else {
+                    return response()->json(['status' => 0, 'error' => 'No Sales tier found!']);
+                }
+            } else {
+                return response()->json(['status' => 0, 'error' => 'No Sales tier found!']);
             }
-            else{
-                return ['status' => 0 ,'error'=>"Shipper not found with sales tier tagging!"];
-            }
-     }
+        } else {
+            return ['status' => 0, 'error' => "Shipper not found with sales tier tagging!"];
+        }
+    }
 
-     public function kam_poc_ref_tag_remove(Request $request){
+    public function kam_poc_ref_tag_remove(Request $request)
+    {
         $shipper_id = $request->shipper_id;
-         if($shipper_id) {
-             $sale_tier = SaleTierTag::where('user_id', $shipper_id);
-             if($sale_tier->exists()){
-                 $sale_tier = $sale_tier->first();
-                 if($request->has('poc')){
-                     $sale_tier->poc = null;
-                 }
-                 if($request->has('kam')){
-                     $sale_tier->kam = null;
-                 }
-                 if($request->has('ref')){
-                     $sale_tier->ref = null;
-                 }
-                 $sale_tier->save();
-                 return redirect()->back()->with('success', 'Sales tier tag removed successfully!');
-             }
-             else{
-                 return redirect()->back()->with('error', 'No Sales tier found!');
-             }
+        if ($shipper_id) {
+            $sale_tier = SaleTierTag::where('user_id', $shipper_id);
+            if ($sale_tier->exists()) {
+                $sale_tier = $sale_tier->first();
+                if ($request->has('poc')) {
+                    $sale_tier->poc = null;
+                }
+                if ($request->has('kam')) {
+                    $sale_tier->kam = null;
+                }
+                if ($request->has('ref')) {
+                    $sale_tier->ref = null;
+                }
+                $sale_tier->save();
+                return redirect()->back()->with('success', 'Sales tier tag removed successfully!');
+            } else {
+                return redirect()->back()->with('error', 'No Sales tier found!');
             }
-            else{
-                return redirect()->back()->with('error', 'Shipper not found with sales tier tagging!');
-            }
-     }
+        } else {
+            return redirect()->back()->with('error', 'Shipper not found with sales tier tagging!');
+        }
+    }
 
-     public function rate_history_date(Request $request){
+    public function rate_history_date(Request $request)
+    {
         $user_id = $request->user_id;
         $details = array();
-        if($user_id){
+        if ($user_id) {
             $user = User::find($user_id);
-            if($user->account_type_id == 1){
-                $old_reimbursement_account = HistoryRateStatus::where('user_id',$user_id);
-                if($old_reimbursement_account->exists()){
+            if ($user->account_type_id == 1) {
+                $old_reimbursement_account = HistoryRateStatus::where('user_id', $user_id);
+                if ($old_reimbursement_account->exists()) {
                     $old_reimbursement_account_dates = $old_reimbursement_account->select('created_at')->groupBy('created_at')->get();
-                    foreach($old_reimbursement_account_dates as $date){
+                    foreach ($old_reimbursement_account_dates as $date) {
                         $date = Carbon::parse($date->created_at)->toDateString();
-                        if(!in_array($date, $details)){
+                        if (!in_array($date, $details)) {
                             $details[] = $date;
                         }
                     }
-                    return response()->json(['status' => 1,'account_type' => 1,'details' => $details, 'user_id' => $user_id]);
+                    return response()->json(['status' => 1, 'account_type' => 1, 'details' => $details, 'user_id' => $user_id]);
+                } else {
+                    return response()->json(['status' => 0, 'error' => 'No Data Found']);
                 }
-                else{
-                    return response()->json(['status' => 0,'error'=>'No Data Found']);
-                }
-            }
-            else{
-                $old_corporate_account = HistoryCorporateRateStatus::where('user_id',$user_id);
-                if ($old_corporate_account->exists()){
+            } else {
+                $old_corporate_account = HistoryCorporateRateStatus::where('user_id', $user_id);
+                if ($old_corporate_account->exists()) {
                     $old_corporate_account_dates = $old_corporate_account->select('created_at')->groupBy('created_at')->get();
-                    foreach($old_corporate_account_dates as $date){
+                    foreach ($old_corporate_account_dates as $date) {
                         $date = Carbon::parse($date->created_at)->toDateString();
-                        if(!in_array($date, $details)){
+                        if (!in_array($date, $details)) {
                             $details[] = $date;
                         }
                     }
-                    return response()->json(['status' => 1,'success','account_type' => 2,'details' => $details, 'user_id' => $user_id]);
-                }
-                else{
+                    return response()->json(['status' => 1, 'success', 'account_type' => 2, 'details' => $details, 'user_id' => $user_id]);
+                } else {
                     return response()->json(['status' => 0, 'error' => 'No Data Found']);
                 }
             }
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'error' => 'No Data Found']);
         }
 
-     }
+    }
 
 //     public function modesAjax(Request $request) {
 //        $city_id = $request->id;
@@ -11421,17 +11387,18 @@ class AdminDashboardController extends Controller
 //            return response()->json(['status' => 0, 'No Shipping mode found!']);
 //        }
 //     }
-    public function add_territory(Request $request){
+    public function add_territory(Request $request)
+    {
         $territory = $request->territory;
         $user_ids = $request->user_ids;
-        if($user_ids){
+        if ($user_ids) {
             $user_ids = explode(',', $user_ids);
-            foreach($user_ids as $id){
+            foreach ($user_ids as $id) {
                 $user = User::find($id);
-                if($user->territory_id)
-                return redirect()->back()->with('error', 'Territory not added as '.$user->name.' is tagged previously');
+                if ($user->territory_id)
+                    return redirect()->back()->with('error', 'Territory not added as ' . $user->name . ' is tagged previously');
             }
-            foreach($user_ids as $id){
+            foreach ($user_ids as $id) {
                 $user = User::find($id);
                 $user->territory_id = $territory;
                 $user->save();
@@ -11442,64 +11409,62 @@ class AdminDashboardController extends Controller
                 $history->save();
             }
             return redirect()->back()->with('success', 'Territory is added.');
-            }
-        else{
+        } else {
             return redirect()->back()->with('error', 'Territory not added.');
         }
     }
 
-    public function add_segments(Request $request){
+    public function add_segments(Request $request)
+    {
         $segment_id = $request->bulk_segment;
         $sub_segment_id = $request->bulk_sub_segment;
         $user_ids = $request->user_ids;
-        if($user_ids){
+        if ($user_ids) {
             $user_ids = explode(',', $user_ids);
-            foreach($user_ids as $id){
+            foreach ($user_ids as $id) {
                 $user = User::find($id);
                 $user->sub_segment_id = $sub_segment_id;
                 $user->segment_id = $segment_id;
                 $user->save();
             }
             return redirect()->back()->with('success', 'Segments is added.');
-            }
-        else{
+        } else {
             return redirect()->back()->with('error', 'Segments not added.');
         }
     }
 
-    
 
-
-    public function todayActiveAccountsList(){
+    public function todayActiveAccountsList()
+    {
         // dd(Carbon::parse('-24 hours'));
         // dd(Carbon::today('-12 hours'));
         // dd(Carbon::today('+12 hours'));
-        ActivityTrailController::createActivityTrailLog(Auth::id(),279);
-       return view('admin.accounts.today_active_accounts_list');
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 279);
+        return view('admin.accounts.today_active_accounts_list');
 
     }
 
-    public function todayActiveAccountListAjax(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),280);
+    public function todayActiveAccountListAjax(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 280);
         }
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->leftjoin('account_types as at','at.id','=','users.account_type_id')
+            ->leftjoin('account_types as at', 'at.id', '=', 'users.account_type_id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
                 $join->on('spt.user_id', '=', 'users.id')
-                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
-                    ->where('spt.status','=',0);
+                    ->leftjoin('admins as ad', 'ad.id', '=', 'spt.admin_id')
+                    ->where('spt.status', '=', 0);
             })
-            ->leftjoin('sale_tier_tags as st','st.user_id','=','users.id')
-            ->leftjoin('admins as poc','poc.id','=','st.poc')
-			->select(['users.phone as phone','users.email as email','users.id','ad.name as admin_tag_id', 'users.name','users.poc','users.account_type_id','at.name as account_type'])->whereIn('users.status',[3,4])->where('blacklist',0)
+            ->leftjoin('sale_tier_tags as st', 'st.user_id', '=', 'users.id')
+            ->leftjoin('admins as poc', 'poc.id', '=', 'st.poc')
+            ->select(['users.phone as phone', 'users.email as email', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'users.poc', 'users.account_type_id', 'at.name as account_type'])->whereIn('users.status', [3, 4])->where('blacklist', 0)
             ->where('users.activated_at', '>', Carbon::parse('-24 hours'));
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
-        if(session('department_id') == 7){
-            if(!in_array(session('id'), session('sale_users_bypass'))){
+        if (session('department_id') == 7) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
@@ -11514,104 +11479,106 @@ class AdminDashboardController extends Controller
     }
 
 
-    static public function compare_data($array_1,$array_2){
-        if(count($array_2) == count($array_1)){
-            $diff = array_diff($array_1,$array_2);
+    static public function compare_data($array_1, $array_2)
+    {
+        if (count($array_2) == count($array_1)) {
+            $diff = array_diff($array_1, $array_2);
             //dd(count($diff));
-            if(count($diff) > 0){
+            if (count($diff) > 0) {
                 return 1;
-            }
-            else{
+            } else {
                 return 0;
             }
-        }
-        else{
+        } else {
             return 1;
         }
     }
 
-    public function restrict_order_id_info(Request $request){
+    public function restrict_order_id_info(Request $request)
+    {
         $user = User::find($request->user_id);
-        return response()->json(['status'=>$user->restrict_order_id]);
+        return response()->json(['status' => $user->restrict_order_id]);
     }
 
-    public function restrict_order_id_submit(Request $request){
+    public function restrict_order_id_submit(Request $request)
+    {
         $user = User::find($request->user_id);
-        if ($request->has('restrict_order_id_checkbox')){
+        if ($request->has('restrict_order_id_checkbox')) {
             $user->restrict_order_id = 1;
             $user->save();
             return redirect()->back()->with('success', 'Order ID restricted successfully!');
-        }
-        else{
+        } else {
             $user->restrict_order_id = 0;
             $user->save();
             return redirect()->back()->with('success', 'Order ID restriction removed successfully!');
         }
     }
-    public function admin_profile(Request $request){
+
+    public function admin_profile(Request $request)
+    {
         $user = Employee::leftjoin('employee_designations as d', 'd.id', '=', 'employees.designation_id')
             ->leftjoin('admin_departments as ad', 'd.department_id', '=', 'ad.id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'employees.blood_group')
-            ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.official_email as email', 'employees.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'employees.emergency_contact as emergency_contact_no', 'employees.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id','employees.personal_email as personal_email', 'employees.official_phone_number as official_phone_number')
+            ->select('employees.trax_id as trax_id', 'employees.name as name', 'employees.official_email as email', 'employees.phone_number as phone', 'd.name as designation', 'ad.name as department_name', 'bg.name as blood_group', 'employees.emergency_contact as emergency_contact_no', 'employees.emergency_contact_person as emergency_contact_person', 'bg.id as blood_group_id', 'employees.personal_email as personal_email', 'employees.official_phone_number as official_phone_number')
             ->where('employees.trax_id', Auth::user()->trax_id);
-        if($user->exists()){
+        if ($user->exists()) {
             $user = $user->first();
             $email = $user->email;
-            if($user->personal_email){
-                $email .= " / ".$user->personal_email;
+            if ($user->personal_email) {
+                $email .= " / " . $user->personal_email;
             }
             $phone = $user->phone;
-            if($user->official_phone_number){
-                $phone .= " / ".$user->official_phone_number;
+            if ($user->official_phone_number) {
+                $phone .= " / " . $user->official_phone_number;
             }
-            return response()->json(['full_name' => $user->name,'department' => $user->department_name,'designation' => $user->designation,'employee_id' => $user->trax_id,'email' => $email,'contact' => $phone, 'blood_group' => $user->blood_group, 'emergency_contact_no'=> $user->emergency_contact_no, 'emergency_contact_person' => $user->emergency_contact_person]);
-        }
-        else{
+            return response()->json(['full_name' => $user->name, 'department' => $user->department_name, 'designation' => $user->designation, 'employee_id' => $user->trax_id, 'email' => $email, 'contact' => $phone, 'blood_group' => $user->blood_group, 'emergency_contact_no' => $user->emergency_contact_no, 'emergency_contact_person' => $user->emergency_contact_person]);
+        } else {
             return response()->json(['error' => 'User not found!']);
         }
 
-   }
+    }
 
-    public function edit_profile(Request $request){
+    public function edit_profile(Request $request)
+    {
         $employee = Employee::where('trax_id', Auth::user()->trax_id)->where('trax_id', '!=', null);
-        if($employee->exists()){
+        if ($employee->exists()) {
             $employee = $employee->first();
             $blood_groups = EmployeeBloodGroup::all();
             return view('admin.profile.edit_profile_form')->with(['blood_groups' => $blood_groups, 'employee' => $employee]);
-        }
-        else{
+        } else {
             return response()->json(['status' => 1, 'error' => 'User not found!']);
         }
 
-   }
+    }
 
-    public function edit_profile_submit(Request $request){
+    public function edit_profile_submit(Request $request)
+    {
         $employee = Employee::where('trax_id', Auth::user()->trax_id)->where('trax_id', '!=', null);
-        if($employee->exists()){
+        if ($employee->exists()) {
             $employee = $employee->first();
             $employee->blood_group = $request->blood_group;
             $employee->emergency_contact_person = $request->emergency_contact_name;
             $employee->emergency_contact = $request->emergency_contact_no;
             $employee->save();
             return redirect()->back()->with('success', 'Profile Successfully Updated');
-        }
-        else{
+        } else {
             return redirect()->back()->with('error', 'User not found!');
         }
 
-   }
+    }
 
-   public function add_retag_territory(Request $request){
-    $territory = $request->territory;
-    $user_ids = $request->user_ids;
-        if($user_ids){
+    public function add_retag_territory(Request $request)
+    {
+        $territory = $request->territory;
+        $user_ids = $request->user_ids;
+        if ($user_ids) {
             $user_ids = explode(',', $user_ids);
-            foreach($user_ids as $id){
+            foreach ($user_ids as $id) {
                 $user = User::find($id);
-                if(!$user->territory_id)
-                return redirect()->back()->with('error', 'Retagging not done as '.$user->name.' is not tagged previously');
+                if (!$user->territory_id)
+                    return redirect()->back()->with('error', 'Retagging not done as ' . $user->name . ' is not tagged previously');
             }
-            foreach($user_ids as $id){
+            foreach ($user_ids as $id) {
                 $user = User::find($id);
                 $user->territory_id = $territory;
                 $user->save();
@@ -11622,45 +11589,45 @@ class AdminDashboardController extends Controller
                 $history->save();
             }
             return redirect()->back()->with('success', 'Territory is added.');
-            }
-        else{
+        } else {
             return redirect()->back()->with('error', 'Territory not added.');
         }
     }
-    public function osa_list(Request $request){
+
+    public function osa_list(Request $request)
+    {
         $city = City::find($request->city_id);
 
-        $osa_list = CityOsaRate::where('city_id',$city->id)->get();
-        return response()->json(['status'=>1,'osa_list'=>$osa_list]);
+        $osa_list = CityOsaRate::where('city_id', $city->id)->get();
+        return response()->json(['status' => 1, 'osa_list' => $osa_list]);
 
     }
 
-	public function packaging_invoice_log(Request $request){
-	     $logs = CorporateUserPackagingInvoiceLog::join('admins as a','a.id','=','corporate_user_packaging_invoice_logs.admin_id')
-	         ->select('a.name as admin','corporate_user_packaging_invoice_logs.created_at as time','corporate_user_packaging_invoice_logs.status as status')
-	         ->where('corporate_user_packaging_invoice_logs.user_id',$request->user_id);
-	     if($logs->exists()){
-	         $logs = $logs->get();
-	         return response()->json(['status' => 0, 'details' => $logs]);
-	     }
-	     else{
-	         return response()->json(['status' => 1, 'error' => 'No Log found!']);
-	     }
+    public function packaging_invoice_log(Request $request)
+    {
+        $logs = CorporateUserPackagingInvoiceLog::join('admins as a', 'a.id', '=', 'corporate_user_packaging_invoice_logs.admin_id')
+            ->select('a.name as admin', 'corporate_user_packaging_invoice_logs.created_at as time', 'corporate_user_packaging_invoice_logs.status as status')
+            ->where('corporate_user_packaging_invoice_logs.user_id', $request->user_id);
+        if ($logs->exists()) {
+            $logs = $logs->get();
+            return response()->json(['status' => 0, 'details' => $logs]);
+        } else {
+            return response()->json(['status' => 1, 'error' => 'No Log found!']);
+        }
 
-   }
+    }
 
-	    public function auto_cancelation_days(Request $request)
+    public function auto_cancelation_days(Request $request)
     {
         $user = User::find($request->user_id);
-        if(!$user)
-        {
-            return back()->with(['error'=>'Invalid Shipper']);
+        if (!$user) {
+            return back()->with(['error' => 'Invalid Shipper']);
         }
 
         $user->auto_shipment_cancellation_days = $request->cancelation_days;
         $user->update();
 
-        return back()->with(['success'=>'Auto Cancelation Days Updated Successfully']);
+        return back()->with(['success' => 'Auto Cancelation Days Updated Successfully']);
 
     }
 
@@ -11668,11 +11635,11 @@ class AdminDashboardController extends Controller
     {
         $admin_id = Auth::id();
         $admin = Admin::find($admin_id);
-        if($admin && $admin->trax_id){
+        if ($admin && $admin->trax_id) {
             $admin_profile = Employee::where('trax_id', $admin->trax_id);
             if ($admin_profile->exists()) {
                 $admin_profile = $admin_profile->first();
-                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id){
+                if (!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name || !$admin_profile->address || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id) {
                     return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
                 }
                 return response()->json(['status' => 2, 'info' => "Profile Already Updated"]);
@@ -11680,7 +11647,7 @@ class AdminDashboardController extends Controller
 
                 return response()->json(['status' => 1, 'error' => "Admin Profile Not Found"]);
             }
-        }else{
+        } else {
             return response()->json(['status' => 1, 'error' => "Admin Profile Not Found"]);
         }
 
@@ -11690,7 +11657,7 @@ class AdminDashboardController extends Controller
     {
         $admin_id = Auth::id();
         $admin = Admin::find($admin_id);
-        if($admin && $admin->trax_id){
+        if ($admin && $admin->trax_id) {
             $blood_group_list = EmployeeBloodGroup::all();
             $gender_list = EmployeeGender::all();
             $religion_list = EmployeeReligion::all();
@@ -11705,7 +11672,7 @@ class AdminDashboardController extends Controller
             } else {
                 return redirect()->back()->with('error', 'Admin Profile Not Found');
             }
-        }else{
+        } else {
             return redirect()->back()->with('error', 'Admin Profile Not Found');
         }
     }
@@ -11715,7 +11682,7 @@ class AdminDashboardController extends Controller
         $employee_request = Employee::find($request->employee_id);
         if ($employee_request) {
             $admin = Admin::where('trax_id', $employee_request->trax_id);
-            if($admin->exists()){
+            if ($admin->exists()) {
                 $admin = $admin->first();
                 $city = City::find($employee_request->city_id);
                 $employee_request->zone_id = $city->zone_id;
@@ -11779,8 +11746,7 @@ class AdminDashboardController extends Controller
                 $employee_request->save();
                 $admin->save();
                 return redirect()->route('admin.dashboard.index')->with('success', 'Profile Updated Successfully');
-            }
-            else {
+            } else {
                 return redirect()->route('admin.dashboard.index')->with('error', 'User not found!');
             }
         } else {
