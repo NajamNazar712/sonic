@@ -759,6 +759,7 @@ class AdminCargoController extends Controller
     }
 
     public function in_transit_index() {
+        return redirect()->route('admin.access_denied');
         $shipping_mode = ShippingMode::all();
         $cargo_status = CargoConsignmentStatus::all();
         $transport_vendor = TransportModeVendor::all();

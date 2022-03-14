@@ -68,7 +68,23 @@ class AdminERFController extends Controller
             ->editColumn('erf_id', function ($erf) {
                 return "ERF" . $erf->erf_id;
             })
+            ->addColumn('aging',function ($erf){
+                $log = EmployeeRequisitionStatusLog::where('er_id',$erf->id)->where('status_id',3);
+                if($log->exists())
+                {
+                    if(EmployeeRequisitionStatusLog::where('er_id',$erf->id)->where('status_id',4)->doesntExist()) {
+                        $log = $log->first();
+                        $from = Carbon::parse($log->created_at);
+                        $to = Carbon::now();
+                        return $from->diffInDays($to);
+                    }
 
+                    return "-";
+
+                }
+
+                return "-";
+            })
             ->filterColumn('erf_id', function($query, $keyword) {
                 $keyword = str_replace('erf', '', strtolower($keyword));
                 if($keyword != ''){
@@ -147,7 +163,8 @@ class AdminERFController extends Controller
 
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
-        $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',2)->get();
+        $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
+        $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',2)->whereNotIn('trax_id',$invalid_employees)->get();
         $today = Carbon::now()->endOfDay();
 
         return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id,'today' => $today]);

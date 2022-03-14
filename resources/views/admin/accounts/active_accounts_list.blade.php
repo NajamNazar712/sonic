@@ -86,6 +86,8 @@
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
+                                        <th class="border-primary border-darken-1">Account Disable Count</th>
+                                        <th class="border-primary border-darken-1">Account Disable Days</th>
                                         <th class="border-primary border-darken-1">Document Uploaded At</th>
                                         <th class="border-primary border-darken-1">Documents Approved By</th>
                                         <th class="border-primary border-darken-1">Document Approved At</th>
@@ -744,6 +746,9 @@
                         head.push('Account Activation Date');
                         head.push('Account Disable Date');
                         head.push('Account Disable Remarks');
+                        // head.push('Account Disable Remarks');
+                        head.push('Account Disable Count');
+                        head.push('Account Disable Day(s)');
                         head.push('Documents Uploaded At');
                         head.push('Documents Approved By');
                         head.push('Documents Approved At');
@@ -787,6 +792,8 @@
                             row.push(values.activated_date);
                             row.push(values.disable_at);
                             row.push(values.disable_remarks);
+                            row.push(values.status_count);
+                            row.push(values.days_to_disable);
                             row.push(values.documents_uploaded_at);
                             row.push(values.documents_approved_by);
                             row.push(values.documents_approved_at);
@@ -1444,6 +1451,8 @@
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'disable_at', name: 'users.disable_at', class: 'align-middle disable_at'},
                 {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
+                {data: 'status_count', name: 'ucs.status_count', class: 'align-middle status_count'},
+                {data: 'days_to_disable', name: 'days_to_disable', class: 'align-middle days_to_disable'},
                 {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
                 {data: 'documents_approved_by', name: 'dab.name', class: 'align-middle documents_approved_by', searchable: false},
                 {data: 'documents_approved_at', name: 'uda.approved_at', class: 'align-middle documents_approved_at', searchable: false},
