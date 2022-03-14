@@ -47,6 +47,7 @@
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
@@ -276,6 +277,7 @@
                             head.push('Zone');
                             head.push('Business Category');
                             head.push('Rider');
+                            head.push('Rider Type');
                             head.push('Route');
                             head.push('No. Of Shipments');
                             head.push('No. Of Pending Shipments');
@@ -296,6 +298,7 @@
                                 row.push(values.zone_name);
                                 row.push(values.business_category);
                                 row.push(values.rider);
+                                row.push(values.rt);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
                                 row.push(values.shipments_unverified_count);
@@ -364,6 +367,7 @@
                         class: 'align-middle business_category'
                     },
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
+                    {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
                     {
                         data: 'shipments_count_link',

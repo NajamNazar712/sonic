@@ -4,8 +4,7 @@ namespace App\Http\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
 
-
-class AdminPositionTypes extends Model
+class UserCheckStatus extends Model
 {
     //
 }

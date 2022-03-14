@@ -8,6 +8,7 @@ use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentPiece;
+use App\Http\Models\Shipper\ShipperReceivingSheetSetting;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
@@ -446,6 +447,12 @@ class ShipperReceivingSheetController extends Controller
         if ($receiving_sheet_shipments->exists()) {
             $total_shipments = 0;
             $total_cod = 0;
+            $item_description_flag = TRUE;
+            $setting = ShipperReceivingSheetSetting::where('user_id', session('user_id'));
+            if($setting->exists()){
+                $setting = $setting->first();
+                $item_description_flag = $setting->item_description;
+            }
 
             $shipment_details = '
                       <table class="table table-sm table-bordered border">
@@ -457,8 +464,12 @@ class ShipperReceivingSheetController extends Controller
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
                             <td class="color primary"><strong>Product Type</strong></td>
-                            <td class="color primary"><strong>Booking Date</strong></td>
-                            <td class="color primary"><strong>Quantity</strong></td>
+                            <td class="color primary"><strong>Booking Date</strong></td>';
+            if($item_description_flag){
+                $shipment_details .= '<td class="color primary"><strong>Description</strong></td>';
+            }
+            $shipment_details .=
+                '<td class="color primary"><strong>Quantity</strong></td>
                             <td class="color primary"><strong>Destination</strong></td>
                             <td class="color primary"><strong>Estimated Weight</strong></td>
                             <td class="color primary"><strong>Pieces</strong></td>
@@ -516,8 +527,12 @@ class ShipperReceivingSheetController extends Controller
 
                     $shipment_details .= '
                             <td>' . $item->product->product_name . '</td>
-                            <td>' . $item->created_at . '</td>
-                            <td>' . $item->quantity . '</td>
+                            <td>' . $item->created_at . '</td>';
+                    if($item_description_flag){
+                        $shipment_details .= '<td>' . $item->description . '</td>';
+                    }
+                    $shipment_details .='
+                             <td>' . $item->quantity . '</td>
                     ';
 
                     $shipment_details .= $shipment_details_row_end;
@@ -529,8 +544,12 @@ class ShipperReceivingSheetController extends Controller
 
                     $shipment_details .= '
                             <td>' . $item->product->product_name . '</td>
-                            <td>' . $item->created_at . '</td>
-                            <td>' . $item->quantity . '</td>
+                            <td>' . $item->created_at . '</td>';
+                    if($item_description_flag){
+                        $shipment_details .= '<td>' . $item->description . '</td>';
+                    }
+                    $shipment_details .='
+                             <td>' . $item->quantity . '</td>
                     ';
 
                     $shipment_details .= $shipment_details_row_end;
@@ -550,9 +569,13 @@ class ShipperReceivingSheetController extends Controller
 
                         $shipment_details .= '
                             <td>' . $item->product->product_name . '</td>
-                            <td>' . $item->created_at . '</td>
-                            <td>' . $item->quantity . '</td>
-                        ';
+                            <td>' . $item->created_at . '</td>';
+                            if($item_description_flag){
+                                $shipment_details .= '<td>' . $item->description . '</td>';
+                            }
+                            $shipment_details .='
+                                     <td>' . $item->quantity . '</td>
+                            ';
 
                         if ($first) {
                             $shipment_details .= $shipment_details_row_end;
@@ -573,8 +596,12 @@ class ShipperReceivingSheetController extends Controller
 
                     $shipment_details .= '
                             <td>' . $item->product->product_name . '</td>
-                            <td>' . $item->created_at . '</td>
-                            <td>' . $item->quantity . '</td>
+                            <td>' . $item->created_at . '</td>';
+                    if($item_description_flag){
+                        $shipment_details .= '<td>' . $item->description . '</td>';
+                    }
+                    $shipment_details .='
+                             <td>' . $item->quantity . '</td>
                     ';
 
                     $shipment_details .= $shipment_details_row_end;

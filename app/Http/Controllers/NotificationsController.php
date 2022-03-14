@@ -8471,7 +8471,7 @@ class NotificationsController extends Controller
                         $employee_directory = Employee::where('trax_id', $data_set->trax_id);
                         if($employee_directory->exists()){
                             $employee_directory = $employee_directory->first();
-                            $employee_directory->status_id = 3;
+                            $employee_directory->status_id = 2;
                             $employee_directory->save();
                         }
 
@@ -8487,8 +8487,9 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = ' Rider deactivation';
-                    $to = ['Hasnain.saleem@trax.pk', 'Adnan.ahmed@trax.pk', 'rameel.khan@trax.pk', 'abdul.ahad@trax.pk', 'fabiha.shahid@trax.pk'];
-                    self::email($subject, $body_updated, $to);
+                    $to = ['Hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk'];
+
+//                    self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
                     $now = Carbon::now();
                     $month = $now->subMonth()->format('F');
