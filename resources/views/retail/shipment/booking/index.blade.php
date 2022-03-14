@@ -843,7 +843,7 @@
                                 $('#charges').val(data.details.charges);
                                 $('#discount').val(data.details.discount_amount);
                                 if(shipping_mode_id == 3){
-                                   total_charges = data.details.charges_with_discount + $('#cod').val();
+                                   total_charges = data.details.charges_with_discount + (+$('#cod').val());
                                 }
                                 else{
                                     total_charges = data.details.charges_with_discount;
