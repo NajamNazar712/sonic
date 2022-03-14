@@ -17,7 +17,7 @@ use App\Http\Models\EmployeeRequisitionStatus;
 use App\Http\Models\EmployeeRequisitionStatusLog;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
-use App\Models\Admin\AdminPositionTypes;
+use App\Http\Models\Admin\AdminPositionTypes;
 use SnappyImage;
 use SnappyPDF;
 use Carbon\Carbon;
@@ -68,7 +68,23 @@ class AdminERFController extends Controller
             ->editColumn('erf_id', function ($erf) {
                 return "ERF" . $erf->erf_id;
             })
+            ->addColumn('aging',function ($erf){
+                $log = EmployeeRequisitionStatusLog::where('er_id',$erf->id)->where('status_id',3);
+                if($log->exists())
+                {
+                    if(EmployeeRequisitionStatusLog::where('er_id',$erf->id)->where('status_id',4)->doesntExist()) {
+                        $log = $log->first();
+                        $from = Carbon::parse($log->created_at);
+                        $to = Carbon::now();
+                        return $from->diffInDays($to);
+                    }
 
+                    return "-";
+
+                }
+
+                return "-";
+            })
             ->filterColumn('erf_id', function($query, $keyword) {
                 $keyword = str_replace('erf', '', strtolower($keyword));
                 if($keyword != ''){
@@ -141,10 +157,14 @@ class AdminERFController extends Controller
             $departments = AdminDepartment::where('id', '=', session('department_id'))->select('id', 'name')->get();
         }
         $designations = EmployeeDesignation::where('status',1)->select('id','name')->get();
-        $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58,70])->where('status', 1)->select('id','name')->get();
+        // $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58,70])->where('status', 1)->select('id','name')->get();
+        $department_admins = AdminDepartment::all()->pluck('department_head_id')->toArray();
+        $department_heads = Admin::whereIn('id', $department_admins)->where('status', 1)->select('id','name')->get();
+
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
-        $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',2)->get();
+        $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
+        $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',2)->whereNotIn('trax_id',$invalid_employees)->get();
         $today = Carbon::now()->endOfDay();
 
         return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id,'today' => $today]);
@@ -585,5 +605,12 @@ class AdminERFController extends Controller
 
     }
 
+    public function employee_data(Request $request){
+        $department = AdminDepartment::find($request->id);
+        $data['department_head'] = Admin::find($department->department_head_id);
+        $data['designations'] = EmployeeDesignation::where('department_id',$request->id)->select('name','id')->get();
+        return response()->json(['status' => 1,'emplyee_detail' => $data]);
+
+    }
 
 }

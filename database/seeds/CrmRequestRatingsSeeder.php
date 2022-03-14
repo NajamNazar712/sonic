@@ -16,7 +16,7 @@ class CrmRequestRatingsSeeder extends Seeder
         DB::table('crm_request_ratings')->insert(array(
             array('id' => 1, 'name' => 'Bad', 'code' => '😞'),
             array('id' => 2, 'name' => 'Poor', 'code' => '🙁'),
-            array('id' => 3, 'name' => 'Regular', 'code' => '😶'),
+            array('id' => 3, 'name' => 'Average', 'code' => '😶'),
             array('id' => 4, 'name' => 'Good', 'code' => '😁'),
             array('id' => 5, 'name' => 'Excellent', 'code' => '😍')
         ));

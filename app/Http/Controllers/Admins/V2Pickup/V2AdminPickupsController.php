@@ -99,7 +99,6 @@ class V2AdminPickupsController extends Controller
 
     public function pending_list(Request $request)
     {
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
         }
@@ -358,7 +357,6 @@ class V2AdminPickupsController extends Controller
         if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
             $from = $request->get('requested_from_date');
             $to = $request->get('requested_to_date');
-
             $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
             $datatables->whereBetween('v2_pickup_requests.created_at', [$from, $stop_date]);
         }
@@ -460,7 +458,11 @@ class V2AdminPickupsController extends Controller
             else {
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if ($pickup_request->current_rider_id == $rider_id) {
-                    continue;
+
+                    if (!in_array($pickup_request_id, $allowed_pickup_requests)) {
+                        $allowed_pickup_requests[] = $pickup_request_id;
+                    }
+
                 } else {
                     $previous_rider_id = $pickup_request->current_rider_id;
                     $riders['old_rider_id'] = $pickup_request->current_rider_id;
@@ -499,14 +501,14 @@ class V2AdminPickupsController extends Controller
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
             }
-            if ($previous_rider_id != NULL) {
+            /*if ($previous_rider_id != NULL) {
                 NotificationsController::app_notification(2, $previous_rider_id, 2, $pickup_request->current_rider_id, $pickup_request->shipper_id);
             }
             if ($rider_id != NULL && $previous_rider_id == NULL) {
                 NotificationsController::app_notification(3, $rider_id, 2, $pickup_request->shipper_id);
             } elseif ($rider_id != NULL && $previous_rider_id != NULL) {
                 NotificationsController::app_notification(1, $rider_id, 2, $previous_rider_id, $pickup_request->shipper_id);
-            }
+            }*/
         }
         if (count($allowed_pickup_requests) > 0) {
             $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
