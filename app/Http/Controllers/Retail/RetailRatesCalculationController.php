@@ -40,37 +40,37 @@ class RetailRatesCalculationController extends Controller
                         if($zone_class->class == 0){
                             if($remaining_weight > 0){
                                 $additional_charges = intval($remaining_weight * $weight_charges->zone_a);;
-                                $charges = intval($weight_charges->zone_a) + $additional_charges;
+                                $charges = intval($charges->zone_a) + $additional_charges;
                             }
                             else{
-                                $charges = intval($weight_charges->zone_a);
+                                $charges = intval($charges->zone_a);
                             }
                         }
                         elseif ($zone_class->class == 1){
                             if($remaining_weight > 0){
                                 $additional_charges = intval($remaining_weight * $weight_charges->zone_b);
-                                $charges = intval($weight_charges->zone_b) + $additional_charges;
+                                $charges = intval($charges->zone_b) + $additional_charges;
                             }
                             else{
-                                $charges = intval($weight_charges->zone_b);
+                                $charges = intval($charges->zone_b);
                             }
                         }
                         elseif ($zone_class->class == 2){
                             if($remaining_weight > 0){
                                 $additional_charges = intval($remaining_weight * $weight_charges->zone_c);
-                                $charges = intval($weight_charges->zone_c) + $additional_charges;
+                                $charges = intval($charges->zone_c) + $additional_charges;
                             }
                             else{
-                                $charges = intval($weight_charges->zone_c);
+                                $charges = intval($charges->zone_c);
                             }
                         }
                         elseif ($zone_class->class == 3){
                             if($remaining_weight > 0){
                                 $additional_charges = intval($remaining_weight * $weight_charges->zone_d);
-                                $charges = intval($weight_charges->zone_d) + $additional_charges;
+                                $charges = intval($charges->zone_d) + $additional_charges;
                             }
                             else{
-                                $charges = intval($weight_charges->zone_d);
+                                $charges = intval($charges->zone_d);
                             }
                         }
                     }
@@ -79,28 +79,28 @@ class RetailRatesCalculationController extends Controller
                         if($pickup_city->id == $consignee_city->id){
                             if($remaining_weight > 0){
                                 $additional_charges = intval($remaining_weight * $weight_charges->within_city);
-                                $charges = intval($weight_charges->within_city) + $additional_charges;
+                                $charges = intval($charges->within_city) + $additional_charges;
                             }
                             else{
-                                $charges = intval($weight_charges->within_city);
+                                $charges = intval($charges->within_city);
                             }
                         }
                         elseif ($pickup_city->zone_id == $consignee_city->zone_id){
                             if($remaining_weight > 0){
                                 $additional_charges = intval($remaining_weight * $weight_charges->same_zone);
-                                $charges = intval($weight_charges->same_zone) + $additional_charges;
+                                $charges = intval($charges->same_zone) + $additional_charges;
                             }
                             else{
-                                $charges = intval($weight_charges->same_zone);
+                                $charges = intval($charges->same_zone);
                             }
                         }
                         else{
                             if($remaining_weight > 0){
                                 $additional_charges = intval($remaining_weight * $weight_charges->different_zone);
-                                $charges = intval($weight_charges->different_zone) + $additional_charges;
+                                $charges = intval($charges->different_zone) + $additional_charges;
                             }
                             else{
-                                $charges = intval($weight_charges->different_zone);
+                                $charges = intval($charges->different_zone);
                             }
                         }
                     }
@@ -112,7 +112,7 @@ class RetailRatesCalculationController extends Controller
                     $weight_charges = $weight_charges->first();
                     if($weight_charges->weight_addition == 1){
                         // = (intval($weight - $weight_charges->range_up) / $weight_charges->kg_range) + 1;
-                        $charges = RetailStandardRates::where('shipping_mode_id',$shipping_mode_id)->where('trax_box_id', $trax_box_id)->orderby('id','desc')->skip(1)->take(2)->first();
+                        $charges = RetailStandardRates::where('shipping_mode_id',$shipping_mode_id)->where('trax_box_id', $trax_box_id)->where('id', '<', $weight_charges->id)->orderby('id','desc')->first();
                         if($charges){
                             $remaining_weight = intval($weight - $charges->range_down);
                         }
@@ -122,30 +122,30 @@ class RetailRatesCalculationController extends Controller
                        /* $charges = intval($weight_charges->within_city) * $multiplier;*/
                         if($remaining_weight > 0){
                             $additional_charges = intval($remaining_weight * $weight_charges->within_city);
-                            $charges = intval($weight_charges->within_city) + $additional_charges;
+                            $charges = intval($charges->within_city) + $additional_charges;
                         }
                         else{
-                            $charges = intval($weight_charges->within_city);
+                            $charges = intval($charges->within_city);
                         }
                     }
                     elseif ($pickup_city->zone_id == $consignee_city->zone_id){
                        // $charges = intval($weight_charges->same_zone) * $multiplier;
                         if($remaining_weight > 0){
                             $additional_charges = intval($remaining_weight * $weight_charges->same_zone);
-                            $charges = intval($weight_charges->same_zone) + $additional_charges;
+                            $charges = intval($charges->same_zone) + $additional_charges;
                         }
                         else{
-                            $charges = intval($weight_charges->same_zone);
+                            $charges = intval($charges->same_zone);
                         }
                     }
                     else{
                         //$charges = intval($weight_charges->different_zone) * $multiplier;
                         if($remaining_weight > 0){
                             $additional_charges = intval($remaining_weight * $weight_charges->different_zone);
-                            $charges = intval($weight_charges->different_zone) + $additional_charges;
+                            $charges = intval($charges->different_zone) + $additional_charges;
                         }
                         else{
-                            $charges = intval($weight_charges->different_zone);
+                            $charges = intval($charges->different_zone);
                         }
                     }
                 }
