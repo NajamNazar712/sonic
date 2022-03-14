@@ -233,7 +233,7 @@
             var resign_date = $('#resign_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                format:'dd mmmm, yyyy',
+                format:'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
@@ -248,6 +248,8 @@
             });
 
             $('#employee_information_form').validate({
+                
+                
                 ignore: [],
                 errorClass: 'danger',
                 successClass: 'success',
@@ -255,6 +257,11 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
+                    $('#department_id').removeAttr('disabled');
+                    $('#city').removeAttr('disabled');
+                    $('#designation').removeAttr('disabled');
+                    $('#employee_name').removeAttr('disabled');
+                    
                     swal({
                         title: 'Please Wait!',
                         text: 'Your request is being processed!',

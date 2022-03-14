@@ -173,6 +173,8 @@ class AdminFnfController extends Controller
             $fnf->status_id = 1;
             $fnf->save();
 
+            $employee->joining_date = $request->joining_date_formatted;
+            $employee->save();
             $line_manager_trax_id = Admin::find($fnf->line_manager)->trax_id;
             $hod_trax_id = Admin::find($fnf->hod)->trax_id;
             $admins = array('Trax01099','Trax04484','Trax00043','Trax03840','Trax02533',$line_manager_trax_id,$hod_trax_id);
