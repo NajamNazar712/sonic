@@ -44,8 +44,8 @@ class AdminFnfController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),420);
     }
      $employee = Employee::join('fnf_section_employees as fnf','fnf.employee_id','=','employees.id')
-         ->join('admins as a','a.id','=','fnf.line_manager')
-         ->join('admins as ah','ah.id','=','fnf.hod')
+         ->join('employees as a','a.id','=','fnf.line_manager')
+         ->join('employees as ah','ah.id','=','fnf.hod')
          ->join('admins as h','h.id','=','fnf.created_by')
          ->join('admin_departments as d','d.id','=','employees.department_id')
          ->join('employee_designations as ed','ed.id','=','employees.designation_id')
