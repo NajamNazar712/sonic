@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
@@ -20,6 +22,7 @@ use App\Http\Models\DeliveryType;
 use App\Http\Models\PaymentMode;
 use App\Http\Models\Product;
 use App\Http\Models\RateStatus;
+use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShippingMode;
@@ -1047,6 +1050,209 @@ class ShipmentReturnAddressController extends Controller
         }
     }
 
+    public function return_address_change_excel_index(){
+        if(Session::has('shipment_return_address_change') && session('shipment_return_address_change') == 1){
+            return view('client.shipment.return_address_change.index');
+        }
+        else{
+            return redirect()->route('cod.access_denied');
+        }
+    }
+
+    public function return_address_change_excel_store(Request $request){
+
+        $user_id = session('user_id');
+        $allowed_statuses = array(20,22,24,27,29,30,33,35,37,44,45,46,47,48, 60);
+
+        Validator::extend('return_status_check', function ($attribute, $value, $parameters, $validator) use ($user_id, $allowed_statuses) {
+            $data = $validator->getData();
+            if(isset($data['tracking_number'])){
+                $return_address_id = $data['return_address_id'];
+                $tracking_number = $data['tracking_number'];
+            }
+            else{
+                return false;
+            }
+            if ($value) {
+
+                $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $user_id)->whereIn('shipper_status_id', $allowed_statuses)->whereNotNull('return_address_id');
+                if ($shipment->exists()) {
+                    $shipment = $shipment->first();
+                    if($shipment->shipper_status_id == 20){
+                        $return_city = NULL;
+                        $current_return_city = $shipment->return_address->city_id;
+                        $return_address = UserShippingInfo::find($return_address_id);
+                        if($return_address){
+                            $return_city = $return_address->city_id;
+                        }
+                        else{
+                            return false;
+                        }
+                        if($current_return_city == $return_city){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                    else{
+                        return true;
+                    }
+                } else {
+                    return false;
+                }
+            }
+        });
+
+        Validator::extend('return_destination_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+
+            $data = $validator->getData();
+            if(isset($data['return_address_id'])){
+                $return_address_id = $data['return_address_id'];
+                $tracking_number = $data['tracking_number'];
+            }
+            else{
+                return false;
+            }
+            if ($value) {
+
+                $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $user_id)->whereNotNull('return_address_id');
+                if ($shipment->exists()) {
+                    $shipment = $shipment->first();
+                    if($shipment->return_address_id == null){
+                        return false;
+                    }
+                    $current_return_city = $shipment->return_address->city_id;
+
+                    $return_city = UserShippingInfo::find($return_address_id);
+                    if($return_city){
+                        $return_city = $return_city->city_id;
+                    }
+                    if($current_return_city == $return_city){
+                        return true;
+                    }
+                    return false;
+                } else {
+                    return false;
+                }
+            }
+        });
+
+        $names = [
+            'tracking_number' => 'Tracking Number',
+            'return_address_id' => 'Return Address ID'
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'required_if' => ':attribute is Required when :other is :value.',
+            'filled' => ':attribute is Optional but cannot be Empty if Present.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'email' => ':attribute must be a Valid Email Address.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+            'unique' => ':attribute is already Present.',
+            'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+            'in' => ':attribute must be No or Yes.',
+            'return_destination_check' => 'Return city not same!',
+            'return_status_check' => 'Shipment not arrived at return destination!',
+        ];
+
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id, $allowed_statuses) {
+                $query->where('user_id', $user_id)->whereIn('shipper_status_id', $allowed_statuses)->whereNotNull('return_address_id');
+            }), 'return_status_check'],
+            'return_address_id' => ['required', 'integer', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id)->where('hidden', 0);
+            }), 'return_destination_check'],
+        ];
+
+        $fields = [0 => 'tracking_number', 1 => 'return_address_id'];
+
+        if($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number', 'Return Address ID'];
+        }
+
+        if (isset($spreadsheet)) {
+
+            $column_count = 2;
+
+            if (count($spreadsheet[0]) != $column_count) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            else {
+                unset($spreadsheet[0]);
+            }
+        }
+
+        if (!empty($spreadsheet) || !isset($spreadsheet)) {
+            $rows = array();
+            foreach ($spreadsheet as $spreadsheet_row) {
+                $row = array();
+
+                foreach ($spreadsheet_row as $key => $value) {
+                    $row[$fields[$key]] = $value;
+                }
+
+                $rows[] = $row;
+            }
+            unset($spreadsheet);
+            $errors = array();
+            $tracking_numbers = array();
+
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
+
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
+                }
+
+            }
+            if(!empty($errors)){
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
+                return redirect()->back()->withErrors($errors);
+            }
+            else{
+
+                foreach($rows as $key => $row){
+                    $shipment = Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', $allowed_statuses)->first();
+
+
+                    $shipment->return_address_id = $row['return_address_id'];
+
+                    $shipment->save();
+
+                    $tracking_numbers[] = $shipment->tracking_number;
+                }
+
+
+                $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                    return $tracking_number;
+                }, array_keys($tracking_numbers), $tracking_numbers));
+
+
+                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+            }
+
+        }
+        else {
+            return redirect()->back()->with('error', 'No Shipments in File');
+        }
+
+
+    }
 
 
 }

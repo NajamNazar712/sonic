@@ -206,7 +206,8 @@
                         <th class="border-primary border-darken-1">Tagged Hub</th>
                         <th class="border-primary border-darken-1">Tagged At</th>
                         <th class="border-primary border-darken-1">Tagged TAT</th>
-                        
+                        <th class="border-primary border-darken-1">Rating</th>
+
                     </tr>
                     </thead>
                 </table>
@@ -269,6 +270,9 @@
             display: table;
             width: auto !important;
             text-align: left;
+        }
+        td.rating_code {
+            font-size: 2em !important;
         }
     </style>
 @endsection
@@ -483,7 +487,8 @@
                             head.push('Tagged Hub');
                             head.push('Tagged At');
                             head.push('Tagged TAT');
-                            
+                            head.push('Rating');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -527,7 +532,8 @@
                                 row.push(values.tagged_hub);
                                 row.push(values.tagged_at);
                                 row.push(values.tagged_aging);
-                                
+                                row.push(values.rating);
+
 
 
                                 body.push(row);
@@ -627,7 +633,8 @@
                     {data: 'tagged_hub', name: 'crtadh.name', class: 'align-middle tagged_hub'},
                     {data: 'tagged_at', name: 'crt.created_at', class: 'align-middle tagged_at'},
                     {data: 'tagged_aging', name: 'crt.created_at', class: 'align-middle tagged_aging', orderable: false, searchable: false},
-                    
+                    {data: 'rating_code', name: 'crr.name', class: 'align-middle rating_code'},
+
                     
                 ],
                 rowCallback: function(row, data, index) {
