@@ -217,7 +217,7 @@ class AdminTrackingController extends Controller
                                 else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
                                     $bag = CargoManifestBag::where('seal_number',$journey->reference_1_id);
                                     if($journey->shipper_status_id == 11 && $bag->exists()){
-                                        $bag = $bag->first();
+                                        $bag = $bag->latest()->first();
                                         $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
                                         if($cargo_manifest->exists()){
 
@@ -1086,7 +1086,7 @@ class AdminTrackingController extends Controller
                                             $manifest_bag_seal_number++;
                                             $bag = CargoManifestBag::where('id',$bag_shipment->cargo_manifest_bag_id);
                                             if($bag->exists()){
-                                                $bag= $bag->first();
+                                                $bag= $bag->latest()->first();
                                                 $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
                                                 if($cargo_manifest->exists()){
 
@@ -1136,7 +1136,7 @@ class AdminTrackingController extends Controller
                                     else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
                                         $bag = CargoManifestBag::where('seal_number',$journey->reference_1_id);
                                         if($journey->shipper_status_id == 11 && $bag->exists()){
-                                            $bag = $bag->first();
+                                            $bag= $bag->latest()->first();
                                             $cargo_manifest = ManifestBag::where('cargo_manifest_bag_id',$bag->id);
                                             if($cargo_manifest->exists()){
 

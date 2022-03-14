@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Rider;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2RiderPickup;
@@ -43,13 +44,14 @@ class RiderDeactivateAutomatically extends Command
      */
     public function handle()
     {
-        $date_week_age = Carbon::now()->subDays(7)->toDateTimeString();
+        $date_week_age = Carbon::now()->subDays(3)->toDateTimeString();
         $today = Carbon::now()->toDateTimeString();
         $rider_data = '';
         $rider_ids = Rider::where('status', 1)->whereDate('created_at', '<', $date_week_age)->pluck('id')->toArray();
         $deliveries  = DeliveryNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
         $v2_pickups  = V2PickupNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
-        $rider_active = array_unique(array_merge($deliveries,$v2_pickups));
+        $return_notes  = ReturnNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
+        $rider_active = array_unique(array_merge($deliveries,$v2_pickups,$return_notes));
         $data = array_diff($rider_ids, $rider_active);
         if ($data != null){
             NotificationsController::send(155, $data);
