@@ -216,7 +216,7 @@
             var joining_date = $('#joining_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                format:'dd mmmm, yyyy',
+                format:'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
