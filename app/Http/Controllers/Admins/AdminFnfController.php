@@ -175,8 +175,8 @@ class AdminFnfController extends Controller
 
             $employee->joining_date = $request->joining_date_formatted;
             $employee->save();
-            $line_manager_trax_id = Admin::find($fnf->line_manager)->trax_id;
-            $hod_trax_id = Admin::find($fnf->hod)->trax_id;
+            $line_manager_trax_id = Employee::find($fnf->line_manager)->trax_id;
+            $hod_trax_id = Employee::find($fnf->hod)->trax_id;
             $admins = array('Trax01099','Trax04484','Trax00043','Trax03840','Trax02533',$line_manager_trax_id,$hod_trax_id);
             NotificationsController::send(146,$fnf->id,$admins);
             return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request Added Successfully']);
