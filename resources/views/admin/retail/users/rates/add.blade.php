@@ -90,7 +90,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                       data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required" value="0.5">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -219,7 +219,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" data-rule-required="true" data-msg-required="This field is required" name="rush_kg_range[{{$index_row}}]">
+                                                                       data-bts-button-up-class="btn btn-success" data-rule-required="true" data-msg-required="This field is required" name="rush_kg_range[{{$index_row}}]" value="0.5">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -331,7 +331,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" data-rule-required="true" data-msg-required="This field is required"  name="cod_kg_range[{{$index_row}}]">
+                                                                       data-bts-button-up-class="btn btn-success" data-rule-required="true" data-msg-required="This field is required"  name="cod_kg_range[{{$index_row}}]" value="0.5">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -443,7 +443,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="swift_kg_range[{{$index_row}}]">
+                                                                       data-bts-button-up-class="btn btn-success" name="swift_kg_range[{{$index_row}}]" value="0.5">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -554,7 +554,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" data-rule-required="true" data-msg-required="This field is required"  name="flyer_kg_range[{{$index_row}}]">
+                                                                       data-bts-button-up-class="btn btn-success" data-rule-required="true" data-msg-required="This field is required"  name="flyer_kg_range[{{$index_row}}]" value="0.5">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -663,7 +663,7 @@
 
                                                             <div class="input-group input-group-sm form-group">
                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="hdocs_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                       data-bts-button-up-class="btn btn-success" name="hdocs_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required" value="0.5">
                                                             </div>
                                                         </fieldset>
                                                     </div>
@@ -784,7 +784,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success"  data-rule-required="true" data-msg-required="This field is required"name="trax_box_2_kg_range[{{$index_row}}]">
+                                                                                       data-bts-button-up-class="btn btn-success"  data-rule-required="true" data-msg-required="This field is required"name="trax_box_2_kg_range[{{$index_row}}]" value="0.5">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -889,7 +889,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_5_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_5_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required" value="0.5">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -995,7 +995,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_10_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_10_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required" value="0.5">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -1100,7 +1100,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_15_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_15_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required" value="0.5">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -1205,7 +1205,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_20_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_20_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required" value="0.5">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -1310,7 +1310,7 @@
 
                                                                             <div class="input-group input-group-sm form-group">
                                                                                 <input type="text" class="touchspin-color input-sm spkg"  disabled data-bts-button-down-class="btn btn-success"
-                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_30_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                                                       data-bts-button-up-class="btn btn-success" name="trax_box_30_kg_range[{{$index_row}}]" data-rule-required="true" data-msg-required="This field is required" value="0.5">
                                                                             </div>
                                                                         </fieldset>
                                                                     </div>
@@ -1547,7 +1547,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color input-sm spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[' + on_door_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="saver_plus_kg_range[' + on_door_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_a[' + on_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_b[' + on_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_c[' + on_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_zone_d[' + on_door_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -1606,7 +1606,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color input-sm spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="rush_kg_range[' + rush_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="rush_kg_range[' + rush_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="rush_wc[' + rush_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="rush_sz[' + rush_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="rush_dz[' + rush_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -1662,7 +1662,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color  input-sm spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="cod_kg_range[' + cod_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color  input-sm spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="cod_kg_range[' + cod_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="cod_wc[' + cod_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="cod_sz[' + cod_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="cod_dz[' + cod_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -1720,7 +1720,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color  input-sm spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="swift_kg_range[' + swift_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color  input-sm spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="swift_kg_range[' + swift_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="swift_wc[' + swift_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="swift_sz[' + swift_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="swift_dz[' + swift_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -1778,7 +1778,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color  input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="flyer_kg_range[' + flyer_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color  input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="flyer_kg_range[' + flyer_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="flyer_wc[' + flyer_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="flyer_sz[' + flyer_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="flyer_dz[' + flyer_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -1836,7 +1836,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color  input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="swift_kg_range[' + doc_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color  input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="swift_kg_range[' + doc_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="hdocs_wc[' + doc_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="hdocs_sz[' + doc_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="hdocs_dz[' + doc_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -1895,7 +1895,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_2_kg_range[' + trax_boz_2_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_2_kg_range[' + trax_boz_2_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_2_wc[' + trax_boz_2_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_2_sz[' + trax_boz_2_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_2_dz[' + trax_boz_2_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -1952,7 +1952,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_5_kg_range[' + trax_box_5_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_5_kg_range[' + trax_box_5_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_5_wc[' + trax_box_5_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_5_sz[' + trax_box_5_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_5_dz[' + trax_box_5_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -2007,7 +2007,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_10_kg_range[' + trax_box_10_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_10_kg_range[' + trax_box_10_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_10_wc[' + trax_box_10_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_10_sz[' + trax_box_10_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_10_dz[' + trax_box_10_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -2062,7 +2062,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_15_kg_range[' + trax_box_15_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_15_kg_range[' + trax_box_15_count + ']"  disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_wc[' + trax_box_15_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_sz[' + trax_box_15_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_15_dz[' + trax_box_15_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -2117,7 +2117,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_20_kg_range[' + trax_box_20_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_20_kg_range[' + trax_box_20_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_wc[' + trax_box_20_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_sz[' + trax_box_20_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_20_dz[' + trax_box_20_count + ']"></fieldset></div><div class="col-1">\n' +
@@ -2171,7 +2171,7 @@
                     '       </div><div class="col text-center">\n' +
                     '                                                        <fieldset style="padding-top: 5px;">\n' +
                     '                                                            <div class="input-group input-group-sm form-group">\n' +
-                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_30_kg_range[' + trax_box_30_count + ']" disabled>\n' +
+                    '                                                                <input type="text" class="touchspin-color input-sm spkg validated" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="trax_box_30_kg_range[' + trax_box_30_count + ']" disabled value="0.5">\n' +
                     '                                                            </div>\n' +
                     '                                                        </fieldset>\n' +
                     '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_wc[' + trax_box_30_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_sz[' + trax_box_30_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="trax_box_30_dz[' + trax_box_30_count + ']"></fieldset></div><div class="col-1">\n' +

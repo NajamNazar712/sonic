@@ -25,6 +25,7 @@ class RetailRatesCalculationController extends Controller
         $remaining_weight = 0;
         $multiplier = 1;
         if($business_category_id == 1){
+            $destination_city = City::find($destination_id);
             $pickup_city = City::find($pickup_city_id);
             if($shipping_mode_id != 5){
                 $weight_charges = RetailStandardRates::where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
@@ -34,11 +35,10 @@ class RetailRatesCalculationController extends Controller
                         $charges = RetailStandardRates::where('shipping_mode_id',$shipping_mode_id)->where('id', '<', $weight_charges->id)->orderby('id','desc')->first();
                         if($charges){
                          $remaining_weight = intval($weight - $charges->range_down);
-                         //$multiplier = (intval($weight - $weight_charges->range_up) / $weight_charges->kg_range) + 1;
                         }
                     }
                     if($shipping_mode_id == 1){
-                        $zone_class = ZoneClassCity::where('city_id', $pickup_city_id)->where('zone_id', $pickup_city->zone_id)->first();
+                        $zone_class = ZoneClassCity::where('city_id', $destination_id)->where('zone_id', $destination_city->zone_id)->first();
                         if($zone_class->class == 0){
                             if($remaining_weight > 0){
                                 $additional_charges = intval(($remaining_weight/$weight_charges->kg_range) * $weight_charges->zone_a);
@@ -121,7 +121,7 @@ class RetailRatesCalculationController extends Controller
                     }
                     $consignee_city = City::find($destination_id);
                     if($pickup_city->id == $consignee_city->id){
-                       /* $charges = intval($weight_charges->within_city) * $multiplier;*/
+
                         if($remaining_weight > 0){
                             $additional_charges = intval(($remaining_weight/$weight_charges->kg_range) * $weight_charges->within_city);
                             $charges = intval($charges->within_city) + $additional_charges;
@@ -131,7 +131,6 @@ class RetailRatesCalculationController extends Controller
                         }
                     }
                     elseif ($pickup_city->zone_id == $consignee_city->zone_id){
-                       // $charges = intval($weight_charges->same_zone) * $multiplier;
                         if($remaining_weight > 0){
                             $additional_charges = intval(($remaining_weight/$weight_charges->kg_range) * $weight_charges->same_zone);
                             $charges = intval($charges->same_zone) + $additional_charges;
@@ -141,7 +140,7 @@ class RetailRatesCalculationController extends Controller
                         }
                     }
                     else{
-                        //$charges = intval($weight_charges->different_zone) * $multiplier;
+                       
                         if($remaining_weight > 0){
                             $additional_charges = intval(($remaining_weight/$weight_charges->kg_range) * $weight_charges->different_zone);
                             $charges = intval($charges->different_zone) + $additional_charges;
