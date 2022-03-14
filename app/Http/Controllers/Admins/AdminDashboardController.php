@@ -11759,8 +11759,8 @@ class AdminDashboardController extends Controller
                     $admin->email = $request->official_email;
                 }
 
-                if ($request->has('date_of_birth')) {
-                    $employee_request->date_of_birth = $request->date_of_birth;
+                if ($request->has('date_of_birth_formatted')) {
+                    $employee_request->date_of_birth = $request->date_of_birth_formatted;
                 }
 
                 if ($request->has('mother_name')) {
