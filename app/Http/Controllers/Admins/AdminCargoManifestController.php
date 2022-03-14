@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
@@ -1348,7 +1349,7 @@ class AdminCargoManifestController extends Controller
                         $bag->update();
                         $details = array();
 
-                        $origin = $bag->origin_hub;
+                        $origin = City::find($origin_id);
                         $destination = $bag->destination_hub;
 
                         $details['id'] = $bag->id;
@@ -2220,7 +2221,7 @@ class AdminCargoManifestController extends Controller
                     ->where('mb.cargo_manifest_bag_id', $bag->id);
 
                 if ($cargo_bag->exists()) {
-                    $cargo_bag = $cargo_bag->first();
+                    $cargo_bag = $cargo_bag->latest()->first();
 
                     $mapping = V2JunctionMapping::where('id', $bag->junction_mapping_id);
 
@@ -2297,7 +2298,7 @@ class AdminCargoManifestController extends Controller
                     ->where('mb.cargo_manifest_bag_id', $bag->id);
 
                 if ($cargo_bag->exists()) {
-                    $cargo_bag = $cargo_bag->first();
+                    $cargo_bag = $cargo_bag->latest()->first();
                     $mapping = V2JunctionMapping::where('id', $bag->junction_mapping_id);
 
                     if ($mapping->exists()) {
@@ -2362,8 +2363,8 @@ class AdminCargoManifestController extends Controller
                 ->where('mb.cargo_manifest_bag_id', $bag->id);
 
             if ($cargo_bag->exists()) {
-                $cargo_bag = $cargo_bag->first();
-                $manifest_bags = ManifestBag::where('cargo_manifest_id', $cargo_bag->id)->get();
+                $cargo_bag = $cargo_bag->latest()->first();
+                $manifest_bags = ManifestBag::where('cargo_manifest_id',$cargo_bag->id)->where('status',0)->get();
                 $bag_short_received_count = 0;
                 $cargo_short_received = array();
                 foreach ($manifest_bags as $manifest_bag) {
@@ -2409,8 +2410,8 @@ class AdminCargoManifestController extends Controller
                 ->where('mb.cargo_manifest_bag_id', $bag->id);
 
             if ($cargo_bag->exists()) {
-                $cargo_bag = $cargo_bag->first();
-                $manifest_bags = ManifestBag::where('cargo_manifest_id', $cargo_bag->id)->get();
+                $cargo_bag = $cargo_bag->latest()->first();
+                $manifest_bags = ManifestBag::where('cargo_manifest_id',$cargo_bag->id)->where('status',0)->get();
                 $bag_short_received_count = 0;
                 $cargo_short_received = array();
                 foreach ($manifest_bags as $manifest_bag) {
@@ -3040,6 +3041,52 @@ class AdminCargoManifestController extends Controller
         } else {
             return response()->json(['status' => 0]);
         }
+    }
+
+    public function manifest_draft_setting(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),509);
+        $users = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
+            ->select(['admins.id','admins.trax_id','admins.name'])
+            ->where('ar.department_id',6)
+            ->where('admins.status',1);
+
+        if(session('role_id') != 1)
+        {
+            $users = $users->where('default_hub_id', Auth::user()->default_hub_id);
+        }
+
+        $users = $users->get();
+        return view('admin.cargo.manifest.draft_setting',compact('users'));
+    }
+
+    public function manifest_draft_setting_list(Request $request)
+    {
+        $cargo = CargoManifestDraftBags::join('cities as o', 'cargo_manifest_draft_bags.origin_id', '=', 'o.id')
+            ->join('cities as d', 'cargo_manifest_draft_bags.destination_id', '=', 'd.id')
+            ->join('admins as u', 'cargo_manifest_draft_bags.added_by', '=', 'u.id')
+            ->select('cargo_manifest_draft_bags.id as id','cargo_manifest_draft_bags.seal_number as seal_number', 'cargo_manifest_draft_bags.shipments_count as shipment_count', 'o.id as origin_id', 'o.name as origin', 'd.id as destination_id', 'd.name as destination', 'u.name as assigned_to', 'cargo_manifest_draft_bags.created_at as created_at');
+
+
+        if(session('role_id') != 1)
+        {
+            $cargo->where('cargo_manifest_draft_bags.origin_id',Auth::user()->default_hub_id);
+        }
+
+        $datatables = Datatables::of($cargo);
+
+        return $datatables->make(true);
+    }
+
+    public function manifest_draft_update (Request $request)
+    {
+        $request->validate([
+            'ids' => 'required',
+            'user_id' => 'required',
+        ]);
+
+        $ids = explode(',', $request->ids);
+        CargoManifestDraftBags::whereIn('id',$ids)->update(['added_by'=>$request->user_id]);
+        return back()->with(['success' => 'Bag Transfered Successfully']);
     }
 
 }

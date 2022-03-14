@@ -33,4 +33,7 @@ class CrmRequest extends Model
     public function images(){
         return $this->hasMany('App\Http\Models\CRM\CrmRequestImage', 'crm_request_id');
     }
+    public function feedback() {
+        return $this->hasOne('App\Http\Models\CRM\CrmRequestFeedback');
+    }
 }

@@ -54,6 +54,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function pending_index() {
+        return redirect()->route('admin.access_denied');
         ActivityTrailController::createActivityTrailLog(Auth::id(),297);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
@@ -1232,6 +1233,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public  function history_index(){
+        return redirect()->route('admin.access_denied');
         $shipping_mode = ShippingMode::all();
         $bag_statuses = BagStatus::all();
         $transport_vendor = TransportModeVendor::all();
@@ -1329,6 +1331,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_pending_index() {
+        return redirect()->route('admin.access_denied');
         ActivityTrailController::createActivityTrailLog(Auth::id(),299);
         $shipping_mode = ShippingMode::all();
         $transport_vendor = TransportModeVendor::all();
@@ -1452,7 +1455,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_create_index(Request $request, $id = NULL) {
-       
+        return redirect()->route('admin.access_denied');
         if($id == NULL){
             $id = 0;
         }
@@ -1728,7 +1731,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_in_transit_index(){
-        
+        return redirect()->route('admin.access_denied');
         $shipping_mode = ShippingMode::all();
         $cargo_status = MasterCargoStatus::all();
         $transport_vendor = TransportModeVendor::all();
@@ -2770,6 +2773,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_bag_quick_receive_index(){
+        return redirect()->route('admin.access_denied');
         return view('admin.master_cargo.bag.quick_receive');
     }
 
@@ -3006,6 +3010,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_received_index(){
+        return redirect()->route('admin.access_denied');
         $shipping_mode = ShippingMode::all();
         $cargo_status = MasterCargoStatus::all();
         $transport_vendor = TransportModeVendor::all();
@@ -3131,6 +3136,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_history_index(){
+        return redirect()->route('admin.access_denied');
         $shipping_mode = ShippingMode::all();
         $cargo_status = MasterCargoStatus::all();
         $transport_vendor = TransportModeVendor::all();
@@ -3261,6 +3267,8 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_in_transit_bag_index() {
+        return redirect()->route('admin.access_denied');
+
         $shipping_mode = ShippingMode::all();
         $transport_vendor = TransportModeVendor::all();
         $transport_mode = TransportMode::all();
@@ -3399,6 +3407,8 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_bag_receive_index() {
+        return redirect()->route('admin.access_denied');
+
         if (session('bag_number')) {
             $bag = Bag::find(session('bag_number'));
             $total = BagShipment::where('bag_id', session('bag_number'))->where('status', 0)->count();

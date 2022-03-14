@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins\Retail;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\Admins\DeliveryController;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\PickupNoteStationDepositNote;
@@ -182,22 +183,24 @@ class RetailCompletedDeliveries extends Controller
 //                $expense = $request->has('total_expenses') ? $request->total_expenses : 0;
                 $total_amount = $request->total_pncc_amount;
 //                $total_amount = $request->has('total_amount') ? $request->total_amount : $request->total_dncc_amount;
-                $sdn_id = StationDepositNote::create([
+                $created_by = Auth::id();
+                $sdn = StationDepositNote::create([
                     'hub_id' => $request->sdn_hub_id,
                     'dncc_count' => $request->sdn_count,
                     'sdn_delivered_shipments' => $request->sdn_delivered_shipments,
                     'sdn_amount' => $request->total_pncc_amount,
                     'sdn_net_amount' => $total_amount,
-                    'deposited_by' => Auth::id(),
+                    'deposited_by' => $created_by,
                     'sdn_type' => 2
                 ]);
                 foreach ($pncc_ids as $pncc) {
                     PickupNoteStationDepositNote::create([
-                        'station_deposit_note_id' => $sdn_id->id,
+                        'station_deposit_note_id' => $sdn->id,
                         'retail_pickup_note_id' => $pncc
                     ]);
                     RetailPickupNote::where('id', $pncc)->update(['expense' => $request->expense[$pncc], 'net_amount' => $request->net_amount[$pncc], 'remarks' => $request->remarks[$pncc], 'pncc_status' => 1]);
                 }
+                DeliveryController::add_sdn_logs($sdn->id, 0, $created_by);
 
                 return redirect(route('admin.delivery.sdn.index'))->with('success', 'SDN created successfully!');
             } else {

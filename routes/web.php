@@ -174,6 +174,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('', 'Shippers\ShipmentOriginChangeController@shipments_origin_index')->name('index');
             Route::post('store', 'Shippers\ShipmentOriginChangeController@shipments_origin_store')->name('store');
         });
+
+        Route::prefix('return_address_change')->name('return_address_change.')->group(function () {
+            Route::get('', 'Shippers\ShipmentReturnAddressController@return_address_change_excel_index')->name('index');
+            Route::post('', 'Shippers\ShipmentReturnAddressController@return_address_change_excel_store')->name('store');
+        });
     });
 
     Route::prefix('dispute')->name('dispute.')->group(function (){
@@ -295,10 +300,18 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('invoice')->name('invoice.')->group(function () {
             Route::get('', 'Shippers\ShipperFinanceController@invoice_index')->name('index');
             Route::get('list', 'Shippers\ShipperFinanceController@invoice_list')->name('list');
-            Route::post('print', 'Shippers\ShipperFinanceController@invoices_print')->name('print');
+            Route::post('detail_print', 'Shippers\ShipperFinanceController@invoices_detail_print')->name('detail_print');
             Route::get('export_to_excel', 'Shippers\ShipperFinanceController@invoices_export_to_excel')->name('export_to_excel');
+            Route::get('reimbursement/export_to_excel', 'Shippers\ShipperFinanceController@reimbursement_invoices_export_to_excel')->name('reimbursement.export_to_excel');
             Route::put('email_reminder', 'Shippers\ShipperFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('print_origin_wise', 'Shippers\ShipperFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
+            Route::post('print', 'Shippers\ShipperFinanceController@corporate_invoice_print')->name('invoices_print');
+
+            Route::prefix('reimbursement')->name('reimbursement.')->group(function () {
+                Route::post('detail_print', 'Shippers\ShipperFinanceController@reimbursement_invoices_print')->name('detail_print');
+                Route::post('print', 'Shippers\ShipperFinanceController@invoice_reimbursement_print')->name('invoices_print');
+            });
+
         });
     });
 
@@ -395,6 +408,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('add', 'Shippers\ShipperCRMController@add_request')->name('add');
             Route::post('re_open', 'Shippers\ShipperCRMController@re_open_request')->name('re_open');
             Route::post('/lost/claim', 'Shippers\ShipperCRMController@lost_claim')->name('lost.claim');
+            Route::post('feedback', 'Shippers\ShipperCRMController@customer_feedback')->name('feedback');
+
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Shippers\ShipperCRMController@add_feedback')->name('add');
@@ -403,6 +418,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('add', 'Shippers\ShipperCRMController@add_comment')->name('add');
             Route::post('get', 'Shippers\ShipperCRMController@get_latest_comment')->name('get');
         });
+
     });
 
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
@@ -451,6 +467,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('payment_subscription')->name('payment_subscription.')->group(function () {
             Route::get('', 'Shippers\ShipperGlobalSettingsController@payment_subscription_index')->name('index');
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@payment_subscription_submit')->name('store');
+        });
+
+        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@receiving_sheet_description_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@receiving_sheet_description_submit')->name('store');
         });
 
     });
@@ -1221,6 +1242,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('adjustment/add','Admins\DeliveryController@sdn_adjustment_add')->name('adjustment.add');
             Route::get('petty_cash_detail','Admins\DeliveryController@sdn_petty_cash_detail')->name('petty_cash_detail');
 
+            Route::post('status_logs','Admins\DeliveryController@sdn_status_logs')->name('status_logs');
+
             Route::prefix('retail')->name('retail.')->group(function() {
                 Route::get('{id}/details','Admins\Retail\RetailCompletedDeliveries@sdn_details')->name('details');
                 Route::get('{id}/ajax','Admins\Retail\RetailCompletedDeliveries@sdn_details_ajax')->name('ajax');
@@ -1725,7 +1748,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('draft')->name('draft.')->group(function () {
             Route::get('/list', 'Admins\AdminCargoManifestController@manifest_draft')->name('list');
             Route::post('/delete', 'Admins\AdminCargoManifestController@manifest_draft_delete')->name('delete');
-
+            Route::get('setting/list', 'Admins\AdminCargoManifestController@manifest_draft_setting_list')->name('setting.list');
+            Route::get('setting', 'Admins\AdminCargoManifestController@manifest_draft_setting')->name('setting');
+            Route::post('update', 'Admins\AdminCargoManifestController@manifest_draft_update')->name('update');
         });
 
     });
@@ -1948,7 +1973,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
             Route::post('slip', 'Admins\AdminFinanceController@invoices_slip')->name('slip');
             Route::post('slip/view', 'Admins\AdminFinanceController@invoices_slip_view')->name('slip_view');
-            Route::post('print', 'Admins\AdminFinanceController@invoices_print')->name('print');
+            Route::post('invoices_detail_print', 'Admins\AdminFinanceController@invoices_detail_print')->name('invoices_detail_print');
+            Route::post('print', 'Admins\AdminFinanceController@corporate_invoice_print')->name('invoices_print');
             Route::post('print_origin_wise', 'Admins\AdminFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
             Route::post('print_gst_wise', 'Admins\AdminFinanceController@invoices_print_gst_wise')->name('print_gst_wise');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@invoices_export_to_excel')->name('export_to_excel');
@@ -1965,8 +1991,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('print_origin_wise', 'Admins\AdminFinanceController@reimbursement_invoices_print_origin_wise')->name('print_origin_wise');
                 Route::post('print_gst_wise', 'Admins\AdminFinanceController@reimbursement_invoices_print_gst_wise')->name('print_gst_wise');
                 Route::get('export_to_excel', 'Admins\AdminFinanceController@reimbursement_invoices_export_to_excel')->name('export_to_excel');
-                Route::post('print', 'Admins\AdminFinanceController@reimbursement_invoices_print')->name('print');
-
+                Route::post('detail_print', 'Admins\AdminFinanceController@reimbursement_detail_invoices_print')->name('detail_print');
+                Route::post('print', 'Admins\AdminFinanceController@reimbursement_invoice_print')->name('invoices_print');
             });
         });
 
@@ -1983,7 +2009,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             
         });
-
 
         Route::prefix('retail')->name('retail.')->group(function () {
 
@@ -2017,10 +2042,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
         });
-
-
-
-
     });
 
     Route::prefix('petty_cash')->name('petty_cash.')->group(function() {
@@ -3197,6 +3218,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@return_reason_mandatory_store')->name('store');
         });
 
+        Route::prefix('return_shipments_address')->name('return_shipments_address.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@return_shipments_address_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@return_shipments_address_store')->name('store');
+        });
+
     });
 
 
@@ -3580,6 +3606,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/education', 'Admins\AdminHumanResourseController@employee_directory_education_update')->name('education.update');
             Route::post('{employee}/employment', 'Admins\AdminHumanResourseController@employee_directory_employment_update')->name('employment.update');
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
+            Route::post('designation_logs', 'Admins\AdminHumanResourseController@designation_change_logs')->name('designation_logs');
             Route::prefix('staff')->name('staff.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');

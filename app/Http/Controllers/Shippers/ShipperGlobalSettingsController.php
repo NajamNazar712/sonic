@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shippers;
 use App\Http\Controllers\Webhook\WebhookLogController;
 use App\Http\Models\PickupAddressIbanMapping;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\Http\Models\Shipper\ShipperReceivingSheetSetting;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -409,4 +410,47 @@ class ShipperGlobalSettingsController extends Controller
 
         }
     }
+
+    public function receiving_sheet_description_index(){
+        $description = TRUE;
+        $sheet_settings = ShipperReceivingSheetSetting::where('user_id', session('user_id'));
+        if($sheet_settings->exists()){
+            $sheet_settings = $sheet_settings->first();
+            $description = $sheet_settings->item_description;
+        }
+
+        return view('client.settings.receiving_sheet')->with(['description'=>$description]);
+    }
+
+    public function receiving_sheet_description_submit(Request $request){
+
+        $settings = ShipperReceivingSheetSetting::where('user_id', session('user_id'));
+
+        if($settings->exists()){
+            $settings = $settings->first();
+            if($request->item_description == "on"){
+                $settings->item_description = 1;
+            }
+            else{
+                $settings->item_description = 0;
+            }
+            $settings->save();
+        }
+        else{
+            $new_settings = new ShipperReceivingSheetSetting();
+            $new_settings->user_id = session('user_id');
+
+            if($request->item_description == "on"){
+                $new_settings->item_description = 1;
+            }
+            else{
+                $new_settings->item_description = 0;
+            }
+            $new_settings->save();
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+
+    }
+
 }

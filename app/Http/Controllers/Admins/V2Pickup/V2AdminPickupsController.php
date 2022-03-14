@@ -137,7 +137,7 @@ class V2AdminPickupsController extends Controller
             $pickup_requests = $pickup_requests->whereIn('ci.hub_id', session('hubs'));
         }
         if (session('department_id') == 7) {
-            if (session('role_id') != 4) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $pickup_requests = $pickup_requests->whereIn('u.id', session('tagged_shippers'));
             }
         }
@@ -3182,7 +3182,7 @@ class V2AdminPickupsController extends Controller
             $pickup_requests = $pickup_requests->whereIn('ci.hub_id', session('hubs'));
         }
         if (session('department_id') == 7) {
-            if (session('role_id') != 4) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $pickup_requests = $pickup_requests->whereIn('u.id', session('tagged_shippers'));
             }
         }

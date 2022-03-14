@@ -26,6 +26,7 @@ use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteAdjustment;
+use App\Http\Models\Admin\StationDepositNoteLog;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\DeliveryNoteRequests;
@@ -319,7 +320,7 @@ class DeliveryController extends Controller
     public function check_rider_dncc_status(Request $request)
     {
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-        $delivery_note = DeliveryNote::where([['rider_id', $request->rider_id], ['dncc_status', 0]])->where('status', '!=', 4)
+        $delivery_note = DeliveryNote::where(['rider_id' => $request->rider_id, 'dncc_status' => 0])->where('status', '!=', 4)
             ->whereDate('created_at', '>', $datetime)
             ->whereDate('created_at', '!=', Carbon::today());
 
@@ -646,8 +647,6 @@ class DeliveryController extends Controller
             } else {
                 return ['status' => 1, 'error' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!'];
             }
-
-
         }
     }
 
@@ -918,7 +917,7 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->join('zones as z','oc.zone_id','=','z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.rider_type_id', 'riders.operation_rider_id'])
             ->where('delivery_notes.status', 0);
 
 
@@ -1098,6 +1097,9 @@ class DeliveryController extends Controller
     {
         $delivery_note = DeliveryNote::find($id);
         if ($delivery_note) {
+            if($delivery_note->status == 4){
+                return redirect()->back()->with('error', 'Delivery note is cancelled!');
+            }
             if (($delivery_note->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(304, session('permissions')))) {
                 if (DeliveryNoteShipment::where('delivery_note_id', $id)->where('status', '>', 0)->count() == 0) {
                     $service_type = BookingType::all();
@@ -1191,13 +1193,17 @@ class DeliveryController extends Controller
                     if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                         $cod = $cod - $parcel->amount;
                     }
+
+                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
+                    ShipmentsJourneyController::add($request->shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id(), $request->delivery_note_id);
+
+
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
                     } else {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                     }
-                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 6]);
-                    ShipmentsJourneyController::add($request->shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id(), $request->delivery_note_id);
+
                 }
 
                 return ['status' => 0, 'success' => 'Shipment is successfully removed'];
@@ -1579,6 +1585,12 @@ class DeliveryController extends Controller
         }
         $require_password = false;
         if ($note_data) {
+
+            $rider = $note_data->rider;
+            if(session('role_id') !== 1 && ($rider->operation_rider_id === 1 && $rider->rider_type_id === 1)){
+                return redirect()->back()->with('error', 'You are not authorized to update this delivery note!');
+            }
+
             if ($note_data->password != null) {
                 $require_password = true;
             }
@@ -4634,22 +4646,24 @@ class DeliveryController extends Controller
                 $expense = $request->has('total_expenses') ? $request->total_expenses : 0;
                 $total_amount = $request->total_dncc_amount;
 //                $total_amount = $request->has('total_amount') ? $request->total_amount : $request->total_dncc_amount;
-                $sdn_id = StationDepositNote::create([
+                $created_by =  Auth::id();
+                $sdn = StationDepositNote::create([
                     'hub_id' => $request->sdn_hub_id,
                     'dncc_count' => $request->sdn_count,
                     'sdn_delivered_shipments' => $request->sdn_delivered_shipments,
                     'sdn_amount' => $request->total_dncc_amount,
                     'sdn_net_amount' => $total_amount,
-                    'deposited_by' => Auth::id()
+                    'deposited_by' => $created_by
                 ]);
                 foreach ($dncc_ids as $dncc) {
                     DeliveryNoteStationDepositNote::create([
-                        'station_deposit_note_id' => $sdn_id->id,
+                        'station_deposit_note_id' => $sdn->id,
                         'delivery_note_id' => $dncc
                     ]);
                     DeliveryNote::where('id', $dncc)->update(['expense' => $request->expense[$dncc], 'net_amount' => $request->net_amount[$dncc], 'remarks' => $request->remarks[$dncc], 'dncc_status' => 1]);
                 }
 
+                self::add_sdn_logs($sdn->id, 0, $created_by);
                 return redirect(route('admin.delivery.sdn.index'));
             } else {
                 return redirect(route('admin.delivery.sdn.index'))->with('error', 'SDN already created!');
@@ -4822,6 +4836,7 @@ class DeliveryController extends Controller
 
                 $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove PNCC</div></button>';
 
+                $view_logs = '<button type="button" class="dropdown-item view_logs"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
                 $dropdown = '
                   <div class="btn-group">
@@ -4866,6 +4881,7 @@ class DeliveryController extends Controller
                         }
                     }
                 }
+                $dropdown .= $view_logs;
                 $dropdown .= '
                     </div>
                   </div>
@@ -4963,6 +4979,7 @@ class DeliveryController extends Controller
                         }
                     }
 
+                    self::add_sdn_logs($station_deposit_note->id, 1, Auth::id());
                     return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Deposited']);
                 } else {
 
@@ -5076,6 +5093,8 @@ class DeliveryController extends Controller
         $sdn->deposit_slip_status = 1;
         $sdn->status = 1;
         $sdn->save();
+
+        self::add_sdn_logs($sdn_id, 1, Auth::id());
         return redirect()->back()->with(['status' => 1, 'success' => 'Deposit Slip uploaded successfully!']);
 
     }
@@ -6923,10 +6942,11 @@ class DeliveryController extends Controller
                 foreach ($slips as $slip) {
                     $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
                     $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;
+                    $sorted_array[$slip->id]['code'] = $slip->id;
                     $sorted_array[$slip->id]['amount'] = $slip->amount;
                     $sorted_array[$slip->id]['created_at'] = Carbon::parse($slip->created_at)->toDateTimeString();
-                    $sorted_array[$slip->id]['uploaded_by'] = $slip->uploaded_by_admin->name;
-                    $img_url = 'uploads/sdn/'. $slip->created_at;
+                    $sorted_array[$slip->id]['uploaded_by'] = ($slip->uploaded_by != '') ? $slip->uploaded_by_admin->name : '';
+                    $img_url = 'uploads/sdn/'. $slip->image;
                     if(file_exists($img_url)){
                         $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     } else {
@@ -7234,6 +7254,9 @@ class DeliveryController extends Controller
         if ($shipment) {
             $delivery_note = DeliveryNote::find($delivery_note_id);
             if ($delivery_note) {
+                if($delivery_note->status == 4){
+                    return response()->json(['status' => 1, 'error' => 'Delivery note is cancelled, all shipments removed!']);
+                }
                 $rider = $delivery_note->rider;
                 if ($shipment->payment_mode_id == 2 && $rider->ccd == 0) {
                     return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);
@@ -7691,4 +7714,38 @@ class DeliveryController extends Controller
         }
     }
 
+    static public function add_sdn_logs($sdn_id, $status_id, $admin_id){
+        $sdn_log = new StationDepositNoteLog();
+        $sdn_log->sdn_id = $sdn_id;
+        $sdn_log->status_id = $status_id;
+        $sdn_log->admin_id = $admin_id;
+        $sdn_log->save();
+    }
+
+    public function sdn_status_logs(Request $request){
+        $sdn_id = $request->sdn_id;
+        if($sdn_id){
+            $status_logs = array();
+            $logs = StationDepositNoteLog::where('sdn_id', $sdn_id);
+            if($logs->exists()){
+                $logs = $logs->get();
+                foreach ($logs as $log){
+                    if($log->status_id == 0){
+                        $status_logs[$log->id]['status'] = 'Created';
+                    }
+                    else if($log->status_id == 1){
+                        $status_logs[$log->id]['status'] = 'Deposited';
+                    }
+                    else{
+                        $status_logs[$log->id]['status'] = 'Resolved';
+                    }
+                    $status_logs[$log->id]['updated_by'] = $log->updated_by->name;
+                    $status_logs[$log->id]['date'] = Carbon::parse($log->created_at)->toDateTimeString();
+                }
+
+                return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $status_logs]);
+            }
+            return response()->json(['status' => 0, 'message' => 'No logs found!']);
+        }
+    }
 }
