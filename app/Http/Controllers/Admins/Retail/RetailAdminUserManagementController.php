@@ -1232,8 +1232,6 @@ class RetailAdminUserManagementController extends Controller
             }
         }
 
-
-
         return redirect()->route('admin.retail.rates.edit')->with('success', 'Rates added');
     }
 
@@ -1258,7 +1256,6 @@ class RetailAdminUserManagementController extends Controller
 
     public function standard_rates_update(Request $request)
     {
-
         //dd($request);
         $messages = [
             'saver_plus_range_up.*.required' => 'The saver plus range up field is required.',

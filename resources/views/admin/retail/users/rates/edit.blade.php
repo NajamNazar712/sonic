@@ -204,7 +204,7 @@
 
                                                                     <div class="input-group input-group-sm form-group">
                                                                         <input type="text" class="touchspin-color input-sm spkg" data-bts-button-down-class="btn btn-success"
-                                                                               data-bts-button-up-class="btn btn-success" @if($rush->weight_addition == 0) disabled @endif  name="rush_kg_range[{{$index}}]" value="{{$rush->weight_addition}}">
+                                                                               data-bts-button-up-class="btn btn-success" @if($rush->weight_addition == 0) disabled @endif  name="rush_kg_range[{{$index}}]" value="{{$rush->kg_range}}">
                                                                     </div>
                                                                 </fieldset>
                                                             </div>
