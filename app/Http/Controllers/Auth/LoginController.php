@@ -280,6 +280,17 @@ class LoginController extends Controller
                 session(['shipper_return_address' => TRUE]);
             }
         }
+
+        $settings = GlobalSettings::where('type', 'return_shipments_address_change_shippers');
+        if($settings->exists()){
+            $settings = $settings->first();
+            $return_address_change_shippers = array();
+            $return_address_change_shippers = array_map('intval', explode(',' , $settings->text));
+            if(in_array($shipper_user_id, $return_address_change_shippers)){
+                session(['shipment_return_address_change' => TRUE]);
+            }
+        }
+
         return redirect()->route('cod.welcome');
     }
 

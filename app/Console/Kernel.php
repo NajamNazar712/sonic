@@ -111,9 +111,8 @@ class Kernel extends ConsoleKernel
         
         'App\Console\Commands\RCPSMSToConsigneeReattempt',
         'App\Console\Commands\CRMCount',
-        'App\Console\Commands\ShortOfBusinessShippers',
-//        '\App\Console\Commands\ReattemptRatioCalculate',
-    ];
+        '\App\Console\Commands\ReattemptRatioCalculate',
+        'App\Console\Commands\ShortOfBusinessShippers',    ];
 
     /**
      * Define the application's command schedule.

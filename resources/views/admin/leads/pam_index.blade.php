@@ -31,6 +31,7 @@
                                     <th class="border-primary border-darken-1">Images</th>
                                     <th class="border-primary border-darken-1">Include</th>
                                     <th class="border-primary border-darken-1">Video Link</th>
+                                    <th class="border-primary border-darken-1">Lead Creation Date</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -110,7 +111,8 @@
                             head.push('Destination');
                             head.push('Include');
                             head.push('Video Link');
-
+                            head.push('Lead Creation Date');
+                            
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -125,6 +127,7 @@
                                 row.push(values.destination);
                                 row.push(values.case);
                                 row.push(values.video_link);
+                                row.push(values.lead_created_at);
 
                                 body.push(row);
                             });
@@ -159,7 +162,7 @@
                     url: '{{ route('admin.pam_leads.list') }}',
                 },
                 rowId: 'id',
-                order: [[1, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'lead_id', name: 'pam_leads.lead_id', class: 'align-middle lead_id'},
@@ -172,6 +175,8 @@
                     {data: 'images_link_btn', name:'', orderable: false, searchable: false, class: 'align-middle text-center images_link_btn'},
                     {data: 'case', name: 'pam_leads.case_type', class: 'align-middle case'},
                     {data: 'video_link_btn', orderable: false, searchable: false, name: '', class: 'align-middle text-center video_link_btn'},
+                    
+                    {data: 'lead_created_at', name: 'pam_leads.created_at', searchable: false, name: '', class: 'align-middle text-center lead_created_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -193,7 +198,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.item_count') || $(header).is('.images_link_btn') || $(header).is('.video_link_btn')) {
+                        if ($(header).is('.serial_number') || $(header).is('.item_count') || $(header).is('.images_link_btn') || $(header).is('.video_link_btn') || $(header).is('.lead_created_at')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.category')){
                             $(category_select).appendTo($(search))

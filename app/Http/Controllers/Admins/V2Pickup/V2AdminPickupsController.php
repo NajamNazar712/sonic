@@ -99,7 +99,6 @@ class V2AdminPickupsController extends Controller
 
     public function pending_list(Request $request)
     {
-
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
         }
@@ -358,7 +357,6 @@ class V2AdminPickupsController extends Controller
         if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
             $from = $request->get('requested_from_date');
             $to = $request->get('requested_to_date');
-
             $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
             $datatables->whereBetween('v2_pickup_requests.created_at', [$from, $stop_date]);
         }

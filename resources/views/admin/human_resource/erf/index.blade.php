@@ -34,6 +34,7 @@
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Line Manager</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Aging</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -200,6 +201,7 @@
                             head.push('City');
                             head.push('Line Manager');
                             head.push('Status');
+                            head.push('Aging');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -212,6 +214,7 @@
                                 row.push(values.city);
                                 row.push(values.admin);
                                 row.push(values.status);
+                                row.push(values.aging);
                                 body.push(row);
                             });
                         },
@@ -282,6 +285,7 @@
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'admin', name: 'a.name', class: 'align-middle admin'},
                     {data: 'status', name: 's.name', class: 'align-middle status'},
+                    {data: 'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, sortable: false},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
 
 
@@ -306,7 +310,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.aging')) {
                             $(td).appendTo($(search));
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function () {

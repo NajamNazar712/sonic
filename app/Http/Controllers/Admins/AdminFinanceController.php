@@ -769,11 +769,12 @@ class AdminFinanceController extends Controller
 
     public static function outstanding_sdn_reconcile_delivery_notes_function($station_deposit_note_id,$delivery_note_ids)
     {
+        $updated_by = Auth::id();
         $station_deposit_note = StationDepositNote::find($station_deposit_note_id);
 
         $station_deposit_note->status = 2;
         $station_deposit_note->status_updated_at = Carbon::now();
-        $station_deposit_note->status_updated_by = Auth::id();
+        $station_deposit_note->status_updated_by = $updated_by;
 
         $station_deposit_note->save();
 
@@ -797,6 +798,8 @@ class AdminFinanceController extends Controller
                 }
             }
         }
+
+        DeliveryController::add_sdn_logs($station_deposit_note_id, 2, $updated_by);
     }
 
     public function outstanding_sdn_export_to_excel(Request $request) {
