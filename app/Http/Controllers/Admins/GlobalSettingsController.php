@@ -2295,7 +2295,7 @@ class GlobalSettingsController extends Controller
         }
         $shipments = BusinessProjectionShipment::join('users as u', 'u.id', '=', 'business_projection_shipments.user_id')->select('u.name as shipper', 'business_projection_shipments.shipment');
         if (session('department_id') == 7) {
-            if (session('role_id') != 4) {
+            if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $shipments = $shipments->where(function ($query) {
                     $query->whereIn('u.id', session('tagged_shippers'));
                 });
@@ -6219,5 +6219,45 @@ public function sales_incentive()
         }else{
             return redirect()->route('admin.access_denied');
         }
+    }
+
+
+    public function return_shipments_address_index()
+    {
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'return_shipments_address_change_shippers');
+        $return_shipments_address_change_shippers = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $return_shipments_address_change_shippers = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.shipper.return_shipments_address_change_shippers')->with(['shippers' => $shippers, 'return_shipments_address_change_shippers' => $return_shipments_address_change_shippers]);
+    }
+
+    public function return_shipments_address_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'return_shipments_address_change_shippers');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'return_shipments_address_change_shippers';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
     }
 }

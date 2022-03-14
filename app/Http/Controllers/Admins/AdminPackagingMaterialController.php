@@ -360,7 +360,7 @@ class AdminPackagingMaterialController extends Controller
         ->having('total_quantity', '>', 0);
 
         if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if(!in_array(session('id'), session('sale_users_bypass')) ){
                 $requests = $requests->whereIn('u.id', session('tagged_shippers'));
             }
         }

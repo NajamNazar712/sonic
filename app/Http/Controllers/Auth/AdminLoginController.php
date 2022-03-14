@@ -115,6 +115,7 @@ class AdminLoginController extends Controller
                 $settings = $settings->first();
                 $sale_users_bypass = array_map('intval', explode(',', $settings->text));
             }
+
             session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login, 'id' => $id, 'sale_users_bypass' => $sale_users_bypass]);
 
             return redirect()->intended(route('admin.dashboard.index'));
