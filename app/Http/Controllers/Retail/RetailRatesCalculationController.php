@@ -43,7 +43,7 @@ class RetailRatesCalculationController extends Controller
                                 $charges = intval($charges->zone_a) + $additional_charges;
                             }
                             else{
-                                $charges = intval($charges->zone_a);
+                                $charges = intval($weight_charges->zone_a);
                             }
                         }
                         elseif ($zone_class->class == 1){
@@ -52,7 +52,7 @@ class RetailRatesCalculationController extends Controller
                                 $charges = intval($charges->zone_b) + $additional_charges;
                             }
                             else{
-                                $charges = intval($charges->zone_b);
+                                $charges = intval($weight_charges->zone_b);
                             }
                         }
                         elseif ($zone_class->class == 2){
@@ -61,7 +61,7 @@ class RetailRatesCalculationController extends Controller
                                 $charges = intval($charges->zone_c) + $additional_charges;
                             }
                             else{
-                                $charges = intval($charges->zone_c);
+                                $charges = intval($weight_charges->zone_c);
                             }
                         }
                         elseif ($zone_class->class == 3){
@@ -70,7 +70,7 @@ class RetailRatesCalculationController extends Controller
                                 $charges = intval($charges->zone_d) + $additional_charges;
                             }
                             else{
-                                $charges = intval($charges->zone_d);
+                                $charges = intval($weight_charges->zone_d);
                             }
                         }
                     }
@@ -82,7 +82,7 @@ class RetailRatesCalculationController extends Controller
                                 $charges = intval($charges->within_city) + $additional_charges;
                             }
                             else{
-                                $charges = intval($charges->within_city);
+                                $charges = intval($weight_charges->within_city);
                             }
                         }
                         elseif ($pickup_city->zone_id == $consignee_city->zone_id){
@@ -91,7 +91,7 @@ class RetailRatesCalculationController extends Controller
                                 $charges = intval($charges->same_zone) + $additional_charges;
                             }
                             else{
-                                $charges = intval($charges->same_zone);
+                                $charges = intval($weight_charges->same_zone);
                             }
                         }
                         else{
@@ -100,7 +100,7 @@ class RetailRatesCalculationController extends Controller
                                 $charges = intval($charges->different_zone) + $additional_charges;
                             }
                             else{
-                                $charges = intval($charges->different_zone);
+                                $charges = intval($weight_charges->different_zone);
                             }
                         }
                     }
@@ -125,7 +125,7 @@ class RetailRatesCalculationController extends Controller
                             $charges = intval($charges->within_city) + $additional_charges;
                         }
                         else{
-                            $charges = intval($charges->within_city);
+                            $charges = intval($weight_charges->within_city);
                         }
                     }
                     elseif ($pickup_city->zone_id == $consignee_city->zone_id){
@@ -135,7 +135,7 @@ class RetailRatesCalculationController extends Controller
                             $charges = intval($charges->same_zone) + $additional_charges;
                         }
                         else{
-                            $charges = intval($charges->same_zone);
+                            $charges = intval($weight_charges->same_zone);
                         }
                     }
                     else{
@@ -145,7 +145,7 @@ class RetailRatesCalculationController extends Controller
                             $charges = intval($charges->different_zone) + $additional_charges;
                         }
                         else{
-                            $charges = intval($charges->different_zone);
+                            $charges = intval($weight_charges->different_zone);
                         }
                     }
                 }
