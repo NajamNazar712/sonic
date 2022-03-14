@@ -1266,6 +1266,10 @@
             filter: grayscale(0);
             font-size: 4rem;
         }
+        .feedback .radio:hover ~ span {
+            filter: grayscale(0);
+            font-size: 4rem;
+        }
     </style>
 @endsection
 
