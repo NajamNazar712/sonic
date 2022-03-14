@@ -136,8 +136,11 @@ class AdminFnfController extends Controller
 
         $trax_id = $request->trax_id;
         if($trax_id){
-            $line_manager = Admin::where('email',$request->line_manager)->where('department_id',$request->department_id);
-            $hod = Admin::where('email',$request->hod)->where('department_id',$request->department_id);
+            
+            $line_manager = Admin::join('employee_designations as ed','ed.id','=','admins.designation_id')
+                            ->where('admins.email',$request->line_manager)->where('employee_designations.department_id',$request->department_id);
+            $hod = Admin::join('employee_designations as ed','ed.id','=','admins.designation_id')
+                            ->where('admins.email',$request->hod)->where('employee_designations.department_id',$request->department_id);
             if($line_manager->exists()){
                 $line_manager = $line_manager->first();
             }
