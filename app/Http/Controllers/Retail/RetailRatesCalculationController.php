@@ -30,7 +30,7 @@ class RetailRatesCalculationController extends Controller
                 if($weight_charges->exists()){
                     $weight_charges = $weight_charges->first();
                     if($weight_charges->weight_addition == 1){
-                        $charges = RetailStandardRates::where('shipping_mode_id',$shipping_mode_id)->orderby('id','desc')->skip(1)->take(2)->first();
+                        $charges = RetailStandardRates::where('shipping_mode_id',$shipping_mode_id)->where('id', '<', $weight_charges->id)->orderby('id','desc')->first();
                         if($charges){
                          $remaining_weight = intval($weight - $charges->range_down);
                         }
