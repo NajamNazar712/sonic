@@ -52,6 +52,7 @@
                         @if(session('shipper_return_address') == 1)
                             <li><a class="menu-item" href="{{ route('cod.shipment.book.return_address.excel.index') }}">Return Address</a></li>
                         @endif
+
                         {{--						<li><a class="menu-item" href="{{ route('cod.consolidation.history.index') }}">Consolidation History</a></li>--}}
                     </ul>
                 </li>
@@ -85,6 +86,11 @@
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{route('cod.return.confirmed.index')}}">Confirmed</a></li>
                     </ul>
+                    @if(session('shipment_return_address_change') == 1)
+                        <ul class="menu-content">
+                            <li><a class="menu-item" href="{{ route('cod.shipment.return_address_change.index') }}">Return Address Change</a></li>
+                        </ul>
+                    @endif
                     <ul class="menu-content">
                         <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Return Sheet</span></a>
                             <ul class="menu-content">
@@ -94,6 +100,7 @@
                             </ul>
                         </li>
                     </ul>
+
                 </li>
             @endif
 
@@ -111,7 +118,7 @@
                         <li><a href="{{ route('cod.finance.payments.index') }}">Payments</a></li>
                         <li><a href="{{ route('cod.finance.payments.reconcile_through_receiving_sheet.index') }}">Payments Reconcile through Receiving Sheet</a></li>
                         <li><a href="{{ route('cod.ledger') }}">General Ledger</a></li>
-                        @if((session('account_type') == 2 && session('user_type') == 1) || (session('user_type') == 2 && in_array(14, session('permissions'))))
+                        @if (session('user_type') == 1 || in_array(14, session('permissions')))
                             <li><a href="{{ route('cod.finance.invoice.index') }}">Invoice</a></li>
                         @endif
                     </ul>
@@ -180,6 +187,10 @@
                         @endif
                         @if(session('user_type') == 1)
                             <li><a class="menu-item" href="{{route('cod.settings.final_charges_subscription.index')}}">Final Charges Subscription</a></li>
+                        @endif
+
+                        @if(session('user_type') == 1)
+                            <li><a class="menu-item" href="{{route('cod.settings.receiving_sheet.index')}}">Receiving Sheet (Shipment Description)</a></li>
                         @endif
                     </ul>
 

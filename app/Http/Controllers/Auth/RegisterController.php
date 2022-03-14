@@ -379,6 +379,14 @@ class RegisterController extends Controller
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);
 
+        if ($lead_id) {
+            $lead = Lead::find($lead_id);
+
+            if ($lead) {
+                $lead->status_id = 12;
+                $lead->save();
+            }
+        }
 
         if($data['sale_person']){
             $sale_person = new SalePersonTag();

@@ -14,7 +14,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-
+use Session;
 class ShipmentOriginChangeController extends Controller
 {
     public function __construct() {
@@ -59,7 +59,12 @@ class ShipmentOriginChangeController extends Controller
     }
 
     public function shipments_origin_index(){
-        return view('client.shipment.origin_change.index');
+        if(Session::has('shipper_origin_change') && session('shipper_origin_change') == 1){
+            return view('client.shipment.origin_change.index');
+        }
+        else{
+            return redirect()->route('cod.access_denied');
+        }
     }
 
     public function shipments_origin_store(Request $request){
