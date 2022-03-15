@@ -1078,10 +1078,8 @@ class AdminFinanceController extends Controller
 
                     $difference = $updated_at->diffInDays($now);
 
-                    if ($difference <= 2) {
-                        if (session('role_id') == 1 || in_array(56, session('permissions'))) {
-                            $dropdown .= $adjust_in_payment_button;
-                        }
+                    if (($difference <= 2 && in_array(56, session('permissions'))) || session('role_id') == 1 || in_array(346, session('permissions'))) {
+                        $dropdown .= $adjust_in_payment_button;
                     }
 
                     if (session('role_id') == 1 || in_array(55, session('permissions'))) {
