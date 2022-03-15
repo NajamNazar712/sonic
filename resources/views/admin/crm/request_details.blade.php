@@ -209,12 +209,26 @@
                                                <tr>
                                                     <th scope="row">Special Request </th>
                                                     <td class="name">
-                                                        @foreach($approvers as $admin)
-                                                            <h5 class="mb-0">{{$admin}}</h5>
-                                                        @endforeach
+                                                            <h5 class="mb-0">{{$approvers->admin}} {{$approvers->percentage == '' ? '' : ' ('.$approvers->percentage.')'}}</h5>
                                                     </td>
                                                 </tr>
+                                                @if($approvers->percentage != '')
+                                                    <tr>
+                                                        <th scope="row">Adjusted Percentage</th>
+                                                        <td class="name">
+                                                                <h5 class="mb-0">{{$approvers->percentage}}</h5>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">Special Request Status</th>
+                                                        <td class="name">
+                                                                <h5 class="mb-0">Approved</h5>
+                                                        </td>
+                                                    </tr>
+                                                
                                             @endif
+                                            @endif
+                                            
                                             </tbody>
                                         </table>
                                         <div class="row justify-content-center">
@@ -293,8 +307,10 @@
                                                     </form>
                                                 </div>
                                             @endif
-                                            @if (session('role_id') == 1 || in_array(523, session('permissions')))
-                                                <button id="special_request" class="btn btn-primary ml-1"><span class="d-none d-lg-block">Special Request</span></button>
+                                            @if ($crm_details['case_nature_id'] == 4)
+                                                @if (session('role_id') == 1 || in_array(523, session('permissions')))
+                                                    <button id="special_request" class="btn btn-primary ml-1"><span class="d-none d-lg-block">Special Request</span></button>
+                                                @endif
                                             @endif
 
                                         </div>
@@ -1093,6 +1109,7 @@
                 </div>
 
                 <div class="modal-body  text-center">
+                    @if ($special_request_agent == null)
                     <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
                         @csrf
                         <input type="hidden" name="request_id" value="{{$crm_details->id}}">
@@ -1105,47 +1122,93 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="32" name="admin[]">
-                                    </div>
-                                </td>
-                                <td>Waqas Ahmed Dar</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="372" name="admin[]">
-                                    </div>
-                                </td>
-                                <td>Mursaleen Rafiq</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="661" name="admin[]">
-                                    </div>
-                                </td>
-                                <td>Waqas Sheikh</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="169" name="admin[]">
-                                    </div>
-                                </td>
-                                <td>Sohaib Jawaid</td>
-                            </tr>
+                                @if(!empty($approvers))
+                                   
+                                @endif
+                                @foreach ($sepcial_request_admins as $special_admin)
+                                    <tr>
+                                        <td>
+                                            <div class="custom-control custom-checkbox">
+                                                @if(!empty($approvers))
+                                                <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" {{$special_admin->id == $approvers->id ? 'checked' : ' '}}>
+                                                @else
+                                                    <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" >
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>{{$special_admin->name}}</td>
+                                    </tr>
+                                @endforeach
+                            
                             </tbody>
                         </table>
 
                         <div class="row justify-content-center mt-2 ml-2">
                             <div class="col-4">
-                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Submit</button>
+                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Request</button>
                             </div>
                         </div>
                     </form>
+                    @elseif($special_request_agent != session('id'))
+                    <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="request_id" value="{{$crm_details->id}}">
+
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Admin</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @if(!empty($approvers))
+                                   
+                                @endif
+                                @foreach ($sepcial_request_admins as $special_admin)
+                                    <tr>
+                                        <td>
+                                            <div class="custom-control custom-checkbox">
+                                                @if(!empty($approvers))
+                                                <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" {{$special_admin->id == $approvers->id ? 'checked' : ' '}}>
+                                                @else
+                                                    <input class="form-check-input" type="radio" value="{{$special_admin->id}}" name="admin" >
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>{{$special_admin->name}}</td>
+                                    </tr>
+                                @endforeach
+                            
+                            </tbody>
+                        </table>
+
+                        <div class="row justify-content-center mt-2 ml-2">
+                            <div class="col-4">
+                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Request</button>
+                            </div>
+                        </div>
+                    </form>
+                    @endif
+
+                    @if ($special_request_agent != null)
+                    <hr>
+                    <form class="mb-2" action="{{route('admin.crm.request.special_request_adjusted')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="special_request_agent_id" value="{{$special_request_agent}}">
+                        <input type="hidden" name="crm_request_id" value="{{$crm_details->id}}">
+
+                        <div class="row justify-content-center mt-2 ml-2">
+                            <div class="col-4">
+                                <input type="text" id="adjusted_persentage" name="adjusted_persentage" class="form-control">
+                            </div>
+                            <div class="col-4">
+                                <button id="special_request_approve_btn" type="submit" class="btn btn-primary btn-block">Approve</button>
+                            </div>
+                        </div>
+                    </form>
+                    <hr>
+                    @endif
                 </div>
 
             </div>
@@ -1266,6 +1329,10 @@
             filter: grayscale(0);
             font-size: 4rem;
         }
+        .feedback .radio:hover ~ span {
+            filter: grayscale(0);
+            font-size: 4rem;
+        }
     </style>
 @endsection
 
@@ -1290,7 +1357,17 @@
                 'min': 0.00,
                 'max': 1000000.00
             });
-
+            $('#adjusted_persentage').inputmask({
+                'alias': 'percentage',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+                'max': 100.00
+            });
+            
+            
             {{--$('#valid').on('click', function (e) {--}}
             {{--e.preventDefault();--}}
             {{--$.ajax({--}}

@@ -157,7 +157,10 @@ class AdminERFController extends Controller
             $departments = AdminDepartment::where('id', '=', session('department_id'))->select('id', 'name')->get();
         }
         $designations = EmployeeDesignation::where('status',1)->select('id','name')->get();
-        $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58,70])->where('status', 1)->select('id','name')->get();
+        // $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58,70])->where('status', 1)->select('id','name')->get();
+        $department_admins = AdminDepartment::all()->pluck('department_head_id')->toArray();
+        $department_heads = Admin::whereIn('id', $department_admins)->where('status', 1)->select('id','name')->get();
+
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
         $invalid_employees = EmployeeRequisitionReplacement::pluck('trax_id')->toArray();
@@ -602,5 +605,12 @@ class AdminERFController extends Controller
 
     }
 
+    public function employee_data(Request $request){
+        $department = AdminDepartment::find($request->id);
+        $data['department_head'] = Admin::find($department->department_head_id);
+        $data['designations'] = EmployeeDesignation::where('department_id',$request->id)->select('name','id')->get();
+        return response()->json(['status' => 1,'emplyee_detail' => $data]);
+
+    }
 
 }
