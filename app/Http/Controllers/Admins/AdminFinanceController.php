@@ -1059,7 +1059,7 @@ class AdminFinanceController extends Controller
                 $reject_button = '<button type="button" class="dropdown-item reject"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
                 $adjust_in_payment_button = '<button type="button" class="dropdown-item adjust_in_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Adjust in Payment</div></button>';
 
-                if (session('role_id') == 1 || count(array_intersect([55, 56], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([55, 56, 346], session('permissions'))) !== 0) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
