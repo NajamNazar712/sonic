@@ -7847,9 +7847,9 @@ class NotificationsController extends Controller
                         $body = str_replace('[code]', $otp, $body);
                     }
                     $to = $reference_2_id['phone_number'];
-                    // self::sms($body, $to, 1);
+                    self::sms($body, $to, 1);
 
-                    self::sms_otp($body, $to, $name, $otp, 1);
+                    // self::sms_otp($body, $to, $name, $otp, 1);
                 } else if ($id == 139) {
 
                     $yesterday = Carbon::yesterday();
@@ -8150,9 +8150,9 @@ class NotificationsController extends Controller
                         $body = str_replace('[otp]', $otp, $body);
                     }
                     $to = $rider->phone;
-                    // self::delivery_note_otp_sms($body, $to);
+                    self::delivery_note_otp_sms($body, $to);
 
-                    self::sms_otp($body, $to, $name, $otp, 2);
+                    // self::sms_otp($body, $to, $name, $otp, 2);
                 } else if ($id == 145) {
                     $shipment_id = $reference_1_id;
                     $delivery_note_id = $reference_2_id;
