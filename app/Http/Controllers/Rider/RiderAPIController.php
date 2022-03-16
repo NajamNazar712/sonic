@@ -11122,10 +11122,10 @@ class RiderAPIController extends Controller
                         $shipment_ids = explode(',', $request->shipment_ids);
                         $rider_pickup->shipments = count($shipment_ids);
                         $rider_pickup->save();
-                        $tracking_numbers = array();
                         foreach ($shipment_ids as $shipment_id) {
-                            $shipment = Shipment::find($shipment_id);
-                            if ($shipment) {
+                            $shipment = Shipment::where('tracking_number',$shipment_id);
+                            if ($shipment->exists()) {
+                                $shipment = $shipment->first();
                                 if ($shipment->shipper_status_id == 17) {
                                     AdminPickupsController::generate($shipment->id);
                                 }
@@ -11133,10 +11133,9 @@ class RiderAPIController extends Controller
                                 $shipment->consignee_status_id = 53;
                                 $shipment->save();
                                 ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
-                                $tracking_numbers[] = $shipment->tracking_number;
                             }
                         }
-                        NotificationsController::send(73, $tracking_numbers, $request->pickup_request_id);
+                        NotificationsController::send(73, $shipment_ids, $request->pickup_request_id);
                     }
                 }
 
