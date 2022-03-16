@@ -23,6 +23,7 @@
                                         <th class="border-primary border-darken-1">Sales Person</th>
                                         <th class="border-primary border-darken-1">High Alert By</th>
                                         <th class="border-primary border-darken-1">Description</th>
+                                        <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -42,11 +43,11 @@
                     <h4 class="modal-title white">Mark High Alert</h4>
 
                 </div>
-                <form id="add_report_form" method="post" action="{{route('admin.qa.high_alert.shippers.add')}}" class="justify-content-center" novalidate="novalidate">
+                <form id="add_shipper_form" method="post" action="#" class="justify-content-center" novalidate="novalidate">
                     <div class="modal-body text-center">
                         @csrf
                         <div class="form-group">
-                            <select class="form-control" name="station_id" id="station" data-rule-required="true" data-msg-required="Station is required">
+                            <select class="form-control" name="shipper_id" id="shipper_select" data-rule-required="true" data-msg-required="Shipper is required">
                                 @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                 @endforeach
@@ -99,37 +100,14 @@
 
 
 
-            $('#tagged_to').select2({
+
+            $('#shipper_select').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Tag Person*",
+                placeholder:"Search Shipper",
                 allowClear:true,
-                dropdownParent:$('#add_report_form')
+                dropdownParent:$('#add_shipper_form')
             });
 
-            $('#admin_ids').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:"Search Tag Persons",
-                allowClear:true,
-            });
-
-            $('#monitoring_area').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Monitoring Area',
-                width:'100%',
-                allowClear:true,
-                dropdownParent:$('#add_report_form')
-            });
-            $('#case_nature').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Case Nature',
-                width:'100%',
-                allowClear:true,
-                dropdownParent:$('#add_report_form')
-            });
-            $('#nc_level').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select NC Level',
-                width:'100%',
-                allowClear:true,
-                dropdownParent:$('#add_report_form')
-            });
             $('#add_report_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -187,15 +165,17 @@
                     return {body: body, header: head};
                 }
             });*/
-            /*var table = $('#datatable').DataTable({
+            var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                         @if(session('role_id') == 1 || in_array(536,session('permissions')))
                     {
-                        text: 'Add Report',
+                        text: 'Add',
                         className: 'btn btn-primary',
                         action: function (e, dt, node, config) {
-                            $('#addReportModal').modal('show');
+                            $('#addShipperModal #shipper_select').val('').trigger('change');
+                            $('#addShipperModal #description').val('');
+                            $('#addShipperModal').modal('show');
                         }
                     },
                         @endif
@@ -222,17 +202,12 @@
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return ''; }},
-                    {data: 'station_name', name: 'station.id', class: 'align-middle station_name'},
-                    {data: 'report_link', name: 'incidence_monitorings.id', class: 'align-middle incidence_monitorings_id_padded'},
-                    {data: 'area_name', name: 'area.name', class: 'align-middle area_name'},
-                    {data: 'time_slot', name: 'time_slot', class: 'align-middle time_slot', orderable: false, searchable: false},
-                    {data: 'case_nature_type', name: 'case_nature.name', class: 'align-middle case_nature_type'},
-                    {data: 'observation', name: 'incidence_monitorings.observation', class: 'align-middle observation', orderable: false, searchable: false},
-                    {data: 'nc_level_name', name: 'nc_level.id', class: 'align-middle nc_level_name'},
-                    {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to', orderable: false, searchable: false},
-                    {data: 'tagging_date', name: 'incidence_monitorings.tagging_date', class: 'align-middle tagging_date'},
-                    {data: 'status_name', name: 'status.id', class: 'align-middle status_name'},
-                    {data: 'clip_link', name: 'incidence_monitorings.clip_link', class: 'align-middle clip_link'},
+                    {data: 'shipper', name: 'users.name', class: 'align-middle shipper'},
+                    {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'sale_person', name: 'sp.name', class: 'align-middle sale_person'},
+                    {data: 'alert_by', name: 'hab.name', class: 'align-middle alert_by', orderable: false, searchable: false},
+                    {data: 'description', name: 'high_alert_shippers.description', class: 'align-middle description', orderable: false, searchable: false},
+                    {data: 'status', name: 'status', class: 'align-middle status', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -247,24 +222,14 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    var nc_level_select = '<select name="nc_level_select" id="nc_level_select" class="select2 form-control"></select>';
+
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.tagged_to') || $(header).is('.time_slot')  || $(header).is('.observation')) {
+                        if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.status')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status_name')){
-                            $(status_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.nc_level_name')){
-                            $(nc_level_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -277,23 +242,73 @@
                         }
                     });
 
-
-
                     this.api().table().columns.adjust();
 
 
                 }
-            });*/
-
-            $("#editIncidenceReport").on("show.bs.modal", function(e) {
-                var $invoker = $(e.relatedTarget);
-                var action = $invoker.attr('rel');
-                var id = $(e.relatedTarget).data('target-id');
-
-
             });
-            $('body').on('hidden.bs.modal','#addReportModal',function () {
-                window.location.reload()
+
+            $('#add_shipper_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
+
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'You want to mark this Shipper asHigh Alert!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+
+                            var shipper_id = $('#add_shipper_form #shipper_select').val();
+                            var description = $('#add_shipper_form #description').val();
+                            $.ajax({
+                                url: '{{ route('admin.qa.high_alert.shippers.add') }}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'shipper_id': shipper_id,
+                                    'description': description,
+                                }
+                            })
+                                .done(function (data){
+                                    if(data.status == 0){
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                    }
+                                    else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                    $('#addShipperModal').modal('hide');
+                                    table.draw(false);
+                                });
+                        }
+                    });
+
+                }
             });
 
         });

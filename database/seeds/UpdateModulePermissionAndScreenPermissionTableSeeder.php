@@ -13,6 +13,9 @@ class UpdateModulePermissionAndScreenPermissionTableSeeder extends Seeder
     {
         DB::table('module_permissions')->insert(array(
             array('id' => 692, 'name' => 'Red Alert Shippers - View', 'module_id' => 31),
+            array('id' => 693, 'name' => 'Red Alert Shippers - Add', 'module_id' => 31),
+            array('id' => 694, 'name' => 'Red Alert Shippers - Remove', 'module_id' => 31),
+            array('id' => 695, 'name' => 'Red Alert Shippers - Edit', 'module_id' => 31),
         ));
 
         DB::table('activity_trail_actions')->insert(array(
