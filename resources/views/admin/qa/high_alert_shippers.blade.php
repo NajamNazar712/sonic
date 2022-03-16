@@ -59,18 +59,50 @@
                             <textarea type="text" class="form-control" name="description" placeholder="Enter description" id="description" data-rule-required="true" data-msg-required="Description is required"></textarea>
                         </div>
 
-
-
-
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary width-100" id="add_special_rider_button">Add</button>
+                        <button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary width-100">Submit</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <div class="modal fade text-left" id="editShipperModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editShipperModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Mark High Alert (Edit)</h4>
+
+                </div>
+                <form id="edit_shipper_form" method="post" action="#" class="justify-content-center" novalidate="novalidate">
+                    <input type="hidden" name="alert_id" id="alert_id">
+                    <div class="modal-body text-center">
+                        @csrf
+                        <div class="form-group">
+                            <select class="form-control" name="shipper_id" id="edit_shipper_select" data-rule-required="true" data-msg-required="Shipper is required">
+                                @foreach($shippers as $shipper)
+                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+
+                        <div class="form-group">
+                            <textarea type="text" class="form-control" name="description" placeholder="Enter description" id="edit_description" data-rule-required="true" data-msg-required="Description is required"></textarea>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary width-100">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div
 @endsection
 
 @section('css')
@@ -108,6 +140,12 @@
                 dropdownParent:$('#add_shipper_form')
             });
 
+            $('#edit_shipper_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Search Shipper",
+                dropdownParent:$('#edit_shipper_form')
+            });
+
             $('#add_report_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -118,44 +156,34 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
             });
-            /*jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.incidence_monitoring.list') }}',
+                        url: '{{ route('admin.qa.high_alert.shippers.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Station');
-                            head.push('Case #');
-                            head.push('Monitoring Area');
-                            head.push('Time Slot');
-                            head.push('Case Nature');
-                            head.push('Observations');
-                            head.push('NC Level');
-                            head.push('Tagged To');
-                            head.push('Tagging Date');
-                            head.push('Current Status');
-                            head.push('Clips Link');
+                            head.push('Shipper');
+                            head.push('City');
+                            head.push('Sales Person');
+                            head.push('High Alert By');
+                            head.push('Description');
+                            head.push('Status');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.station_name);
-                                row.push(values.incidence_monitorings_id_padded);
-                                row.push(values.area_name);
-                                row.push(values.time_slot);
-                                row.push(values.case_nature_type);
-                                row.push(values.observation);
-                                row.push(values.nc_level_name);
-                                row.push(values.tagged_to);
-                                row.push(values.tagging_date);
-                                row.push(values.status_name);
-                                row.push(values.excel_clip_link);
+                                row.push(values.shipper);
+                                row.push(values.city);
+                                row.push(values.sale_person);
+                                row.push(values.alert_by);
+                                row.push(values.description);
+                                row.push(values.status);
                                 body.push(row);
                             });
                         },
@@ -164,14 +192,15 @@
 
                     return {body: body, header: head};
                 }
-            });*/
+            });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if(session('role_id') == 1 || in_array(536,session('permissions')))
+                        @if(session('role_id') == 1 || in_array(693,session('permissions')))
                     {
-                        text: 'Add',
+                        title: 'Mark ',
                         className: 'btn btn-primary',
+                        text: '<i class="la la-check"></i> Mark',
                         action: function (e, dt, node, config) {
                             $('#addShipperModal #shipper_select').val('').trigger('change');
                             $('#addShipperModal #description').val('');
@@ -205,8 +234,8 @@
                     {data: 'shipper', name: 'users.name', class: 'align-middle shipper'},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'sale_person', name: 'sp.name', class: 'align-middle sale_person'},
-                    {data: 'alert_by', name: 'hab.name', class: 'align-middle alert_by', orderable: false, searchable: false},
-                    {data: 'description', name: 'high_alert_shippers.description', class: 'align-middle description', orderable: false, searchable: false},
+                    {data: 'alert_by', name: 'hab.name', class: 'align-middle alert_by'},
+                    {data: 'description', name: 'high_alert_shippers.description', class: 'align-middle description'},
                     {data: 'status', name: 'status', class: 'align-middle status', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
@@ -259,7 +288,7 @@
 
                     swal({
                         title: 'Are You Sure?',
-                        text: 'You want to mark this Shipper asHigh Alert!',
+                        text: 'You want to mark this Shipper as High Alert!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -311,6 +340,153 @@
                 }
             });
 
+            $('#datatable tbody').on('click', 'td.action button', function (){
+                if($(this).hasClass('edit')){
+                    var id = $(this).parents('tr').attr('id');
+                    if(id){
+
+                        $.ajax({
+                            url: '{!! route('admin.qa.high_alert.shippers.info') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'alert_id': id,
+                            }
+                        }).done(function (data) {
+                            if(data.status == 0){
+
+                                $('#edit_shipper_form #alert_id').val(id);
+                                $('#edit_shipper_form #edit_shipper_select').val(data.shipper_id).trigger('change');
+                                $('#edit_shipper_form #edit_shipper_select').prop('disabled', true);
+                                $('#edit_shipper_form #edit_description').val(data.description);
+                                $('#editShipperModal').modal('show');
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                }
+                if($(this).hasClass('remove')){
+                    var id = $(this).parents('tr').attr('id');
+                    if(id){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'You want to mark this Shipper as High Alert!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                $.ajax({
+                                    url: '{!! route('admin.qa.high_alert.shippers.remove') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'alert_id': id,
+                                    }
+                                }).done(function (data) {
+                                    if(data.status == 0){
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                        table.draw(false);
+                                    }
+                                    else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                });
+                            }
+                        });
+
+
+                    }
+                }
+
+            });
+
+
+            $('#edit_shipper_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'You want to mark this Shipper as High Alert!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+
+                            var alert_id = $('#edit_shipper_form #alert_id').val();
+                            // var shipper_id = $('#edit_shipper_form #edit_shipper_select').val();
+                            var description = $('#edit_shipper_form #edit_description').val();
+                            $.ajax({
+                                url: '{{ route('admin.qa.high_alert.shippers.edit') }}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    // 'shipper_id': shipper_id,
+                                    'alert_id': alert_id,
+                                    'description': description,
+                                }
+                            })
+                                .done(function (data){
+                                    if(data.status == 0){
+                                        toastr.success(data.success, 'Success!', {
+                                            positionClass: 'toast-bottom-center',
+                                            containerId: 'toast-bottom-center'
+                                        });
+                                        $('#editShipperModal').modal('hide');
+                                        table.draw(false);
+
+                                    }
+                                    else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                    $('#addShipperModal').modal('hide');
+                                    table.draw(false);
+                                });
+                        }
+                    });
+
+                }
+            });
         });
     </script>
 

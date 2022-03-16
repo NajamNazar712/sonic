@@ -9,6 +9,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
+use App\Http\Models\Admin\HighAlertShipper;
 use App\Http\Models\Admin\KeyAccountDailyShipment;
 use App\Http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\Bag;
@@ -845,6 +846,16 @@ class AdminTrackingController extends Controller
                             $details['shipper']['email'] = $shipper->email;
                             $details['shipper']['sales_person'] = $sales_person_name;
                             $details['shipper']['tagged_kae'] = $tagged_kae_name;
+
+                            $high_alert = HighAlertShipper::where('user_id', $shipper->id)->where('status', 1);
+                            if($high_alert->exists()){
+                                $high_alert = $high_alert->first();
+
+                                $details['high_alert'] = "High alert marked on ". Carbon::parse($high_alert->created_at)->toDateTimeString() . " by " . $high_alert->alerted_by->name . " because of " . $high_alert->description;
+
+                            }
+
+
                         } else {
                             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
                             if ($retail_shipment) {

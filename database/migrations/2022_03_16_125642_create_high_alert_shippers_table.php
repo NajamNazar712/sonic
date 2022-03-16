@@ -18,6 +18,7 @@ class CreateHighAlertShippersTable extends Migration
             $table->integer('user_id')->index();
             $table->string('description');
             $table->integer('alert_by')->index();
+            $table->integer('last_updated_by')->index();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });

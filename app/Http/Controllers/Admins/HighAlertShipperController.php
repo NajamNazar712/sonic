@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\HighAlertShipper;
 use App\Http\Models\Shipper\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -37,7 +38,7 @@ class HighAlertShipperController extends Controller
             ->join('admins AS sp', 'sp.id', '=', 'spt.admin_id')
             ->join('admins AS hab', 'hab.id', '=', 'high_alert_shippers.alert_by')
             ->join('cities as c', 'c.id', '=', 'users.city_id')
-            ->select(['users.id', 'users.name as shipper', 'sp.name as sale_person', 'high_alert_shippers.description', 'hab.name as alert_by','high_alert_shippers.status', 'c.name as city'])
+            ->select(['high_alert_shippers.id', 'users.name as shipper', 'sp.name as sale_person', 'high_alert_shippers.description', 'hab.name as alert_by','high_alert_shippers.status', 'c.name as city'])
             ->where('spt.status', '=', 0);
 
         $datatables = Datatables::of($shippers)
@@ -57,11 +58,11 @@ class HighAlertShipperController extends Controller
                         ';
 
                     if (session('role_id') == 1 || in_array(695, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item qa_edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-activity"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                     }
                     if (session('role_id') == 1 || in_array(694, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item qa_view" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-crosshair"></i></div><div class="col-9 offset-1">Remove</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item remove" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-crosshair"></i></div><div class="col-9 offset-1">Remove</div></button>';
 
                     }
 
@@ -85,13 +86,103 @@ class HighAlertShipperController extends Controller
         if(!$shipper_id && !$description){
             return response()->json(['status' => 1, 'error' => 'Please fill all fields!']);
         }
-        $high_alert = new HighAlertShipper();
-        $high_alert->user_id = $shipper_id;
-        $high_alert->description = $description;
-        $high_alert->alert_by = $alert_by;
-        $high_alert->status = 0;
-        $high_alert->save();
 
-        return response()->json(['status' => 0, 'success' => 'Shipper marked as high alert!']);
+        $count = HighAlertShipper::where('status', 0)->where('user_id', $shipper_id)->count();
+        if($count < 3){
+            $high_alert = new HighAlertShipper();
+            $high_alert->user_id = $shipper_id;
+            $high_alert->description = $description;
+            $high_alert->alert_by = $alert_by;
+            $high_alert->last_updated_by = $alert_by;
+            $high_alert->status = 1;
+            $high_alert->save();
+
+            return response()->json(['status' => 0, 'success' => 'Shipper marked as high alert!']);
+        }
+        else{
+            $user = User::find($shipper_id);
+            if($user){
+                $user->disable_at = Carbon::now();
+                $user->status = 4;
+                $user->save();
+
+                return response()->json(['status' => 0, 'success' => 'Shipper is disabled due to High Alert Frequency!']);
+            }
+        }
     }
+
+    public function remove(Request $request){
+        $alert_id = $request->alert_id;
+        if($alert_id){
+            $high_alert = HighAlertShipper::find($alert_id);
+            if($high_alert){
+                if($high_alert->status == 1){
+                    $high_alert->status = 0;
+                    $high_alert->last_updated_by = Auth::id();
+                    $high_alert->save();
+
+                    return response()->json(['status' => 0, 'success' => 'High Alert removed from this shipper!']);
+                }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'High Alert from this shipper is already removed!']);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+        }
+    }
+
+    public function info(Request $request){
+        $alert_id = $request->alert_id;
+        if($alert_id){
+            $high_alert = HighAlertShipper::find($alert_id);
+            if($high_alert){
+                if($high_alert->status == 1){
+                    $shipper_id = $high_alert->user_id;
+                    $description = $high_alert->description;
+
+                    return response()->json(['status' => 0, 'shipper_id' => $shipper_id, 'description' => $description]);
+                }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'High Alert from this shipper is already removed!']);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+        }
+    }
+
+    public function edit(Request $request){
+        $alert_id = $request->alert_id;
+        if($alert_id){
+            $high_alert = HighAlertShipper::find($alert_id);
+            if($high_alert){
+                if($high_alert->status == 1){
+                    $high_alert->description = $request->description;
+                    $high_alert->alert_by = Auth::id();
+                    $high_alert->last_updated_by = Auth::id();
+                    $high_alert->save();
+                    return response()->json(['status' => 0, 'success' => 'High Alert updated!']);
+                }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'High Alert from this shipper is already removed!']);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+        }
+    }
+
 }

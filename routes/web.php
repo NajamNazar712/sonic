@@ -3794,8 +3794,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('shippers')->name('shippers.')->group(function (){
                 Route::get('/','Admins\HighAlertShipperController@index')->name('index');
                 Route::get('/list','Admins\HighAlertShipperController@list')->name('list');
-
                 Route::post('/add','Admins\HighAlertShipperController@add')->name('add');
+                Route::post('/info','Admins\HighAlertShipperController@info')->name('info');
+                Route::post('/edit','Admins\HighAlertShipperController@edit')->name('edit');
+                Route::post('/remove','Admins\HighAlertShipperController@remove')->name('remove');
 
             });
         });
