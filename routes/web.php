@@ -3788,9 +3788,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/update','Admins\QAEvaluationController@update')->name('update');
         Route::post('/actvities_data','Admins\QAEvaluationController@actvities_data')->name('actvities_data');
         Route::post('update_activities','Admins\QAEvaluationController@update_activities')->name('update_activities');
-        
-        
-        
+    });
+    Route::prefix('qa')->name('qa.')->group(function (){
+        Route::prefix('high_alert')->name('high_alert.')->group(function (){
+            Route::prefix('shippers')->name('shippers.')->group(function (){
+                Route::get('/','Admins\HighAlertShipperController@index')->name('index');
+                Route::get('/list','Admins\HighAlertShipperController@list')->name('list');
+
+                Route::post('/add','Admins\HighAlertShipperController@add')->name('add');
+
+            });
+        });
     });
 });
 

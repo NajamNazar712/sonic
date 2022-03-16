@@ -1799,6 +1799,9 @@
                     @if (session('role_id') == 1 || in_array(648, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.qa_evaluation.index')}}">CX Evaluation</a></li>
                     @endif
+                    @if (session('role_id') == 1 || in_array(692, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.qa.high_alert.shippers.index')}}">High Alert Shippers</a></li>
+                    @endif
                 </ul>
             </li>
             @endif
