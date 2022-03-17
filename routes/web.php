@@ -3228,6 +3228,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@return_shipments_address_store')->name('store');
         });
 
+        Route::prefix('auto_tag_territories')->name('auto_tag_territories.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@auto_tag_territories_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@auto_tag_territories_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@auto_tag_territories_store')->name('submit');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@auto_tag_territories_enable_disable')->name('enable_disable');
+            Route::post('data', 'Admins\GlobalSettingsController@auto_tag_territories_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@auto_tag_territories_update')->name('update');
+        
+        });
+
+
     });
 
 

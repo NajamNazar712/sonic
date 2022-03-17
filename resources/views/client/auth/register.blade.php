@@ -301,16 +301,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group">
-                                                        <label for="territory">Territory:
-                                                           <span class="danger">*</span>
-                                                        </label>
-                                                        <div>
-                                                            <select name="territory_id" id="territory" class="select2 form-control required" style="width: 100%"></select>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                               
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="sub_segments">Sub Segments:
@@ -882,37 +873,7 @@
                         });
                     }
                 });
-                $.ajax({
-                    url: '{!! route('cod.territory') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-
-                    if (data.status == 0) {
-                        $('#territory').empty();
-                        $.each(data.territory, function (key, value) {
-                            var newOption = "<option value="+ value.id +">" + value.name + "</option>";
-                            $('#territory').append(newOption);
-                        });
-                        $('#territory').val('').trigger('change');
-                        
-                    } else {
-                        $('#territory').empty();
-                        var error = 'No Territory found for the selected city';
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                    @if($lead != null)
-                    @if($lead->territory_id != null)
-                    $('select[name="territory_id"]').val({{$lead->territory_id}}).trigger('change');
-                    @endif
-                    @endif
-                });
+                
             }
 
 
@@ -1028,10 +989,7 @@
             });
         
         
-        $('select[name="territory_id"]').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select Territory',
-
-        });
+        
         $("input[name='average_shipment']").inputmask({
             'alias': 'integer',
             'allowMinus': false,
