@@ -7526,25 +7526,53 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('dn_no_excel', function ($entry) use ($from,$to,$cutt_off) {
-                if ($cutt_off== 1) {
+                if ($cutt_off == 1) {
+                    $cut_off_time_start = '20:00:00';
+                    $cut_off_time_end = '14:00:00';
+                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
+                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
 
-                    $from = $from . ' ' . '20:00:00';
-                    $to = $to . ' ' . '14:00:00';
-                }
-                elseif ($cutt_off== 2)
-                {
-                    $from = $from . ' ' . '14:01:00';
-                    $to = $to . ' ' . '19:59:00';
-                }
                 $dn_no = DB::connection('reports')
                     ->table('delivery_notes')
                     ->where('rider_id', $entry->rider_id)
                     ->whereBetween('delivery_notes.created_at', [$from, $to])
-                    ->count();
-                if ($dn_no > 0) {
-                    return $dn_no;
+                    ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start);
+
+                $dn_no1 = DB::connection('reports')
+                    ->table('delivery_notes')
+                    ->where('rider_id', $entry->rider_id)
+                    ->whereBetween('delivery_notes.created_at', [$from, $to])
+                    ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
+                    ->union($dn_no)
+                    ->get();
+                $dn_no_count = count($dn_no1);
+                if ($dn_no_count > 0) {
+                    return  $dn_no_count ;
                 } else {
                     return 0;
+                }
+            }
+                if ($cutt_off == 2) {
+                    $cut_off_time_start = '14:01:00';
+                    $cut_off_time_end = '19:59:00';
+                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
+                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
+
+                    $dn_no = DB::connection('reports')
+                        ->table('delivery_notes')
+                        ->where('rider_id', $entry->rider_id)
+                        ->whereBetween('delivery_notes.created_at', [$from, $to])
+                        ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start)
+                        ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
+                        ->get();
+
+                    $dn_no_count = count($dn_no);
+                    if ($dn_no_count > 0) {
+//                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no_count . '</button>';
+                        return $dn_no_count ;
+                    } else {
+                        return 0;
+                    }
                 }
             })
             ->addColumn('dncc_amount', function ($entry) use ($from,$to,$cutt_off) {
