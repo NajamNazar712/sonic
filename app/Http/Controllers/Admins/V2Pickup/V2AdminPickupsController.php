@@ -13,21 +13,17 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\BookingSmsForShippers;
-use App\Http\Models\Admin\FtlRequest;
-use App\Http\Models\Admin\FtlRequestAdditionalCost;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\PickupAction;
-use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
@@ -50,7 +46,8 @@ use App\Http\Models\V2Pickup\V2PickupRequestStatus;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
 use App\Http\Models\Zone;
-use Carbon\Carbon;use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -371,13 +368,13 @@ class V2AdminPickupsController extends Controller
     {
         $pickup_request_ids = $request->input('pickup_request_ids');
         $pickup_request_ids = explode(',', $pickup_request_ids);
-        //dd($pickup_request_ids);
         $rider_id = $request->input('rider');
         $rider_ids = $request->input('rider');
         $previous_rider_id = null;
         $riders = array();
         $riders['new'] = $rider_id;
         $riders['new_phone'] = $rider_ids;
+        $notification_data = array();
         if (count($pickup_request_ids) == 0) {
             return redirect()->back()->with('error', 'No Pickups selected!');
         }
@@ -503,14 +500,7 @@ class V2AdminPickupsController extends Controller
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
             }
-            /*if ($previous_rider_id != NULL) {
-                NotificationsController::app_notification(2, $previous_rider_id, 2, $pickup_request->current_rider_id, $pickup_request->shipper_id);
-            }
-            if ($rider_id != NULL && $previous_rider_id == NULL) {
-                NotificationsController::app_notification(3, $rider_id, 2, $pickup_request->shipper_id);
-            } elseif ($rider_id != NULL && $previous_rider_id != NULL) {
-                NotificationsController::app_notification(1, $rider_id, 2, $previous_rider_id, $pickup_request->shipper_id);
-            }*/
+            $notification_data[] = ["rider_id" => $rider_id, "previous_rider" => $previous_rider_id, "pickup_request" => $pickup_request->id];
         }
         if (count($allowed_pickup_requests) > 0) {
             $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
@@ -573,8 +563,41 @@ class V2AdminPickupsController extends Controller
 
             EmployeeAttendanceController::riders_attendance_mark($rider_id);
 
+            foreach ($notification_data as $notification_datum){
+                $previous_rider_id = $notification_datum["previous_rider"];
+                $rider_id = $notification_datum["rider_id"];
+                $pickup_request_id = $notification_datum["pickup_request"];
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                if($pickup_request){
+                    if ($previous_rider_id != NULL) {
+                        NotificationsController::app_notification(2, $previous_rider_id, 2, $pickup_request->current_rider_id, $pickup_request->shipper_id);
+                    }
+                    if ($rider_id != NULL && $previous_rider_id == NULL) {
+                        NotificationsController::app_notification(3, $rider_id, 2, $pickup_request->shipper_id);
+                    } elseif ($rider_id != NULL && $previous_rider_id != NULL) {
+                        NotificationsController::app_notification(1, $rider_id, 2, $previous_rider_id, $pickup_request->shipper_id);
+                    }
+                }
+            }
+
             return redirect()->back()->with('success', 'Pickup Request(s) has been Assigned to the Rider!');
         } else {
+            foreach ($notification_data as $notification_datum){
+                $previous_rider_id = $notification_datum["previous_rider"];
+                $rider_id = $notification_datum["rider_id"];
+                $pickup_request_id = $notification_datum["pickup_request"];
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                if($pickup_request){
+                    if ($previous_rider_id != NULL) {
+                        NotificationsController::app_notification(2, $previous_rider_id, 2, $pickup_request->current_rider_id, $pickup_request->shipper_id);
+                    }
+                    if ($rider_id != NULL && $previous_rider_id == NULL) {
+                        NotificationsController::app_notification(3, $rider_id, 2, $pickup_request->shipper_id);
+                    } elseif ($rider_id != NULL && $previous_rider_id != NULL) {
+                        NotificationsController::app_notification(1, $rider_id, 2, $previous_rider_id, $pickup_request->shipper_id);
+                    }
+                }
+            }
             return redirect()->back()->with('success', 'Pickup Request(s) rider updated / assigned!');
         }
         return redirect()->back()->with('error', 'Pickup Request(s) already assigned!');
