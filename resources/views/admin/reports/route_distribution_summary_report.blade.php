@@ -78,16 +78,16 @@
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
+{{--                    <div class="col-4">--}}
+{{--                        <fieldset class="form-group">--}}
 
-                            <select name="search_cutt_off" id="search_cutt_off" class="form-control">
+{{--                            <select name="search_cutt_off" id="search_cutt_off" class="form-control">--}}
 {{--                                <option value="{{'1'}}" selected>8pm to 2pm</option>--}}
 {{--                                <option value="{{'2'}}">2:01pm to 7:59pm</option>--}}
-                            </select>
+{{--                            </select>--}}
 
-                        </fieldset>
-                    </div>
+{{--                        </fieldset>--}}
+{{--                    </div>--}}
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -212,8 +212,8 @@
             var confirmation_pending_shipments = 0;
             var confirmation_pending_shipments_per = 0;
 
-            $('#search_cutt_off').prepend('<option value="1">8pm to 2pm</option><br><option value="2">2:01pm to 7:59pm</option>').select2({
-                // placeholder:'Select Zone',
+            $('#search_cutt_off').prepend('<option value="3">All</option><option value="1">8pm to 2pm</option><br><option value="2">2:01pm to 7:59pm</option>').select2({
+                placeholder:'Select CuttOff',
                 width:'100%',
                 allowClear:true
             });
@@ -253,7 +253,7 @@
                 format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#from_date_root').css('top','40px');
@@ -270,7 +270,7 @@
                 format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#to_date_root').css('top', '40px');
