@@ -614,7 +614,7 @@ class AdminTrackingController extends Controller
                     $shipment = Shipment::leftjoin('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
                         ->select('delivery_note_shipments.delivery_note_id')
                         ->where('delivery_note_shipments.shipment_id', '=', $shipment->id)
-                        ->orderBy('delivery_note_shipments.id', 'desc');
+                        ->orderBy('delivery_note_shipments.shipment_id', 'desc');
                     if($shipment->exists()){
                         $shipment = $shipment->first();
                         $dn = str_pad($shipment->delivery_note_id, 6, '0', STR_PAD_LEFT);;
