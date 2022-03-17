@@ -212,8 +212,8 @@
             var confirmation_pending_shipments = 0;
             var confirmation_pending_shipments_per = 0;
 
-            $('#search_cutt_off').prepend('<option value="1">8pm to 2pm</option><br><option value="2">2:01pm to 7:59pm</option>').select2({
-                // placeholder:'Select Zone',
+            $('#search_cutt_off').prepend('<option value="3">All</option><option value="1">8pm to 2pm</option><br><option value="2">2:01pm to 7:59pm</option>').select2({
+                placeholder:'Select CuttOff',
                 width:'100%',
                 allowClear:true
             });
