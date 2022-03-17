@@ -7633,6 +7633,7 @@ class AdminReportsController extends Controller
                     $from = $from . ' ' . '14:01:00';
                     $to = $to . ' ' . '19:59:00';
                 }
+                elseif ($cutt_off== 3)
                 {
                     $from = $from . ' ' . '00:00:00';
                     $to = $to . ' ' . '23:59:00';
