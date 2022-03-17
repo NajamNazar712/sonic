@@ -7627,6 +7627,11 @@ class AdminReportsController extends Controller
 
                     $from = $from . ' ' . '20:00:00';
                     $to = $to . ' ' . '14:00:00';
+
+                    $cut_off_time_start = '20:00:00';
+                    $cut_off_time_end = '14:00:00';
+                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
+                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
                 }
                 elseif ($cutt_off== 2)
                 {
@@ -7643,6 +7648,8 @@ class AdminReportsController extends Controller
                     ->where('rider_id', $entry->rider_id)
                     ->where('delivery_notes.received_cod_amount', '!=', 0)
                     ->whereBetween('delivery_notes.created_at', [$from, $to])
+                    ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start)
+                    ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
                     ->sum('total_cod_amount');
 
                 return $amount;
