@@ -7416,12 +7416,11 @@ class AdminReportsController extends Controller
     {
         $from = $request->get('search_from');
         $to = $request->get('search_to');
-//        $from = $from.' '.'20:00:00';
-//        $to = $to.' '.'14:00:00';
-        $to = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
 
-        $cutt_off = $request->get('search_cutt_off');
-
+        $to = date('Y-m-d', strtotime($to . ' +1 day'));
+//        dd($from,$to);
+//        $cutt_off = $request->get('search_cutt_off');
+$cutt_off = 3;
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 198);
         }
@@ -7624,10 +7623,10 @@ class AdminReportsController extends Controller
             })
             ->addColumn('dncc_amount', function ($entry) use ($from,$to,$cutt_off) {
                 if ($cutt_off== 1) {
-
+//dd($from,$to);
                     $from = $from . ' ' . '20:00:00';
-                    $to = $to . ' ' . '14:00:00';
-
+                    $to = $to . ' ' . '14:01:00';
+//                        dd($to);
                     $cut_off_time_start = '20:00:00';
                     $cut_off_time_end = '14:00:00';
                     $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
@@ -7637,11 +7636,20 @@ class AdminReportsController extends Controller
                 {
                     $from = $from . ' ' . '14:01:00';
                     $to = $to . ' ' . '19:59:00';
+                    $cut_off_time_start = '14:01:00';
+                    $cut_off_time_end = '19:59:00';
+                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
+                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
                 }
                 elseif ($cutt_off== 3)
                 {
                     $from = $from . ' ' . '00:00:00';
                     $to = $to . ' ' . '23:59:00';
+                    $cut_off_time_start = '00:00:00';
+                    $cut_off_time_end = '23:59:00';
+                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
+                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
+
                 }
                 $amount = DB::connection('reports')
                     ->table('delivery_notes')
