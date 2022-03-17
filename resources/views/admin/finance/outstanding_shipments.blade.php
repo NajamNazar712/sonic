@@ -50,6 +50,11 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+                                        </div>
+                                    </div>
                                     <div class="col-3">
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
@@ -74,16 +79,11 @@
 
                                     </div>
 
-                                    <div class="col-3">
+                                    <div class="col-2">
                                         <div class="form-group">
                                             <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
                                         </div>
                                     </div>
-
-
-
-
-
                                 </div>
 
                             </form>
@@ -244,6 +244,16 @@
                     if (context.select) {
                         $('#search_form #delivery_date_from').pickadate('picker').set('max', $('#search_form #delivery_date_to').pickadate('picker').get('select'));
                     }
+                }
+            });
+
+            $('#search_form #tracking_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            }).bind('input', function() {
+                if (this.value.length == 0 || this.value.length >= 6) {
+                    table.draw();
                 }
             });
 
@@ -613,6 +623,7 @@
                         d.service = $('#search_form #service').val();
                         d.delivery_date_from = $('#search_form input[name="delivery_date_from_formatted"]').val();
                         d.delivery_date_to = $('#search_form input[name="delivery_date_to_formatted"]').val();
+                        d.tracking_number = $('#search_form #tracking_number').val();
                     }
                 },
                 deferLoading: 0,

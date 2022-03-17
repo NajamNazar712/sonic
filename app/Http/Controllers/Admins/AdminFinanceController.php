@@ -1133,6 +1133,10 @@ class AdminFinanceController extends Controller
             $datatables->where('sjd.created_at', '<', Carbon::parse($delivery_date_to)->addDay()->toDateTimeString());
         }
 
+        if ($tracking_number = $request->get('tracking_number')) {
+            $datatables->where('s.tracking_number', '=', $tracking_number);
+        }
+
         return $datatables->make(true);
     }
 
