@@ -9057,6 +9057,15 @@ class NotificationsController extends Controller
                     $data = array($body, $to);
                     return $data;
                   
+                }else if($id == 131) {
+                    $request_no = $reference_1_id;
+                    $admin_id = $reference_2_id;
+                    if (strpos($body, '[request_no]') !== FALSE) {
+                        $body = str_replace('[request_no]', $request_no, $body);
+                    }
+                    $admin = Admin::find($admin_id);
+                    $to = $admin->email;
+                    self::email($subject, $body, $to);
                 }
                 else if ($id == 170) {
                     $sale_person = Admin::find($reference_1_id);
