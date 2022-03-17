@@ -10174,15 +10174,7 @@ class AdminFinanceController extends Controller
                 }
             })
             ->filterColumn('account_type', function($query, $keyword) {
-                if ($keyword == 'Corporate Account') {
-                    $query->where('invoices.account_type', 2);
-                }
-                else if($keyword == 'Reimbursement Account'){
-                    $query->where('invoices.account_type', 1);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
+                    $query->where('invoices.account_type', $keyword);
             })
             ->addColumn('action', function($invoice) {
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
