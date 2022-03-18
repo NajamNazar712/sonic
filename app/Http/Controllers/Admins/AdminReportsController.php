@@ -7414,31 +7414,26 @@ class AdminReportsController extends Controller
 
     public function route_distribution_list(Request $request)
     {
-        $from = $request->get('search_from');
-        $to = $request->get('search_to');
 
-        $to = date('Y-m-d', strtotime($to . ' +1 day'));
-//        dd($from,$to);
-//        $cutt_off = $request->get('search_cutt_off');
-$cutt_off = 3;
-        if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 198);
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),198);
         }
 
         $count = DB::connection('reports')->table('delivery_notes')
             ->join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id');
 
-        if ($rider = $request->get('search_rider')) {
+        if($rider = $request->get('search_rider')){
             $count = $count->where('r.id', '=', $rider);
         }
-        if ($hub = $request->get('search_hub')) {
+        if($hub = $request->get('search_hub')){
             $count = $count->where('c.hub_id', '=', $hub);
         }
-        if ($zone = $request->get('search_zone')) {
+        if($zone = $request->get('search_zone')){
             $count = $count->where('c.zone_id', '=', $zone);
         }
-        if ($destination = $request->get('search_destination')) {
+        if($destination = $request->get('search_destination')){
             $count = $count->where('c.id', '=', $destination);
         }
         if ($search_rider_cat = $request->get('search_rider_cat')) {
@@ -7449,7 +7444,6 @@ $cutt_off = 3;
 
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
             ->join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
-            ->join('rider_types as rt', 'r.rider_type_id', '=', 'rt.id')
             ->leftjoin('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
@@ -7469,286 +7463,75 @@ $cutt_off = 3;
                     ->where('us.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,12,15,18,56) and verification = 1)'));
             })
-            ->select('r.name as courier_name', DB::raw('r.id as rider_id'), DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 'c.name as hub', 'rt.name as rider_type')
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 'c.name as hub')
             ->groupBy('r.id');
 
         $datatables = Datatables::of($route_distribution_summary)
             ->setTotalRecords($count)
-            ->addColumn('dn_no', function ($entry) use ($from,$to,$cutt_off) {
-
-                if ($cutt_off == 1) {
-                    $cut_off_time_start = '20:00:00';
-                    $cut_off_time_end = '14:00:00';
-                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
-                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
-
-                $dn_no = DB::connection('reports')
-                    ->table('delivery_notes')
-                    ->where('rider_id', $entry->rider_id)
-                    ->whereBetween('delivery_notes.created_at', [$from, $to])
-                    ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start);
-
-                $dn_no1 = DB::connection('reports')
-                    ->table('delivery_notes')
-                    ->where('rider_id', $entry->rider_id)
-                    ->whereBetween('delivery_notes.created_at', [$from, $to])
-                    ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
-                    ->union($dn_no)
-                    ->get();
-                $dn_no_count = count($dn_no1);
-                if ($dn_no_count > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $dn_no1->pluck('id') . ')" >' . $dn_no_count . '</button>';
-                } else {
-                    return 0;
-                }
-            }
-                if ($cutt_off == 2) {
-                    $cut_off_time_start = '14:01:00';
-                    $cut_off_time_end = '19:59:00';
-                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
-                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
-
-                    $dn_no = DB::connection('reports')
-                        ->table('delivery_notes')
-                        ->where('rider_id', $entry->rider_id)
-                        ->whereBetween('delivery_notes.created_at', [$from, $to])
-                        ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start)
-                        ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
-                        ->get();
-
-                    $dn_no_count = count($dn_no);
-                    if ($dn_no_count > 0) {
-//                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no_count . '</button>';
-                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $dn_no->pluck('id') . ')" >' . $dn_no_count . '</button>';
-                    } else {
-                        return 0;
-                    }
-                }
-                if ($cutt_off == 3) {
-
-                    $cut_off_time_start = '01:00:00';
-                    $cut_off_time_end = '23:59:00';
-                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
-                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
-
-                    $dn_no = DB::connection('reports')
-                        ->table('delivery_notes')
-                        ->where('rider_id', $entry->rider_id)
-                        ->whereBetween('delivery_notes.created_at', [$from, $to])
-                        ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start)
-                        ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
-                        ->get();
-
-
-                    $dn_no_count = count($dn_no);
-                    if ($dn_no_count > 0) {
-//                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no_count . '</button>';
-                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $dn_no->pluck('id') . ')" >' . $dn_no_count . '</button>';
-                    } else {
-                        return 0;
-                    }
-                }
-            })
-            ->addColumn('dn_no_excel', function ($entry) use ($from,$to,$cutt_off) {
-                if ($cutt_off == 1) {
-                    $cut_off_time_start = '20:00:00';
-                    $cut_off_time_end = '14:00:00';
-                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
-                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
-
-                $dn_no = DB::connection('reports')
-                    ->table('delivery_notes')
-                    ->where('rider_id', $entry->rider_id)
-                    ->whereBetween('delivery_notes.created_at', [$from, $to])
-                    ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start);
-
-                $dn_no1 = DB::connection('reports')
-                    ->table('delivery_notes')
-                    ->where('rider_id', $entry->rider_id)
-                    ->whereBetween('delivery_notes.created_at', [$from, $to])
-                    ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
-                    ->union($dn_no)
-                    ->get();
-                $dn_no_count = count($dn_no1);
-                if ($dn_no_count > 0) {
-                    return  $dn_no_count ;
-                } else {
-                    return 0;
-                }
-            }
-                if ($cutt_off == 2) {
-                    $cut_off_time_start = '14:01:00';
-                    $cut_off_time_end = '19:59:00';
-                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
-                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
-
-                    $dn_no = DB::connection('reports')
-                        ->table('delivery_notes')
-                        ->where('rider_id', $entry->rider_id)
-                        ->whereBetween('delivery_notes.created_at', [$from, $to])
-                        ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start)
-                        ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
-                        ->get();
-
-                    $dn_no_count = count($dn_no);
-                    if ($dn_no_count > 0) {
-//                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no_count . '</button>';
-                        return $dn_no_count ;
-                    } else {
-                        return 0;
-                    }
-                }
-                if ($cutt_off == 3) {
-                    $cut_off_time_start = '00:00:00';
-                    $cut_off_time_end = '23:59:00';
-                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
-                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
-
-                    $dn_no = DB::connection('reports')
-                        ->table('delivery_notes')
-                        ->where('rider_id', $entry->rider_id)
-                        ->whereBetween('delivery_notes.created_at', [$from, $to])
-                        ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start)
-                        ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
-                        ->get();
-
-                    $dn_no_count = count($dn_no);
-                    if ($dn_no_count > 0) {
-//                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no_count . '</button>';
-                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $dn_no->pluck('id') . ')" >' . $dn_no_count . '</button>';
-                    } else {
-                        return 0;
-                    }
-                }
-            })
-            ->addColumn('dncc_amount', function ($entry) use ($from,$to,$cutt_off) {
-                if ($cutt_off== 1) {
-//dd($from,$to);
-                    $from = $from . ' ' . '20:00:00';
-                    $to = $to . ' ' . '14:01:00';
-//                        dd($to);
-                    $cut_off_time_start = '20:00:00';
-                    $cut_off_time_end = '14:00:00';
-                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
-                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
-                }
-                elseif ($cutt_off== 2)
-                {
-                    $from = $from . ' ' . '14:01:00';
-                    $to = $to . ' ' . '19:59:00';
-                    $cut_off_time_start = '14:01:00';
-                    $cut_off_time_end = '19:59:00';
-                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
-                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
-                }
-                elseif ($cutt_off== 3)
-                {
-                    $from = $from . ' ' . '00:00:00';
-                    $to = $to . ' ' . '23:59:00';
-                    $cut_off_time_start = '00:00:00';
-                    $cut_off_time_end = '23:59:00';
-                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
-                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
-
-                }
-                $amount = DB::connection('reports')
-                    ->table('delivery_notes')
-                    ->where('rider_id', $entry->rider_id)
-                    ->where('delivery_notes.received_cod_amount', '!=', 0)
-                    ->whereBetween('delivery_notes.created_at', [$from, $to])
-                    ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start)
-                    ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
-                    ->sum('total_cod_amount');
-
-                return $amount;
-
-            })
             ->addColumn('delivered_shipments_per', function ($entry) {
                 if ($entry->shipments_count) {
                     return round(($entry->delivered_shipments / $entry->shipments_count) * 100, 2);
-                } else {
+                }
+                else {
                     return '';
                 }
             })
             ->addColumn('undelivered_shipments_per', function ($entry) {
                 if ($entry->shipments_count) {
                     return round(($entry->undelivered_shipments / $entry->shipments_count) * 100, 2);
-                } else {
+                }
+                else {
                     return '';
                 }
             })
             ->addColumn('confirmation_pending_shipments_per', function ($entry) {
                 if ($entry->shipments_count) {
                     return round(($entry->confirmation_pending_shipments / $entry->shipments_count) * 100, 2);
-                } else {
+                }
+                else {
                     return '';
                 }
             })
             ->addColumn('pending_shipments', function ($entry) {
                 if ($entry->shipments_count) {
                     return ($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments));
-                } else {
+                }
+                else {
                     return '';
                 }
             })
             ->addColumn('pending_shipments_per', function ($entry) {
                 if ($entry->shipments_count) {
                     return round((($entry->shipments_count - ($entry->undelivered_shipments + $entry->delivered_shipments)) / $entry->shipments_count) * 100, 2);
-                } else {
+                }
+                else {
                     return '';
                 }
             });
 
-
-        if ($rider = $request->get('search_rider')) {
+        if($rider = $request->get('search_rider')){
             $datatables = $datatables->where('r.id', '=', $rider);
         }
-        if ($hub = $request->get('search_hub')) {
+        if($hub = $request->get('search_hub')){
             $datatables = $datatables->where('c.hub_id', '=', $hub);
         }
-        if ($zone = $request->get('search_zone')) {
+        if($zone = $request->get('search_zone')){
             $datatables = $datatables->where('c.zone_id', '=', $zone);
         }
-        if ($destination = $request->get('search_destination')) {
+        if($destination = $request->get('search_destination')){
             $datatables = $datatables->where('c.id', '=', $destination);
         }
         if ($search_rider_cat = $request->get('search_rider_cat')) {
             $datatables->where('r.operation_rider_id', $search_rider_cat);
         }
-
-
-        if ($request->get('search_from') && $request->get('search_to') && $request->get('search_cutt_off')) {
-
-            if ($request->get('search_cutt_off') == 1) {
-
-                $from = $request->get('search_from');
-                $to = $request->get('search_to');
-                $from = $from . ' ' . '20:00:00';
-                $to = $to . ' ' . '14:00:00';
-
-                $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
-            }
-            elseif ($request->get('search_cutt_off') == 2) {
-
-                $from = $request->get('search_from');
-                $to = $request->get('search_to');
-                $from = $from . ' ' . '14:01:00';
-                $to = $to . ' ' . '19:59:00';
-
-                $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
-            }
-            elseif ($request->get('search_cutt_off') == 3) {
-
-                $from = $request->get('search_from');
-                $to = $request->get('search_to');
-                $from = $from . ' ' . '00:00:00';
-                $to = $to . ' ' . '23:59:00';
-
-                $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from, $to]);
-            }
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
         }
 
         return $datatables->make(true);
+
     }
 
 //    delivery_note fetching

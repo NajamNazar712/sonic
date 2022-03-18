@@ -99,9 +99,9 @@
 
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
-                            <th class="border-primary border-darken-1">Rider Type</th>
-                            <th class="border-primary border-darken-1">Delivery Note</th>
-                            <th class="border-primary border-darken-1">DNCC Amount</th>
+{{--                            <th class="border-primary border-darken-1">Rider Type</th>--}}
+{{--                            <th class="border-primary border-darken-1">Delivery Note</th>--}}
+{{--                            <th class="border-primary border-darken-1">DNCC Amount</th>--}}
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Total Out For Delivery</th>
                             <th class="border-primary border-darken-1">Pending</th>
@@ -297,9 +297,9 @@
 
                             head.push('S.No');
                             head.push('Rider Name');
-                            head.push('Rider Type');
-                            head.push('Delivery Note');
-                            head.push('DNCC Amount');
+                            // head.push('Rider Type');
+                            // head.push('Delivery Note');
+                            // head.push('DNCC Amount');
                             head.push('Hub');
                             head.push('Total Out For Delivery');
                             head.push('Pending');
@@ -314,9 +314,9 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.courier_name);
-                                row.push(values.rider_type);
-                                row.push(values.dn_no_excel);
-                                row.push(values.dncc_amount);
+                                // row.push(values.rider_type);
+                                // row.push(values.dn_no_excel);
+                                // row.push(values.dncc_amount);
                                 row.push(values.hub);
                                 row.push(values.shipments_count);
                                 row.push(values.pending_shipments);
@@ -332,9 +332,9 @@
 
                             footer.push('-');
                             footer.push('Total');
-                            footer.push('');
-                            footer.push('');
-                            footer.push('');
+                            // footer.push('');
+                            // footer.push('');
+                            // footer.push('');
                             footer.push('');
                             footer.push(shipments_count.toFixed(2));
                             footer.push(pending_shipments.toFixed(2));
@@ -354,7 +354,8 @@
                 }
             } );
 
-            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
+            // Add <td></td><td></td><td></td> below
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -395,9 +396,9 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'courier_name' ,name: 'r.name', class: 'align-middle text-center courier_name'},
-                    { data:'rider_type' ,name: 'rt.name', class: 'align-middle text-center rider_type'},
-                    { data:'dn_no' ,name: 'delivery_notes.id', class: 'align-middle text-center dn_no'},
-                    { data:'dncc_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle text-center dncc_amount'},
+                    // { data:'rider_type' ,name: 'rt.name', class: 'align-middle text-center rider_type'},
+                    // { data:'dn_no' ,name: 'delivery_notes.id', class: 'align-middle text-center dn_no'},
+                    // { data:'dncc_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle text-center dncc_amount'},
                     { data:'hub' ,name: 'hub', class: 'align-middle text-center hub'},
                     { data:'shipments_count', class: 'align-middle shipments_count', orderable: false, searchable: false},
                     { data:'pending_shipments', class: 'align-middle pending_shipments', orderable: false, searchable: false},
