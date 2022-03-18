@@ -7444,6 +7444,7 @@ class AdminReportsController extends Controller
 
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
             ->join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->join('rider_types as rt', 'r.rider_type_id', '=', 'rt.id')
             ->leftjoin('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
@@ -7463,11 +7464,24 @@ class AdminReportsController extends Controller
                     ->where('us.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,12,15,18,56) and verification = 1)'));
             })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 'c.name as hub')
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 'c.name as hub',DB::raw('count(DISTINCT delivery_notes.id) as dn_no_count'),DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'),'rt.name as rider_type')
             ->groupBy('r.id');
 
         $datatables = Datatables::of($route_distribution_summary)
             ->setTotalRecords($count)
+            ->addColumn('dn_no', function ($entry) {
+                $function = "dn_no_pop('".$entry->dn_ids."')";
+                if ($entry->dn_no_count > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->dn_no_count . '</button>';
+                } else {
+                    return 0;
+                }
+
+            })
+            ->addColumn('dncc_amount',function($entry) {
+                $dn_ids = explode(',',$entry->dn_ids);
+                return DB::connection('reports')->table('delivery_notes')->whereIn('id',$dn_ids )->sum('received_cod_amount');
+            })
             ->addColumn('delivered_shipments_per', function ($entry) {
                 if ($entry->shipments_count) {
                     return round(($entry->delivered_shipments / $entry->shipments_count) * 100, 2);
@@ -7522,7 +7536,7 @@ class AdminReportsController extends Controller
             $datatables = $datatables->where('c.id', '=', $destination);
         }
         if ($search_rider_cat = $request->get('search_rider_cat')) {
-            $datatables->where('r.operation_rider_id', $search_rider_cat);
+            $datatables = $datatables->where('r.operation_rider_id', $search_rider_cat);
         }
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
@@ -7532,20 +7546,6 @@ class AdminReportsController extends Controller
 
         return $datatables->make(true);
 
-    }
-
-//    delivery_note fetching
-    public function get_dn_no(Request $request)
-    {
-        $dn_no = $request->input('dn_no');
-
-        $html = "";
-        foreach ($dn_no as $dn) {
-
-            $html .= '<u>' . $dn . '</u><br>';
-        }
-
-        return response()->json(['status' => 1, 'html' => $html]);
     }
 
     public function destination_delivery_received_index()

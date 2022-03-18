@@ -78,16 +78,6 @@
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
-{{--                    <div class="col-4">--}}
-{{--                        <fieldset class="form-group">--}}
-
-{{--                            <select name="search_cutt_off" id="search_cutt_off" class="form-control">--}}
-{{--                                <option value="{{'1'}}" selected>8pm to 2pm</option>--}}
-{{--                                <option value="{{'2'}}">2:01pm to 7:59pm</option>--}}
-{{--                            </select>--}}
-
-{{--                        </fieldset>--}}
-{{--                    </div>--}}
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -99,9 +89,9 @@
 
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
-{{--                            <th class="border-primary border-darken-1">Rider Type</th>--}}
-{{--                            <th class="border-primary border-darken-1">Delivery Note</th>--}}
-{{--                            <th class="border-primary border-darken-1">DNCC Amount</th>--}}
+                            <th class="border-primary border-darken-1">Rider Type</th>
+                            <th class="border-primary border-darken-1">Delivery Note</th>
+                            <th class="border-primary border-darken-1">DNCC Amount</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Total Out For Delivery</th>
                             <th class="border-primary border-darken-1">Pending</th>
@@ -212,11 +202,6 @@
             var confirmation_pending_shipments = 0;
             var confirmation_pending_shipments_per = 0;
 
-            $('#search_cutt_off').prepend('<option value="3">All</option><option value="1">8pm to 2pm</option><br><option value="2">2:01pm to 7:59pm</option>').select2({
-                placeholder:'Select CuttOff',
-                width:'100%',
-                allowClear:true
-            });
             $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Zone',
                 width:'100%',
@@ -253,7 +238,7 @@
                 format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#from_date_root').css('top','40px');
@@ -270,7 +255,7 @@
                 format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#to_date_root').css('top', '40px');
@@ -297,9 +282,9 @@
 
                             head.push('S.No');
                             head.push('Rider Name');
-                            // head.push('Rider Type');
-                            // head.push('Delivery Note');
-                            // head.push('DNCC Amount');
+                            head.push('Rider Type');
+                            head.push('Delivery Note');
+                            head.push('DNCC Amount');
                             head.push('Hub');
                             head.push('Total Out For Delivery');
                             head.push('Pending');
@@ -314,9 +299,9 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.courier_name);
-                                // row.push(values.rider_type);
-                                // row.push(values.dn_no_excel);
-                                // row.push(values.dncc_amount);
+                                row.push(values.rider_type);
+                                row.push(values.dn_no_count);
+                                row.push(values.dncc_amount);
                                 row.push(values.hub);
                                 row.push(values.shipments_count);
                                 row.push(values.pending_shipments);
@@ -332,9 +317,9 @@
 
                             footer.push('-');
                             footer.push('Total');
-                            // footer.push('');
-                            // footer.push('');
-                            // footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
                             footer.push('');
                             footer.push(shipments_count.toFixed(2));
                             footer.push(pending_shipments.toFixed(2));
@@ -354,8 +339,7 @@
                 }
             } );
 
-            // Add <td></td><td></td><td></td> below
-            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -379,16 +363,12 @@
                 ajax:{
                     url: '{{ route('admin.reports.route_distribution.list') }}',
                     data: function (d) {
-                        d.search_cutt_off = $('#search_cutt_off').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_zone = $('#search_zone').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
-                        d.search_from = $('#from_date').val();
-                        d.search_to = $('#to_date').val();
-
-                        // d.search_from = $('input[name="from_date_formatted"]').val();
-                        // d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.search_from = $('input[name="from_date_formatted"]').val();
+                        d.search_to = $('input[name="to_date_formatted"]').val();
                         d.search_rider_cat = $('#search_rider_cat').val();
                     }
                 },
@@ -396,9 +376,9 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'courier_name' ,name: 'r.name', class: 'align-middle text-center courier_name'},
-                    // { data:'rider_type' ,name: 'rt.name', class: 'align-middle text-center rider_type'},
-                    // { data:'dn_no' ,name: 'delivery_notes.id', class: 'align-middle text-center dn_no'},
-                    // { data:'dncc_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle text-center dncc_amount'},
+                    { data:'rider_type' ,name: 'rt.name', class: 'align-middle text-center rider_type'},
+                    { data:'dn_no' ,name: 'delivery_notes.id', class: 'align-middle text-center dn_no'},
+                    { data:'dncc_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle text-center dncc_amount', orderable: false, searchable: false},
                     { data:'hub' ,name: 'hub', class: 'align-middle text-center hub'},
                     { data:'shipments_count', class: 'align-middle shipments_count', orderable: false, searchable: false},
                     { data:'pending_shipments', class: 'align-middle pending_shipments', orderable: false, searchable: false},
@@ -516,65 +496,18 @@
                 $('#datatable_wrapper').show();
                 table.draw();
             });
-
-
-            {{--$('#datatable tbody').on('click', 'tr td.dn_no button', function () {--}}
-            {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
-            {{--    if (id) {--}}
-            {{--        $.ajax({--}}
-            {{--            url: '{!! route('admin.reports.destination_delivery_received.get.dn_no') !!}',--}}
-            {{--            method: 'POST',--}}
-            {{--            data: {--}}
-            {{--                '_token': '{{ csrf_token() }}',--}}
-            {{--                'dn_id': id,--}}
-            {{--            },--}}
-            {{--            success: function (data) {--}}
-            {{--                if (data.status == 1) {--}}
-
-
-            {{--                    $('#dn_data').html(data.html);--}}
-
-            {{--                } else {--}}
-            {{--                    toastr.error('Something went wrong!', 'Error!', {--}}
-            {{--                        positionClass: 'toast-top-center',--}}
-            {{--                        containerId: 'toast-top-center'--}}
-            {{--                    });--}}
-            {{--                }--}}
-            {{--            }--}}
-            {{--        })--}}
-
-            {{--    }--}}
-
-            {{--});--}}
-
-
         });
 
-        function dn_no_pop(id) {
-            if (id) {
-                $.ajax({
-                    url: '{!! route('admin.reports.destination_delivery_received.get.dn_no') !!}',
-                    method: 'get',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'dn_no': id,
-                    }
+        function dn_no_pop(dn_no) {
+            if (dn_no) {
+                let notes = "";
+                let dn_array = dn_no.split(',');
+                console.log(dn_array);
+                $.each(dn_array,function(i,v){
+                    notes += "<u>"+v+"<u><br>";
                 })
-                    .done(function (data) {
-                        if (data.status == 1) {
-                            var notes = '';
-
-                            notes += data.html
-                            $('#dn_no_modal .modal-body').html('');
-                            $('#dn_no_modal').modal('show');
-                            $('#dn_no_modal .modal-body').html(notes);
-                        } else {
-                            toastr.error('Something went wrong!', 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    });
+                $('#dn_no_modal .modal-body').html(notes);
+                $('#dn_no_modal').modal('show');
             }
         }
 
