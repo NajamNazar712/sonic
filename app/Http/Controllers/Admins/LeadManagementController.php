@@ -11,6 +11,7 @@ use App\Http\Models\Admin\Lead\LeadRemark;
 use App\Http\Models\Admin\Lead\LeadStatus;
 use App\Http\Models\Admin\Lead\PamLead;
 use App\Http\Models\Admin\Lead\PamLeadItem;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\City;
 use App\Models\Admin\Lead\LeadReason;
 use Carbon\Carbon;
@@ -203,11 +204,11 @@ class LeadManagementController extends Controller
             }
             $leads->whereIn('leads.status_id', $search_statuses);
         }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+        /*if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $leads->whereBetween('leads.requested_date', [$from, $to]);
-        }
+        }*/
         return Datatables::of($leads)
             ->filterColumn('status', function ($query, $keyword) {
                 if ($keyword != '') {
@@ -252,6 +253,10 @@ class LeadManagementController extends Controller
 
 //                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.leads.view_remarks', ['id' => $lead->lead_id]) . '\')" type="button" class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
+
+                if ((session('role_id') == 1 || in_array(696, session('permissions')))) {
+                    $dropdown .= '<button type="button"  class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                }
 
                 return $dropdown;
             })->make(true);
@@ -732,5 +737,40 @@ class LeadManagementController extends Controller
         }else{
             return response()->json(['status' => 0, 'error' => 'Reason not found!']);
         }
+    }
+
+    public function info(Request $request){
+        $lead_id = $request->lead_id;
+
+        $lead = Lead::find($lead_id);
+        if($lead_id){
+            $details = array();
+            $details['city'] = '';
+            $details['territory'] = '';
+            $details['area'] = '';
+            if($lead->city_id){
+                $details['city'] = $lead->city->name;
+            }
+
+            if($lead->territory_id){
+                $details['territory'] = Territory::find($lead->territory_id)->name;
+            }
+            if($lead->terrirory_area_id){
+                $details['area'] = Territory::find($lead->terrirory_area_id)->name;
+            }
+
+            $details['phone_number'] = $lead->phone_number;
+            $details['email_address'] = $lead->email_address;
+            $details['brand'] = $lead->brand;
+            $details['company'] = $lead->company;
+            return response()->json(['status' => 0, 'details' => $details]);
+        }
+        else{
+           return response()->json(['status' => 1, 'error' => 'Invalid Lead ID!']);
+        }
+    }
+
+    public function edit(Request $request){
+        return $request;
     }
 }

@@ -465,75 +465,85 @@
     </div>
 
     {{--    todo bulk status model--}}
-    <div class="modal fade" id="add_bulk_status_modal" role="dialog" aria-labelledby="add_bulk_status_modal_title"
+    <div class="modal fade" id="edit_lead_modal" role="dialog" aria-labelledby="edit_lead_modal"
          aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="add_remarks_title">Update Bulk Status</h4>
+                    <h4 class="modal-title" id="edit_lead_modal_title">Edit Lead (<span></span>)</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_bulk_status_form" class="form-horizontal mb-1 justify-content-center"
-                          novalidate="novalidate">
-                        <div class="form-group">
-                            <select name="update_lead_bulk_status" id="update_bulk_lead_status"
-                                    class="form-control select2">
-                                @foreach($lead_statuses as $lead_status)
-                                    <option value="{{ $lead_status->id }}"> {{ $lead_status->name }} </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div id="div_lead_status_rejected1" class="form-group d-none">
-                            <select name="lead_status_rejected1" id="lead_status_rejected1"
-                                    class="form-control select2">
-                                <option value="1"> Prohibited Items</option>
-                                <option value="2"> Wrong Contact Details</option>
-                                <option value="3"> Duplicate</option>
-                                <option value="10"> Others</option>
-                            </select>
-                        </div>
-                        <div id="div_lead_status_notinterested1" class="form-group d-none">
-                            <select name="lead_status_notinterested1" id="lead_status_notinterested1"
-                                    class="form-control select2">
-                                <option value="4"> A/C Query Call</option>
-                                <option value="10"> Others</option>
-                            </select>
-                        </div>
-                        <div id="div_lead_status_irrelevant1" class="form-group d-none">
-                            <select name="lead_status_irrelevant1" id="lead_status_irrelevant1"
-                                    class="form-control select2">
-                                <option value="5"> Operational Query</option>
-                                <option value="6"> HR Query</option>
-                                <option value="7"> Sales Person Already Assigned</option>
-                                <option value="10"> Others</option>
-                            </select>
-                        </div>
-                        <div id="div_lead_status_blocked1" class="form-group d-none">
-                            <select name="lead_status_blocked1" id="lead_status_blocked1" class="form-control select2">
-                                <option value="8"> Unresponsive</option>
-                                <option value="9"> Customer Wants To Be Contacted Later</option>
-                                <option value="11"> Customer Needs More Time</option>
-                                <option value="12"> General Query</option>
-                                <option value="13"> Rates Negotiations</option>
-                            </select>
-                        </div>
-                        <div id="div_lead_status_dormant1" class="form-group d-none">
-                            <select name="lead_status_dormant1" id="lead_status_dormant1" class="form-control select2">
-                                <option value="8"> Unresponsive</option>
-                                <option value="9"> Customer Wants To Be Contacted Later</option>
-                                <option value="11"> Customer Needs More Time</option>
-                                <option value="12"> General Query</option>
-                                <option value="13"> Rates Negotiations</option>
-                            </select>
-                        </div>
-                        <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Update</button>
-                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+                    <table class="table table-bordered datatable text-center" id="lead_info_table">
+                        <thead>
+                            <tr>
+                                <th>City</th>
+                                <th>Territory</th>
+                                <th>Area</th>
+                                <th>Phone Number</th>
+                                <th>Email</th>
+                                <th>Brand</th>
+                                <th>Company</th>
+                            </tr>
+                        </thead>
+                    </table>
 
+                    <form id="edit_lead_form" class="form-horizontal mb-1 justify-content-center"
+                          novalidate="novalidate">
+                        <input type="hidden" name="edit_lead_id" id="edit_lead_id">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="edit_city" id="edit_city" class="form-control select2" data-rule-required="true"  data-msg-required="City is required">
+                                        @foreach($cities as $city)
+                                            <option value="{{ $city->id }}"> {{ $city->name }} </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="edit_territory" id="edit_territory" class="form-control select2" data-rule-required="true"  data-msg-required="Territory is required">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <select name="edit_area" id="edit_area" class="form-control select2" data-rule-required="true"  data-msg-required="Area is required">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="edit_phone_number" id="edit_phone_number" placeholder="Phone Number" data-rule-required="true"  data-msg-required="Phone Number is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="email" class="form-control" name="edit_email" id="edit_email" placeholder="Email" data-rule-required="true"  data-msg-required="Email is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="edit_brand" id="edit_brand" placeholder="Brand" data-rule-required="true"  data-msg-required="Brand is required">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="edit_company" id="edit_company" placeholder="Company" data-rule-required="true"  data-msg-required="Company Name is required">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <div class="form-group ml-1">
+                                <button type="submit" name="add" class="btn btn-primary width-200" value="Add">Edit</button>
+                                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                            </div>
                         </div>
                     </form>
 
@@ -543,6 +553,25 @@
         </div>
     </div>
     {{--    todo bulk status model end--}}
+
+    <div class="modal fade text-left" id="DetailsModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="DetailsModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 @endsection
 
@@ -1336,7 +1365,8 @@
                 placeholder: "Select Status",
                 width: '100%',
                 dropdownParent: $('#add_bulk_status_modal')
-            }).bind('change', function () {
+            }).bind('change', function ()
+            {
                 $(this).valid();
                 $('#lead_status_rejected1').val('').trigger('change');
                 $('#lead_status_notinterested1').val('').trigger('change');
@@ -1741,6 +1771,184 @@
             $('#dormant_div').on('click', function () {
                 $('#search_statistics_div').val(7);
                 table.draw();
+            });
+
+            $("#edit_city").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select City",
+                width: '100%'
+            });
+            $("#edit_territory").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Territory",
+                width: '100%'
+            });
+
+            $('#edit_phone_number').inputmask("Regex", { regex: "[+|0][0-9]*"});
+            $("#edit_phone_number").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+
+
+
+            $('#edit_city').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder:'Select City',
+            }).bind('change', function () {
+                var id = $(this).val();
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('cod.territory') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+
+                        if (data.status == 0) {
+                            $('#edit_territory').empty();
+                            $.each(data.territory, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                $('#edit_territory').append(newOption);
+                            });
+                            $('#edit_territory').val('').trigger('change');
+
+                        } else {
+                            $('#edit_territory').empty();
+                            var error = 'No Territory found for the selected city';
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                    });
+                }
+            });
+            $('#edit_territory').on('change',function () {
+                territory_id = $(this).val();
+                $.ajax({
+                    url: '{!! route('cod.area') !!}',
+                    method: 'POST',
+                    data: {
+                        'territory_id': territory_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                .done(function (data) {
+                    if (data.status == 0) {
+
+                        $('#edit_area').empty();
+                        $.each(data.area, function (key, value) {
+                            var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                            $('#edit_area').append(newOption);
+                        });
+                        $('#edit_area').val('').trigger('change');
+                    }
+                    else{
+                        $('#edit_area').empty();
+                        var error = 'No Area found for the selected Territory';
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
+
+
+
+            var lead_table = $('#lead_info_table').DataTable({
+                dom: 'ltipr',
+                scrollX: false,
+                autoWidth : true,
+                paging:false,
+                "order": [],
+                columns: [
+                    {name: 'city',  class: 'align-middle city', orderable: false, searchable: false},
+                    {name: 'territory', class: 'align-middle tracking_number', orderable: false, searchable: false},
+                    {name: 'area', class: 'align-middle order_id', orderable: false, searchable: false},
+                    {name: 'phone_number', class: 'align-middle service_type', orderable: false, searchable: false},
+                    {name: 'email_address', class: 'align-middle destination', orderable: false, searchable: false},
+                    {name: 'brand', class: 'align-middle amount', orderable: false, searchable: false},
+                    {name: 'company', class: 'align-middle open_box', orderable: false, searchable: false},
+                ],
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+            $('#datatable tbody').on('click', 'tr button.edit', function (){
+               var lead_id = parseInt($(this).parents('tr').attr('id'));
+
+               if(lead_id){
+                   $.ajax({
+                       url: "{{route('admin.leads.info')}}",
+                       method: 'POST',
+                       data: {
+                           'lead_id': lead_id,
+                           '_token': '{{ csrf_token() }}'
+                       }
+                   }).done(function (data) {
+                        if(data.status == 0){
+
+                            lead_table.clear();
+                            var details = data.details;
+                            lead_table.row.add([details.city, details.territory, details.area, details.phone_number, details.email_address, details.brand, details.company]).node().id = lead_id;
+                            lead_table.draw(true);
+                            $('#edit_lead_modal_title span').text(lead_id);
+                            $('input#edit_lead_id').val(lead_id);
+                            $('#edit_lead_modal').modal('show');
+
+
+                        }
+                   });
+               }
+               else{
+                   var error = 'Invalid Lead ID!';
+                   toastr.error(error, 'Error!', {
+                       positionClass: 'toast-top-center',
+                       containerId: 'toast-top-center'
+                   });
+               }
+            });
+
+
+            $('#edit_lead_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function (value) {
+                    return $.trim(value);
+                },
+                submitHandler: function (form) {
+                    var lead_id = $('#lead_id').val();
+                    $
+                    if (lead_id != null) {
+                        blockPagePermanently();
+                        $.ajax({
+                            url: "{{route('admin.leads.add_remarks')}}",
+                            method: 'POST',
+                            data: {
+                                'lead_id': lead_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            UnblockPagePermanently();
+                            $('#add_remarks_modal').modal('hide');
+                            remark_lead_id = null;
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                        });
+                    } else {
+                        var error = 'Invalid Lead ID!';
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                }
             });
         });
 
