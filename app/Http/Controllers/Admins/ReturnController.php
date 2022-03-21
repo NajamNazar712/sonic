@@ -4730,15 +4730,16 @@ class ReturnController extends Controller
             }
        })
        ->editColumn('status',function ($rcp){
-            if($rcp->status == 0){
+            if ($rcp->status == 0) {
                 return 'Pending';
             }
-            else if($rcp->status == 2){
-                return 'Re-Attempt';
-            }
-            else{
+            else if ($rcp->status == 1) {
                 return 'Return';
             }
+            else if ($rcp->status == 2) {
+                return 'Re-Attempt';
+            }
+            else {}
        })
        ->filterColumn('return_confirmation_pending_sms_attempts.status',function ($query,$keyword){
 
