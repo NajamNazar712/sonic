@@ -36,14 +36,11 @@ class ProcessPushNotification implements ShouldQueue
     public function handle()
     {
         $push_notification = $this->notification_history;
-//        dd($push_notification);
         $employee_device_token = EmployeeDeviceToken::where('employee_id', $push_notification->employee_id)
             ->where('employee_type_id', $push_notification->employee_type_id)
             ->select('device_token');
-//        dd($push_notification->employee_type_id, $push_notification->employee_id);
         if ($employee_device_token->exists()) {
             $employee_device_token = $employee_device_token->first();
-//            dd($employee_device_token);
             $device_token = $employee_device_token->device_token;
             $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
             $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
@@ -67,7 +64,6 @@ class ProcessPushNotification implements ShouldQueue
                 'body' => json_encode($message)
             ]);
             $response = json_decode($response->getBody()->getContents(), true);
-            dd($response);
             if ($response['success'] != 0) {
                 $push_notification->status = 1;
                 $push_notification->save();
