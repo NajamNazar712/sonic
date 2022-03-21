@@ -69,6 +69,7 @@ use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\ShipmentDistributionProduct;
+use App\Http\Models\ShipmentOpenBox;
 use App\Http\Models\ShipmentOtp;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
@@ -11257,8 +11258,23 @@ class RiderAPIController extends Controller
 
                                         $shipment->shipper_status_id = $request->shipper_status_id;
                                         $shipment->consignee_status_id = $request->status_reason_id;
-                                        $shipment->open_box = $request->open_box;
+                                        $shipment->open_box = (in_array($request->open_box,[1,2])) ? 1 : 0;
                                         $shipment->delivery_in_route = 0;
+
+                                        if(in_array($request->open_box,[1,2])){
+                                            $shipment->open_box = 1;
+                                            $shipment_open_box = ShipmentOpenBox::where('shipment_id', $shipment->id);
+                                            if($shipment_open_box->exists()){
+                                                $shipment_open_box->first();
+                                            }else{
+                                                $shipment_open_box = new ShipmentOpenBox();
+                                                $shipment_open_box->shipment_id = $shipment->id;
+                                            }
+                                            $shipment_open_box->open_box_type = $request->open_box;
+                                            $shipment_open_box->save();
+                                        }else{
+                                            $shipment->open_box = 0;
+                                        }
                                         $shipment->save();
 
                                         $remarks = NULL;
