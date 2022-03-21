@@ -485,8 +485,8 @@ class ShipperFinanceController extends Controller
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0') . '</td>
-                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0') . '</td>
-                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
+                              <td>' . number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) . '</td>
+                              <td>' . number_format($done_payment_shipment->payable, 2) . '</td>
                             </tr>
             ';
 

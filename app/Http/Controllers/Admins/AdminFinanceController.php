@@ -1133,6 +1133,10 @@ class AdminFinanceController extends Controller
             $datatables->where('sjd.created_at', '<', Carbon::parse($delivery_date_to)->addDay()->toDateTimeString());
         }
 
+        if($tracking_numbers = $request->get('tracking_numbers')){
+            $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+        }
+
         return $datatables->make(true);
     }
 
@@ -5786,8 +5790,8 @@ class AdminFinanceController extends Controller
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0') . '</td>
-                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0') . '</td>
-                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
+                              <td>' . number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) . '</td>
+                              <td>' . number_format($done_payment_shipment->payable, 2) . '</td>
                             </tr>
             ';
 
@@ -10174,15 +10178,7 @@ class AdminFinanceController extends Controller
                 }
             })
             ->filterColumn('account_type', function($query, $keyword) {
-                if ($keyword == 'Corporate Account') {
-                    $query->where('invoices.account_type', 2);
-                }
-                else if($keyword == 'Reimbursement Account'){
-                    $query->where('invoices.account_type', 1);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
+                    $query->where('invoices.account_type', $keyword);
             })
             ->addColumn('action', function($invoice) {
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
