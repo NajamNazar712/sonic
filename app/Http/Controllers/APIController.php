@@ -4491,6 +4491,7 @@ class APIController extends Controller
     }
 
     public function rcp_sms_from_consignee(Request $request) {
+        // var_dump($request->ip());
         // $api_token = $request->header('Authorization');
 
         // if ($api_token) {
@@ -4628,13 +4629,16 @@ class APIController extends Controller
                                     return ['status' => 0, 'message' => 'Invalid message response from consignee'];
                                 }
                             }
+                            else {
+                                return ['status' => 0, 'message' => 'Invalid message response from consignee - attempt'];
+                            }
                         }
                         else {
-                            return ['status' => 0, 'message' => 'Invalid message response from consignee'];
+                            return ['status' => 0, 'message' => 'Invalid message response from consignee - tracking number'];
                         }
                     }
                     else {
-                        return ['status' => 0, 'message' => 'Invalid message response from consignee'];
+                        return ['status' => 0, 'message' => 'Invalid message response from consignee - format'];
                     }
                 }
                 else {
