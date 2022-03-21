@@ -62,7 +62,7 @@ class RCPSmsToConsignee implements ShouldQueue
                 $status = true;
 
                 if ($attempt->exists()) {
-                    $attempt = $attempt->first();
+                    $attempt = $attempt->latest('id')->first();
                     $current_count = $attempt->count;
                     $status = $attempt->status == 0;
                 }
