@@ -93,7 +93,7 @@ class RCPSmsToConsignee implements ShouldQueue
                         $sms->save();
 
                         if (!$attempt) {
-                            ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment_id, 'status' => 1, 'count' => 1]);
+                            ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment_id, 'status' => 0, 'count' => 1]);
                         }
                         else {
                             $attempt->count = $attempt->count + 1;

@@ -4565,15 +4565,16 @@ class APIController extends Controller
 
                                         NotificationsController::send(15, 0, $shipment->id);
                                         NotificationsController::send(16, 0, $shipment->id);
+
+                                        $res_from_consignee = $data[0] . " ". $res;
+
+                                        $rcp->response = $res_from_consignee;
+                                        $rcp->status = 2;
+                                        $rcp->save();
+
+                                        return ['status' => 1, 'message' => 'Message Received'];
                                     }
 
-                                    $res_from_consignee = $data[0] . " ". $res;
-
-                                    $rcp->response = $res_from_consignee;
-                                    $rcp->status = 2;
-                                    $rcp->save();
-
-                                    return ['status' => 1, 'message' => 'Message Received'];
                                 }
                                 elseif (in_array($res, $response_no)) {
                                     if (in_array($shipment->shipper_status_id, [12, 52])) {
@@ -4615,15 +4616,16 @@ class APIController extends Controller
                                             $return_assign_log->assigned_by = 50;
                                             $return_assign_log->save();
                                         }
+
+                                        $res_from_consignee = $data[0] . " " . $res;
+
+                                        $rcp->response = $res_from_consignee;
+                                        $rcp->status = 1;
+                                        $rcp->save();
+
+                                        return ['status' => 1, 'message' => 'Message Received'];
                                     }
 
-                                    $res_from_consignee = $data[0] . " " . $res;
-
-                                    $rcp->response = $res_from_consignee;
-                                    $rcp->status = 1;
-                                    $rcp->save();
-
-                                    return ['status' => 1, 'message' => 'Message Received'];
                                 }
                                 else {
                                     return ['status' => 0, 'message' => 'Invalid message response from consignee'];
