@@ -8487,9 +8487,9 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = ' Rider deactivation';
-                    $to = ['Hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk'];
+                    $to = ['Hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
 
-//                    self::email($subject, $body_updated, $to);
+                    self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
                     $now = Carbon::now();
                     $month = $now->subMonth()->format('F');
