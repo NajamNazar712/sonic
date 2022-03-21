@@ -118,7 +118,7 @@ class RCPSmsToConsignee implements ShouldQueue
                     }
                 }
                 else {
-                    if ($attempt) {
+                    if ($attempt && $status) {
                         $attempt->status = 3;
                         $attempt->update();
                     }
