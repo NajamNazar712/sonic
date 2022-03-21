@@ -2105,7 +2105,7 @@ class DeliveryController extends Controller
                                 $return_assign_log->assigned_by = Auth::id();
                                 $return_assign_log->save();
                             }
-                            if(in_array(session('role_id'),[18,19]) && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) /*&& ($now > $end_of_the_day)*/){
+                            if(in_array(session('role_id'),[1,18,19]) && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) /*&& ($now > $end_of_the_day)*/){
                                 dispatch(new RCPSmsToConsignee($shipment));
                             }
 
