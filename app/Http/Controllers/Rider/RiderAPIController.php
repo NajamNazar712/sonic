@@ -11258,7 +11258,6 @@ class RiderAPIController extends Controller
 
                                         $shipment->shipper_status_id = $request->shipper_status_id;
                                         $shipment->consignee_status_id = $request->status_reason_id;
-                                        $shipment->open_box = (in_array($request->open_box,[1,2])) ? 1 : 0;
                                         $shipment->delivery_in_route = 0;
 
                                         if(in_array($request->open_box,[1,2])){
