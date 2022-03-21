@@ -491,13 +491,14 @@
                         </thead>
                     </table>
 
-                    <form id="edit_lead_form" class="form-horizontal mb-1 justify-content-center"
-                          novalidate="novalidate">
+                    <form id="edit_lead_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.leads.edit') }}">
+                        @method('POST')
+                        @csrf
                         <input type="hidden" name="edit_lead_id" id="edit_lead_id">
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group">
-                                    <select name="edit_city" id="edit_city" class="form-control select2" data-rule-required="true"  data-msg-required="City is required">
+                                    <select name="city_id" id="edit_city" class="form-control select2" data-rule-required="true"  data-msg-required="City is required">
                                         @foreach($cities as $city)
                                             <option value="{{ $city->id }}"> {{ $city->name }} </option>
                                         @endforeach
@@ -506,41 +507,41 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <select name="edit_territory" id="edit_territory" class="form-control select2" data-rule-required="true"  data-msg-required="Territory is required">
+                                    <select name="territory_id" id="edit_territory" class="form-control select2" data-rule-required="true"  data-msg-required="Territory is required">
                                     </select>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <select name="edit_area" id="edit_area" class="form-control select2" data-rule-required="true"  data-msg-required="Area is required">
+                                    <select name="area_id" id="edit_area" class="form-control select2">
                                     </select>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="edit_phone_number" id="edit_phone_number" placeholder="Phone Number" data-rule-required="true"  data-msg-required="Phone Number is required">
+                                    <input type="text" class="form-control" name="phone_number" id="edit_phone_number" placeholder="Phone Number" data-rule-required="true"  data-msg-required="Phone Number is required">
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input type="email" class="form-control" name="edit_email" id="edit_email" placeholder="Email" data-rule-required="true"  data-msg-required="Email is required">
+                                    <input type="email" class="form-control" name="email_address" id="edit_email" placeholder="Email" data-rule-required="true"  data-msg-required="Email is required">
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="edit_brand" id="edit_brand" placeholder="Brand" data-rule-required="true"  data-msg-required="Brand is required">
+                                    <input type="text" class="form-control" name="brand" id="edit_brand" placeholder="Brand" data-rule-required="true"  data-msg-required="Brand is required">
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="edit_company" id="edit_company" placeholder="Company" data-rule-required="true"  data-msg-required="Company Name is required">
+                                    <input type="text" class="form-control" name="company" id="edit_company" placeholder="Company" data-rule-required="true"  data-msg-required="Company Name is required">
                                 </div>
                             </div>
                         </div>
 
                         <div class="modal-footer">
                             <div class="form-group ml-1">
-                                <button type="submit" name="add" class="btn btn-primary width-200" value="Add">Edit</button>
+                                <button type="submit" class="btn btn-primary width-200" value="Add">Edit</button>
                                 <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                             </div>
@@ -1773,12 +1774,13 @@
                 table.draw();
             });
 
-            $("#edit_city").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select City",
-                width: '100%'
-            });
+
             $("#edit_territory").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Territory",
+                width: '100%'
+            });
+            $("#edit_area").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Area",
                 width: '100%'
             });
 
@@ -1823,36 +1825,44 @@
                 }
             });
             $('#edit_territory').on('change',function () {
-                territory_id = $(this).val();
-                $.ajax({
-                    url: '{!! route('cod.area') !!}',
-                    method: 'POST',
-                    data: {
-                        'territory_id': territory_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                .done(function (data) {
-                    if (data.status == 0) {
+                var territory_id = $(this).val();
+                if(territory_id){
+                    $.ajax({
+                        url: '{!! route('cod.area') !!}',
+                        method: 'POST',
+                        data: {
+                            'territory_id': territory_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                    .done(function (data) {
+                        if (data.status == 0) {
 
-                        $('#edit_area').empty();
-                        $.each(data.area, function (key, value) {
-                            var newOption = "<option value="+ value.id +">" + value.name + "</option>";
-                            $('#edit_area').append(newOption);
-                        });
-                        $('#edit_area').val('').trigger('change');
-                    }
-                    else{
-                        $('#edit_area').empty();
-                        var error = 'No Area found for the selected Territory';
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                });
+                            $('#edit_area').empty();
+                            $.each(data.area, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                $('#edit_area').append(newOption);
+                            });
+                            $('#edit_area').val('').trigger('change');
+                        }
+                        else{
+                            $('#edit_area').empty();
+                            var error = 'No Area found for the selected Territory';
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+
             });
-
+            $('#edit_lead_modal').on('hidden.bs.modal', function (e) {
+                // $('#edit_lead_form')[0].reset();
+                var form_errors = $('#edit_lead_form');
+                form_errors.validate().resetForm();
+                form_errors.find('.error').removeClass('error');
+            });
 
 
             var lead_table = $('#lead_info_table').DataTable({
@@ -1921,26 +1931,11 @@
                     return $.trim(value);
                 },
                 submitHandler: function (form) {
-                    var lead_id = $('#lead_id').val();
-                    $
+                    var lead_id = $('#edit_lead_id').val();
+
                     if (lead_id != null) {
                         blockPagePermanently();
-                        $.ajax({
-                            url: "{{route('admin.leads.add_remarks')}}",
-                            method: 'POST',
-                            data: {
-                                'lead_id': lead_id,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function (data) {
-                            UnblockPagePermanently();
-                            $('#add_remarks_modal').modal('hide');
-                            remark_lead_id = null;
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
-                        });
+                        form.submit();
                     } else {
                         var error = 'Invalid Lead ID!';
                         toastr.error(error, 'Error!', {

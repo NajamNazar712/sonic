@@ -771,6 +771,23 @@ class LeadManagementController extends Controller
     }
 
     public function edit(Request $request){
-        return $request;
+
+        $lead_id = $request->edit_lead_id;
+        if($lead_id){
+            $lead = Lead::find($lead_id);
+            if($lead){
+                $lead->city_id = $request->city_id;
+                $lead->territory_id = $request->territory_id;
+                $lead->territory_area_id = ($request->has('territory_area_id') ? $request->territory_area_id: NULL);
+                $lead->phone_number = $request->phone_number;
+                $lead->email_address = $request->email_address;
+                $lead->brand = $request->brand;
+                $lead->company = $request->company;
+                $lead->save();
+                return redirect()->back()->with('success', 'Lead Edited successfully!');
+            }
+            return redirect()->back()->with('error', 'Lead not found!');
+        }
+        return redirect()->back()->with('error', 'Something went wrong!');
     }
 }
