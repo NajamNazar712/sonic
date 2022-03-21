@@ -500,6 +500,7 @@ class V2AdminPickupsController extends Controller
             }
             $notification_data[] = ["rider_id" => $rider_id, "previous_rider" => $previous_rider_id, "pickup_request" => $pickup_request->id];
         }
+        dd($notification_data);
         if (count($allowed_pickup_requests) > 0) {
             $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
 
