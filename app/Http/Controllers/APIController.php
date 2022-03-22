@@ -4496,7 +4496,7 @@ class APIController extends Controller
             if ($request->has('message') && !empty($request->message)) {
                 $message = $request->message;
 
-                $data = explode(" ", $message);
+                $data = explode(" ", urldecode($message));
 
                 if (count($data) == 3) {
                     $response_yes = array("YES",'YE','Y');
