@@ -293,7 +293,7 @@
                 },
                 ajax: '{{ route('admin.settings.auto_tag_territories.list') }}',
                 rowId: 'id',
-                order: [[4, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
