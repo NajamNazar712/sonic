@@ -661,16 +661,23 @@
 
                                         <div class="discount-weight-origin-wise-addition-overnight">
                                             <div class="row">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group ">
+                                                        <input type="checkbox" name="on_discount_destination_wise_weight_switch"
+                                                               class="switchery" id="on_discount_destination_wise_weight_switch" data-color="success"
+                                                               data-size="sm"/>
+                                                    </div>
                                                 </div>
 
                                             </div>
-                                            <div id="discount_on_weight_destination_row">
+                                            <div id="discount_on_weight_destination_row" class="d-none">
 
                                             </div>
                                         </div>
-                                        <div class="mt-1 d-flex justify-content-end">
+                                        <div class="mt-1 d-none" id="discount_on_weight_destination_btn_row">
                                             <button type="button" class="btn btn-outline-success mr-1"
                                                     title="Add more slabs" id="discount_waddition_destination_btn"><i class="la la-plus"></i> Add Destination
                                             </button>
@@ -1310,16 +1317,23 @@
 
                                         <div class="discount-weight-origin-wise-addition-overland">
                                             <div class="row">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group ">
+                                                        <input type="checkbox" name="ol_discount_destination_wise_weight_switch"
+                                                               class="switchery" id="ol_discount_destination_wise_weight_switch" data-color="success"
+                                                               data-size="sm"/>
+                                                    </div>
                                                 </div>
 
                                             </div>
-                                            <div id="discount_ol_weight_destination_row">
+                                            <div id="discount_ol_weight_destination_row" class="d-none">
 
                                             </div>
                                         </div>
-                                        <div class="mt-1 d-flex justify-content-end">
+                                        <div class="mt-1 d-none" id="discount_ol_weight_destination_btn_row">
                                             <button type="button" class="btn btn-outline-success mr-1"
                                                     title="Add more slabs" id="discount_ol_waddition_destination_btn"><i class="la la-plus"></i> Add Destination
                                             </button>
@@ -1965,16 +1979,23 @@
 
                                         <div class="discount-weight-origin-wise-addition-detain">
                                             <div class="row">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group ">
+                                                        <input type="checkbox" name="d_discount_destination_wise_weight_switch"
+                                                               class="switchery" id="d_discount_destination_wise_weight_switch" data-color="success"
+                                                               data-size="sm"/>
+                                                    </div>
                                                 </div>
 
                                             </div>
-                                            <div id="discount_d_weight_destination_row">
+                                            <div id="discount_d_weight_destination_row" class="d-none">
 
                                             </div>
                                         </div>
-                                        <div class="mt-1 d-flex justify-content-end">
+                                        <div class="mt-1 d-none" id="discount_d_weight_destination_btn_row">
                                             <button type="button" class="btn btn-outline-success mr-1"
                                                     title="Add more slabs" id="discount_d_waddition_destination_btn"><i class="la la-plus"></i> Add Destination
                                             </button>
@@ -2559,16 +2580,22 @@
 
                                         <div class="discount-weight-origin-wise-addition-sameday">
                                             <div class="row">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
                                                 </div>
-
+                                                <div class="col-md-2">
+                                                    <div class="form-group ">
+                                                        <input type="checkbox" name="sd_discount_destination_wise_weight_switch"
+                                                               class="switchery" id="sd_discount_destination_wise_weight_switch" data-color="success"
+                                                               data-size="sm"/>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div id="discount_sd_weight_destination_row">
+                                            <div id="discount_sd_weight_destination_row" class="d-none">
 
                                             </div>
                                         </div>
-                                        <div class="mt-1 d-flex justify-content-end">
+                                        <div class="mt-1 d-none" id="discount_sd_weight_destination_btn_row">
                                             <button type="button" class="btn btn-outline-success mr-1"
                                                     title="Add more slabs" id="discount_sd_waddition_destination_btn"><i class="la la-plus"></i> Add Destination
                                             </button>
@@ -3458,6 +3485,57 @@
         var sd_discount_weight = 0;
         var sd_discount_weight_charges = [];
 
+        // Switches For Discount Weight Charges
+        var on_discount_weight_switch = document.querySelector('#on_discount_destination_wise_weight_switch');
+        var ol_discount_weight_switch = document.querySelector('#ol_discount_destination_wise_weight_switch');
+        var d_discount_weight_switch = document.querySelector('#d_discount_destination_wise_weight_switch');
+        var sd_discount_weight_switch = document.querySelector('#sd_discount_destination_wise_weight_switch');
+
+        //Activate Discount Functions
+        on_discount_weight_switch.onchange = function () {
+            if (on_discount_weight_switch.checked === true) {
+                $("#discount_on_weight_destination_row").removeClass("d-none");
+                $("#discount_on_weight_destination_btn_row").removeClass("d-none");
+            } else if (on_discount_weight_switch.checked === false) {
+                $("#discount_on_weight_destination_row").addClass("d-none");
+                $("#discount_on_weight_destination_btn_row").addClass("d-none");
+
+            }
+        };
+
+        ol_discount_weight_switch.onchange = function () {
+            if (ol_discount_weight_switch.checked === true) {
+                $("#discount_ol_weight_destination_row").removeClass("d-none");
+                $("#discount_ol_weight_destination_btn_row").removeClass("d-none");
+            } else if (ol_discount_weight_switch.checked === false) {
+                $("#discount_ol_weight_destination_row").addClass("d-none");
+                $("#discount_ol_weight_destination_btn_row").addClass("d-none");
+
+            }
+        };
+
+        d_discount_weight_switch.onchange = function () {
+            if (d_discount_weight_switch.checked === true) {
+                $("#discount_d_weight_destination_row").removeClass("d-none");
+                $("#discount_d_weight_destination_btn_row").removeClass("d-none");
+            } else if (d_discount_weight_switch.checked === false) {
+                $("#discount_d_weight_destination_row").addClass("d-none");
+                $("#discount_d_weight_destination_btn_row").addClass("d-none");
+
+            }
+        };
+
+        sd_discount_weight_switch.onchange = function () {
+            if (sd_discount_weight_switch.checked === true) {
+                $("#discount_sd_weight_destination_row").removeClass("d-none");
+                $("#discount_sd_weight_destination_btn_row").removeClass("d-none");
+            } else if (sd_discount_weight_switch.checked === false) {
+                $("#discount_sd_weight_destination_row").addClass("d-none");
+                $("#discount_sd_weight_destination_btn_row").addClass("d-none");
+
+            }
+        };
+
         // Functions For Discount Weight Charges Start
 
         //OverNight/Rush Functions
@@ -3611,9 +3689,10 @@
 
         $('body').on('click', '.discount_waddition_btn', function () {
             var parent_count = $(this).attr('data-id');
+            var current_top_id = $(this).parent().prev().find('.row').last().attr('id').split(parent_count+"_")[1];
             var child_count = on_discount_weight_charges[parent_count];
             on_discount_weight_charges[parent_count] += 1;
-            var on_range_down = parseFloat($('#discount_on_range_down' + parent_count+'_'+(child_count - 1)).val());
+            var on_range_down = parseFloat($('#discount_on_range_down' + parent_count+'_'+current_top_id).val());
             var on_new_range_down = on_range_down + 0.01;
             let html = `<div class="row" id="discount_on_weight_row${parent_count}_${child_count}">
                             <div class="col text-center">
@@ -3860,9 +3939,10 @@
 
         $('body').on('click', '.discount_ol_waddition_btn', function () {
             var parent_count = $(this).attr('data-id');
+            var current_top_id = $(this).parent().prev().find('.row').last().attr('id').split(parent_count+"_")[1];
             var child_count = ol_discount_weight_charges[parent_count];
             ol_discount_weight_charges[parent_count] += 1;
-            var ol_range_down = parseFloat($('#discount_ol_range_down' + parent_count+'_'+(child_count - 1)).val());
+            var ol_range_down = parseFloat($('#discount_ol_range_down' + parent_count+'_'+current_top_id).val());
             var ol_new_range_down = ol_range_down + 0.01;
             let html = `<div class="row" id="discount_ol_weight_row${parent_count}_${child_count}">
                             <div class="col text-center">
@@ -4109,9 +4189,10 @@
 
         $('body').on('click', '.discount_d_waddition_btn', function () {
             var parent_count = $(this).attr('data-id');
+            var current_top_id = $(this).parent().prev().find('.row').last().attr('id').split(parent_count+"_")[1];
             var child_count = d_discount_weight_charges[parent_count];
             d_discount_weight_charges[parent_count] += 1;
-            var d_range_down = parseFloat($('#discount_d_range_down' + parent_count+'_'+(child_count - 1)).val());
+            var d_range_down = parseFloat($('#discount_d_range_down' + parent_count+'_'+current_top_id).val());
             var d_new_range_down = d_range_down + 0.01;
             let html = `<div class="row" id="discount_d_weight_row${parent_count}_${child_count}">
                             <div class="col text-center">
@@ -4358,9 +4439,10 @@
 
         $('body').on('click', '.discount_sd_waddition_btn', function () {
             var parent_count = $(this).attr('data-id');
+            var current_top_id = $(this).parent().prev().find('.row').last().attr('id').split(parent_count+"_")[1];
             var child_count = sd_discount_weight_charges[parent_count];
             sd_discount_weight_charges[parent_count] += 1;
-            var sd_range_down = parseFloat($('#discount_sd_range_down' + parent_count+'_'+(child_count - 1)).val());
+            var sd_range_down = parseFloat($('#discount_sd_range_down' + parent_count+'_'+current_top_id).val());
             var sd_new_range_down = sd_range_down + 0.01;
             let html = `<div class="row" id="discount_sd_weight_row${parent_count}_${child_count}">
                             <div class="col text-center">

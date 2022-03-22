@@ -34,6 +34,7 @@ use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\DiscountWeightCharge;
 use App\Http\Models\DuplicateUser;
 use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
@@ -6783,7 +6784,7 @@ class AdminDashboardController extends Controller
                 'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
                 'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
                 'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
-                'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on'
+                'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on',
             ];
         }
         //overland
@@ -7088,6 +7089,46 @@ class AdminDashboardController extends Controller
                     ]);
                 }
 
+                if($request->has('on_discount_destination_wise_weight_switch') && $request->on_discount_destination_wise_weight_switch == "on")
+                {
+                    foreach($request->discount_on_destination as $parent_key => $destination)
+                    {
+                        $discount_wa_switch = array();
+                        $discount_wa_spkg = array();
+                        foreach($request->discount_on_wa_range_up[$parent_key] as $child_key => $value)
+                        {
+                            if ($request->has('discount_on_wa_switch')) {
+                                if (array_key_exists($child_key, $request->discount_on_wa_switch[$parent_key])) {
+                                    $discount_wa_switch[$child_key] = 1;
+                                } else {
+                                    $discount_wa_switch[$child_key] = 0;
+                                };
+                            } else {
+                                $discount_wa_switch[$child_key] = 0;
+                            }
+                            if ($request->has('discount_on_wa_spkg')) {
+                                if (array_key_exists($child_key, $request->discount_on_wa_spkg[$parent_key])) {
+                                    $discount_wa_spkg[$child_key] = $request->discount_on_wa_spkg[$parent_key][$child_key];
+                                } else {
+                                    $discount_wa_spkg[$child_key] = 0.5;
+                                };
+                            } else {
+                                $discount_wa_spkg[$child_key] = 0.5;
+                            }
+                            DiscountWeightCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'destination_id' => $destination,
+                                'range_up' => $request->discount_on_wa_range_up[$parent_key][$child_key],
+                                'range_down' => $request->discount_on_wa_range_down[$parent_key][$child_key],
+                                'weight_addition' => $discount_wa_switch[$child_key],
+                                'spkg' => $discount_wa_spkg[$child_key],
+                                'local_or_6hr' => $request->discount_on_wa_local_charges[$parent_key][$child_key],
+                            ]);
+                        }
+                    }
+                }
+
             }
             //dd($weightAlready);
             if ($request->has('on_dws_weight')) {
@@ -7276,6 +7317,47 @@ class AdminDashboardController extends Controller
                         'added_by' => Auth::id()
                     ]);
                 }
+
+                if($request->has('ol_discount_destination_wise_weight_switch') && $request->ol_discount_destination_wise_weight_switch == "on")
+                {
+                    foreach($request->discount_ol_destination as $parent_key => $destination)
+                    {
+                        $discount_wa_switch = array();
+                        $discount_wa_spkg = array();
+                        foreach($request->discount_ol_wa_range_up[$parent_key] as $child_key => $value)
+                        {
+                            if ($request->has('discount_ol_wa_switch')) {
+                                if (array_key_exists($child_key, $request->discount_ol_wa_switch[$parent_key])) {
+                                    $discount_wa_switch[$child_key] = 1;
+                                } else {
+                                    $discount_wa_switch[$child_key] = 0;
+                                };
+                            } else {
+                                $discount_wa_switch[$child_key] = 0;
+                            }
+                            if ($request->has('discount_ol_wa_spkg')) {
+                                if (array_key_exists($child_key, $request->discount_ol_wa_spkg[$parent_key])) {
+                                    $discount_wa_spkg[$child_key] = $request->discount_ol_wa_spkg[$parent_key][$child_key];
+                                } else {
+                                    $discount_wa_spkg[$child_key] = 0.5;
+                                };
+                            } else {
+                                $discount_wa_spkg[$child_key] = 0.5;
+                            }
+                            DiscountWeightCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 2,
+                                'destination_id' => $destination,
+                                'range_up' => $request->discount_ol_wa_range_up[$parent_key][$child_key],
+                                'range_down' => $request->discount_ol_wa_range_down[$parent_key][$child_key],
+                                'weight_addition' => $discount_wa_switch[$child_key],
+                                'spkg' => $discount_wa_spkg[$child_key],
+                                'local_or_6hr' => $request->discount_ol_wa_local_charges[$parent_key][$child_key],
+                            ]);
+                        }
+                    }
+                }
+
 
             }
             if ($request->has('ol_dws_weight')) {
@@ -7466,6 +7548,46 @@ class AdminDashboardController extends Controller
                     ]);
                 }
 
+                if($request->has('d_discount_destination_wise_weight_switch') && $request->d_discount_destination_wise_weight_switch == "on")
+                {
+                    foreach($request->discount_d_destination as $parent_key => $destination)
+                    {
+                        $discount_wa_switch = array();
+                        $discount_wa_spkg = array();
+                        foreach($request->discount_d_wa_range_up[$parent_key] as $child_key => $value)
+                        {
+                            if ($request->has('discount_d_wa_switch')) {
+                                if (array_key_exists($child_key, $request->discount_d_wa_switch[$parent_key])) {
+                                    $discount_wa_switch[$child_key] = 1;
+                                } else {
+                                    $discount_wa_switch[$child_key] = 0;
+                                };
+                            } else {
+                                $discount_wa_switch[$child_key] = 0;
+                            }
+                            if ($request->has('discount_d_wa_spkg')) {
+                                if (array_key_exists($child_key, $request->discount_d_wa_spkg[$parent_key])) {
+                                    $discount_wa_spkg[$child_key] = $request->discount_d_wa_spkg[$parent_key][$child_key];
+                                } else {
+                                    $discount_wa_spkg[$child_key] = 0.5;
+                                };
+                            } else {
+                                $discount_wa_spkg[$child_key] = 0.5;
+                            }
+                            DiscountWeightCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 3,
+                                'destination_id' => $destination,
+                                'range_up' => $request->discount_d_wa_range_up[$parent_key][$child_key],
+                                'range_down' => $request->discount_d_wa_range_down[$parent_key][$child_key],
+                                'weight_addition' => $discount_wa_switch[$child_key],
+                                'spkg' => $discount_wa_spkg[$child_key],
+                                'local_or_6hr' => $request->discount_d_wa_local_charges[$parent_key][$child_key],
+                            ]);
+                        }
+                    }
+                }
+
             }
             if ($request->has('detain_dws_weight')) {
                 if ($request->detain_dws_weight == 2) {
@@ -7653,6 +7775,46 @@ class AdminDashboardController extends Controller
                         'from' => $from,
                         'added_by' => Auth::id()
                     ]);
+                }
+
+                if($request->has('sd_discount_destination_wise_weight_switch') && $request->sd_discount_destination_wise_weight_switch == "on")
+                {
+                    foreach($request->discount_sd_destination as $parent_key => $destination)
+                    {
+                        $discount_wa_switch = array();
+                        $discount_wa_spkg = array();
+                        foreach($request->discount_sd_wa_range_up[$parent_key] as $child_key => $value)
+                        {
+                            if ($request->has('discount_sd_wa_switch')) {
+                                if (array_key_exists($child_key, $request->discount_sd_wa_switch[$parent_key])) {
+                                    $discount_wa_switch[$child_key] = 1;
+                                } else {
+                                    $discount_wa_switch[$child_key] = 0;
+                                };
+                            } else {
+                                $discount_wa_switch[$child_key] = 0;
+                            }
+                            if ($request->has('discount_sd_wa_spkg')) {
+                                if (array_key_exists($child_key, $request->discount_sd_wa_spkg[$parent_key])) {
+                                    $discount_wa_spkg[$child_key] = $request->discount_sd_wa_spkg[$parent_key][$child_key];
+                                } else {
+                                    $discount_wa_spkg[$child_key] = 0.5;
+                                };
+                            } else {
+                                $discount_wa_spkg[$child_key] = 0.5;
+                            }
+                            DiscountWeightCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 4,
+                                'destination_id' => $destination,
+                                'range_up' => $request->discount_sd_wa_range_up[$parent_key][$child_key],
+                                'range_down' => $request->discount_sd_wa_range_down[$parent_key][$child_key],
+                                'weight_addition' => $discount_wa_switch[$child_key],
+                                'spkg' => $discount_wa_spkg[$child_key],
+                                'local_or_6hr' => $request->discount_sd_wa_local_charges[$parent_key][$child_key],
+                            ]);
+                        }
+                    }
                 }
 
             }
