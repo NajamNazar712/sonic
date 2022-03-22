@@ -50,6 +50,11 @@
                                             </select>
                                         </div>
                                     </div>
+                                    <div class="col-4">
+                                        <div class="form-group">
+                                            <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)" id="tracking_numbers" style="width: 100%">
+                                        </div>
+                                    </div>
                                     <div class="col-3">
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
@@ -74,16 +79,11 @@
 
                                     </div>
 
-                                    <div class="col-3">
+                                    <div class="col-2">
                                         <div class="form-group">
                                             <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
                                         </div>
                                     </div>
-
-
-
-
-
                                 </div>
 
                             </form>
@@ -167,6 +167,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <style>
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
@@ -196,10 +197,40 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
+            var select = $('#search_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            });
+
             $('#search_form #hub').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Hub'
@@ -613,6 +644,7 @@
                         d.service = $('#search_form #service').val();
                         d.delivery_date_from = $('#search_form input[name="delivery_date_from_formatted"]').val();
                         d.delivery_date_to = $('#search_form input[name="delivery_date_to_formatted"]').val();
+                        d.tracking_numbers = $('#search_form #tracking_numbers').val();
                     }
                 },
                 deferLoading: 0,
