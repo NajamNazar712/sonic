@@ -5142,24 +5142,26 @@ class AdminAPIController extends Controller
 
                     }
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
-                    if ($pickup_request->received >= 1) {
-                        $pickup_note_request = $pickup_request->pickup_note_request;
-                        if ($pickup_note_request) {
-                            $pickup_note_id = $pickup_note_request->pickup_note_id;
-                            $pickup_note_request->status = 1;
-                            $pickup_note_request->save();
-//                            $pickup_note = V2PickupNote::find($pickup_note_id);
-
+                    if($pickup_request){
+                        if ($pickup_request->received >= 1) {
+                            $pickup_note_request = $pickup_request->pickup_note_request;
+                            if ($pickup_note_request) {
+                                $pickup_note_id = $pickup_note_request->pickup_note_id;
+                                $pickup_note_request->status = 1;
+                                $pickup_note_request->save();
+    //                            $pickup_note = V2PickupNote::find($pickup_note_id);
+    
+                            }
+    
+                            $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
+                            if ($retail_pickup_note->exists()) {
+                                $retail_pickup_note = $retail_pickup_note->first();
+                                $retail_pickup_note->status = 3;
+                                $retail_pickup_note->save();
+                            }
+    
+    
                         }
-
-                        $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
-                        if ($retail_pickup_note->exists()) {
-                            $retail_pickup_note = $retail_pickup_note->first();
-                            $retail_pickup_note->status = 3;
-                            $retail_pickup_note->save();
-                        }
-
-
                     }
                     $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
                     if ($pickup_note_requests_count == 0) {
