@@ -3807,6 +3807,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             if($request->shipping_mode == 2){
+                dd(1);
                 if($request->hasFile('replacement_parcel_img')){
                     $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $shipment_id);
                     if($shipment_parcel_image->exists()){
