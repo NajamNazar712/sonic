@@ -45,7 +45,6 @@ class BirthdayMessage extends Command
         $employees = Employee::whereMonth('date_of_birth', $month)->whereDay('date_of_birth', $day);
         if($employees->exists()){
             $employees = $employees->get();
-            dd($employees);
             foreach ($employees as $employee){
                 NotificationsController::send(171, $employee->name, $employee->phone_number);
             }
