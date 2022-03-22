@@ -57,20 +57,19 @@ class RCPSmsToConsignee implements ShouldQueue
             $limit = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
 
             if ($limit) {
-                $attempt = ReturnConfirmationPendingSmsAttempt::where('shipment_id', $shipment_id);
+                $attempt = ReturnConfirmationPendingSmsAttempt::where('shipment_id', $shipment_id)->where('status', 0);
                 $current_count = 0;
                 $status = true;
 
                 if ($attempt->exists()) {
                     $attempt = $attempt->latest('id')->first();
                     $current_count = $attempt->count;
-                    $status = $attempt->status == 0;
                 }
                 else {
                     $attempt = FALSE;
                 }
 
-                if ($current_count < $limit->text && $status) {
+                if ($current_count < $limit->text) {
                     $client = new Client(['base_uri' => 'https://gateway.its.com.pk/api', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
                     $response = $client->get('', [
@@ -118,7 +117,7 @@ class RCPSmsToConsignee implements ShouldQueue
                     }
                 }
                 else {
-                    if ($attempt && $status) {
+                    if ($attempt) {
                         $attempt->status = 3;
                         $attempt->update();
                     }
