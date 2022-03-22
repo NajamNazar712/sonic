@@ -46,9 +46,8 @@ class RCPSmsToConsignee implements ShouldQueue
         $sms->body = $data[0];
 
         $sms->save();
-
-
-       self::its($data, $this->shipment_id);
+        
+       self::its($sms, $this->shipment_id);
 
     }
 
