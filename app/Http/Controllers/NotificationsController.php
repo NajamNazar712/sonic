@@ -160,12 +160,12 @@ class NotificationsController extends Controller
 
     static private function bot_sms($body, $to) {
         $sms = new SMS();
-  
+
         $sms->to = str_replace('-', '', $to);
         $sms->body = $body;
-  
+
         $sms->save();
-  
+
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
@@ -9056,7 +9056,7 @@ class NotificationsController extends Controller
                     $to = $shipment->consignee_phone_number_1;
                     $data = array($body, $to);
                     return $data;
-                  
+
                 }else if($id == 131) {
                     $request_no = $reference_1_id;
                     $admin_id = $reference_2_id;
@@ -9104,6 +9104,17 @@ class NotificationsController extends Controller
                             self::email($subject, $body_updated, $to);
                         }
                     }
+                }
+                else if ($id == 171) {
+                    $name = $reference_1_id;
+                    $phone_number = $reference_2_id;
+
+                    if (strpos($body, '[name]') !== FALSE) {
+                        $body = str_replace('[name]', $name, $body);
+                    }
+
+                    $to = $phone_number;
+                    self::sms($body, $to);
                 }
             }
         }
