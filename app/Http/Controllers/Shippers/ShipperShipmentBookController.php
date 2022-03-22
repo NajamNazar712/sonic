@@ -926,6 +926,21 @@ class ShipperShipmentBookController extends Controller
                             $this->cod_breakup_create($shipment_id, $shipping_charges, $total_cod, $descriptions, $amounts);
                         }
                     }
+                if($request->hasFile('replacement_parcel_img')){
+                    $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $shipment_id);
+                    if($shipment_parcel_image->exists()){
+                        $shipment_parcel_image = $shipment_parcel_image->first();
+                        Storage::disk('public')->delete($shipment_parcel_image->picture_path);
+                    }else{
+                        $shipment_parcel_image = new ShipmentReplacementParcelImage();
+                        $shipment_parcel_image->shipment_id = $shipment_id;
+                    }
+                    $time = Carbon::now()->toDateString();
+                    $picture_path = 'replacement_parcel/' . $shipment_id . '_' . $time . '.png';
+                    Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_img));
+                    $shipment_parcel_image->picture_path = $picture_path;
+                    $shipment_parcel_image->save();
+                }
                    
                     return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
             }
