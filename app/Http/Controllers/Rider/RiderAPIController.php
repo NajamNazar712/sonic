@@ -71,6 +71,7 @@ use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
 use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentOpenBox;
 use App\Http\Models\ShipmentOtp;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
@@ -8559,6 +8560,7 @@ class RiderAPIController extends Controller
     public function delivery_summary_multiple_v5(Request $request)
     {
         $rider_id = $request->rider_id;
+        $replacement_parcel_image = null;
 
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
 
@@ -8689,6 +8691,14 @@ class RiderAPIController extends Controller
                         $deliveries['try_n_buy_items'] = $product;
                         $deliveries['try_and_buy_fees'] = (double)$shipment_data->try_and_buy_fees;
                     }
+
+                    elseif($booking_type == 2){
+                        $replacement_parcel = ShipmentReplacementParcelImage::where('shipment_id', $shipment_id);
+                        if($replacement_parcel->exists()){
+                            $replacement_parcel = $replacement_parcel->first();
+                            $replacement_parcel_image = $replacement_parcel->picture_path;
+                        }
+                    }
                     if ($shipment_status_count > 1) {
                         $deliveries['rcp'] = 1;
                     } else {
@@ -8709,6 +8719,7 @@ class RiderAPIController extends Controller
                     $deliveries['shipper'] = $shipper_name;
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
+                    $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
                         $shipment_location = $shipment_location->first();

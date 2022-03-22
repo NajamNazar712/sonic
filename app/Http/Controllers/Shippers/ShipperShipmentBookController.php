@@ -33,6 +33,7 @@ use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
 use App\Http\Models\ShipmentOrderDate;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsAirWaybillJourney;
 use App\Http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
@@ -3315,7 +3316,6 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
-       
         if($request->open_shipment=='on'){
             $open_shipment=1;
         }else{
@@ -3716,6 +3716,21 @@ class ShipperShipmentBookController extends Controller
                     $type = 1;
 
                     $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+                    if($request->hasFile('replacement_parcel_img')){
+                        $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $shipment_id);
+                        if($shipment_parcel_image->exists()){
+                            $shipment_parcel_image = $shipment_parcel_image->first();
+                            Storage::disk('public')->delete($shipment_parcel_image->picture_path);
+                        }else{
+                            $shipment_parcel_image = new ShipmentReplacementParcelImage();
+                            $shipment_parcel_image->shipment_id = $shipment_id;
+                        }
+                        $time = Carbon::now()->toDateString();
+                        $picture_path = 'replacement_parcel/' . $shipment_id . '_' . $time . '.png';
+                        Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_img));
+                        $shipment_parcel_image->picture_path = $picture_path;
+                        $shipment_parcel_image->save();
+                    }
                 }
                 else if ($service_type_id == 3) {
                     foreach ($request->input('try_and_buy') as $try_and_buy) {
