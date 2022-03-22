@@ -3316,6 +3316,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
+        dd($request);
         if($request->open_shipment=='on'){
             $open_shipment=1;
         }else{
