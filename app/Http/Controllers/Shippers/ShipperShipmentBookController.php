@@ -3806,6 +3806,7 @@ class ShipperShipmentBookController extends Controller
                     NotificationsController::send(153, $shipment_id);
                 }
             }
+            dd($request->shipping_mode);
             if($request->shipping_mode == 2){
                 dd(1);
                 if($request->hasFile('replacement_parcel_img')){
