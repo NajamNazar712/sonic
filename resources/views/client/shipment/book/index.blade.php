@@ -20,7 +20,7 @@
 						<div class="card-body">
 							@include('client.inc.messages')
 
-							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.store') }}" novalidate="novalidate">
+							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.store') }}" novalidate="novalidate" enctype="multipart/form-data">
 								{{ csrf_field() }}
 
 								<input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ Session::get('service_type_id') }}">
