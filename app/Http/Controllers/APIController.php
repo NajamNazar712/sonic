@@ -4491,8 +4491,7 @@ class APIController extends Controller
     }
 
     public function rcp_sms_from_consignee(Request $request) {
-        Log::info("RCP SMS FROM CONSIGNEE(" . $request->ip() . "): " . json_encode($request->all()));
-        if (TRUE || $request->ip() == "202.141.247.133") {
+        if ($request->ip() == "202.141.247.130" || $request->ip() == "202.141.247.133") {
             if ($request->has('message') && !empty($request->message)) {
                 $message = $request->message;
 
