@@ -40,10 +40,12 @@ class BirthdayMessage extends Command
      */
     public function handle()
     {
-        $date = Carbon::today()->toDateString();
-        $employees = Employee::whereDate('date_of_birth', $date);
+        $month = Carbon::now()->month;
+        $day = Carbon::now()->day;
+        $employees = Employee::whereMonth('date_of_birth', $month)->whereDay('date_of_birth', $day);
         if($employees->exists()){
             $employees = $employees->get();
+            dd($employees);
             foreach ($employees as $employee){
                 NotificationsController::send(171, $employee->name, $employee->phone_number);
             }
