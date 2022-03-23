@@ -16,6 +16,10 @@ class UpdateCrmAgentsForCaseNatureId extends Migration
         Schema::table('crm_agents', function (Blueprint $table) {
             $table->integer('case_nature_id')->nullable()->change();
         });
+
+        Schema::table('crm_agent_logs', function (Blueprint $table) {
+            $table->integer('case_nature_id')->nullable()->change();
+        });
     }
 
     /**
@@ -26,6 +30,10 @@ class UpdateCrmAgentsForCaseNatureId extends Migration
     public function down()
     {
         Schema::table('crm_agents', function (Blueprint $table) {
+            $table->integer('case_nature_id')->change();
+        });
+
+        Schema::table('crm_agent_logs', function (Blueprint $table) {
             $table->integer('case_nature_id')->change();
         });
     }
