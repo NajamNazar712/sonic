@@ -48,7 +48,7 @@ class AutoComplaintHighAging extends Command
         foreach ($shipments as $shipment) {
 
             
-            $arrival_status = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',2)->whereDate('created_at', '>=', Carbon::today()->subDays(15));
+            $arrival_status = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',2)->whereDate('created_at', '>=', Carbon::today()->subDays(15));// yada date hardcode hogi 
             $delivery_status = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',$shipment->shipper_status_id);
             if($arrival_status->exists() && $delivery_status->exists()){
                 $delivery_status = $delivery_status->latest()->first();
