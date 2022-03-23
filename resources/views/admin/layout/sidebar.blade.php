@@ -856,6 +856,9 @@
                     @if (session('role_id') == 1 || in_array(567, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.airway_journey.index') }}">Airway Bill Print History</a></li>
                     @endif
+                        @if (session('role_id') == 1 || in_array(699, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.settings.cn_print_right.cn_print_right')}}">CN Print Rights Setting</a></li>
+                        @endif
 
                   {{--  <li><a class="menu-item" href="{{route('admin.attendance.mark')}}">Attendance</a></li>--}}
                 </ul>
@@ -1370,6 +1373,7 @@
                                     @if (session('role_id') == 1 || in_array(684, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.return_reason_mandatory.index')}}">Return Reason Mandatory</a></li>
                                     @endif
+
                                     
                                 </ul>
                             </li>

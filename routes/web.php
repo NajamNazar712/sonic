@@ -3221,11 +3221,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_reason_mandatory_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@return_reason_mandatory_list')->name('list');
             Route::post('store', 'Admins\GlobalSettingsController@return_reason_mandatory_store')->name('store');
+//            Route::get('cn_print_right', 'Admins\GlobalSettingsController@cn_print_right')->name('cn_print_right');
         });
 
         Route::prefix('return_shipments_address')->name('return_shipments_address.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_shipments_address_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@return_shipments_address_store')->name('store');
+        });
+
+        Route::prefix('cn_print_right')->name('cn_print_right.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@cn_print_right')->name('cn_print_right');
+            Route::post('store', 'Admins\GlobalSettingsController@cn_print_right_store')->name('store');
         });
 
     });

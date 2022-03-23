@@ -6200,6 +6200,21 @@ public function sales_incentive()
         $return_shipper_reason->save();
         return redirect()->back()->with('success', 'Shipper Has Been Added!');
     }
+    public function cn_print_right()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 519);
+        return view('admin.settings.cn_print_right');
+    }
+    public function cn_print_right_store(Request $request)
+    {
+        $role_ids = GlobalSettings::find(75);
+        $exist = $role_ids->text;
+        $newids = $exist.','.$request->get('role_ids');
+
+        $role_ids->text = $newids;
+        $role_ids->save();
+
+    }
 
     public function bolt_update_version_index(){
         if(session('role_id') == 1){
