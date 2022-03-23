@@ -43,12 +43,12 @@ class AutoComplaintHighAging extends Command
      */
     public function handle()
     {
-        $shipments = Shipment::whereIn('shipper_status_id',[36,37,38,14,25,31,51,18])->get();
+        $shipments = Shipment::whereNotIn('shipper_status_id',[36,37,38,14,25,31,51,18])->get();
 
         foreach ($shipments as $shipment) {
 
             
-            $arrival_status = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',2);
+            $arrival_status = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',2)->whereDate('created_at', '>=', Carbon::today());
             $delivery_status = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',$shipment->shipper_status_id);
             if($arrival_status->exists() && $delivery_status->exists()){
                 $delivery_status = $delivery_status->latest()->first();
