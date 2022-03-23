@@ -4947,7 +4947,7 @@ class GlobalSettingsController extends Controller
             }
             
         })->editColumn('case_nature', function($roles) {
-            if($roles->crm_case_nature_id == 4){
+            if($roles->case_nature == 4){
                 return 'Claim';
             }else{
                 return 'Complaints / Service Request';
