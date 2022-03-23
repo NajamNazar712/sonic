@@ -67,7 +67,7 @@ class AutoComplaintHighAging extends Command
                     
                     $crm_req = CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_type_id',34);
                     if(!$crm_req->exists()){
-                        CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $shipment->shipper_id, null, $description);
+                        CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $shipment->user_id, null, $description);
                     }
                       
                 }elseif($shipment->shipper_status_id == 2){
