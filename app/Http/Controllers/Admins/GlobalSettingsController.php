@@ -6250,7 +6250,7 @@ public function sales_incentive()
             $role_ids->text = null;
             $role_ids->save();
 
-            return redirect()->back()->with('error', 'Updated But No Admin selected!');
+            return redirect()->back()->with('error', 'Updated But No Admin Role selected!');
         }
 
     }
