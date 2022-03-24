@@ -6688,10 +6688,13 @@ class AdminAPIController extends Controller
                 $sale_users_bypass = explode(',', $settings->text);
             }
             if(in_array($request->admin_id,$sale_users_bypass)){
-                $admin_list = Admin::where('status', 1)->select('id', 'name')->get();
+                $admin_list = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
                 return response()->json(['status' => 0, 'admin_list' => $admin_list]);
             }
-            return response()->json(['status' => 0, 'admin_list' => []]);
+            else {
+                $admin_list = Admin::where('status', 1)->where('user_id', $request->user_id)->select('id', 'name')->get();
+                return response()->json(['status' => 0, 'admin_list' => $admin_list]);
+            }
         }
         if ($request->isMethod('post')){
             $daily_visit = DB::connection('reports')->table('daily_visits')
@@ -6706,7 +6709,7 @@ class AdminAPIController extends Controller
                     $daily_visit = $daily_visit->whereDate('daily_visits.created_at', $request->from_date);
                 }
             }
-            if($request->user_id){
+            if(!$request->admin_id){
                 $daily_visit = $daily_visit->where('a.id', $request->user_id);
             }else{
                 $daily_visit = $daily_visit->where('a.id', $request->admin_id);
