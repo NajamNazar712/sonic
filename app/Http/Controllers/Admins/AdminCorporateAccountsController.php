@@ -277,6 +277,7 @@ class AdminCorporateAccountsController extends Controller
 
     public function add_rates_submit(Request $request, $id)
     {
+        dd($request);
         $messages = [
             'on_door_mcw_charges.required' => 'The overnight doorstep minimum chargeable weight field is required.',
             'on_door_mcw_charges.numeric' => 'The overnight doorstep minimum chargeable weight field must be numeric or decimal.',

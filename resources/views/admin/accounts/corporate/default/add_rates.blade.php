@@ -522,6 +522,32 @@
                                             {{--                                            </div>--}}
                                         </div>
 
+                                        <hr>
+
+                                        <div class="discount-weight-origin-wise-addition-overnight">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group ">
+                                                        <input type="checkbox" name="on_discount_destination_wise_weight_switch"
+                                                               class="switchery" id="on_discount_destination_wise_weight_switch" data-color="success"
+                                                               data-size="sm"/>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div id="discount_on_weight_destination_row" class="d-none">
+
+                                            </div>
+                                        </div>
+                                        <div class="mt-1 d-none" id="discount_on_weight_destination_btn_row">
+                                            <button type="button" class="btn btn-outline-success mr-1"
+                                                    title="Add more slabs" id="discount_waddition_destination_btn"><i class="la la-plus"></i> Add Destination
+                                            </button>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -1005,7 +1031,31 @@
                                             {{--                                                </fieldset>--}}
                                             {{--                                            </div>--}}
                                         </div>
+                                        <hr>
 
+                                        <div class="discount-weight-origin-wise-addition-overland">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group ">
+                                                        <input type="checkbox" name="ol_discount_destination_wise_weight_switch"
+                                                               class="switchery" id="ol_discount_destination_wise_weight_switch" data-color="success"
+                                                               data-size="sm"/>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div id="discount_ol_weight_destination_row" class="d-none">
+
+                                            </div>
+                                        </div>
+                                        <div class="mt-1 d-none" id="discount_ol_weight_destination_btn_row">
+                                            <button type="button" class="btn btn-outline-success mr-1"
+                                                    title="Add more slabs" id="discount_ol_waddition_destination_btn"><i class="la la-plus"></i> Add Destination
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1494,7 +1544,31 @@
                                             {{--                                                </fieldset>--}}
                                             {{--                                            </div>--}}
                                         </div>
+                                        <hr>
 
+                                        <div class="discount-weight-origin-wise-addition-detain">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group ">
+                                                        <input type="checkbox" name="d_discount_destination_wise_weight_switch"
+                                                               class="switchery" id="d_discount_destination_wise_weight_switch" data-color="success"
+                                                               data-size="sm"/>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div id="discount_d_weight_destination_row" class="d-none">
+
+                                            </div>
+                                        </div>
+                                        <div class="mt-1 d-none" id="discount_d_weight_destination_btn_row">
+                                            <button type="button" class="btn btn-outline-success mr-1"
+                                                    title="Add more slabs" id="discount_d_waddition_destination_btn"><i class="la la-plus"></i> Add Destination
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1940,7 +2014,30 @@
                                             {{--                                                </fieldset>--}}
                                             {{--                                            </div>--}}
                                         </div>
+                                        <hr>
 
+                                        <div class="discount-weight-origin-wise-addition-sameday">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group ">
+                                                        <input type="checkbox" name="sd_discount_destination_wise_weight_switch"
+                                                               class="switchery" id="sd_discount_destination_wise_weight_switch" data-color="success"
+                                                               data-size="sm"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="discount_sd_weight_destination_row" class="d-none">
+
+                                            </div>
+                                        </div>
+                                        <div class="mt-1 d-none" id="discount_sd_weight_destination_btn_row">
+                                            <button type="button" class="btn btn-outline-success mr-1"
+                                                    title="Add more slabs" id="discount_sd_waddition_destination_btn"><i class="la la-plus"></i> Add Destination
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -2246,7 +2343,6 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var rate_type = $('#corporate_type_id').val();
-            console.log(rate_type);
 
             //sales tier
             /* *********************
@@ -2729,6 +2825,1073 @@
                 regex: '^\\d{1,9}(\\.\\d{1,2})?%?$'
             });
         }
+
+        // Variables For Discount Weight Charges
+        var on_discount_weight = 0;
+        var on_discount_weight_charges = [];
+        var ol_discount_weight = 0;
+        var ol_discount_weight_charges = [];
+        var d_discount_weight = 0;
+        var d_discount_weight_charges = [];
+        var sd_discount_weight = 0;
+        var sd_discount_weight_charges = [];
+
+        // Switches For Discount Weight Charges
+        var on_discount_weight_switch = document.querySelector('#on_discount_destination_wise_weight_switch');
+        var ol_discount_weight_switch = document.querySelector('#ol_discount_destination_wise_weight_switch');
+        var d_discount_weight_switch = document.querySelector('#d_discount_destination_wise_weight_switch');
+        var sd_discount_weight_switch = document.querySelector('#sd_discount_destination_wise_weight_switch');
+
+        //Activate Discount Functions
+        on_discount_weight_switch.onchange = function () {
+            if (on_discount_weight_switch.checked === true) {
+                $("#discount_on_weight_destination_row").removeClass("d-none");
+                $("#discount_on_weight_destination_btn_row").removeClass("d-none");
+            } else if (on_discount_weight_switch.checked === false) {
+                $("#discount_on_weight_destination_row").addClass("d-none");
+                $("#discount_on_weight_destination_btn_row").addClass("d-none");
+
+            }
+        };
+
+        ol_discount_weight_switch.onchange = function () {
+            if (ol_discount_weight_switch.checked === true) {
+                $("#discount_ol_weight_destination_row").removeClass("d-none");
+                $("#discount_ol_weight_destination_btn_row").removeClass("d-none");
+            } else if (ol_discount_weight_switch.checked === false) {
+                $("#discount_ol_weight_destination_row").addClass("d-none");
+                $("#discount_ol_weight_destination_btn_row").addClass("d-none");
+
+            }
+        };
+
+        d_discount_weight_switch.onchange = function () {
+            if (d_discount_weight_switch.checked === true) {
+                $("#discount_d_weight_destination_row").removeClass("d-none");
+                $("#discount_d_weight_destination_btn_row").removeClass("d-none");
+            } else if (d_discount_weight_switch.checked === false) {
+                $("#discount_d_weight_destination_row").addClass("d-none");
+                $("#discount_d_weight_destination_btn_row").addClass("d-none");
+
+            }
+        };
+
+        sd_discount_weight_switch.onchange = function () {
+            if (sd_discount_weight_switch.checked === true) {
+                $("#discount_sd_weight_destination_row").removeClass("d-none");
+                $("#discount_sd_weight_destination_btn_row").removeClass("d-none");
+            } else if (sd_discount_weight_switch.checked === false) {
+                $("#discount_sd_weight_destination_row").addClass("d-none");
+                $("#discount_sd_weight_destination_btn_row").addClass("d-none");
+
+            }
+        };
+
+        // Functions For Discount Weight Charges Start
+
+        //OverNight/Rush Functions
+        $('body').on('click', '#discount_waddition_destination_btn', function () {
+            on_discount_weight_charges[on_discount_weight] = 1;
+            var html = `<div id="discount_on_container_div${on_discount_weight}">
+                                <div class="row mt-2">
+                                    <div class="col-2">
+                                        <h3>Select Destination City</h3>
+                                    </div>
+                                    <div class="col-7">
+                                        <div class="form-group card border-success p-2">
+                                            <select name="discount_on_destination[${on_discount_weight}]" id="discount_on_destination${on_discount_weight}" class="form-control select2 validated">
+                                                @foreach($cities as $city)
+            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                @endforeach
+            </select>
+        </div>
+    </div>
+    <div class="col-1">
+        <span class="btn btn-danger rounded btn-lg mt-1 mr-1 mb-1 discount_wremove_destination_btn" data-id="${on_discount_weight}"><i class="ft-x"></i></span>
+                                    </div>
+                                </div>
+                                <div id="discount_on_weight_container_div${on_discount_weight}">
+                                    <div class="row">
+                                        <div class="col text-center">
+                                            <label class="card-title">Range Up</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Range Down</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Weight Addition</label>
+                                        </div>
+                                        <div class="col-2 text-center">
+                                            <label class="card-title">KG Range</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Charges</label>
+                                        </div>
+                                        <div class="col-1"></div>
+                                    </div>
+                                    <div class="row" id="discount_on_weight_row${on_discount_weight}_0">
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" id="discount_on_range_up${on_discount_weight}_0"
+                                                   class="form-control decimal validated"
+                                                   data-rule-required="true"
+                                                   data-msg-required="This field is required"
+                                                   value=""
+                                                   data-rule-min="0.1"
+                                                   data-msg-min="Minimum chargeable weight can not be less than 0.1"
+                                                   name="discount_on_wa_range_up[${on_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" id="discount_on_range_down${on_discount_weight}_0"
+                                                       class="form-control decimal validated"
+                                                       data-rule-required="true"
+                                                       data-msg-required="This field is required"
+                                                       value=""
+                                                       name="discount_on_wa_range_down[${on_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <div class="form-group " style="padding-top: 8px;">
+                                                <input type="checkbox" id="discount_OvernightSwitch${on_discount_weight}_0"
+                                                       class="switchery discountweightAdditionOvernight validated"
+                                                       data-color="success" data-size="sm"
+                                                       name="discount_on_wa_switch[${on_discount_weight}][0]">
+                                            </div>
+                                        </div>
+                                        <div class="col-2 text-center">
+                                            <fieldset style="padding-top: 5px;">
+                                                <div class="input-group input-group-sm form-group">
+                                                    <input type="text" class="touchspin-color input-sm spkg"
+                                                        id="discount_on_wa_spkg${on_discount_weight}_0"
+                                                        data-bts-button-down-class="btn btn-success validated"
+                                                        data-bts-button-up-class="btn btn-success"
+                                                        name="discount_on_wa_spkg[${on_discount_weight}][0]"
+                                                        data-rule-required="true"
+                                                        data-msg-required="This field is required"
+                                                        value="0.5"
+                                                        disabled>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" class="form-control decimal validated"
+                                                   data-rule-required="true"
+                                                   data-msg-required="This field is required"
+                                                   value=""
+                                                   name="discount_on_wa_local_charges[${on_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-1">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-outline-success mr-1 discount_waddition_btn"
+                                            title="Add more slabs" data-id="${on_discount_weight}"><i class="la la-plus"></i>
+                                    </button>
+                                </div>
+                            </div>`;
+            $("#discount_on_weight_destination_row").append(html);
+
+            $("#discount_on_destination"+on_discount_weight).prepend('<option selected="" value=""></option>').select2({
+                width: '100%',
+                placeholder: "Select Destination",
+            });
+
+            var switches = document.querySelector('#discount_OvernightSwitch'+on_discount_weight+'_0');
+            var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+            $("#discount_on_wa_spkg"+on_discount_weight+"_0").TouchSpin({
+                min: 0.5,
+                max: 100,
+                step: 0.5,
+                decimals: 2,
+                buttondown_class: "btn btn-success",
+                buttonup_class: "btn btn-success",
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            });
+
+            masks();
+
+            switches.onchange = function () {
+
+                if (switches.checked === true) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                } else if (switches.checked === false) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+                }
+            };
+            $("#discount_on_container_div" + on_discount_weight + " .validated").each(function () {
+                $(this).rules("add", {
+                    required: true,
+                });
+
+            });
+            on_discount_weight++;
+        });
+
+        $("body").on('click','.discount_wremove_destination_btn',function(){
+            var id = $(this).attr('data-id');
+            $("#discount_on_container_div"+id).remove();
+        });
+
+        $('body').on('click', '.discount_waddition_btn', function () {
+            var parent_count = $(this).attr('data-id');
+            var current_top_id = $(this).parent().prev().find('.row').last().attr('id').split(parent_count+"_")[1];
+            var child_count = on_discount_weight_charges[parent_count];
+            on_discount_weight_charges[parent_count] += 1;
+            var on_range_down = parseFloat($('#discount_on_range_down' + parent_count+'_'+current_top_id).val());
+            var on_new_range_down = on_range_down + 0.01;
+            let html = `<div class="row" id="discount_on_weight_row${parent_count}_${child_count}">
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" id="discount_on_range_up${parent_count}_${child_count}"
+                                       class="form-control decimal validated"
+                                       data-rule-required="true"
+                                       data-msg-required="This field is required"
+                                       value="${on_new_range_down}"
+                                       name="discount_on_wa_range_up[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" id="discount_on_range_down${parent_count}_${child_count}"
+                                           class="form-control decimal validated"
+                                           data-rule-required="true"
+                                           data-msg-required="This field is required"
+                                           value=""
+                                           name="discount_on_wa_range_down[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <div class="form-group " style="padding-top: 8px;">
+                                    <input type="checkbox" id="discount_OvernightSwitch${parent_count}_${child_count}"
+                                           class="switchery discountweightAdditionOvernight validated"
+                                           data-color="success" data-size="sm"
+                                           name="discount_on_wa_switch[${parent_count}][${child_count}]">
+                                </div>
+                            </div>
+                            <div class="col-2 text-center">
+                                <fieldset style="padding-top: 5px;">
+                                    <div class="input-group input-group-sm form-group">
+                                        <input type="text" class="touchspin-color input-sm spkg"
+                                            id="discount_on_wa_spkg${parent_count}_${child_count}"
+                                            data-bts-button-down-class="btn btn-success validated"
+                                            data-bts-button-up-class="btn btn-success"
+                                            name="discount_on_wa_spkg[${parent_count}][${child_count}]"
+                                            data-rule-required="true"
+                                            data-msg-required="This field is required"
+                                            value="0.5"
+                                            disabled>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" class="form-control decimal validated"
+                                       data-rule-required="true"
+                                       data-msg-required="This field is required"
+                                       value=""
+                                       name="discount_on_wa_local_charges[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col-1">
+                                <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 discount_on_weight_close" data-id="${child_count}" data-parent_id="${parent_count}"><i class="ft-x"></i></span>
+                            </div>
+                        </div>`;
+            $('#discount_on_weight_container_div'+parent_count).append(html);
+            var switches = document.querySelector('#discount_OvernightSwitch'+parent_count+'_'+child_count);
+            var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+            $("#discount_on_wa_spkg"+parent_count+"_"+child_count).TouchSpin({
+                min: 0.5,
+                max: 100,
+                step: 0.5,
+                decimals: 2,
+                buttondown_class: "btn btn-success",
+                buttonup_class: "btn btn-success",
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            });
+
+            masks();
+            switches.onchange = function () {
+
+                if (switches.checked === true) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                } else if (switches.checked === false) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+                }
+            };
+            $("#discount_on_weight_row" + parent_count + "_"+child_count+" .validated").each(function () {
+                $(this).rules("add", {
+                    required: true,
+                });
+
+            });
+        });
+
+        $('body').on('click','.discount_on_weight_close',function(){
+            var parent_count = $(this).attr('data-parent_id');
+            var child_count = $(this).attr('data-id');
+            $("#discount_on_weight_row"+parent_count+"_"+child_count).remove();
+        });
+
+        //Overland/Saver Plus Functions
+        $('body').on('click', '#discount_ol_waddition_destination_btn', function () {
+            ol_discount_weight_charges[ol_discount_weight] = 1;
+            var html = `<div id="discount_ol_container_div${ol_discount_weight}">
+                                <div class="row mt-2">
+                                    <div class="col-2">
+                                        <h3>Select Destination City</h3>
+                                    </div>
+                                    <div class="col-7">
+                                        <div class="form-group card border-success p-2">
+                                            <select name="discount_ol_destination[${ol_discount_weight}]" id="discount_ol_destination${ol_discount_weight}" class="form-control select2 validated">
+                                                @foreach($cities as $city)
+            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                @endforeach
+            </select>
+        </div>
+    </div>
+    <div class="col-1">
+        <span class="btn btn-danger rounded btn-lg mt-1 mr-1 mb-1 discount_ol_wremove_destination_btn" data-id="${ol_discount_weight}"><i class="ft-x"></i></span>
+                                    </div>
+                                </div>
+                                <div id="discount_ol_weight_container_div${ol_discount_weight}">
+                                    <div class="row">
+                                        <div class="col text-center">
+                                            <label class="card-title">Range Up</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Range Down</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Weight Addition</label>
+                                        </div>
+                                        <div class="col-2 text-center">
+                                            <label class="card-title">KG Range</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Charges</label>
+                                        </div>
+                                        <div class="col-1"></div>
+                                    </div>
+                                    <div class="row" id="discount_ol_weight_row${ol_discount_weight}_0">
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" id="discount_ol_range_up${ol_discount_weight}_0"
+                                                   class="form-control decimal validated"
+                                                   data-rule-required="true"
+                                                   data-msg-required="This field is required"
+                                                   value=""
+                                                   data-rule-min="0.1"
+                                                   data-msg-min="Minimum chargeable weight can not be less than 0.1"
+                                                   name="discount_ol_wa_range_up[${ol_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" id="discount_ol_range_down${ol_discount_weight}_0"
+                                                       class="form-control decimal validated"
+                                                       data-rule-required="true"
+                                                       data-msg-required="This field is required"
+                                                       value=""
+                                                       name="discount_ol_wa_range_down[${ol_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <div class="form-group " style="padding-top: 8px;">
+                                                <input type="checkbox" id="discount_OverlandSwitch${ol_discount_weight}_0"
+                                                       class="switchery discountweightAdditionOverland validated"
+                                                       data-color="success" data-size="sm"
+                                                       name="discount_ol_wa_switch[${ol_discount_weight}][0]">
+                                            </div>
+                                        </div>
+                                        <div class="col-2 text-center">
+                                            <fieldset style="padding-top: 5px;">
+                                                <div class="input-group input-group-sm form-group">
+                                                    <input type="text" class="touchspin-color input-sm spkg"
+                                                        id="discount_ol_wa_spkg${ol_discount_weight}_0"
+                                                        data-bts-button-down-class="btn btn-success validated"
+                                                        data-bts-button-up-class="btn btn-success"
+                                                        name="discount_ol_wa_spkg[${ol_discount_weight}][0]"
+                                                        data-rule-required="true"
+                                                        data-msg-required="This field is required"
+                                                        value="0.5"
+                                                        disabled>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" class="form-control decimal validated"
+                                                   data-rule-required="true"
+                                                   data-msg-required="This field is required"
+                                                   value=""
+                                                   name="discount_ol_wa_local_charges[${ol_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-1">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-outline-success mr-1 discount_ol_waddition_btn"
+                                            title="Add more slabs" data-id="${ol_discount_weight}"><i class="la la-plus"></i>
+                                    </button>
+                                </div>
+                            </div>`;
+            $("#discount_ol_weight_destination_row").append(html);
+
+            $("#discount_ol_destination"+ol_discount_weight).prepend('<option selected="" value=""></option>').select2({
+                width: '100%',
+                placeholder: "Select Destination",
+            });
+
+            var switches = document.querySelector('#discount_OverlandSwitch'+ol_discount_weight+'_0');
+            var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+            $("#discount_ol_wa_spkg"+ol_discount_weight+"_0").TouchSpin({
+                min: 0.5,
+                max: 100,
+                step: 0.5,
+                decimals: 2,
+                buttondown_class: "btn btn-success",
+                buttonup_class: "btn btn-success",
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            });
+
+            masks();
+
+            switches.onchange = function () {
+
+                if (switches.checked === true) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                } else if (switches.checked === false) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+                }
+            };
+            $("#discount_ol_container_div" + ol_discount_weight + " .validated").each(function () {
+                $(this).rules("add", {
+                    required: true,
+                });
+
+            });
+            ol_discount_weight++;
+        });
+
+        $("body").on('click','.discount_ol_wremove_destination_btn',function(){
+            var id = $(this).attr('data-id');
+            $("#discount_ol_container_div"+id).remove();
+        });
+
+        $('body').on('click', '.discount_ol_waddition_btn', function () {
+            var parent_count = $(this).attr('data-id');
+            var current_top_id = $(this).parent().prev().find('.row').last().attr('id').split(parent_count+"_")[1];
+            var child_count = ol_discount_weight_charges[parent_count];
+            ol_discount_weight_charges[parent_count] += 1;
+            var ol_range_down = parseFloat($('#discount_ol_range_down' + parent_count+'_'+current_top_id).val());
+            var ol_new_range_down = ol_range_down + 0.01;
+            let html = `<div class="row" id="discount_ol_weight_row${parent_count}_${child_count}">
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" id="discount_ol_range_up${parent_count}_${child_count}"
+                                       class="form-control decimal validated"
+                                       data-rule-required="true"
+                                       data-msg-required="This field is required"
+                                       value="${ol_new_range_down}"
+                                       name="discount_ol_wa_range_up[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" id="discount_ol_range_down${parent_count}_${child_count}"
+                                           class="form-control decimal validated"
+                                           data-rule-required="true"
+                                           data-msg-required="This field is required"
+                                           value=""
+                                           name="discount_ol_wa_range_down[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <div class="form-group " style="padding-top: 8px;">
+                                    <input type="checkbox" id="discount_OverlandSwitch${parent_count}_${child_count}"
+                                           class="switchery discountweightAdditionOverland validated"
+                                           data-color="success" data-size="sm"
+                                           name="discount_ol_wa_switch[${parent_count}][${child_count}]">
+                                </div>
+                            </div>
+                            <div class="col-2 text-center">
+                                <fieldset style="padding-top: 5px;">
+                                    <div class="input-group input-group-sm form-group">
+                                        <input type="text" class="touchspin-color input-sm spkg"
+                                            id="discount_ol_wa_spkg${parent_count}_${child_count}"
+                                            data-bts-button-down-class="btn btn-success validated"
+                                            data-bts-button-up-class="btn btn-success"
+                                            name="discount_ol_wa_spkg[${parent_count}][${child_count}]"
+                                            data-rule-required="true"
+                                            data-msg-required="This field is required"
+                                            value="0.5"
+                                            disabled>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" class="form-control decimal validated"
+                                       data-rule-required="true"
+                                       data-msg-required="This field is required"
+                                       value=""
+                                       name="discount_ol_wa_local_charges[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col-1">
+                                <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 discount_ol_weight_close" data-id="${child_count}" data-parent_id="${parent_count}"><i class="ft-x"></i></span>
+                            </div>
+                        </div>`;
+            $('#discount_ol_weight_container_div'+parent_count).append(html);
+            var switches = document.querySelector('#discount_OverlandSwitch'+parent_count+'_'+child_count);
+            var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+            $("#discount_ol_wa_spkg"+parent_count+"_"+child_count).TouchSpin({
+                min: 0.5,
+                max: 100,
+                step: 0.5,
+                decimals: 2,
+                buttondown_class: "btn btn-success",
+                buttonup_class: "btn btn-success",
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            });
+
+            masks();
+            switches.onchange = function () {
+
+                if (switches.checked === true) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                } else if (switches.checked === false) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+                }
+            };
+            $("#discount_ol_weight_row" + parent_count + "_"+child_count+" .validated").each(function () {
+                $(this).rules("add", {
+                    required: true,
+                });
+
+            });
+        });
+
+        $('body').on('click','.discount_ol_weight_close',function(){
+            var parent_count = $(this).attr('data-parent_id');
+            var child_count = $(this).attr('data-id');
+            $("#discount_ol_weight_row"+parent_count+"_"+child_count).remove();
+        });
+
+        //Detain/Swift Function
+        $('body').on('click', '#discount_d_waddition_destination_btn', function () {
+            d_discount_weight_charges[d_discount_weight] = 1;
+            var html = `<div id="discount_d_container_div${d_discount_weight}">
+                                <div class="row mt-2">
+                                    <div class="col-2">
+                                        <h3>Select Destination City</h3>
+                                    </div>
+                                    <div class="col-7">
+                                        <div class="form-group card border-success p-2">
+                                            <select name="discount_d_destination[${d_discount_weight}]" id="discount_d_destination${d_discount_weight}" class="form-control select2 validated">
+                                                @foreach($cities as $city)
+            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                @endforeach
+            </select>
+        </div>
+    </div>
+    <div class="col-1">
+        <span class="btn btn-danger rounded btn-lg mt-1 mr-1 mb-1 discount_d_wremove_destination_btn" data-id="${d_discount_weight}"><i class="ft-x"></i></span>
+                                    </div>
+                                </div>
+                                <div id="discount_d_weight_container_div${d_discount_weight}">
+                                    <div class="row">
+                                        <div class="col text-center">
+                                            <label class="card-title">Range Up</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Range Down</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Weight Addition</label>
+                                        </div>
+                                        <div class="col-2 text-center">
+                                            <label class="card-title">KG Range</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Charges</label>
+                                        </div>
+                                        <div class="col-1"></div>
+                                    </div>
+                                    <div class="row" id="discount_d_weight_row${d_discount_weight}_0">
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" id="discount_d_range_up${d_discount_weight}_0"
+                                                   class="form-control decimal validated"
+                                                   data-rule-required="true"
+                                                   data-msg-required="This field is required"
+                                                   value=""
+                                                   data-rule-min="0.1"
+                                                   data-msg-min="Minimum chargeable weight can not be less than 0.1"
+                                                   name="discount_d_wa_range_up[${d_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" id="discount_d_range_down${d_discount_weight}_0"
+                                                       class="form-control decimal validated"
+                                                       data-rule-required="true"
+                                                       data-msg-required="This field is required"
+                                                       value=""
+                                                       name="discount_d_wa_range_down[${d_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <div class="form-group " style="padding-top: 8px;">
+                                                <input type="checkbox" id="discount_DetainSwitch${d_discount_weight}_0"
+                                                       class="switchery discountweightAdditionDetain validated"
+                                                       data-color="success" data-size="sm"
+                                                       name="discount_d_wa_switch[${d_discount_weight}][0]">
+                                            </div>
+                                        </div>
+                                        <div class="col-2 text-center">
+                                            <fieldset style="padding-top: 5px;">
+                                                <div class="input-group input-group-sm form-group">
+                                                    <input type="text" class="touchspin-color input-sm spkg"
+                                                        id="discount_d_wa_spkg${d_discount_weight}_0"
+                                                        data-bts-button-down-class="btn btn-success validated"
+                                                        data-bts-button-up-class="btn btn-success"
+                                                        name="discount_d_wa_spkg[${d_discount_weight}][0]"
+                                                        data-rule-required="true"
+                                                        data-msg-required="This field is required"
+                                                        value="0.5"
+                                                        disabled>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" class="form-control decimal validated"
+                                                   data-rule-required="true"
+                                                   data-msg-required="This field is required"
+                                                   value=""
+                                                   name="discount_d_wa_local_charges[${d_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-1">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-outline-success mr-1 discount_d_waddition_btn"
+                                            title="Add more slabs" data-id="${d_discount_weight}"><i class="la la-plus"></i>
+                                    </button>
+                                </div>
+                            </div>`;
+            $("#discount_d_weight_destination_row").append(html);
+
+            $("#discount_d_destination"+d_discount_weight).prepend('<option selected="" value=""></option>').select2({
+                width: '100%',
+                placeholder: "Select Destination",
+            });
+
+            var switches = document.querySelector('#discount_DetainSwitch'+d_discount_weight+'_0');
+            var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+            $("#discount_d_wa_spkg"+d_discount_weight+"_0").TouchSpin({
+                min: 0.5,
+                max: 100,
+                step: 0.5,
+                decimals: 2,
+                buttondown_class: "btn btn-success",
+                buttonup_class: "btn btn-success",
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            });
+
+            masks();
+
+            switches.onchange = function () {
+
+                if (switches.checked === true) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                } else if (switches.checked === false) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+                }
+            };
+            $("#discount_d_container_div" + d_discount_weight + " .validated").each(function () {
+                $(this).rules("add", {
+                    required: true,
+                });
+
+            });
+            d_discount_weight++;
+        });
+
+        $("body").on('click','.discount_d_wremove_destination_btn',function(){
+            var id = $(this).attr('data-id');
+            $("#discount_d_container_div"+id).remove();
+        });
+
+        $('body').on('click', '.discount_d_waddition_btn', function () {
+            var parent_count = $(this).attr('data-id');
+            var current_top_id = $(this).parent().prev().find('.row').last().attr('id').split(parent_count+"_")[1];
+            var child_count = d_discount_weight_charges[parent_count];
+            d_discount_weight_charges[parent_count] += 1;
+            var d_range_down = parseFloat($('#discount_d_range_down' + parent_count+'_'+current_top_id).val());
+            var d_new_range_down = d_range_down + 0.01;
+            let html = `<div class="row" id="discount_d_weight_row${parent_count}_${child_count}">
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" id="discount_d_range_up${parent_count}_${child_count}"
+                                       class="form-control decimal validated"
+                                       data-rule-required="true"
+                                       data-msg-required="This field is required"
+                                       value="${d_new_range_down}"
+                                       name="discount_d_wa_range_up[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" id="discount_d_range_down${parent_count}_${child_count}"
+                                           class="form-control decimal validated"
+                                           data-rule-required="true"
+                                           data-msg-required="This field is required"
+                                           value=""
+                                           name="discount_d_wa_range_down[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <div class="form-group " style="padding-top: 8px;">
+                                    <input type="checkbox" id="discount_DetainSwitch${parent_count}_${child_count}"
+                                           class="switchery discountweightAdditionDetain validated"
+                                           data-color="success" data-size="sm"
+                                           name="discount_d_wa_switch[${parent_count}][${child_count}]">
+                                </div>
+                            </div>
+                            <div class="col-2 text-center">
+                                <fieldset style="padding-top: 5px;">
+                                    <div class="input-group input-group-sm form-group">
+                                        <input type="text" class="touchspin-color input-sm spkg"
+                                            id="discount_d_wa_spkg${parent_count}_${child_count}"
+                                            data-bts-button-down-class="btn btn-success validated"
+                                            data-bts-button-up-class="btn btn-success"
+                                            name="discount_d_wa_spkg[${parent_count}][${child_count}]"
+                                            data-rule-required="true"
+                                            data-msg-required="This field is required"
+                                            value="0.5"
+                                            disabled>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" class="form-control decimal validated"
+                                       data-rule-required="true"
+                                       data-msg-required="This field is required"
+                                       value=""
+                                       name="discount_d_wa_local_charges[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col-1">
+                                <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 discount_d_weight_close" data-id="${child_count}" data-parent_id="${parent_count}"><i class="ft-x"></i></span>
+                            </div>
+                        </div>`;
+            $('#discount_d_weight_container_div'+parent_count).append(html);
+            var switches = document.querySelector('#discount_DetainSwitch'+parent_count+'_'+child_count);
+            var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+            $("#discount_d_wa_spkg"+parent_count+"_"+child_count).TouchSpin({
+                min: 0.5,
+                max: 100,
+                step: 0.5,
+                decimals: 2,
+                buttondown_class: "btn btn-success",
+                buttonup_class: "btn btn-success",
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            });
+
+            masks();
+            switches.onchange = function () {
+
+                if (switches.checked === true) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                } else if (switches.checked === false) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+                }
+            };
+            $("#discount_d_weight_row" + parent_count + "_"+child_count+" .validated").each(function () {
+                $(this).rules("add", {
+                    required: true,
+                });
+
+            });
+        });
+
+        $('body').on('click','.discount_d_weight_close',function(){
+            var parent_count = $(this).attr('data-parent_id');
+            var child_count = $(this).attr('data-id');
+            $("#discount_d_weight_row"+parent_count+"_"+child_count).remove();
+        });
+
+        //SameDay Function
+        $('body').on('click', '#discount_sd_waddition_destination_btn', function () {
+            sd_discount_weight_charges[sd_discount_weight] = 1;
+            var html = `<div id="discount_sd_container_div${sd_discount_weight}">
+                                <div class="row mt-2">
+                                    <div class="col-2">
+                                        <h3>Select Destination City</h3>
+                                    </div>
+                                    <div class="col-7">
+                                        <div class="form-group card border-success p-2">
+                                            <select name="discount_sd_destination[${sd_discount_weight}]" id="discount_sd_destination${sd_discount_weight}" class="form-control select2 validated">
+                                                @foreach($cities as $city)
+            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                @endforeach
+            </select>
+        </div>
+    </div>
+    <div class="col-1">
+        <span class="btn btn-danger rounded btn-lg mt-1 mr-1 mb-1 discount_sd_wremove_destination_btn" data-id="${sd_discount_weight}"><i class="ft-x"></i></span>
+                                    </div>
+                                </div>
+                                <div id="discount_sd_weight_container_div${sd_discount_weight}">
+                                    <div class="row">
+                                        <div class="col text-center">
+                                            <label class="card-title">Range Up</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Range Down</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Weight Addition</label>
+                                        </div>
+                                        <div class="col-2 text-center">
+                                            <label class="card-title">KG Range</label>
+                                        </div>
+                                        <div class="col text-center">
+                                            <label class="card-title">Charges</label>
+                                        </div>
+                                        <div class="col-1"></div>
+                                    </div>
+                                    <div class="row" id="discount_sd_weight_row${sd_discount_weight}_0">
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" id="discount_sd_range_up${sd_discount_weight}_0"
+                                                   class="form-control decimal validated"
+                                                   data-rule-required="true"
+                                                   data-msg-required="This field is required"
+                                                   value=""
+                                                   data-rule-min="0.1"
+                                                   data-msg-min="Minimum chargeable weight can not be less than 0.1"
+                                                   name="discount_sd_wa_range_up[${sd_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" id="discount_sd_range_down${sd_discount_weight}_0"
+                                                       class="form-control decimal validated"
+                                                       data-rule-required="true"
+                                                       data-msg-required="This field is required"
+                                                       value=""
+                                                       name="discount_sd_wa_range_down[${sd_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <div class="form-group " style="padding-top: 8px;">
+                                                <input type="checkbox" id="discount_SamedaySwitch${sd_discount_weight}_0"
+                                                       class="switchery discountweightAdditionSameday validated"
+                                                       data-color="success" data-size="sm"
+                                                       name="discount_sd_wa_switch[${sd_discount_weight}][0]">
+                                            </div>
+                                        </div>
+                                        <div class="col-2 text-center">
+                                            <fieldset style="padding-top: 5px;">
+                                                <div class="input-group input-group-sm form-group">
+                                                    <input type="text" class="touchspin-color input-sm spkg"
+                                                        id="discount_sd_wa_spkg${sd_discount_weight}_0"
+                                                        data-bts-button-down-class="btn btn-success validated"
+                                                        data-bts-button-up-class="btn btn-success"
+                                                        name="discount_sd_wa_spkg[${sd_discount_weight}][0]"
+                                                        data-rule-required="true"
+                                                        data-msg-required="This field is required"
+                                                        value="0.5"
+                                                        disabled>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col text-center">
+                                            <fieldset class="form-group">
+                                                <input type="text" class="form-control decimal validated"
+                                                   data-rule-required="true"
+                                                   data-msg-required="This field is required"
+                                                   value=""
+                                                   name="discount_sd_wa_local_charges[${sd_discount_weight}][0]">
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-1">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-outline-success mr-1 discount_sd_waddition_btn"
+                                            title="Add more slabs" data-id="${sd_discount_weight}"><i class="la la-plus"></i>
+                                    </button>
+                                </div>
+                            </div>`;
+            $("#discount_sd_weight_destination_row").append(html);
+
+            $("#discount_sd_destination"+sd_discount_weight).prepend('<option selected="" value=""></option>').select2({
+                width: '100%',
+                placeholder: "Select Destination",
+            });
+
+            var switches = document.querySelector('#discount_SamedaySwitch'+sd_discount_weight+'_0');
+            var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+            $("#discount_sd_wa_spkg"+sd_discount_weight+"_0").TouchSpin({
+                min: 0.5,
+                max: 100,
+                step: 0.5,
+                decimals: 2,
+                buttondown_class: "btn btn-success",
+                buttonup_class: "btn btn-success",
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            });
+
+            masks();
+
+            switches.onchange = function () {
+
+                if (switches.checked === true) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                } else if (switches.checked === false) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+                }
+            };
+            $("#discount_sd_container_div" + sd_discount_weight + " .validated").each(function () {
+                $(this).rules("add", {
+                    required: true,
+                });
+
+            });
+            sd_discount_weight++;
+        });
+
+        $("body").on('click','.discount_sd_wremove_destination_btn',function(){
+            var id = $(this).attr('data-id');
+            $("#discount_sd_container_div"+id).remove();
+        });
+
+        $('body').on('click', '.discount_sd_waddition_btn', function () {
+            var parent_count = $(this).attr('data-id');
+            var current_top_id = $(this).parent().prev().find('.row').last().attr('id').split(parent_count+"_")[1];
+            var child_count = sd_discount_weight_charges[parent_count];
+            sd_discount_weight_charges[parent_count] += 1;
+            var sd_range_down = parseFloat($('#discount_sd_range_down' + parent_count+'_'+current_top_id).val());
+            var sd_new_range_down = sd_range_down + 0.01;
+            let html = `<div class="row" id="discount_sd_weight_row${parent_count}_${child_count}">
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" id="discount_sd_range_up${parent_count}_${child_count}"
+                                       class="form-control decimal validated"
+                                       data-rule-required="true"
+                                       data-msg-required="This field is required"
+                                       value="${sd_new_range_down}"
+                                       name="discount_sd_wa_range_up[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" id="discount_sd_range_down${parent_count}_${child_count}"
+                                           class="form-control decimal validated"
+                                           data-rule-required="true"
+                                           data-msg-required="This field is required"
+                                           value=""
+                                           name="discount_sd_wa_range_down[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <div class="form-group " style="padding-top: 8px;">
+                                    <input type="checkbox" id="discount_SamedaySwitch${parent_count}_${child_count}"
+                                           class="switchery discountweightAdditionSameday validated"
+                                           data-color="success" data-size="sm"
+                                           name="discount_sd_wa_switch[${parent_count}][${child_count}]">
+                                </div>
+                            </div>
+                            <div class="col-2 text-center">
+                                <fieldset style="padding-top: 5px;">
+                                    <div class="input-group input-group-sm form-group">
+                                        <input type="text" class="touchspin-color input-sm spkg"
+                                            id="discount_sd_wa_spkg${parent_count}_${child_count}"
+                                            data-bts-button-down-class="btn btn-success validated"
+                                            data-bts-button-up-class="btn btn-success"
+                                            name="discount_sd_wa_spkg[${parent_count}][${child_count}]"
+                                            data-rule-required="true"
+                                            data-msg-required="This field is required"
+                                            value="0.5"
+                                            disabled>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="col text-center">
+                                <fieldset class="form-group">
+                                    <input type="text" class="form-control decimal validated"
+                                       data-rule-required="true"
+                                       data-msg-required="This field is required"
+                                       value=""
+                                       name="discount_sd_wa_local_charges[${parent_count}][${child_count}]">
+                                </fieldset>
+                            </div>
+                            <div class="col-1">
+                                <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 discount_sd_weight_close" data-id="${child_count}" data-parent_id="${parent_count}"><i class="ft-x"></i></span>
+                            </div>
+                        </div>`;
+            $('#discount_sd_weight_container_div'+parent_count).append(html);
+            var switches = document.querySelector('#discount_SamedaySwitch'+parent_count+'_'+child_count);
+            var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+            $("#discount_sd_wa_spkg"+parent_count+"_"+child_count).TouchSpin({
+                min: 0.5,
+                max: 100,
+                step: 0.5,
+                decimals: 2,
+                buttondown_class: "btn btn-success",
+                buttonup_class: "btn btn-success",
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            });
+
+            masks();
+            switches.onchange = function () {
+
+                if (switches.checked === true) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                } else if (switches.checked === false) {
+                    $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+                }
+            };
+            $("#discount_sd_weight_row" + parent_count + "_"+child_count+" .validated").each(function () {
+                $(this).rules("add", {
+                    required: true,
+                });
+
+            });
+        });
+
+        $('body').on('click','.discount_sd_weight_close',function(){
+            var parent_count = $(this).attr('data-parent_id');
+            var child_count = $(this).attr('data-id');
+            $("#discount_sd_weight_row"+parent_count+"_"+child_count).remove();
+        });
+
+        // Functions For Discount Weight Charges End
+
+
         $('body').on('click','.on_weight_close',function () {
             $(this).parent().parent().remove();
         });
