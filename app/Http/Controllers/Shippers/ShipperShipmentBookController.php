@@ -2223,7 +2223,7 @@ class ShipperShipmentBookController extends Controller
         {
             $role_ids = explode(',', $ids);
 //            dd($role_ids);
-
+//            $admin = Admin::select('id')->whereIn('role_id',$role_ids)->get();
             if (in_array(session('role_id'),$role_ids)) {
                 return response()->json(['status' => '2', 'error' => 'You have no rights to print']);
             }

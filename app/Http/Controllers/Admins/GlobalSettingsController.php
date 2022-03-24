@@ -6204,8 +6204,15 @@ public function sales_incentive()
     public function cn_print_right()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 519);
-        $admin_roles = AdminRole::all();
-        return view('admin.settings.cn_print_right')->with(['admin_roles' => $admin_roles]);
+        $admin_roles_id = AdminRole::all();
+//        dd($admin_roles);
+        $settings = GlobalSettings::where('type', 'cn_print_rights');
+        $foc_account_tags = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $admin_roles = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.cn_print_right')->with(['admin_roles' => $admin_roles_id,'existing_admin_roles'=> $admin_roles ]);
     }
     public function cn_print_right_store(Request $request)
     {
@@ -6213,30 +6220,37 @@ public function sales_incentive()
         if ($request->has('admin_role')) {
 
             $newids=$request->get('admin_role');
-            $admin = Admin::select('id')->whereIn('role_id',$newids)->get();
-            $admin = $admin->pluck('id')->toArray();
+//            $admin = Admin::select('id')->whereIn('role_id',$newids)->get();
+//            $admin = $admin->pluck('id')->toArray();
 
-            $role_ids = GlobalSettings::find(75);
+            $role_ids = GlobalSettings::where('type','cn_print_rights')->first();
             $exist = $role_ids->text;
             if ($exist == null) {
 
                 $default = 0;
-                $role_ids->text = implode(",",$admin);
+                $role_ids->text = implode(",",$newids);
                 $role_ids->save();
                 return redirect()->back()->with('success', 'Settings Updated!');
 
             } else {
-                $newids = $exist.','.implode(",",$admin);
-//                $newids = $exist.','.implode(",",$admin);
+                $role_ids->text = null;
+                $role_ids->save();
 
-                $role_ids->text = $newids;
+                $role_ids->text = implode(",",$newids);
+////                $newids = $exist.','.implode(",",$admin);
+//
+//                $role_ids->text = $newids;
                 $role_ids->save();
                 return redirect()->back()->with('success', 'Settings Updated!');
             }
         }
         else
         {
-            return redirect()->back()->with('error', 'No Admin selected!');
+            $role_ids = GlobalSettings::where('type','cn_print_rights')->first();
+            $role_ids->text = null;
+            $role_ids->save();
+
+            return redirect()->back()->with('error', 'Updated But No Admin selected!');
         }
 
     }

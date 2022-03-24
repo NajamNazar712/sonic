@@ -22,7 +22,7 @@
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
-                                                <select name="admin_role[]" id="admin_role_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Admin is required" data-rule-required="true" required="required">
+                                                <select name="admin_role[]" id="admin_role_select" class="form-control select2" multiple="multiple">
                                                     @foreach($admin_roles as $admin_role)
                                                         <option value="{{$admin_role->id}}">{{$admin_role->name}}</option>
                                                     @endforeach
@@ -61,7 +61,6 @@
     <script>
 
         $(document).ready(function () {
-
             $('#admin_role_select').select2({
                 placeholder:'Select Admin(s)',
                 width:'100%',
@@ -75,18 +74,18 @@
 
             $('#admin_role_select').on('select2:unselect', function () {
                 if($(this).val().length == 0){
-                    $('#settings_form').find('button[type=submit]').prop('disabled', true);
+                    $('#settings_form').find('button[type=submit]').prop('enable', true);
                 }
             });
 
-{{--                    @if(count($foc_account_tags) > 0)--}}
-{{--            var ids = @json($foc_account_tags);--}}
-{{--            $('#admin_role_select').val(ids).trigger('change');--}}
-{{--            @endif--}}
+                    @if(count($existing_admin_roles) > 0)
+            var ids = @json($existing_admin_roles);
+            $('#admin_role_select').val(ids).trigger('change');
+            @endif
 
             $('#settings_form').validate({
                 // ignore: ":not(:visible),:disabled",
-                errorClass: 'danger',
+                errorClass: 'warning',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
@@ -94,7 +93,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to update FOC Accounts!',
+                        text: 'Select Yes to Update Airway Bill Setting!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
