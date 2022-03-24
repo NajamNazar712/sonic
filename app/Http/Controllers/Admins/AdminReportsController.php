@@ -7526,25 +7526,53 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('dn_no_excel', function ($entry) use ($from,$to,$cutt_off) {
-                if ($cutt_off== 1) {
+                if ($cutt_off == 1) {
+                    $cut_off_time_start = '20:00:00';
+                    $cut_off_time_end = '14:00:00';
+                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
+                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
 
-                    $from = $from . ' ' . '20:00:00';
-                    $to = $to . ' ' . '14:00:00';
-                }
-                elseif ($cutt_off== 2)
-                {
-                    $from = $from . ' ' . '14:01:00';
-                    $to = $to . ' ' . '19:59:00';
-                }
                 $dn_no = DB::connection('reports')
                     ->table('delivery_notes')
                     ->where('rider_id', $entry->rider_id)
                     ->whereBetween('delivery_notes.created_at', [$from, $to])
-                    ->count();
-                if ($dn_no > 0) {
-                    return $dn_no;
+                    ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start);
+
+                $dn_no1 = DB::connection('reports')
+                    ->table('delivery_notes')
+                    ->where('rider_id', $entry->rider_id)
+                    ->whereBetween('delivery_notes.created_at', [$from, $to])
+                    ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
+                    ->union($dn_no)
+                    ->get();
+                $dn_no_count = count($dn_no1);
+                if ($dn_no_count > 0) {
+                    return  $dn_no_count ;
                 } else {
                     return 0;
+                }
+            }
+                if ($cutt_off == 2) {
+                    $cut_off_time_start = '14:01:00';
+                    $cut_off_time_end = '19:59:00';
+                    $cut_off_time_start = Carbon::parse($cut_off_time_start)->format('H:i:s');
+                    $cut_off_time_end = Carbon::parse($cut_off_time_end)->format('H:i:s');
+
+                    $dn_no = DB::connection('reports')
+                        ->table('delivery_notes')
+                        ->where('rider_id', $entry->rider_id)
+                        ->whereBetween('delivery_notes.created_at', [$from, $to])
+                        ->whereTime('delivery_notes.created_at', '>=', $cut_off_time_start)
+                        ->whereTime('delivery_notes.created_at', '<=', $cut_off_time_end)
+                        ->get();
+
+                    $dn_no_count = count($dn_no);
+                    if ($dn_no_count > 0) {
+//                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="dn_no_pop(' . $entry->rider_id . ')" >' . $dn_no_count . '</button>';
+                        return $dn_no_count ;
+                    } else {
+                        return 0;
+                    }
                 }
             })
             ->addColumn('dncc_amount', function ($entry) use ($from,$to,$cutt_off) {
@@ -9769,7 +9797,10 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 268);
         }
-        $shipments = DB::connection('reports')->table('shipments_journey')->leftjoin('admins as ad', 'shipments_journey.admin_id', '=', 'ad.id')
+        $shipments = DB::connection('reports')->table('shipments_journey')
+            ->leftjoin('admins as ad', 'shipments_journey.admin_id', '=', 'ad.id')
+            ->leftjoin('admin_roles as adr', 'ad.role_id', '=', 'adr.id')
+            ->leftjoin('admin_departments as dpt', 'adr.department_id', '=', 'dpt.id')
             ->join('shipments as sh', 'shipments_journey.shipment_id', '=', 'sh.id')
             ->join('users as su', 'sh.user_id', '=', 'su.id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
@@ -9777,8 +9808,8 @@ class AdminReportsController extends Controller
             ->leftjoin('delivery_notes as dn', 'shipments_journey.reference_1_id', '=', 'dn.id')
             ->leftjoin('return_notes as rn', 'shipments_journey.reference_1_id', '=', 'rn.id')
             ->leftjoin('riders as r', 'shipments_journey.rider_id', '=', 'r.id')
-            ->select(['shipments_journey.reference_1_id as ref_id', 'sh.id as shipment_id', 'sh.tracking_number', 'sh.tracking_number as tracking_number_link', 'r.id', 'r.name as rider_status_marked_by', 'u.name as shipper_status_marked_by', 'su.name as shipper', 'sh.user_id', 'ss.name as status_marked', 'shipments_journey.created_at as status_marking_date', 'ad.name as status_marked_by', 'ad.id as admin_id', 'shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id', 'shipments_journey.admin_id', 'shipments_journey.rider_id']);
-
+            ->select(['shipments_journey.reference_1_id as ref_id','sh.id as shipment_id','sh.tracking_number','sh.tracking_number as tracking_number_link','r.id','r.name as rider_status_marked_by','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id', 'shipments_journey.admin_id', 'shipments_journey.rider_id','dpt.name as status_marked_by_department']);
+            
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -9827,7 +9858,7 @@ class AdminReportsController extends Controller
         }
 
         if ($status_marked = $request->get('status_marked')) {
-            $datatable->where('ss.id', $status_marked);
+            $datatable->whereIn('ss.id', $status_marked);
         }
         if ($rider_id = $request->get('search_rider')) {
             $datatable->where('shipments_journey.rider_id', $rider_id);
@@ -10443,6 +10474,64 @@ class AdminReportsController extends Controller
             });
 
         return $datatables->make(true);
+    }
+
+    public function crm_special_approval_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),513);
+        return view('admin.reports.crm_special_approval');
+    }
+
+    public function crm_special_approval_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),514);
+        }
+        $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s','s.id','=','crm_requests.shipment_id')
+            ->leftjoin('special_approval_requests as sar', 'sar.crm_request_id' , '=', 'crm_requests.id')
+            ->leftjoin('admins as sarapproveby' ,'sarapproveby.id', '=' , 'sar.admin_id')
+            ->leftjoin('admins as sarrequestedby' ,'sarrequestedby.id', '=' , 'sar.requested_by')
+            ->leftjoin('admin_roles as ar' ,'ar.id', '=' , 'sarapproveby.role_id')
+            ->leftjoin('admin_departments as ad' ,'ad.id', '=' , 'ar.department_id')
+            ->leftjoin('adjustment_logs as adjustment', function ($join) {
+                $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
+                    ->where('adjustment.created_at','=',DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
+            })
+            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount', 'sarrequestedby.name as requested_by', 'sar.created_at as requested_date','sarapproveby.name as approved_by','ar.name as designation','ad.name as department','sar.approved_date as approved_at','sar.adjusted_percentage as adjusted_percentage','sar.status as status')
+            ->where('sar.status',1);
+
+        $datatable = Datatables::of($crm)
+            ->editColumn('request_number', function ($crm_request) {
+                return str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('id_padded_link', function ($crm_request) {
+                return '<u><a href=' . route('admin.crm.request.details', ['id' => $crm_request->request_number]) . ' target="_blank">' . str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT). '</a></u>';
+            })
+            ->addColumn('tracking_number_link', function ($crm_request) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
+            })
+            ->editColumn('approved_by', function ($crm_request) {
+                if($crm_request->adjusted_percentage == null){
+                    return '';
+                }else{
+                    return $crm_request->approved_by;
+                }
+            });
+        if($tracking = $request->get('search_tracking_no')){
+            $tracking_numbers = explode(',', $tracking);
+            $datatable->whereIn('s.tracking_number', $tracking_numbers);
+        }
+        if($rnumber = $request->get('search_request_number')){
+            $rnumber = explode(',',$rnumber);
+            $datatable->whereIn('crm_requests.id', $rnumber);
+        }
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatable->whereBetween('sar.created_at', [$from,$to]);
+        }
+
+        return $datatable->make(true);
     }
 }
 

@@ -97,7 +97,7 @@ class AutoAssignCrmAgent extends Command
                     }
                 }else{
                     $agent_log = CrmAgentLog::where('zone_id',$value->zone_id)
-                    ->where('case_nature_id',$value->case_nature_id)
+                    ->where('case_nature_id',null)
                     ->where('assinged_requests','<',90)
                     ->whereDate('assigned_date',Carbon::today()->toDateString())
                     ->orderBy('assinged_requests', 'asc')->get()->first();
