@@ -26,6 +26,7 @@ use App\Mail\Notifications;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AutoTagTerritory;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -346,7 +347,13 @@ class RegisterController extends Controller
             $territory_id = $data['territory_id'];
         }
         else{
-            $territory_id = null;
+            $auto_tag_territory = AutoTagTerritory::where('admin_id',$data['sale_person'])->where('status',1);
+            if($auto_tag_territory->exists()){
+                $auto_tag_territory = $auto_tag_territory->first();
+                $territory_id = $auto_tag_territory->territory_id;
+            }else{
+                $territory_id = null;
+            }
         }
 
         $newUser = User::create([

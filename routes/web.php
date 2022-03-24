@@ -601,7 +601,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('update_one_time_profile')->name('update_one_time_profile.')->group(function () {
         Route::get('','Admins\AdminDashboardController@get_one_time_profile')->name('index');
         Route::get('check','Admins\AdminDashboardController@check_profile')->name('check');
-        Route::post('submit','Admins\AdminDashboardController@update_one_time_profile_v2')->name('submit');
+        Route::post('submit','Admins\AdminDashboardController@update_one_time_profile')->name('submit');
     });
 
 
@@ -2555,6 +2555,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@crm_count_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@crm_count_list')->name('list');    
         });
+        Route::prefix('crm_special_approval')->name('crm_special_approval.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@crm_special_approval_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@crm_special_approval_list')->name('list');    
+        });
         
     });
 
@@ -3224,6 +3228,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@return_shipments_address_store')->name('store');
         });
 
+        Route::prefix('auto_tag_territories')->name('auto_tag_territories.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@auto_tag_territories_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@auto_tag_territories_list')->name('list');
+            Route::post('submit', 'Admins\GlobalSettingsController@auto_tag_territories_store')->name('submit');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@auto_tag_territories_enable_disable')->name('enable_disable');
+            Route::post('data', 'Admins\GlobalSettingsController@auto_tag_territories_data')->name('data');
+            Route::post('update', 'Admins\GlobalSettingsController@auto_tag_territories_update')->name('update');
+        
+        });
+
+
     });
 
 
@@ -3286,6 +3301,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('image_delete','Admins\AdminCRMController@crm_image_delete')->name('image_delete');
             Route::post('/lost/claim', 'Admins\AdminCRMController@lost_claim')->name('lost.claim');
             Route::post('request', 'Admins\AdminCRMController@special_request_appvove')->name('special_request_appvove');
+            Route::post('request_adjusted', 'Admins\AdminCRMController@special_request_adjusted')->name('special_request_adjusted');
+            
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
@@ -3531,6 +3548,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 	Route::prefix('leads')->name('leads.')->group(function(){
         Route::get('', 'Admins\LeadManagementController@index')->name('index');
         Route::get('list', 'Admins\LeadManagementController@list')->name('list');
+        Route::post('lead_reasons', 'Admins\LeadManagementController@lead_reasons')->name('lead_reasons');
         Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
         Route::post('add_bulk_status', 'Admins\LeadManagementController@add_bulk_status')->name('add_bulk_status');
         Route::post('tag_sale_person', 'Admins\LeadManagementController@tag_sale_person_forward_lead')->name('tag_sale_person');
@@ -3679,6 +3697,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('approve', 'Admins\AdminERFController@approve')->name('approve');
            // Route::get('{id}/documents','Admins\AdminERFController@documents')->name('documents');
             Route::post('documents','Admins\AdminERFController@documents')->name('documents');
+            Route::post('/employee_data', 'Admins\AdminERFController@employee_data')->name('employee_data');
+
+            
 
         });
 
@@ -3699,6 +3720,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/finance', 'Admins\AdminFnfController@finance_index')->name('finance.index');
             Route::post('finance/submit', 'Admins\AdminFnfController@finance_submit')->name('finance.submit');
             Route::get('{id}/hr', 'Admins\AdminFnfController@hr_index')->name('hr.index');
+            Route::post('hr_print', 'Admins\AdminFnfController@hr_print')->name('hr.print');
             Route::post('hr/submit', 'Admins\AdminFnfController@hr_submit')->name('hr.submit');
             Route::post('rm_status_edit', 'Admins\AdminFnfController@rm_status_edit')->name('rm_status_edit');
             Route::post('cs_status_edit', 'Admins\AdminFnfController@cs_status_edit')->name('cs_status_edit');

@@ -110,8 +110,6 @@ Route::name('api.')->group(function () {
         Route::post('reset_pin', 'Rider\RiderAPIController@reset_pin')->name('reset_pin');
         Route::get('check_pin', 'Rider\RiderAPIController@check_pin')->name('check_pin');
         Route::get('logout', 'Rider\RiderAPIController@logout')->name('logout');
-        Route::get('check_app_version', 'AdminAPIController@check_bolt_version')->name('check_app_version');
-
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'Rider\RiderAPIController@validate_cnic_phone_number')->name('validate_data');
@@ -128,7 +126,8 @@ Route::name('api.')->group(function () {
         });
 
 		Route::middleware('RiderAPIToken')->group(function () {
-			Route::prefix('pickup')->name('pickup.')->group(function () {
+            Route::get('check_app_version', 'Rider\RiderAPIController@check_bolt_version')->name('check_app_version');
+            Route::prefix('pickup')->name('pickup.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@pickup_summary')->name('pickup_summary');
                 Route::post('pick', 'Rider\RiderAPIController@pickup_pick')->name('pickup_pick');
                 Route::post('not_pick', 'Rider\RiderAPIController@pickup_not_pick')->name('pickup_not_pick');
@@ -277,6 +276,7 @@ Route::name('api.')->group(function () {
         });
 
         Route::middleware('AdminAPIToken')->group(function () {
+            Route::get('check_app_version', 'AdminAPIController@check_bolt_version')->name('check_app_version');
             Route::post('verify', 'AdminAPIController@verify')->name('verify');
             Route::get('check_permissions', 'AdminAPIController@check_permissions')->name('check_permissions');
             Route::post('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
@@ -353,6 +353,12 @@ Route::name('api.')->group(function () {
                 Route::post('detail', 'AdminAPIController@pick_list_details')->name('detail');
                 Route::post('barcode_validate', 'AdminAPIController@pick_list_barcode_validate')->name('barcode_validate');
                 Route::post('receive', 'AdminAPIController@pick_list_receive')->name('receive');
+            });
+
+            Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
+                Route::get('index', 'AdminAPIController@daily_visit_index')->name('index');
+                Route::post('store', 'AdminAPIController@daily_visit_store')->name('store');
+                Route::any('report', 'AdminAPIController@daily_visit_report')->name('report');
             });
 
         });
