@@ -2217,13 +2217,13 @@ class ShipperShipmentBookController extends Controller
 
     public function print_air_waybill(Request $request)
     {
-        $ids = GlobalSettings::where('type','cn_print_rights')->first();
 
+        $ids = GlobalSettings::where('type','cn_print_rights')->first();
         if($ids->text != null)
         {
+            $ids=$ids->text;
             $role_ids = explode(',', $ids);
-//            dd($role_ids);
-//            $admin = Admin::select('id')->whereIn('role_id',$role_ids)->get();
+
             if (in_array(session('role_id'),$role_ids)) {
                 return response()->json(['status' => '2', 'error' => 'You have no rights to print']);
             }
