@@ -2222,6 +2222,7 @@ class ShipperShipmentBookController extends Controller
         if($ids->text != null)
         {
             $role_ids = explode(',', $ids);
+//            dd($role_ids);
 
             if (in_array(session('role_id'),$role_ids)) {
                 return response()->json(['status' => '2', 'error' => 'You have no rights to print']);

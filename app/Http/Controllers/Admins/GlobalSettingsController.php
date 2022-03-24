@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminAppSlider;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
@@ -6203,26 +6204,39 @@ public function sales_incentive()
     public function cn_print_right()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 519);
-        return view('admin.settings.cn_print_right');
+        $admin_roles = AdminRole::all();
+        return view('admin.settings.cn_print_right')->with(['admin_roles' => $admin_roles]);
     }
     public function cn_print_right_store(Request $request)
     {
-        $role_ids = GlobalSettings::find(75);
-        $exist = $role_ids->text;
-        if($exist == null)
-        {
-            $default = 0;
-            $role_ids->text = $default.$exist.','.$request->get('role_ids');
-            $role_ids->save();
-            return response()->json(['status' => '2', 'success' => 'Saved']);
+
+        if ($request->has('admin_role')) {
+
+            $newids=$request->get('admin_role');
+            $admin = Admin::select('id')->whereIn('role_id',$newids)->get();
+            $admin = $admin->pluck('id')->toArray();
+
+            $role_ids = GlobalSettings::find(75);
+            $exist = $role_ids->text;
+            if ($exist == null) {
+
+                $default = 0;
+                $role_ids->text = implode(",",$admin);
+                $role_ids->save();
+                return redirect()->back()->with('success', 'Settings Updated!');
+
+            } else {
+                $newids = $exist.','.implode(",",$admin);
+//                $newids = $exist.','.implode(",",$admin);
+
+                $role_ids->text = $newids;
+                $role_ids->save();
+                return redirect()->back()->with('success', 'Settings Updated!');
+            }
         }
         else
         {
-            $newids = $exist.','.$request->get('role_ids');
-
-            $role_ids->text = $newids;
-            $role_ids->save();
-            return response()->json(['status' => '2', 'success' => 'Saved']);
+            return redirect()->back()->with('error', 'No Admin selected!');
         }
 
     }

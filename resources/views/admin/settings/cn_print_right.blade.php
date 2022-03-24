@@ -17,17 +17,20 @@
                             @include('admin.inc.messages')
 
                             <div class="row justify-content-center">
-                                <div class="col-5 col-sm-4 col-md-3 col-lg-2">
-                                    <form id="track_form" action="{{route('admin.settings.cn_print_right.store')}}" method="post" class="justify-content-center m-2" novalidate="novalidate">
-                                        @csrf
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="Rule Ids" name="role_ids"
-                                                   id="role_ids"  data-tags-input-name="role_ids">
+                                <div class="col-6">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.cn_print_right.store') }}" novalidate="novalidate">
+                                        {{ csrf_field() }}
+                                        <div class="row mb-2 justify-content-center">
+                                            <div class="col-12 form-group">
+                                                <select name="admin_role[]" id="admin_role_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Admin is required" data-rule-required="true" required="required">
+                                                    @foreach($admin_roles as $admin_role)
+                                                        <option value="{{$admin_role->id}}">{{$admin_role->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
                                         </div>
-                                        <button type="submit" id="search_filter_btn"
-                                                class="btn btn-outline-primary btn-min-width search"><i
-                                                    class="la la-search"></i> Insert
-                                        </button>
+                                        <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
                                 </div>
                             </div>
@@ -40,8 +43,8 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
@@ -51,63 +54,75 @@
             type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
             type="text/javascript"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script>
 
         $(document).ready(function () {
 
-            //form submission
-            $("#track_form").submit(function(e) {
-                e.preventDefault(); // prevent actual form submit
-                var form = $(this);
-                var url = form.attr('action'); //get submit url [replace url here if desired]
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: form.serialize(), // serializes form input
-                }).done(function (data) {
-                    // console.log(data);
-                        if(data.status == 2)
-                        {
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                        else{
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
+            $('#admin_role_select').select2({
+                placeholder:'Select Admin(s)',
+                width:'100%',
+                allowClear:true
+            }).bind('select2:select', function () {
+
+                if($(this).val().length != 0){
+                    $('#settings_form').find('button[type=submit]').prop('disabled', false);
+                }
+            });
+
+            $('#admin_role_select').on('select2:unselect', function () {
+                if($(this).val().length == 0){
+                    $('#settings_form').find('button[type=submit]').prop('disabled', true);
+                }
+            });
+
+{{--                    @if(count($foc_account_tags) > 0)--}}
+{{--            var ids = @json($foc_account_tags);--}}
+{{--            $('#admin_role_select').val(ids).trigger('change');--}}
+{{--            @endif--}}
+
+            $('#settings_form').validate({
+                // ignore: ":not(:visible),:disabled",
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update FOC Accounts!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if(confirm){
+                            $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                            blockPagePermanently();
+                            form.submit();
                         }
                     });
-            });
-            //form submission end
-            var select = $('#track_form #role_ids').selectize({
-                placeholder: 'Enter Role ID(s)*',
-                delimiter: ',',
-                createOnBlur: true,
-                persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function(dropdown) {
-                    dropdown.remove();
-                },
-                create: function (input) {
-                    var regex = /^[0-9,]+$/;
-
-                    if (!regex.test(input)) {
-                        return false;
-                    }
-                    return {
-                        value: input,
-                        text: input
-                    }
                 }
             });
         });
-
 
 
     </script>
