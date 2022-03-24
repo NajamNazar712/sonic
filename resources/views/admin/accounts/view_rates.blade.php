@@ -781,6 +781,121 @@
                                             </div>
                                         </div>
 
+
+                                        <hr>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sd_discount_destination_wise_weight_switch"
+                                                           class="switchery" disabled id="sd_discount_destination_wise_weight_switch" data-color="success"
+                                                           data-size="sm" @if(isset($discount_weight_rates[1]) && count($discount_weight_rates[1]) > 0) checked  @endif/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if(isset($discount_weight_rates[1]) && count($discount_weight_rates[1]) > 0)
+                                            @foreach($discount_weight_rates[1] as $destination_id => $data)
+                                                <div class="row mt-2">
+                                                    <div class="col-2">
+                                                        <h3>Select Destination City</h3>
+                                                    </div>
+                                                    <div class="col-7">
+                                                        <div class="form-group card border-success p-2">
+                                                            <select name="discount_on_destination[]" id="discount_on_destination" class="form-control select2 validated" disabled>
+                                                                    <option value="" selected>
+                                                                        {{$data[0]->destination->name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="discount_on_weight_container_div">
+                                                    <div class="row">
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Up</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Down</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Weight Addition</label>
+                                                        </div>
+                                                        <div class="col-2 text-center">
+                                                            <label class="card-title">KG Range</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Charges</label>
+                                                        </div>
+                                                    </div>
+                                                    @foreach($data->sortBy('id') as $datum)
+                                                    <div class="row" id="discount_on_weight_row">
+                                                        <div class="col text-center">
+                                                            <fieldset class="form-group">
+                                                                <input type="text" id="discount_on_range_up"
+                                                                       class="form-control decimal validated"
+                                                                       data-rule-required="true"
+                                                                       data-msg-required="This field is required"
+                                                                       value="{{$datum->range_up}}"
+                                                                       disabled
+                                                                       data-rule-min="0.1"
+                                                                       data-msg-min="Minimum chargeable weight can not be less than 0.1"
+                                                                       name="discount_on_wa_range_up[][0]">
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <fieldset class="form-group">
+                                                                <input type="text" id="discount_on_range_down_0"
+                                                                       class="form-control decimal validated"
+                                                                       data-rule-required="true"
+                                                                       data-msg-required="This field is required"
+                                                                       disabled
+                                                                       value="{{$datum->range_down}}"
+                                                                       name="discount_on_wa_range_down[][0]">
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <div class="form-group " style="padding-top: 8px;">
+                                                                <input type="checkbox" id="discount_OvernightSwitch_0"
+                                                                       class="switchery discountweightAdditionOvernight validated"
+                                                                       disabled
+                                                                       data-color="success" data-size="sm"
+                                                                       name="discount_on_wa_switch[][0]" {{$datum->weight_addition ? 'checked' : ''}}>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-2 text-center">
+                                                            <fieldset style="padding-top: 5px;">
+                                                                <div class="input-group input-group-sm form-group">
+                                                                    <input type="text" class="touchspin-color input-sm spkg"
+                                                                           id="discount_on_wa_spkg_0"
+                                                                           data-bts-button-down-class="btn btn-success validated"
+                                                                           data-bts-button-up-class="btn btn-success"
+                                                                           disabled
+                                                                           name="discount_on_wa_spkg[][0]"
+                                                                           data-rule-required="true"
+                                                                           data-msg-required="This field is required"
+                                                                           value="{{$datum->spkg}}"
+                                                                           disabled>
+                                                                </div>
+                                                            </fieldset>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <fieldset class="form-group">
+                                                                <input type="text" class="form-control decimal validated"
+                                                                       data-rule-required="true"
+                                                                       data-msg-required="This field is required"
+                                                                       disabled
+                                                                       value="{{$datum->local_or_6hr}}"
+                                                                       name="discount_on_wa_local_charges[][0]">
+                                                            </fieldset>
+                                                        </div>
+                                                    </div>
+                                                    @endforeach
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -1031,13 +1146,13 @@
                                                                 <input type="checkbox" name="ol_dws" id="ol_dws" class="switchery ol_dws" {{ (($ol_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true" disabled>
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <select name="ol_dws_weight" id="ol_dws_weight" class="form-control" disabled>
                                                                     @if ($ol_dws_charges != null)
-                                                                   
+
                                                                         @if ($ol_dws_charges == 1)
                                                                         <option value="1" selected>High</option>
                                                                         <option value="2">Low</option>
@@ -1055,9 +1170,9 @@
                                                                 </select>
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                 </div>
-                                                
+
                                             </div>
                                         </div>
                                         <hr>
@@ -1310,7 +1425,7 @@
 
                                         <div class="row fuel-surcharge-div-overland">
                                             <input type="hidden" name="ol_fuel_record" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->id != '')? $fuelCharges[2][0]->id : ''}}">
-                                            
+
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
@@ -1537,6 +1652,122 @@
                                             </div>
                                         </div>
 
+
+
+                                        <hr>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sd_discount_destination_wise_weight_switch"
+                                                           class="switchery" disabled id="sd_discount_destination_wise_weight_switch" data-color="success"
+                                                           data-size="sm" @if(isset($discount_weight_rates[2]) && count($discount_weight_rates[2]) > 0) checked  @endif/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if(isset($discount_weight_rates[2]) && count($discount_weight_rates[2]) > 0)
+                                            @foreach($discount_weight_rates[2] as $destination_id => $data)
+                                                <div class="row mt-2">
+                                                    <div class="col-2">
+                                                        <h3>Select Destination City</h3>
+                                                    </div>
+                                                    <div class="col-7">
+                                                        <div class="form-group card border-success p-2">
+                                                            <select name="discount_on_destination[]" id="discount_on_destination" class="form-control select2 validated" disabled>
+                                                                <option value="" selected>
+                                                                    {{$data[0]->destination->name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="discount_on_weight_container_div">
+                                                    <div class="row">
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Up</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Down</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Weight Addition</label>
+                                                        </div>
+                                                        <div class="col-2 text-center">
+                                                            <label class="card-title">KG Range</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Charges</label>
+                                                        </div>
+                                                    </div>
+                                                    @foreach($data->sortBy('id') as $datum)
+                                                        <div class="row" id="discount_on_weight_row">
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" id="discount_on_range_up"
+                                                                           class="form-control decimal validated"
+                                                                           data-rule-required="true"
+                                                                           data-msg-required="This field is required"
+                                                                           value="{{$datum->range_up}}"
+                                                                           disabled
+                                                                           data-rule-min="0.1"
+                                                                           data-msg-min="Minimum chargeable weight can not be less than 0.1"
+                                                                           name="discount_on_wa_range_up[][0]">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" id="discount_on_range_down_0"
+                                                                           class="form-control decimal validated"
+                                                                           data-rule-required="true"
+                                                                           data-msg-required="This field is required"
+                                                                           disabled
+                                                                           value="{{$datum->range_down}}"
+                                                                           name="discount_on_wa_range_down[][0]">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" id="discount_OvernightSwitch_0"
+                                                                           class="switchery discountweightAdditionOvernight validated"
+                                                                           disabled
+                                                                           data-color="success" data-size="sm"
+                                                                           name="discount_on_wa_switch[][0]" {{$datum->weight_addition ? 'checked' : ''}}>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center">
+                                                                <fieldset style="padding-top: 5px;">
+                                                                    <div class="input-group input-group-sm form-group">
+                                                                        <input type="text" class="touchspin-color input-sm spkg"
+                                                                               id="discount_on_wa_spkg_0"
+                                                                               data-bts-button-down-class="btn btn-success validated"
+                                                                               data-bts-button-up-class="btn btn-success"
+                                                                               disabled
+                                                                               name="discount_on_wa_spkg[][0]"
+                                                                               data-rule-required="true"
+                                                                               data-msg-required="This field is required"
+                                                                               value="{{$datum->spkg}}"
+                                                                               disabled>
+                                                                    </div>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control decimal validated"
+                                                                           data-rule-required="true"
+                                                                           data-msg-required="This field is required"
+                                                                           disabled
+                                                                           value="{{$datum->local_or_6hr}}"
+                                                                           name="discount_on_wa_local_charges[][0]">
+                                                                </fieldset>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -1783,13 +2014,13 @@
                                                                 <input type="checkbox" name="detain_dws" id="detain_dws" class="switchery detain_dws"  {{ (($detain_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true" disabled>
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <select name="detain_dws_weight" id="detain_dws_weight" class="form-control" disabled>
                                                                     @if ($detain_dws_charges != null)
-                                                                    
+
                                                                         @if ($detain_dws_charges == 1)
                                                                         <option value="1" selected>High</option>
                                                                         <option value="2">Low</option>
@@ -1807,9 +2038,9 @@
                                                                 </select>
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                 </div>
-                                                
+
                                             </div>
                                         </div>
                                         <hr>
@@ -2293,6 +2524,120 @@
                                             </div>
                                         </div>
 
+                                        <hr>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sd_discount_destination_wise_weight_switch"
+                                                           class="switchery" disabled id="sd_discount_destination_wise_weight_switch" data-color="success"
+                                                           data-size="sm" @if(isset($discount_weight_rates[3]) && count($discount_weight_rates[3]) > 0) checked  @endif/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if(isset($discount_weight_rates[3]) && count($discount_weight_rates[3]) > 0)
+                                            @foreach($discount_weight_rates[3] as $destination_id => $data)
+                                                <div class="row mt-2">
+                                                    <div class="col-2">
+                                                        <h3>Select Destination City</h3>
+                                                    </div>
+                                                    <div class="col-7">
+                                                        <div class="form-group card border-success p-2">
+                                                            <select name="discount_on_destination[]" id="discount_on_destination" class="form-control select2 validated" disabled>
+                                                                <option value="" selected>
+                                                                    {{$data[0]->destination->name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="discount_on_weight_container_div">
+                                                    <div class="row">
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Up</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Down</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Weight Addition</label>
+                                                        </div>
+                                                        <div class="col-2 text-center">
+                                                            <label class="card-title">KG Range</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Charges</label>
+                                                        </div>
+                                                    </div>
+                                                    @foreach($data->sortBy('id') as $datum)
+                                                        <div class="row" id="discount_on_weight_row">
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" id="discount_on_range_up"
+                                                                           class="form-control decimal validated"
+                                                                           data-rule-required="true"
+                                                                           data-msg-required="This field is required"
+                                                                           value="{{$datum->range_up}}"
+                                                                           disabled
+                                                                           data-rule-min="0.1"
+                                                                           data-msg-min="Minimum chargeable weight can not be less than 0.1"
+                                                                           name="discount_on_wa_range_up[][0]">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" id="discount_on_range_down_0"
+                                                                           class="form-control decimal validated"
+                                                                           data-rule-required="true"
+                                                                           data-msg-required="This field is required"
+                                                                           disabled
+                                                                           value="{{$datum->range_down}}"
+                                                                           name="discount_on_wa_range_down[][0]">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" id="discount_OvernightSwitch_0"
+                                                                           class="switchery discountweightAdditionOvernight validated"
+                                                                           disabled
+                                                                           data-color="success" data-size="sm"
+                                                                           name="discount_on_wa_switch[][0]" {{$datum->weight_addition ? 'checked' : ''}}>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center">
+                                                                <fieldset style="padding-top: 5px;">
+                                                                    <div class="input-group input-group-sm form-group">
+                                                                        <input type="text" class="touchspin-color input-sm spkg"
+                                                                               id="discount_on_wa_spkg_0"
+                                                                               data-bts-button-down-class="btn btn-success validated"
+                                                                               data-bts-button-up-class="btn btn-success"
+                                                                               disabled
+                                                                               name="discount_on_wa_spkg[][0]"
+                                                                               data-rule-required="true"
+                                                                               data-msg-required="This field is required"
+                                                                               value="{{$datum->spkg}}"
+                                                                               disabled>
+                                                                    </div>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control decimal validated"
+                                                                           data-rule-required="true"
+                                                                           data-msg-required="This field is required"
+                                                                           disabled
+                                                                           value="{{$datum->local_or_6hr}}"
+                                                                           name="discount_on_wa_local_charges[][0]">
+                                                                </fieldset>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -2507,13 +2852,13 @@
                                                                 <input type="checkbox" name="sameday_dws" id="sameday_dws" class="switchery sameday_dws" {{ (($sameday_dws_charges != null) ? 'checked' : '') }} data-size="xs" data-switchery="true" disabled>
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                     <div class="col-4">
                                                         <fieldset>
                                                             <div class="input-group form-group">
                                                                 <select name="sameday_dws_weight" id="sameday_dws_weight" class="form-control" disabled>
                                                                     @if ($sameday_dws_charges != null)
-                                                                    
+
                                                                         @if ($sameday_dws_charges == 1)
                                                                         <option value="1" selected>High</option>
                                                                         <option value="2">Low</option>
@@ -2531,7 +2876,7 @@
                                                                 </select>
                                                             </div>
                                                         </fieldset>
-                                                    </div> 
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -3001,6 +3346,121 @@
                                             </div>
                                         </div>
 
+
+                                        <hr>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <h3 class="card-title">Discount Weight Charges (Destination Wise)</h3>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group ">
+                                                    <input type="checkbox" name="sd_discount_destination_wise_weight_switch"
+                                                           class="switchery" disabled id="sd_discount_destination_wise_weight_switch" data-color="success"
+                                                           data-size="sm" @if(isset($discount_weight_rates[4]) && count($discount_weight_rates[4]) > 0) checked  @endif/>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if(isset($discount_weight_rates[4]) && count($discount_weight_rates[4]) > 0)
+                                            @foreach($discount_weight_rates[4] as $destination_id => $data)
+                                                <div class="row mt-2">
+                                                    <div class="col-2">
+                                                        <h3>Select Destination City</h3>
+                                                    </div>
+                                                    <div class="col-7">
+                                                        <div class="form-group card border-success p-2">
+                                                            <select name="discount_on_destination[]" id="discount_on_destination" class="form-control select2 validated" disabled>
+                                                                <option value="" selected>
+                                                                    {{$data[0]->destination->name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="discount_on_weight_container_div">
+                                                    <div class="row">
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Up</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Range Down</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Weight Addition</label>
+                                                        </div>
+                                                        <div class="col-2 text-center">
+                                                            <label class="card-title">KG Range</label>
+                                                        </div>
+                                                        <div class="col text-center">
+                                                            <label class="card-title">Charges</label>
+                                                        </div>
+                                                    </div>
+                                                    @foreach($data->sortBy('id') as $datum)
+                                                        <div class="row" id="discount_on_weight_row">
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" id="discount_on_range_up"
+                                                                           class="form-control decimal validated"
+                                                                           data-rule-required="true"
+                                                                           data-msg-required="This field is required"
+                                                                           value="{{$datum->range_up}}"
+                                                                           disabled
+                                                                           data-rule-min="0.1"
+                                                                           data-msg-min="Minimum chargeable weight can not be less than 0.1"
+                                                                           name="discount_on_wa_range_up[][0]">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" id="discount_on_range_down_0"
+                                                                           class="form-control decimal validated"
+                                                                           data-rule-required="true"
+                                                                           data-msg-required="This field is required"
+                                                                           disabled
+                                                                           value="{{$datum->range_down}}"
+                                                                           name="discount_on_wa_range_down[][0]">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" id="discount_OvernightSwitch_0"
+                                                                           class="switchery discountweightAdditionOvernight validated"
+                                                                           disabled
+                                                                           data-color="success" data-size="sm"
+                                                                           name="discount_on_wa_switch[][0]" {{$datum->weight_addition ? 'checked' : ''}}>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 text-center">
+                                                                <fieldset style="padding-top: 5px;">
+                                                                    <div class="input-group input-group-sm form-group">
+                                                                        <input type="text" class="touchspin-color input-sm spkg"
+                                                                               id="discount_on_wa_spkg_0"
+                                                                               data-bts-button-down-class="btn btn-success validated"
+                                                                               data-bts-button-up-class="btn btn-success"
+                                                                               disabled
+                                                                               name="discount_on_wa_spkg[][0]"
+                                                                               data-rule-required="true"
+                                                                               data-msg-required="This field is required"
+                                                                               value="{{$datum->spkg}}"
+                                                                               disabled>
+                                                                    </div>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control decimal validated"
+                                                                           data-rule-required="true"
+                                                                           data-msg-required="This field is required"
+                                                                           disabled
+                                                                           value="{{$datum->local_or_6hr}}"
+                                                                           name="discount_on_wa_local_charges[][0]">
+                                                                </fieldset>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -3010,7 +3470,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead primary">Warehousing</h3>
-                                        
+
                                     </div>
                                     <div class="col-md-6">
                                         <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" {{ ($wms_user_info->warehousing)? 'checked':'' }} disabled/></a>
@@ -3018,7 +3478,7 @@
                                 </div>
 
                             </div>
-                            
+
                             <div id="warehousing" class="border-primary no-border-top card {{ ($wms_user_info->warehousing)? '':'hide' }}">
                                 <div class="card-content">
                                     <div class="card-body pb-0">
@@ -3031,7 +3491,7 @@
                                                         @else
                                                             <option value="{{ $cycle->id }}">{{ $cycle->name }}</option>
                                                         @endif
-                                                        
+
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -3049,7 +3509,7 @@
 
                                         <div class="card border-primary p-2">
                                             <div class="row">
-                        
+
                                                 <div class="col-12">
                                                     <div class="row">
                                                         <div class="col-4 text-center">
@@ -3097,7 +3557,7 @@
                                                             @if($wms_user_info->storage_charges)
                                                             @foreach($wms_storage_charges as $key => $storage)
                                                             <div class="row">
-                                                                
+
                                                                 <div class="col-md-2">
                                                                     <fieldset class="form-group">
                                                                         <select class="select2 form-control storage_type" name="storage_type[{{$key}}]" data-rule-required="true" data-msg-required="This field is required" disabled>
@@ -3117,15 +3577,15 @@
                                                             @endforeach
                                                             @endif
                                                         </div>
-                                                        
+
                                                     </div>
 
                                                 </div>
-                                               
+
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div class="card-body">
                                                 <div>
                                                     <h3 class="card-title">Fulfillment Charges</h3>
@@ -3133,9 +3593,9 @@
 
                                             <div class="card border-primary p-2">
                                             <div class="row">
-                                                
+
                                                 <div class="col-12">
-                                                    
+
 
                                                     <div class="row">
                                                         <div class="col-3">
@@ -3193,7 +3653,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                        
+
                                                     <div class="row">
                                                         <div class="col-md-2">
                                                             <fieldset class="form-group">
@@ -3205,17 +3665,17 @@
                                                             </fieldset>
                                                         </div>
                                                     </div>
-                                                            
-                                                        
+
+
                                                     </div>
 
 
                                                 </div>
-                                               
+
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                     </div>
 
                             @else
@@ -3223,7 +3683,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead primary">Warehousing</h3>
-                                        
+
                                     </div>
                                     <div class="col-md-6">
                                         <a id="warehouse_main_switch" href="javascript:void(0);" class="pull-right"><input name="warehouse_main_switch" type="checkbox" class="switchery warehouse-main-switch" data-size="sm" data-color="info" disabled/></a>
@@ -3295,8 +3755,8 @@
                                             </table>
                                             </div>
                                         </div>
-                                    </div>  
-                                    
+                                    </div>
+
                                 </div>
                             @endif
                         </form>
@@ -3338,7 +3798,7 @@
         var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
         var invoicing_cycle = '{{$wms_user_info->invoicing_cycle}}';
         invoicing_cycle = parseInt(invoicing_cycle);
-        
+
         $('#invoicing_cycle_select').select2({
             placeholder: "Select Invoicing Cycle",
             width:'100%'
