@@ -57,7 +57,7 @@ class AutoComplaintHighAging extends Command
                 $end_date = $delivery_status->created_at;
                 $difference = $start_date->diffInDays($end_date);
     
-                if($difference > 14){
+                if($difference == 15){
                     //launch request
                     $nature_id = 1;
                     $complaint_id = 34;
