@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-{{--@section('title', 'Re-Attempt Percentage')--}}
+@section('title', 'CN Print Rights')
 
 @section('content')
     <div class="app-content content">
