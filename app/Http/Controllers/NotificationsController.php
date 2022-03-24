@@ -8459,6 +8459,7 @@ class NotificationsController extends Controller
 
                     $html .= '<table style="width:100%;">';
                     $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>';
+                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Trax ID</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">CNIC Number</th>';
@@ -8477,6 +8478,7 @@ class NotificationsController extends Controller
 
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->trax_id . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->phone . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cnic . '</td>';
@@ -8486,8 +8488,8 @@ class NotificationsController extends Controller
                     $html .= '</tr></tbody></table>';
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
-                    $subject = ' Rider deactivation';
-                    $to = ['Hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
+                    $subject = ' Rider Deactivation';
+                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
