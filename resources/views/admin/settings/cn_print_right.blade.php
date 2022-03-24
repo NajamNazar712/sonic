@@ -43,6 +43,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
@@ -52,8 +53,38 @@
             type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script>
+
         $(document).ready(function () {
+
+            //form submission
+            $("#track_form").submit(function(e) {
+                e.preventDefault(); // prevent actual form submit
+                var form = $(this);
+                var url = form.attr('action'); //get submit url [replace url here if desired]
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: form.serialize(), // serializes form input
+                }).done(function (data) {
+                    // console.log(data);
+                        if(data.status == 2)
+                        {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+            });
+            //form submission end
             var select = $('#track_form #role_ids').selectize({
                 placeholder: 'Enter Role ID(s)*',
                 delimiter: ',',

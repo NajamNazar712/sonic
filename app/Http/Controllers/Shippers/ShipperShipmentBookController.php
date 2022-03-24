@@ -2217,7 +2217,7 @@ class ShipperShipmentBookController extends Controller
 
     public function print_air_waybill(Request $request)
     {
-        $ids = GlobalSettings::where('type','cn_prints_rights')->first();
+        $ids = GlobalSettings::where('type','cn_print_rights')->first();
 
         if($ids->text != null)
         {

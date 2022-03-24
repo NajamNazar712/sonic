@@ -6209,10 +6209,21 @@ public function sales_incentive()
     {
         $role_ids = GlobalSettings::find(75);
         $exist = $role_ids->text;
-        $newids = $exist.','.$request->get('role_ids');
+        if($exist == null)
+        {
+            $default = 0;
+            $role_ids->text = $default.$exist.','.$request->get('role_ids');
+            $role_ids->save();
+            return response()->json(['status' => '2', 'success' => 'Saved']);
+        }
+        else
+        {
+            $newids = $exist.','.$request->get('role_ids');
 
-        $role_ids->text = $newids;
-        $role_ids->save();
+            $role_ids->text = $newids;
+            $role_ids->save();
+            return response()->json(['status' => '2', 'success' => 'Saved']);
+        }
 
     }
 
