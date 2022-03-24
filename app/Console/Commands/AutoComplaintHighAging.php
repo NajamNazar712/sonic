@@ -44,11 +44,11 @@ class AutoComplaintHighAging extends Command
     public function handle()
     {
         $shipments = Shipment::whereNotIn('shipper_status_id',[36,37,38,14,25,31,51,18])->get();
-
+        $date = new Carbon('2022-03-31');
         foreach ($shipments as $shipment) {
 
             
-            $arrival_status = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',2)->whereDate('created_at', '>=', Carbon::today()->subDays(15));// yada date hardcode hogi 
+            $arrival_status = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',2)->whereDate('created_at', '>=', $date->subDays(15));  // date when sprint_90 get live 
             $delivery_status = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',$shipment->shipper_status_id);
             if($arrival_status->exists() && $delivery_status->exists()){
                 $delivery_status = $delivery_status->latest()->first();
