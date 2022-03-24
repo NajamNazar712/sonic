@@ -4491,13 +4491,11 @@ class APIController extends Controller
     }
 
     public function rcp_sms_from_consignee(Request $request) {
-        if (TRUE || $request->ip() == "202.141.247.133") {
-            $message = $request->message;
-
+        if ($request->ip() == "202.141.247.130" || $request->ip() == "202.141.247.133") {
             if ($request->has('message') && !empty($request->message)) {
                 $message = $request->message;
 
-                $data = explode(" ", $message);
+                $data = explode(" ", urldecode($message));
 
                 if (count($data) == 3) {
                     $response_yes = array("YES",'YE','Y');
