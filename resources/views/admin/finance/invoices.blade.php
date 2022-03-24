@@ -506,15 +506,19 @@
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var company_bank_select = '<select name="company_bank_select" id="company_bank_select" class="select2 form-control"></select>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+					var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+					var account_type_select = '<select name="account_type_select" id="account_type_select" class="select2 form-control">'+
+							'<option value="1">Reimbursement Account</option>' +
+							'<option value="2">Corporate Account</option>' +
+							'</select>';
 					var invoice_type_select = '<select name="invoice_type_select" id="invoice_type_select" class="select2 form-control">' +
 							'<option value="1">Courier Invoice</option>' +
 							'<option value="2">Packaging Invoice</option>' +
 							'</select>';
-				/*	var account = '<select name="account" id="account" class="select2 form-control">' +
-							'<option value="1">Corporate Account</option>' +
-							'<option value="2">Reimbursement Account</option>' +
-							'</select>';*/
+					/*	var account = '<select name="account" id="account" class="select2 form-control">' +
+                                '<option value="1">Corporate Account</option>' +
+                                '<option value="2">Reimbursement Account</option>' +
+                                '</select>';*/
 
 
 					this.api().columns().every(function(column_id) {
@@ -523,6 +527,13 @@
 
 						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip') || $(header).is('.deposit_slip')) {
 							$(td).appendTo($(search));
+						}
+						else if($(header).is('.account'))
+						{
+							$(account_type_select).appendTo($(search))
+									.on('change', function() {
+										column.search($(this).val(), false, false, true).draw();
+									}).wrap(td);
 						}
 						else if ($(header).is('.company_bank')) {
                             $(company_bank_select).appendTo($(search))
@@ -574,6 +585,13 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+					$('#account_type_select').prepend('<option value="" selected></option>').select2({
+						placeholder: 'Select Account Type',
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
 
 					/*$('#account').prepend('<option value="" selected></option>').select2({
 						data: account,

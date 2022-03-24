@@ -110,7 +110,7 @@
                                                     <span class="danger">*</span>
                                                 </label>
                                                 <div>
-                                                    <input type="email" class="form-control required"  name="line_manager" placeholder="Line Manager Email" data-rule-required="true" data-msg-required="Email is required" value="{{$fnf->reporting_manager->email}}">
+                                                    <input type="email" class="form-control required"  name="line_manager" placeholder="Line Manager Email" data-rule-required="true" data-msg-required="Email is required" value="{{$fnf->reporting_manager->official_email}}">
                                                 </div>
                                             </div>
                                         </div>
@@ -120,12 +120,11 @@
                                                     <span class="danger">*</span>
                                                 </label>
                                                 <div>
-                                                    <input type="text" class="form-control required"  name="hod" placeholder="HOD Email" data-rule-required="true" data-msg-required="Email is required" value="{{$fnf->department_head->email}}">
+                                                    <input type="text" class="form-control required"  name="hod" placeholder="HOD Email" data-rule-required="true" data-msg-required="Email is required" value="{{$fnf->department_head->official_email}}">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    @if($fnf->manager)
                                         <hr>
                                         <h3 class="text-center"><strong>Reporting Manager</strong></h3>
                                         <div class="row mb-1">
@@ -226,9 +225,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @endif
 
-                                    @if($fnf->customer_experience)
                                         <hr>
                                         <h3 class="text-center mt-2 mb-2"><strong>Customer Experience</strong></h3>
                                         <h6 class="text-center mt-2 mb-2"><strong>Deductions</strong></h6>
@@ -284,9 +281,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @endif
 
-                                    @if($fnf->administration)
                                         <hr>
                                         <h3 class="text-center mt-2 mb-2"><strong>Administration</strong></h3>
                                         <h6 class="text-center mt-2 mb-2"><strong>Deductions</strong></h6>
@@ -338,9 +333,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @endif
 
-                                    @if($fnf->it_support)
                                         <hr>
                                         <h3 class="text-center mt-2 mb-2"><strong>IT Support</strong></h3>
                                         <div class="row justify-content-center">
@@ -362,9 +355,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @endif
 
-                                    @if($fnf->finance)
                                         <hr>
                                         <h3 class="text-center mt-2 mb-2"><strong>Finance</strong></h3>
                                         <h6 class="text-center mt-2 mb-2"><strong>Deductions</strong></h6>
@@ -440,9 +431,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @endif
 
-                                    @if($fnf->hod_approval)
+                                    
                                     <hr>
                                     <h3 class="text-center mt-2 mb-2"><strong>HOD </strong></h3>
                                     <div class="row justify-content-center">
@@ -452,7 +442,7 @@
 
                                                 </label>
                                                 <div>
-                                                    <textarea cols="50"  class="form-control"  rows="5" id="hod_comments" name="hod_comments" placeholder="Enter Comments">{{$fnf->hod_approval->comments ?? ''}}</textarea>
+                                                    <textarea cols="50"  class="form-control" disabled rows="5" id="hod_comments" name="hod_comments" placeholder="Enter Comments">{{$fnf->hod_approval->comments ?? ''}}</textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -468,7 +458,7 @@
                                         </div>
                                     </div>
 
-                                    @endif
+                                    
                                     <hr>
                                     <h3 class="text-center mt-2 mb-2"><strong>HR Details</strong></h3>
                                     <div class="row mb-1">

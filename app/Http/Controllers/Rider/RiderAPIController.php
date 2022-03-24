@@ -3647,12 +3647,12 @@ class RiderAPIController extends Controller
                             if ($updated_shipments_count == 0) {
                                 DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
                             }
-                           
+
                             $arr['shipment_id'] = $request->shipment_id;
                             $arr['delivery_note_id'] = $request->delivery_note_id;
                             dispatch(new ProcessAgentCallMonitoring($arr));
-                            
-                            
+
+
                             $message = 'Shipment is marked as Undelivered Successfully';
                         } else {
                             $message = 'Shipment is already marked as Undelivered';
@@ -8812,7 +8812,6 @@ class RiderAPIController extends Controller
             $rider_id = $request->rider_id;
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-
             if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
                 if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
                     {
@@ -8914,7 +8913,7 @@ class RiderAPIController extends Controller
 
                         if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
 
-                            
+
                             if ($request->distribution == 1) {
                                 if ($request->has('distribution_items_list')) {
                                     $distribution_items = json_decode($request->distribution_items_list, true);
@@ -10987,6 +10986,17 @@ class RiderAPIController extends Controller
             } else {
                 return response()->json(['status' => 1, 'message' => 'User not found!']);
             }
+        }
+    }
+
+    public function check_bolt_version(Request $request)
+    {
+        $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
+        if($global_settings->exists()){
+            $global_settings = $global_settings->first();
+            return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value]);
+        }else{
+            return response()->json(['status' => 0, 'app_version' => 24]);
         }
     }
 
