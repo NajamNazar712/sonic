@@ -4876,16 +4876,15 @@ class GlobalSettingsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),469);
         $agents = Admin::select('id', 'name')->whereIn('role_id',[37,28])->get();//37,28 role
         $zones = Zone::where('status',1)->where('business_category_id',1)->get();
-        $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
+        // $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
 
-        return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents , 'zones' => $zones, 'case_natures' => $case_natures]);
+        return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents , 'zones' => $zones]);
     }
 
     public function crm_auto_assigning_list(){
         $roles = CrmAgent::join('admins as ad', 'ad.id', '=', 'crm_agents.admin_id')
                  ->join('zones as z','z.id','crm_agents.zone_id')   
-                 ->join('crm_request_case_nature as cn','cn.id','crm_agents.case_nature_id')   
-        ->select('crm_agents.id', 'ad.name as agent_name', 'z.name as zone_name', 'cn.name as case_nature','crm_agents.status as status');
+        ->select('crm_agents.id', 'ad.name as agent_name', 'z.name as zone_name','crm_agents.status as status','crm_agents.case_nature_id as case_nature');
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
@@ -4949,13 +4948,20 @@ class GlobalSettingsController extends Controller
                 return 'Disable';
             }
             
+        })->editColumn('case_nature', function($roles) {
+            if($roles->case_nature == 4){
+                return 'Claim';
+            }else{
+                return 'Complaints / Service Request';
+            }
+            
         });
 
     return $datatables->make(true);
     }
 
     public function crm_auto_assigning_submit(Request $request){
-        $crm_agent = CrmAgent::where('admin_id',$request->admin_id)->where('case_nature_id',$request->case_nature_id);
+        $crm_agent = CrmAgent::where('admin_id',$request->admin_id);
         if(!$crm_agent->exists()){
 
             CrmAgent::create($request->all());
@@ -4964,8 +4970,6 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'Agent Already Exists!');
 
         }
-
-
     }
 
     public function crm_auto_assigning_data(Request $request){
@@ -4973,9 +4977,9 @@ class GlobalSettingsController extends Controller
 
         $agent_id = $crm_agent_data->admin_id;
         $zone_id = $crm_agent_data->zone_id;
-        $case_nature_id = $crm_agent_data->case_nature_id;
+        // $case_nature_id = $crm_agent_data->case_nature_id;
         $crm_agent_id = $crm_agent_data->id;
-        return response()->json(['status' => 1, 'agent_id' => $agent_id,'zone_id' => $zone_id ,'case_nature_id'=> $case_nature_id,'crm_agent_id'=> $crm_agent_id]);
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'zone_id' => $zone_id ,'crm_agent_id'=> $crm_agent_id]);
 
     }
 
@@ -4991,7 +4995,7 @@ class GlobalSettingsController extends Controller
 
         $crm_agent_data->admin_id = $request->admin_id;
         $crm_agent_data->zone_id = $request->zone_id;
-        $crm_agent_data->case_nature_id = $request->case_nature_id;
+        // $crm_agent_data->case_nature_id = $request->case_nature_id;
         $crm_agent_data->save();
         return redirect()->back()->with('success', 'Agent Updated!');
 
