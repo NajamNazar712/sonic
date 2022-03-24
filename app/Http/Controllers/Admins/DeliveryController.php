@@ -1880,7 +1880,7 @@ class DeliveryController extends Controller
                 $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
             } else {
                 if ($status_id == 12) {
-                    $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereIn('id', [7, 8, 12, 19, 27, 34, 35, 40])->orderBy('name')->get();
+                    $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
                 } else {
                     $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4, 6])->orderBy('name')->get();
                 }
@@ -2105,9 +2105,9 @@ class DeliveryController extends Controller
                                 $return_assign_log->assigned_by = Auth::id();
                                 $return_assign_log->save();
                             }
-                           /* if(in_array(session('role_id'),[18,19]) && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
+                            if(in_array(session('role_id'),[18,19]) && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
                                 dispatch(new RCPSmsToConsignee($shipment));
-                            }*/
+                            }
 
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
@@ -2907,7 +2907,10 @@ class DeliveryController extends Controller
 
     // Check
     public function receive_delivery_verify_status_submit(Request $request)
-    {
+    {  
+        $now = Carbon::now();
+        $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
+        $rcp_sms_setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
         $delivery_note_id = $request->delivery_note_id;
         $delivery_note = DeliveryNote::find($delivery_note_id);
         $zero_cod_shipments = array();
@@ -3089,7 +3092,10 @@ class DeliveryController extends Controller
 
                                                 if (!$parcel->packaging_material_request) {
                                                     if ($parcel->shipper_status_id != 12) {
-                                                        ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+                                                         if(in_array(session('role_id'),[18,19]) && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
+                                                              dispatch(new RCPSmsToConsignee($shipment));
+                                                          }
+                            ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                     }
                                                     Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                                                     if ($verification == 1) {
@@ -3202,9 +3208,11 @@ class DeliveryController extends Controller
                                                         Shipment::where('id', $shipment)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                                                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                                     }
-
                                                 }
-
+                                               
+                                                if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
+                                                    dispatch(new RCPSmsToConsignee($shipment));
+                                                }
                                             }
                                             $dispute_shipments[] = $shipment;
                                         } else if (($shipper_status_details->shipper_status_id == $shipper_status_id) && ($journey->status_reason_id != ($request->has($reasonId) ? $status_reason_id : null))) {

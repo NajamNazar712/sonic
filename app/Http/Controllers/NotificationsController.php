@@ -160,12 +160,12 @@ class NotificationsController extends Controller
 
     static private function bot_sms($body, $to) {
         $sms = new SMS();
-  
+
         $sms->to = str_replace('-', '', $to);
         $sms->body = $body;
-  
+
         $sms->save();
-  
+
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
@@ -8459,6 +8459,7 @@ class NotificationsController extends Controller
 
                     $html .= '<table style="width:100%;">';
                     $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>';
+                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Trax ID</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">CNIC Number</th>';
@@ -8477,6 +8478,7 @@ class NotificationsController extends Controller
 
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->trax_id . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->phone . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cnic . '</td>';
@@ -8486,8 +8488,8 @@ class NotificationsController extends Controller
                     $html .= '</tr></tbody></table>';
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
-                    $subject = ' Rider deactivation';
-                    $to = ['Hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
+                    $subject = ' Rider Deactivation';
+                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
@@ -9056,7 +9058,7 @@ class NotificationsController extends Controller
                     $to = $shipment->consignee_phone_number_1;
                     $data = array($body, $to);
                     return $data;
-                  
+
                 }else if($id == 131) {
                     $request_no = $reference_1_id;
                     $admin_id = $reference_2_id;
@@ -9104,6 +9106,17 @@ class NotificationsController extends Controller
                             self::email($subject, $body_updated, $to);
                         }
                     }
+                }
+                else if ($id == 171) {
+                    $name = $reference_1_id;
+                    $phone_number = $reference_2_id;
+
+                    if (strpos($body, '[name]') !== FALSE) {
+                        $body = str_replace('[name]', $name, $body);
+                    }
+
+                    $to = $phone_number;
+                    self::sms($body, $to);
                 }
             }
         }

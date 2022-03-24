@@ -112,7 +112,9 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RCPSMSToConsigneeReattempt',
         'App\Console\Commands\CRMCount',
         '\App\Console\Commands\ReattemptRatioCalculate',
-        'App\Console\Commands\ShortOfBusinessShippers',    ];
+        'App\Console\Commands\ShortOfBusinessShippers',
+        'App\Console\Commands\BirthdayMessage',
+        ];
 
     /**
      * Define the application's command schedule.
@@ -324,6 +326,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(2, '01:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
+        $schedule->command('auto:birthdaymessage')->dailyAt('00:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
         if ($settings->exists()) {
@@ -381,7 +384,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('crm:count')->dailyAt('17:30')->runInBackground();
         $schedule->command('shipper:short_of_business')->dailyAt('8:00')->runInBackground();
         $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
-        //$schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt('00:01')->runInBackground();
+        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt('00:01')->runInBackground();
 
     }
     /**
