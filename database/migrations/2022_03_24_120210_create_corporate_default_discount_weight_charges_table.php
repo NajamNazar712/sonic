@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateHistoryCorporateDiscountWeightChargesTable extends Migration
+class CreateCorporateDefaultDiscountWeightChargesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateHistoryCorporateDiscountWeightChargesTable extends Migration
      */
     public function up()
     {
-        Schema::create('history_corporate_discount_weight_charges', function (Blueprint $table) {
+        Schema::create('corporate_default_discount_weight_charges', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->index();
-            $table->integer('shipping_mode_id')->index();
-            $table->integer('destination_id')->index();
+            $table->integer('shipping_mode_id')->index('smi');
+            $table->integer('destination_id')->index('di');
             $table->decimal('range_up', 8, 2);
             $table->decimal('range_down', 8, 2);
             $table->boolean('weight_addition')->default(0);
@@ -34,6 +34,6 @@ class CreateHistoryCorporateDiscountWeightChargesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('history_corporate_discount_weight_charges');
+        Schema::dropIfExists('corporate_default_discount_weight_charges');
     }
 }
