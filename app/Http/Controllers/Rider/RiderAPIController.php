@@ -190,12 +190,13 @@ class RiderAPIController extends Controller
         }
     }
 
-    static public function rider_pickup_invalid_logs($rider_id, $pickup_request_id, $pickup_note_id, $shipment_id){
+    static public function rider_pickup_invalid_logs($rider_id, $pickup_request_id, $pickup_note_id, $shipment_id, $status_id){
         $rider_pickup_invalid_logs = new RiderPickupInvalidLog();
         $rider_pickup_invalid_logs->rider_id = $rider_id;
         $rider_pickup_invalid_logs->pickup_request_id = $pickup_request_id;
         $rider_pickup_invalid_logs->pickup_note_id = $pickup_note_id;
         $rider_pickup_invalid_logs->shipment_id = $shipment_id;
+        $rider_pickup_invalid_logs->shipment_status_id = $status_id;
         $rider_pickup_invalid_logs->save();
     }
 
@@ -11138,7 +11139,7 @@ class RiderAPIController extends Controller
                                     $shipment->save();
                                     ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
                                 }else{
-                                    self::rider_pickup_invalid_logs($rider_id,$request->pickup_request_id, $request->pickup_note_id,$rider_id);
+                                    self::rider_pickup_invalid_logs($rider_id,$request->pickup_request_id, $request->pickup_note_id,$shipment->id, 53);
                                 }
                             }
                         }

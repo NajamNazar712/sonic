@@ -19,6 +19,7 @@ class CreateRiderPickupInvalidLogsTable extends Migration
             $table->integer('pickup_note_id')->index();
             $table->integer('pickup_request_id')->index();
             $table->integer('shipment_id')->index();
+            $table->integer('shipment_status_id')->index();
             $table->timestamps();
         });
     }
