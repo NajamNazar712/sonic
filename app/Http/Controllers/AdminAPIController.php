@@ -4854,6 +4854,9 @@ class AdminAPIController extends Controller
                         $volume_weight = 0.01;
                     }
                     $dense_weight = $request->weight;
+                    if($dense_weight < 0.01){
+                        $dense_weight = 0.01;
+                    }
 
                     if ($shipment->business_category_id == 2) {
                         if ($dense_weight < $volume_weight) {
