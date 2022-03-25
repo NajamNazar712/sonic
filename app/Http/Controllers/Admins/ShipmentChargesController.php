@@ -17,7 +17,7 @@ use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateDefaultReturnCharge;
 use App\Http\Models\CorporateDefaultWeightCharge;
-use App\Http\Models\CorporateDiscountWeightCharge;
+use App\Http\Models\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\DiscountWeightCharge;
@@ -174,7 +174,7 @@ class ShipmentChargesController extends Controller
                     $weight_charge = CorporateWeightChargeZoneWise::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                 }
                 else{
-                    $weight_charge = CorporateDiscountWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight)->where('destination_id',$destination_city_id);
+                    $weight_charge = CorporateDefaultDiscountWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight)->where('destination_id',$destination_city_id);
                     if($weight_charge->doesntExist()) {
                         $weight_charge = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                     }
@@ -458,7 +458,7 @@ class ShipmentChargesController extends Controller
                             if(!$discount_weight_charge) {
                                 $weight_charge = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
                             }else{
-                                $weight_charge = CorporateDiscountWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('destination_id',$destination_city_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                                $weight_charge = CorporateDefaultDiscountWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('destination_id',$destination_city_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
                             }
                         }
                         else{

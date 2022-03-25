@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\BookingType;
 use App\Http\Models\CashHandlingCharge;
@@ -24,6 +25,7 @@ use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\CRFTermsConditions;
+use App\Http\Models\DiscountWeightCharge;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\InsuranceCharge;
@@ -949,7 +951,28 @@ otherwise it will be rejected</li>
                         }
                     }
 
+                    $discount_weight_charges_details = '';
+                    if($shipper->account_type_id == 1){
+                        $discount_weight_charges = DiscountWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get()->groupBy('destination_id');
+                    }else{
+                        if($corporate_rate_type == 3){
+                            $discount_weight_charges = CorporateDefaultDiscountWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get()->groupBy('destination_id');
+                        }
+                    }
+                    if($discount_weight_charges) {
+                        foreach ($discount_weight_charges as $destination_id => $data) {
+                            $discount_weight_charges_details .= '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Discount Weight Charges (' . $data[0]->destination->name . ')</strong></thead></table></div></div>';
 
+                                    $discount_weight_charges_details .= '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>Charges</th></tr></thead><tbody>';
+
+                                    foreach ($data as $datum) {
+                                        $discount_weight_charges_details .= '<tr><td>' . $datum->range_up . '</td><td>' . $datum->range_down . '</td><td>' . $datum->spkg . '</td><td>' . $datum->local_or_6hr . '</td></tr>';
+                                    }
+
+                                $discount_weight_charges_details .= '</tbody></table>';
+
+                        }
+                    }
 
                     $rate_details .= $service_type_details;
                     $rate_details .= $rate_origin_details;
@@ -959,6 +982,7 @@ otherwise it will be rejected</li>
                     $rate_details .= $insurance_charges_details;
                     $rate_details .= $fuel_surcharge_charges_details;
                     $rate_details .= $return_charges_details;
+                    $rate_details .= $discount_weight_charges_details;
                     $rate_details .= '<div class="new-page"></div>';
                 }
               /*  $html .= $packaging_details;*/

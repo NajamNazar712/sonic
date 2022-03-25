@@ -18,11 +18,11 @@ class CreateDiscountWeightChargesTable extends Migration
             $table->integer('user_id')->index();
             $table->integer('shipping_mode_id')->index();
             $table->integer('destination_id')->index();
-            $table->decimal('range_up', 8, 2);
-            $table->decimal('range_down', 8, 2);
+            $table->float('range_up', 8, 2);
+            $table->float('range_down', 8, 2);
             $table->boolean('weight_addition')->default(0);
-            $table->decimal('spkg')->nullable(true);
-            $table->decimal('local_or_6hr', 8, 2);
+            $table->float('spkg')->nullable(true);
+            $table->float('local_or_6hr', 8, 2);
             $table->timestamps();
         });
     }
