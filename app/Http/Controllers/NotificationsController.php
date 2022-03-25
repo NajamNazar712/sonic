@@ -8469,7 +8469,7 @@ class NotificationsController extends Controller
                         $data_set = Rider::find($data->id);
                         $data_set->status = 0;
                         $data_set->save();
-                        $employee_directory = Employee::where('trax_id', $data_set->trax_id)->where('rider_type_id',2);
+                        $employee_directory = Employee::where('trax_id', $data_set->trax_id)->where('employee_type_id',2);
                         if($employee_directory->exists()){
                             $employee_directory = $employee_directory->first();
                             $employee_directory->status_id = 2;
