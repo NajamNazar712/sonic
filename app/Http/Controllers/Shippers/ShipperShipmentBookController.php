@@ -492,7 +492,13 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
-         //dd($request);
+        $rules = [
+            'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
+        ];
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
+        } else {
         if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
 
             if($request->filled('open_shipment')){
@@ -950,6 +956,7 @@ class ShipperShipmentBookController extends Controller
         }
         else {
             return redirect()->back()->with('error', 'Invalid Service Type Selected');
+        }
         }
     }
 
@@ -3331,6 +3338,13 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
+        $rules = [
+            'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
+        ];
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
+        } else {
         if($request->open_shipment=='on'){
             $open_shipment=1;
         }else{
@@ -3841,6 +3855,7 @@ class ShipperShipmentBookController extends Controller
             }
         else {
             return redirect()->back()->with('error', 'Shipping Mode needs to be Selected');
+        }
         }
     }
 
