@@ -8,6 +8,7 @@ use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ShipperInterceptReBookController extends Controller
 {
@@ -124,6 +126,22 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->save();
 
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
+
+                        if($request->hasFile('replacement_parcel_image')){
+                            $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
+                            if($shipment_parcel_image->exists()){
+                                $shipment_parcel_image = $shipment_parcel_image->first();
+                                Storage::disk('public')->delete($shipment_parcel_image->picture_path);
+                            }else{
+                                $shipment_parcel_image = new ShipmentReplacementParcelImage();
+                                $shipment_parcel_image->shipment_id = $request->shipment_id;
+                            }
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'replacement_parcel/' . $request->shipment_id . '_' . $time . '.png';
+                            Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_image));
+                            $shipment_parcel_image->picture_path = $picture_path;
+                            $shipment_parcel_image->save();
+                        }
                         
                     }
 

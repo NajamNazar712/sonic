@@ -133,7 +133,6 @@ class AdminInterceptRebookRequestHistoryController extends Controller
 
     public function intercept_re_book_update(Request $request)
     {
-        dd($request);
         $s_amount = str_replace(",", "", $request->amount);
         $amount = intval($s_amount);
         $shipment = Shipment::find($request->shipment_id);
@@ -210,7 +209,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
 
                        ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
 
-                       if($request->hasFile('replacement_parcel_img')){
+                       if($request->hasFile('replacement_parcel_image')){
                            $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
                            if($shipment_parcel_image->exists()){
                                $shipment_parcel_image = $shipment_parcel_image->first();
@@ -221,7 +220,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                            }
                            $time = Carbon::now()->toDateString();
                            $picture_path = 'replacement_parcel/' . $request->shipment_id . '_' . $time . '.png';
-                           Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_img));
+                           Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_image));
                            $shipment_parcel_image->picture_path = $picture_path;
                            $shipment_parcel_image->save();
                        }

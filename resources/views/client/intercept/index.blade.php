@@ -14,7 +14,7 @@
                     <h4><b>Tracking Number: {{$shipment->tracking_number}}</b></h4>
                 </div>
                 
-                <form id="intercept_form" class="form-horizontal" method="post" action="{{route('cod.intercept.update')}}">
+                <form id="intercept_form" class="form-horizontal" method="post" action="{{route('cod.intercept.update')}}" enctype="multipart/form-data">
                 @csrf
                     <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
                         <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
@@ -58,6 +58,13 @@
                             <div class="form-group">
                                 <input type="email" name="consignee_email" id="consignee_email" class="form-control" value="{{$shipment['consignee_email']}}" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
                             </div>
+
+                            @if($shipment->booking_type_id == 2)
+                                <div class="form-group d-none" id="replacement_parcel_image_div">
+                                    <label class="d-block bold">Replacement Parcel Image</label>
+                                    <input class="form-control form-control-sm" type="file" name="replacement_parcel_image"  id="replacement_parcel_image">
+                                </div>
+                            @endif
                         </div>
                         <div class="col col_custom">
                             <h4 class="form-section mb-2 text-center">Payment Information</h4>
@@ -138,6 +145,7 @@
                     $( "#consignee_email" ).prop('readonly', true);
                     $( "#amount" ).val(amount);
                     $( "#amount" ).prop('readonly', true);
+                    $("#replacement_parcel_image_div").removeClass("d-none");
                 }
                 else{
                     $( "#consignee_name" ).prop('readonly', false);
@@ -146,6 +154,7 @@
                     $('#intercept_form').find('#new_city').remove(); // remove the hidden fields if any
                     $('#consignee_city').removeClass('disabled')  //remove disable class
                         .prop({name : 'consignee_city' , disabled : false}); //restore the name and enable
+                    $("#replacement_parcel_image_div").addClass("d-none");
                 }
             });
 
