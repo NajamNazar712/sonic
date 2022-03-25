@@ -17,6 +17,7 @@ use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ShipperInterceptReBookController extends Controller
 {
@@ -63,6 +64,13 @@ class ShipperInterceptReBookController extends Controller
 
     public function intercept_re_book_update(Request $request)
     {
+        $rules = [
+            'replacement_parcel_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+        ];
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
+        } else {
         $s_amount = str_replace(",", "", $request->amount);
         $amount = intval($s_amount);
         $shipment = Shipment::find($request->shipment_id);
@@ -154,6 +162,7 @@ class ShipperInterceptReBookController extends Controller
         } else {
             return redirect()->route('cod.return.pending.index')->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
         }
+    }
     }
 
 }

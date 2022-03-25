@@ -61,7 +61,7 @@
                             @if($shipment->booking_type_id == 2)
                                 <div class="form-group d-none" id="replacement_parcel_image_div">
                                     <label class="d-block bold">Replacement Parcel Image</label>
-                                    <input class="form-control form-control-sm" type="file" name="replacement_parcel_image"  id="replacement_parcel_image">
+                                    <input class="form-control form-control-sm" type="file" name="replacement_parcel_image"  id="replacement_parcel_image" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                                 </div>
                             @endif
                         </div>
