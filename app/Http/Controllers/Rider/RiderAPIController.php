@@ -68,6 +68,7 @@ use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\Rider\RiderReturnNoteStatus;
 use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
+use App\Http\Models\RiderPickupInvalidLog;
 use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentOpenBox;
 use App\Http\Models\ShipmentOtp;
@@ -187,6 +188,15 @@ class RiderAPIController extends Controller
             $retail_pickup_note->status = 2;
             $retail_pickup_note->save();
         }
+    }
+
+    static public function rider_pickup_invalid_logs($rider_id, $pickup_request_id, $pickup_note_id, $shipment_id){
+        $rider_pickup_invalid_logs = new RiderPickupInvalidLog();
+        $rider_pickup_invalid_logs->rider_id = $rider_id;
+        $rider_pickup_invalid_logs->pickup_request_id = $pickup_request_id;
+        $rider_pickup_invalid_logs->pickup_note_id = $pickup_note_id;
+        $rider_pickup_invalid_logs->shipment_id = $shipment_id;
+        $rider_pickup_invalid_logs->save();
     }
 
     public function distance($origin, $destination)
@@ -11110,6 +11120,7 @@ class RiderAPIController extends Controller
                         V2PickupNote::where('id', $request->pickup_note_id)->update(['status' => 1]);
                     }
 
+                    $pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $request->pickup_request_id)->pluck('shipment_id')->toArray();
                     if ($request->has('shipment_ids')) {
                         $shipment_ids = explode(',', $request->shipment_ids);
                         $rider_pickup->shipments = count($shipment_ids);
@@ -11118,13 +11129,17 @@ class RiderAPIController extends Controller
                             $shipment = Shipment::where('tracking_number',$shipment_id);
                             if ($shipment->exists()) {
                                 $shipment = $shipment->first();
-                                if ($shipment->shipper_status_id == 17) {
-                                    AdminPickupsController::generate($shipment->id);
+                                if($shipment->shipper_status_id == 1 && in_array($shipment->id, $pickup_request_shipments)){
+                                    if ($shipment->shipper_status_id == 17) {
+                                        AdminPickupsController::generate($shipment->id);
+                                    }
+                                    $shipment->shipper_status_id = 53;
+                                    $shipment->consignee_status_id = 53;
+                                    $shipment->save();
+                                    ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
+                                }else{
+                                    self::rider_pickup_invalid_logs($rider_id,$request->pickup_request_id, $request->pickup_note_id,$rider_id);
                                 }
-                                $shipment->shipper_status_id = 53;
-                                $shipment->consignee_status_id = 53;
-                                $shipment->save();
-                                ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
                             }
                         }
                         NotificationsController::send(73, $shipment_ids, $request->pickup_request_id);
