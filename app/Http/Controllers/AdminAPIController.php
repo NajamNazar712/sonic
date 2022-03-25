@@ -5008,6 +5008,25 @@ class AdminAPIController extends Controller
 
                     ShipmentsJourneyController::add($shipment_id, 2, 2, null, 'DWS Arrival', null, $request->admin_id, $reference_1_id, $reference_2_id, 1, null, $rider_id);
 
+                    if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
+                        if ($shipment->booking_type_id == 4) {
+                            ShipmentChargesController::walkin_weight($shipment_id);
+                        } else {
+                            ShipmentChargesController::weight($shipment_id);
+                            if ($shipment->business_category_id == 1) {
+                                ShipmentChargesController::cash_handling($shipment_id);
+                                ShipmentChargesController::insurance($shipment_id);
+                                ShipmentChargesController::fuel_surcharge($shipment_id);
+                            } else {
+                                ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                            }
+                        }
+
+                        if ($shipment->walk_in_status == 0) {
+                            InitialChargesWebhookController::webhook_subscription($shipment_id);
+                        }
+                    }
+
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if ($self_collection_shipment->exists()) {
                         if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
@@ -5072,24 +5091,6 @@ class AdminAPIController extends Controller
                     $booking_sms = BookingSmsForShippers::where('user_id', $shipment->user_id)->where('status', 1);
                     if ($booking_sms->exists()) {
                         NotificationsController::send(3, $shipment_id);
-                    }
-                    if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
-                        if ($shipment->booking_type_id == 4) {
-                            ShipmentChargesController::walkin_weight($shipment_id);
-                        } else {
-                            ShipmentChargesController::weight($shipment_id);
-                            if ($shipment->business_category_id == 1) {
-                                ShipmentChargesController::cash_handling($shipment_id);
-                                ShipmentChargesController::insurance($shipment_id);
-                                ShipmentChargesController::fuel_surcharge($shipment_id);
-                            } else {
-                                ShipmentChargesController::international_fuel_surcharge($shipment_id);
-                            }
-                        }
-
-                        if ($shipment->walk_in_status == 0) {
-                            InitialChargesWebhookController::webhook_subscription($shipment_id);
-                        }
                     }
 
                     if ($shipment->shipment_type != 2 && $shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
