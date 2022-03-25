@@ -9,6 +9,7 @@ use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -119,9 +120,18 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                 $consignee_cities = $consignee_cities->orderBy('c.name')
                     ->groupBy('c.name')
                     ->get();
+
+                $replcement_parcel_image = null;
+                if($shipment->booking_type_id == 2){
+                    $replcement_parcel = ShipmentReplacementParcelImage::where('shipment_id', $shipment->id);
+                    if($replcement_parcel->exists()){
+                        $replcement_parcel = $replcement_parcel->first();
+                        $replcement_parcel_image = $replcement_parcel->picture_path;
+                    }
+                }
 //        dd($consignee_cities);
 //        $consignee_cities = City::leftjoin('city_deliveries as cd', 'cd.city_id', '=', 'cities.id')->leftjoin('')->where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
-                return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
+                return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities, 'replcement_parcel_image' => $replcement_parcel_image]);
             }
             return redirect()->back()->with('error', 'Shipment not found!');
         }
