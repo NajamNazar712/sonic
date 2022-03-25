@@ -10,9 +10,11 @@ use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Retail\RetailFranchise;
@@ -120,18 +122,9 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                 $consignee_cities = $consignee_cities->orderBy('c.name')
                     ->groupBy('c.name')
                     ->get();
-
-                $replcement_parcel_image = null;
-                if($shipment->booking_type_id == 2){
-                    $replcement_parcel = ShipmentReplacementParcelImage::where('shipment_id', $shipment->id);
-                    if($replcement_parcel->exists()){
-                        $replcement_parcel = $replcement_parcel->first();
-                        $replcement_parcel_image = $replcement_parcel->picture_path;
-                    }
-                }
 //        dd($consignee_cities);
 //        $consignee_cities = City::leftjoin('city_deliveries as cd', 'cd.city_id', '=', 'cities.id')->leftjoin('')->where('status', 1)->where('pickup',1)->whereNotNull('zone_id')->orderBy('name')->get();
-                return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities, 'replcement_parcel_image' => $replcement_parcel_image]);
+                return view('admin.intercept.index')->with(['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
             }
             return redirect()->back()->with('error', 'Shipment not found!');
         }
@@ -140,6 +133,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
 
     public function intercept_re_book_update(Request $request)
     {
+        dd($request);
         $s_amount = str_replace(",", "", $request->amount);
         $amount = intval($s_amount);
         $shipment = Shipment::find($request->shipment_id);
@@ -215,6 +209,22 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                        $shipment->save();
 
                        ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
+
+                       if($request->hasFile('replacement_parcel_img')){
+                           $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
+                           if($shipment_parcel_image->exists()){
+                               $shipment_parcel_image = $shipment_parcel_image->first();
+                               Storage::disk('public')->delete($shipment_parcel_image->picture_path);
+                           }else{
+                               $shipment_parcel_image = new ShipmentReplacementParcelImage();
+                               $shipment_parcel_image->shipment_id = $request->shipment_id;
+                           }
+                           $time = Carbon::now()->toDateString();
+                           $picture_path = 'replacement_parcel/' . $request->shipment_id . '_' . $time . '.png';
+                           Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_img));
+                           $shipment_parcel_image->picture_path = $picture_path;
+                           $shipment_parcel_image->save();
+                       }
 
                    }
                     return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);

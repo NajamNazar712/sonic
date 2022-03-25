@@ -57,13 +57,13 @@
                             <div class="form-group">
                                 <input type="email" name="consignee_email" id="consignee_email" class="form-control" value="{{$shipment['consignee_email']}}" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
                             </div>
+
                             @if($shipment->booking_type_id == 2)
                                 <div class="form-group d-none" id="replacement_parcel_image_div">
-                                    <label class="d-block">Replacement Parcel Image</label>
+                                    <label class="d-block bold">Replacement Parcel Image</label>
                                     <input class="form-control form-control-sm" type="file" name="replacement_parcel_image"  id="replacement_parcel_image">
                                 </div>
                             @endif
-
                         </div>
                         <div class="col col_custom">
                             <h4 class="form-section mb-2 text-center">Payment Information</h4>
