@@ -11124,9 +11124,8 @@ class RiderAPIController extends Controller
 
                     $pickup_request_shipments = V2PickupRequestShipment::where('pickup_request_id', $request->pickup_request_id)->pluck('shipment_id')->toArray();
                     if ($request->has('shipment_ids')) {
+                        $shipment_count = 0;
                         $shipment_ids = explode(',', $request->shipment_ids);
-                        $rider_pickup->shipments = count($shipment_ids);
-                        $rider_pickup->save();
                         foreach ($shipment_ids as $shipment_id) {
                             $shipment = Shipment::where('tracking_number',$shipment_id);
                             if ($shipment->exists()) {
@@ -11139,12 +11138,15 @@ class RiderAPIController extends Controller
                                     $shipment->consignee_status_id = 53;
                                     $shipment->save();
                                     ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
+                                    $shipment_count+=1;
                                 }else{
                                     self::rider_pickup_invalid_logs($rider_id,$request->pickup_request_id, $request->pickup_note_id,$shipment->id, 53);
                                 }
                             }
                         }
                         NotificationsController::send(73, $shipment_ids, $request->pickup_request_id);
+                        $rider_pickup->shipments = $shipment_count;
+                        $rider_pickup->save();
                     }
                 }
 
