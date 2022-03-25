@@ -62,7 +62,7 @@
 
         $(document).ready(function () {
             $('#admin_role_select').select2({
-                placeholder:'Select Admin(s)',
+                placeholder:'Select Admin Role(s)',
                 width:'100%',
                 allowClear:true
             }).bind('select2:select', function () {
