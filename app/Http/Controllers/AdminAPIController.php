@@ -4850,7 +4850,7 @@ class AdminAPIController extends Controller
 
                     }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
-                    if($volume_weight == 0){
+                    if($volume_weight < 0.01){
                         $volume_weight = 0.01;
                     }
                     $dense_weight = $request->weight;
