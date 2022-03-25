@@ -38,7 +38,7 @@ class ProcessPushNotification implements ShouldQueue
         $push_notification = $this->notification_history;
         $employee_device_token = EmployeeDeviceToken::where('employee_id', $push_notification->employee_id)
             ->where('employee_type_id', $push_notification->employee_type_id)
-            ->select('device_token');
+            ->select('device_token')->orderby('id', 'DESC');
         if ($employee_device_token->exists()) {
             $employee_device_token = $employee_device_token->first();
             $device_token = $employee_device_token->device_token;
