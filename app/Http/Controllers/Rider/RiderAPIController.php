@@ -4984,7 +4984,9 @@ class RiderAPIController extends Controller
                         $information['cargo_user'] = 0;
 
                         if($request->has('device_token')){
-                            EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                            EmployeeDeviceToken::where('device_token', $request->get('device_token'))
+                                ->orWhere(['employee_type_id' => 2, 'employee_id' => $rider->id])
+                                ->delete();
                             $employee_device_token = new EmployeeDeviceToken();
                             $employee_device_token->employee_id = $rider->id;
                             $employee_device_token->employee_type_id = 2;
