@@ -6688,14 +6688,14 @@
             var count = parseInt($("#discount_ol_weight_container_div"+i).children().last().attr('id').split("row"+i+"_")[1]);
             ol_discount_weight_charges[i] = count + 1;
         }
-        var d_discount_weight = parseInt("{{isset($discount_weight_charges[3]) ? count($discount_weight_charges[1]) : 0}}");
+        var d_discount_weight = parseInt("{{isset($discount_weight_charges[3]) ? count($discount_weight_charges[3]) : 0}}");
         var d_discount_weight_charges = [];
         for(i = 0; i < d_discount_weight; i++)
         {
             var count = parseInt($("#discount_d_weight_container_div"+i).children().last().attr('id').split("row"+i+"_")[1]);
             d_discount_weight_charges[i] = count + 1;
         }
-        var sd_discount_weight = parseInt("{{isset($discount_weight_charges[4]) ? count($discount_weight_charges[1]) : 0}}");
+        var sd_discount_weight = parseInt("{{isset($discount_weight_charges[4]) ? count($discount_weight_charges[4]) : 0}}");
         var sd_discount_weight_charges = [];
         for(i = 0; i < sd_discount_weight; i++)
         {
