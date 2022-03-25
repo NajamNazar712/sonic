@@ -6692,7 +6692,7 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 0, 'admin_list' => $admin_list]);
             }
             else {
-                $admin_list = Admin::where('status', 1)->where('user_id', $request->user_id)->select('id', 'name')->get();
+                $admin_list = Admin::where('status', 1)->where('id', $request->admin_id)->select('id', 'name')->get();
                 return response()->json(['status' => 0, 'admin_list' => $admin_list]);
             }
         }
