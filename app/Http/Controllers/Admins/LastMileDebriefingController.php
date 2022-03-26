@@ -886,7 +886,7 @@ class LastMileDebriefingController extends Controller
 
                                     }
                                    
-                                    if(in_array(session('role_id'),[18,19]) && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1)){
+                                    if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1)){
                                     dispatch(new RCPSmsToConsignee($shipment));
                                 }
                                     $dispute_shipments[] = $shipment;
