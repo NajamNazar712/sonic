@@ -16,6 +16,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Jobs\RCPSmsToConsignee;
+use App\ReturnConfirmationPendingSmsAttempt;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
@@ -887,7 +888,8 @@ class LastMileDebriefingController extends Controller
                                     }
                                    
                                     if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1)){
-                                    dispatch(new RCPSmsToConsignee($shipment));
+                                    //dispatch(new RCPSmsToConsignee($shipment));
+                                        ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 1]);
                                 }
                                     $dispute_shipments[] = $shipment;
                                 }
