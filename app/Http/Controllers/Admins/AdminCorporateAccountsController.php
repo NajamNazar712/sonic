@@ -38,7 +38,7 @@ use App\Http\Models\CorporateDefaultHistoryReturnCharge;
 use App\Http\Models\CorporateDefaultHistoryWeightCharge;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\CorporateDefaultRateHistory;
-use App\Http\Models\PendingCorporateDefaultDiscountWeightCharge;
+use App\Http\Models\Admin\PendingCorporateDefaultDiscountWeightCharge;
 use App\Http\Models\RateRemark;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateDefaultReturnCharge;
