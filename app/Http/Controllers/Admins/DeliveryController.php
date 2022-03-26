@@ -2106,7 +2106,7 @@ class DeliveryController extends Controller
                                 $return_assign_log->assigned_by = Auth::id();
                                 $return_assign_log->save();
                             }
-                            if(in_array(session('role_id'),[18,19]) && $selected_status == 12 && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1)){
+                            if(in_array(session('role_id'),[18,19]) && $selected_status == 12 && in_array($selected_reason,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && !ReturnConfirmationPendingSmsAttempt::where('shipment_id',$shipment)->where('status',0)->exists()){
                                 //dispatch(new RCPSmsToConsignee($shipment));
                                 ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 1]);
                             }
@@ -3094,7 +3094,7 @@ class DeliveryController extends Controller
 
                                                 if (!$parcel->packaging_material_request) {
                                                     if ($parcel->shipper_status_id != 12) {
-                                                         if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1)){
+                                                         if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && !ReturnConfirmationPendingSmsAttempt::where('shipment_id',$shipment)->where('status',0)->exists()){
                                                               //dispatch(new RCPSmsToConsignee($shipment));
                                                              ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 1]);
                                                           }
@@ -3266,7 +3266,7 @@ class DeliveryController extends Controller
                                                 }
                                             }
                                         }
-                                        if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1)){
+                                        if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && !ReturnConfirmationPendingSmsAttempt::where('shipment_id',$shipment)->where('status',0)->exists()){
                                             //dispatch(new RCPSmsToConsignee($shipment));
                                             ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 1]);
                                         }
