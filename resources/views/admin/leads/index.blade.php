@@ -513,7 +513,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="form-group">
-                                    <select name="area_id" id="edit_area" class="form-control select2">
+                                    <select name="territory_area_id" id="edit_area" class="form-control select2" data-rule-required="true"  data-msg-required="Area is required">
                                     </select>
                                 </div>
                             </div>
@@ -1831,7 +1831,7 @@
                         url: '{!! route('cod.area') !!}',
                         method: 'POST',
                         data: {
-                            'territory_id': territory_id,
+                            'id': territory_id,
                             '_token': '{{ csrf_token() }}'
                         }
                     })

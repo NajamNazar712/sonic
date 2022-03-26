@@ -778,12 +778,15 @@ class LeadManagementController extends Controller
             if($lead){
                 $lead->city_id = $request->city_id;
                 $lead->territory_id = $request->territory_id;
-                $lead->territory_area_id = ($request->has('territory_area_id') ? $request->territory_area_id: NULL);
+                $lead->territory_area_id = $request->territory_area_id;
                 $lead->phone_number = $request->phone_number;
                 $lead->email_address = $request->email_address;
                 $lead->brand = $request->brand;
                 $lead->company = $request->company;
+                $lead->status_id = 15;
                 $lead->save();
+
+                LeadTaggingController::auto_tagging($lead->id,386);
                 return redirect()->back()->with('success', 'Lead Edited successfully!');
             }
             return redirect()->back()->with('error', 'Lead not found!');

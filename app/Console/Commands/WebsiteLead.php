@@ -6,6 +6,8 @@ use App\Http\Controllers\Admins\LeadTaggingController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
+use App\Http\Models\City;
+use App\Http\Models\ServiceList;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
@@ -51,7 +53,7 @@ class WebsiteLead extends Command
 //            $base_uri = 'https://trax.pk/api/';
 //        }
         else{
-            $base_uri = 'website.test/api/';
+            $base_uri = 'http://trax_website.test/wp-json/tl/v1/';
         }
         $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
         $response = $client->post('leads', [
@@ -62,25 +64,39 @@ class WebsiteLead extends Command
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
         $new_leads = array();
+        $leads_added = array();
         if($response->status == 0){
             $leads = $response->leads;
             foreach ($leads as $lead) {
-                // $max_lead_id = Lead::max('lead_id');
-                // $max_lead_id = $max_lead_id + 1;
+
+                
+                $city = City::where('name', $lead->data->city_name[0])->first();
+                if($city){
+                    $city_id = $city->id;
+                }
+                else{
+                    continue;
+                }
+
+                $services = ServiceList::where('name', $lead->data->service_name[0])->first();
+                if($services){
+                    $service_id = $services->id;
+                }
+                else{
+                    continue;
+                }
+
+
                 $new_lead = new Lead();
-                // $new_lead->lead_id = $max_lead_id;
-                $new_lead->contact_person = $lead->full_name;
-                $new_lead->city_id = $lead->city_id;
-                $new_lead->territory_id = $lead->territory_id;
-                $new_lead->territory_area_id = $lead->territory_area_id;
-                $new_lead->phone_number = $lead->phone_number;
-                $new_lead->email_address = $lead->email;
-                $new_lead->requested_date = $lead->created_at;
-                $new_lead->message = $lead->message;
-                $new_lead->reference_id = $lead->reference_id;
-                $new_lead->brand = $lead->brand;
-                $new_lead->service_id = $lead->service_id;
-                $new_lead->company = $lead->company;
+                $new_lead->contact_person = $lead->data->full_name;
+                $new_lead->city_id = $city_id;
+//                $new_lead->territory_id = $lead->territory_id;
+//                $new_lead->territory_area_id = $lead->territory_area_id;
+                $new_lead->phone_number = $lead->data->phone_number;
+                $new_lead->email_address = $lead->data->email;
+                $new_lead->requested_date = Carbon::now();
+                $new_lead->service_id = $service_id;
+//                $new_lead->company = $lead->company;
                 $new_lead->save();
 
                 $lead_log = new LeadLog();
@@ -89,10 +105,10 @@ class WebsiteLead extends Command
                 $lead_log->status_id = 1;
                 $lead_log->updated_by = 7;
                 $lead_log->save();
-
-                $new_leads[] = $new_lead->id;
+                $leads_added[] = $lead->id;
+                // $new_leads[] = $new_lead->id;
                 //enter admin_id from global settings
-                LeadTaggingController::auto_tagging($new_lead->id,386);
+                // LeadTaggingController::auto_tagging($new_lead->id,386);
             }
         }
 
@@ -100,6 +116,16 @@ class WebsiteLead extends Command
             NotificationsController::send(203, $new_leads, Carbon::today());
         }
 
-        echo $response->message;
+        if(count($leads_added) > 0){
+            $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+            $response = $client->delete('leads', [
+                'form_params' => [
+                    "token" => 'TraxOnlinePvtLtdAYWD',
+                    "ids" => $leads_added
+                ]
+            ]);
+        }
+
+//        echo $response->message;
     }
 }
