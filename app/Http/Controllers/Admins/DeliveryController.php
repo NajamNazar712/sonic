@@ -3212,11 +3212,6 @@ class DeliveryController extends Controller
                                                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                                     }
                                                 }
-                                               
-                                                if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1)){
-                                                    //dispatch(new RCPSmsToConsignee($shipment));
-                                                    ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 1]);
-                                                }
                                             }
                                             $dispute_shipments[] = $shipment;
                                         } else if (($shipper_status_details->shipper_status_id == $shipper_status_id) && ($journey->status_reason_id != ($request->has($reasonId) ? $status_reason_id : null))) {
@@ -3270,6 +3265,10 @@ class DeliveryController extends Controller
                                                     }
                                                 }
                                             }
+                                        }
+                                        if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1)){
+                                            //dispatch(new RCPSmsToConsignee($shipment));
+                                            ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 1]);
                                         }
                                     }//main if condition
 
