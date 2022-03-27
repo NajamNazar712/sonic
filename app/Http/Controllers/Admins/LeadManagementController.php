@@ -785,8 +785,7 @@ class LeadManagementController extends Controller
                 $lead->brand = $request->brand;
                 $lead->company = $request->company;
                 $lead->save();
-
-                LeadTaggingController::auto_tagging($lead->id,386);
+                
                 return redirect()->back()->with('success', 'Lead Edited successfully!');
             }
             return redirect()->back()->with('error', 'Lead not found!');
