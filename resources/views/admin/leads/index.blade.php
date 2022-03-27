@@ -1861,6 +1861,9 @@
                 // $('#edit_lead_form')[0].reset();
                 var form_errors = $('#edit_lead_form');
                 form_errors.validate().resetForm();
+                $('#edit_city').val('').trigger('change');
+                $('#edit_territory').val('').trigger('change');
+                $('#edit_area').val('').trigger('change');
                 form_errors.find('.error').removeClass('error');
             });
 
