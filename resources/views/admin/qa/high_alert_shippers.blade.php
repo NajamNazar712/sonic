@@ -129,10 +129,6 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-
-
-
-
             $('#shipper_select').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Search Shipper",

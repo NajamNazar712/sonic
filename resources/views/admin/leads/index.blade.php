@@ -1870,6 +1870,7 @@
                 scrollX: false,
                 autoWidth : true,
                 paging:false,
+                bInfo:false,
                 "order": [],
                 columns: [
                     {name: 'city',  class: 'align-middle city', orderable: false, searchable: false},

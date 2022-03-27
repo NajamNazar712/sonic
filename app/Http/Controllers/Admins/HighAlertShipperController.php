@@ -87,7 +87,7 @@ class HighAlertShipperController extends Controller
             return response()->json(['status' => 1, 'error' => 'Please fill all fields!']);
         }
 
-        $count = HighAlertShipper::where('status', 0)->where('user_id', $shipper_id)->count();
+        $count = HighAlertShipper::where('status', 1)->where('user_id', $shipper_id)->count();
         if($count < 3){
             $high_alert = new HighAlertShipper();
             $high_alert->user_id = $shipper_id;

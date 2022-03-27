@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AreaTerritory;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\Lead\LeadRemark;
@@ -755,8 +756,8 @@ class LeadManagementController extends Controller
             if($lead->territory_id){
                 $details['territory'] = Territory::find($lead->territory_id)->name;
             }
-            if($lead->terrirory_area_id){
-                $details['area'] = Territory::find($lead->terrirory_area_id)->name;
+            if($lead->territory_area_id){
+                $details['area'] = AreaTerritory::find($lead->territory_area_id)->name;
             }
 
             $details['phone_number'] = $lead->phone_number;
