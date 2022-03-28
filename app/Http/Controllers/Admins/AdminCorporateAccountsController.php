@@ -22064,6 +22064,13 @@ class AdminCorporateAccountsController extends Controller
             'packing_charges.*.numeric' => 'Packing charges field must be numeric',
             'labelling_charges.required' => 'Labelling charges field is required',
             'labelling_charges.numeric' => 'Labelling charges field must be numeric',
+
+            'discount_on_destination.required_if' => 'Rush Destination Field is required if discount weight (destination-wise) toggle is on',
+            'discount_ol_destination.required_if' => 'Saver Plus Destination Field is required if discount weight (destination-wise) toggle is on',
+            'discount_d_destination.required_if' => 'Detain Destination Field is required if discount weight (destination-wise) toggle is on',
+            'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on'
+
+
         ];
 
         $validations = array();
@@ -22140,6 +22147,8 @@ class AdminCorporateAccountsController extends Controller
                 'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on',
                 'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on',
                 'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on',
+
+                'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on|numeric',
             ];
         }
         //overland
@@ -22175,6 +22184,8 @@ class AdminCorporateAccountsController extends Controller
                 'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on',
                 'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on',
                 'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on',
+
+                'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on|numeric',
             ];
         }
         //sameday
@@ -22207,6 +22218,8 @@ class AdminCorporateAccountsController extends Controller
                 'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on',
                 'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on',
                 'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on',
+
+                'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on|numeric',
             ];
         }
 
@@ -24022,6 +24035,11 @@ class AdminCorporateAccountsController extends Controller
                 'labelling_charges.required' => 'Labelling charges field is required',
                 'labelling_charges.numeric' => 'Labelling charges field must be numeric',
 
+                'discount_on_destination.required_if' => 'Rush Destination Field is required if discount weight (destination-wise) toggle is on',
+                'discount_ol_destination.required_if' => 'Saver Plus Destination Field is required if discount weight (destination-wise) toggle is on',
+                'discount_d_destination.required_if' => 'Detain Destination Field is required if discount weight (destination-wise) toggle is on',
+                'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on'
+
             ];
 
             $validations = array();
@@ -24061,7 +24079,9 @@ class AdminCorporateAccountsController extends Controller
                     'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
                     'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
                     'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
-                    'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on'
+                    'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on',
+
+                    'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
             //overland
@@ -24097,6 +24117,8 @@ class AdminCorporateAccountsController extends Controller
                     'ol_discount_insurance_rate' => 'required_if:ol_discount_insurance_switch,==,on',
                     'ol_discount_return_rate' => 'required_if:ol_discount_return_switch,==,on',
                     'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
+
+                    'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
             //overland
@@ -24132,6 +24154,8 @@ class AdminCorporateAccountsController extends Controller
                     'detain_discount_insurance_rate' => 'required_if:detain_discount_insurance_switch,==,on',
                     'detain_discount_return_rate' => 'required_if:detain_discount_return_switch,==,on',
                     'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
+
+                    'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
             //sameday
@@ -24164,6 +24188,8 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_discount_insurance_rate' => 'required_if:sameday_discount_insurance_switch,==,on',
                     'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
                     'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
+
+                    'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
 
@@ -26070,6 +26096,11 @@ class AdminCorporateAccountsController extends Controller
                 'labelling_charges.required' => 'Labelling charges field is required',
                 'labelling_charges.numeric' => 'Labelling charges field must be numeric',
 
+                'discount_on_destination.required_if' => 'Rush Destination Field is required if discount weight (destination-wise) toggle is on',
+                'discount_ol_destination.required_if' => 'Saver Plus Destination Field is required if discount weight (destination-wise) toggle is on',
+                'discount_d_destination.required_if' => 'Detain Destination Field is required if discount weight (destination-wise) toggle is on',
+                'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on'
+
             ];
 
             $validations = array();
@@ -26110,7 +26141,9 @@ class AdminCorporateAccountsController extends Controller
                     'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
                     'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
                     'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
-                    'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on'
+                    'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on',
+
+                    'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
             //overland
@@ -26146,6 +26179,9 @@ class AdminCorporateAccountsController extends Controller
                     'ol_discount_insurance_rate' => 'required_if:ol_discount_insurance_switch,==,on',
                     'ol_discount_return_rate' => 'required_if:ol_discount_return_switch,==,on',
                     'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
+
+
+                    'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
             //overland
@@ -26181,6 +26217,8 @@ class AdminCorporateAccountsController extends Controller
                     'detain_discount_insurance_rate' => 'required_if:detain_discount_insurance_switch,==,on',
                     'detain_discount_return_rate' => 'required_if:detain_discount_return_switch,==,on',
                     'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
+
+                    'discount_d_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
             //sameday
@@ -26213,6 +26251,9 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_discount_insurance_rate' => 'required_if:sameday_discount_insurance_switch,==,on',
                     'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
                     'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
+
+
+                    'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
 
@@ -28843,6 +28884,11 @@ class AdminCorporateAccountsController extends Controller
                 'labelling_charges.required' => 'Labelling charges field is required',
                 'labelling_charges.numeric' => 'Labelling charges field must be numeric',
 
+                'discount_on_destination.required_if' => 'Rush Destination Field is required if discount weight (destination-wise) toggle is on',
+                'discount_ol_destination.required_if' => 'Saver Plus Destination Field is required if discount weight (destination-wise) toggle is on',
+                'discount_d_destination.required_if' => 'Detain Destination Field is required if discount weight (destination-wise) toggle is on',
+                'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on'
+
             ];
 
             $validations = array();
@@ -28883,7 +28929,9 @@ class AdminCorporateAccountsController extends Controller
                     'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
                     'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
                     'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
-                    'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on'
+                    'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on',
+
+                    'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
             //overland
@@ -28919,6 +28967,8 @@ class AdminCorporateAccountsController extends Controller
                     'ol_discount_insurance_rate' => 'required_if:ol_discount_insurance_switch,==,on',
                     'ol_discount_return_rate' => 'required_if:ol_discount_return_switch,==,on',
                     'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
+
+                    'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
             //overland
@@ -28954,6 +29004,8 @@ class AdminCorporateAccountsController extends Controller
                     'detain_discount_insurance_rate' => 'required_if:detain_discount_insurance_switch,==,on',
                     'detain_discount_return_rate' => 'required_if:detain_discount_return_switch,==,on',
                     'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
+
+                    'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
             //sameday
@@ -28986,6 +29038,8 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_discount_insurance_rate' => 'required_if:sameday_discount_insurance_switch,==,on',
                     'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
                     'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
+
+                    'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on|numeric',
                 ];
             }
 
@@ -34357,6 +34411,11 @@ class AdminCorporateAccountsController extends Controller
               'packing_charges.*.numeric' => 'Packing charges field must be numeric',
               'labelling_charges.required' => 'Labelling charges field is required',
               'labelling_charges.numeric' => 'Labelling charges field must be numeric',
+
+              'discount_on_destination.required_if' => 'Rush Destination Field is required if discount weight (destination-wise) toggle is on',
+              'discount_ol_destination.required_if' => 'Saver Plus Destination Field is required if discount weight (destination-wise) toggle is on',
+              'discount_d_destination.required_if' => 'Detain Destination Field is required if discount weight (destination-wise) toggle is on',
+              'discount_sd_destination.required_if' => 'Same Day Destination Field is required if discount weight (destination-wise) toggle is on'
           ];
 
           $validations = array();
@@ -34397,7 +34456,8 @@ class AdminCorporateAccountsController extends Controller
                   'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on',
                   'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on',
                   'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on',
-                  'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on'
+                  'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on',
+                  'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on|numeric',
               ];
           }
           //overland
@@ -34433,6 +34493,8 @@ class AdminCorporateAccountsController extends Controller
                   'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on',
                   'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on',
                   'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on',
+
+                  'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on|numeric',
               ];
           }
           //overland
@@ -34468,6 +34530,8 @@ class AdminCorporateAccountsController extends Controller
                   'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on',
                   'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on',
                   'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on',
+
+                  'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on|numeric',
               ];
           }
           //sameday
@@ -34500,6 +34564,8 @@ class AdminCorporateAccountsController extends Controller
                   'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on',
                   'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on',
                   'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on',
+
+                  'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on|numeric',
               ];
           }
 
