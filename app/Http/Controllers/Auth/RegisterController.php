@@ -26,6 +26,7 @@ use App\Mail\Notifications;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AutoTagTerritory;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -346,7 +347,13 @@ class RegisterController extends Controller
             $territory_id = $data['territory_id'];
         }
         else{
-            $territory_id = null;
+            $auto_tag_territory = AutoTagTerritory::where('admin_id',$data['sale_person'])->where('status',1);
+            if($auto_tag_territory->exists()){
+                $auto_tag_territory = $auto_tag_territory->first();
+                $territory_id = $auto_tag_territory->territory_id;
+            }else{
+                $territory_id = null;
+            }
         }
 
         $newUser = User::create([
@@ -655,7 +662,7 @@ class RegisterController extends Controller
     }
 
     public function sales_person(Request $request){
-//        dd($request);
+
         $id = $request->id;
         if($id){
             $sales_persons_city = City::where('id', $id);
@@ -663,7 +670,18 @@ class RegisterController extends Controller
                 $sales_persons_city = $sales_persons_city->first();
                 $hub_id = $sales_persons_city->hub_id;
                 $admin_ids = AdminHub::where('hub_id', $hub_id)->pluck('admin_id')->toArray();
-                $sale_persons = Admin::join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->whereIn('admins.id', $admin_ids)->where('ar.id','!=' ,4)->get();
+
+                $sale_persons = Admin::join('admin_roles as ar','admins.role_id', '=','ar.id')
+                    ->select(['admins.id', 'admins.name'])
+                    ->where('admins.status', 1)
+                    ->where('ar.department_id', 7)
+                    ->whereIn('admins.id', $admin_ids)
+                    ->where('ar.id','!=' ,4)
+                    ->where('ar.id','!=' ,75)
+                    ->where('ar.id','!=' ,67)
+                    ->where('ar.id','!=' ,43)
+                    ->get();
+
                 return response()->json(['status' => 0, 'sale_persons' => $sale_persons]);
             }else{
                 $sale_person_admin = City::find($id)->name;
