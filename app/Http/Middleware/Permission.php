@@ -1189,6 +1189,9 @@ class Permission
             'qa_evaluation.edit' => 654,
             'qa_evaluation.view' => 655,
             'qa_evaluation.edit_activities' => 656,
+
+            'qa.high_alert.shippers.index' => 692,
+
             'settings.lead_tagging.index' => 661,
             'settings.lead_tagging.list' => 661,
             'settings.lead_zones.index' => 664,
