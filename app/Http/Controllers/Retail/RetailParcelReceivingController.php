@@ -36,7 +36,10 @@ class RetailParcelReceivingController extends Controller
             ->where('retail_parcel_receivings.retail_user_id', Auth::id());
         $datatable = Datatables::of($cash_deposit)
             ->addColumn('shipments_button', function ($data) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $data->total_shipments . '</button>';
+                $retail_parcel_receiving_shipment = RetailParcelReceivingShipment::join('shipments as s','s.id','retail_parcel_receiving_shipments.shipment_id')
+                ->where('retail_parcel_receiving_shipments.parcel_receiving_id',$data->performa_no)
+                ->whereNotIn('s.shipper_status_id',[17,25])->count();
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $retail_parcel_receiving_shipment . '</button>';
             })
             ->editColumn('performa_no', function ($data) {
                 return str_pad($data->performa_no, 6, '0', STR_PAD_LEFT);
@@ -74,7 +77,10 @@ class RetailParcelReceivingController extends Controller
         if ($parcel_receiving_shipments->count() != 0) {
             foreach ($parcel_receiving_shipments as $parcel_receiving_shipment) {
                 $shipment = Shipment::find($parcel_receiving_shipment->shipment_id);
-                $shipments[] = $shipment->tracking_number;
+                if(!in_array($shipment->shipper_status_id,[17,25])){
+
+                    $shipments[] = $shipment->tracking_number;
+                }
             }
             return ['status' => 1, 'success' => 'Parcel Receiving Shipments', 'shipments' => $shipments];
         } else {
@@ -123,6 +129,11 @@ class RetailParcelReceivingController extends Controller
         $parcel_receiving_id = $request->id;
         $parcel_receiving = RetailParcelReceiving::find($parcel_receiving_id);
         $parcel_receiving_shipments = $parcel_receiving->shipments;
+        $parcel_receiving_total_cns = RetailParcelReceivingShipment::join('shipments as s','s.id','retail_parcel_receiving_shipments.shipment_id')
+                ->where('retail_parcel_receiving_shipments.parcel_receiving_id',$parcel_receiving_id)
+                ->whereNotIn('s.shipper_status_id',[17,25])->count();
+        $parcel_receiving_total_cash = 0;
+        
         $html = '<!doctype html>
                 <html lang="en">
                   <head>
@@ -243,7 +254,7 @@ class RetailParcelReceivingController extends Controller
                                 <div class="col">
                                         <table class="table table-bordered border">
                                             <tbody>
-                                            <tr><td class="color primary w-50">Performa No.</td><td class=" w-50">' . str_pad($parcel_receiving->id, 6, '0', STR_PAD_LEFT) . '</td></tr>
+                                            <tr><td class="color primary w-50">Retail Note</td><td class=" w-50">' . str_pad($parcel_receiving->id, 6, '0', STR_PAD_LEFT) . '</td></tr>
                                             <tr><td class="color primary w-50">Branch Name</td><td class=" w-50">' . $parcel_receiving->user->store->name . '</td></tr>
                                             <tr><td class="color primary w-50">Booking Code</td><td class=" w-50">' . str_pad($parcel_receiving->user->id, 6, '0', STR_PAD_LEFT) . '</td></tr>
                                             </tbody>
@@ -271,21 +282,25 @@ class RetailParcelReceivingController extends Controller
                                             </tr>';
 
         foreach ($parcel_receiving_shipments as $parcel_receiving_shipment) {
-            $html .= '
-                                            <tr>
-                                                <td style="border-bottom: none !important;">' . $parcel_receiving_shipment->shipping_mode->name . '</td>
-                                                <td>' . $parcel_receiving_shipment->shipment->tracking_number . '</td>
-                                                <td>' . $parcel_receiving_shipment->shipment->created_at . '</td>
-                                                <td>' . number_format(ROUND($parcel_receiving_shipment->retail_shipment->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
-                                            </tr>';
+            if(!in_array($parcel_receiving_shipment->shipment->shipper_status_id,[17,25])){
+
+                $html .= '
+                <tr>
+                <td style="border-bottom: none !important;">' . $parcel_receiving_shipment->shipping_mode->name . '</td>
+                <td>' . $parcel_receiving_shipment->shipment->tracking_number . '</td>
+                <td>' . $parcel_receiving_shipment->shipment->created_at . '</td>
+                <td>' . number_format(ROUND($parcel_receiving_shipment->retail_shipment->total_charges, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                </tr>';
+                $parcel_receiving_total_cash += $parcel_receiving_shipment->retail_shipment->total_charges;
+            }
         }
 
         $html .= '
                                             <tr>
                                                 <td><b>Total</b></td>
-                                                <td><b>' . $parcel_receiving->total_cn . '</b></td>
+                                                <td><b>' . $parcel_receiving_total_cns . '</b></td>
                                                 <td></td>
-                                                <td><b>' . number_format(ROUND($parcel_receiving->total_cash, 0, PHP_ROUND_HALF_DOWN)) . '</b></td>
+                                                <td><b>' . number_format(ROUND($parcel_receiving_total_cash, 0, PHP_ROUND_HALF_DOWN)) . '</b></td>
                                             </tr>';
 
         $html .= '
@@ -380,7 +395,11 @@ class RetailParcelReceivingController extends Controller
             ->where('other_parcel_receivings.retail_user_id', Auth::id());
         $datatable = Datatables::of($other_parcel_list)
             ->addColumn('shipments_button', function ($data) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $data->total_shipments . '</button>';
+                $other_parcel_receiving_shipment = OtherParcelReceivingShipment::join('shipments as s','s.id','other_parcel_receiving_shipments.shipment_id')
+                ->where('other_parcel_receiving_shipments.other_parcel_receiving_id',$data->performa_no)
+                ->whereNotIn('s.shipper_status_id',[17,25])->count();
+                
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $other_parcel_receiving_shipment . '</button>';
             })
             ->editColumn('performa_no', function ($data) {
                 return str_pad($data->performa_no, 6, '0', STR_PAD_LEFT);
@@ -446,7 +465,10 @@ class RetailParcelReceivingController extends Controller
         if ($parcel_receiving_shipments->count() != 0) {
             foreach ($parcel_receiving_shipments as $parcel_receiving_shipment) {
                 $shipment = Shipment::find($parcel_receiving_shipment->shipment_id);
-                $shipments[] = $shipment->tracking_number;
+                if(!in_array($shipment->shipper_status_id,[17,25])){
+
+                    $shipments[] = $shipment->tracking_number;
+                }
             }
             return ['status' => 1, 'success' => 'Other Parcel Receiving Shipments', 'shipments' => $shipments];
         } else {
@@ -459,6 +481,11 @@ class RetailParcelReceivingController extends Controller
         $other_parcel_receiving_id = $request->id;
         $other_parcel_receiving = OtherParcelReceiving::find($other_parcel_receiving_id);
         $other_parcel_receiving_shipments = $other_parcel_receiving->shipments;
+        
+        $other_receiving_total_cns = OtherParcelReceivingShipment::join('shipments as s','s.id','other_parcel_receiving_shipments.shipment_id')
+        ->where('other_parcel_receiving_shipments.other_parcel_receiving_id',$other_parcel_receiving_id)
+        ->whereNotIn('s.shipper_status_id',[17,25])->count();
+
         $html = '<!doctype html>
               <html lang="en">
                 <head>
@@ -579,7 +606,7 @@ class RetailParcelReceivingController extends Controller
                               <div class="col">
                                       <table class="table table-bordered border">
                                           <tbody>
-                                          <tr><td class="color primary w-50">Performa No.</td><td class=" w-50">' . str_pad($other_parcel_receiving->id, 6, '0', STR_PAD_LEFT) . '</td></tr>
+                                          <tr><td class="color primary w-50">Retail Note</td><td class=" w-50">' . str_pad($other_parcel_receiving->id, 6, '0', STR_PAD_LEFT) . '</td></tr>
                                           <tr><td class="color primary w-50">Branch Name</td><td class=" w-50">' . $other_parcel_receiving->user->store->name . '</td></tr>
                                           <tr><td class="color primary w-50">Booking Code</td><td class=" w-50">' . str_pad($other_parcel_receiving->user->id, 6, '0', STR_PAD_LEFT) . '</td></tr>
                                           </tbody>
@@ -617,7 +644,7 @@ class RetailParcelReceivingController extends Controller
         $html .= '
                                           <tr>
                                               <td><b>Total</b></td>
-                                              <td><b>' . $other_parcel_receiving->total_cn . '</b></td>
+                                              <td><b>' . $other_receiving_total_cns . '</b></td>
                                           </tr>';
 
         $html .= '
