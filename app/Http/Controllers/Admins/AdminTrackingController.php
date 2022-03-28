@@ -856,7 +856,7 @@ class AdminTrackingController extends Controller
 
                             $high_alert = HighAlertShipper::where('user_id', $shipper->id)->where('status', 1);
                             if($high_alert->exists()){
-                                $high_alert = $high_alert->first();
+                                $high_alert = $high_alert->latest()->first();
 
                                 $details['high_alert'] = "High alert marked on ". Carbon::parse($high_alert->created_at)->toDateTimeString() . " by " . $high_alert->alerted_by->name . " because of " . $high_alert->description;
 
