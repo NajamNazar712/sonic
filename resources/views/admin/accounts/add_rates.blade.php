@@ -3548,7 +3548,7 @@
                                     </div>
                                     <div class="col-7">
                                         <div class="form-group card border-success p-2">
-                                            <select name="discount_on_destination[${on_discount_weight}]" id="discount_on_destination${on_discount_weight}" class="form-control select2 validated">
+                                            <select name="discount_on_destination[${on_discount_weight}]" id="discount_on_destination${on_discount_weight}" class="form-control select2 validated on_unique_destination">
                                                 @foreach($cities as $city)
                                                     <option value="{{$city->id}}">{{$city->name}}</option>
                                                 @endforeach
@@ -3798,7 +3798,7 @@
                                     </div>
                                     <div class="col-7">
                                         <div class="form-group card border-success p-2">
-                                            <select name="discount_ol_destination[${ol_discount_weight}]" id="discount_ol_destination${ol_discount_weight}" class="form-control select2 validated">
+                                            <select name="discount_ol_destination[${ol_discount_weight}]" id="discount_ol_destination${ol_discount_weight}" class="form-control select2 validated ol_unique_destination">
                                                 @foreach($cities as $city)
             <option value="{{$city->id}}">{{$city->name}}</option>
                                                 @endforeach
@@ -4048,7 +4048,7 @@
                                     </div>
                                     <div class="col-7">
                                         <div class="form-group card border-success p-2">
-                                            <select name="discount_d_destination[${d_discount_weight}]" id="discount_d_destination${d_discount_weight}" class="form-control select2 validated">
+                                            <select name="discount_d_destination[${d_discount_weight}]" id="discount_d_destination${d_discount_weight}" class="form-control select2 validated d_unique_destiantion">
                                                 @foreach($cities as $city)
             <option value="{{$city->id}}">{{$city->name}}</option>
                                                 @endforeach
@@ -4298,7 +4298,7 @@
                                     </div>
                                     <div class="col-7">
                                         <div class="form-group card border-success p-2">
-                                            <select name="discount_sd_destination[${sd_discount_weight}]" id="discount_sd_destination${sd_discount_weight}" class="form-control select2 validated">
+                                            <select name="discount_sd_destination[${sd_discount_weight}]" id="discount_sd_destination${sd_discount_weight}" class="form-control select2 validated sd_unique_destination">
                                                 @foreach($cities as $city)
             <option value="{{$city->id}}">{{$city->name}}</option>
                                                 @endforeach
@@ -5867,6 +5867,62 @@
                 }
             }
         });
+
+        $.validator.addMethod("ol_unique_destination", function (value, element) {
+            var parentForm = $(element).closest('form');
+            var timeRepeated = 0;
+            if (value != '') {
+                $(parentForm.find('.ol_unique_destination')).each(function () {
+                    if ($(this).val() === value && value != 0) {
+                        timeRepeated++;
+                    }
+                });
+            }
+            return timeRepeated === 1 || timeRepeated === 0;
+
+        }, "Destination Can Not Be Duplicate");
+
+        $.validator.addMethod("on_unique_destination", function (value, element) {
+            var parentForm = $(element).closest('form');
+            var timeRepeated = 0;
+            if (value != '') {
+                $(parentForm.find('.on_unique_destination')).each(function () {
+                    if ($(this).val() === value && value != 0) {
+                        timeRepeated++;
+                    }
+                });
+            }
+            return timeRepeated === 1 || timeRepeated === 0;
+
+        }, "Destination Can Not Be Duplicate");
+
+        $.validator.addMethod("d_unique_destination", function (value, element) {
+            var parentForm = $(element).closest('form');
+            var timeRepeated = 0;
+            if (value != '') {
+                $(parentForm.find('.d_unique_destination')).each(function () {
+                    if ($(this).val() === value && value != 0) {
+                        timeRepeated++;
+                    }
+                });
+            }
+            return timeRepeated === 1 || timeRepeated === 0;
+
+        }, "Destination Can Not Be Duplicate");
+
+        $.validator.addMethod("sd_unique_destination", function (value, element) {
+            var parentForm = $(element).closest('form');
+            var timeRepeated = 0;
+            if (value != '') {
+                $(parentForm.find('.sd_unique_destination')).each(function () {
+                    if ($(this).val() === value && value != 0) {
+                        timeRepeated++;
+                    }
+                });
+            }
+            return timeRepeated === 1 || timeRepeated === 0;
+
+        }, "Destination Can Not Be Duplicate");
 
     </script>
 @endsection
