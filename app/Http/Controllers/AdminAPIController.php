@@ -4850,10 +4850,13 @@ class AdminAPIController extends Controller
 
                     }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
-                    if($volume_weight == 0){
+                    if($volume_weight < 0.01){
                         $volume_weight = 0.01;
                     }
                     $dense_weight = $request->weight;
+                    if($dense_weight < 0.01){
+                        $dense_weight = 0.01;
+                    }
 
                     if ($shipment->business_category_id == 2) {
                         if ($dense_weight < $volume_weight) {
@@ -5008,6 +5011,25 @@ class AdminAPIController extends Controller
 
                     ShipmentsJourneyController::add($shipment_id, 2, 2, null, 'DWS Arrival', null, $request->admin_id, $reference_1_id, $reference_2_id, 1, null, $rider_id);
 
+                    if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
+                        if ($shipment->booking_type_id == 4) {
+                            ShipmentChargesController::walkin_weight($shipment_id);
+                        } else {
+                            ShipmentChargesController::weight($shipment_id);
+                            if ($shipment->business_category_id == 1) {
+                                ShipmentChargesController::cash_handling($shipment_id);
+                                ShipmentChargesController::insurance($shipment_id);
+                                ShipmentChargesController::fuel_surcharge($shipment_id);
+                            } else {
+                                ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                            }
+                        }
+
+                        if ($shipment->walk_in_status == 0) {
+                            InitialChargesWebhookController::webhook_subscription($shipment_id);
+                        }
+                    }
+
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if ($self_collection_shipment->exists()) {
                         if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
@@ -5073,24 +5095,6 @@ class AdminAPIController extends Controller
                     if ($booking_sms->exists()) {
                         NotificationsController::send(3, $shipment_id);
                     }
-                    if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
-                        if ($shipment->booking_type_id == 4) {
-                            ShipmentChargesController::walkin_weight($shipment_id);
-                        } else {
-                            ShipmentChargesController::weight($shipment_id);
-                            if ($shipment->business_category_id == 1) {
-                                ShipmentChargesController::cash_handling($shipment_id);
-                                ShipmentChargesController::insurance($shipment_id);
-                                ShipmentChargesController::fuel_surcharge($shipment_id);
-                            } else {
-                                ShipmentChargesController::international_fuel_surcharge($shipment_id);
-                            }
-                        }
-
-                        if ($shipment->walk_in_status == 0) {
-                            InitialChargesWebhookController::webhook_subscription($shipment_id);
-                        }
-                    }
 
                     if ($shipment->shipment_type != 2 && $shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
@@ -5142,24 +5146,26 @@ class AdminAPIController extends Controller
 
                     }
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
-                    if ($pickup_request->received >= 1) {
-                        $pickup_note_request = $pickup_request->pickup_note_request;
-                        if ($pickup_note_request) {
-                            $pickup_note_id = $pickup_note_request->pickup_note_id;
-                            $pickup_note_request->status = 1;
-                            $pickup_note_request->save();
-//                            $pickup_note = V2PickupNote::find($pickup_note_id);
-
+                    if($pickup_request){
+                        if ($pickup_request->received >= 1) {
+                            $pickup_note_request = $pickup_request->pickup_note_request;
+                            if ($pickup_note_request) {
+                                $pickup_note_id = $pickup_note_request->pickup_note_id;
+                                $pickup_note_request->status = 1;
+                                $pickup_note_request->save();
+    //                            $pickup_note = V2PickupNote::find($pickup_note_id);
+    
+                            }
+    
+                            $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
+                            if ($retail_pickup_note->exists()) {
+                                $retail_pickup_note = $retail_pickup_note->first();
+                                $retail_pickup_note->status = 3;
+                                $retail_pickup_note->save();
+                            }
+    
+    
                         }
-
-                        $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
-                        if ($retail_pickup_note->exists()) {
-                            $retail_pickup_note = $retail_pickup_note->first();
-                            $retail_pickup_note->status = 3;
-                            $retail_pickup_note->save();
-                        }
-
-
                     }
                     $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
                     if ($pickup_note_requests_count == 0) {
@@ -6686,10 +6692,13 @@ class AdminAPIController extends Controller
                 $sale_users_bypass = explode(',', $settings->text);
             }
             if(in_array($request->admin_id,$sale_users_bypass)){
-                $admin_list = Admin::where('status', 1)->select('id', 'name')->get();
+                $admin_list = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
                 return response()->json(['status' => 0, 'admin_list' => $admin_list]);
             }
-            return response()->json(['status' => 0, 'admin_list' => []]);
+            else {
+                $admin_list = Admin::where('status', 1)->where('id', $request->admin_id)->select('id', 'name')->get();
+                return response()->json(['status' => 0, 'admin_list' => $admin_list]);
+            }
         }
         if ($request->isMethod('post')){
             $daily_visit = DB::connection('reports')->table('daily_visits')
@@ -6704,7 +6713,7 @@ class AdminAPIController extends Controller
                     $daily_visit = $daily_visit->whereDate('daily_visits.created_at', $request->from_date);
                 }
             }
-            if($request->user_id){
+            if(!$request->admin_id){
                 $daily_visit = $daily_visit->where('a.id', $request->user_id);
             }else{
                 $daily_visit = $daily_visit->where('a.id', $request->admin_id);
