@@ -490,6 +490,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('add_remarks', 'Shippers\ShipperPickupController@add_remarks')->name('add_remarks');
         Route::post('cancel', 'Shippers\ShipperPickupController@cancel')->name('cancel');
         Route::post('renew', 'Shippers\ShipperPickupController@renew')->name('renew');
+        Route::get('view_details', 'Shippers\ShipperPickupController@view_details')->name('view_details');
     });
 
     Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function (){
