@@ -11131,9 +11131,6 @@ class RiderAPIController extends Controller
                             if ($shipment->exists()) {
                                 $shipment = $shipment->first();
                                 if($shipment->shipper_status_id == 1 && in_array($shipment->id, $pickup_request_shipments)){
-                                    if ($shipment->shipper_status_id == 17) {
-                                        AdminPickupsController::generate($shipment->id);
-                                    }
                                     $shipment->shipper_status_id = 53;
                                     $shipment->consignee_status_id = 53;
                                     $shipment->save();
