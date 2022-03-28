@@ -447,7 +447,7 @@ class ReturnController extends Controller
                     continue;
                 }
                 $remark_inp = "remark.$shipment";
-                if(!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55])){
+                if(!in_array($parcel->shipper_status_id, [5, 13, 15, 20, 54, 55])){
 
 //                    $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
 //                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
@@ -4730,14 +4730,20 @@ class ReturnController extends Controller
             }
        })
        ->editColumn('status',function ($rcp){
-            if($rcp->status == 0){
+            if ($rcp->status == 0) {
                 return 'Pending';
             }
-            else if($rcp->status == 2){
+            else if ($rcp->status == 1) {
+                return 'Return';
+            }
+            else if ($rcp->status == 2) {
                 return 'Re-Attempt';
             }
-            else{
-                return 'Return';
+            else if ($rcp->status == 3) {
+                return 'Attempt Limit Reached';
+            }
+            else {
+                return 'Invalid Number';
             }
        })
        ->filterColumn('return_confirmation_pending_sms_attempts.status',function ($query,$keyword){
@@ -4746,11 +4752,17 @@ class ReturnController extends Controller
            if ($keyword == 'pending') {
                $query->where('return_confirmation_pending_sms_attempts.status',0);
            }
-           else if($keyword == 'return'){
+           else if($keyword == 'return') {
                $query->where('return_confirmation_pending_sms_attempts.status',1);
            }
-           else if($keyword == 're-attempt'){
+           else if($keyword == 're-attempt') {
                $query->where('return_confirmation_pending_sms_attempts.status',2);
+           }
+           else if($keyword == 'attempt limit reached') {
+               $query->where('return_confirmation_pending_sms_attempts.status',3);
+           }
+           else if($keyword == 'invalid number') {
+               $query->where('return_confirmation_pending_sms_attempts.status',4);
            }
            else {
                $query->whereRaw('false');
