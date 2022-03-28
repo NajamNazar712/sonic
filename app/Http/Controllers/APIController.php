@@ -4645,4 +4645,67 @@ class APIController extends Controller
             return ['status' => 0, 'message' => 'Unauthorized IP'];
         }
     }
+
+    public function receiving_sheet_list(Request $request){
+        $user_id = $request->user_id;
+
+        $rules = [
+            
+            'from_date' => ['required', 'date_format:Y-m-d'],
+            'to_date' => ['required', 'date_format:Y-m-d'],
+
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $from = $request->from_date;
+            $to = $request->to_date;
+
+            $receiving_sheets = ReceivingSheet::join('user_shipping_infos as usi', 'receiving_sheets.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities as c', 'usi.city_id', '=', 'c.id')
+            ->join('users as u','u.id','=','receiving_sheets.user_id')
+            ->select('receiving_sheets.id as receiving_sheet_id','receiving_sheets.created_at as created_at','receiving_sheets.booked as bookings', 'receiving_sheets.received as receiving','receiving_sheets.pickup_address_id as pickup_address', 'c.name as origin', 'usi.pickup_address as address')
+            ->whereBetween('receiving_sheets.created_at', [$from,$to]);
+
+            if($receiving_sheets->exists()){
+                $receiving_sheets = $receiving_sheets->get();
+
+                $details = array();
+                $details['status'] = 0;
+                $details['from_date'] = $from;
+                $details['to_date'] = $to;
+                $details['receiving_sheets'] = [];
+                foreach ($receiving_sheets as $receiving_sheet) {
+                    $detail = array();
+                    $detail['receiving_sheet_id'] = str_pad($receiving_sheet->receiving_sheet_id, 6, '0', STR_PAD_LEFT);
+                    $detail['created_at'] = Carbon::parse($receiving_sheet->created_at)->format('d/m/Y h:i A');
+                    $detail['shipments_booked'] = $receiving_sheet->bookings;
+                    $detail['shipments_received'] = $receiving_sheet->receiving;
+                    if($receiving_sheet->bookings != 0){
+                        $detail['shipments_short_received'] = $receiving_sheet->bookings - $receiving_sheet->receiving;
+                    }else{
+                        $detail['shipments_short_received'] = 0;
+                    }
+                    $detail['pickup_address_id'] = $receiving_sheet->pickup_address;
+                    $detail['origin_city'] = $receiving_sheet->origin;
+                    $detail['address'] = $receiving_sheet->address;
+                    array_push($details['receiving_sheets'] , $detail);
+                }
+
+                return response()->json($details);
+
+
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Receiving Sheet Not Found ']);
+
+            }
+
+        }
+    }
 }
