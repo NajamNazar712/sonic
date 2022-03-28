@@ -11357,7 +11357,8 @@ class RiderAPIController extends Controller
         }
     }
 
-    public function store_device_token(Request $request){
+    public function check_profile_v3(Request $request)
+    {
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
         if($rider){
@@ -11369,11 +11370,24 @@ class RiderAPIController extends Controller
                 $employee_device_token->employee_type_id = 2;
                 $employee_device_token->device_token = $request->get('device_token');
                 $employee_device_token->save();
-                return response()->json(['status' => 0, 'device_token_message' => 'Device Token Stored']);
             }
-            return response()->json(['status' => 1, 'device_token_message' => 'Provide Device Token']);
+            $rider->current_app_version = $request->app_version;
+            $rider->save();
+            $profile = Employee::where('trax_id', $rider->trax_id);
+            if ($profile->exists()) {
+                $profile = $profile->first();
+                if(!$profile->blood_group || !$profile->emergency_contact || !$profile->emergency_contact_person || !$profile->guardian_name || !$profile->mother_name  || !$profile->address  || !$profile->employee_gender_id || !$profile->religion_id || !$profile->marital_status_id || !$profile->date_of_birth || !$profile->shift_id || !$profile->domicile_id || !$profile->rider_main_category || !$profile->rider_sub_category || !$profile->nationality_id){
+                    return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => "Profile already updated"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
+            }
+        }else{
+            return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
         }
-        return response()->json(['status' => 1, 'device_token_message' => 'Invalid Rider']);
+
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
