@@ -13,7 +13,7 @@ class AddCountToUsercheckstatusTable extends Migration
      */
     public function up()
     {
-        Schema::table('User_Check_Statuses', function (Blueprint $table) {
+        Schema::table('user_check_statuses', function (Blueprint $table) {
             $table->bigInteger('status_count');
         });
     }
@@ -25,7 +25,7 @@ class AddCountToUsercheckstatusTable extends Migration
      */
     public function down()
     {
-        Schema::table('User_Check_Statuses', function (Blueprint $table) {
+        Schema::table('user_check_statuses', function (Blueprint $table) {
             $table->dropColumn('status_count');
         });
     }

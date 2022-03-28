@@ -160,12 +160,12 @@ class NotificationsController extends Controller
 
     static private function bot_sms($body, $to) {
         $sms = new SMS();
-  
+
         $sms->to = str_replace('-', '', $to);
         $sms->body = $body;
-  
+
         $sms->save();
-  
+
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
@@ -8459,6 +8459,7 @@ class NotificationsController extends Controller
 
                     $html .= '<table style="width:100%;">';
                     $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>';
+                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Trax ID</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">CNIC Number</th>';
@@ -8468,7 +8469,7 @@ class NotificationsController extends Controller
                         $data_set = Rider::find($data->id);
                         $data_set->status = 0;
                         $data_set->save();
-                        $employee_directory = Employee::where('trax_id', $data_set->trax_id);
+                        $employee_directory = Employee::where('trax_id', $data_set->trax_id)->where('employee_type_id',2);
                         if($employee_directory->exists()){
                             $employee_directory = $employee_directory->first();
                             $employee_directory->status_id = 2;
@@ -8477,6 +8478,7 @@ class NotificationsController extends Controller
 
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->trax_id . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->phone . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cnic . '</td>';
@@ -8486,10 +8488,10 @@ class NotificationsController extends Controller
                     $html .= '</tr></tbody></table>';
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
-                    $subject = ' Rider deactivation';
-                    $to = ['Hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk'];
+                    $subject = ' Rider Deactivation';
+                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
 
-//                    self::email($subject, $body_updated, $to);
+                    self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
                     $now = Carbon::now();
                     $month = $now->subMonth()->format('F');
@@ -9056,7 +9058,65 @@ class NotificationsController extends Controller
                     $to = $shipment->consignee_phone_number_1;
                     $data = array($body, $to);
                     return $data;
-                  
+
+                }else if($id == 131) {
+                    $request_no = $reference_1_id;
+                    $admin_id = $reference_2_id;
+                    if (strpos($body, '[request_no]') !== FALSE) {
+                        $body = str_replace('[request_no]', $request_no, $body);
+                    }
+                    $admin = Admin::find($admin_id);
+                    $to = $admin->email;
+                    self::email($subject, $body, $to);
+                }
+                else if ($id == 170) {
+                    $sale_person = Admin::find($reference_1_id);
+                    $shipper_ids = $reference_2_id;
+                    if($sale_person && $sale_person->email){
+                        $shippers_data = User::leftJoin('shipments as s', function ($join) {
+                            $join->on('s.user_id', '=', 'users.id')
+                                ->where('s.id', '=',
+                                    DB::raw('(select max(id) from shipments where shipments.user_id = users.id)'));
+                        })
+                            ->select('users.name as shipper_name', 'users.id as account_id', 's.tracking_number as last_tracking_number')
+                            ->whereIn('users.id', $reference_2_id);
+                        if($shippers_data->exists()){
+                            $shippers_data = $shippers_data->get();
+                            if (strpos($body, '[sale_person]') !== FALSE) {
+                                $body = str_replace('[sale_person]',$sale_person->name, $body);
+                            }
+                            $html = '';
+                            $html .= '<table style="width:100%;">';
+                            $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>';
+                            $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account ID</th>';
+                            $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Last Tracking No.</th>';
+                            $html .= '</tr></thead><tbody>';
+                            foreach ($shippers_data as $datum) {
+                                $account_id = str_pad($datum->account_id, 6, 0, STR_PAD_LEFT);
+                                $last_tracking = ($datum->last_tracking_number) ? $datum->last_tracking_number : "-";
+                                $html .= '<tr>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->shipper_name . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $account_id . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $last_tracking . '</td>';
+                            }
+                            $html .= '</tr></tbody></table>';
+                            $body_updated = $body;
+                            $body_updated = str_replace('[preview]', $html, $body_updated);
+                            $to = $sale_person->email;
+                            self::email($subject, $body_updated, $to);
+                        }
+                    }
+                }
+                else if ($id == 171) {
+                    $name = $reference_1_id;
+                    $phone_number = $reference_2_id;
+
+                    if (strpos($body, '[name]') !== FALSE) {
+                        $body = str_replace('[name]', $name, $body);
+                    }
+
+                    $to = $phone_number;
+                    self::sms($body, $to);
                 }
             }
         }
@@ -9346,6 +9406,24 @@ class NotificationsController extends Controller
                     $data['title'] = $title;
                     $data['body'] = $body;
                     $data['lead_id'] = $lead->id;
+                } else if ($id == 16) {
+                    $admin = Admin::find($reference1_id);
+                    $shippers = User::whereIn('id', $reference2_id)->select('name');
+                    if($admin && $shippers->exists()){
+                        $shippers = $shippers->get();
+                        $shipper_name = '';
+                        foreach ($shippers as $shipper){
+                            $shipper_name .= $shipper->name.PHP_EOL;
+                        }
+                        if (strpos($body, '[sale_person]') !== FALSE) {
+                            $body = str_replace('[sale_person]', $admin->name, $body);
+                        }
+                        if (strpos($body, '[shipper_names]') !== FALSE) {
+                            $body = str_replace('[shipper_names]', $shipper_name, $body);
+                        }
+                    }
+                    $data['title'] = $title;
+                    $data['body'] = $body;
                 }
                 $employee_device_token = EmployeeDeviceToken::where('employee_id', $employee_id)
                     ->where('employee_type_id', $employee_type)
