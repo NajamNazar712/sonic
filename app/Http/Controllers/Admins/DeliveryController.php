@@ -841,10 +841,6 @@ class DeliveryController extends Controller
 
                 }
 
-                if ($normal_rider) {
-                    NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
-                }
-
                 foreach ($valid_shipments as $index => $shipment) {
                     NotificationsController::send(10, $note->id, $shipment);
                     NotificationsController::send(11, $note->id, $shipment);
@@ -872,6 +868,9 @@ class DeliveryController extends Controller
                     }
                 }
                 NotificationsController::send(40, $note->id);
+                if ($normal_rider) {
+                    NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
+                }
             }
 
             //rider attendance

@@ -11357,6 +11357,25 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function store_device_token(Request $request){
+        $rider_id = $request->rider_id;
+        $rider = Rider::find($rider_id);
+        if($rider){
+            if($request->has('device_token')){
+                EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id',$rider->id)->delete();
+                $employee_device_token = new EmployeeDeviceToken();
+                $employee_device_token->employee_id = $rider->id;
+                $employee_device_token->employee_type_id = 2;
+                $employee_device_token->device_token = $request->get('device_token');
+                $employee_device_token->save();
+                return response()->json(['status' => 0, 'device_token_message' => 'Device Token Stored']);
+            }
+            return response()->json(['status' => 1, 'device_token_message' => 'Provide Device Token']);
+        }
+        return response()->json(['status' => 1, 'device_token_message' => 'Invalid Rider']);
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){

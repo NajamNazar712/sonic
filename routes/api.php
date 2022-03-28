@@ -127,6 +127,7 @@ Route::name('api.')->group(function () {
 
 		Route::middleware('RiderAPIToken')->group(function () {
             Route::get('check_app_version', 'Rider\RiderAPIController@check_bolt_version')->name('check_app_version');
+            Route::post('store_device_token', 'Rider\RiderAPIController@store_device_token')->name('store_device_token');
             Route::prefix('pickup')->name('pickup.')->group(function () {
                 Route::get('summary', 'Rider\RiderAPIController@pickup_summary')->name('pickup_summary');
                 Route::post('pick', 'Rider\RiderAPIController@pickup_pick')->name('pickup_pick');
@@ -283,6 +284,7 @@ Route::name('api.')->group(function () {
             Route::get('check_permissions', 'AdminAPIController@check_permissions')->name('check_permissions');
             Route::post('return_note_details', 'AdminAPIController@return_note_details')->name('return_note_details');
             Route::post('history_update_image', 'AdminAPIController@history_update_image')->name('history_update_image');
+            Route::post('store_device_token', 'AdminAPIController@store_device_token')->name('store_device_token');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
                 Route::get('shift', 'AdminAPIController@employee_shift')->name('shift');

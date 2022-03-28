@@ -5380,6 +5380,7 @@ class AdminAPIController extends Controller
                     $information['role'] = 'staff';
                     if($request->has('device_token')){
                         EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                        EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id',$user->id)->delete();
                         $employee_device_token = new EmployeeDeviceToken();
                         $employee_device_token->employee_id = $user->id;
                         $employee_device_token->employee_type_id = 1;
@@ -6715,5 +6716,24 @@ class AdminAPIController extends Controller
             }
             return response()->json(['status' => 1, 'message' => 'No data found!']);
         }
+    }
+
+    public function store_device_token(Request $request){
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            if($request->has('device_token')){
+                EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id',$admin->id)->delete();
+                $employee_device_token = new EmployeeDeviceToken();
+                $employee_device_token->employee_id = $admin->id;
+                $employee_device_token->employee_type_id = 1;
+                $employee_device_token->device_token = $request->get('device_token');
+                $employee_device_token->save();
+                return response()->json(['status' => 0, 'device_token_message' => 'Device Token Stored']);
+            }
+            return response()->json(['status' => 1, 'device_token_message' => 'Provide Device Token']);
+        }
+        return response()->json(['status' => 1, 'device_token_message' => 'Invalid Admin']);
     }
 }
