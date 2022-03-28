@@ -20,7 +20,7 @@
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
-										<th class="border-primary border-darken-1">S. No.</th>
+										<th class="border-primary border-darken-1">Table ID</th>
 										<th class="border-primary border-darken-1">Designation</th>
 										<th class="border-primary border-darken-1">Department</th>
 										<th class="border-primary border-darken-1">Created Datetime</th>
@@ -76,7 +76,7 @@
 				rowId: 'id',
 				order: [[4, 'desc']],
 				columns: [
-					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'id', name: 'admin_roles.id', class: 'align-middle id'},
 					{data: 'name', name: 'admin_roles.name', class: 'align-middle name'},
 					{data: 'department', name: 'ad.id', class: 'align-middle department'},
 					{data: 'created_at', name: 'admin_roles.created_at', class: 'align-middle created_at'},
@@ -87,7 +87,7 @@
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
 
-					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+					// $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());

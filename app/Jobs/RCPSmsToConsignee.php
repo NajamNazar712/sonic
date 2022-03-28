@@ -38,67 +38,94 @@ class RCPSmsToConsignee implements ShouldQueue
      */
     public function handle()
     {
+        $data = NotificationsController::send(169, $this->shipment_id);
 
-       $data = NotificationsController::send(169,$this->shipment_id);
-       self::telecard($data,$this->shipment_id);
+        $sms = new SMS();
+
+        $sms->to = str_replace('-', '', $data[1]);
+        $sms->body = $data[0];
+
+        $sms->save();
+        
+       self::its($sms, $this->shipment_id);
 
     }
-    private function telecard($sms,$shipment_id) {
-        //$to = ['nabeel.siddiqui@trax.pk'];
+
+    private function its($sms, $shipment_id) {
         try {
             $limit = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
-            if($limit) {
-                $attempt = ReturnConfirmationPendingSmsAttempt::where('shipment_id', $shipment_id);
+
+            if ($limit) {
+                $attempt = ReturnConfirmationPendingSmsAttempt::where('shipment_id', $shipment_id)->where('status', 0);
                 $current_count = 0;
                 $status = true;
-                if ($attempt->exists()) {
-                    $attempt = $attempt->first();
-                    $current_count = $attempt->count;
-                    $status = $attempt->status == 0;
-                }
-                if ($current_count < $limit->text && $status) {
 
-                    $client = new Client(['base_uri' => 'https://bsms.telecard.com.pk/SMSPortal/Customer/ProcessSMS.aspx', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
+                if ($attempt->exists()) {
+                    $attempt = $attempt->latest('id')->first();
+                    $current_count = $attempt->count;
+                }
+                else {
+                    $attempt = FALSE;
+                }
+
+                if ($current_count < $limit->text) {
+                    $client = new Client(['base_uri' => 'https://gateway.its.com.pk/api', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
                     $response = $client->get('', [
                         'query' => [
-                            'userid' => 'TraxPL',
-                            'pwd' => 'TRAX@2022',
-                            'mobileno' => $sms[1],
-                            'msg' => $sms[0]
+                            'action' => 'sendmessage',
+                            'username' => 'Trax',
+                            'password' => 'Tr@x!101',
+                            'originator' => 87323,
+                            'recipient' => $sms->to,
+                            'messagedata' => $sms->body
                         ]
                     ]);
 
-                    $response = $response->getBody()->getContents();
+                    $response = simplexml_load_string($response->getBody());
+                    $response = json_decode(json_encode($response), true);
 
-                    if (substr($response, 0, 2) == 'OK') {
+                    if (isset($response['data']['acceptreport']) && $response['data']['acceptreport']['statuscode'] == 0) {
+                        $sms->status = 3;
 
-                        SMS::create(['to' => $sms[1],'body'=>$sms[0],'status' => 3]);
-                        if($current_count == 0){
-                            ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment_id, 'status' => 1, 'count' => 1]);
+                        $sms->save();
+
+                        if (!$attempt) {
+                            ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment_id, 'status' => 0, 'count' => 1]);
                         }
-                        else{
+                        else {
                             $attempt->count = $attempt->count + 1;
                             $attempt->update();
                         }
-                        
-                    } else {
-                        $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-                        SMS::create(['to' => $sms[1],'body'=>$sms[0],'status' => 2]);
-                        $subject = '[Error] RCP SMS API';
-                        $body = 'Unrecognized Error in RCP SMS API.<br/>Response Received: ' . json_encode($response);
+                    }
+                    else {
+                        $sms->status = 2;
+
+                        $sms->save();
+
+                        if ($attempt) {
+                            $attempt->status = 4;
+                            $attempt->update();
+                        }
+
+                        $to = ['muhammad.yousuf@trax.pk'];
+                        $subject = '[Error] SMS API - ITS';
+                        $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
 
                         $mail = Mail::to($to)->send(new Notifications($subject, $body));
                     }
                 }
+                else {
+                    if ($attempt) {
+                        $attempt->status = 3;
+                        $attempt->update();
+                    }
+                }
             }
         } catch (RequestException $e) {
-            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-            SMS::create(['to' => $sms[1],'body'=>$sms[0],'status' => 1]);
-            $subject = '[Error] RCP SMS API';
-            $body = 'Unrecognized Error in RCP SMS API.<br/>Response Received: ' . $e->getMessage();
+            $sms->status = 1;
 
-            $mail = Mail::to($to)->send(new Notifications($subject, $body));
+            $sms->save();
         }
     }
 }

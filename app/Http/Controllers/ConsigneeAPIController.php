@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\CRM\CRMController;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\City;
 use App\Http\Models\ConsigneeOtp;
@@ -289,6 +290,11 @@ class ConsigneeAPIController extends Controller
                 if ($consignee_shipment->status_id == 5) {
                     $datum['latitude'] = $consignee_shipment->consignee_latitude;
                     $datum['longitude'] = $consignee_shipment->consignee_longitude;
+                    $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $consignee_shipment->id)->latest('delivery_note_id')->first();
+                    $delivery_note = $delivery_note_shipment->delivery_note;
+                    $rider = $delivery_note->rider;
+                    $datum['rider_name'] = $rider->name;
+                    $datum['rider_phone_number'] = $rider->phone;
                 } elseif (in_array($consignee_shipment->status_id, [3, 49])) {
 
                     $origin_city = City::where('id', $pickup_address->city_id);
@@ -317,6 +323,14 @@ class ConsigneeAPIController extends Controller
                         $datum['runner_id'] = $fleet->runner_id;
                     }
                 } else {
+                    if(in_array($consignee_shipment->status_id, [14, 20])){
+                        if($consignee_shipment->status_id == 14){
+                            $datum['received_by'] = $consignee_shipment->shipment_journey->received_or_refused_by;
+                        }
+                        else if ($consignee_shipment->status_id == 20){
+                            $datum['refused_by'] = $consignee_shipment->shipment_journey->received_or_refused_by;
+                        }
+                    }
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $consignee_shipment->shipment_id)
                         ->where('shipper_status_id', $consignee_shipment->status_id)
                         ->orderBy('id', 'DESC');
