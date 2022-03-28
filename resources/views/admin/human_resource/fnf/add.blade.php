@@ -92,7 +92,7 @@
                                             <span class="la la-calendar-o small-calender-icon"></span>
                                         </span>
                                                     </div>
-                                                    <input type="text" name="joining_date" class="form-control bg-primary border-primary white rounded-right pickadate" id="joining_date" placeholder="Joining Date" data-rule-required="true" data-msg-required="Joining Date is required">
+                                                    <input type="text" id="joining_date" name="joining_date" class="form-control bg-primary border-primary white rounded-right pickadate" id="joining_date" placeholder="Joining Date" data-rule-required="true" data-msg-required="Joining Date is required">
                                                 </div>
                                             </div>
                                         </div>
@@ -200,6 +200,8 @@
                           $('#designation').val(data.data.designation).trigger('change');
                           $('#department_id').val(data.data.department).trigger('change');
                           $('#city').val(data.data.city);
+                          $('#joining_date').val(data.data.joining_date);
+                          
                        }
                        else{
                            toastr.error(data.error, 'Error!', {
@@ -214,7 +216,7 @@
             var joining_date = $('#joining_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                format:'dd mmmm, yyyy',
+                format:'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
@@ -231,7 +233,7 @@
             var resign_date = $('#resign_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                format:'dd mmmm, yyyy',
+                format:'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
@@ -246,6 +248,8 @@
             });
 
             $('#employee_information_form').validate({
+                
+                
                 ignore: [],
                 errorClass: 'danger',
                 successClass: 'success',
@@ -253,6 +257,11 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function(form) {
+                    $('#department_id').removeAttr('disabled');
+                    $('#city').removeAttr('disabled');
+                    $('#designation').removeAttr('disabled');
+                    $('#employee_name').removeAttr('disabled');
+                    
                     swal({
                         title: 'Please Wait!',
                         text: 'Your request is being processed!',

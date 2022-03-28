@@ -60,7 +60,7 @@
                     </div>
                     <div class="col-4 mb-1">
                         <fieldset class="form-group">
-                            <select name="status_marked" id="status_marked" class="form-control status_marked">
+                            <select name="status_marked[]" multiple="multiple" id="status_marked" class="form-control status_marked">
                                 @foreach($statuses as $status)
                                     <option value="{{$status->id}}">{{$status->name}}</option>
                                 @endforeach
@@ -113,6 +113,7 @@
                         <th class="border-primary border-darken-1">Status Marked</th>
                         <th class="border-primary border-darken-1">Status Marking Date</th>
                         <th class="border-primary border-darken-1">Status Marked By</th>
+                        <th class="border-primary border-darken-1">Status Marked By Department</th>
                         <th class="border-primary border-darken-1">Assigned Rider</th>
                     </tr>
                     </thead>
@@ -240,7 +241,7 @@
                 allowClear:true,
             });
            
-            $('#status_marked').prepend('<option value="" selected="selected"></option>').select2({
+            $('#status_marked').prepend('<option value="" ></option>').select2({
                 width:'100%',
                 placeholder:"Select Status",
                 allowClear:true,
@@ -320,6 +321,7 @@
                             head.push('Status Marked');
                             head.push('Status Marking Date');
                             head.push('Status Marked By');
+                            head.push('Status Marked By Depertment');
                             head.push('Assigned Rider');
                             
                             $.each(result.data, function(index, values) {
@@ -332,6 +334,7 @@
                                 row.push(values.status_marked);
                                 row.push(values.status_marking_date);
                                 row.push(values.status_marked_by);
+                                row.push(values.status_marked_by_department);
                                 row.push(values.rider_status_marked_by);
 
                                 body.push(row);
@@ -392,6 +395,7 @@
                     {data: 'status_marked', name: 'ss.id', class: 'align-middle status_marked'},
                     {data: 'status_marking_date', name: 'shipments_journey.created_at', class: 'align-middle status_marking_date'},
                     {data: 'status_marked_by', name: 'ad.name', class: 'align-middle status_marked_by'},
+                    {data: 'status_marked_by_department', name: 'dpt.name', class: 'align-middle status_marked_by_department'},
                     {data: 'rider_status_marked_by', name: 'r.name', class: 'align-middle rider_status_marked_by'},
                     
                 ],
