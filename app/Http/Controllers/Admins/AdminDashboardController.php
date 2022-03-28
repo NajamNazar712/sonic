@@ -2574,7 +2574,7 @@ class AdminDashboardController extends Controller
                     'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
                     'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on',
 
-                    'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on|numeric',
+                    'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on',
                 ];
             }
             //overland
@@ -2611,7 +2611,7 @@ class AdminDashboardController extends Controller
                     'ol_discount_return_rate' => 'required_if:ol_discount_return_switch,==,on',
                     'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
 
-                    'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on|numeric',
+                    'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on',
                 ];
             }
             //overland
@@ -2648,7 +2648,7 @@ class AdminDashboardController extends Controller
                     'detain_discount_return_rate' => 'required_if:detain_discount_return_switch,==,on',
                     'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
 
-                    'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on|numeric',
+                    'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on',
                 ];
             }
             //sameday
@@ -2682,7 +2682,7 @@ class AdminDashboardController extends Controller
                     'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
                     'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
 
-                    'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on|numeric',
+                    'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on',
                 ];
             }
 
@@ -4551,7 +4551,7 @@ class AdminDashboardController extends Controller
                     'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
                     'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on',
 
-                    'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on|numeric',
+                    'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on',
                 ];
             }
             //overland
@@ -4588,7 +4588,7 @@ class AdminDashboardController extends Controller
                     'ol_discount_return_rate' => 'required_if:ol_discount_return_switch,==,on',
                     'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
 
-                    'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on|numeric',
+                    'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on',
                 ];
             }
             //overland
@@ -4625,7 +4625,7 @@ class AdminDashboardController extends Controller
                     'detain_discount_return_rate' => 'required_if:detain_discount_return_switch,==,on',
                     'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
 
-                    'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on|numeric',
+                    'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on',
                 ];
             }
             //sameday
@@ -4659,7 +4659,7 @@ class AdminDashboardController extends Controller
                     'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
                     'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
 
-                    'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on|numeric',
+                    'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on',
                 ];
             }
 
@@ -7266,7 +7266,7 @@ class AdminDashboardController extends Controller
                 'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
                 'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on',
 
-                'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on|numeric',
+                'discount_on_destination' => 'required_if:on_discount_destination_wise_weight_switch,==,on',
             ];
         }
         //overland
@@ -7303,7 +7303,7 @@ class AdminDashboardController extends Controller
                 'ol_discount_return_rate' => 'required_if:ol_discount_return_switch,==,on',
                 'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
 
-                'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on|numeric',
+                'discount_ol_destination' => 'required_if:ol_discount_destination_wise_weight_switch,==,on',
             ];
         }
         //overland
@@ -7340,7 +7340,7 @@ class AdminDashboardController extends Controller
                 'detain_discount_return_rate' => 'required_if:detain_discount_return_switch,==,on',
                 'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
 
-                'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on|numeric',
+                'discount_d_destination' => 'required_if:d_discount_destination_wise_weight_switch,==,on',
             ];
         }
         //sameday
@@ -7374,7 +7374,7 @@ class AdminDashboardController extends Controller
                 'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
                 'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
 
-                'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on|numeric',
+                'discount_sd_destination' => 'required_if:sd_discount_destination_wise_weight_switch,==,on',
             ];
         }
 
