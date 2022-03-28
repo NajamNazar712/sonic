@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminAppSlider;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\AutoTagTerritory;
 use App\Http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
@@ -115,6 +116,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
 
 class GlobalSettingsController extends Controller
@@ -1645,8 +1647,8 @@ class GlobalSettingsController extends Controller
     public function crm_case_nature_types_list(Request $request)
     {
         $case_nature_types = CrmRequestCaseNatureType::leftjoin('crm_request_case_nature as crcs', 'crcs.id', '=', 'crm_request_case_nature_types.nature_id')
-            ->select('crm_request_case_nature_types.id','crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type', 'crm_request_case_nature_types.status_id as status');
-
+            ->select('crm_request_case_nature_types.id','crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type', 'crm_request_case_nature_types.status_id as status')
+            ->where('crm_request_case_nature_types.id','<>',34);
         $datatable = Datatables::of($case_nature_types)
             ->editColumn('status', function($case_nature_types) {
                 if($case_nature_types->status==1){
@@ -4875,16 +4877,15 @@ class GlobalSettingsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),469);
         $agents = Admin::select('id', 'name')->whereIn('role_id',[37,28])->get();//37,28 role
         $zones = Zone::where('status',1)->where('business_category_id',1)->get();
-        $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
+        // $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
 
-        return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents , 'zones' => $zones, 'case_natures' => $case_natures]);
+        return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents , 'zones' => $zones]);
     }
 
     public function crm_auto_assigning_list(){
         $roles = CrmAgent::join('admins as ad', 'ad.id', '=', 'crm_agents.admin_id')
                  ->join('zones as z','z.id','crm_agents.zone_id')   
-                 ->join('crm_request_case_nature as cn','cn.id','crm_agents.case_nature_id')   
-        ->select('crm_agents.id', 'ad.name as agent_name', 'z.name as zone_name', 'cn.name as case_nature','crm_agents.status as status');
+        ->select('crm_agents.id', 'ad.name as agent_name', 'z.name as zone_name','crm_agents.status as status','crm_agents.case_nature_id as case_nature');
         
     $datatables = Datatables::of($roles)
         ->addColumn('action', function($roles) {
@@ -4948,13 +4949,20 @@ class GlobalSettingsController extends Controller
                 return 'Disable';
             }
             
+        })->editColumn('case_nature', function($roles) {
+            if($roles->case_nature == 4){
+                return 'Claim';
+            }else{
+                return 'Complaints / Service Request';
+            }
+            
         });
 
     return $datatables->make(true);
     }
 
     public function crm_auto_assigning_submit(Request $request){
-        $crm_agent = CrmAgent::where('admin_id',$request->admin_id)->where('case_nature_id',$request->case_nature_id);
+        $crm_agent = CrmAgent::where('admin_id',$request->admin_id);
         if(!$crm_agent->exists()){
 
             CrmAgent::create($request->all());
@@ -4963,8 +4971,6 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('error', 'Agent Already Exists!');
 
         }
-
-
     }
 
     public function crm_auto_assigning_data(Request $request){
@@ -4972,9 +4978,9 @@ class GlobalSettingsController extends Controller
 
         $agent_id = $crm_agent_data->admin_id;
         $zone_id = $crm_agent_data->zone_id;
-        $case_nature_id = $crm_agent_data->case_nature_id;
+        // $case_nature_id = $crm_agent_data->case_nature_id;
         $crm_agent_id = $crm_agent_data->id;
-        return response()->json(['status' => 1, 'agent_id' => $agent_id,'zone_id' => $zone_id ,'case_nature_id'=> $case_nature_id,'crm_agent_id'=> $crm_agent_id]);
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'zone_id' => $zone_id ,'crm_agent_id'=> $crm_agent_id]);
 
     }
 
@@ -4990,7 +4996,7 @@ class GlobalSettingsController extends Controller
 
         $crm_agent_data->admin_id = $request->admin_id;
         $crm_agent_data->zone_id = $request->zone_id;
-        $crm_agent_data->case_nature_id = $request->case_nature_id;
+        // $crm_agent_data->case_nature_id = $request->case_nature_id;
         $crm_agent_data->save();
         return redirect()->back()->with('success', 'Agent Updated!');
 
@@ -6314,4 +6320,133 @@ public function sales_incentive()
         }
 
     }
+
+    public function auto_tag_territories_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 518);
+
+        $agents = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
+                            ->select(['admins.id', 'admins.name'])
+                            ->where('admins.status', 1)->where('ar.department_id', 7)->get();
+
+        $territories = Territory::where('territory_status',1)->get();
+        $cities = City::where('status',1)->get();
+        return view('admin.settings.auto_tag_territory',compact('agents','territories','cities'));
+    }
+
+
+    public function auto_tag_territories_list(Request $request){
+       
+        $roles = AutoTagTerritory::join('admins as ad', 'ad.id', '=', 'auto_tag_territories.admin_id')
+        ->leftjoin('territories as t','t.id','auto_tag_territories.territory_id')   
+        ->leftjoin('cities as c','c.id','t.city_id')   
+        ->select('auto_tag_territories.id', 'ad.name as agent_name', 'c.name as city_name', 't.name as territory_name','auto_tag_territories.status');
+        
+    $datatables = Datatables::of($roles)
+        ->addColumn('action', function($roles) {
+            if (session('role_id') == 1 || in_array(698, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                    ';
+                    // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
+                    if($roles->status == 1 ){
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }else{
+
+                        $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    }
+                    
+                    $dropdown .='</div>
+                  </div>
+          ';
+
+          return $dropdown;
+               
+            }
+            else {
+                return '';
+            }
+        })->editColumn('status', function($roles) {
+            if($roles->status == 1){
+                return 'Enable';
+            }else{
+                return 'Disable';
+            }
+            
+        })->editColumn('city_name', function($roles) {
+            if($roles->city_name == '' || $roles->city_name == null){
+                return 'All Cities';
+            }else{
+                return $roles->city_name;
+            }
+            
+        });
+
+    return $datatables->make(true);
+    }
+
+    public function auto_tag_territories_store(Request $request){
+        $check_tagging = AutoTagTerritory::where('admin_id',$request->agent_id);
+            
+        if(!$check_tagging->exists()){
+            $auto_tagging = new AutoTagTerritory;
+            $auto_tagging->admin_id = $request->agent_id;
+            $auto_tagging->territory_id = $request->territory_id;
+            $auto_tagging->save();
+
+            return redirect()->back()->with('success', 'Sales Person\'s Territory Added!');
+
+        }else{
+            return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
+        }
+    }
+    public function auto_tag_territories_enable_disable(Request $request){
+        $auto_tagging = AutoTagTerritory::find($request->id);
+        if($auto_tagging->status == 1){
+            $auto_tagging->status = 0;
+            $auto_tagging->save();
+        return redirect()->back()->with('success', 'Sales Person\'s Territory Disabled!');
+
+        }else{
+            $auto_tagging->status = 1;
+            $auto_tagging->save();
+        return redirect()->back()->with('success', 'Sales Person\'s Territory Enabled!');
+
+        }
+    }
+
+    public function auto_tag_territories_data(Request $request){
+        $auto_tagging = AutoTagTerritory::find($request->id);
+
+        $agent_id = $auto_tagging->admin_id;
+        $territory_id = $auto_tagging->territory_id;
+        $city_id = Territory::find($territory_id)->city_id;
+        $auto_tagging_id = $auto_tagging->id;
+
+        return response()->json(['status' => 1, 'agent_id' => $agent_id,'city_id' => $city_id ,'auto_tagging_id'=> $auto_tagging_id ,'territory_id'=> $territory_id]);
+
+    }
+
+    public function auto_tag_territories_update(Request $request){
+        $auto_tagging = AutoTagTerritory::find($request->auto_tagging_id);
+        if($request->agent_id == $auto_tagging->admin_id){
+            $auto_tagging->territory_id = $request->territory_id;
+            $auto_tagging->save();
+            return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
+        }else{
+            $check_tagging = AutoTagTerritory::where('admin_id',$request->agent_id);
+            if(!$check_tagging->exists()){
+                $auto_tagging->admin_id = $request->agent_id;
+                $auto_tagging->territory_id = $request->territory_id;
+                $auto_tagging->save();
+                return redirect()->back()->with('success', 'Sales Person\'s Territory Updated!');
+            }else{
+                return redirect()->back()->with('error', 'Sales Person\'s Territory already exist');
+            }
+        }
+    }
+    
+    
 }
