@@ -6922,7 +6922,6 @@ class DeliveryController extends Controller
                     }
 
 
-
                     Shipment::where('id', $request->shipment_id)->update([
                         'booking_type_id' => 1,
                         'shipper_status_id' => 13,
@@ -6942,13 +6941,13 @@ class DeliveryController extends Controller
 
                     return redirect()->back()->with('success', 'Shipment Service type has been updated to Regular');
                 } else {
-                    return redirect()->back()->with('error', 'Shipment Service type can\'nt be update to Regular');
+                    return redirect()->back()->with('error', 'Shipment Service type cann\'t be update to Regular');
                 }
             } else {
-                return redirect()->back()->with('error', 'Shipment Service type can\'nt be update to Regular');
+                return redirect()->back()->with('error', 'Shipment Service type cann\'t be update to Regular');
             }
         } else {
-            return redirect()->back()->with('error', 'Shipment Service type can\'nt be update to Regular');
+            return redirect()->back()->with('error', 'Shipment Service type cann\'t be update to Regular');
         }
     }
 
