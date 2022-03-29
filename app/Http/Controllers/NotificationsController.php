@@ -9209,7 +9209,6 @@ class NotificationsController extends Controller
             if ($push_notification->status) {
                 $title = $push_notification->title;
                 $body = $push_notification->body;
-                $data = array();
                 if ($id == 1) {
                     $rider = Rider::find($reference1_id);
                     $shipper = User::find($reference2_id);
@@ -9327,8 +9326,8 @@ class NotificationsController extends Controller
                         if (strpos($body, '[status]') !== FALSE) {
                             $body = str_replace('[status]', $status, $body);
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
-                    self::push_notification($employee_id, $employee_type, $title, $body);
                 }
                 else if ($id == 12) {
                     $leave = EmployeeLeave::find($reference1_id);
@@ -9356,8 +9355,8 @@ class NotificationsController extends Controller
                                 $body = str_replace('[to]', $leave->from, $body);
                             }
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
-                    self::push_notification($employee_id, $employee_type, $title, $body);
                 }
                 else if ($id == 13) {
                     $leave = EmployeeLeave::find($reference1_id);
@@ -9385,8 +9384,8 @@ class NotificationsController extends Controller
                                 $body = str_replace('[to]', $leave->from, $body);
                             }
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
-                    self::push_notification($employee_id, $employee_type, $title, $body);
                 }
                 else if ($id == 14) {
                     $lead = Lead::find($reference1_id);
@@ -9402,9 +9401,8 @@ class NotificationsController extends Controller
                         if (strpos($body, '[lead_id]') !== FALSE) {
                             $body = str_replace('[lead_id]', $lead->id, $body);
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
                 }
                 else if ($id == 15) {
                     $lead = Lead::find($reference1_id);
@@ -9416,9 +9414,10 @@ class NotificationsController extends Controller
                         if (strpos($body, '[lead_id]') !== FALSE) {
                             $body = str_replace('[lead_id]', $lead->id, $body);
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body, $lead->id);
                     }
-                    self::push_notification($employee_id, $employee_type, $title, $body, $lead->id);
-                } else if ($id == 16) {
+                }
+                else if ($id == 16) {
                     $admin = Admin::find($reference1_id);
                     $shippers = User::whereIn('id', $reference2_id)->select('name');
                     if($admin && $shippers->exists()){
@@ -9433,9 +9432,8 @@ class NotificationsController extends Controller
                         if (strpos($body, '[shipper_names]') !== FALSE) {
                             $body = str_replace('[shipper_names]', $shipper_name, $body);
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
                 }
             }
         }
