@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Controllers\ShipperAgreementController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\CorporateDefaultDiscountWeightCharge;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
 use App\Http\Models\BookingType;
@@ -1320,7 +1321,7 @@ class ShipperDashboardController extends Controller
                 $fuel = CorporateDefaultFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $discount = CorporateDefaultDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
-                $discount_weight_rates = DiscountWeightCharge::all()->where('user_id',$id)->groupBy(['shipping_mode_id','destination_id']);
+                $discount_weight_rates = CorporateDefaultDiscountWeightCharge::all()->where('user_id',$id)->groupBy(['shipping_mode_id','destination_id']);
                 $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
                 $packaging = PackagingCharge::all()->where('user_id', $id);
                 $packaging_type_ids = array_unique($packaging->pluck('type_id')->toArray());
