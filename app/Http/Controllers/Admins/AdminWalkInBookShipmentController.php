@@ -578,6 +578,7 @@ class AdminWalkInBookShipmentController extends Controller
 //    }
 
     public function print_air_waybill(Request $request) {
+
         $user_type = NULL;
         $user_id = NULL;
 
@@ -1033,6 +1034,7 @@ class AdminWalkInBookShipmentController extends Controller
             return $html;
         }
     }
+
     public function check_min_charges(Request $request){
         if($request->pickup_city != null && $request->consignee_city != null) {
             $min_charges = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();

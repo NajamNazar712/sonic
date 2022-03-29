@@ -138,6 +138,7 @@ Route::name('api.')->group(function () {
                 Route::post('not_pick_v2', 'Rider\RiderAPIController@pickup_not_pick_v2')->name('pickup_not_pick_v2');
                 Route::post('action_log_v2', 'Rider\RiderAPIController@pickup_action_log_v2')->name('pickup_action_log_v2');
                 Route::post('not_pick_v3', 'Rider\RiderAPIController@pickup_not_pick_v3')->name('pickup_not_pick_v3');
+                Route::post('pick_v3', 'Rider\RiderAPIController@pickup_pick_v3')->name('pickup_pick_v3');
 
                 Route::post('check_tracking_number', 'Rider\RiderAPIController@pickup_check_tracking_number')->name('check_tracking_number');
 
@@ -168,6 +169,7 @@ Route::name('api.')->group(function () {
                 Route::post('delivered_v3', 'Rider\RiderAPIController@shipment_delivered_v3')->name('delivered_v3');
                 Route::post('delivered_v4', 'Rider\RiderAPIController@shipment_delivered_v4')->name('delivered_v4');
                 Route::post('delivered_v5', 'Rider\RiderAPIController@shipment_delivered_v5')->name('delivered_v5');
+                Route::post('undelivered_v3', 'Rider\RiderAPIController@shipment_undelivered_v3')->name('undelivered_v3');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -230,6 +232,7 @@ Route::name('api.')->group(function () {
 
                 Route::get('index_v2', 'Rider\RiderAPIController@get_profile_v2')->name('index_v2');
                 Route::get('check_v2', 'Rider\RiderAPIController@check_profile_v2')->name('check_v2');
+                Route::post('check_v3', 'Rider\RiderAPIController@check_profile_v3')->name('check_v3');
                 Route::post('update_v2', 'Rider\RiderAPIController@update_profile_v2')->name('update_v2');
             });
 
@@ -332,6 +335,7 @@ Route::name('api.')->group(function () {
 
                 Route::get('index_v2', 'AdminAPIController@get_profile_v2')->name('index_v2');
                 Route::get('check_v2', 'AdminAPIController@check_profile_v2')->name('check_v2');
+                Route::post('check_v3', 'AdminAPIController@check_profile_v3')->name('check_v3');
                 Route::post('update_v2', 'AdminAPIController@update_profile_v2')->name('update_v2');
             });
             Route::get('profile', 'AdminAPIController@admin_profile')->name('profile');

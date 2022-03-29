@@ -365,7 +365,6 @@
                             <div class="form-group">
                                 <input type="text" id="return_reason_shipment_remarks" class="form-control" maxlength="100" placeholder="Remarks">
                             </div>
-                            </div>
                             <div class="row justify-content-center">
                                 <div class="col-3">
                                     <button id="btnReturn" type="submit" class="btn btn-primary btn-block">Submit</button>
@@ -374,6 +373,24 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="HighAlertModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="HighAlertModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">High Alert</h4>
+
+                </div>
+                    <div class="modal-body">
+                        <h4 class="high_alert_text red"></h4>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
             </div>
         </div>
     </div>
@@ -622,22 +639,34 @@
                     }
                 })
                     .done(function (data) {
-                        var tab = window.open('', '_blank');
 
-                        if (!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
+                        if(data.status == 2)
+                        {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
                             });
                         }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
+                        else{
+                            var tab = window.open('', '_blank');
+
+                            if (!tab) {
+                                swal({
+                                    title: 'Popup Blocker Enabled!',
+                                    text: 'Please add this site to your exception list.',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            }
+                            else {
+                                tab.document.write(data);
+                                tab.document.close();
+                                tab.focus();
+                            }
                         }
+
+
                     });
             }
 
@@ -725,7 +754,7 @@
                                     shipment += '">' + details.complain.padded_id + ' (' + details.complain.tat + 'd)</button></a>';
                                     if(details.pod_file){
                               
-                                        shipment += '<button class="d-none mr-sm-1 d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
+                                        shipment += '<button class="d-none mr-sm-1 d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Printq</button>';
                                         shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.pod_file + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> POD File</a>';
 
                                     }else{
@@ -763,7 +792,14 @@
 
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Name</strong></td>';
-                                shipment += '<td>' + details.shipper.name + '</td>';
+
+                                if(details.high_alert){
+                                    shipment += '<td>' + details.shipper.name + ' <span class="border-2 border-red red pl-1 pr-1 high_alert_popup" data-toggle="modal" data-target="#HighAlertModal" style="cursor:pointer;">Highalert</span></td>';
+                                    $('#HighAlertModal h4.high_alert_text').text(details.high_alert);
+                                }
+                                else{
+                                    shipment += '<td>' + details.shipper.name + '</td>';
+                                }
                                 shipment += '<td><strong>Account No.</strong></td>';
                                 shipment += '<td>' + details.shipper.account_number + '</td>';
                                 shipment += '<td colspan="3"><strong>City</strong></td>';

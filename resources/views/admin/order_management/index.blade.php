@@ -605,9 +605,18 @@
                                 }
                             })
                             .done(function(data) {
+
+                                if (data.status == 2) {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                else
+                                {
                                 var tab = window.open('', '_blank');
 
-                                if(!tab) {
+                                if (!tab) {
                                     swal({
                                         title: 'Popup Blocker Enabled!',
                                         text: 'Please add this site to your exception list.',
@@ -615,12 +624,12 @@
                                         closeOnClickOutside: false,
                                         closeOnEsc: false
                                     });
-                                }
-                                else {
+                                } else {
                                     tab.document.write(data);
                                     tab.document.close();
                                     tab.focus();
                                 }
+                            }
                             });
                         }
                     }
@@ -817,6 +826,7 @@
                         className: 'btn btn-primary print',
                         enabled: false,
                         action: function (e, dt, node, config) {
+
                             var rows = selected_rows.slice();
 
                             table.button('.shipper_recall').disable();

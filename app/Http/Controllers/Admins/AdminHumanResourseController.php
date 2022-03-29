@@ -1233,12 +1233,12 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_bank_update(Employee $employee, Request $request)
     {
-        if ($employee->bank_info()->exists()) {
-            $bank_info = $employee->bank_info->first();
+        $bank_info = EmployeeBankInformation::where('employee_id', $employee->id);
+        if ($bank_info->exists()) {
+            $bank_info = $bank_info->first();
         } else {
             $bank_info = new EmployeeBankInformation();
         }
-
         $bank_info->employee_id = $employee->id;
         $bank_info->account_title = $request->account_title;
         $bank_info->branch_code = $request->branch_code;
