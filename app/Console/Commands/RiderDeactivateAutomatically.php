@@ -8,6 +8,7 @@ use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Rider;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\WMS\WmsPickupRun;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -51,7 +52,8 @@ class RiderDeactivateAutomatically extends Command
         $deliveries  = DeliveryNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
         $v2_pickups  = V2PickupNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
         $return_notes  = ReturnNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
-        $rider_active = array_unique(array_merge($deliveries,$v2_pickups,$return_notes));
+        $wms_pickup_run  = WmsPickupRun::whereBetween('created_at', [$date_week_age, $today])->pluck('wms_rider_id')->toArray();
+        $rider_active = array_unique(array_merge($deliveries, $v2_pickups, $return_notes, $wms_pickup_run));
         $data = array_diff($rider_ids, $rider_active);
         if ($data != null){
             NotificationsController::send(155, $data);

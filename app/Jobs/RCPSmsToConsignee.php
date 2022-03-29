@@ -68,7 +68,7 @@ class RCPSmsToConsignee implements ShouldQueue
                     $attempt = FALSE;
                 }
 
-                if ($current_count < $limit->text) {
+                if ($current_count <= $limit->text) {
                     $client = new Client(['base_uri' => 'https://gateway.its.com.pk/api', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
                     $response = $client->get('', [
