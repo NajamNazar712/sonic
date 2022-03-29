@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Auto Assigning Agents')
+@section('title', 'Auto Tag Territory')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Auto Assigning Agents
+                    Auto Tag Territory 
                 </h1>
 
                 <div class="card">
@@ -21,9 +21,9 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Agent</th>
-                                    <th class="border-primary border-darken-1">Zone</th>
-                                    <th class="border-primary border-darken-1">Case Nature</th>
+                                    <th class="border-primary border-darken-1">Sales Person</th>
+                                    <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Territory</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -39,29 +39,31 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Assign Agent</h4>
+                    <h4 class="modal-title" id="">Tag Territory</h4>
                 </div>
-                <form method="post" id="crm_agent_assign" action="{{route('admin.settings.auto_assigning.submit')}}">
+                <form method="post" id="agent_assign" action="{{route('admin.settings.auto_tag_territories.submit')}}">
                     @csrf
 
                 <div class="modal-body">
-                    <div class="form-group">
-                        <select name="admin_id" id="agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
+                    <div class="form-group" id="city_select">
+                        <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                        </select>
+                    </div>
+                    <div class="form-group" id="territory_select">
+                        <select name="territory_id" id="territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="agent_select">
+                        <select name="agent_id" id="agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
                             @foreach($agents as $agent)
                                 <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group">
-                        <select name="zone_id" id="zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
-                            @foreach($zones as $zone)
-                                <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Assign</button>
+                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Tag</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                 </div>
             </form>
@@ -76,30 +78,45 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Edit Agent</h4>
+                    <h4 class="modal-title" id="">Edit Tagged User</h4>
                 </div>
-                <form method="post" id="crm_agent_edit" action="{{route('admin.settings.auto_assigning.update')}}">
+                <form method="post" id="agent_edit" action="{{route('admin.settings.auto_tag_territories.update')}}" novalidate="novalidate">
                     @csrf
 
                 <div class="modal-body">
-                    <input type="hidden" name="crm_agent_id" id="crm_agent_id">
+                    <input type="hidden" name="auto_tagging_id" id="auto_tagging_id">
+                    
+                   
+
+                    <div class="form-group" id="edit_city_select">
+                        <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                            @foreach($cities as $city)
+                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="edit_territory_select">
+                        <select name="territory_id" id="edit_territory_id" class="form-control select2" data-rule-required="true" data-msg-required="Territory is required">
+                            @foreach($territories as $territory)
+                                <option value="{{ $territory->id }}" > {{ $territory->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    
                     <div class="form-group">
-                        <select name="admin_id" id="edit_agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
+                        <select name="agent_id" id="edit_agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
                             @foreach($agents as $agent)
                                 <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group">
-                        <select name="zone_id" id="edit_zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
-                            @foreach($zones as $zone)
-                                <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
+                    
+                    
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Assign</button>
+                    <button type="submit" class="btn btn-success" id="edit_agentSubmit">Tag</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                 </div>
             </form>
@@ -130,55 +147,133 @@
         $(document).ready(function() {
 
             $('#AssignAgentModal').on('hidden.bs.modal', function () {
-                // $("agent_id").select2('val', '')
+                
                 $('#agent_id').val('').trigger('change.select2');
-                $('#zone_id').val('').trigger('change.select2');
-                $('#case_nature_id').val('').trigger('change.select2');
+                $('#city_id').val('').trigger('change.select2');
+                $('#territory_id').val('').trigger('change.select2');
+                
             });
+            $('#territory_select').css('display','none');
+                    $('#agent_select').css('display','none');
+           
             $('#agent_id').prepend('<option selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Sales Person",
+                allowClear:true,
+                dropdownParent:$('#agent_assign')
+            });
+            
+            var city_obj = [];
+            city_obj.length = 0
+
+            $.map({!! $cities !!}, function (obj,index) {
+                city_obj.push({id: obj.id, text: obj.name});
+            });
+
+            $('#city_id').prepend('<option selected></option>').select2({
+                    width:'100%',
+                    placeholder:"Select City",
+                    allowClear:true,
+                    dropdownParent:$('#agent_assign'),
+                    data:city_obj
+                }).bind('change', function() {
+
+                    var id = parseInt($(this).val());
+
+                    $('#territory_select').css('display','block');
+                    $('#agent_select').css('display','block');
+
+                    $('#territory_id').children().remove()
+
+                        var territory_obj  = [];
+                        territory_obj.length = 0
+
+                    $.map({!! $territories !!}, function (obj) {
+                            if(id == obj.city_id){
+                                territory_obj.push({id: obj.id, text: obj.name});
+                            }
+                    });
+
+                    $('#territory_id').prepend('<option selected></option>').select2({
+                            width:'100%',
+                            placeholder:"Select Territory",
+                            allowClear:true,
+                            dropdownParent:$('#agent_assign'),
+                            data:territory_obj
+                    });
+
+                });
+
+
+            $('#edit_agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Agent",
                 allowClear:true,
-                dropdownParent:$('#crm_agent_assign')
+                dropdownParent:$('#agent_edit')
             });
-            $('#zone_id').prepend('<option selected></option>').select2({
+           
+            $('#edit_city_id').select2({
                 width:'100%',
-                placeholder:"Select Zone",
                 allowClear:true,
-                dropdownParent:$('#crm_agent_assign')
+                dropdownParent:$('#agent_edit')
             });
-            $('#case_nature_id').prepend('<option selected></option>').select2({
+            $('#edit_territory_id').prepend('<option selected></option>').select2({
                 width:'100%',
-                placeholder:"Select Case Nature",
+                placeholder:"Select Territory",
                 allowClear:true,
-                dropdownParent:$('#crm_agent_assign')
+                dropdownParent:$('#agent_edit')
             });
+                
+                
+                    var city_obj = [];
+                    city_obj.length = 0
 
-            $('#edit_agent_id').select2({
-                width:'100%',
-                allowClear:true,
-                dropdownParent:$('#crm_agent_edit')
-            });
-            $('#edit_zone_id').select2({
-                width:'100%',
-                allowClear:true,
-                dropdownParent:$('#crm_agent_edit')
-            });
-            $('#edit_case_nature_id').select2({
-                width:'100%',
-                allowClear:true,
-                dropdownParent:$('#crm_agent_edit')
-            });
-            
+                $.map({!! $cities !!}, function (obj, index) {
+                    
+                    city_obj.push({id: obj.id, text: obj.name});
+                });    
+                $('#edit_city_id').select2({
+                        width:'100%',
+                        allowClear:true,
+                        dropdownParent:$('#agent_edit'),
+                        data:city_obj
+                    }).bind('change', function() {
+                
+                        var id = parseInt($(this).val());
+                            console.log('change_city');
+                            $('#edit_territory_select').css('display','block');
+
+
+                            $('#edit_territory_id').children().remove();
+                            var territory_obj = [];
+                            territory_obj.length = 0
+
+                        $.map({!! $territories !!}, function (obj) {
+                                if(id == obj.city_id){
+                                    territory_obj.push({id: obj.id, text: obj.name});
+                                }
+                        });
+
+                        $('#edit_territory_id').prepend('<option selected></option>').select2({
+                                width:'100%',
+                                placeholder:"Select Territory",
+                                allowClear:true,
+                                dropdownParent:$('#agent_edit'),
+                                data:territory_obj
+                            });
+                        
+                        
+                    });
+
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
-                    @if (session('role_id') == 1 || in_array(617, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(698, session('permissions')))
                     
                     {
-                        text: '<i class="la la-plus"></i> ADD',
-                        className: 'btn btn-primary bulk_internal_comment',
+                        text: '<i class="la la-plus"></i> Add',
+                        className: 'btn btn-primary tag_agents',
                         enabled: true,
                         action: function (e, dt, node, config) {
                             $('#AssignAgentModal').modal('show');
@@ -196,15 +291,15 @@
                 language: {
                     processing: data_table_loader
                 },
-                ajax: '{{ route('admin.settings.auto_assigning.list') }}',
+                ajax: '{{ route('admin.settings.auto_tag_territories.list') }}',
                 rowId: 'id',
                 order: [[3, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
-                    {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
-                    {data: 'case_nature', name: 'case_nature', class: 'align-middle case_nature'},
-                    {data: 'status', name: 'crm_agents.status', class: 'align-middle status'},
+                    {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
+                    {data: 'territory_name', name: 't.name', class: 'align-middle territory_name'},
+                    {data: 'status', name: 'auto_tag_territories.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -229,7 +324,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.case_nature')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.department')){
@@ -271,17 +366,23 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $.ajax({
-                    url:'{!! route("admin.settings.auto_assigning.data") !!}',
+                    url:'{!! route("admin.settings.auto_tag_territories.data") !!}',
                     method: 'POST',
                     data: {
                         'id': id,
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
-                    $('#edit_agent_id').val(data.agent_id).change();
-                    $('#edit_zone_id').val(data.zone_id).change();
-                    $('#edit_case_nature_id').val(data.case_nature_id).change();
-                    $('#crm_agent_id').val(data.crm_agent_id);
+
+                    $('#auto_tagging_id').val(data.auto_tagging_id);
+
+
+                            $('#edit_territory_select').css('display','block');
+                            $('#edit_territory_id').css('display','block');
+                            console.log(data.agent_id);
+                            $('#edit_agent_id').val(data.agent_id).change();
+                            $('#edit_city_id').val(data.city_id).change();
+                            $('#edit_territory_id').val(data.territory_id).change();
                     
                     $('#EditAgentModal').modal('show');
 
@@ -313,7 +414,7 @@
                                 dangerMode: true
                             }).then(function(confirm) {
                                          $.ajax({
-                                            url:'{!! route("admin.settings.auto_assigning.delete") !!}',
+                                            url:'{!! route("admin.settings.auto_tagging.delete") !!}',
                                             method: 'POST',
                                             data: {
                                                 'id': id,
@@ -333,7 +434,7 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                                          $.ajax({
-                                            url:'{!! route("admin.settings.auto_assigning.enable_disable") !!}',
+                                            url:'{!! route("admin.settings.auto_tag_territories.enable_disable") !!}',
                                             method: 'POST',
                                             data: {
                                                 'id': id,
@@ -351,7 +452,18 @@
             });
 
             
-            $( "#crm_agent_assign" ).validate({
+            $( "#agent_assign" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    form.submit();    
+                }
+                
+                });
+
+                $( "#agent_edit" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
