@@ -4723,7 +4723,7 @@ class DeliveryController extends Controller
             })
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['admins.name as resolved_by', 'station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank', 'station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount', 'station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type', 'sdna.date as adjustment_date_latest']);
+            ->select(['admins.name as resolved_by', 'station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank', 'station_deposit_notes.deposit_slip_status', 'station_deposit_notes.sdn_deposit_amount', 'station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type', 'sdna.date as adjustment_date_latest', 'station_deposit_notes.closed_at']);
         //admins.name as resolved_by to be changed before merging on sprint_78
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -4829,6 +4829,16 @@ class DeliveryController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('aging', function ($sdn) {
+                $start_date = Carbon::parse($sdn->created_at);
+                if ($sdn->status == 3) {
+                    $end_date = Carbon::parse($sdn->closed_at);
+                    return $end_date->diffInHours($start_date);;
+                } else {
+                    $end_date = Carbon::now();
+                    return $end_date->diffInHours($start_date);;
+                }
+            })
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.sdn.details', ['id' => $result->sdn_id]);
                 $retail_route = route('admin.delivery.sdn.retail.details', ['id' => $result->sdn_id]);
@@ -4855,6 +4865,12 @@ class DeliveryController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
+                if(($result->sdn_amount - ($result->sdn_deposit_amount + $result->adjustment_amount)) == 0 && $result->status == 1){
+
+                    $closed_status = '<button type="button" class="dropdown-item update_status_closed"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Update Status To Closed</div></button>';
+                    $dropdown .= $closed_status;
+                }
+
                 if ($result->sdn_type == 1) {
                     $dropdown .= $details_button;
                 } else {
@@ -4906,8 +4922,10 @@ class DeliveryController extends Controller
                     return 'Created';
                 } else if ($sdn->status == 1) {
                     return 'Deposited';
-                } else {
+                } else if ($sdn->status == 2) {
                     return 'Resolved';
+                } else {
+                    return 'Closed';
                 }
             })
             ->filterColumn('status', function ($query, $keyword) {
@@ -7748,8 +7766,11 @@ class DeliveryController extends Controller
                     else if($log->status_id == 1){
                         $status_logs[$log->id]['status'] = 'Deposited';
                     }
-                    else{
+                    else if($log->status_id == 2){
                         $status_logs[$log->id]['status'] = 'Resolved';
+                    }
+                    else{
+                        $status_logs[$log->id]['status'] = 'Closed';
                     }
                     $status_logs[$log->id]['updated_by'] = $log->updated_by->name;
                     $status_logs[$log->id]['date'] = Carbon::parse($log->created_at)->toDateTimeString();
@@ -7758,6 +7779,23 @@ class DeliveryController extends Controller
                 return response()->json(['status' => 1, 'sdn_id' => str_pad($sdn_id, 6, '0', STR_PAD_LEFT), 'logs' => $status_logs]);
             }
             return response()->json(['status' => 0, 'message' => 'No logs found!']);
+        }
+    }
+
+    public function closed(Request $request){
+        $station_deposit_note = StationDepositNote::find($request->sdn_id);
+
+        if ($station_deposit_note) {
+            if ($station_deposit_note->status == 1) {
+                $station_deposit_note->status = 3;
+                $station_deposit_note->closed_at = Carbon::now();
+                $station_deposit_note->save();
+                return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Closed']);
+            } else {
+                return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Resolved']);
+            }
+        } else {
+            return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Found']);
         }
     }
 }
