@@ -30780,12 +30780,64 @@ class AdminCorporateAccountsController extends Controller
                        'fuel_charges' => $switches['fuel_charges']
                    ]);
                }
-               if ($weights = PendingCorporateDefaultWeightCharge::where('user_id', $id)->get()) {
+               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id', $id,'shipping_mode_id' => 1])->get()) {
                    foreach ($weights as $weight) {
                        CorporateDefaultWeightCharge::create([
                            'user_id' => $id,
                            'shipping_mode_id' => 1,
-                           'delivery_type_id' => 1,
+                           'range_up' => $weight['range_up'],
+                           'range_down' => $weight['range_down'],
+                           'weight_addition' => $weight['weight_addition'],
+                           'spkg' => $weight['spkg'],
+                           'local_or_6hr' => $weight['local_or_6hr'],
+                           'national_charges_class_0' => $weight['national_charges_class_0'],
+                           'national_charges_class_1' => $weight['national_charges_class_1'],
+                           'national_charges_class_2' => $weight['national_charges_class_2'],
+                           'national_charges_class_3' => $weight['national_charges_class_3'],
+                       ]);
+                   }
+               }
+
+               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id', $id,'shipping_mode_id' => 2])->get()) {
+                   foreach ($weights as $weight) {
+                       CorporateDefaultWeightCharge::create([
+                           'user_id' => $id,
+                           'shipping_mode_id' => 2,
+                           'range_up' => $weight['range_up'],
+                           'range_down' => $weight['range_down'],
+                           'weight_addition' => $weight['weight_addition'],
+                           'spkg' => $weight['spkg'],
+                           'local_or_6hr' => $weight['local_or_6hr'],
+                           'national_charges_class_0' => $weight['national_charges_class_0'],
+                           'national_charges_class_1' => $weight['national_charges_class_1'],
+                           'national_charges_class_2' => $weight['national_charges_class_2'],
+                           'national_charges_class_3' => $weight['national_charges_class_3'],
+                       ]);
+                   }
+               }
+               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id', $id,'shipping_mode_id' => 3])->get()) {
+                   foreach ($weights as $weight) {
+                       CorporateDefaultWeightCharge::create([
+                           'user_id' => $id,
+                           'shipping_mode_id' => 3,
+                           'range_up' => $weight['range_up'],
+                           'range_down' => $weight['range_down'],
+                           'weight_addition' => $weight['weight_addition'],
+                           'spkg' => $weight['spkg'],
+                           'local_or_6hr' => $weight['local_or_6hr'],
+                           'national_charges_class_0' => $weight['national_charges_class_0'],
+                           'national_charges_class_1' => $weight['national_charges_class_1'],
+                           'national_charges_class_2' => $weight['national_charges_class_2'],
+                           'national_charges_class_3' => $weight['national_charges_class_3'],
+                       ]);
+                   }
+               }
+
+               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id', $id,'shipping_mode_id' => 4])->get()) {
+                   foreach ($weights as $weight) {
+                       CorporateDefaultWeightCharge::create([
+                           'user_id' => $id,
+                           'shipping_mode_id' => 4,
                            'range_up' => $weight['range_up'],
                            'range_down' => $weight['range_down'],
                            'weight_addition' => $weight['weight_addition'],

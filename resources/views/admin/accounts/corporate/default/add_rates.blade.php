@@ -24,7 +24,7 @@
                                 <label class="display-inline ml-1 font-medium-1">Generate Packaging Invoice</label>
                             </div>
                             <div class="col-4">
-                                <div class="badge badge-success pull-right"><h2 class="text-white">Corporate Invoicing Account</h2></div>
+                                <div class="badge badge-success pull-right"><h2 class="text-white">Corporate Default Invoicing Account</h2></div>
                             </div>
                         </div>
                     </div>
