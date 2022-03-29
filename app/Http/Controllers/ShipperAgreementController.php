@@ -959,7 +959,7 @@ otherwise it will be rejected</li>
                             $discount_weight_charges = CorporateDefaultDiscountWeightCharge::where('user_id', $id)->where('shipping_mode_id', $rate->shipping_mode_id)->get()->groupBy('destination_id');
                         }
                     }
-                    if($discount_weight_charges) {
+                    if(isset($discount_weight_charges)) {
                         foreach ($discount_weight_charges as $destination_id => $data) {
                             $discount_weight_charges_details .= '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead><tr><td><strong>Discount Weight Charges (' . $data[0]->destination->name . ')</strong></thead></table></div></div>';
 
