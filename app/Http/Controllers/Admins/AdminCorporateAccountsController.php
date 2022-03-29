@@ -30780,7 +30780,7 @@ class AdminCorporateAccountsController extends Controller
                        'fuel_charges' => $switches['fuel_charges']
                    ]);
                }
-               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id', $id,'shipping_mode_id' => 1])->get()) {
+               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id,'shipping_mode_id' => 1])->get()) {
                    foreach ($weights as $weight) {
                        CorporateDefaultWeightCharge::create([
                            'user_id' => $id,
@@ -30798,7 +30798,7 @@ class AdminCorporateAccountsController extends Controller
                    }
                }
 
-               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id', $id,'shipping_mode_id' => 2])->get()) {
+               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id,'shipping_mode_id' => 2])->get()) {
                    foreach ($weights as $weight) {
                        CorporateDefaultWeightCharge::create([
                            'user_id' => $id,
@@ -30815,7 +30815,7 @@ class AdminCorporateAccountsController extends Controller
                        ]);
                    }
                }
-               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id', $id,'shipping_mode_id' => 3])->get()) {
+               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id'=> $id,'shipping_mode_id' => 3])->get()) {
                    foreach ($weights as $weight) {
                        CorporateDefaultWeightCharge::create([
                            'user_id' => $id,
@@ -30833,7 +30833,7 @@ class AdminCorporateAccountsController extends Controller
                    }
                }
 
-               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id', $id,'shipping_mode_id' => 4])->get()) {
+               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id,'shipping_mode_id' => 4])->get()) {
                    foreach ($weights as $weight) {
                        CorporateDefaultWeightCharge::create([
                            'user_id' => $id,
