@@ -2117,13 +2117,12 @@ class AdminCorporateAccountsController extends Controller
             }
         }
         else if($user['status'] == 3 && $user['new_rate_type_id'] != null){
-           
+
             $switches = PendingCorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $min_weight = PendingCorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $bookingType = PendingCorporateBookingTypeCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = PendingCorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = PendingCorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-
             $fuel = PendingCorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount = PendingCorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $wms_user_info = WmsUserInformation::where('user_id', $id)->first();
@@ -2236,9 +2235,11 @@ class AdminCorporateAccountsController extends Controller
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || in_array(session('id'), session('sale_users_bypass')) || in_array($id, session('tagged_shippers'))) {
                     if($user['new_rate_type_id'] == 1){
+
                         return view('admin.accounts.corporate.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'packaging_invoice' => $packaging_invoice]);
                     }
                     else{
+
                         return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'packaging_invoice' => $packaging_invoice]);
                     }
 
@@ -2249,6 +2250,7 @@ class AdminCorporateAccountsController extends Controller
                 if ($user['new_rate_type_id'] == 1) {
                     return view('admin.accounts.corporate.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'packaging_invoice' => $packaging_invoice]);
                 } else {
+
                     return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['sameday_dws_charges' => $sameday_dws_charges,'detain_dws_charges' => $detain_dws_charges,'ol_dws_charges' => $ol_dws_charges,'on_dws_charges' => $on_dws_charges,'shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities,'packaging_invoice' => $packaging_invoice]);
                 }
             }
@@ -2257,8 +2259,8 @@ class AdminCorporateAccountsController extends Controller
 
     public function edit_rates_submit(Request $request, $id)
     {
-        
-        
+
+
         $user = User::find($id);
         $new_rate_type_id = $user->new_rate_type_id;
 
@@ -13080,8 +13082,8 @@ class AdminCorporateAccountsController extends Controller
     }
 
     public function edit_rates_zone_wise_submit(Request $request, $id){
-
         $user = User::find($id);
+
         //dd($user['status'],$user['new_rate_type_id']);
         if ($user['status'] != 3) {
 
@@ -20100,11 +20102,10 @@ class AdminCorporateAccountsController extends Controller
                                 'range_up' => $weight['range_up'],
                                 'range_down' => $weight['range_down'],
                                 'base' => $weight['base'],
-                                'local_or_6hr' => $weight['local_or_6hr'],
-                                'national_charges_class_0' => $weight['national_charges_class_0'],
-                                'national_charges_class_1' => $weight['national_charges_class_1'],
-                                'national_charges_class_2' => $weight['national_charges_class_2'],
-                                'national_charges_class_3' => $weight['national_charges_class_3'],
+                                'local' => $weight['local'],
+                                'same_zone' => $weight['same_zone'],
+                                'different_zone' => $weight['different_zone'],
+
                             ]);
                         }
                     }
@@ -20117,11 +20118,9 @@ class AdminCorporateAccountsController extends Controller
                                 'range_up' => $weight['range_up'],
                                 'range_down' => $weight['range_down'],
                                 'base' => $weight['base'],
-                                'local_or_6hr' => $weight['local_or_6hr'],
-                                'national_charges_class_0' => $weight['national_charges_class_0'],
-                                'national_charges_class_1' => $weight['national_charges_class_1'],
-                                'national_charges_class_2' => $weight['national_charges_class_2'],
-                                'national_charges_class_3' => $weight['national_charges_class_3'],
+                                'local' => $weight['local'],
+                                'same_zone' => $weight['same_zone'],
+                                'different_zone' => $weight['different_zone'],
                             ]);
                         }
                     }
@@ -20134,11 +20133,9 @@ class AdminCorporateAccountsController extends Controller
                                 'range_up' => $weight['range_up'],
                                 'range_down' => $weight['range_down'],
                                 'base' => $weight['base'],
-                                'local_or_6hr' => $weight['local_or_6hr'],
-                                'national_charges_class_0' => $weight['national_charges_class_0'],
-                                'national_charges_class_1' => $weight['national_charges_class_1'],
-                                'national_charges_class_2' => $weight['national_charges_class_2'],
-                                'national_charges_class_3' => $weight['national_charges_class_3'],
+                                'local' => $weight['local'],
+                                'same_zone' => $weight['same_zone'],
+                                'different_zone' => $weight['different_zone'],
                             ]);
                         }
                     }
@@ -20151,11 +20148,9 @@ class AdminCorporateAccountsController extends Controller
                                 'range_up' => $weight['range_up'],
                                 'range_down' => $weight['range_down'],
                                 'base' => $weight['base'],
-                                'local_or_6hr' => $weight['local_or_6hr'],
-                                'national_charges_class_0' => $weight['national_charges_class_0'],
-                                'national_charges_class_1' => $weight['national_charges_class_1'],
-                                'national_charges_class_2' => $weight['national_charges_class_2'],
-                                'national_charges_class_3' => $weight['national_charges_class_3'],
+                                'local' => $weight['local'],
+                                'same_zone' => $weight['same_zone'],
+                                'different_zone' => $weight['different_zone'],
                             ]);
                         }
                     }
@@ -20168,11 +20163,9 @@ class AdminCorporateAccountsController extends Controller
                                 'range_up' => $weight['range_up'],
                                 'range_down' => $weight['range_down'],
                                 'base' => $weight['base'],
-                                'local_or_6hr' => $weight['local_or_6hr'],
-                                'national_charges_class_0' => $weight['national_charges_class_0'],
-                                'national_charges_class_1' => $weight['national_charges_class_1'],
-                                'national_charges_class_2' => $weight['national_charges_class_2'],
-                                'national_charges_class_3' => $weight['national_charges_class_3'],
+                                'local' => $weight['local'],
+                                'same_zone' => $weight['same_zone'],
+                                'different_zone' => $weight['different_zone'],
                             ]);
                         }
                     }
@@ -20185,11 +20178,9 @@ class AdminCorporateAccountsController extends Controller
                                 'range_up' => $weight['range_up'],
                                 'range_down' => $weight['range_down'],
                                 'base' => $weight['base'],
-                                'local_or_6hr' => $weight['local_or_6hr'],
-                                'national_charges_class_0' => $weight['national_charges_class_0'],
-                                'national_charges_class_1' => $weight['national_charges_class_1'],
-                                'national_charges_class_2' => $weight['national_charges_class_2'],
-                                'national_charges_class_3' => $weight['national_charges_class_3'],
+                                'local' => $weight['local'],
+                                'same_zone' => $weight['same_zone'],
+                                'different_zone' => $weight['different_zone'],
                             ]);
                         }
                     }
@@ -20202,11 +20193,9 @@ class AdminCorporateAccountsController extends Controller
                                 'range_up' => $weight['range_up'],
                                 'range_down' => $weight['range_down'],
                                 'base' => $weight['base'],
-                                'local_or_6hr' => $weight['local_or_6hr'],
-                                'national_charges_class_0' => $weight['national_charges_class_0'],
-                                'national_charges_class_1' => $weight['national_charges_class_1'],
-                                'national_charges_class_2' => $weight['national_charges_class_2'],
-                                'national_charges_class_3' => $weight['national_charges_class_3'],
+                                'local' => $weight['local'],
+                                'same_zone' => $weight['same_zone'],
+                                'different_zone' => $weight['different_zone'],
                             ]);
                         }
                     }
@@ -20219,11 +20208,9 @@ class AdminCorporateAccountsController extends Controller
                                 'range_up' => $weight['range_up'],
                                 'range_down' => $weight['range_down'],
                                 'base' => $weight['base'],
-                                'local_or_6hr' => $weight['local_or_6hr'],
-                                'national_charges_class_0' => $weight['national_charges_class_0'],
-                                'national_charges_class_1' => $weight['national_charges_class_1'],
-                                'national_charges_class_2' => $weight['national_charges_class_2'],
-                                'national_charges_class_3' => $weight['national_charges_class_3'],
+                                'local' => $weight['local'],
+                                'same_zone' => $weight['same_zone'],
+                                'different_zone' => $weight['different_zone'],
                             ]);
                         }
                     }
