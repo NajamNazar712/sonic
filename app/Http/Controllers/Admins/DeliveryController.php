@@ -7706,8 +7706,8 @@ class DeliveryController extends Controller
                 $rider->delivery_note_otp = $otp;
                 $rider->otp_date = Carbon::now();
                 $rider->save();
-                NotificationsController::send(144, $rider, $otp);
                 NotificationsController::app_notification(9, $rider->id, 2, $otp);
+                NotificationsController::send(144, $rider, $otp);
                 return response()->json(['status' => 1]);
             } else {
                 return response()->json(['status' => 0, 'error' => 'Rider not found!']);
