@@ -188,6 +188,16 @@ class AdminERFController extends Controller
         $erf->qualifications = $request->qualification;
         $erf->skills = $request->skills;
         $erf->job_description = $request->job_description;
+
+        if($request->has('employee_status')){
+            if($request->employee_status == 1){
+                $erf->employee_status = 1;
+            }
+            else {
+                $erf->employee_status = 2;
+            }
+        }
+
         $erf->save();
 
        if($request->erf_type == 1){
@@ -210,6 +220,7 @@ class AdminERFController extends Controller
              $replacement->save();
           }
        }
+
 
        $log = new EmployeeRequisitionStatusLog();
        $log->er_id = $erf->id ;

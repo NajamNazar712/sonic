@@ -24,7 +24,7 @@
                                         <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 mb-2">
                                             <h2 class="ml-2"> ERF Type</h2>
                                         </div>
-                                        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 mb-2">
+                                        <div class="col-md-6 col-lg-6 mb-2">
                                             <div class="form-check form-check-inline pull-left">
                                                 <input class="form-check-input" type="radio" name="erf_type" id="additional"  value="1" checked />
                                                 <label class="form-check-label" for="inlineRadio1" >Additional</label>
@@ -33,6 +33,15 @@
                                             <div class="form-check form-check-inline pull-left">
                                                 <input class="form-check-input" type="radio" name="erf_type" id="replacement" value="2"/>
                                                 <label class="form-check-label" for="inlineRadio2">Replacement</label>
+                                            </div>
+                                            <div class="form-check form-check-inline pull-left">
+                                                <input class="form-check-input" type="radio" name="employee_status" id="inactive" value="1"/>
+                                                <label class="form-check-label" for="inlineRadio1" >Inactive</label>
+                                            </div>
+
+                                            <div class="form-check form-check-inline pull-left">
+                                                <input class="form-check-input" type="radio" name="employee_status" id="notice_period" value="2"/>
+                                                <label class="form-check-label" for="inlineRadio2">Notice Period</label>
                                             </div>
                                         </div>
                                     </div>
