@@ -1373,6 +1373,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
+        Route::post('rcp_sms','Admins\ReturnController@manual_rcp_sms')->name('rcp_sms');
 
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::post('revert','Admins\ReturnController@return_confirmed_revert')->name('revert');

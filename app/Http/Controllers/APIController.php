@@ -4562,7 +4562,7 @@ class APIController extends Controller
                                     $shipment->consignee_status_id = 13;
                                     $shipment->save();
 
-                                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 50);
+                                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
                                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id)->latest()->first();
 
                                     if ($return_assign_shipment){
@@ -4572,7 +4572,7 @@ class APIController extends Controller
                                         $return_assign_log = new ReturnAssignedShipmentLogs();
                                         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
                                         $return_assign_log->status = 1;
-                                        $return_assign_log->assigned_by = 50;
+                                        $return_assign_log->assigned_by = 346;
                                         $return_assign_log->save();
                                     }
 
@@ -4617,7 +4617,7 @@ class APIController extends Controller
                                             AdminFinanceController::done_payment($shipment->id, 1);
                                         }
                                     }
-                                    ShipmentsJourneyController::add($shipment->id, 20, 20, 38, NULL, NULL, 50);
+                                    ShipmentsJourneyController::add($shipment->id, 20, 20, 38, NULL, NULL, 346);
                                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
                                     if ($return_assign_shipment->exists()){
                                         $return_assign_shipment = $return_assign_shipment ->latest()->first();
@@ -4627,7 +4627,7 @@ class APIController extends Controller
                                         $return_assign_log = new ReturnAssignedShipmentLogs();
                                         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
                                         $return_assign_log->status = 2;
-                                        $return_assign_log->assigned_by = 50;
+                                        $return_assign_log->assigned_by = 346;
                                         $return_assign_log->save();
                                     }
                                 }
