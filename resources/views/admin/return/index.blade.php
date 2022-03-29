@@ -1963,7 +1963,7 @@
                                 method: 'POST',
                                 data: {
                                     '_token': '{{ csrf_token() }}',
-                                    'phone': id
+                                    'id': id
                                 }
                             })
                                 .done(function(data) {
