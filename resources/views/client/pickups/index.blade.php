@@ -700,10 +700,6 @@
                                     <td>${result.attempt_date}</td>
                                     <td>${result.attempts}</td>
                                     </tr>`)
-
-
-
-
                         }
                         else{
                             $('#view_details tbody ').html('') ;
