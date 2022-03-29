@@ -481,7 +481,7 @@
                         <input type="hidden" name="sdn_id" id="sdn_id_for_add_pncc">
                         <div class="form-group">
                             <select name="pncc_id" id="pncc_select" data-rule-required="true"
-                                    data-msg-required="PNCC is Required" class="select2 form-control">
+                                    data-msg-required="RNCC is Required" class="select2 form-control">
 
                             </select>
                         </div>
@@ -497,7 +497,7 @@
                                 </button>
                             </div>
                             <div class="col-3">
-                                <button type="submit" class="btn btn-primary btn-block">Add PNCC</button>
+                                <button type="submit" class="btn btn-primary btn-block">Add RNCC</button>
                             </div>
 
                         </div>
@@ -513,7 +513,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Remove PNCC</h4>
+                    <h4 class="modal-title white">Remove RNCC</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -530,7 +530,7 @@
                             <tr role="row" class="bg-primary white">
                                 <th class="border-primary border-darken-1"></th>
                                 <th class="border-primary border-darken-1">S NO.</th>
-                                <th class="border-primary border-darken-1">PNCC #</th>
+                                <th class="border-primary border-darken-1">RNCC #</th>
                                 <th class="border-primary border-darken-1">No. of Shipments</th>
                                 <th class="border-primary border-darken-1">Amount</th>
                             </tr>
@@ -544,7 +544,7 @@
                             </div>
                             <div class="col-3">
                                 <button type="submit" id="remove_pncc_btn" disabled class="btn btn-primary btn-block">
-                                    Remove PNCC
+                                    Remove RNCC
                                 </button>
                             </div>
 
@@ -1050,7 +1050,7 @@
 
 
             $("#sdn_add_pncc #pncc_select").prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Select PNCC*',
+                placeholder: 'Select RNCC*',
                 width: '100%',
                 dropdownCssClass: 'form-control-sm p-0',
                 dropdownParent: $("#sdn_add_pncc")
@@ -1186,7 +1186,7 @@
                     })
                         .done(function (data) {
                             if (data.status == 1) {
-                                var notes = '<div>PNCC Number(s) :</div>';
+                                var notes = '<div>RNCC Number(s) :</div>';
 
                                 if (data.pickup_notes) {
                                     $.each(data.pickup_notes, function (index, value) {
@@ -1272,7 +1272,7 @@
                             var html = '<div><b>Delivered Shipment(s) :</b></div>';
                             var dn_pn_title = '';
                             if (data.status == 1) {
-                                dn_pn_title = 'PNCC Number ';
+                                dn_pn_title = 'RNCC Number ';
                             } else {
                                 dn_pn_title = 'DNCC Number ';
                             }
@@ -2098,7 +2098,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to Add PNCC To SDN!',
+                        text: 'Select Yes to Add RNCC To SDN!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -2175,7 +2175,7 @@
                     if (pncc_selected_rows.length > 0) {
                         swal({
                             title: 'Are You Sure?',
-                            text: 'Select Yes to Remove PNCC From SDN!',
+                            text: 'Select Yes to Remove RNCC From SDN!',
                             icon: 'warning',
                             buttons: {
                                 cancel: {

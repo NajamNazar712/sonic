@@ -15,11 +15,11 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">PNCC No.</th>
+                        <th class="border-primary border-darken-1">RNCC No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
-                        <th class="border-primary border-darken-1">PNCC Amount</th>
+                        <th class="border-primary border-darken-1">RNCC Amount</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                     </tr>
                     </thead>
@@ -111,11 +111,11 @@
                         success: function (result) {
                             head = [];
                             head.push('S. No');
-                            head.push('PNCC No.');
+                            head.push('RNCC No.');
                             head.push('Hub');
                             head.push('Rider');
                             head.push('No. Of Shipments');
-                            head.push('PNCC Amount');
+                            head.push('RNCC Amount');
                             // head.push('Net Amount');
                             head.push('Remarks');
                             $.each(result.data, function(index, values) {

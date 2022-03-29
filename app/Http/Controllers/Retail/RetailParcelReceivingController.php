@@ -119,7 +119,7 @@ class RetailParcelReceivingController extends Controller
             $parcel_receiving->total_cn = $total_cn;
             $parcel_receiving->total_cash = $total_charges;
             $parcel_receiving->save();
-            return response()->json(['status' => 0, 'success' => 'Parcel Receiving Sheet generated with Performa No: ' . str_pad($parcel_receiving->id, 6, '0', STR_PAD_LEFT), 'parcel_receiving_id' => $parcel_receiving->id]);
+            return response()->json(['status' => 0, 'success' => 'Parcel Receiving Sheet generated with Retail Note: ' . str_pad($parcel_receiving->id, 6, '0', STR_PAD_LEFT), 'parcel_receiving_id' => $parcel_receiving->id]);
         } else {
             return response()->json(['status' => 1, 'error' => 'Shipments not found!']);
         }
@@ -451,7 +451,7 @@ class RetailParcelReceivingController extends Controller
 
             $other_parcel_receiving->total_cn = $total_cn;
             $other_parcel_receiving->save();
-            return response()->json(['status' => 0, 'success' => 'Other Parcel Receiving Sheet generated with Performa No: ' . str_pad($other_parcel_receiving->id, 6, '0', STR_PAD_LEFT), 'other_parcel_receiving_id' => $other_parcel_receiving->id]);
+            return response()->json(['status' => 0, 'success' => 'Other Parcel Receiving Sheet generated with Retail Note: ' . str_pad($other_parcel_receiving->id, 6, '0', STR_PAD_LEFT), 'other_parcel_receiving_id' => $other_parcel_receiving->id]);
         } else {
             return response()->json(['status' => 1, 'error' => 'Shipments not found!']);
         }

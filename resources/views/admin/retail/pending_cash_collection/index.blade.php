@@ -32,7 +32,7 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1"></th>
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">PNCC No.</th>
+                            <th class="border-primary border-darken-1">RNCC No.</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Rider</th>
                             <th class="border-primary border-darken-1">Center/Franchise Name</th>
@@ -40,7 +40,7 @@
                             <th class="border-primary border-darken-1">Center and Franchise Code</th>
                             <th class="border-primary border-darken-1">Assigned By</th>
                             <th class="border-primary border-darken-1">Assigned Date</th>
-                            <th class="border-primary border-darken-1">PNCC Amount</th>
+                            <th class="border-primary border-darken-1">RNCC Amount</th>
 {{--                            <th class="border-primary border-darken-1">Action</th>--}}
                         </tr>
                         </thead>
@@ -103,7 +103,7 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('PNCC No.');
+                            head.push('RNCC No.');
                             head.push('Hub');
                             head.push('Rider');
                             head.push('Center/Franchise Name');
@@ -111,7 +111,7 @@
                             head.push('Center and Franchise Code');
                             head.push('Assigned By');
                             head.push('Assigned Date');
-                            head.push('PNCC Amount');
+                            head.push('RNCC Amount');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -200,7 +200,7 @@
                                                     if(data.notes != null){
                                                         $.each(data.notes,function (index,id) {
                                                             $msg += '<br>';
-                                                            $msg += 'PNCC # '+id;
+                                                            $msg += 'RNCC # '+id;
                                                         });
                                                     }
                                                     toastr.error($msg, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

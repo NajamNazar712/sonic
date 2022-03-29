@@ -4457,7 +4457,7 @@ class DeliveryController extends Controller
                     $pickup_notes = RetailPickupNote::where('status', 4)->where('pncc_status', 0)->where('hub_id', $sdn->hub_id)->orderBy('id', 'desc')->get(['id']);
                     return response()->json(['status' => 1, 'dn' => $pickup_notes]);
                 } else {
-                    return response()->json(['status' => 0, 'message' => 'Can not add PNCC to SDN']);
+                    return response()->json(['status' => 0, 'message' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return response()->json(['status' => 0, 'message' => 'Invalid SDN Id']);
@@ -4492,9 +4492,9 @@ class DeliveryController extends Controller
                     $pickup_note->pncc_status = 1;
                     $pickup_note->update();
 
-                    return back()->with(['success' => 'PNCC added to SDN']);
+                    return back()->with(['success' => 'RNCC added to SDN']);
                 } else {
-                    return back()->with(['error' => 'Can not add PNCC to SDN']);
+                    return back()->with(['error' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return back()->with(['error' => 'Invalid SDN Id']);
@@ -4517,7 +4517,7 @@ class DeliveryController extends Controller
 
                     return response()->json(['status' => 1, 'pncc' => RetailPickupNote::whereIn('id', $pickup_note_ids)->get()]);
                 } else {
-                    return response()->json(['status' => 0, 'message' => 'Can not remove PNCC from SDN']);
+                    return response()->json(['status' => 0, 'message' => 'Can not remove RNCC from SDN']);
                 }
             } else {
                 return response()->json(['status' => 0, 'message' => 'Invalid SDN Id']);
@@ -4560,12 +4560,12 @@ class DeliveryController extends Controller
                         $sdn->sdn_net_amount = $sdn->sdn_net_amount - $total_sdn_net_amount;
                         $sdn->update();
 
-                        return back()->with(['success' => 'PNCC removed successfully']);
+                        return back()->with(['success' => 'RNCC removed successfully']);
                     } else {
-                        return back()->with('error', 'Invalid PNCC');
+                        return back()->with('error', 'Invalid RNCC');
                     }
                 } else {
-                    return back()->with(['error' => 'Can not add PNCC to SDN']);
+                    return back()->with(['error' => 'Can not add RNCC to SDN']);
                 }
             } else {
                 return back()->with(['error' => 'Invalid SDN Id']);
@@ -4842,11 +4842,11 @@ class DeliveryController extends Controller
 
                 $add_dncc = '<button type="button" class="dropdown-item add_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add DNCC</div></button>';
 
-                $add_pncc = '<button type="button" class="dropdown-item add_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add PNCC</div></button>';
+                $add_pncc = '<button type="button" class="dropdown-item add_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add RNCC</div></button>';
 
                 $remove_dncc = '<button type="button" class="dropdown-item remove_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove DNCC</div></button>';
 
-                $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove PNCC</div></button>';
+                $remove_pncc = '<button type="button" class="dropdown-item remove_pncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Remove RNCC</div></button>';
 
                 $view_logs = '<button type="button" class="dropdown-item view_logs"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
