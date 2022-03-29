@@ -4789,8 +4789,13 @@ class ReturnController extends Controller
                     if ($rcp_sms->count <= $limit->text){
                         dispatch(new RCPSmsToConsignee($rcp_sms->shipment_id));
                     }
-
                 }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'Shipment not found in SMS attempts!']);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
             }
         }
     }
