@@ -22445,7 +22445,7 @@ class AdminCorporateAccountsController extends Controller
                         $discount_wa_spkg = array();
                         foreach($request->discount_on_wa_range_up[$parent_key] as $child_key => $value)
                         {
-                            if ($request->has('discount_on_wa_switch')) {
+                            if ($request->has('discount_on_wa_switch.'.$parent_key)) {
                                 if (array_key_exists($child_key, $request->discount_on_wa_switch[$parent_key])) {
                                     $discount_wa_switch[$child_key] = 1;
                                 } else {
@@ -22454,7 +22454,7 @@ class AdminCorporateAccountsController extends Controller
                             } else {
                                 $discount_wa_switch[$child_key] = 0;
                             }
-                            if ($request->has('discount_on_wa_spkg')) {
+                            if ($request->has('discount_on_wa_spkg.'.$parent_key)) {
                                 if (array_key_exists($child_key, $request->discount_on_wa_spkg[$parent_key])) {
                                     $discount_wa_spkg[$child_key] = $request->discount_on_wa_spkg[$parent_key][$child_key];
                                 } else {
@@ -22673,7 +22673,7 @@ class AdminCorporateAccountsController extends Controller
                         $discount_wa_spkg = array();
                         foreach($request->discount_ol_wa_range_up[$parent_key] as $child_key => $value)
                         {
-                            if ($request->has('discount_ol_wa_switch')) {
+                            if ($request->has('discount_ol_wa_switch.'.$parent_key)) {
                                 if (array_key_exists($child_key, $request->discount_ol_wa_switch[$parent_key])) {
                                     $discount_wa_switch[$child_key] = 1;
                                 } else {
@@ -22682,7 +22682,7 @@ class AdminCorporateAccountsController extends Controller
                             } else {
                                 $discount_wa_switch[$child_key] = 0;
                             }
-                            if ($request->has('discount_ol_wa_spkg')) {
+                            if ($request->has('discount_ol_wa_spkg.'.$parent_key)) {
                                 if (array_key_exists($child_key, $request->discount_ol_wa_spkg[$parent_key])) {
                                     $discount_wa_spkg[$child_key] = $request->discount_ol_wa_spkg[$parent_key][$child_key];
                                 } else {
@@ -22902,7 +22902,7 @@ class AdminCorporateAccountsController extends Controller
                         $discount_wa_spkg = array();
                         foreach($request->discount_d_wa_range_up[$parent_key] as $child_key => $value)
                         {
-                            if ($request->has('discount_d_wa_switch')) {
+                            if ($request->has('discount_d_wa_switch.'.$parent_key)) {
                                 if (array_key_exists($child_key, $request->discount_d_wa_switch[$parent_key])) {
                                     $discount_wa_switch[$child_key] = 1;
                                 } else {
@@ -22911,7 +22911,7 @@ class AdminCorporateAccountsController extends Controller
                             } else {
                                 $discount_wa_switch[$child_key] = 0;
                             }
-                            if ($request->has('discount_d_wa_spkg')) {
+                            if ($request->has('discount_d_wa_spkg.'.$parent_key)) {
                                 if (array_key_exists($child_key, $request->discount_d_wa_spkg[$parent_key])) {
                                     $discount_wa_spkg[$child_key] = $request->discount_d_wa_spkg[$parent_key][$child_key];
                                 } else {
@@ -23128,7 +23128,7 @@ class AdminCorporateAccountsController extends Controller
                         $discount_wa_spkg = array();
                         foreach($request->discount_sd_wa_range_up[$parent_key] as $child_key => $value)
                         {
-                            if ($request->has('discount_sd_wa_switch')) {
+                            if ($request->has('discount_sd_wa_switch.'.$parent_key)) {
                                 if (array_key_exists($child_key, $request->discount_sd_wa_switch[$parent_key])) {
                                     $discount_wa_switch[$child_key] = 1;
                                 } else {
@@ -23137,7 +23137,7 @@ class AdminCorporateAccountsController extends Controller
                             } else {
                                 $discount_wa_switch[$child_key] = 0;
                             }
-                            if ($request->has('discount_sd_wa_spkg')) {
+                            if ($request->has('discount_sd_wa_spkg.'.$parent_key)) {
                                 if (array_key_exists($child_key, $request->discount_sd_wa_spkg[$parent_key])) {
                                     $discount_wa_spkg[$child_key] = $request->discount_sd_wa_spkg[$parent_key][$child_key];
                                 } else {
@@ -24592,7 +24592,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_on_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_on_wa_switch')) {
+                                if ($request->has('discount_on_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_on_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -24601,7 +24601,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_on_wa_spkg')) {
+                                if ($request->has('discount_on_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_on_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_on_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -24914,7 +24914,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_ol_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_ol_wa_switch')) {
+                                if ($request->has('discount_ol_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_ol_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -24923,7 +24923,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_ol_wa_spkg')) {
+                                if ($request->has('discount_ol_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_ol_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_ol_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -24954,7 +24954,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_ol_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_ol_wa_switch')) {
+                                if ($request->has('discount_ol_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_ol_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -24963,7 +24963,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_ol_wa_spkg')) {
+                                if ($request->has('discount_ol_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_ol_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_ol_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -25272,7 +25272,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_d_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_d_wa_switch')) {
+                                if ($request->has('discount_d_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_d_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -25281,7 +25281,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_d_wa_spkg')) {
+                                if ($request->has('discount_d_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_d_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_d_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -25312,7 +25312,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_d_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_d_wa_switch')) {
+                                if ($request->has('discount_d_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_d_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -25321,7 +25321,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_d_wa_spkg')) {
+                                if ($request->has('discount_d_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_d_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_d_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -25639,7 +25639,7 @@ class AdminCorporateAccountsController extends Controller
                             
                             foreach($request->discount_sd_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_sd_wa_switch')) {
+                                if ($request->has('discount_sd_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_sd_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -25648,7 +25648,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_sd_wa_spkg')) {
+                                if ($request->has('discount_sd_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_sd_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_sd_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -26550,7 +26550,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_on_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_on_wa_switch')) {
+                                if ($request->has('discount_on_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_on_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -26559,7 +26559,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_on_wa_spkg')) {
+                                if ($request->has('discount_on_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_on_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_on_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -26778,7 +26778,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_ol_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_ol_wa_switch')) {
+                                if ($request->has('discount_ol_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_ol_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -26787,7 +26787,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_ol_wa_spkg')) {
+                                if ($request->has('discount_ol_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_ol_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_ol_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -27007,7 +27007,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_d_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_d_wa_switch')) {
+                                if ($request->has('discount_d_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_d_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -27016,7 +27016,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_d_wa_spkg')) {
+                                if ($request->has('discount_d_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_d_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_d_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -27233,7 +27233,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_sd_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_sd_wa_switch')) {
+                                if ($request->has('discount_sd_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_sd_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -27242,7 +27242,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_sd_wa_spkg')) {
+                                if ($request->has('discount_sd_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_sd_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_sd_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -29332,7 +29332,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_on_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_on_wa_switch')) {
+                                if ($request->has('discount_on_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_on_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -29341,7 +29341,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_on_wa_spkg')) {
+                                if ($request->has('discount_on_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_on_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_on_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -29559,7 +29559,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_ol_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_ol_wa_switch')) {
+                                if ($request->has('discount_ol_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_ol_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -29568,7 +29568,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_ol_wa_spkg')) {
+                                if ($request->has('discount_ol_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_ol_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_ol_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -29787,7 +29787,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_d_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_d_wa_switch')) {
+                                if ($request->has('discount_d_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_d_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -29796,7 +29796,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_d_wa_spkg')) {
+                                if ($request->has('discount_d_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_d_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_d_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -30012,7 +30012,7 @@ class AdminCorporateAccountsController extends Controller
                             $discount_wa_spkg = array();
                             foreach($request->discount_sd_wa_range_up[$parent_key] as $child_key => $value)
                             {
-                                if ($request->has('discount_sd_wa_switch')) {
+                                if ($request->has('discount_sd_wa_switch.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_sd_wa_switch[$parent_key])) {
                                         $discount_wa_switch[$child_key] = 1;
                                     } else {
@@ -30021,7 +30021,7 @@ class AdminCorporateAccountsController extends Controller
                                 } else {
                                     $discount_wa_switch[$child_key] = 0;
                                 }
-                                if ($request->has('discount_sd_wa_spkg')) {
+                                if ($request->has('discount_sd_wa_spkg.'.$parent_key)) {
                                     if (array_key_exists($child_key, $request->discount_sd_wa_spkg[$parent_key])) {
                                         $discount_wa_spkg[$child_key] = $request->discount_sd_wa_spkg[$parent_key][$child_key];
                                     } else {
@@ -34819,7 +34819,7 @@ class AdminCorporateAccountsController extends Controller
                       $discount_wa_spkg = array();
                       foreach($request->discount_on_wa_range_up[$parent_key] as $child_key => $value)
                       {
-                          if ($request->has('discount_on_wa_switch')) {
+                          if ($request->has('discount_on_wa_switch.'.$parent_key)) {
                               if (array_key_exists($child_key, $request->discount_on_wa_switch[$parent_key])) {
                                   $discount_wa_switch[$child_key] = 1;
                               } else {
@@ -34828,7 +34828,7 @@ class AdminCorporateAccountsController extends Controller
                           } else {
                               $discount_wa_switch[$child_key] = 0;
                           }
-                          if ($request->has('discount_on_wa_spkg')) {
+                          if ($request->has('discount_on_wa_spkg.'.$parent_key)) {
                               if (array_key_exists($child_key, $request->discount_on_wa_spkg[$parent_key])) {
                                   $discount_wa_spkg[$child_key] = $request->discount_on_wa_spkg[$parent_key][$child_key];
                               } else {
@@ -35050,7 +35050,7 @@ class AdminCorporateAccountsController extends Controller
                       $discount_wa_spkg = array();
                       foreach($request->discount_ol_wa_range_up[$parent_key] as $child_key => $value)
                       {
-                          if ($request->has('discount_ol_wa_switch')) {
+                          if ($request->has('discount_ol_wa_switch.'.$parent_key)) {
                               if (array_key_exists($child_key, $request->discount_ol_wa_switch[$parent_key])) {
                                   $discount_wa_switch[$child_key] = 1;
                               } else {
@@ -35059,7 +35059,7 @@ class AdminCorporateAccountsController extends Controller
                           } else {
                               $discount_wa_switch[$child_key] = 0;
                           }
-                          if ($request->has('discount_ol_wa_spkg')) {
+                          if ($request->has('discount_ol_wa_spkg.'.$parent_key)) {
                               if (array_key_exists($child_key, $request->discount_ol_wa_spkg[$parent_key])) {
                                   $discount_wa_spkg[$child_key] = $request->discount_ol_wa_spkg[$parent_key][$child_key];
                               } else {
@@ -35278,7 +35278,7 @@ class AdminCorporateAccountsController extends Controller
                       $discount_wa_spkg = array();
                       foreach($request->discount_d_wa_range_up[$parent_key] as $child_key => $value)
                       {
-                          if ($request->has('discount_d_wa_switch')) {
+                          if ($request->has('discount_d_wa_switch.'.$parent_key)) {
                               if (array_key_exists($child_key, $request->discount_d_wa_switch[$parent_key])) {
                                   $discount_wa_switch[$child_key] = 1;
                               } else {
@@ -35287,7 +35287,7 @@ class AdminCorporateAccountsController extends Controller
                           } else {
                               $discount_wa_switch[$child_key] = 0;
                           }
-                          if ($request->has('discount_d_wa_spkg')) {
+                          if ($request->has('discount_d_wa_spkg.'.$parent_key)) {
                               if (array_key_exists($child_key, $request->discount_d_wa_spkg[$parent_key])) {
                                   $discount_wa_spkg[$child_key] = $request->discount_d_wa_spkg[$parent_key][$child_key];
                               } else {
@@ -35507,7 +35507,7 @@ class AdminCorporateAccountsController extends Controller
                       $discount_wa_spkg = array();
                       foreach($request->discount_sd_wa_range_up[$parent_key] as $child_key => $value)
                       {
-                          if ($request->has('discount_sd_wa_switch')) {
+                          if ($request->has('discount_sd_wa_switch.'.$parent_key)) {
                               if (array_key_exists($child_key, $request->discount_sd_wa_switch[$parent_key])) {
                                   $discount_wa_switch[$child_key] = 1;
                               } else {
@@ -35516,7 +35516,7 @@ class AdminCorporateAccountsController extends Controller
                           } else {
                               $discount_wa_switch[$child_key] = 0;
                           }
-                          if ($request->has('discount_sd_wa_spkg')) {
+                          if ($request->has('discount_sd_wa_spkg.'.$parent_key)) {
                               if (array_key_exists($child_key, $request->discount_sd_wa_spkg[$parent_key])) {
                                   $discount_wa_spkg[$child_key] = $request->discount_sd_wa_spkg[$parent_key][$child_key];
                               } else {
