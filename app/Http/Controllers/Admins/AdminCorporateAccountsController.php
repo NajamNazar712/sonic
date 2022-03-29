@@ -20091,9 +20091,9 @@ class AdminCorporateAccountsController extends Controller
                             'min_chargeable_weight' => $min_charge['min_chargeable_weight']
                         ]);
                     }
-                    if ($weights = PendingCorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->get()) {
+                    if ($weights = PendingCorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->get()) {
                         foreach ($weights as $weight) {
-                            CorporateWeightCharge::create([
+                            CorporateWeightChargeZoneWise::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'delivery_type_id' => 1,
@@ -20108,9 +20108,9 @@ class AdminCorporateAccountsController extends Controller
                             ]);
                         }
                     }
-                    if ($weights = PendingCorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 1])->get()) {
+                    if ($weights = PendingCorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 1])->get()) {
                         foreach ($weights as $weight) {
-                            CorporateWeightCharge::create([
+                            CorporateWeightChargeZoneWise::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'delivery_type_id' => 1,
@@ -20125,9 +20125,9 @@ class AdminCorporateAccountsController extends Controller
                             ]);
                         }
                     }
-                    if ($weights = PendingCorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 1])->get()) {
+                    if ($weights = PendingCorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 1])->get()) {
                         foreach ($weights as $weight) {
-                            CorporateWeightCharge::create([
+                            CorporateWeightChargeZoneWise::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'delivery_type_id' => 1,
@@ -20142,9 +20142,9 @@ class AdminCorporateAccountsController extends Controller
                             ]);
                         }
                     }
-                    if ($weights = PendingCorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 1])->get()) {
+                    if ($weights = PendingCorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 1])->get()) {
                         foreach ($weights as $weight) {
-                            CorporateWeightCharge::create([
+                            CorporateWeightChargeZoneWise::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'delivery_type_id' => 1,
@@ -20159,9 +20159,9 @@ class AdminCorporateAccountsController extends Controller
                             ]);
                         }
                     }
-                    if ($weights = PendingCorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->get()) {
+                    if ($weights = PendingCorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->get()) {
                         foreach ($weights as $weight) {
-                            CorporateWeightCharge::create([
+                            CorporateWeightChargeZoneWise::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
                                 'delivery_type_id' => 2,
@@ -20176,9 +20176,9 @@ class AdminCorporateAccountsController extends Controller
                             ]);
                         }
                     }
-                    if ($weights = PendingCorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->get()) {
+                    if ($weights = PendingCorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 2, 'delivery_type_id' => 2])->get()) {
                         foreach ($weights as $weight) {
-                            CorporateWeightCharge::create([
+                            CorporateWeightChargeZoneWise::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
                                 'delivery_type_id' => 2,
@@ -20193,9 +20193,9 @@ class AdminCorporateAccountsController extends Controller
                             ]);
                         }
                     }
-                    if ($weights = PendingCorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->get()) {
+                    if ($weights = PendingCorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->get()) {
                         foreach ($weights as $weight) {
-                            CorporateWeightCharge::create([
+                            CorporateWeightChargeZoneWise::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
                                 'delivery_type_id' => 2,
@@ -20210,9 +20210,9 @@ class AdminCorporateAccountsController extends Controller
                             ]);
                         }
                     }
-                    if ($weights = PendingCorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->get()) {
+                    if ($weights = PendingCorporateWeightChargeZoneWise::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->get()) {
                         foreach ($weights as $weight) {
-                            CorporateWeightCharge::create([
+                            CorporateWeightChargeZoneWise::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
                                 'delivery_type_id' => 2,
@@ -20511,7 +20511,7 @@ class AdminCorporateAccountsController extends Controller
                         }
                     }
 
-                    PendingCorporateWeightCharge::where('user_id', $id)->delete();
+                    PendingCorporateWeightChargeZoneWise::where('user_id', $id)->delete();
                     PendingCorporateRateStatus::where('user_id', $id)->delete();
                     PendingCorporateBookingTypeCharges::where('user_id', $id)->delete();
                     PendingCorporateCashHandlingCharge::where('user_id', $id)->delete();
