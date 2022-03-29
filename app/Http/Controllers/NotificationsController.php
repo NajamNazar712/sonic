@@ -9427,7 +9427,7 @@ class NotificationsController extends Controller
                 }
                 $employee_device_token = EmployeeDeviceToken::where('employee_id', $employee_id)
                     ->where('employee_type_id', $employee_type)
-                    ->select('device_token');
+                    ->select('device_token')->orderBy('id', 'DESC');
                 if ($employee_device_token->exists()) {
                     $employee_device_token = $employee_device_token->first();
                     $device_token = $employee_device_token->device_token;
