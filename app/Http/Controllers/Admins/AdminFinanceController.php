@@ -5218,7 +5218,8 @@ class AdminFinanceController extends Controller
                 $dropdown = '<div class="btn-group">
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                   <div class="dropdown-menu dropdown-menu-sm">
-                    <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
+                    <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>
+                    <button type="button" class="dropdown-item view_status_history"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Status History</div></button>';
 
                 if (session('role_id') == 1 || session('department_id') == 4) {
                     $dropdown .= '<button type="button" class="dropdown-item update_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Details</div></button>';
@@ -5299,6 +5300,42 @@ class AdminFinanceController extends Controller
         }
         return $datatables->make(true);
     }
+
+    public function view_status_history(Request $request)
+{
+    $status_history = array();
+    $done_payments = DonePayment::join('admins','admins.id','=','done_payments.status_updated_by')->
+            where('done_payments.id',$request->id)
+            ->select('done_payments.id','done_payments.status','done_payments.status_updated_by','done_payments.status_updated_at','admins.name')
+            ->first();
+
+    $payment_id = $done_payments->id;
+
+    if ($done_payments->status == 0) {
+        $payment_status =  'Processed';
+    }
+    else if ($done_payments->status == 1) {
+        $payment_status = 'Paid';
+    }
+    else if ($done_payments->status == 2) {
+        $payment_status = 'Reverted';
+    }
+    else {
+        $payment_status = 'Unknown';
+    }
+    $status_updated_at = $done_payments->status_updated_at;
+
+    $updated_by = $done_payments->name;
+
+    $status_history['payment_id'] = $payment_id;
+    $status_history['$payment_status'] = $payment_status;
+    $status_history['$status_updated_at'] = $status_updated_at;
+    $status_history['$updated_by'] = $updated_by;
+
+    echo json_encode($status_history);
+
+//    dd($done_payments);
+}
 
     public function done_payments_paid(Request $request) {
         foreach ($request->ids as $done_payment_id) {

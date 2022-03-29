@@ -188,6 +188,25 @@
 								</div>
 							</div>
 
+							<div class="modal fade" id="view_status_history" role="dialog" aria-labelledby="view_status_history_title" aria-hidden="true">
+								<div class="modal-dialog modal-sm" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="delivered_shipments_title">Status History</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
 							<div class="modal fade" id="returned_shipments" role="dialog" aria-labelledby="returned_shipments_title" aria-hidden="true">
 								<div class="modal-dialog modal-sm" role="document">
 									<div class="modal-content">
@@ -1069,6 +1088,25 @@
 						}
 					});
 				}
+				// todo view status history
+				else if ($(this).hasClass('view_status_history')) {
+					$.ajax({
+						url: '{!! route('admin.finance.done_payments.view_status_history') !!}',
+						method: 'GET',
+						data: {
+							'id': id
+						}
+					})
+							.done(function(data) {
+								$('#view_status_history').modal('show');
+								var result = JSON.parse(data);
+								if (result) {
+
+									
+								}
+							});
+				}
+				// todo view status history end
 				else if ($(this).hasClass('export_to_excel')) {
 					window.open('{!! route('admin.finance.done_payments.export_to_excel') !!}?id=' + id, '_blank');
 				}
