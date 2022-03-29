@@ -4491,7 +4491,7 @@ class APIController extends Controller
     }
 
     public function rcp_sms_from_consignee(Request $request) {
-//        if ($request->ip() == "202.141.247.130" || $request->ip() == "202.141.247.133") {
+        if ($request->ip() == "202.141.247.130" || $request->ip() == "202.141.247.133") {
             if ($request->has('message') && !empty($request->message)) {
                 $message = $request->message;
 
@@ -4640,9 +4640,9 @@ class APIController extends Controller
             else {
                 return ['status' => 0, 'message' => 'message field is required'];
             }
-//        }
-//        else {
-//            return ['status' => 0, 'message' => 'Unauthorized IP'];
-//        }
+        }
+        else {
+            return ['status' => 0, 'message' => 'Unauthorized IP'];
+        }
     }
 }
