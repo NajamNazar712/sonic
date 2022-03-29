@@ -1929,7 +1929,58 @@
                     form.submit();
                 }
             });
-       
+
+            $('#datatable tbody').on('click', '.dropdown-menu a.rcp_sms', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+                if(id){
+
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update Estimated Charges!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if(confirm){
+                            $.ajax({
+                                url: '{!! route('admin.return.rcp_sms') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'phone': id
+                                }
+                            })
+                                .done(function(data) {
+                                    if (data.status == 0) {
+
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    else {
+
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                });
+                        }
+                    });
+                }
+            });
+
 
       
         });
