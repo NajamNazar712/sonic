@@ -16,6 +16,8 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\HistoryShipperBankAccount;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
+use App\Http\Models\Admin\OpenBoxCharges;
+use App\Http\Models\Admin\PendingOpenBoxCharges;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\Segment;
 use App\Http\Models\Admin\Territory;
@@ -100,7 +102,6 @@ use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\UserDocumentAttachment;
 use App\Http\Models\WalkInCities;
 use App\Http\Models\ZoneClassCity;
-use App\OpenBoxCharges;
 use App\RouteLocations;
 use App\Http\Models\RouteType;
 use App\TerritoryTagHistory;
@@ -8560,8 +8561,14 @@ class AdminDashboardController extends Controller
                 }
             }
 
+            $on_open_box_diff = 0;
+            if ($request->has('on_open_box_switch') && $request->on_open_box_switch == 'on') {
+                if($request->overnight_open_box != null){
+                    $on_open_box_diff = 1;
+                }
+            }
 
-            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $on_dws_weight_diff == 1) {
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $on_dws_weight_diff == 1 || $on_open_box_diff == 1) {
                 $overnight_changes = 1;
 
             }
@@ -8684,7 +8691,16 @@ class AdminDashboardController extends Controller
                     $ol_dws_weight_diff = 1;
                 }
             }
-            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $ol_dws_weight_diff == 1) {
+
+            $ol_open_box_diff = 0;
+            if ($request->has('ol_open_box_switch') && $request->ol_open_box_switch == 'on') {
+                if($request->overland_open_box != null){
+                    $ol_open_box_diff = 1;
+                }
+            }
+
+
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $ol_dws_weight_diff == 1 || $ol_open_box_diff == 1) {
                 $overland_changes = 1;
             }
         }
@@ -8804,7 +8820,16 @@ class AdminDashboardController extends Controller
                     $detain_dws_weight_diff = 1;
                 }
             }
-            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $detain_dws_weight_diff == 1) {
+
+            $detain_open_box_diff = 0;
+            if ($request->has('detain_open_box_switch') && $request->detain_open_box_switch == 'on') {
+                if($request->detain_open_box != null){
+                    $detain_open_box_diff = 1;
+                }
+            }
+
+
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $detain_dws_weight_diff == 1 || $detain_open_box_diff == 1) {
                 $detain_changes = 1;
             }
         }
@@ -8925,7 +8950,16 @@ class AdminDashboardController extends Controller
                     $sameday_dws_weight_diff = 1;
                 }
             }
-            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $sameday_dws_weight_diff == 1) {
+
+            $sd_open_box_diff = 0;
+            if ($request->has('sd_open_box_switch') && $request->sd_open_box_switch == 'on') {
+                if($request->sd_open_box != null){
+                    $sd_open_box_diff = 1;
+                }
+            }
+
+
+            if ($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1 || $sameday_dws_weight_diff == 1 || $sd_open_box_diff == 1) {
                 $sameday_changes = 1;
             }
         }
