@@ -3756,6 +3756,7 @@ class ShipperShipmentBookController extends Controller
         }
         }
     }
+    }
 
     public function corporate_invoice(Request $request)
     {
