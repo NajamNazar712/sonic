@@ -222,7 +222,7 @@ class NotificationsController extends Controller
         }
     }
 
-    static public function send($id, $reference_1_id, $reference_2_id = NULL)
+    static public function send($id, $reference_1_id, $reference_2_id = NULL,$reference_3_id = NULL,$reference_4_id = NULL)
     {
         $notification = Notification::find($id);
 
@@ -9131,6 +9131,27 @@ class NotificationsController extends Controller
                     $to = $phone_number;
                     self::sms($body, $to);
                 }
+                else if ($id == 172) {
+                    $name = $reference_1_id;
+                    $phone_number = $reference_2_id;
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $name, $body);
+                    }
+                    if (strpos($body, '[total_amount]') !== FALSE) {
+                        $body = str_replace('[total_amount]', $reference_3_id, $body);
+                    }
+                    if (strpos($body, '[payment_id]') !== FALSE) {
+                        $body = str_replace('[payment_id]', $reference_4_id, $body);
+                    }
+                    $link ='https://sonic.pk/cod/finance/payments';
+                    if (strpos($body, '[status_link]') !== FALSE) {
+                        $body = str_replace('[status_link]', $link, $body);
+                    }
+
+                    $to = $phone_number;
+                    self::sms($body, $to);
+                }
+
             }
         }
     }
