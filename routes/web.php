@@ -1373,6 +1373,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
+        Route::post('rcp_sms','Admins\ReturnController@manual_rcp_sms')->name('rcp_sms');
 
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::post('revert','Admins\ReturnController@return_confirmed_revert')->name('revert');
@@ -3220,6 +3221,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_reason_mandatory_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@return_reason_mandatory_list')->name('list');
             Route::post('store', 'Admins\GlobalSettingsController@return_reason_mandatory_store')->name('store');
+//            Route::get('cn_print_right', 'Admins\GlobalSettingsController@cn_print_right')->name('cn_print_right');
         });
 
         Route::prefix('return_shipments_address')->name('return_shipments_address.')->group(function () {
@@ -3236,9 +3238,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@auto_tag_territories_update')->name('update');
         
         });
-
-
-    });
+		Route::prefix('cn_print_right')->name('cn_print_right.')->group(function () {
+			Route::get('', 'Admins\GlobalSettingsController@cn_print_right')->name('cn_print_right');
+			Route::post('store', 'Admins\GlobalSettingsController@cn_print_right_store')->name('store');
+		});
+	});
 
 
     Route::prefix('shipment')->name('shipment.')->group(function () {

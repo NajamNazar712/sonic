@@ -43,6 +43,7 @@ use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentPrebook;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentShipperReference;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -61,6 +62,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use phpDocumentor\Reflection\PseudoTypes\False_;
 use phpDocumentor\Reflection\Types\Null_;
@@ -577,6 +579,7 @@ class APIController extends Controller
                 'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
                 'replacement_item_description' => ['required_if:service_type_id,2', 'between:0,1000'],
                 'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
+                'replacement_item_image' => ['nullable', 'mimes:png,jpeg,jpg'],
 
                 'items' => ['required_if:service_type_id,3', 'array'],
                 'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -1099,6 +1102,23 @@ class APIController extends Controller
                 $replacement_item_type = 1;
 
                 ShipperShipmentBookController::add_item($shipment_id, $replacement_item_product_type_id, $replacement_item_description, $replacement_item_quantity, $replacement_item_price, $replacement_item_insurance, $replacement_item_type);
+
+                if($request->has('replacement_item_image')){
+                    $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $shipment_id);
+                    if($shipment_parcel_image->exists()){
+                        $shipment_parcel_image = $shipment_parcel_image->first();
+                        Storage::disk('public')->delete($shipment_parcel_image->picture_path);
+                    }else{
+                        $shipment_parcel_image = new ShipmentReplacementParcelImage();
+                        $shipment_parcel_image->shipment_id = $shipment_id;
+                    }
+                    $time = Carbon::now()->toDateString();
+                    $picture_path = 'replacement_parcel/' . $shipment_id . '_' . $time . '.png';
+                    Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_item_image));
+                    $shipment_parcel_image->picture_path = $picture_path;
+                    $shipment_parcel_image->save();
+                }
+
             } else if ($service_type_id == 3) {
                 $try_and_buy_cod_amount = intval($try_and_buy_charges);
                 foreach ($request->input('items') as $item) {
@@ -4542,7 +4562,7 @@ class APIController extends Controller
                                     $shipment->consignee_status_id = 13;
                                     $shipment->save();
 
-                                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 50);
+                                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 346);
                                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id)->latest()->first();
 
                                     if ($return_assign_shipment){
@@ -4552,7 +4572,7 @@ class APIController extends Controller
                                         $return_assign_log = new ReturnAssignedShipmentLogs();
                                         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
                                         $return_assign_log->status = 1;
-                                        $return_assign_log->assigned_by = 50;
+                                        $return_assign_log->assigned_by = 346;
                                         $return_assign_log->save();
                                     }
 
@@ -4597,7 +4617,7 @@ class APIController extends Controller
                                             AdminFinanceController::done_payment($shipment->id, 1);
                                         }
                                     }
-                                    ShipmentsJourneyController::add($shipment->id, 20, 20, 38, NULL, NULL, 50);
+                                    ShipmentsJourneyController::add($shipment->id, 20, 20, 38, NULL, NULL, 346);
                                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
                                     if ($return_assign_shipment->exists()){
                                         $return_assign_shipment = $return_assign_shipment ->latest()->first();
@@ -4607,7 +4627,7 @@ class APIController extends Controller
                                         $return_assign_log = new ReturnAssignedShipmentLogs();
                                         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
                                         $return_assign_log->status = 2;
-                                        $return_assign_log->assigned_by = 50;
+                                        $return_assign_log->assigned_by = 346;
                                         $return_assign_log->save();
                                     }
                                 }

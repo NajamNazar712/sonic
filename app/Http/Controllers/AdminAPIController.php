@@ -5386,6 +5386,7 @@ class AdminAPIController extends Controller
                     $information['role'] = 'staff';
                     if($request->has('device_token')){
                         EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                        EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id',$user->id)->delete();
                         $employee_device_token = new EmployeeDeviceToken();
                         $employee_device_token->employee_id = $user->id;
                         $employee_device_token->employee_type_id = 1;
@@ -6724,5 +6725,38 @@ class AdminAPIController extends Controller
             }
             return response()->json(['status' => 1, 'message' => 'No data found!']);
         }
+    }
+
+    public function check_profile_v3(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            if($request->has('device_token')){
+                EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id',$admin->id)->delete();
+                $employee_device_token = new EmployeeDeviceToken();
+                $employee_device_token->employee_id = $admin->id;
+                $employee_device_token->employee_type_id = 1;
+                $employee_device_token->device_token = $request->get('device_token');
+                $employee_device_token->save();
+            }
+            $admin->current_app_version = $request->app_version;
+            $admin->save();
+            $admin_profile = Employee::where('trax_id', $admin->trax_id);
+            if ($admin_profile->exists()) {
+                $admin_profile = $admin_profile->first();
+                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id || !$admin_profile->nationality_id){
+                    return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => "Profile already updated"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+            }
+        }else{
+            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+
     }
 }
