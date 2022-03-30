@@ -722,7 +722,7 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 172)
         {
-            $details['fields'] = ['shipper_name','total_amount','status_link'];
+            $details['fields'] = ['shipper_name','total_amount','status_link','payment_id'];
         }
 		return $details;
     }
