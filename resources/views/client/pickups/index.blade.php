@@ -28,10 +28,10 @@
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Trax Reason</th>
-                        <th class="border-primary border-darken-1">Trax Remarks</th>
-                        <th class="border-primary border-darken-1">Shipper Remarks</th>
-                        <th class="border-primary border-darken-1">Attempt Date/Time</th>
+{{--                        <th class="border-primary border-darken-1">Trax Reason</th>--}}
+{{--                        <th class="border-primary border-darken-1">Trax Remarks</th>--}}
+{{--                        <th class="border-primary border-darken-1">Shipper Remarks</th>--}}
+{{--                        <th class="border-primary border-darken-1">Attempt Date/Time</th>--}}
                         <th class="border-primary border-darken-1">Attempt Count</th>
                         <th class="border-primary border-darken-1">View Details</th>
                         <th class="border-primary border-darken-1"></th>
@@ -593,10 +593,10 @@
                     {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
                     {data: 'city', name: 'ci.name', class: 'align-middle city'},
                     {data: 'status', name: 'vprs.id', class: 'align-middle status'},
-                    {data: 'reason', name: 'reason', class: 'align-middle reason', orderable: false, searchable: false, width: 200},
-                    {data: 'remarks', name: 'remarks', class: 'align-middle remarks', orderable: false, searchable: false, width: 400},
-                    {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false, width: 400},
-                    {data: 'attempt_date_time', name: 'attempt_date_time', class: 'align-middle attempt_date_time', orderable: false, searchable: false, width: 400},
+                    // {data: 'reason', name: 'reason', class: 'align-middle reason', orderable: false, searchable: false, width: 200},
+                    // {data: 'remarks', name: 'remarks', class: 'align-middle remarks', orderable: false, searchable: false, width: 400},
+                    // {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false, width: 400},
+                    // {data: 'attempt_date_time', name: 'attempt_date_time', class: 'align-middle attempt_date_time', orderable: false, searchable: false, width: 400},
                     {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempt'},
                     {data: 'view_details', name: '', class: 'align-middle view_details'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

@@ -179,11 +179,11 @@ class ShipperPickupController extends Controller
         if (!empty($attempt_reasons)) {
             $attempts = $attempt_reasons->reason_id;
             $v2 = V2PickupRequestNotPickReason::find($attempts);
-            $all_reason['reason'] = isset($v2->name) ? $v2->name : '';
-            $all_reason['trax_remarks'] = isset($attempt_reasons->trax_remarks) ? $attempt_reasons->trax_remarks : '';
-            $all_reason['shipper_remarks'] = isset($attempt_reasons->shipper_remarks) ? $attempt_reasons->shipper_remarks : '';
-            $all_reason['attempt_date'] = isset($attempt_reasons->attempt_date) ? $attempt_reasons->attempt_date : '';
-            $all_reason['attempts'] = isset($pickups->attempts) ? $pickups->attempts : '';
+            $all_reason['reason'] = isset($v2->name) ? $v2->name : '-';
+            $all_reason['trax_remarks'] = isset($attempt_reasons->trax_remarks) ? $attempt_reasons->trax_remarks : '-';
+            $all_reason['shipper_remarks'] = isset($attempt_reasons->shipper_remarks) ? $attempt_reasons->shipper_remarks : '-';
+            $all_reason['attempt_date'] = isset($attempt_reasons->attempt_date) ? $attempt_reasons->attempt_date : '-';
+            $all_reason['attempts'] = isset($pickups->attempts) ? $pickups->attempts : '-';
 
         }
 
