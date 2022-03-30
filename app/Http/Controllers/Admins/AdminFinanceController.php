@@ -5079,7 +5079,8 @@ class AdminFinanceController extends Controller
 
         $count = $count->count();
 
-        $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
+        $done_payments = DonePayment::with('VisionSoftCodPaymentClear')
+            ->join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('done_payment_calculations as dpc','dpc.done_payment_id', '=', 'done_payments.id')
             ->leftJoin('user_bank_infos as ubi', function ($join) {
@@ -5099,7 +5100,7 @@ class AdminFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('done_payments.user_id as user_id','done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at','dpc.wht as total_wht');
+            ->select('done_payments.user_id as user_id','done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at','dpc.wht as total_wht','done_payments.created_at as start_date','done_payments.updated_at as end_date');
 
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass'))){
@@ -5195,6 +5196,28 @@ class AdminFinanceController extends Controller
                 else {
                     return 'Unknown';
                 }
+            })
+            ->addColumn('aging', function ($done_payment){
+
+                if($done_payment->status == 1) {
+                    $start_date = isset($done_payment->start_date) ? date('Y-m-d H:i:s', strtotime($done_payment->start_date)) : '';
+                    $end_date = isset($done_payment->VisionSoftCodPaymentClear->created_at) ? date('Y-m-d H:i:s', strtotime($done_payment->VisionSoftCodPaymentClear->created_at)) : date('Y-m-d H:i:s', strtotime($done_payment->end_date));
+
+                    if (!empty($end_date) && !empty($start_date)) {
+
+                        $datetime1 = date_create($start_date);
+                        $datetime2 = date_create($end_date);
+
+                        // Calculates the difference between DateTime objects
+                        $interval = date_diff($datetime1, $datetime2);
+                        return $interval->format('%m months, %d days,%h hours and %i mints');
+                    } else {
+                        return '-';
+                    }
+                }else {
+                    return '-';
+                }
+
             })
             ->filterColumn('bank', function($query, $keyword) {
 
@@ -5298,43 +5321,53 @@ class AdminFinanceController extends Controller
             $to = $request->get('search_date_to');
             $datatables->whereBetween('done_payments.status_updated_at', [$from,$to]);
         }
+
         return $datatables->make(true);
     }
 
     public function view_status_history(Request $request)
 {
-    $status_history = array();
-    $done_payments = DonePayment::join('admins','admins.id','=','done_payments.status_updated_by')->
-            where('done_payments.id',$request->id)
+    if(!empty($request->id))
+    {
+        $status_history = array();
+        $done_payments = DonePayment::join('admins','admins.id','=','done_payments.status_updated_by')->
+        where('done_payments.id',$request->id)
             ->select('done_payments.id','done_payments.status','done_payments.status_updated_by','done_payments.status_updated_at','admins.name')
             ->first();
+        if(!empty($done_payments)) {
+//            dd($done_payments);
+            $payment_id = $done_payments->id;
 
-    $payment_id = $done_payments->id;
+            if ($done_payments->status == 0) {
+                $payment_status = 'Processed';
+            } else if ($done_payments->status == 1) {
+                $payment_status = 'Paid';
+            } else if ($done_payments->status == 2) {
+                $payment_status = 'Reverted';
+            } else {
+                $payment_status = 'Unknown';
+            }
+            $status_updated_at = $done_payments->status_updated_at;
 
-    if ($done_payments->status == 0) {
-        $payment_status =  'Processed';
+            $updated_by = $done_payments->name;
+
+            $status_history['payment_id'] = isset($payment_id) ? $payment_id : '' ;
+            $status_history['payment_status'] = isset($payment_status) ? $payment_status : '';
+            $status_history['status_updated_at'] = isset($status_updated_at) ? $status_updated_at : '';
+            $status_history['status_updated_by'] = isset($updated_by) ? $updated_by : '';
+            $status_history['status'] = 2;
+
+
+            echo json_encode($status_history);
+        }
+        else
+        {
+            return json_encode(['status' => 0, 'error' => 'Something Went Wrong']);
+        }
     }
-    else if ($done_payments->status == 1) {
-        $payment_status = 'Paid';
-    }
-    else if ($done_payments->status == 2) {
-        $payment_status = 'Reverted';
-    }
-    else {
-        $payment_status = 'Unknown';
-    }
-    $status_updated_at = $done_payments->status_updated_at;
+    else
+        return json_encode(['status' => 0, 'error' => 'Payment Not Found']);
 
-    $updated_by = $done_payments->name;
-
-    $status_history['payment_id'] = $payment_id;
-    $status_history['$payment_status'] = $payment_status;
-    $status_history['$status_updated_at'] = $status_updated_at;
-    $status_history['$updated_by'] = $updated_by;
-
-    echo json_encode($status_history);
-
-//    dd($done_payments);
 }
 
     public function done_payments_paid(Request $request) {

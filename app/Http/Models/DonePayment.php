@@ -10,8 +10,16 @@ class DonePayment extends Model
 		return $this->hasMany('App\Http\Models\DonePaymentShipment');
 	}
 
-	public function shipper() {
-		return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
+
+    public function shipper() {
+        return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
+    }
+
+	public function VisionSoftCodPaymentClear() {
+
+        return $this->belongsTo('App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear', 'id', 'payment_id')
+            ->where('status',1)
+            ->orderBy('id','desc');
 	}
 
     public function done_payment_calculation(){

@@ -156,7 +156,7 @@
 										<th class="border-primary border-darken-1">Total GST</th>
 										<th class="border-primary border-darken-1">Total WHT</th>
 										<th class="border-primary border-darken-1">Packing Charges</th>
-										<th class="border-primary border-darken-1">Total Deductable</th>
+										<th class="border-primary border-darken-1">Total Deductible</th>
 										<th class="border-primary border-darken-1">Adjustment Charges</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
@@ -164,6 +164,7 @@
 										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
 										<th class="border-primary border-darken-1">Status</th>
+										<th class="border-primary border-darken-1">Aging</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -188,17 +189,33 @@
 								</div>
 							</div>
 
-							<div class="modal fade" id="view_status_history" role="dialog" aria-labelledby="view_status_history_title" aria-hidden="true">
-								<div class="modal-dialog modal-sm" role="document">
+							<div class="modal fade" id="view_status_history_modal" role="dialog" aria-labelledby="view_status_history_title" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
 									<div class="modal-content">
 										<div class="modal-header">
-											<h4 class="modal-title" id="delivered_shipments_title">Status History</h4>
+											<h4 class="modal-title" id="view_status_history_title"></h4>
 
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">×</span>
 											</button>
 										</div>
 										<div class="modal-body text-center">
+											<div class="modal-body">
+												<table class="table table-striped" id="view_status_history">
+													<thead>
+													<tr>
+														<th>Payment ID</th>
+														<th>Payment Status</th>
+														<th>Updated At</th>
+														<th>Updated By</th>
+{{--														<th>Attempts</th>--}}
+													</tr>
+													</thead>
+													<tbody>
+
+													</tbody>
+												</table>
+											</div>
 										</div>
 										<div class="modal-footer">
 											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -517,6 +534,7 @@
                             head.push('Done Datetime');
                             head.push('Company Bank');
                             head.push('Status');
+							head.push('Aging');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -545,6 +563,7 @@
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
                                 row.push(values.status);
+								row.push(values.aging);
 
 
                                 body.push(row);
@@ -783,6 +802,7 @@
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'company_bank', class: 'align-middle text-center company_bank'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
+					{data:'aging', name: 'aging', class: 'align-middle text-center aging'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -1098,11 +1118,27 @@
 						}
 					})
 							.done(function(data) {
-								$('#view_status_history').modal('show');
 								var result = JSON.parse(data);
-								if (result) {
+								var count = JSON.parse(data).length;
 
-									
+								if (result.status == 2) {
+									$('#view_status_history_modal').modal('show');
+									$('#view_status_history_modal #view_status_history_title').html('Status History');
+									$('#view_status_history tbody ').html(`
+                                    <tr>
+                                    <td>${result.payment_id}</td>
+                                    <td>${result.payment_status}</td>
+                                    <td>${result.status_updated_at}</td>
+                                    <td>${result.status_updated_by}</td>
+                                    </tr>`)
+								} else {
+									$('#view_status_history tbody ').html('');
+								}
+								if (result.status == 0) {
+									toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
+								if (result.status == 1) {
+									toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 								}
 							});
 				}
