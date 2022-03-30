@@ -8,6 +8,7 @@ use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Controllers\Admins\LeadTaggingController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Retail\RetailRatesCalculationController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\Admin;
@@ -37,6 +38,7 @@ use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\Retail\RetailShippingMode;
 use App\Http\Models\Admin\Retail\RetailTraxBox;
 use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
@@ -2738,6 +2740,23 @@ class AdminAPIController extends Controller
             return response()->json(["status" => 0, "shipper_bank_info" => $shipper_info, "shipment_count" => $shipment_count]);
         }
         return response()->json(["status" => 0, "shipper_bank_info" => "", "shipment_count" => ""]);
+    }
+
+    public function retail_shipment_calculate_rates(Request $request){
+        $retail_user_id = $request->retail_user_id;
+        $retail_user = RetailUser::find($retail_user_id);
+        if($retail_user) {
+            $pickup_city_id = $retail_user->store->pickup_address->city_id;
+            $discount =  $retail_user->store->discount;
+            if ($request->volumetric_weight == 1) {
+                $weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
+            } else {
+                $weight = $request->input('weight');
+            }
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $request->trax_box_id, $discount, $weight);
+            return response()->json(['status' => 0, 'rates' => $rates]);
+        }
+        return response()->json(['status' => 1, 'message' => "Invalid User"]);
     }
 
     public function retail_shipment_store(Request $request)
