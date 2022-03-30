@@ -333,6 +333,23 @@ class RetailAPIController extends Controller
 
     }
 
+    public function retail_shipment_calculate_rates(Request $request){
+        $retail_user_id = $request->retail_user_id;
+        $retail_user = RetailUser::find($retail_user_id);
+        if($retail_user) {
+            $pickup_city_id = $retail_user->store->pickup_address->city_id;
+            $discount =  $retail_user->store->discount;
+            if ($request->volumetric_weight == 1) {
+                $weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
+            } else {
+                $weight = $request->input('weight');
+            }
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $request->trax_box_id, $discount, $weight);
+            return response()->json(['status' => 0, 'rates' => $rates]);
+        }
+        return response()->json(['status' => 1, 'message' => "Invalid User"]);
+    }
+
     public function retail_ticker_images(Request $request)
     {
         $retail_ticker_images = RetailAppSlider::orderBy('id', 'ASC');

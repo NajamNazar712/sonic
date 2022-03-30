@@ -681,7 +681,9 @@
                                                                 <td>{{$tagging_history->user->name}}</td>
                                                                 <td>{{$tagging_history->tagging->name}}</td>
                                                             @elseif($tagging_history->crm_request_tagging_type_id == 4 || $tagging_history->crm_request_tagging_type_id == 5)
-                                                                <td>{{$tagging_history->user->name}}</td>
+                                                                @if ($tagging_history->user)
+                                                                    <td>{{$tagging_history->user->name}}</td>
+                                                                @endif
                                                                 <td>Auto Tag</td>
                                                             @else
                                                                 <td>-</td>
