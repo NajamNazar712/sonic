@@ -4935,6 +4935,8 @@ class DeliveryController extends Controller
                     $query->where('station_deposit_notes.status', '=', $keyword);
                 } else if ($keyword == 2) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
+                } else if ($keyword == 3) {
+                    $query->where('station_deposit_notes.status', '=', $keyword);
                 } else {
                     $query->whereRaw('false');
                 }
