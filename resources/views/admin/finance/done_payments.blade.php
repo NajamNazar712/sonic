@@ -534,6 +534,8 @@
                             head.push('Done Datetime');
                             head.push('Company Bank');
                             head.push('Status');
+							head.push('Updated At');
+							head.push('Updated By');
 							head.push('Aging');
 
                             $.each(result.data, function(index, values) {
@@ -563,6 +565,8 @@
                                 row.push(values.done_at);
                                 row.push(values.company_bank);
                                 row.push(values.status);
+								row.push(values.updated_at);
+								row.push(values.updated_by);
 								row.push(values.aging);
 
 
