@@ -17,7 +17,7 @@ class CreateAutoTagTerritoriesTable extends Migration
             $table->increments('id');
             $table->integer('admin_id')->index();
             $table->integer('territory_id')->index();
-            $table->tinyInteger('status')->default(1);
+            $table->tinyInteger('status')->default(1)->index();
             $table->timestamps();
         });
     }

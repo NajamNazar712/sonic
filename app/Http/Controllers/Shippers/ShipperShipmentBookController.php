@@ -3274,16 +3274,10 @@ class ShipperShipmentBookController extends Controller
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
-        if($request->open_shipment=='on'){
-            $open_shipment=1;
-        }else{
-            $open_shipment=0;
-
         if ($request->open_shipment == 'on') {
             $open_shipment = 1;
         } else {
             $open_shipment = 0;
-
         }
         if (!empty($request->input('shipping_mode'))) {
             $user_id = session('user_id');
