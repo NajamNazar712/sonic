@@ -334,6 +334,7 @@ class RetailAPIController extends Controller
     }
 
     public function retail_shipment_calculate_rates(Request $request){
+        dd($request);
         $retail_user_id = $request->retail_user_id;
         $retail_user = RetailUser::find($retail_user_id);
         if($retail_user) {
