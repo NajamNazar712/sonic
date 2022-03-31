@@ -34,7 +34,7 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">PNCC No.</th>
                             <th class="border-primary border-darken-1">Hub</th>
-                            <th class="border-primary border-darken-1">Rider</th>
+                            {{-- <th class="border-primary border-darken-1">Rider</th> --}}
                             <th class="border-primary border-darken-1">Center/Franchise Name</th>
                             <th class="border-primary border-darken-1">No Of Shipments</th>
                             <th class="border-primary border-darken-1">Center and Franchise Code</th>
@@ -105,7 +105,7 @@
                             head.push('S.No');
                             head.push('PNCC No.');
                             head.push('Hub');
-                            head.push('Rider');
+                            // head.push('Rider');
                             head.push('Center/Franchise Name');
                             head.push('No. Of Shipments');
                             head.push('Center and Franchise Code');
@@ -119,7 +119,7 @@
                                 row.push(index + 1);
                                 row.push(values.retail_pickup_note_id);
                                 row.push(values.hub);
-                                row.push(values.rider);
+                                // row.push(values.rider);
                                 row.push(values.store);
                                 row.push(values.shipments_count);
                                 row.push(values.code);
@@ -320,7 +320,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'retail_pickup_note_id',name:'retail_pickup_notes.id', class: 'text-center align-middle retail_pickup_note_id'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
+                    // { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
                     { data:'store' ,name: 'store', class: 'align-middle store text-center', orderable: false, searchable: false},
                     { data:'count' ,name: 'retail_pickup_notes.shipments', class: 'align-middle count text-center'},
                     { data:'code' ,name: 'code', class: 'align-middle code text-center', orderable: false, searchable: false},
