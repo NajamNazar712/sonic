@@ -223,10 +223,24 @@ class RetailShipmentBookController extends Controller
         }
         $same_day_timing_id = NULL;
 
-      /*  $request->weight_charges = (float)str_replace(',', '', $request->input('weight_charges'));
-        $request->fuel_surcharge = (float)str_replace(',', '', $request->input('fuel_surcharge'));*/
-        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $request->weight);
-       
+        if ($request->volumetric_weight == "on") {
+            $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
+            $length = $request->length;
+            $breadth = $request->breadth;
+            $height = $request->height;
+        } else {
+            $estimated_weight = $request->input('weight');
+            $length = null;
+            $breadth = null;
+            $height = null;
+        }
+
+        $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight);
+
+
+        /*  $request->weight_charges = (float)str_replace(',', '', $request->input('weight_charges'));
+          $request->fuel_surcharge = (float)str_replace(',', '', $request->input('fuel_surcharge'));*/
+
         $city = City::find($pickup_city_id);
         //$gst = $city->zone->gst;
        // $total_charges_without_gst = $request->weight_charges + $request->fuel_surcharge;
@@ -253,17 +267,6 @@ class RetailShipmentBookController extends Controller
         $pieces_quantity = $request->input('pieces');
         $business_category_id = $request->input('business_category');
 
-        if ($request->volumetric_weight == "on") {
-            $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
-            $length = $request->length;
-            $breadth = $request->breadth;
-            $height = $request->height;
-        } else {
-            $estimated_weight = $request->input('weight');
-            $length = null;
-            $breadth = null;
-            $height = null;
-        }
 
         $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
 
@@ -432,9 +435,17 @@ class RetailShipmentBookController extends Controller
         }
     }
     public function calculate_rates(Request $request){
+
         $pickup_city_id = Auth::user()->store->pickup_address->city_id;
         $discount =  Auth::user()->store->discount;
-        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $request->weight);
+        if($request->weight != null){
+
+            $weight = $request->weight;
+        }
+        else{
+            $weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
+        }
+        $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight);
         return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
     }
 

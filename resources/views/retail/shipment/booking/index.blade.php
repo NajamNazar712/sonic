@@ -800,6 +800,10 @@
             });
             var city_id = null;
             var trax_box = null;
+            var length = null;
+            var breadth = null;
+            var height = null;
+
             $('#calculate_rates').on('click', function () {
                 var destination = '';
                 var shipping_mode_id = $('#shipping_mode').val();
@@ -816,8 +820,11 @@
                 
                 var weight = $('#weight').val();
                 var trax_box = $('#trax_box').val();
-              
-                if(shipping_mode_id != '' && business_category != '' && destination != ''  && weight != ''){
+                 length = $('#length').val();
+                 breadth = $('#breadth').val();
+                 height = $('#height').val();
+
+                if(shipping_mode_id != '' && business_category != '' && destination != ''  && (weight != '' || length != '')){
                     if(shipping_mode_id == 5 && trax_box == ''){
                         var error = 'Trax Box field is required';
                         toastr.error(error, 'Error!', {
@@ -834,6 +841,9 @@
                             'consignee_city_id': destination,
                             'weight': weight,
                             'trax_box': trax_box,
+                            'length': length,
+                            'breadth': breadth,
+                            'height': height,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -853,7 +863,7 @@
                         });
                 }
                 else{
-                    var error = 'Shipping Mode,Business Category,Destination and Weight should not be empty';
+                    var error = 'Shipping Mode,Business Category,Destination and Weight/Volumetric weight should not be empty';
                     toastr.error(error, 'Error!', {
                         positionClass: 'toast-top-center',
                         containerId: 'toast-top-center'
