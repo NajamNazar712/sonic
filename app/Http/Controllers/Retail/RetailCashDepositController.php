@@ -28,7 +28,7 @@ class RetailCashDepositController extends Controller
 
     public function list(Request $request){
         $cash_deposit = RetailCashDeposit::join('retail_users as ru', 'ru.id', '=', 'retail_cash_deposits.retail_user_id')
-            ->select('retail_cash_deposits.id as performa_no', 'retail_cash_deposits.category as category', 'ru.name as user', 'retail_cash_deposits.total_cn as total_shipments', 'retail_cash_deposits.total_cash as total_cash', DB::raw('DATE(retail_cash_deposits.created_at) AS booking_date'), 'ru.id as employee_id')
+            ->select('retail_cash_deposits.id as performa_no', 'retail_cash_deposits.category as category', 'ru.name as user', 'retail_cash_deposits.total_cn as total_shipments', 'retail_cash_deposits.total_cash as total_cash', DB::raw('DATE(retail_cash_deposits.created_at) AS booking_date'), 'ru.id as employee_id', 'retail_cash_deposits.status as status')
         ->where('retail_cash_deposits.retail_user_id', Auth::id());
         $datatable = Datatables::of($cash_deposit)
             ->addColumn('shipments_button', function ($data) {
@@ -53,6 +53,15 @@ class RetailCashDepositController extends Controller
             })
             ->addColumn('performa_button', function ($data) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . str_pad($data->performa_no, 6, '0', STR_PAD_LEFT) . '</button>';
+            })
+            ->editColumn('status', function ($data) {
+                if($data->status == 0){
+                    return 'Pending';
+                }elseif($data->status == 1){
+                    return 'Cash Collected';
+                }else{
+                    return 'Deposited';
+                }
             });
 
         if ($request->get('search_from') && $request->get('search_to')) {
