@@ -2743,20 +2743,21 @@ class AdminAPIController extends Controller
     }
 
     public function retail_shipment_calculate_rates(Request $request){
-        $retail_user_id = $request->retail_user_id;
-        $retail_user = RetailUser::find($retail_user_id);
-        if($retail_user) {
-            $pickup_city_id = $retail_user->store->pickup_address->city_id;
-            $discount =  $retail_user->store->discount;
+        $pickup_address_id = $request->pickup_address_id;
+        $pickup_address = RetailTraxCenter::where('pickup_address_id', $pickup_address_id);
+        if($pickup_address->exists()) {
+            $pickup_city_id = $pickup_address->pickup_address->city_id;
+            $discount =  $pickup_address->discount;
+            $trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
             if ($request->volumetric_weight == 1) {
                 $weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
             } else {
                 $weight = $request->input('weight');
             }
-            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $request->trax_box_id, $discount, $weight);
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight);
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
-        return response()->json(['status' => 1, 'message' => "Invalid User"]);
+        return response()->json(['status' => 1, 'message' => "Invalid Pickup Address"]);
     }
 
     public function retail_shipment_store(Request $request)
