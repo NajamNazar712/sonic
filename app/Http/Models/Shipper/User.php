@@ -33,6 +33,10 @@ class User extends Authenticatable
         return $this->belongsTo('App\Http\Models\City');
     }
 
+    public function city2() {
+        return $this->belongsTo('App\Http\Models\City', 'city_id', 'id');
+    }
+
     public function bank(){
         return $this->hasMany('App\Http\Models\Shipper\UserBankInfo');
     }
