@@ -168,9 +168,11 @@ class RetailCashCollectionController extends Controller
             $retail_shipment = RetailPickupNoteShipment::where('retail_pickup_note_id',$note_id)->get()->first();
             if($retail_shipment){
                 $retail_cash_depost = RetailCashDepositShipment::where('shipment_id',$retail_shipment->shipment_id)->get()->first();
-                RetailCashDeposit::where('id',$retail_cash_depost->cash_deposit_id)->update([
-                    'status' => 1,
-                ]);
+                if($retail_cash_depost){
+                    RetailCashDeposit::where('id',$retail_cash_depost->cash_deposit_id)->update([
+                        'status' => 1,
+                    ]);
+                }
             }
             if ($note_details) {
                 $note_details->status = 4;
