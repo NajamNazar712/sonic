@@ -3002,17 +3002,17 @@ class AdminAPIController extends Controller
         }
         $same_day_timing_id = NULL;
 
-        $total_charges = $request->total_charges;
+        $charges = $request->total_charges;
         if ($shipping_mode_check == 3) {
             $amount = str_replace(',', '', $request->input('cod_amount'));
             $r_amount = 0;
             if($charges_mode_id == 2){
-                $amount = $amount + $total_charges;
+                $amount = $amount + $charges;
             }
         } else {
             $amount = 0;
             if($charges_mode_id == 2){
-                $amount = $total_charges;
+                $amount = $charges;
             }
             $r_amount = 0;
         }
@@ -3125,7 +3125,7 @@ class AdminAPIController extends Controller
         $retail_shipment->shipper_cnic = $request->shipper_cnic;
         $retail_shipment->shipper_address = $request->shipper_address;
         $retail_shipment->trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
-        $retail_shipment->total_charges = $total_charges;
+        $retail_shipment->total_charges = $amount;
         $retail_shipment->shipper_account_no = $shipper_info->id;
         $retail_shipment->weight = $estimated_weight;
         $retail_shipment->length = $length;
@@ -3140,7 +3140,7 @@ class AdminAPIController extends Controller
         if($cash_deposit->exists()){
             $cash_deposit = $cash_deposit->first();
             $total_shipments = $cash_deposit->total_cn + 1;
-            $total_cash = $cash_deposit->total_cash + $total_charges;
+            $total_cash = $cash_deposit->total_cash + $amount;
             $cash_deposit->total_cn = $total_shipments;
             $cash_deposit->total_cash = $total_cash;
             $cash_deposit->save();
@@ -3150,7 +3150,7 @@ class AdminAPIController extends Controller
             $cash_deposit->category = 3;
             $cash_deposit->admin_id = $admin_id;
             $cash_deposit->total_cn = 1;
-            $cash_deposit->total_cash = $total_charges;
+            $cash_deposit->total_cash = $amount;
             $cash_deposit->save();
 
         }
