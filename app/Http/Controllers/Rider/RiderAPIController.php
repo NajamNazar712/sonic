@@ -7790,6 +7790,7 @@ class RiderAPIController extends Controller
         $pickup_address_id = $request->pickup_address_id;
         $pickup_address = RetailTraxCenter::where('pickup_address_id', $pickup_address_id);
         if($pickup_address->exists()) {
+            $pickup_address = $pickup_address->first();
             $pickup_city_id = $pickup_address->pickup_address->city_id;
             $discount =  $pickup_address->discount;
             $trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
