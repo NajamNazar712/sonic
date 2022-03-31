@@ -2715,13 +2715,23 @@ class GlobalSettingsController extends Controller
     {
         $reason = trim($request->reason);
         if ($reason) {
-            $shipment_reason = new ShipmentStatusReason();
-            $shipment_reason->name = $reason;
-            $shipment_reason->save();
+            $shipment_reasons = ShipmentStatusReason::where('name', 'like', strtolower($reason));
+            if(!$shipment_reasons->exists()){
 
-            DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+                $shipment_reason = new ShipmentStatusReason();
+                $shipment_reason->name = $reason;
+                $shipment_reason->save();
 
-            return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+                DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+
+                return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+            }
+            else{
+                $shipment_reason = $shipment_reasons->first();
+                DB::table('shipment_status_shipment_status_reason')->insert(['shipment_status_id' => 20, 'shipment_status_reason_id' => $shipment_reason->id]);
+                return response()->json(['status' => 0, 'success' => 'Reason added successfully!']);
+            }
+
         }
         return response()->json(['status' => 1, 'error' => 'Please enter reason!']);
     }
