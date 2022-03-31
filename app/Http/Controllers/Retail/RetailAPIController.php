@@ -334,7 +334,6 @@ class RetailAPIController extends Controller
     }
 
     public function retail_shipment_calculate_rates(Request $request){
-        dd($request);
         $retail_user_id = $request->retail_user_id;
         $retail_user = RetailUser::find($retail_user_id);
         if($retail_user) {
@@ -345,6 +344,7 @@ class RetailAPIController extends Controller
             } else {
                 $weight = $request->input('weight');
             }
+            dd($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $request->trax_box_id, $discount, $weight);
             $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $request->trax_box_id, $discount, $weight);
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
