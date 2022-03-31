@@ -13,7 +13,15 @@
                 @include('admin.inc.messages')
 
                 <div class="row mb-2 justify-content-center">
-
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shipment_status" id="search_shipment_status" class="form-control select2">
+                                @foreach($shipment_status as $status)
+                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
@@ -209,6 +217,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_shipment_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Status',
+                width:'100%',
+                allowClear:true
+            });
             $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Shipper',
                 width:'100%',
@@ -392,6 +405,7 @@
                 ajax: {
                     url: '{{ route('admin.reports.qsr.list') }}',
                     data: function (d) {
+                        d.search_shipment_status = $('#search_shipment_status').val();
                         d.search_shipper = $('#search_shipper').val();
                         d.search_shippers = $('#search_shippers').val();
                         d.search_origin = $('#search_origin').val();
