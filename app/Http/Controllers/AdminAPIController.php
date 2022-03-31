@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DailyVisit;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\DisputeController;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
@@ -13,6 +14,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminAppSlider;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\AdminRoleModulePermission;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
@@ -44,6 +46,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\DailyVisitLeadStatus;
 use App\Http\Models\DwsDetail;
 use App\Http\Models\DwsWeightCharges;
 use App\Http\Models\EmployeeDeviceToken;
@@ -3039,9 +3042,6 @@ class AdminAPIController extends Controller
         $admin = Admin::find($admin_id);
         $bag_ids = explode(',', $request->bags);
         $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
-        if($admin->default_hub_id){
-            array_push($admin_hubs,$admin->default_hub_id);
-        }
         $bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
             ->join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
@@ -3072,8 +3072,10 @@ class AdminAPIController extends Controller
                 }
                 if ($junctions->exists()) {
                     $junctions = $junctions->pluck('junction_id')->toArray();
-                    if (in_array($admin->default_hub_id, $junctions)) {
-                        $datum["misroute"] = 0;
+                    foreach ($admin_hubs as $admin_hub){
+                        if (in_array($admin_hub, $junctions)) {
+                            $datum["misroute"] = 0;
+                        }
                     }
                 }
                 $data[] = $datum;
@@ -3088,9 +3090,6 @@ class AdminAPIController extends Controller
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
         $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
-        if($admin->default_hub_id){
-            array_push($admin_hubs,$admin->default_hub_id);
-        }
         if ($request->has('bags')) {
             $bag_details = json_decode($request->bags, true);
             $bag_numbers = array();
@@ -4851,7 +4850,13 @@ class AdminAPIController extends Controller
 
                     }
                     $volume_weight = (($request->dimension_l * $request->dimension_w * $request->dimension_h) / 5000);
+                    if($volume_weight < 0.01){
+                        $volume_weight = 0.01;
+                    }
                     $dense_weight = $request->weight;
+                    if($dense_weight < 0.01){
+                        $dense_weight = 0.01;
+                    }
 
                     if ($shipment->business_category_id == 2) {
                         if ($dense_weight < $volume_weight) {
@@ -5006,6 +5011,25 @@ class AdminAPIController extends Controller
 
                     ShipmentsJourneyController::add($shipment_id, 2, 2, null, 'DWS Arrival', null, $request->admin_id, $reference_1_id, $reference_2_id, 1, null, $rider_id);
 
+                    if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
+                        if ($shipment->booking_type_id == 4) {
+                            ShipmentChargesController::walkin_weight($shipment_id);
+                        } else {
+                            ShipmentChargesController::weight($shipment_id);
+                            if ($shipment->business_category_id == 1) {
+                                ShipmentChargesController::cash_handling($shipment_id);
+                                ShipmentChargesController::insurance($shipment_id);
+                                ShipmentChargesController::fuel_surcharge($shipment_id);
+                            } else {
+                                ShipmentChargesController::international_fuel_surcharge($shipment_id);
+                            }
+                        }
+
+                        if ($shipment->walk_in_status == 0) {
+                            InitialChargesWebhookController::webhook_subscription($shipment_id);
+                        }
+                    }
+
                     $self_collection_shipment = SelfCollectionShipment::where('shipment_id', $shipment_id);
                     if ($self_collection_shipment->exists()) {
                         if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
@@ -5071,24 +5095,6 @@ class AdminAPIController extends Controller
                     if ($booking_sms->exists()) {
                         NotificationsController::send(3, $shipment_id);
                     }
-                    if ($shipment->packaging_material_request == 0 && $shipment->shipment_type == 1) {
-                        if ($shipment->booking_type_id == 4) {
-                            ShipmentChargesController::walkin_weight($shipment_id);
-                        } else {
-                            ShipmentChargesController::weight($shipment_id);
-                            if ($shipment->business_category_id == 1) {
-                                ShipmentChargesController::cash_handling($shipment_id);
-                                ShipmentChargesController::insurance($shipment_id);
-                                ShipmentChargesController::fuel_surcharge($shipment_id);
-                            } else {
-                                ShipmentChargesController::international_fuel_surcharge($shipment_id);
-                            }
-                        }
-
-                        if ($shipment->walk_in_status == 0) {
-                            InitialChargesWebhookController::webhook_subscription($shipment_id);
-                        }
-                    }
 
                     if ($shipment->shipment_type != 2 && $shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
@@ -5140,24 +5146,26 @@ class AdminAPIController extends Controller
 
                     }
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
-                    if ($pickup_request->received >= 1) {
-                        $pickup_note_request = $pickup_request->pickup_note_request;
-                        if ($pickup_note_request) {
-                            $pickup_note_id = $pickup_note_request->pickup_note_id;
-                            $pickup_note_request->status = 1;
-                            $pickup_note_request->save();
-//                            $pickup_note = V2PickupNote::find($pickup_note_id);
-
+                    if($pickup_request){
+                        if ($pickup_request->received >= 1) {
+                            $pickup_note_request = $pickup_request->pickup_note_request;
+                            if ($pickup_note_request) {
+                                $pickup_note_id = $pickup_note_request->pickup_note_id;
+                                $pickup_note_request->status = 1;
+                                $pickup_note_request->save();
+    //                            $pickup_note = V2PickupNote::find($pickup_note_id);
+    
+                            }
+    
+                            $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
+                            if ($retail_pickup_note->exists()) {
+                                $retail_pickup_note = $retail_pickup_note->first();
+                                $retail_pickup_note->status = 3;
+                                $retail_pickup_note->save();
+                            }
+    
+    
                         }
-
-                        $retail_pickup_note = RetailPickupNote::where('pickup_request_id', $pickup_request_id)->where('status', 2);
-                        if ($retail_pickup_note->exists()) {
-                            $retail_pickup_note = $retail_pickup_note->first();
-                            $retail_pickup_note->status = 3;
-                            $retail_pickup_note->save();
-                        }
-
-
                     }
                     $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
                     if ($pickup_note_requests_count == 0) {
@@ -5378,6 +5386,7 @@ class AdminAPIController extends Controller
                     $information['role'] = 'staff';
                     if($request->has('device_token')){
                         EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                        EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id',$user->id)->delete();
                         $employee_device_token = new EmployeeDeviceToken();
                         $employee_device_token->employee_id = $user->id;
                         $employee_device_token->employee_type_id = 1;
@@ -5953,7 +5962,8 @@ class AdminAPIController extends Controller
         $leads = Lead::join('cities as c', 'c.id', '=', 'leads.city_id')
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
-            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand');
+            ->leftjoin('admins as ad', 'ad.id', '=', 'leads.sale_person_id')
+            ->select('leads.id as lead_id','leads.contact_person as contact_person', 'leads.phone_number as phone_number', 'leads.email_address as email_address', 'leads.requested_date as requested_date', 'leads.message as message', 'leads.status_id', 'ls.name as status', 'c.name as city', 'sl.name as service','leads.brand as brand', 'ad.name as sale_person');
 
         if($admin->role_id != 4 && $admin->role_id != 44 && $admin->role_id != 60){
             $leads = $leads->where('leads.sale_person_id', $admin_id)->wherenotin('leads.status_id', [3, 11, 12]);
@@ -6352,6 +6362,7 @@ class AdminAPIController extends Controller
         if ($admin) {
             $permissions = array();
             $wms_user_permissions = DB::table('wms_admin_role_module_permissions')->where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
+            $user_permissions = AdminRoleModulePermission::where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
             $permissions['cargo_user'] = (in_array($admin->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
             if ($admin->designation_id) {
                 $user_department = $admin->Edesignation->department_id;
@@ -6360,6 +6371,8 @@ class AdminAPIController extends Controller
             }
             $permissions['sales_person'] = ($user_department == 7) ? 1 : 0;
             $permissions['pick_list_user'] = (in_array(23, $wms_user_permissions)) ? 1 : 0;
+            $permissions['daily_visit_report'] = (in_array(264, $user_permissions)) ? 1 : 0;
+            $permissions['daily_visit_form'] = (in_array(265, $user_permissions)) ? 1 : 0;
             return response()->json(['status' => 0, 'permissions' => $permissions]);
 
         }
@@ -6582,11 +6595,168 @@ class AdminAPIController extends Controller
 
     public function check_bolt_version(Request $request)
     {
-        $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
-        if($global_settings->exists()){
-            $global_settings = $global_settings->first();
-            return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value]);
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if ($admin) {
+            $permissions = array();
+            $wms_user_permissions = DB::table('wms_admin_role_module_permissions')->where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
+            $user_permissions = AdminRoleModulePermission::where('role_id', $admin->role_id)->pluck('permission_id')->toArray();
+            $permissions['cargo_user'] = (in_array($admin->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
+            if ($admin->designation_id) {
+                $user_department = $admin->Edesignation->department_id;
+            } else {
+                $user_department = $admin->role->department_id;
+            }
+            $permissions['sales_person'] = ($user_department == 7) ? 1 : 0;
+            $permissions['pick_list_user'] = (in_array(23, $wms_user_permissions)) ? 1 : 0;
+            $permissions['daily_visit_report'] = (in_array(264, $user_permissions)) ? 1 : 0;
+            $permissions['daily_visit_form'] = (in_array(265, $user_permissions)) ? 1 : 0;
+            $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
+            if($global_settings->exists()){
+                $global_settings = $global_settings->first();
+                return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value,'permissions' => $permissions]);
+            }else{
+                return response()->json(['status' => 0, 'app_version' => 24,'permissions' => $permissions]);
+            }
         }
-        return response()->json(['status' => 0, 'app_version' => 24]);
+    }
+
+    public function daily_visit_index()
+    {
+        $lead_statuses = DailyVisitLeadStatus::select('id', 'name')->get();
+        return response()->json(['status' => 0, 'lead_statuses' => $lead_statuses]);
+    }
+
+    public function daily_visit_store(Request $request)
+    {
+        $rules = [
+            'company_name' => ['required'],
+            'customer_name' => ['required'],
+            'customer_address' => ['required'],
+            'phone_no' => ['required'],
+            'email_address' => ['required'],
+            'lead_status' => ['required'],
+            'feedback' => ['required'],
+            'latitude' => ['required'],
+            'longitude' => ['required'],
+            'business_card_image' => ['required'],
+            'location_image' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }else{
+            try{
+                $daily_visit = new DailyVisit();
+                $daily_visit->company_name = str_replace('"',"",$request->company_name);
+                $daily_visit->customer_name = str_replace('"',"",$request->customer_name);
+                $daily_visit->customer_address = str_replace('"',"",$request->customer_address);
+                $daily_visit->phone_no = str_replace('"',"",$request->phone_no);
+                $daily_visit->email = str_replace('"',"",$request->email_address);
+                $daily_visit->lead_status_id = $request->lead_status;
+                $daily_visit->feedback = str_replace('"',"",$request->feedback);
+                $daily_visit->latitude = $request->latitude;
+                $daily_visit->longitude = $request->longitude;
+                $daily_visit->admin_id = $request->admin_id;
+                $daily_visit->save();
+                if ($request->hasFile('business_card_image')) {
+                    $filename = 'daily_visit_bc_' . $daily_visit->id . '.png';
+                    $file = $request->file('business_card_image');
+                    Storage::disk('public')->putFileAs('daily_visit\business_card', $file, $filename);
+                    $daily_visit->business_card_image = $filename;
+                    $daily_visit->save();
+                }
+
+                if ($request->hasFile('location_image')) {
+                    $filename = 'daily_visit_l_' . $daily_visit->id . '.png';
+                    $file = $request->file('location_image');
+                    Storage::disk('public')->putFileAs('daily_visit\location', $file, $filename);
+                    $daily_visit->location_image = $filename;
+                    $daily_visit->save();
+                }
+                return response()->json(['status' => 0, 'message' => 'Daily Visit Has been Submitted']);
+            }
+            catch (Exception $ex){
+                return response()->json(['status' => 1, 'message' => 'Error ', 'errors' => $ex]);
+            }
+        }
+    }
+
+    public function daily_visit_report(Request $request)
+    {
+        if ($request->isMethod('get')){
+            $sale_users_bypass = array();
+            $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                $sale_users_bypass = explode(',', $settings->text);
+            }
+            if(in_array($request->admin_id,$sale_users_bypass)){
+                $admin_list = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
+                return response()->json(['status' => 0, 'admin_list' => $admin_list]);
+            }
+            else {
+                $admin_list = Admin::where('status', 1)->where('id', $request->admin_id)->select('id', 'name')->get();
+                return response()->json(['status' => 0, 'admin_list' => $admin_list]);
+            }
+        }
+        if ($request->isMethod('post')){
+            $daily_visit = DB::connection('reports')->table('daily_visits')
+                ->join('daily_visit_lead_statuses as dvls', 'dvls.id', '=', 'daily_visits.lead_status_id')
+                ->join('admins as a', 'a.id', '=', 'daily_visits.admin_id')
+                ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image')
+                ->orderBy('daily_visits.created_at', 'DESC');
+            if($request->from_date){
+                if($request->to_date){
+                    $daily_visit = $daily_visit->whereBetween('daily_visits.created_at', [$request->from_date.' 00:00:00', $request->to_date.' 23:59:59']);
+                }else{
+                    $daily_visit = $daily_visit->whereDate('daily_visits.created_at', $request->from_date);
+                }
+            }
+            if(!$request->admin_id){
+                $daily_visit = $daily_visit->where('a.id', $request->user_id);
+            }else{
+                $daily_visit = $daily_visit->where('a.id', $request->admin_id);
+            }
+            if ($daily_visit->exists()) {
+                $daily_visit = $daily_visit->get();
+                return response()->json(['status' => 0, 'data' => $daily_visit]);
+            }
+            return response()->json(['status' => 1, 'message' => 'No data found!']);
+        }
+    }
+
+    public function check_profile_v3(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
+        if($admin){
+            if($request->has('device_token')){
+                EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id',$admin->id)->delete();
+                $employee_device_token = new EmployeeDeviceToken();
+                $employee_device_token->employee_id = $admin->id;
+                $employee_device_token->employee_type_id = 1;
+                $employee_device_token->device_token = $request->get('device_token');
+                $employee_device_token->save();
+            }
+            $admin->current_app_version = $request->app_version;
+            $admin->save();
+            $admin_profile = Employee::where('trax_id', $admin->trax_id);
+            if ($admin_profile->exists()) {
+                $admin_profile = $admin_profile->first();
+                if(!$admin_profile->blood_group || !$admin_profile->emergency_contact || !$admin_profile->emergency_contact_person || !$admin_profile->guardian_name || !$admin_profile->mother_name  || !$admin_profile->address  || !$admin_profile->employee_gender_id || !$admin_profile->religion_id || !$admin_profile->marital_status_id || !$admin_profile->date_of_birth || !$admin_profile->staff_category_id || !$admin_profile->shift_id || !$admin_profile->domicile_id || !$admin_profile->nationality_id){
+                    return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => "Profile already updated"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+            }
+        }else{
+            return response()->json(['status' => 1, 'message' => "Admin Profile Not Found"]);
+        }
+
     }
 }

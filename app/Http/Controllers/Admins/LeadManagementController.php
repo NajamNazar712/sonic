@@ -5,13 +5,16 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AreaTerritory;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
 use App\Http\Models\Admin\Lead\LeadRemark;
 use App\Http\Models\Admin\Lead\LeadStatus;
 use App\Http\Models\Admin\Lead\PamLead;
 use App\Http\Models\Admin\Lead\PamLeadItem;
+use App\Http\Models\Admin\Territory;
 use App\Http\Models\City;
+use App\Models\Admin\Lead\LeadReason;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -164,7 +167,8 @@ class LeadManagementController extends Controller
             ->leftjoin('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'leads.reason as reason_id');
+            ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -201,11 +205,11 @@ class LeadManagementController extends Controller
             }
             $leads->whereIn('leads.status_id', $search_statuses);
         }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+        /*if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $leads->whereBetween('leads.requested_date', [$from, $to]);
-        }
+        }*/
         return Datatables::of($leads)
             ->filterColumn('status', function ($query, $keyword) {
                 if ($keyword != '') {
@@ -224,23 +228,7 @@ class LeadManagementController extends Controller
             })
             ->editColumn('reason_id', function ($lead) {
                 if ($lead->reason_id) {
-                    if ($lead->reason_id == 10) {
-                        return "Others";
-                    } else if ($lead->reason_id == 1) {
-                        return "Prohibited Items";
-                    } else if ($lead->reason_id == 2) {
-                        return "Wrong Contact Details";
-                    } else if ($lead->reason_id == 3) {
-                        return "Duplicate";
-                    } else if ($lead->reason_id == 4) {
-                        return "A/C Query Call";
-                    } else if ($lead->reason_id == 5) {
-                        return "Operational Query";
-                    } else if ($lead->reason_id == 6) {
-                        return "HR Query";
-                    } else if ($lead->reason_id == 7) {
-                        return "Sales Person Already Assigned";
-                    }
+                    return $lead->reason_id;
                 } else {
                     return "-";
                 }
@@ -266,6 +254,10 @@ class LeadManagementController extends Controller
 
 //                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.leads.view_remarks', ['id' => $lead->lead_id]) . '\')" type="button" class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
+
+                if ((session('role_id') == 1 || in_array(696, session('permissions')))) {
+                    $dropdown .= '<button type="button"  class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                }
 
                 return $dropdown;
             })->make(true);
@@ -734,5 +726,70 @@ class LeadManagementController extends Controller
         $file = $lead->attachment;
         $url = Storage::url('leads/attachment/' . $file);
         return view('admin.leads.attachment_view')->with(['url' => $url]);
+    }
+
+    public function lead_reasons(Request $request){
+        $lead_reason = LeadReason::join('lead_status_reasons as lsr', 'lsr.reason_id', 'lead_reasons.id')
+            ->select('lead_reasons.id as id', 'lead_reasons.name as name')
+            ->where('lsr.status_id', $request->status_id);
+        if($lead_reason->exists()) {
+            $lead_reason = $lead_reason->get();
+            return response()->json(['status' => 1, 'lead_reasons' => $lead_reason]);
+        }else{
+            return response()->json(['status' => 0, 'error' => 'Reason not found!']);
+        }
+    }
+
+    public function info(Request $request){
+        $lead_id = $request->lead_id;
+
+        $lead = Lead::find($lead_id);
+        if($lead_id){
+            $details = array();
+            $details['city'] = '';
+            $details['territory'] = '';
+            $details['area'] = '';
+            if($lead->city_id){
+                $details['city'] = $lead->city->name;
+            }
+
+            if($lead->territory_id){
+                $details['territory'] = Territory::find($lead->territory_id)->name;
+            }
+            if($lead->territory_area_id){
+                $details['area'] = AreaTerritory::find($lead->territory_area_id)->name;
+            }
+
+            $details['phone_number'] = $lead->phone_number;
+            $details['email_address'] = $lead->email_address;
+            $details['brand'] = $lead->brand;
+            $details['company'] = $lead->company;
+            return response()->json(['status' => 0, 'details' => $details]);
+        }
+        else{
+           return response()->json(['status' => 1, 'error' => 'Invalid Lead ID!']);
+        }
+    }
+
+    public function edit(Request $request){
+
+        $lead_id = $request->edit_lead_id;
+        if($lead_id){
+            $lead = Lead::find($lead_id);
+            if($lead){
+                $lead->city_id = $request->city_id;
+                $lead->territory_id = $request->territory_id;
+                $lead->territory_area_id = $request->territory_area_id;
+                $lead->phone_number = $request->phone_number;
+                $lead->email_address = $request->email_address;
+                $lead->brand = $request->brand;
+                $lead->company = $request->company;
+                $lead->save();
+
+                return redirect()->back()->with('success', 'Lead Edited successfully!');
+            }
+            return redirect()->back()->with('error', 'Lead not found!');
+        }
+        return redirect()->back()->with('error', 'Something went wrong!');
     }
 }

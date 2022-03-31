@@ -44,6 +44,7 @@ use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\Zone;
+use App\Jobs\RCPSmsToConsignee;
 use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use Illuminate\Filesystem\Filesystem;
@@ -350,6 +351,7 @@ class ReturnController extends Controller
                 $intercept = '<a href="javascript:void(0);" class="dropdown-item intercept"><i class="ft-plus-circle primary"></i> Intercept/Re-Book</a>';
                 $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
                 $edit_estimate_charges = '<a href="javascript:void(0);" class="dropdown-item editEstimateCharges" data-action="editEstimateCharges"><i class="ft-plus-circle primary"></i> Edit Estimate Charges</a>';
+                $manual_sms_btn = '<a href="javascript:void(0);" class="dropdown-item rcp_sms"><i class="ft-mail primary"></i> Send SMS</a>';
 
                 $diff_days = self::check_tat($result->last_status_date,$result->tat_value);
                 if(session("role_id") == 1 || $result->assigned_agent_id == Auth::id() || $diff_days < 1 || (in_array(490, session('permissions')))) {
@@ -384,6 +386,9 @@ class ReturnController extends Controller
                                     $dropdown .= $intercept;
                                 }
                             }
+                        }
+                        if(session('role_id') == 1 || in_array(700, session('permissions'))){
+                            $dropdown .= $manual_sms_btn;
                         }
 
                         $dropdown .= "
@@ -447,7 +452,7 @@ class ReturnController extends Controller
                     continue;
                 }
                 $remark_inp = "remark.$shipment";
-                if(!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55])){
+                if(!in_array($parcel->shipper_status_id, [5, 13, 15, 20, 54, 55])){
 
 //                    $remarks = ($request->has($remark_inp) && $request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
 //                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
@@ -1896,8 +1901,6 @@ class ReturnController extends Controller
 
                 $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
 
-                NotificationsController::app_notification(6, $rider, 2, $note->id);
-
                 if ($note) {
                     foreach ($valid_shipments as $index  => $shipment_id) {
                         $shipment = Shipment::where('id', $shipment_id);
@@ -1981,6 +1984,7 @@ class ReturnController extends Controller
                         $return_sheet->save();
 
                     }
+                    NotificationsController::app_notification(6, $rider, 2, $note->id);
                 }
                 EmployeeAttendanceController::riders_attendance_mark($rider);
 
@@ -4714,7 +4718,7 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),503);
         }
        $rcp = ReturnConfirmationPendingSmsAttempt::join('shipments as s','s.id','=','return_confirmation_pending_sms_attempts.shipment_id')
-           ->select('s.id as shipment_id','s.tracking_number as tracking_number','s.tracking_number as tracking','s.consignee_phone_number_1 as phone','return_confirmation_pending_sms_attempts.response as response','return_confirmation_pending_sms_attempts.created_at as created_at','return_confirmation_pending_sms_attempts.updated_at as updated_at','return_confirmation_pending_sms_attempts.status as status');
+           ->select('s.id as shipment_id','s.tracking_number as tracking_number','s.tracking_number as tracking','s.consignee_phone_number_1 as phone','return_confirmation_pending_sms_attempts.response as response','return_confirmation_pending_sms_attempts.created_at as created_at','return_confirmation_pending_sms_attempts.updated_at as updated_at','return_confirmation_pending_sms_attempts.status as status','return_confirmation_pending_sms_attempts.count as count');
 
        $datatable = DataTables::of($rcp)
            ->editColumn('tracking_number', function ($shipments) {
@@ -4730,14 +4734,20 @@ class ReturnController extends Controller
             }
        })
        ->editColumn('status',function ($rcp){
-            if($rcp->status == 0){
+            if ($rcp->status == 0) {
                 return 'Pending';
             }
-            else if($rcp->status == 2){
+            else if ($rcp->status == 1) {
+                return 'Return';
+            }
+            else if ($rcp->status == 2) {
                 return 'Re-Attempt';
             }
-            else{
-                return 'Return';
+            else if ($rcp->status == 3) {
+                return 'Attempt Limit Reached';
+            }
+            else {
+                return 'Invalid Number';
             }
        })
        ->filterColumn('return_confirmation_pending_sms_attempts.status',function ($query,$keyword){
@@ -4746,11 +4756,17 @@ class ReturnController extends Controller
            if ($keyword == 'pending') {
                $query->where('return_confirmation_pending_sms_attempts.status',0);
            }
-           else if($keyword == 'return'){
+           else if($keyword == 'return') {
                $query->where('return_confirmation_pending_sms_attempts.status',1);
            }
-           else if($keyword == 're-attempt'){
+           else if($keyword == 're-attempt') {
                $query->where('return_confirmation_pending_sms_attempts.status',2);
+           }
+           else if($keyword == 'attempt limit reached') {
+               $query->where('return_confirmation_pending_sms_attempts.status',3);
+           }
+           else if($keyword == 'invalid number') {
+               $query->where('return_confirmation_pending_sms_attempts.status',4);
            }
            else {
                $query->whereRaw('false');
@@ -4758,5 +4774,28 @@ class ReturnController extends Controller
        });
 
         return $datatable->make(true);
+    }
+
+    public function manual_rcp_sms(Request $request){
+        if($request->id){
+            $shipment = Shipment::find($request->id)->id;
+            if($shipment){
+                $rcp_sms = ReturnConfirmationPendingSmsAttempt::where('status',0)->where('shipment_id', $shipment);
+                if($rcp_sms->exists()){
+                    $rcp_sms = $rcp_sms->latest('id')->first();
+                    $limit = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
+
+                    if ($rcp_sms->count <= $limit->text){
+                        dispatch(new RCPSmsToConsignee($rcp_sms->shipment_id));
+                    }
+                }
+                else{
+                    return response()->json(['status' => 1, 'error' => 'Shipment not found in SMS attempts!']);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
+            }
+        }
     }
 }

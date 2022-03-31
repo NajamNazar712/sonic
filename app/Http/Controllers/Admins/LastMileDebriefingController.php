@@ -15,6 +15,8 @@ use App\Http\Models\RiderDelivery;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
+use App\Jobs\RCPSmsToConsignee;
+use App\ReturnConfirmationPendingSmsAttempt;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
@@ -750,6 +752,9 @@ class LastMileDebriefingController extends Controller
 
     public function caller_agent_next(Request $request)
     {
+        $now = Carbon::now();
+        $end_of_the_day = Carbon::today()->endOfDay()->addMinute(2);
+        $rcp_sms_setting = GlobalSettings::where('type','return_confirmation_pending_sms')->first();
         $data = AgentCallMonitoring::find($request->call_id);
         if($data){
             $delivery_note_id = $data->delivery_note_id;
@@ -879,7 +884,6 @@ class LastMileDebriefingController extends Controller
                                             }
 
                                         }
-
                                     }
                                     $dispute_shipments[] = $shipment;
                                 }
@@ -917,6 +921,12 @@ class LastMileDebriefingController extends Controller
 
 
                 if ($verification == 1) {
+
+                    if(in_array(session('role_id'),[18,19]) && $shipper_status_id == 12 && in_array($status_reason_id,[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && !ReturnConfirmationPendingSmsAttempt::where('shipment_id',$shipment)->where('status',0)->exists()){
+                        //dispatch(new RCPSmsToConsignee($shipment));
+                        ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 0]);
+                    }
+
                     if (!empty($dispute_shipments)) {
                         DisputeController::add_delivery_wrong_status_dispute($delivery_note_id, $dispute_shipments);
                     }

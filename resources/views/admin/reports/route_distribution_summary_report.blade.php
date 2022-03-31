@@ -58,7 +58,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3 ">
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -68,7 +68,7 @@
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -89,6 +89,9 @@
 
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
+                            <th class="border-primary border-darken-1">Rider Type</th>
+                            <th class="border-primary border-darken-1">Delivery Note</th>
+                            <th class="border-primary border-darken-1">DNCC Amount</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Total Out For Delivery</th>
                             <th class="border-primary border-darken-1">Pending</th>
@@ -102,6 +105,25 @@
                         </tr>
                         </thead>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="dn_no_modal" data-backdrop="static" role="dialog"
+         aria-labelledby="dn_no_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="dn_no_modal">Delivery Notes</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center" id="dn_data">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -212,7 +234,8 @@
                 firstDay: 1,
                 clear: 'Clear',
                 max: max,
-                format:'dd mmmm, yyyy',
+                // format:'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -228,7 +251,8 @@
                 firstDay: 1,
                 clear: 'Clear',
                 max: max,
-                format:'dd mmmm, yyyy',
+                // format:'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -258,6 +282,9 @@
 
                             head.push('S.No');
                             head.push('Rider Name');
+                            head.push('Rider Type');
+                            head.push('Delivery Note');
+                            head.push('DNCC Amount');
                             head.push('Hub');
                             head.push('Total Out For Delivery');
                             head.push('Pending');
@@ -272,6 +299,9 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.courier_name);
+                                row.push(values.rider_type);
+                                row.push(values.dn_no_count);
+                                row.push(values.dncc_amount);
                                 row.push(values.hub);
                                 row.push(values.shipments_count);
                                 row.push(values.pending_shipments);
@@ -287,6 +317,9 @@
 
                             footer.push('-');
                             footer.push('Total');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
                             footer.push('');
                             footer.push(shipments_count.toFixed(2));
                             footer.push(pending_shipments.toFixed(2));
@@ -306,7 +339,7 @@
                 }
             } );
 
-            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -343,6 +376,9 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'courier_name' ,name: 'r.name', class: 'align-middle text-center courier_name'},
+                    { data:'rider_type' ,name: 'rt.name', class: 'align-middle text-center rider_type'},
+                    { data:'dn_no' ,name: 'delivery_notes.id', class: 'align-middle text-center dn_no'},
+                    { data:'dncc_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle text-center dncc_amount', orderable: false, searchable: false},
                     { data:'hub' ,name: 'hub', class: 'align-middle text-center hub'},
                     { data:'shipments_count', class: 'align-middle shipments_count', orderable: false, searchable: false},
                     { data:'pending_shipments', class: 'align-middle pending_shipments', orderable: false, searchable: false},
@@ -460,8 +496,20 @@
                 $('#datatable_wrapper').show();
                 table.draw();
             });
-
         });
+
+        function dn_no_pop(dn_no) {
+            if (dn_no) {
+                let notes = "";
+                let dn_array = dn_no.split(',');
+                console.log(dn_array);
+                $.each(dn_array,function(i,v){
+                    notes += "<u>"+v+"<u><br>";
+                })
+                $('#dn_no_modal .modal-body').html(notes);
+                $('#dn_no_modal').modal('show');
+            }
+        }
 
     </script>
 @endsection

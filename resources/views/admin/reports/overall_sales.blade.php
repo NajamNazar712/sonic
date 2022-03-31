@@ -430,6 +430,7 @@
                             head.push('Tracking No.');
                             head.push('Account No.');
                             head.push('Shipper');
+
                             head.push('Vendor');
                             head.push('Order ID');
                             head.push('Status');
@@ -483,6 +484,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
+
                                 row.push(values.vendor);
                                 row.push(values.order_id);
                                 row.push(values.current_status);
@@ -587,6 +589,7 @@
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
+
                     { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},

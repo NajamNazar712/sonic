@@ -19,8 +19,9 @@
                         <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Consignee Number</th>
                         <th class="border-primary border-darken-1">Responses</th>
-                        <th class="border-primary border-darken-1">Message Sent Date</th>
+                        <th class="border-primary border-darken-1">Msg Send/RCP Date</th>
                         <th class="border-primary border-darken-1">Reply Received Date</th>
+                        <th class="border-primary border-darken-1">Count</th>
                         <th class="border-primary border-darken-1">Status</th>
                     </tr>
                     </thead>
@@ -121,8 +122,9 @@
                             head.push('Tracking Number');
                             head.push('Consignee Number');
                             head.push('Response');
-                            head.push('Message Sent Date');
+                            head.push('Msg Send/RCP Date');
                             head.push('Reply Received Date');
+                            head.push('Count');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -135,6 +137,7 @@
                                 row.push(values.response);
                                 row.push(values.created_at);
                                 row.push(values.updated_at);
+                                row.push(values.count);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -181,6 +184,7 @@
                     {data: 'response', name: 'return_confirmation_pending_sms_attempts.response', class: 'align-middle response'},
                     {data: 'created_at', name: 'return_confirmation_pending_sms_attempts.created_at', class: 'align-middle created_at'},
                     {data: 'updated_at', name: 'return_confirmation_pending_sms_attempts.updated_at', class: 'align-middle updated_at'},
+                    {data: 'count', name: 'return_confirmation_pending_sms_attempts.count', class: 'align-middle count'},
                     {data: 'status', name: 'return_confirmation_pending_sms_attempts.status', class: 'align-middle status'},
                 ],
                 rowCallback: function (row, data, index) {

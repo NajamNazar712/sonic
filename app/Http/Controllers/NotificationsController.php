@@ -64,6 +64,7 @@ use App\Jobs\ProcessDeliveryNoteOtpSms;
 use App\Jobs\ProcessOTPSMS;
 use App\Jobs\ProcessOTPSMSITS;
 use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
+use App\Jobs\ProcessPushNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -123,6 +124,18 @@ class NotificationsController extends Controller
       }
     }
 
+    static private function push_notification($employee_id, $employee_type, $title, $body, $screen = NULL) {
+        $notification_history = new EmployeeNotificationHistory();
+        $notification_history->employee_id = $employee_id;
+        $notification_history->employee_type_id = $employee_type;
+        $notification_history->title = $title;
+        $notification_history->message = $body;
+        $notification_history->screen_id = $screen;
+        $notification_history->save();
+
+        dispatch(new ProcessPushNotification($notification_history));
+    }
+
     static private function sms_otp($body, $to, $name, $otp, $type) {
         if ($type == 1) {
             $sms = new SMS();
@@ -160,12 +173,12 @@ class NotificationsController extends Controller
 
     static private function bot_sms($body, $to) {
         $sms = new SMS();
-  
+
         $sms->to = str_replace('-', '', $to);
         $sms->body = $body;
-  
+
         $sms->save();
-  
+
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
@@ -8459,6 +8472,7 @@ class NotificationsController extends Controller
 
                     $html .= '<table style="width:100%;">';
                     $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>';
+                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Trax ID</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">CNIC Number</th>';
@@ -8468,7 +8482,7 @@ class NotificationsController extends Controller
                         $data_set = Rider::find($data->id);
                         $data_set->status = 0;
                         $data_set->save();
-                        $employee_directory = Employee::where('trax_id', $data_set->trax_id);
+                        $employee_directory = Employee::where('trax_id', $data_set->trax_id)->where('employee_type_id',2);
                         if($employee_directory->exists()){
                             $employee_directory = $employee_directory->first();
                             $employee_directory->status_id = 2;
@@ -8477,6 +8491,7 @@ class NotificationsController extends Controller
 
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->trax_id . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->phone . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cnic . '</td>';
@@ -8486,10 +8501,10 @@ class NotificationsController extends Controller
                     $html .= '</tr></tbody></table>';
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
-                    $subject = ' Rider deactivation';
-                    $to = ['Hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk'];
+                    $subject = ' Rider Deactivation';
+                    $to = ['hasnain.saleem@trax.pk',  'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk'];
 
-//                    self::email($subject, $body_updated, $to);
+                    self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
                     $now = Carbon::now();
                     $month = $now->subMonth()->format('F');
@@ -9056,7 +9071,65 @@ class NotificationsController extends Controller
                     $to = $shipment->consignee_phone_number_1;
                     $data = array($body, $to);
                     return $data;
-                  
+
+                }else if($id == 131) {
+                    $request_no = $reference_1_id;
+                    $admin_id = $reference_2_id;
+                    if (strpos($body, '[request_no]') !== FALSE) {
+                        $body = str_replace('[request_no]', $request_no, $body);
+                    }
+                    $admin = Admin::find($admin_id);
+                    $to = $admin->email;
+                    self::email($subject, $body, $to);
+                }
+                else if ($id == 170) {
+                    $sale_person = Admin::find($reference_1_id);
+                    $shipper_ids = $reference_2_id;
+                    if($sale_person && $sale_person->email){
+                        $shippers_data = User::leftJoin('shipments as s', function ($join) {
+                            $join->on('s.user_id', '=', 'users.id')
+                                ->where('s.id', '=',
+                                    DB::raw('(select max(id) from shipments where shipments.user_id = users.id)'));
+                        })
+                            ->select('users.name as shipper_name', 'users.id as account_id', 's.tracking_number as last_tracking_number')
+                            ->whereIn('users.id', $reference_2_id);
+                        if($shippers_data->exists()){
+                            $shippers_data = $shippers_data->get();
+                            if (strpos($body, '[sale_person]') !== FALSE) {
+                                $body = str_replace('[sale_person]',$sale_person->name, $body);
+                            }
+                            $html = '';
+                            $html .= '<table style="width:100%;">';
+                            $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>';
+                            $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Account ID</th>';
+                            $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Last Tracking No.</th>';
+                            $html .= '</tr></thead><tbody>';
+                            foreach ($shippers_data as $datum) {
+                                $account_id = str_pad($datum->account_id, 6, 0, STR_PAD_LEFT);
+                                $last_tracking = ($datum->last_tracking_number) ? $datum->last_tracking_number : "-";
+                                $html .= '<tr>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $datum->shipper_name . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $account_id . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $last_tracking . '</td>';
+                            }
+                            $html .= '</tr></tbody></table>';
+                            $body_updated = $body;
+                            $body_updated = str_replace('[preview]', $html, $body_updated);
+                            $to = $sale_person->email;
+                            self::email($subject, $body_updated, $to);
+                        }
+                    }
+                }
+                else if ($id == 171) {
+                    $name = $reference_1_id;
+                    $phone_number = $reference_2_id;
+
+                    if (strpos($body, '[name]') !== FALSE) {
+                        $body = str_replace('[name]', $name, $body);
+                    }
+
+                    $to = $phone_number;
+                    self::sms($body, $to);
                 }
             }
         }
@@ -9136,7 +9209,6 @@ class NotificationsController extends Controller
             if ($push_notification->status) {
                 $title = $push_notification->title;
                 $body = $push_notification->body;
-                $data = array();
                 if ($id == 1) {
                     $rider = Rider::find($reference1_id);
                     $shipper = User::find($reference2_id);
@@ -9146,9 +9218,9 @@ class NotificationsController extends Controller
                     if (strpos($body, '[rider]') !== FALSE) {
                         $body = str_replace('[rider]', $rider->name, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 2) {
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }
+                else if ($id == 2) {
                     $rider = Rider::find($reference1_id);
                     $shipper = User::find($reference2_id);
                     if (strpos($body, '[shipper_name]') !== FALSE) {
@@ -9157,35 +9229,35 @@ class NotificationsController extends Controller
                     if (strpos($body, '[rider]') !== FALSE) {
                         $body = str_replace('[rider]', $rider->name, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 3) {
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }
+                else if ($id == 3) {
                     $shipper = User::find($reference1_id);
                     if (strpos($body, '[shipper_name]') !== FALSE) {
                         $body = str_replace('[shipper_name]', $shipper->name, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 4) {
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }
+                else if ($id == 4) {
                     $shipper = User::find($reference1_id);
                     if (strpos($body, '[shipper_name]') !== FALSE) {
                         $body = str_replace('[shipper_name]', $shipper->name, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 5) {
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }
+                else if ($id == 5) {
                     if (strpos($body, '[note_id]') !== FALSE) {
                         $body = str_replace('[note_id]', $reference1_id, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 6) {
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }
+                else if ($id == 6) {
                     if (strpos($body, '[note_id]') !== FALSE) {
                         $body = str_replace('[note_id]', $reference1_id, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 7) {
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }
+                else if ($id == 7) {
                     $shipment = Shipment::find($reference1_id);
                     $status = ShipmentStatus::find($reference2_id);
                     $shipper = User::find($employee_id);
@@ -9198,9 +9270,9 @@ class NotificationsController extends Controller
                     if (strpos($body, '[status_name]') !== FALSE) {
                         $body = str_replace('[status_name]', $status->name, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 8) {
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }
+                else if ($id == 8) {
                     $shipment = Shipment::find($reference1_id);
                     $status = ShipmentStatus::find($reference2_id);
                     $consignee_user = ConsigneeUser::find($employee_id);
@@ -9213,9 +9285,9 @@ class NotificationsController extends Controller
                     if (strpos($body, '[status_name]') !== FALSE) {
                         $body = str_replace('[status_name]', $status->name, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 9) {
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }
+                else if ($id == 9) {
                     $rider = Rider::find($employee_id);
                     if (strpos($body, '[rider]') !== FALSE) {
                         $body = str_replace('[rider]', $rider->name, $body);
@@ -9223,9 +9295,9 @@ class NotificationsController extends Controller
                     if (strpos($body, '[otp]') !== FALSE) {
                         $body = str_replace('[otp]', $reference1_id, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                }else if ($id == 11) {
+                    self::push_notification($employee_id, $employee_type, $title, $body);
+                }
+                else if ($id == 11) {
                     if($employee_type == 1){
                         $user = Admin::find($employee_id);
                     }else{
@@ -9254,10 +9326,10 @@ class NotificationsController extends Controller
                         if (strpos($body, '[status]') !== FALSE) {
                             $body = str_replace('[status]', $status, $body);
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                }else if ($id == 12) {
+                }
+                else if ($id == 12) {
                     $leave = EmployeeLeave::find($reference1_id);
                     if($leave){
                         if($leave->employee_type_id == 1){
@@ -9283,10 +9355,10 @@ class NotificationsController extends Controller
                                 $body = str_replace('[to]', $leave->from, $body);
                             }
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 13) {
+                }
+                else if ($id == 13) {
                     $leave = EmployeeLeave::find($reference1_id);
                     if($leave){
                         if($leave->employee_type_id == 1){
@@ -9312,10 +9384,10 @@ class NotificationsController extends Controller
                                 $body = str_replace('[to]', $leave->from, $body);
                             }
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 14) {
+                }
+                else if ($id == 14) {
                     $lead = Lead::find($reference1_id);
                     $user = Admin::find($employee_id);
                     if (strpos($title, '[date]') !== FALSE) {
@@ -9329,10 +9401,10 @@ class NotificationsController extends Controller
                         if (strpos($body, '[lead_id]') !== FALSE) {
                             $body = str_replace('[lead_id]', $lead->id, $body);
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                } else if ($id == 15) {
+                }
+                else if ($id == 15) {
                     $lead = Lead::find($reference1_id);
                     $user = Admin::find($employee_id);
                     if($lead && $user){
@@ -9342,42 +9414,25 @@ class NotificationsController extends Controller
                         if (strpos($body, '[lead_id]') !== FALSE) {
                             $body = str_replace('[lead_id]', $lead->id, $body);
                         }
+                        self::push_notification($employee_id, $employee_type, $title, $body, $lead->id);
                     }
-                    $data['title'] = $title;
-                    $data['body'] = $body;
-                    $data['lead_id'] = $lead->id;
                 }
-                $employee_device_token = EmployeeDeviceToken::where('employee_id', $employee_id)
-                    ->where('employee_type_id', $employee_type)
-                    ->select('device_token');
-                if ($employee_device_token->exists()) {
-                    $employee_device_token = $employee_device_token->first();
-                    $device_token = $employee_device_token->device_token;
-                    $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
-                    $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
-
-                    $message = [
-                        'data' => $data,
-                        'to' => $device_token
-                    ];
-
-                    $client = new Client(['base_uri' => $fcmUrl, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
-
-                    $response = $client->post('', [
-                        'headers' => [
-                            'Content-Type' => 'application/json',
-                            'Authorization' => 'key=' . $server_key,
-                        ],
-                        'body' => json_encode($message)
-                    ]);
-                    $response = json_decode($response->getBody()->getContents(), true);
-                    if ($response['success'] != 0) {
-                        $notification_history = new EmployeeNotificationHistory();
-                        $notification_history->employee_id = $employee_id;
-                        $notification_history->employee_type_id = $employee_type;
-                        $notification_history->title = $title;
-                        $notification_history->message = $body;
-                        $notification_history->save();
+                else if ($id == 16) {
+                    $admin = Admin::find($reference1_id);
+                    $shippers = User::whereIn('id', $reference2_id)->select('name');
+                    if($admin && $shippers->exists()){
+                        $shippers = $shippers->get();
+                        $shipper_name = '';
+                        foreach ($shippers as $shipper){
+                            $shipper_name .= $shipper->name.PHP_EOL;
+                        }
+                        if (strpos($body, '[sale_person]') !== FALSE) {
+                            $body = str_replace('[sale_person]', $admin->name, $body);
+                        }
+                        if (strpos($body, '[shipper_names]') !== FALSE) {
+                            $body = str_replace('[shipper_names]', $shipper_name, $body);
+                        }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
                 }
             }
