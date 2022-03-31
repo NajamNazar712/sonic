@@ -31,7 +31,9 @@ use App\Http\Models\CorporateInsuranceCharge;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateReturnCharge;
+use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmRequestChannel;
@@ -1214,9 +1216,16 @@ class ShipperDashboardController extends Controller
         }
         else {
             if ($user->corporate_rate_type_id != 3) {
+                if($user->corporate_rate_type_id == 2){
+                    $weight = CorporateWeightChargeZoneWise::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                    $return = CorporateReturnChargeZoneWise::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                }
+                else{
+                    $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                    $return = CorporateReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+                }
                 $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-                $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $cash = CorporateCashHandlingCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $insurance = CorporateInsuranceCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
