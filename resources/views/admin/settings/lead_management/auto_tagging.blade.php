@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Auto Tagging 
+                    Auto Tagging
                 </h1>
 
                 <div class="card">

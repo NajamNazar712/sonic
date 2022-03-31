@@ -85,6 +85,15 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_types" id="search_types" class="form-control select2">
+                                @foreach($types as $id => $type)
+                                    <option value="{{ $id }}">{{ $type }}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-4 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -105,15 +114,7 @@
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_types" id="search_types" class="form-control select2">
-                                @foreach($types as $id => $type)
-                                    <option value="{{ $id }}">{{ $type }}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
+
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
