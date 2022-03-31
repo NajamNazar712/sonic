@@ -344,7 +344,6 @@ class RetailAPIController extends Controller
             } else {
                 $weight = $request->input('weight');
             }
-            dd($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $request->trax_box_id, $discount, $weight);
             $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $request->trax_box_id, $discount, $weight);
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
