@@ -6279,7 +6279,7 @@ class AdminFinanceController extends Controller
                     }
                 }
                 else if ($user_banking_information->invoicing_cycle_id == 3) {
-                    if (Carbon::now()->endOfMonth()->toDateString() == $current_date_string) {
+                    if (Carbon::now()->startOfMonth()->toDateString() == $current_date_string){
                         $generate = TRUE;
 
                         /*$billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();*/
