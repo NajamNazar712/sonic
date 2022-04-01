@@ -87,6 +87,7 @@ use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\RateStatus;
+use App\Http\Models\Referral;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
@@ -6447,6 +6448,92 @@ public function sales_incentive()
             }
         }
     }
+
+    public function referral(){
+
+        return view('admin.settings.referral');
+    }
+
+    public function referral_list(Request $request){
+        $referral = Referral::join('admins as ad','ad.id','=','referrals.admin_id')
+                    ->select('referrals.id','referrals.name as name','referrals.status as status','ad.name as agent_name');
+        $datatables = Datatables::of($referral)
+                    ->addColumn('action', function($referral) {
+                        if (session('role_id') == 1 || in_array(663, session('permissions'))) {
+                                $dropdown = '<div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                                <div class="dropdown-menu dropdown-menu-sm">
+                                ';
+                                
+                                //  <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                                if($referral->status == 1 ){
+            
+                                    $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                                }else{
+            
+                                    $dropdown .=' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                                }
+                                
+                                $dropdown .='</div>
+                              </div>
+                      ';
+            
+                      return $dropdown;
+                           
+                        }
+                        else {
+                            return '';
+                        }
+                    })->editColumn('status', function($referral) {
+                        if($referral->status == 1){
+                            return 'Enable';
+                        }else{
+                            return 'Disable';
+                        }
+                        
+                    });
+            
+                return $datatables->make(true);
+    }
+    
+    public function referral_name(Request $request){
+        if ($request->filled('referral_code')) {
+            $referral = Referral::where('name', $request->input('referral_code'));
+
+            if (!$referral->exists()) {
+                return 'true';
+            } else {
+                return 'false';
+            }
+        } else {
+            return 'false';
+        }
+    }
+
+    public function referral_store(Request $request){
+        $referral = new Referral;
+        $referral->name = $request->referral_code;
+        $referral->admin_id = session('id');
+        $referral->save();
+        return redirect()->back()->with('success', 'Referral Added!');
+
+    }
+
+    public function referral_enable_disable(Request $request){
+        $referral = Referral::find($request->id);
+        if($referral->status == 1){
+            $referral->status = 0;
+            $referral->save();
+        return redirect()->back()->with('success', 'Referral Disabled!');
+
+        }else{
+            $referral->status = 1;
+            $referral->save();
+        return redirect()->back()->with('success', 'Referral Enabled!');
+
+        } 
+    }
+
     
     
 }

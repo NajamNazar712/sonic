@@ -71,4 +71,9 @@ class User extends Authenticatable
     public function dws_charges(){
         return $this->hasMany('App\Http\Models\DwsWeightCharges');
     }
+
+    public function referral()
+    {
+        return $this->belongsTo('App\Http\Models\Referral', 'referral_id', 'id');
+    }
 }

@@ -63,6 +63,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
     Route::post('get_sub_segment', 'Auth\RegisterController@get_sub_segment')->name('get_sub_segment');
     
+    Route::get('referral', 'Auth\RegisterController@referral_valid')->name('referral.valid');
+   
     Route::prefix('orders')->name('orders.')->group(function(){
         Route::get('','Shippers\ShipperDashboardController@orders_index')->name('index');
         Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
@@ -3242,6 +3244,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 			Route::get('', 'Admins\GlobalSettingsController@cn_print_right')->name('cn_print_right');
 			Route::post('store', 'Admins\GlobalSettingsController@cn_print_right_store')->name('store');
 		});
+        Route::prefix('referral')->name('referral.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@referral')->name('index');
+			Route::get('list', 'Admins\GlobalSettingsController@referral_list')->name('list');
+			Route::post('submit', 'Admins\GlobalSettingsController@referral_store')->name('submit');
+            Route::get('name', 'Admins\GlobalSettingsController@referral_name')->name('name');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@referral_enable_disable')->name('enable_disable');
+            
+
+        });
 	});
 
 
