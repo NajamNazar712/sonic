@@ -6763,6 +6763,9 @@ class DeliveryController extends Controller
                     $item_description = $product['description'];
                     $item_quantity = $product['quantity'];
                     $item_price = $product['price'];
+                    if($item_price == null){
+                        $item_price = 0;
+                    }
                     $replacement_charges = $shipment->replacement_charges;
                     ReplacementToRegularLog::create([
                         'shipment_id' => $shipment->id,
@@ -6904,6 +6907,10 @@ class DeliveryController extends Controller
                             $item_description = $product['description'];
                             $item_quantity = $product['quantity'];
                             $item_price = $product['price'];
+
+                            if($item_price == null){
+                                $item_price = 0;
+                            }
 
 
                             ReplacementToRegularLog::create([
