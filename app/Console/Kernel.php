@@ -114,6 +114,7 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\ReattemptRatioCalculate',
         'App\Console\Commands\ShortOfBusinessShippers',
         'App\Console\Commands\BirthdayMessage',
+		'App\Console\Commands\AutoComplaintHighAging',
         ];
 
     /**
@@ -382,6 +383,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('email:dwsarrival')->dailyAt('17:00')->runInBackground();
         $schedule->command('crm:count')->dailyAt('17:30')->runInBackground();
+        $schedule->command('crm:autohighaging')->dailyAt('09:00')->runInBackground();
         $schedule->command('shipper:short_of_business')->dailyAt('8:00')->runInBackground();
         $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
         $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt('00:01')->runInBackground();

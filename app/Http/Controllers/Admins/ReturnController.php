@@ -1901,8 +1901,6 @@ class ReturnController extends Controller
 
                 $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
 
-                NotificationsController::app_notification(6, $rider, 2, $note->id);
-
                 if ($note) {
                     foreach ($valid_shipments as $index  => $shipment_id) {
                         $shipment = Shipment::where('id', $shipment_id);
@@ -1986,6 +1984,7 @@ class ReturnController extends Controller
                         $return_sheet->save();
 
                     }
+                    NotificationsController::app_notification(6, $rider, 2, $note->id);
                 }
                 EmployeeAttendanceController::riders_attendance_mark($rider);
 

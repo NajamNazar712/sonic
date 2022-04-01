@@ -59,13 +59,6 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group">
-                        <select name="case_nature_id" id="case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
-                            @foreach($case_natures as $case_nature)
-                                <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success" id="assign_agentSubmit">Assign</button>
@@ -101,13 +94,6 @@
                         <select name="zone_id" id="edit_zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
                             @foreach($zones as $zone)
                                 <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <select name="case_nature_id" id="edit_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
-                            @foreach($case_natures as $case_nature)
-                                <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
                             @endforeach
                         </select>
                     </div>
@@ -217,7 +203,7 @@
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
-                    {data: 'case_nature', name: 'cn.name', class: 'align-middle case_nature'},
+                    {data: 'case_nature', name: 'case_nature', class: 'align-middle case_nature'},
                     {data: 'status', name: 'crm_agents.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
@@ -243,7 +229,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.case_nature')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.department')){
