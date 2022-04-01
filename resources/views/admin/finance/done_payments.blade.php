@@ -193,7 +193,8 @@
 								<div class="modal-dialog modal-lg" role="document">
 									<div class="modal-content">
 										<div class="modal-header">
-											<h4 class="modal-title" id="view_status_history_title"></h4>
+											<h4 class="modal-title" id="view_status_history_title"></h4>&nbsp;&nbsp;
+											<b><span style="font-size: 19px;" id="view_status_history_id"></span></b>
 
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">×</span>
@@ -204,7 +205,6 @@
 												<table class="table table-striped" id="view_status_history">
 													<thead>
 													<tr>
-														<th>Payment ID</th>
 														<th>Payment Status</th>
 														<th>Updated At</th>
 														<th>Updated By</th>
@@ -1124,26 +1124,33 @@
 							.done(function(data) {
 								var result = JSON.parse(data);
 								var count = JSON.parse(data).length;
+								$('#view_status_history_modal').modal('show');
+								$('#view_status_history tbody ').html('');
+								$('#view_status_history_modal #view_status_history_title').html('Status History');
+								$.each(result.payment_id,function(index, value){
+									// console.log(result.payment_id);
 
-								if (result.status == 2) {
-									$('#view_status_history_modal').modal('show');
-									$('#view_status_history_modal #view_status_history_title').html('Status History');
-									$('#view_status_history tbody ').html(`
+									if (result.status[index] == 2) {
+										$('#view_status_history_id').text(`(${result.payment_id[index]})`);
+
+
+										$('#view_status_history tbody ').append(`
                                     <tr>
-                                    <td>${result.payment_id}</td>
-                                    <td>${result.payment_status}</td>
-                                    <td>${result.status_updated_at}</td>
-                                    <td>${result.status_updated_by}</td>
+
+                                    <td>${result.payment_status[index]}</td>
+                                    <td>${result.status_updated_at[index]}</td>
+                                    <td>${result.status_updated_by[index]}</td>
                                     </tr>`)
-								} else {
-									$('#view_status_history tbody ').html('');
-								}
-								if (result.status == 0) {
-									toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-								}
-								if (result.status == 1) {
-									toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-								}
+									} else {
+										$('#view_status_history tbody ').html('');
+									}
+									if (result.status == 0) {
+										toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+									}
+									if (result.status == 1) {
+										toastr.error(result.error, 'error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+									}
+								});
 							});
 				}
 				// todo view status history end

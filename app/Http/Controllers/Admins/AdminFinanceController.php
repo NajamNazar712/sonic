@@ -5355,36 +5355,34 @@ class AdminFinanceController extends Controller
 {
     if(!empty($request->id))
     {
+
         $status_history = array();
-        $done_payments = DonePayment::join('admins','admins.id','=','done_payments.status_updated_by')->
-        where('done_payments.id',$request->id)
-            ->select('done_payments.id','done_payments.status','done_payments.status_updated_by','done_payments.status_updated_at','admins.name')
-            ->first();
-        if(!empty($done_payments)) {
+        $done_payments = DonePayment::join('shipments_payment_journey as spj','spj.payment_id','=','done_payments.id')
+            ->leftjoin('admins','admins.id','=','spj.admin_id')
+            ->leftjoin('shipment_payment_status as sps','spj.status_id','=','sps.id')
+            ->where('done_payments.id',$request->id)
+            ->select('done_payments.id as payment_id','spj.id','spj.status_id as status_id','spj.admin_id','spj.updated_at as updated_at','admins.name as admin','sps.name as payment_status')
+            ->get();
+//dd($done_payments);
+        if (!empty($done_payments)) {
+            foreach ($done_payments as $key => $done_payment) {
+                $payment_id = $done_payment->payment_id;
+                $payment_id = str_pad($payment_id, 6, '0', STR_PAD_LEFT);
 
-            $payment_id = $done_payments->id;
-            $payment_id = str_pad($payment_id, 6, '0', STR_PAD_LEFT);
+                $payment_status = $done_payment->payment_status;
+                $status_updated_at = $done_payment->updated_at;
 
-            if ($done_payments->status == 0) {
-                $payment_status = 'Processed';
-            } else if ($done_payments->status == 1) {
-                $payment_status = 'Paid';
-            } else if ($done_payments->status == 2) {
-                $payment_status = 'Reverted';
-            } else {
-                $payment_status = 'Unknown';
+                $updated_by = $done_payment->admin;
+
+                $status_history['payment_id'][$key] = isset($payment_id) ? $payment_id : '';
+                $status_history['payment_status'][$key] = isset($payment_status) ? $payment_status : '';
+                $status_history['status_updated_at'][$key] = isset($status_updated_at) ? date('Y-m-d H:i:s',strtotime($status_updated_at)) : '';
+                $status_history['status_updated_by'][$key] = isset($updated_by) ? $updated_by : '';
+                $status_history['status'][$key] = 2;
+
+
             }
-            $status_updated_at = $done_payments->status_updated_at;
-
-            $updated_by = $done_payments->name;
-
-            $status_history['payment_id'] = isset($payment_id) ? $payment_id : '' ;
-            $status_history['payment_status'] = isset($payment_status) ? $payment_status : '';
-            $status_history['status_updated_at'] = isset($status_updated_at) ? $status_updated_at : '';
-            $status_history['status_updated_by'] = isset($updated_by) ? $updated_by : '';
-            $status_history['status'] = 2;
-
-
+//            dd($status_history);
             echo json_encode($status_history);
         }
         else
