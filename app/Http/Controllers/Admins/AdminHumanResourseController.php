@@ -3823,7 +3823,7 @@ class AdminHumanResourseController extends Controller
         }
 
 
-        if(ReturnNote::where('rider_id',$rider->id)->where('status','!=',1)->exists())
+        if(ReturnNote::where('rider_id',$rider->id)->whereNotIn('status',[1,2])->exists())
         {
             return back()->with("error","Rider Has An Unfinished Return Note");
         }
