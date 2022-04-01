@@ -13,15 +13,7 @@
                 @include('admin.inc.messages')
 
                 <div class="row mb-2 justify-content-center">
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shipment_status" id="search_shipment_status" class="form-control select2">
-                                @foreach($shipment_status as $status)
-                                    <option value="{{$status->id}}">{{$status->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
+
                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
@@ -36,6 +28,15 @@
                             <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                 @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_hub" id="search_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -58,15 +59,7 @@
                         </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                        <select name="search_hub" id="search_hub" class="form-control select2">
-                            @foreach($hubs as $hub)
-                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                            @endforeach
-                        </select>
-                        </fieldset>
-                    </div>
+
                     <div class="col-4">
                         <fieldset class="form-group">
                         <select name="search_qsr" id="search_qsr" class="form-control select2">
@@ -74,6 +67,15 @@
                                 <option value="2">Return</option>
                                 <option value="3">All</option>
                         </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shipment_status" id="search_shipment_status" class="form-control select2">
+                                @foreach($shipment_status as $status)
+                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-4">
