@@ -3829,7 +3829,7 @@ class AdminHumanResourseController extends Controller
         }
 
 
-        $rn_check = ReturnNote::where('rider_id',$rider->id)->where('status','!=',1);
+        $rn_check = ReturnNote::where('rider_id',$rider->id)->whereNotIn('status',[1,2]);
         if($rn_check->exists())
         {
             $rn_check = $rn_check->pluck('id')->toArray();
